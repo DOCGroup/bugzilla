@@ -1,0 +1,16 @@
+Index: Stub.cpp
+===================================================================
+RCS file: /project/ace/cvs-repository/ACE_wrappers-repository/TAO/tao/Stub.cpp,v
+retrieving revision 1.62
+diff -u -r1.62 Stub.cpp
+--- Stub.cpp	1999/10/13 20:54:55	1.62
++++ Stub.cpp	1999/10/15 17:59:37
+@@ -114,7 +114,7 @@
+   if (forward_profiles_)
+     reset_profiles ();
+ 
+-  if (this->profile_in_use_ != 0)
++  if (this->profile_in_use_ != 0 && this->orb_->orb_core () != 0)
+     {
+       this->profile_in_use_->reset_hint ();
+       // decrease reference count on profile
