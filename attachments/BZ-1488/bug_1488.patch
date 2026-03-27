@@ -1,0 +1,34 @@
+Index: orbconf.h
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/orbconf.h,v
+retrieving revision 1.1.1.5
+diff -u -r1.1.1.5 orbconf.h
+--- orbconf.h	13 Dec 2002 14:35:14 -0000	1.1.1.5
++++ orbconf.h	10 Apr 2003 00:57:04 -0000
+@@ -810,5 +810,10 @@
+ #  define TAO_USE_MUXED_TRANSPORT_MUX_STRATEGY 1
+ #endif /* TAO_USE_MUXED_TRANSPORT_MUX_STRATEGY */
+ 
++/// By default we use multicast lookup
++#if !defined(TAO_DEFAULT_INIT_REFERENCE_INITIALIZER)
++#  define TAO_DEFAULT_INIT_REFERENCE_INITIALIZER "mcast://:::"
++#endif /* TAO_DEFAULT_INIT_REFERENCE_INITIALIZER */
++
+ #include "ace/post.h"
+ #endif  /* TAO_ORBCONF_H */
+Index: params.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/params.cpp,v
+retrieving revision 1.1.1.4
+diff -u -r1.1.1.4 params.cpp
+--- params.cpp	18 Jul 2002 19:31:25 -0000	1.1.1.4
++++ params.cpp	10 Apr 2003 00:57:04 -0000
+@@ -14,7 +14,7 @@
+ TAO_ORB_Parameters::TAO_ORB_Parameters (void)
+   : endpoints_list_ (),
+     mcast_discovery_endpoint_ (),
+-    default_init_ref_ ("mcast://:::"),
++    default_init_ref_ (TAO_DEFAULT_INIT_REFERENCE_INITIALIZER),
+     sock_rcvbuf_size_ (ACE_DEFAULT_MAX_SOCKET_BUFSIZ),
+     sock_sndbuf_size_ (ACE_DEFAULT_MAX_SOCKET_BUFSIZ),
+     nodelay_ (1),
