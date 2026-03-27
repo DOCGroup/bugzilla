@@ -1,0 +1,675 @@
+? patch_file
+Index: AV_Core.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/AV/AV_Core.cpp,v
+retrieving revision 5.19
+retrieving revision 5.19.36.4
+diff -u -r5.19 -r5.19.36.4
+--- AV_Core.cpp	28 Jul 2002 21:28:16 -0000	5.19
++++ AV_Core.cpp	15 Apr 2003 20:57:06 -0000	5.19.36.4
+@@ -1,4 +1,4 @@
+-// $Id: AV_Core.cpp,v 5.19 2002/07/28 21:28:16 crodrigu Exp $
++// $Id: AV_Core.cpp,v 5.19.36.4 2003/04/15 20:57:06 yamuna Exp $
+ 
+ #include "orbsvcs/AV/AV_Core.h"
+ #include "orbsvcs/AV/FlowSpec_Entry.h"
+@@ -251,18 +251,23 @@
+                   {
+                     if (entry->handler () != 0)
+                       {
++							
+                         //Yamuna:PLEASE CHECK THIS LATER
+ #if defined ACE_HAS_RAPI || defined (ACE_HAS_WINSOCK2_GQOS)
+                         // For IN flows on the A side we should remove the handlers from the reactor.
+                         ACE_Event_Handler *event_handler = entry->handler ()->event_handler ();
+-                        result = event_handler->reactor ()->remove_handler (event_handler,
+-                                                                            ACE_Event_Handler::READ_MASK);
+-                        if (result < 0)
+-                            if (TAO_debug_level > 0)
+-                              ACE_DEBUG ((LM_DEBUG,
+-                                          "TAO_AV_Core::init_forward_flows: remove_handler failed\n"));
+-#endif /*ACE_HAS_RAPI || ACE_HAS_WINSOCK2_GQOS */
+ 
++			if (event_handler->reactor () != 0)
++			  {
++			    result = event_handler->reactor ()->remove_handler (event_handler,
++										ACE_Event_Handler::READ_MASK);
++			    
++			    if (result < 0)
++			      if (TAO_debug_level > 0)
++				ACE_DEBUG ((LM_DEBUG,
++					    "TAO_AV_Core::init_forward_flows: remove_handler failed\n"));
++			  }
++#endif //ACE_HAS_RAPI || ACE_HAS_WINSOCK2_GQOS 
+                       }
+                   }
+                 default:
+@@ -302,65 +307,104 @@
+                   {
+                   case TAO_FlowSpec_Entry::TAO_AV_DIR_OUT:
+                     {
+-                    if (entry->handler () != 0)
+-                      {
+-                        // @@Naga: This wont be called in the case of Full Profile.
+-                        // For IN flows on the A side we should remove the handlers from the reactor.
+-                        ACE_Event_Handler *event_handler = entry->handler ()->event_handler ();
+-                        result = event_handler->reactor ()->remove_handler (event_handler,
+-                                                                            ACE_Event_Handler::READ_MASK);
+-                        if (result < 0)
+-                          if (TAO_debug_level > 0) ACE_DEBUG ((LM_DEBUG,"TAO_AV_Core::init_forward_flows: remove_handler failed\n"));
+-                      }
++		      if (entry->handler () != 0)
++			{
++			  // @@Naga: This wont be called in the case of Full Profile.
++			  // For IN flows on the A side we should remove the handlers from the reactor.
++			  ACE_Event_Handler *event_handler = entry->handler ()->event_handler ();
++			  result = event_handler->reactor ()->remove_handler (event_handler,
++									      ACE_Event_Handler::READ_MASK);
++			  if (result < 0)
++			    if (TAO_debug_level > 0) ACE_DEBUG ((LM_DEBUG,"TAO_AV_Core::init_forward_flows: remove_handler failed\n"));
++			}
+                     }
+                   default:
+                     break;
+                   }
+-              // Now if the address_set has been changed due to the addition of a control entry we should
+-              // add that to the flow_spec_set also.
+-              if (flow_spec_set.find (entry) < 0)
+-                {
+-                  // entry doesn't exist so add it.
+-                  flow_spec_set.insert (entry);
+-                }
++		// Now if the address_set has been changed due to the addition of a control entry we should
++		// add that to the flow_spec_set also.
++		if (flow_spec_set.find (entry) < 0)
++		  {
++		    // entry doesn't exist so add it.
++		    flow_spec_set.insert (entry);
++		  }
+               }
+           }
+         if (flow_set.size () > 0)
+           {
++	    TAO_AV_FlowSpecSet tmp_flow_set (flow_set);
++	    flow_set.reset ();
++	    TAO_AV_FlowSpecSetItor end = tmp_flow_set.end ();
++	    TAO_AV_FlowSpecSetItor start = tmp_flow_set.begin ();
++            for (start; start != end; ++start)
++              {
++		TAO_FlowSpec_Entry *entry = *start;
++		TAO_FlowSpec_Entry *new_entry;
++		ACE_CString dir;
++		if (entry->direction () == 0)
++		  dir += "IN";
++		else if (entry->direction () == 1)
++		  dir += "OUT";
++		if (entry->get_peer_addr () != 0)
++		  {
++		    ACE_NEW_RETURN (new_entry,
++				    TAO_Forward_FlowSpec_Entry (entry->flowname (),
++								dir.c_str (),
++								entry->format (),
++								entry->flow_protocol_str (),
++								entry->carrier_protocol_str (),
++								entry->get_peer_addr (),
++								entry->control_address ()),
++				    -1);
++		  }
++		else 
++		  {
++		    ACE_NEW_RETURN (new_entry,
++				    TAO_Forward_FlowSpec_Entry (entry->flowname (),
++								dir.c_str (),
++								entry->format (),
++								entry->flow_protocol_str (),
++								entry->carrier_protocol_str (),
++								entry->address (),
++								entry->control_address ()),
++				    -1);
++		  }
++		flow_set.insert (new_entry);
++	      }
+             result = this->acceptor_registry_->open (endpoint,
+                                                      this,
+                                                      flow_set);
+             if (result == -1)
+               ACE_ERROR_RETURN ((LM_ERROR,"TAO_AV_Core::init_Forward_flows: Acceptor_registry open failed\n"),-1);
+-            TAO_AV_FlowSpecSetItor end = address_flow_set.end ();
+-            for (TAO_AV_FlowSpecSetItor start = address_flow_set.begin ();
+-                 start != end; ++start)
++            end = address_flow_set.end ();
++	    start = address_flow_set.begin ();
++            for (start; start != end; ++start)
+               {
+                 TAO_FlowSpec_Entry *entry = (*start);
+                 switch (entry->direction ())
+                   {
+                   case TAO_FlowSpec_Entry::TAO_AV_DIR_OUT:
+                     {
+-                    if (entry->handler () != 0)
+-                      {
+-                        // For IN flows on the A side we should remove the handlers from the reactor.
+-                        ACE_Event_Handler *event_handler = entry->handler ()->event_handler ();
+-                        result = event_handler->reactor ()->remove_handler (event_handler,
+-                                                                            ACE_Event_Handler::READ_MASK);
+-                        if (result < 0)
+-                          if (TAO_debug_level > 0) ACE_DEBUG ((LM_DEBUG,"TAO_AV_Core::init_forward_flows: remove_handler failed\n"));
+-                      }
++		      if (entry->handler () != 0)
++			{
++			  // For IN flows on the A side we should remove the handlers from the reactor.
++			  ACE_Event_Handler *event_handler = entry->handler ()->event_handler ();
++			  result = event_handler->reactor ()->remove_handler (event_handler,
++									      ACE_Event_Handler::READ_MASK);
++			  if (result < 0)
++			    if (TAO_debug_level > 0) ACE_DEBUG ((LM_DEBUG,"TAO_AV_Core::init_forward_flows: remove_handler failed\n"));
++			}
+                     }
+                   default:
+                     break;
+                   }
+-              // Now if the address_set has been changed due to the addition of a control entry we should
+-              // add that to the flow_spec_set also.
+-              if (flow_spec_set.find (entry) < 0)
+-                {
+-                  // entry doesn't exist so add it.
+-                  flow_spec_set.insert (entry);
+-                }
++		// Now if the address_set has been changed due to the addition of a control entry we should
++		// add that to the flow_spec_set also.
++		if (flow_spec_set.find (entry) < 0)
++		  {
++		    // entry doesn't exist so add it.
++		    flow_spec_set.insert (entry);
++		  }
+               }
+           }
+ 
+@@ -383,7 +427,13 @@
+                                                   (*connect)->carrier_protocol_str (),
+                                                   local_addr,
+                                                   local_control_addr);
+-
++		/*	
++		  ACE_Addr *addr;
++		  if ((addr = (*connect)->get_peer_addr ()) != 0)
++		  {
++		  entry.set_peer_addr (addr);
++		  };
++		*/
+                 int len = new_flowspec.length ();
+                 if (i == len)
+                   new_flowspec.length (len+1);
+@@ -409,7 +459,7 @@
+                                                   (*connect)->carrier_protocol_str (),
+                                                   local_addr,
+                                                   local_control_addr);
+-
++		
+                 int len = new_flowspec.length ();
+                 if (i == len)
+                   new_flowspec.length (len+1);
+Index: FlowSpec_Entry.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/AV/FlowSpec_Entry.cpp,v
+retrieving revision 5.16
+retrieving revision 5.16.58.3
+diff -u -r5.16 -r5.16.58.3
+--- FlowSpec_Entry.cpp	14 Jan 2002 20:38:32 -0000	5.16
++++ FlowSpec_Entry.cpp	10 Apr 2003 20:58:50 -0000	5.16.58.3
+@@ -1,4 +1,4 @@
+-// $Id: FlowSpec_Entry.cpp,v 5.16 2002/01/14 20:38:32 crodrigu Exp $
++// $Id: FlowSpec_Entry.cpp,v 5.16.58.3 2003/04/10 20:58:50 yamuna Exp $
+ 
+ //------------------------------------------------------------
+ // TAO_FlowSpec_Entry
+@@ -52,9 +52,10 @@
+                                         const char *format_name,
+                                         const char *flow_protocol,
+                                         const char *carrier_protocol,
+-                                        ACE_Addr *address,
++                                        ACE_Addr *fwd_address,
++                                        //ACE_Addr *peer_address,
+                                         ACE_Addr *control_address)
+-  :address_ (address),
++  :address_ (fwd_address),
+    clean_up_address_ (0),
+    control_address_ (control_address),
+    clean_up_control_address_ (0),
+@@ -89,6 +90,7 @@
+                                         const char *format_name,
+                                         const char *flow_protocol,
+                                         const char *address)
++                                        //const char *peer_address)
+   :address_ (0),
+    clean_up_address_ (0),
+    control_address_ (0),
+@@ -115,8 +117,8 @@
+    role_ (TAO_AV_INVALID_ROLE)
+ {
+   this->parse_flow_protocol_string (this->flow_protocol_.c_str() );
+-  this->parse_address (this->address_str_.c_str(), TAO_AV_Core::TAO_AV_DATA );
+-  this->set_direction (this->direction_str_.c_str() );
++  this->parse_address (this->address_str_.c_str(), TAO_AV_Core::TAO_AV_DATA);
++  this->set_direction (this->direction_str_.c_str());
+ }
+ 
+ // Destructor.
+@@ -223,16 +225,15 @@
+   TAO_Tokenizer protocol_tokenizer (address,'=');
+ 
+   this->carrier_protocol_ = protocol_tokenizer[0];
+-
++  
+   int result = this->set_protocol ();
+   if (result < 0)
+     return result;
+-
++  
+   if (protocol_tokenizer [1] != 0)
+     {
+-
+-      if ( (flow_comp == TAO_AV_Core::TAO_AV_DATA) ||
+-           (flow_comp == TAO_AV_Core::TAO_AV_CONTROL) )
++      if ((flow_comp == TAO_AV_Core::TAO_AV_DATA) ||
++	  (flow_comp == TAO_AV_Core::TAO_AV_CONTROL) )
+         {
+           ACE_CString addr;
+           addr += protocol_tokenizer[1];
+@@ -255,12 +256,12 @@
+                 if (flow_comp == TAO_AV_Core::TAO_AV_DATA)
+                   {
+                     this->clean_up_address_ = 1;
+-                  this->address_ = inet_addr;
++		    this->address_ = inet_addr;
+                   }
+                 else
+                   {
+                     this->clean_up_control_address_ = 1;
+-                  this->control_address_ = inet_addr;
++		    this->control_address_ = inet_addr;
+                   }
+ 
+                 if (TAO_debug_level > 0)
+@@ -482,6 +483,21 @@
+     if (this->parse_address (tokenizer [TAO_AV_ADDRESS], TAO_AV_Core::TAO_AV_BOTH) < 0)
+       return -1;
+ 
++  if (tokenizer [TAO_AV_PEER_ADDR] != 0)
++    {
++      ACE_INET_Addr *addr;
++      ACE_NEW_RETURN (addr,
++		      ACE_INET_Addr (tokenizer [TAO_AV_PEER_ADDR]),
++		      0);
++      this->peer_addr_ = addr;
++
++      char buf [BUFSIZ];
++      addr->addr_to_string (buf, BUFSIZ);
++      ACE_DEBUG ((LM_DEBUG,
++		  "Peer Address %s \n",
++		  buf));
++    }
++	
+   if (tokenizer [TAO_AV_FLOW_PROTOCOL] != 0)
+     if (this->parse_flow_protocol_string (tokenizer [TAO_AV_FLOW_PROTOCOL]) < 0)
+       return -1;
+@@ -516,6 +532,7 @@
+ 
+   char address [BUFSIZ];
+   ACE_CString address_str;
++  ACE_CString peer_address_str;
+ 
+   if (this->address_ != 0)
+     {
+@@ -551,6 +568,7 @@
+       address_str = this->carrier_protocol_;
+     }
+ 
++
+   if ( (this->address_ != 0) &&
+        (this->control_address_ == 0) &&
+        (ACE_OS::strncasecmp (this->flow_protocol_.c_str(), "RTP", 3) == 0))
+@@ -584,6 +602,42 @@
+         }
+     }
+ 
++
++  if (this->peer_addr_ != 0)
++    {
++      switch (this->protocol_)
++        {
++        case TAO_AV_Core::TAO_AV_SFP_UDP:
++        case TAO_AV_Core::TAO_AV_SFP_UDP_MCAST:
++        case TAO_AV_Core::TAO_AV_USERDEFINED_UDP:
++        case TAO_AV_Core::TAO_AV_USERDEFINED_UDP_MCAST:
++        case TAO_AV_Core::TAO_AV_RTP_UDP:
++        case TAO_AV_Core::TAO_AV_RTP_UDP_MCAST:
++        case TAO_AV_Core::TAO_AV_UDP:
++        case TAO_AV_Core::TAO_AV_QOS_UDP:
++        case TAO_AV_Core::TAO_AV_UDP_MCAST:
++        case TAO_AV_Core::TAO_AV_TCP:
++          {
++	    ACE_INET_Addr *inet_addr = ACE_dynamic_cast (ACE_INET_Addr*,this->peer_addr_);
++            inet_addr->addr_to_string (address,BUFSIZ);
++	    //inet_addr->get_host_name (address, BUFSIZ);
++	    
++	    //cstring += ACE_OS::itoa (address, BUFSIZ, inet_addr->get_port_number ());
++
++          }
++          break;
++        default:
++          break;
++        }
++
++	  ACE_CString cstring (address);
++
++	  //peer_address_str = this->carrier_protocol_;
++	  //peer_address_str += "=";
++	  peer_address_str += cstring;
++
++    }
++
+   if (this->control_address_ != 0)
+     {
+       u_short control_port = 0;
+@@ -624,8 +678,16 @@
+   this->entry_ += this->flow_protocol_;
+   this->entry_ += "\\";
+   this->entry_ += address_str;
++  
++  if (this->peer_addr_ != 0)
++    {
++      this->entry_ += "\\";
++      this->entry_ += peer_address_str;
++    }
++  
++  if (TAO_debug_level > 0) 
++    ACE_DEBUG ((LM_DEBUG,"entry_to_string: entry = %s\n",this->entry_.c_str()));
+ 
+-  if (TAO_debug_level > 0) ACE_DEBUG ((LM_DEBUG,"entry_to_string: entry = %s\n",this->entry_.c_str()));
+   return this->entry_.c_str();
+ }
+ 
+@@ -706,7 +768,7 @@
+     ACE_DEBUG ((LM_DEBUG,
+                 "TAO_Reverse_FlowSpec_Entry::parse %s\n",
+                 flowSpec_entry));
+-
++  
+   if (tokenizer [TAO_AV_ADDRESS] != 0)
+     if (this->parse_address (tokenizer [TAO_AV_ADDRESS], TAO_AV_Core::TAO_AV_BOTH) < 0)
+       return -1;
+Index: FlowSpec_Entry.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/AV/FlowSpec_Entry.h,v
+retrieving revision 5.8
+retrieving revision 5.8.58.2
+diff -u -r5.8 -r5.8.58.2
+--- FlowSpec_Entry.h	14 Jan 2002 20:38:32 -0000	5.8
++++ FlowSpec_Entry.h	10 Apr 2003 00:41:48 -0000	5.8.58.2
+@@ -5,7 +5,7 @@
+ /**
+  *  @file    FlowSpec_Entry.h
+  *
+- *  $Id: FlowSpec_Entry.h,v 5.8 2002/01/14 20:38:32 crodrigu Exp $
++ *  $Id: FlowSpec_Entry.h,v 5.8.58.2 2003/04/10 00:41:48 yamuna Exp $
+  *
+  *  @author  Nagarajan Surendran <naga@cs.wustl.edu>
+  *
+@@ -89,14 +89,16 @@
+                       const char *format_name,
+                       const char *flow_protocol,
+                       const char *carrier_protocol,
+-                      ACE_Addr *address,
++                      ACE_Addr *fwd_address,
++                      //ACE_Addr *peer_address,
+                       ACE_Addr *control_address = 0);
+ 
+   TAO_FlowSpec_Entry (const char *flowname,
+                       const char *direction,
+                       const char *format_name,
+                       const char *flow_protocol,
+-                      const char *address);
++                      const char *fwd_address);
++                      //const char *peer_address);
+ 
+   /// construct the entry from a string specified by the flowSpec grammar.
+   virtual int parse (const char* flowSpec_entry) = 0;
+@@ -119,13 +121,15 @@
+   void flow_protocol_str (const char *flow_protocol_str);
+ 
+   /// accessor to address of the carrier protocol.
++  //ACE_Addr *fwd_address (void);
+   ACE_Addr *address (void);
+   ACE_Addr *control_address (void);
+   void address (ACE_Addr *address);
+   void control_address (ACE_Addr *address);
+ 
+   /// Address in string format i. hostname:port.
+-  const char * address_str (void) const;
++  const char *address_str (void) const;
++  //  const char * peer_address_str (void) const;
+ 
+   /// accessor to carrier protocol i.e TCP,UDP,RTP/UDP.
+   TAO_AV_Core::Protocol carrier_protocol (void);
+@@ -193,9 +197,12 @@
+   ACE_Addr *control_address_;
+   int clean_up_control_address_; // added to clean up a memory leak
+ 
+-  /// Addr in string format i.e hostname:port.
++  /// Fwd Addr in string format i.e hostname:port.
+   ACE_CString address_str_;
+ 
++  /// Peer Addr in string format i.e hostname:port.
++  ACE_CString peer_address_str_;
++
+   /// format string.
+   ACE_CString format_;
+ 
+@@ -249,7 +256,8 @@
+                  TAO_AV_DIRECTION = 1,
+                  TAO_AV_FORMAT = 2,
+                  TAO_AV_FLOW_PROTOCOL = 3,
+-                 TAO_AV_ADDRESS = 4};
++                 TAO_AV_ADDRESS = 4,
++		 TAO_AV_PEER_ADDR = 5};
+ 
+   /// default constructor.
+   TAO_Forward_FlowSpec_Entry (void);
+Index: QoS_UDP.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/AV/QoS_UDP.cpp,v
+retrieving revision 1.16
+retrieving revision 1.16.44.1
+diff -u -r1.16 -r1.16.44.1
+--- QoS_UDP.cpp	9 Jul 2002 12:15:14 -0000	1.16
++++ QoS_UDP.cpp	15 Apr 2003 21:15:52 -0000	1.16.44.1
+@@ -1,4 +1,4 @@
+-// $Id: QoS_UDP.cpp,v 1.16 2002/07/09 12:15:14 elliott_c Exp $
++// $Id: QoS_UDP.cpp,v 1.16.44.1 2003/04/15 21:15:52 yamuna Exp $
+ 
+ #include "QoS_UDP.h"
+ 
+@@ -1154,10 +1154,15 @@
+   this->flowname_ = entry->flowname ();
+ 
+   ACE_INET_Addr *local_addr;
+-  ACE_NEW_RETURN (local_addr,
+-                  ACE_INET_Addr ("0"),
+-                  -1);
+ 
++  if (entry->get_peer_addr () != 0)
++    {
++      local_addr = ACE_dynamic_cast (ACE_INET_Addr*, entry->get_peer_addr ());
++    }
++  else
++    ACE_NEW_RETURN (local_addr,
++		    ACE_INET_Addr ("0"),
++		    -1);
+ 
+   TAO_AV_Flow_Handler *flow_handler = 0;
+ 
+Index: UDP.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/AV/UDP.cpp,v
+retrieving revision 5.23
+retrieving revision 5.23.20.4
+diff -u -r5.23 -r5.23.20.4
+--- UDP.cpp	24 Jan 2003 08:07:55 -0000	5.23
++++ UDP.cpp	14 Apr 2003 23:49:39 -0000	5.23.20.4
+@@ -1,4 +1,4 @@
+-// $Id: UDP.cpp,v 5.23 2003/01/24 08:07:55 jwillemsen Exp $
++// $Id: UDP.cpp,v 5.23.20.4 2003/04/14 23:49:39 yamuna Exp $
+ 
+ #include "UDP.h"
+ #include "AVStreams_i.h"
+@@ -362,7 +362,7 @@
+   if (flow_comp == TAO_AV_Core::TAO_AV_CONTROL)
+     {
+       this->flowname_ = TAO_AV_Core::get_control_flowname (entry->flowname ());
+-    inet_addr = (ACE_INET_Addr *) entry->control_address ();
++      inet_addr = (ACE_INET_Addr *) entry->control_address ();
+     }
+   else
+     {
+@@ -370,14 +370,17 @@
+       inet_addr = (ACE_INET_Addr *) entry->address ();
+     }
+ 
+-  char buf[BUFSIZ];
+-  inet_addr->addr_to_string (buf,
+-                             BUFSIZ);
+-
+-  if (TAO_debug_level > 0)
+-    ACE_DEBUG ((LM_DEBUG,
+-                "TAO_AV_UDP_Acceptor::open: %s\n",
+-                buf));
++  if (inet_addr != 0)
++    {
++      char buf[BUFSIZ];
++      inet_addr->addr_to_string (buf,
++				 BUFSIZ);
++
++      if (TAO_debug_level > 0)
++	ACE_DEBUG ((LM_DEBUG,
++		    "TAO_AV_UDP_Acceptor::open: %s\n",
++		    buf));
++    }
+ 
+   int result = this->open_i (inet_addr, 0);
+ 
+@@ -422,10 +425,10 @@
+                              int is_default_addr)
+ {
+   int result = -1;
+-
+-  ACE_INET_Addr *local_addr;
++  
++  ACE_INET_Addr *local_addr = 0;
+   TAO_AV_Flow_Handler *flow_handler = 0;
+-
++  
+   // if using a default address and this is the control flow component, the
+   //  handler and local address are already set in the flow spec entry
+   if (is_default_addr &&
+@@ -525,7 +528,8 @@
+       this->entry_->protocol_object (object);
+       this->entry_->set_local_addr (local_addr);
+       this->entry_->handler (flow_handler);
+-      this->entry_->address (inet_addr);
++      //this->entry_->address (inet_addr);
++	  this->entry_->address (local_addr);
+     }
+   else
+     {
+@@ -589,7 +593,7 @@
+                                TAO_AV_Transport *&transport,
+                                TAO_AV_Core::Flow_Component flow_component)
+ {
+-  ACE_INET_Addr *local_addr;
++  ACE_INET_Addr *local_addr = 0;
+   ACE_INET_Addr *control_inet_addr;
+ 
+   this->entry_ = entry;
+@@ -634,6 +638,16 @@
+           // assume the ports will be OK
+           get_new_port = 0;
+ 
++	  ACE_Addr *addr;
++	  if ((addr = entry->get_peer_addr ()) != 0)
++	    {
++	      local_addr = ACE_dynamic_cast (ACE_INET_Addr*,addr);
++	      char buf [BUFSIZ];
++	      local_addr->addr_to_string (buf, BUFSIZ);
++	      ACE_DEBUG ((LM_DEBUG,
++			  "local_addr %s\n",
++			  buf));
++	    }
+           TAO_AV_UDP_Connection_Setup::setup (flow_handler,
+                                               inet_addr,
+                                               local_addr,
+@@ -810,15 +824,22 @@
+ 
+           local_addr->set (local_addr->get_port_number (),
+                            local_addr->get_host_name ());
+-            handler->set_peer_addr (local_addr);
++	  handler->set_peer_addr (local_addr);
+         }
+     }
+   else
+     {
+-      ACE_NEW_RETURN (local_addr,
+-                      ACE_INET_Addr ("0"),
+-                      -1);
+-
++      if (local_addr == 0)
++	ACE_NEW_RETURN (local_addr,
++			ACE_INET_Addr ("0"),
++			-1);
++      
++      char buf [BUFSIZ];
++      local_addr->addr_to_string (buf, BUFSIZ);
++      ACE_DEBUG ((LM_DEBUG,
++		  "Local Address %s\n",
++		  buf));
++      
+       TAO_AV_UDP_Flow_Handler *handler;
+       ACE_NEW_RETURN (handler,
+                       TAO_AV_UDP_Flow_Handler,
+@@ -829,10 +850,10 @@
+       if (ct == ACCEPTOR)
+         result = handler->open (*inet_addr);
+       else
+-      result = handler->open (*local_addr);
++	result = handler->open (*local_addr);
+       if (result < 0)
+         ACE_ERROR_RETURN ((LM_ERROR,"handler::open failed\n"),-1);
+-
++      
+       // set the socket buffer sizes to 64k.
+       int sndbufsize = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+       int rcvbufsize = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+@@ -851,13 +872,20 @@
+         return 0;
+ 
+       if (ct == CONNECTOR)
+-      handler->set_remote_address  (inet_addr);
+-
++	handler->set_remote_address  (inet_addr);
++      
+       result = handler->get_socket ()->get_local_addr (*local_addr);
++      
++      
++      local_addr->set (local_addr->get_port_number (),
++		       local_addr->get_host_name ());
++      
++      local_addr->addr_to_string (buf, BUFSIZ);
++      
+       if (result < 0)
+         ACE_ERROR_RETURN ((LM_ERROR,"TAO_AV_Dgram_Connector::open: get_local_addr failed\n"),result);
+     }
+-
++  
+   return 1;
+ }
+ 
