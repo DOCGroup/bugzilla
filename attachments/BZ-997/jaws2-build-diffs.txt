@@ -1,0 +1,67 @@
+diff -ru ../z/ACE_wrappers/apps/JAWS2/HTTPU/Makefile ./apps/JAWS2/HTTPU/Makefile
+--- ../z/ACE_wrappers/apps/JAWS2/HTTPU/Makefile	Thu Apr 27 16:43:17 2000
++++ ./apps/JAWS2/HTTPU/Makefile	Sat Aug  4 19:29:08 2001
+@@ -11,6 +11,7 @@
+ #BIN = test_parse_url test_parse_http_request test_http_headers \
+ #      test_http_request test_http_response
+ 
++LIB   = libHTTPU.a
+ SHLIB = libHTTPU.so
+ FILES = parse_url parse_http_request parse_http_response \
+         http_request http_response http_base http_status \
+diff -ru ../z/ACE_wrappers/apps/JAWS2/JAWS/Makefile ./apps/JAWS2/JAWS/Makefile
+--- ../z/ACE_wrappers/apps/JAWS2/JAWS/Makefile	Fri Mar 30 11:15:16 2001
++++ ./apps/JAWS2/JAWS/Makefile	Sat Aug  4 19:28:41 2001
+@@ -10,8 +10,8 @@
+ 
+ #BIN   	= main
+ 
+-LIB = libJAWS.a
+-SHLIB = libJAWS.$(SOEXT)
++LIB = libJAWS2.a
++SHLIB = libJAWS2.$(SOEXT)
+ 
+ MYFILES  	= \
+         Cache_Hash_T \
+diff -ru ../z/ACE_wrappers/apps/JAWS2/Makefile ./apps/JAWS2/Makefile
+--- ../z/ACE_wrappers/apps/JAWS2/Makefile	Fri Mar 30 11:15:16 2001
++++ ./apps/JAWS2/Makefile	Sat Aug  4 20:54:30 2001
+@@ -8,6 +8,9 @@
+ #	Local macros
+ #----------------------------------------------------------------------------
+ 
++DIRS	= HTTPU \
++	  JAWS
++
+ BIN   	= main
+ 
+ FILES  	= HTTP_10 \
+@@ -20,7 +23,7 @@
+ OBJ	= $(addsuffix .o,$(FILES))
+ 
+ LDFLAGS += -L./JAWS
+-LDLIBS  = -lHTTPU -lJAWS
++LDLIBS  = -lHTTPU -lJAWS2
+ CFLAGS += -DJAWS_HAS_THREAD_SAFE_ACCEPT
+ CPPFLAGS += -I.
+ 
+@@ -33,7 +36,7 @@
+ include		$(ACE_ROOT)/include/makeinclude/wrapper_macros.GNU
+ include		$(ACE_ROOT)/include/makeinclude/macros.GNU
+ include		$(ACE_ROOT)/include/makeinclude/rules.common.GNU
+-include		$(ACE_ROOT)/include/makeinclude/rules.nonested.GNU
++include		$(ACE_ROOT)/include/makeinclude/rules.nested.GNU
+ include		$(ACE_ROOT)/include/makeinclude/rules.bin.GNU
+ include		$(ACE_ROOT)/include/makeinclude/rules.local.GNU
+ 
+diff -ru ../z/ACE_wrappers/apps/Makefile ./apps/Makefile
+--- ../z/ACE_wrappers/apps/Makefile	Wed Apr 19 15:07:14 2000
++++ ./apps/Makefile	Sat Aug  4 21:00:34 2001
+@@ -13,6 +13,7 @@
+ DIRS  = Gateway \
+         gperf \
+ 	JAWS \
++	JAWS2 \
+ 	drwho
+ 
+ # The following directories aren't compiled by default since haven't
