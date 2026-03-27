@@ -1,0 +1,31 @@
+Index: rules.tao.GNU
+===================================================================
+RCS file: /cvs/ACE_wrappers-repository/TAO/rules.tao.GNU,v
+retrieving revision 1.81
+diff -u -r1.81 rules.tao.GNU
+--- rules.tao.GNU	21 Oct 2002 23:20:30 -0000	1.81
++++ rules.tao.GNU	17 Apr 2003 15:46:33 -0000
+@@ -183,22 +183,10 @@
+ 
+ .SUFFIXES: $(IDL_EXT)
+ 
+-$(foreach ext, $(IDL_EXT_MINUS), %$(ext)): %$(IDL_CLIENT_HDR_EXT)
+-	@
+-
+ ifneq ($(tao_dont_use_idl_make_rule),1)
+-%C.h: %.idl $(TAO_IDL_DEP)
++$(foreach ext, $(IDL_EXT) $(IDL_EXT2), %$(ext)): %.idl $(TAO_IDL_DEP)
+ 	$(TAO_IDL) $(TAO_IDLFLAGS) $<
+ endif
+-
+-$(foreach ext, $(IDL_EXT2_MINUS), %$(ext)): %Cli.h
+-	@
+-
+-ifneq ($(tao_dont_use_idl_make_rule),1)
+-%Cli.h: %.idl $(TAO_IDL_DEP)
+-	$(TAO_IDL) $(TAO_IDLFLAGS) $<
+-endif
+-
+ 
+ # Turn on symbol versioning. The scheme that we follow is to allow
+ # applications dependent on libraries, with same version numbers (major,
