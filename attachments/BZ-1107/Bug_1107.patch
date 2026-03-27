@@ -1,0 +1,175 @@
+Index: server.cpp
+===================================================================
+--- server.cpp	(revision 77872)
++++ server.cpp	(working copy)
+@@ -128,7 +128,14 @@
+ 
+       poa_manager->activate ();
+ 
++      // Clear the STDERR flags so that the first expected
++      // failed connection attempt by the client doesn't trigger an
++      // error on the scoreboard.  The flag is also set in the 
++      // Foo_i::baz() method since the connection has been successfully
++      // made by that time.
++      ACE_LOG_MSG->clr_flags (ACE_Log_Msg::STDERR);
+       orb->run ();
++      ACE_LOG_MSG->set_flags (ACE_Log_Msg::STDERR);
+ 
+       ACE_DEBUG ((LM_DEBUG,
+                   "\n"
+Index: client.cpp
+===================================================================
+--- client.cpp	(revision 77872)
++++ client.cpp	(working copy)
+@@ -99,7 +99,7 @@
+ int
+ parse_args (int argc, char *argv[])
+ {
+-  ACE_Get_Opt get_opts (argc, argv, "k:");
++  ACE_Get_Opt get_opts (argc, argv, "nk:");
+   int c;
+ 
+   while ((c = get_opts ()) != -1)
+@@ -108,6 +108,8 @@
+       case 'k':
+         ior = get_opts.opt_arg ();
+         break;
++      case 'n':
++        break;
+       case '?':
+       default:
+         ACE_ERROR_RETURN ((LM_ERROR,
+@@ -124,11 +126,27 @@
+ int
+ main (int argc, char *argv[])
+ {
++  bool set_cert_file = true;
+   try
+     {
++      // This has to be done before calling CORBA::ORB_init() and
++      // parse_args() has to be called after CORBA::ORB_init(), so we
++      // will look at argv manually.
++      for(int i = 0; i < argc; i++)
++        {
++          if (ACE_OS::strcmp(argv[i], "-n") == 0)
++            {
++              set_cert_file = false;
++              break;
++            }
++        }
++
+       ACE_TString env ("SSL_CERT_FILE=");
+       env += cert_file;
+-      ACE_OS::putenv (env.c_str ());
++      if (set_cert_file)
++        {
++          ACE_OS::putenv (env.c_str ());
++        }
+ 
+       CORBA::ORB_var orb =
+         CORBA::ORB_init (argc, argv);
+@@ -139,26 +157,44 @@
+       CORBA::Object_var object =
+         orb->string_to_object (ior);
+ 
+-      // This test sets creates a Security::QOPPolicy with the
+-      // Quality-of-Protection set to "no protection."  It then
+-      // invokes a method on the server (insecurely), which should
+-      // then result in a CORBA::NO_PERMISSION exception.
+-      //
+-      // The server is not shutdown by this test.
+-      insecure_invocation_test (orb.in (), object.in ());
++      if (set_cert_file)
++        {
++          // This test sets creates a Security::QOPPolicy with the
++          // Quality-of-Protection set to "no protection."  It then
++          // invokes a method on the server (insecurely), which should
++          // then result in a CORBA::NO_PERMISSION exception.
++          //
++          // The server is not shutdown by this test.
++          insecure_invocation_test (orb.in (), object.in ());
++        }
+ 
+       // This test uses the default secure SSLIOP settings to securely
+       // invoke a method on the server.  No exception should occur.
+       //
+       // The server *is* shutdown by this test.
++      if (!set_cert_file)
++        ACE_LOG_MSG->clr_flags (ACE_Log_Msg::STDERR);
+       secure_invocation_test (object.in ());
++      if (!set_cert_file)
++        ACE_LOG_MSG->set_flags (ACE_Log_Msg::STDERR);
+ 
+       orb->destroy ();
+     }
+   catch (const CORBA::Exception& ex)
+     {
+-      ex._tao_print_exception ("Caught exception:");
+-      return 1;
++      ACE_LOG_MSG->set_flags (ACE_Log_Msg::STDERR);
++      if (set_cert_file)
++        {
++          ex._tao_print_exception ("Caught exception:");
++          return 1;
++        }
++      else
++        {
++          ACE_DEBUG ((LM_DEBUG, "Caught an excep. as expected due "
++                                "to the SSL_CERT_FILE environment "
++                                "variable\nnot being set.\n"));
++          return 0;
++        }
+     }
+ 
+   ACE_DEBUG ((LM_DEBUG,
+Index: Foo_i.cpp
+===================================================================
+--- Foo_i.cpp	(revision 77872)
++++ Foo_i.cpp	(working copy)
+@@ -20,6 +20,9 @@
+ void
+ Foo_i::baz (void)
+ {
++  // Make sure that logging will occur.
++  ACE_LOG_MSG->set_flags (ACE_Log_Msg::STDERR);
++
+   SecurityLevel3::ClientCredentials_var credentials =
+     this->current_->client_credentials ();
+ 
+Index: run_test.pl
+===================================================================
+--- run_test.pl	(revision 77872)
++++ run_test.pl	(working copy)
+@@ -24,7 +24,7 @@
+ $SV = new PerlACE::Process ("server",
+ 			    "-o $file -ORBSvcConf server$PerlACE::svcconf_ext");
+ $CL = new PerlACE::Process ("client",
+-			    "-ORBSvcConf client$PerlACE::svcconf_ext -k file://$file");
++			    "-n -ORBSvcConf client$PerlACE::svcconf_ext -k file://$file");
+ 
+ print STDERR "\n\n==== Running Secure_Invocation test\n";
+ 
+@@ -36,6 +36,23 @@
+     exit 1;
+ }
+ 
++for(my $i = 0; $i < 3; $i++) {
++  print STDERR "\nRunning the client without SSL_CERT_FILE\n";
++  $client = $CL->SpawnWaitKill (60);
++
++  if ($client != 0) {
++      print STDERR "ERROR: client returned $client\n";
++      $status = 1;
++      last;
++  }
++}
++
++
++print STDERR "\nRunning the client with SSL_CERT_FILE\n";
++
++my $args = $CL->Arguments();
++$args =~ s/\-n\s+//;
++$CL->Arguments($args);
+ $client = $CL->SpawnWaitKill (60);
+ 
+ if ($client != 0) {
