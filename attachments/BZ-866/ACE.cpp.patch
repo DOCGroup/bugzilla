@@ -1,0 +1,79 @@
+Index: ACE.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/ACE.cpp,v
+retrieving revision 4.313
+diff -u -r4.313 ACE.cpp
+--- ACE.cpp	2001/03/29 03:11:12	4.313
++++ ACE.cpp	2001/04/18 18:40:55
+@@ -1490,7 +1490,7 @@
+       if (n == -1)
+         {
+           // Check for possible blocking.
+-          if (errno == EWOULDBLOCK)
++          if (errno == EWOULDBLOCK || errno == ENOBUFS)
+             {
+               // Wait for the blocking to subside.
+               int result = ACE::handle_write_ready (handle,
+@@ -1548,7 +1548,7 @@
+         {
+           // Check for possible blocking.
+           if (n == -1 &&
+-              errno == EWOULDBLOCK)
++              errno == EWOULDBLOCK || errno == ENOBUFS)
+             {
+               // Wait upto <timeout> for the blocking to subside.
+               int rtn = ACE::handle_write_ready (handle,
+@@ -1610,7 +1610,7 @@
+       if (n == -1)
+         {
+           // Check for possible blocking.
+-          if (errno == EWOULDBLOCK)
++          if (errno == EWOULDBLOCK || errno == ENOBUFS)
+             {
+               // Wait for the blocking to subside.
+               int result = ACE::handle_write_ready (handle,
+@@ -1668,7 +1668,7 @@
+         {
+           // Check for possible blocking.
+           if (n == -1 &&
+-              errno == EWOULDBLOCK)
++              errno == EWOULDBLOCK || errno == ENOBUFS)
+             {
+               // Wait upto <timeout> for the blocking to subside.
+               int rtn = ACE::handle_write_ready (handle,
+@@ -1728,7 +1728,7 @@
+       if (n == -1)
+         {
+           // Check for possible blocking.
+-          if (errno == EWOULDBLOCK)
++          if (errno == EWOULDBLOCK || errno == ENOBUFS)
+             {
+               // Wait for the blocking to subside.
+               int result = ACE::handle_write_ready (handle,
+@@ -1784,7 +1784,7 @@
+         {
+           // Check for possible blocking.
+           if (n == -1 &&
+-              errno == EWOULDBLOCK)
++              errno == EWOULDBLOCK || errno == ENOBUFS)
+             {
+               // Wait upto <timeout> for the blocking to subside.
+               int rtn = ACE::handle_write_ready (handle,
+@@ -1908,7 +1908,7 @@
+       if (n == -1)
+         {
+           // Check for possible blocking.
+-          if (errno == EWOULDBLOCK)
++          if (errno == EWOULDBLOCK || errno == ENOBUFS)
+             {
+               // Wait for the blocking to subside.
+               int result = ACE::handle_write_ready (handle,
+@@ -1981,7 +1981,7 @@
+         {
+           // Check for possible blocking.
+           if (n == -1 &&
+-              errno == EWOULDBLOCK)
++              errno == EWOULDBLOCK || errno == ENOBUFS)
+             {
+               // Wait upto <timeout> for the blocking to subside.
+               int rtn = ACE::handle_write_ready (handle,
