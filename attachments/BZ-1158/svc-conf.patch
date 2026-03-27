@@ -1,0 +1,22 @@
+Index: Svc_Conf_l.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Svc_Conf_l.cpp,v
+retrieving revision 4.62
+diff -u -b -B -w -u -b -B -w -r4.62 Svc_Conf_l.cpp
+--- Svc_Conf_l.cpp	30 Jul 2002 16:11:07 -0000	4.62
++++ Svc_Conf_l.cpp	18 Oct 2002 01:48:00 -0000
+@@ -613,8 +613,13 @@
+ 		{ \
+ 		int c = '*', n; \
+ 		for ( n = 0; n < max_size && \
+-			     (c = getc( ace_yyin )) != EOF && c != '\n'; ++n ) \
++			     (c = getc( ace_yyin )) != EOF && c != '\n'; ) \
++                  {                                                        \
++                    if (c == '\x00')                                       \
++                       continue;                                           \
+ 			buf[n] = (ACE_TCHAR) c; \
++                    ++n;                                                   \
++                  }                                                        \
+ 		if ( c == '\n' ) \
+ 			buf[n++] = (ACE_TCHAR) c; \
+ 		if ( c == EOF && ferror( ace_yyin ) ) \
