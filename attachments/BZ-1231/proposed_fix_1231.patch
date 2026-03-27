@@ -1,0 +1,79 @@
+Index: ace/TP_Reactor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/TP_Reactor.cpp,v
+retrieving revision 4.52
+diff -u -r4.52 TP_Reactor.cpp
+--- ace/TP_Reactor.cpp	27 May 2002 06:12:59 -0000	4.52
++++ ace/TP_Reactor.cpp	19 Jun 2002 18:37:25 -0000
+@@ -533,46 +533,40 @@
+ 
+   // If there is any event handler that is ready to be dispatched, the
+   // dispatch information is recorded in dispatch_info.
+-  if (dispatch_info.dispatch ())
++  if ( ! dispatch_info.dispatch ())
+     {
+-      // Suspend the handler so that other threads don't start
+-      // dispatching it.
+-      // NOTE: This check was performed in older versions of the
+-      // TP_Reactor. Looks like it is a waste..
+-      if (dispatch_info.event_handler_ != this->notify_handler_)
+-        this->suspend_i (dispatch_info.handle_);
++      guard.release_token ();
++      return 0;
+     }
+ 
++  // Suspend the handler so that other threads don't start
++  // dispatching it.
++  // NOTE: This check was performed in older versions of the
++  // TP_Reactor. Looks like it is a waste..
++  if (dispatch_info.event_handler_ != this->notify_handler_)
++    this->suspend_i (dispatch_info.handle_);
++
++  int application_resumes_handler =
++    dispatch_info.event_handler_->resume_handler ();
++
+   // Release the lock.  Others threads can start waiting.
+   guard.release_token ();
+ 
+   int result = 0;
+ 
+-  // If there was an event handler ready, dispatch it.
+-  if (dispatch_info.dispatch ())
+-    {
+-      /// Decrement the event left
+-      --event_count;
+-
+-      if (this->dispatch_socket_event (dispatch_info) == 0)
+-          ++result;                // Dispatched an event
+-
+-      int flag = 0;
++  // Decrement the number of events left to dispatch
++  --event_count;
+ 
+-      // Hack of the decade ;-). We make an extra check for the handle
+-      // in addition to the event handler before we make a check for
+-      // the resume_handler ().
+-      if (dispatch_info.event_handler_ != 0 &&
+-          this->handler_rep_.find (dispatch_info.handle_) != 0)
+-        {
+-         flag =
+-           dispatch_info.event_handler_->resume_handler ();
+-        }
+-
+-      if (dispatch_info.handle_ != ACE_INVALID_HANDLE &&
+-          dispatch_info.event_handler_ != this->notify_handler_ &&
+-          flag == 0)
+-        this->resume_handler (dispatch_info.handle_);
++  // Call the right callback on the event handler.
++  if (this->dispatch_socket_event (dispatch_info) == 0)
++    ++result;
++
++  if (! application_resumes_handler
++      && dispatch_info.handle_ != ACE_INVALID_HANDLE
++      && dispatch_info.event_handler_ != this->notify_handler_
++      && dispatch_info.event_handler_ == this->handler_rep_.find(dispatch_info.handle_))
++    {
++      this->resume_handler (dispatch_info.handle_);
+     }
+ 
+   return result;
