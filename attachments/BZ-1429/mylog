@@ -1,0 +1,173 @@
+
+
+                    Welcome to ElWeb Server!
+   O  R  I  O  N    File ElWebServer.exe, Version 7, 1, 0, 0.
+ energy consulting
+                    Copyright (c) 2002 - Orion Energy Consulting AS.
+
+(1276|340) SSLIOP_Factory: No DH parameters found in certificate <cert.pem>; eit
+her none are needed (RSA) or problems will ensue later.
+(1276|340) SSLIOP loaded SSL certificate from cert.pem
+(1276|340) SSLIOP loaded Private Key from private.key
+TAO (1276|340) Loaded protocol <SSLIOP_Factory>
+TAO (1276|340) created new ORB <>
+This version will write a logfile!
+Notifying IMR of startup
+Starting: ElWebServer
+TAO (1276|340) - ORB_Core::run, start [run]
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_ma
+ximum = 512
+TAO (1276|340) SSLIOP connection from client <62.92.20.144:3011> on 584
+TAO (1276|340) - Transport_Cache_Manager::bind_i, 0x12ea20 -> 0xe41318 Transport
+[584]
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 125 bytes
+00:19:38 : Max Price Columns set to 4
+00:19:38 : electra getting ElWeb session (client ver = 7.0)
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport_Cache_Manager::fill_set_i, current_size = 1, cache_ma
+ximum = 512
+TAO (1276|340) SSLIOP connection from client <62.92.20.144:3012> on 812
+TAO (1276|340) - Transport_Cache_Manager::bind_i, 0x12ea20 -> 0xe51fa0 Transport
+[812]
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[812]::handle_input_i, read 137 bytes
+00:19:38 : Get session info.
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 115 bytes
+00:19:38 : Login
+00:19:38 : electra logged on
+TAO (1276|340) Connector::connect - looking for SSLIOP connection.
+TAO (1276|340) - Transport_Cache_Manager::fill_set_i, current_size = 2, cache_ma
+ximum = 512
+TAO (1276|340) Connector::connect - looking for IIOP connection.
+TAO (1276|340) IIOP connection to peer <62.92.20.156:9997> on 836
+(1276|340) IIOP_SSL_Connector::connect The result is <0>
+TAO (1276|340) - Transport_Cache_Manager::bind_i, 0x12e4a4 -> 0xe85420 Transport
+[836]
+TAO_IIOP_Transport::send_message
+ enable_network_priority = 0
+TAO (1276|340) - Transport[836]::handle_input_i, read 25 bytes
+TAO (1276|340) Connector::connect - looking for SSLIOP connection.
+TAO (1276|340) - Transport_Connector::connect, got an existing Transport[836]
+TAO_IIOP_Transport::send_message
+ enable_network_priority = 0
+TAO (1276|340) - Transport[836]::handle_input_i, read 212 bytes
+00:19:38 : Connecting to ElWebOrganizer via names
+TAO (1276|340) Connector::connect - looking for SSLIOP connection.
+TAO (1276|340) - Transport_Cache_Manager::fill_set_i, current_size = 3, cache_ma
+ximum = 512
+TAO (1276|340) Connector::connect - looking for IIOP connection.
+TAO (1276|340) IIOP connection to peer <62.92.20.156:9999> on 920
+(1276|340) IIOP_SSL_Connector::connect The result is <0>
+TAO (1276|340) - Transport_Cache_Manager::bind_i, 0x12e4d0 -> 0xe9b550 Transport
+[920]
+TAO_IIOP_Transport::send_message
+ enable_network_priority = 0
+TAO (1276|340) - Transport[920]::handle_input_i, read 24 bytes
+00:19:39 : OK
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 84 bytes
+00:19:39 : electra getting exchange name
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 88 bytes
+00:19:39 : electra: getting client info: ACTIVE user.
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 96 bytes
+00:19:39 : electra getting Market Report settings
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 92 bytes
+00:19:39 : Getting server date/time
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 96 bytes
+00:19:40 : Getting market info for electra
+00:19:40 : No weeks for portfolio (logged on customer id 334)
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 92 bytes
+00:19:44 : Getting block definitions
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 88 bytes
+00:19:46 : Getting server info
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 88 bytes
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 111 bytes
+00:19:52 : electra getting market report for 2003-01-15
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+ACE_SSL (1276|340) error code: 336195711 - error:1409F07F:SSL routines:SSL3_WRIT
+E_PENDING:bad write retry
+TAO (1276|340) - Connection_Handler[584]::handle_close_eh, (584, 2)
+TAO (1276|340) - Connection_Handler[584]::close_connection, purging entry from c
+ache
+TAO (1276|340) - Connection_Handler[584]::close_connection, removing from the re
+actor
+TAO (1276|340) - Connection_Handler[584]::close_connection, cancel all timers an
+d refcount [2]
+TAO (1276|340) - Connection_Handler[584]::close_connection, refcount = 0
+TAO (1276|340) - Connection_Handler[584]::handle_close, connection fully closed
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport_Cache_Manager::fill_set_i, current_size = 3, cache_ma
+ximum = 512
+TAO (1276|340) SSLIOP connection from client <62.92.20.144:3013> on 584
+TAO (1276|340) - Transport_Cache_Manager::bind_i, 0x12ea20 -> 0xe41318 Transport
+[584]
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 88 bytes
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 88 bytes
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Transport[584]::handle_input_i, read 80 bytes
+TAO (1276|340) Connector::connect - looking for SSLIOP connection.
+TAO (1276|340) - Transport_Connector::connect, got an existing Transport[920]
+TAO_IIOP_Transport::send_message
+ enable_network_priority = 0
+TAO (1276|340) - Transport[920]::handle_input_i, read 24 bytes
+00:20:21 : Release corba references to Organizer
+00:20:21 : electra logged off
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Connection_Handler[584]::handle_close_eh, (584, 1)
+TAO (1276|340) - Connection_Handler[584]::close_connection, purging entry from c
+ache
+TAO (1276|340) - Connection_Handler[584]::close_connection, removing from the re
+actor
+TAO (1276|340) - Connection_Handler[584]::close_connection, error in remove_hand
+ler (-1)
+TAO (1276|340) - Connection_Handler[584]::close_connection, cancel all timers an
+d refcount [2]
+TAO (1276|340) - Connection_Handler[584]::close_connection, refcount = 0
+TAO (1276|340) - Connection_Handler[584]::handle_close, connection fully closed
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
+TAO (1276|340) - Connection_Handler[812]::handle_close_eh, (812, 1)
+TAO (1276|340) - Connection_Handler[812]::close_connection, purging entry from c
+ache
+TAO (1276|340) - Connection_Handler[812]::close_connection, removing from the re
+actor
+TAO (1276|340) - Connection_Handler[812]::close_connection, error in remove_hand
+ler (-1)
+TAO (1276|340) - Connection_Handler[812]::close_connection, cancel all timers an
+d refcount [2]
+TAO (1276|340) - Connection_Handler[812]::close_connection, refcount = 0
+TAO (1276|340) - Connection_Handler[812]::handle_close, connection fully closed
+TAO (1276|340) - ORB_Core::run, handle_events() returns 1
+TAO (1276|340) - ORB_Core::run, calling handle_events()
