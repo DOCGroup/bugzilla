@@ -1,0 +1,9 @@
+#!/bin/sh
+
+. ./uavenv.sh
+
+cd $QUO_ROOT/UAV/uav/avstreams
+
+./distributor  -ORBInitRef NameService=corbaloc::192.168.1.2:2809/NameService -ORBDebugLevel 1  -s Sender -r Distributer  -a distributer_addr_file $@
+
+
