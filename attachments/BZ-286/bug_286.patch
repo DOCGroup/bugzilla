@@ -1,0 +1,3473 @@
+Index: ACE_wrappers/TAO/ChangeLog.atd
+diff -u ACE_wrappers/TAO/ChangeLog.atd:1.64 ACE_wrappers/TAO/ChangeLog.atd:1.65
+--- ACE_wrappers/TAO/ChangeLog.atd:1.64	Fri Nov  8 11:45:56 2002
++++ ACE_wrappers/TAO/ChangeLog.atd	Fri Nov  8 13:31:04 2002
+@@ -1,3 +1,40 @@
++Fri Nov  8 13:04:08 2002  Carlos O'Ryan  <coryan@atdesk.com>
++
++	* tao/Messaging/Makefile:
++	* tao/Messaging/AMI_ClientRequestInfo_i.h:
++	* tao/Messaging/AMI_ClientRequestInfo_i.cpp:
++	  Add implementation class for AMI ClientRequestInfos.
++
++	* TAO_IDL/be/be_codegen.cpp:
++	  Move some #includes to the .cpp file, include
++	  AMI_ClientRequestInfo_i.h when compiling with interceptors and
++	  AMI.
++
++	* TAO_IDL/be/be_visitor_operation/ami_cs.cpp:
++	  Generate interceptor code for sendc_*** operations.
++
++	* tests/Portable_Interceptors/Makefile:
++	* tests/Portable_Interceptors/AMI/Makefile:
++	* tests/Portable_Interceptors/AMI/run_test.pl:
++	* tests/Portable_Interceptors/AMI/.cvsignore:
++	* tests/Portable_Interceptors/AMI/Client_Interceptor.h:
++	* tests/Portable_Interceptors/AMI/Client_Interceptor.cpp:
++	* tests/Portable_Interceptors/AMI/Client_ORBInitializer.h:
++	* tests/Portable_Interceptors/AMI/Client_ORBInitializer.cpp:
++	* tests/Portable_Interceptors/AMI/Echo.h:
++	* tests/Portable_Interceptors/AMI/Echo.cpp:
++	* tests/Portable_Interceptors/AMI/Echo_Handler.h:
++	* tests/Portable_Interceptors/AMI/Echo_Handler.cpp:
++	* tests/Portable_Interceptors/AMI/Server_Interceptor.h:
++	* tests/Portable_Interceptors/AMI/Server_Interceptor.cpp:
++	* tests/Portable_Interceptors/AMI/Server_ORBInitializer.h:
++	* tests/Portable_Interceptors/AMI/Server_ORBInitializer.cpp:
++	* tests/Portable_Interceptors/AMI/Shared_Interceptor.h:
++	* tests/Portable_Interceptors/AMI/Test.idl:
++	* tests/Portable_Interceptors/AMI/client.cpp:
++	* tests/Portable_Interceptors/AMI/server.cpp:
++	  New regression test for the AMI interceptors.
++
+ Fri Nov  8 11:08:09 2002  Carlos O'Ryan  <coryan@atdesk.com>
+ 
+ 	* orbsvcs/orbsvcs/Makefile.CosNaming:
+Index: ACE_wrappers/TAO/TAO_IDL/be/be_codegen.cpp
+diff -u ACE_wrappers/TAO/TAO_IDL/be/be_codegen.cpp:1.1.1.4 ACE_wrappers/TAO/TAO_IDL/be/be_codegen.cpp:1.2
+--- ACE_wrappers/TAO/TAO_IDL/be/be_codegen.cpp:1.1.1.4	Thu Jul 18 15:30:52 2002
++++ ACE_wrappers/TAO/TAO_IDL/be/be_codegen.cpp	Fri Nov  8 13:31:04 2002
+@@ -192,10 +192,6 @@
+           // Include Messaging skeleton file.
+           this->gen_standard_include (this->client_header_,
+                                       "tao/Messaging/Messaging.h");
+-
+-          // Including Asynch Invocation file.
+-          this->gen_standard_include (this->client_header_,
+-                                      "tao/Messaging/Twoway_Asynch_Invocation.h");
+         }
+ 
+       // Include the smart proxy base class if smart proxies are enabled.
+@@ -349,6 +345,17 @@
+                               "tao/ClientInterceptorAdapter.h");
+   *this->client_stubs_ << "#endif  /* TAO_HAS_INTERCEPTORS == 1 */\n\n";
+ 
++  if (be_global->ami_call_back () == I_TRUE)
++    {
++      // Including Asynch Invocation file.
++      this->gen_standard_include (this->client_stubs_,
++                                  "tao/Messaging/Twoway_Asynch_Invocation.h");
++      *this->client_stubs_ << "\n#if TAO_HAS_INTERCEPTORS == 1\n";
++      this->gen_standard_include (this->client_stubs_,
++                                  "tao/Messaging/AMI_ClientRequestInfo_i.h");
++      *this->client_stubs_ << "#endif  /* TAO_HAS_INTERCEPTORS == 1 */\n\n";
++    }
++
+   *this->client_stubs_ << "#if defined (__BORLANDC__)\n"
+                        << "#pragma option -w-rvl -w-rch -w-ccc -w-aus -w-sig\n"
+                        << "#endif /* __BORLANDC__ */\n\n";
+@@ -455,8 +462,6 @@
+           // Include Messaging skeleton file.
+           this->gen_standard_include (this->server_header_,
+                                       "tao/Messaging/MessagingS.h");
+-          this->gen_standard_include (this->server_header_,
+-                                      "tao/Messaging/Twoway_Asynch_Invocation.h");
+         }
+ 
+       // We must include all the skeleton headers corresponding to
+Index: ACE_wrappers/TAO/TAO_IDL/be/be_visitor_operation/ami_cs.cpp
+diff -u ACE_wrappers/TAO/TAO_IDL/be/be_visitor_operation/ami_cs.cpp:1.1.1.2 ACE_wrappers/TAO/TAO_IDL/be/be_visitor_operation/ami_cs.cpp:1.2
+--- ACE_wrappers/TAO/TAO_IDL/be/be_visitor_operation/ami_cs.cpp:1.1.1.2	Thu Jul 18 15:30:52 2002
++++ ACE_wrappers/TAO/TAO_IDL/be/be_visitor_operation/ami_cs.cpp	Fri Nov  8 13:31:04 2002
+@@ -269,18 +269,13 @@
+ 
+   os->indent ();
+ 
+-  // Create the GIOP_Invocation and grab the outgoing CDR stream.
+-  switch (node->flags ())
+-    {
+-    case AST_Operation::OP_oneway:
+-      // If it is a oneway, we wouldnt have come here to generate AMI
+-      // sendc method.
+-      break;
+-    default:
+-      *os << "TAO_GIOP_Twoway_Asynch_Invocation _tao_call ";
+-    }
++  // Check the flags just once, and assert, getting in this state
++  // indicates a severe bug in the IDL compiler.
++  if(node->flags () == AST_Operation::OP_oneway)
++    ACE_ASSERT(!"Cannot generate AMI calls for oneways");
+ 
+-  *os << "(" << be_idt << be_idt_nl
++  *os << "TAO_GIOP_Twoway_Asynch_Invocation _tao_call("
++      << be_idt << be_idt_nl
+       << "istub," << be_nl;
+   *os << "\"";
+ 
+@@ -348,39 +343,78 @@
+   }
+ 
+ 
+-
+   // Next argument is the ami handler passed in for this method.
+   *os << "ami_handler" << be_uidt_nl
+-
+       << ");" << be_uidt_nl;
+ 
+-  *os << "\n" << be_nl
+-      << "for (;;)" << be_nl
++  *os << be_nl << "// TAO_IDL - Generated from " << be_nl
++      << "// " << __FILE__ << ":" << __LINE__ << "\n" << be_nl;
++
++  *os << "int _invoke_status;\n"
++      << "\n#if (TAO_HAS_INTERCEPTORS == 1)" << be_nl
++      << "TAO_ClientRequestInterceptor_Adapter _tao_vfr ("
++      << be_idt << be_idt_nl
++      << "istub->orb_core ()->client_request_interceptors ()," << be_nl
++      << "&_tao_call," << be_nl
++      << "_invoke_status"
++      << be_uidt_nl
++      << ");" << be_uidt_nl
++      << "\n#endif  /* TAO_HAS_INTERCEPTORS */\n" << be_nl;
++
++  *os << "for (;;)" << be_nl
+       << "{" << be_idt_nl;
+ 
++  *os << "\n#if TAO_HAS_INTERCEPTORS == 1" << be_nl
++      << "TAO_AMI_ClientRequestInfo_i _tao_ri (" << be_idt << be_idt_nl
++      << "&_tao_call," << be_nl
++      << "this" << be_uidt_nl
++      << ");" << be_uidt_nl;
++  *os << "\n#endif /* TAO_HAS_INTERCEPTORS */\n" << be_nl;
++
++  *os << "CORBA::Short _tao_response_flag = TAO_TWOWAY_RESPONSE_FLAG;\n";
++
++  *os << "\n#if TAO_HAS_INTERCEPTORS == 1" << be_nl
++      << "_tao_ri.response_expected(0);" << be_nl
++      << "ACE_TRY" << be_idt_nl
++      << "{" << be_idt_nl
++      << "_tao_vfr.send_request (" << be_idt << be_idt_nl
++      << "&_tao_ri" << be_nl
++      << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
++      << ");" << be_uidt_nl
++      << "ACE_TRY_CHECK;\n" << be_nl
++      << "if (_invoke_status == TAO_INVOKE_RESTART)" << be_nl
++      << "{" << be_idt_nl
++      << "_tao_call.restart_flag (1);" << be_nl
++      << "continue;" << be_uidt_nl
++      << "}\n"
++      << "#endif /* TAO_HAS_INTERCEPTORS */\n" << be_nl;
++
+   *os << "_tao_call.start (ACE_ENV_SINGLE_ARG_PARAMETER);" << be_nl;
+-  // Check if there is an exception.
+-  // Return type is void, so we know what to generate here.
+-  *os << "ACE_CHECK;" << be_nl;
+ 
+-  // Prepare the request header
+-  os->indent ();
+-  *os << "CORBA::Short _tao_response_flag = ";
+-
+-  switch (node->flags ())
+-    {
+-    case AST_Operation::OP_oneway:
+-      *os << "_tao_call.sync_scope ();";
+-      break;
+-    default:
+-      *os << "TAO_TWOWAY_RESPONSE_FLAG;" << be_nl;
++  if (this->gen_check_interceptor_exception (bt) == -1)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         "(%N:%l) be_visitor_operation_ami_cs::"
++                         "gen_marshal_and_invoke - "
++                         "codegen for checking exception failed\n"),
++                        -1);
+     }
+ 
+   *os << be_nl
+       << "_tao_call.prepare_header (" << be_idt << be_idt_nl
+-      << "ACE_static_cast (CORBA::Octet, _tao_response_flag) ACE_ENV_ARG_PARAMETER"
+-      << be_uidt_nl << ");" << be_uidt << "\n";
++      << "ACE_static_cast (CORBA::Octet, _tao_response_flag)" << be_nl
++      << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl << ");"
++      << be_uidt_nl;
+ 
++  if (this->gen_check_interceptor_exception (bt) == -1)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         "(%N:%l) be_visitor_operation_ami_cs::"
++                         "gen_marshal_and_invoke - "
++                         "codegen for checking exception failed\n"),
++                        -1);
++    }
++
+   // Now make sure that we have some in and inout
+   // parameters. Otherwise, there is nothing to be marshaled in.
+   if (this->has_param_type (node, AST_Argument::dir_IN) ||
+@@ -413,9 +447,8 @@
+           << "))" << be_nl;
+ 
+       // If marshaling fails, raise exception.
+-      int status = this->gen_raise_exception (bt, 
+-                                              "CORBA::MARSHAL",
+-                                              "");
++      int status = this->gen_raise_interceptor_exception (
++          bt, "CORBA::MARSHAL", "");
+ 
+       if (status == -1)
+         {
+@@ -430,13 +463,12 @@
+     }
+ 
+   *os << be_nl
+-      << "int _invoke_status =" << be_idt_nl
+-      << "_tao_call.invoke (ACE_ENV_SINGLE_ARG_PARAMETER);" << be_uidt;
++      << "_invoke_status =" << be_idt_nl
++      << "_tao_call.invoke (ACE_ENV_SINGLE_ARG_PARAMETER);"
++      << be_uidt_nl;
+ 
+-  *os << be_uidt_nl;
+-
+   // Check if there is an exception.
+-  if (this->gen_check_exception (bt) == -1)
++  if (this->gen_check_interceptor_exception (bt) == -1)
+     {
+       ACE_ERROR_RETURN ((LM_ERROR,
+                          "(%N:%l) be_visitor_operation_ami_cs::"
+@@ -446,18 +478,26 @@
+     }
+ 
+   *os << be_nl
+-      << "if (_invoke_status == TAO_INVOKE_RESTART)" << be_idt_nl
+-      << "{" << be_nl
+-      << "  _tao_call.restart_flag (1);" << be_nl
+-      << "  continue;" <<be_nl
+-      << "}"<< be_uidt_nl
+-      << "if (_invoke_status != TAO_INVOKE_OK)" << be_nl
++      << "if (_invoke_status == TAO_INVOKE_RESTART)" << be_nl
++      << "{" << be_idt
++      << "\n#if TAO_HAS_INTERCEPTORS == 1" << be_nl
++      << "_tao_ri.reply_status (_invoke_status);" << be_nl
++      << "_tao_vfr.receive_other (" << be_idt << be_idt_nl
++      << "&_tao_ri" << be_nl
++      << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
++      << ");" << be_uidt_nl
++      << "ACE_TRY_CHECK;"
++      << "\n#else" << be_nl
++      << "_tao_call.restart_flag (1);"
++      << "\n#endif  /* TAO_HAS_INTERCEPTORS */" << be_nl
++      << "continue;" << be_uidt_nl
++      << "}"<< be_nl
++      << "else if (_invoke_status != TAO_INVOKE_OK)" << be_nl
+       << "{" << be_idt_nl;
+ 
+-  int status = 
+-    this->gen_raise_exception (bt,
+-                               "CORBA::UNKNOWN",
+-                               "TAO_DEFAULT_MINOR_CODE, CORBA::COMPLETED_YES");
++  int status = this->gen_raise_interceptor_exception (
++      bt, "CORBA::UNKNOWN",
++      "TAO_DEFAULT_MINOR_CODE, CORBA::COMPLETED_YES");
+ 
+   if (status == -1)
+     {
+@@ -467,11 +507,94 @@
+                          "codegen for return var failed\n"),
+                         -1);
+     }
++  *os << be_uidt_nl
++      << "}\n";
++
++  *os << "\n#if TAO_HAS_INTERCEPTORS == 1" << be_nl
++      << "_tao_ri.reply_status (_invoke_status);" << be_nl
++      << "_tao_vfr.receive_other (" << be_idt_nl
++      << "&_tao_ri" << be_nl
++      << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
++      << ");" << be_nl
++      << "ACE_TRY_CHECK;" << be_uidt_nl
++      << "}" << be_uidt_nl
++      << "ACE_CATCHANY" << be_idt_nl
++      << "{" << be_idt_nl
++      << "_tao_ri.exception(&ACE_ANY_EXCEPTION);" << be_nl
++      << "_tao_vfr.receive_exception(" << be_idt << be_idt_nl
++      << "&_tao_ri" << be_nl
++      << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
++      << ");" << be_uidt_nl
++      << "ACE_TRY_CHECK;" << be_nl;
++  // The receive_exception() interception point may have thrown a
++  // PortableInterceptor::ForwardRequest exception.  In that event,
++  // the connection retry loop must be restarted so do not rethrow the
++  // caught exception.
++  *os << be_nl
++      << "PortableInterceptor::ReplyStatus _tao_status =" << be_idt_nl
++      << "_tao_ri.reply_status (ACE_ENV_SINGLE_ARG_PARAMETER);" << be_uidt_nl
++      << "ACE_TRY_CHECK;" << be_nl;
++
++  *os << be_nl
++      << "if (_tao_status == PortableInterceptor::SYSTEM_EXCEPTION" << be_nl
++      << "    || _tao_status == PortableInterceptor::USER_EXCEPTION)" 
++      << be_idt_nl
++      << "{" << be_idt_nl;
++
++  if (be_global->use_raw_throw ())
++    {
++      *os << "throw;";
++    }
++  else
++    {
++      *os << "ACE_RE_THROW;";
++    }
+ 
+   *os << be_uidt_nl
+-      << "}" << be_nl
+-      << "break;" << be_nl
+-      << be_uidt_nl << "}" << be_nl;
++      << "}" << be_uidt << be_uidt_nl;
++
++  *os << "}" << be_uidt_nl
++      << "ACE_ENDTRY;" << be_nl;
++
++  if (this->gen_check_exception (bt) == -1)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         "(%N:%l) be_visitor_operation_cs::"
++                         "gen_marshal_and_invoke - "
++                         "codegen for checking exception failed\n"),
++                        -1);
++    }
++  // The receive_exception() or receive_other() interception point may
++  // have thrown a PortableInterceptor::ForwardRequest exception.  In
++  // that event, the connection retry loop must be restarted.  Note
++  // that the _invoke_status variable is not set by the interceptor
++  // support code, so we must explicitly check the status in the
++  // ClientRequestInfo object.
++  *os << be_nl
++      << "PortableInterceptor::ReplyStatus _tao_status =" << be_idt_nl
++      << "_tao_ri.reply_status (ACE_ENV_SINGLE_ARG_PARAMETER);" << be_uidt_nl;
++
++  if (this->gen_check_exception (bt) == -1)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         "(%N:%l) be_visitor_operation_cs::"
++                         "gen_marshal_and_invoke - "
++                         "codegen for checking exception failed\n"),
++                        -1);
++    }
++
++  *os << be_nl
++      << "if (_tao_status == PortableInterceptor::LOCATION_FORWARD" << be_nl
++      << "    || _tao_status == PortableInterceptor::TRANSPORT_RETRY)"
++      << be_idt_nl
++      << "{" << be_idt_nl
++      << "continue;" << be_uidt_nl
++      << "}" << be_uidt_nl;
++
++  *os << "\n#endif  /* TAO_HAS_INTERCEPTORS */\n" << be_nl;
++
++  *os << "break;" << be_uidt_nl
++      << "}\n" << be_nl;
+ 
+   // Return type is void and we are going to worry about OUT or INOUT
+   // parameters. Return from here.
+Index: ACE_wrappers/TAO/tao/Messaging/AMI_ClientRequestInfo_i.cpp
+diff -u /dev/null ACE_wrappers/TAO/tao/Messaging/AMI_ClientRequestInfo_i.cpp:1.1
+--- /dev/null	Fri Nov  8 14:42:33 2002
++++ ACE_wrappers/TAO/tao/Messaging/AMI_ClientRequestInfo_i.cpp	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,54 @@
++// Some DOC folks do not know how to configure emacs -*- C++ -*-
++/**
++ * @file AMI_ClientRequestInfo_i.cpp
++ *
++ * $Id: AMI_ClientRequestInfo_i.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ *
++ */
++
++#include "AMI_ClientRequestInfo_i.h"
++
++ACE_RCSID(TAO_Messaging, AMI_ClientRequestInfo_i, "$Id: AMI_ClientRequestInfo_i.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $")
++
++#if (TAO_HAS_INTERCEPTORS == 1)
++
++#include "Twoway_Asynch_Invocation.h"
++
++TAO_AMI_ClientRequestInfo_i::
++TAO_AMI_ClientRequestInfo_i (
++    TAO_GIOP_Twoway_Asynch_Invocation * invocation,
++    CORBA::Object_ptr target)
++  : TAO_ClientRequestInfo_i (invocation, target)
++{
++}
++
++Dynamic::ParameterList *
++TAO_AMI_ClientRequestInfo_i::arguments (ACE_ENV_SINGLE_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  ACE_THROW_RETURN (CORBA::NO_RESOURCES (TAO_OMG_VMCID | 1,
++                                         CORBA::COMPLETED_NO), 0);
++  
++}
++
++Dynamic::ExceptionList *
++TAO_AMI_ClientRequestInfo_i::exceptions (ACE_ENV_SINGLE_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  ACE_THROW_RETURN (CORBA::NO_RESOURCES (TAO_OMG_VMCID | 1,
++                                         CORBA::COMPLETED_NO), 0);
++  
++}
++
++CORBA::Any *
++TAO_AMI_ClientRequestInfo_i::result (ACE_ENV_SINGLE_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  ACE_THROW_RETURN (CORBA::NO_RESOURCES (TAO_OMG_VMCID | 1,
++                                         CORBA::COMPLETED_NO), 0);
++  
++}
++
++#endif /* TAO_HAS_INTERCEPTORS == 1 */
+Index: ACE_wrappers/TAO/tao/Messaging/AMI_ClientRequestInfo_i.h
+diff -u /dev/null ACE_wrappers/TAO/tao/Messaging/AMI_ClientRequestInfo_i.h:1.1
+--- /dev/null	Fri Nov  8 14:42:33 2002
++++ ACE_wrappers/TAO/tao/Messaging/AMI_ClientRequestInfo_i.h	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,39 @@
++/**
++ * @file AMI_ClientRequestInfo_i.h
++ *
++ * $Id: AMI_ClientRequestInfo_i.h,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ *
++ */
++
++#ifndef TAO_MESSAGING_AMI_CLIENTREQUESTINFO_I_H
++#define TAO_MESSAGING_AMI_CLIENTREQUESTINFO_I_H
++#include "ace/pre.h"
++
++#include "messaging_export.h"
++#include "tao/ClientRequestInfo_i.h"
++
++class TAO_GIOP_Twoway_Asynch_Invocation;
++
++#if (TAO_HAS_INTERCEPTORS == 1)
++
++class TAO_Messaging_Export TAO_AMI_ClientRequestInfo_i
++  : public TAO_ClientRequestInfo_i
++{
++public:
++  TAO_AMI_ClientRequestInfo_i(TAO_GIOP_Twoway_Asynch_Invocation *,
++                              CORBA::Object_ptr target);
++
++  virtual Dynamic::ParameterList * arguments (ACE_ENV_SINGLE_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++  virtual Dynamic::ExceptionList * exceptions (ACE_ENV_SINGLE_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++  virtual CORBA::Any * result (ACE_ENV_SINGLE_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++};
++
++#endif /* TAO_HAS_INTERCEPTORS == 1 */
++
++#include "ace/post.h"
++#endif /* TAO_MESSAGING_AMI_CLIENTREQUESTINFO_I_H */
+Index: ACE_wrappers/TAO/tao/Messaging/Makefile
+diff -u ACE_wrappers/TAO/tao/Messaging/Makefile:1.2 ACE_wrappers/TAO/tao/Messaging/Makefile:1.3
+--- ACE_wrappers/TAO/tao/Messaging/Makefile:1.2	Wed Sep  4 16:22:56 2002
++++ ACE_wrappers/TAO/tao/Messaging/Makefile	Fri Nov  8 13:31:04 2002
+@@ -25,7 +25,8 @@
+   TAO_ExtC \
+   Messaging_ORBInitializer \
+   Messaging_PolicyFactory \
+-  Messaging_Policy_i
++  Messaging_Policy_i \
++  AMI_ClientRequestInfo_i
+ 
+ FILES = $(CPP_SRCS)
+ DEFS  = $(addsuffix .h,$(FILES))
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/Makefile
+diff -u ACE_wrappers/TAO/tests/Portable_Interceptors/Makefile:1.1.1.2 ACE_wrappers/TAO/tests/Portable_Interceptors/Makefile:1.2
+--- ACE_wrappers/TAO/tests/Portable_Interceptors/Makefile:1.1.1.2	Fri Oct 19 13:49:14 2001
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/Makefile	Fri Nov  8 13:31:04 2002
+@@ -17,7 +17,8 @@
+   IORInterceptor \
+   ForwardRequest \
+   Request_Interceptor_Flow \
+-  PICurrent
++  PICurrent \
++  AMI
+ 
+ ifndef TAO_ROOT
+   TAO_ROOT = $(ACE_ROOT)/TAO
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/.cvsignore
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/.cvsignore:1.1
+--- /dev/null	Fri Nov  8 14:42:43 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/.cvsignore	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,12 @@
++TestC.cpp
++TestC.h
++TestC.i
++TestS.cpp
++TestS.h
++TestS.i
++TestS_T.cpp
++TestS_T.h
++TestS_T.i
++client
++server
++test.ior
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_Interceptor.cpp
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_Interceptor.cpp:1.1
+--- /dev/null	Fri Nov  8 14:42:43 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_Interceptor.cpp	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,139 @@
++/**
++ * @file Client_Interceptor.cpp
++ *
++ * $Id: Client_Interceptor.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++
++#include "Client_Interceptor.h"
++#include "Shared_Interceptor.h"
++#include "tao/OctetSeqC.h"
++
++ACE_RCSID(Portable_Interceptor_AMI, Client_Interceptor, "$Id: Client_Interceptor.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $")
++
++unsigned long Echo_Client_Request_Interceptor::request_count = 0;
++unsigned long Echo_Client_Request_Interceptor::reply_count = 0;
++unsigned long Echo_Client_Request_Interceptor::other_count = 0;
++unsigned long Echo_Client_Request_Interceptor::exception_count = 0;
++
++Echo_Client_Request_Interceptor::
++Echo_Client_Request_Interceptor ()
++{
++}
++
++char *
++Echo_Client_Request_Interceptor::name (ACE_ENV_SINGLE_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  return CORBA::string_dup ("Echo_Client_Interceptor");
++}
++
++void
++Echo_Client_Request_Interceptor::destroy (ACE_ENV_SINGLE_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++}
++
++void
++Echo_Client_Request_Interceptor::send_poll (
++    PortableInterceptor::ClientRequestInfo_ptr
++    ACE_ENV_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  ACE_ERROR((LM_ERROR,
++             "ERROR, unexpected interception point called send_poll()\n"));
++  ACE_THROW(CORBA::BAD_PARAM());
++}
++
++void
++Echo_Client_Request_Interceptor::send_request (
++    PortableInterceptor::ClientRequestInfo_ptr ri
++    ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException,
++                   PortableInterceptor::ForwardRequest))
++{
++  IOP::ServiceContext sc;
++  sc.context_id = ::service_id;
++
++  CORBA::Octet *buf = CORBA::OctetSeq::allocbuf(magic_cookie_len);
++  ACE_OS::memcpy(buf, magic_cookie, magic_cookie_len);
++  sc.context_data.replace (magic_cookie_len, magic_cookie_len, buf, 1);
++
++  // Add this context to the service context list.
++  ri->add_request_service_context (sc, 0 ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++
++  // Check that the request service context can be retrieved.
++  IOP::ServiceContext_var rc =
++    ri->get_request_service_context (::service_id ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++
++  if (rc->context_data.length() != magic_cookie_len
++      || ACE_OS::memcmp(
++             magic_cookie, rc->context_data.get_buffer(),
++             magic_cookie_len) != 0
++      )
++    {
++      ACE_THROW(CORBA::BAD_PARAM());
++    }
++
++  Echo_Client_Request_Interceptor::request_count++;
++}
++
++void
++Echo_Client_Request_Interceptor::receive_reply (
++    PortableInterceptor::ClientRequestInfo_ptr ri
++    ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  // Check that the request service context can be retrieved.
++  IOP::ServiceContext_var rc =
++    ri->get_request_service_context (::service_id ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++
++  if (rc->context_data.length() != magic_cookie_len
++      || ACE_OS::memcmp(
++             magic_cookie, rc->context_data.get_buffer(),
++             magic_cookie_len) != 0
++      )
++    {
++      ACE_THROW(CORBA::BAD_PARAM());
++    }
++
++  Echo_Client_Request_Interceptor::reply_count++;
++}
++
++void
++Echo_Client_Request_Interceptor::receive_other (
++    PortableInterceptor::ClientRequestInfo_ptr ri
++    ACE_ENV_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC ((CORBA::SystemException,
++                   PortableInterceptor::ForwardRequest))
++{
++  // Check that the request service context can be retrieved.
++  IOP::ServiceContext_var rc =
++    ri->get_request_service_context (::service_id ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++
++  if (rc->context_data.length() != magic_cookie_len
++      || ACE_OS::memcmp(
++             magic_cookie, rc->context_data.get_buffer(),
++             magic_cookie_len) != 0
++      )
++    {
++      ACE_THROW(CORBA::BAD_PARAM());
++    }
++
++  Echo_Client_Request_Interceptor::other_count++;
++}
++
++void
++Echo_Client_Request_Interceptor::receive_exception (
++    PortableInterceptor::ClientRequestInfo_ptr
++    ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException,
++                   PortableInterceptor::ForwardRequest))
++{
++  Echo_Client_Request_Interceptor::exception_count++;
++}
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_Interceptor.h
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_Interceptor.h:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_Interceptor.h	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,58 @@
++/**
++ * @file Client_Interceptor.h
++ *
++ * $Id: Client_Interceptor.h,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++#ifndef Client_Interceptor__h_
++#define Client_Interceptor__h_
++
++#include "tao/PortableInterceptorC.h"
++#include "tao/LocalObject.h"
++#include "tao/ORB.h"
++
++class Echo_Client_Request_Interceptor
++  : public virtual PortableInterceptor::ClientRequestInterceptor
++  , public virtual TAO_Local_RefCounted_Object
++{
++public:
++  Echo_Client_Request_Interceptor ();
++
++  static unsigned long request_count;
++  static unsigned long reply_count;
++  static unsigned long other_count;
++  static unsigned long exception_count;
++
++  virtual char * name (ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++  // Canonical name of the interceptor.
++
++  virtual void destroy (ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  virtual void send_poll (PortableInterceptor::ClientRequestInfo_ptr
++                          ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  virtual void send_request (PortableInterceptor::ClientRequestInfo_ptr ri
++                             ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException,
++                     PortableInterceptor::ForwardRequest));
++
++  virtual void receive_reply (PortableInterceptor::ClientRequestInfo_ptr ri
++                              ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  virtual void receive_other (PortableInterceptor::ClientRequestInfo_ptr
++                              ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException,
++                     PortableInterceptor::ForwardRequest));
++
++  virtual void receive_exception (PortableInterceptor::ClientRequestInfo_ptr ri
++                                  ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException,
++                    PortableInterceptor::ForwardRequest));
++};
++
++#endif /* Client_Interceptor__h_ */
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_ORBInitializer.cpp
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_ORBInitializer.cpp:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_ORBInitializer.cpp	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,38 @@
++/**
++ * @file Client_ORBInitializer.cpp
++ *
++ * $Id: Client_ORBInitializer.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++
++#include "Client_ORBInitializer.h"
++#include "Client_Interceptor.h"
++
++ACE_RCSID(Portable_Interceptor_AMI, Client_ORBInitializer, "$Id: Client_ORBInitializer.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $")
++
++Client_ORBInitializer::Client_ORBInitializer ()
++{
++}
++
++void
++Client_ORBInitializer::pre_init (
++    PortableInterceptor::ORBInitInfo_ptr
++    ACE_ENV_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++}
++
++void
++Client_ORBInitializer::post_init (
++    PortableInterceptor::ORBInitInfo_ptr info
++    ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  PortableInterceptor::ClientRequestInterceptor_var interceptor(
++      new Echo_Client_Request_Interceptor);
++
++  info->add_client_request_interceptor (interceptor.in ()
++                                        ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++}
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_ORBInitializer.h
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_ORBInitializer.h:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Client_ORBInitializer.h	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,33 @@
++/**
++ * @file Client_ORBInitializer.h
++ *
++ * $Id: Client_ORBInitializer.h,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++
++#ifndef Client_ORBInitializer__h_
++#define Client_ORBInitializer__h_
++#include "ace/pre.h"
++
++#include "tao/PortableInterceptorC.h"
++#include "tao/LocalObject.h"
++
++class Client_ORBInitializer
++  : public virtual PortableInterceptor::ORBInitializer
++  , public virtual TAO_Local_RefCounted_Object
++{
++public:
++  Client_ORBInitializer ();
++
++  virtual void pre_init (PortableInterceptor::ORBInitInfo_ptr info
++                         ACE_ENV_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  virtual void post_init (PortableInterceptor::ORBInitInfo_ptr info
++                          ACE_ENV_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++};
++
++#include "ace/post.h"
++#endif /* Client_ORBInitializer__h_ */
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo.cpp
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo.cpp:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo.cpp	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,30 @@
++/**
++ * @file Echo.cpp
++ *
++ * $Id: Echo.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++#include "Echo.h"
++
++ACE_RCSID(Portable_Interceptors_AMI, Echo, "$Id: Echo.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $")
++
++Echo::Echo(CORBA::ORB_ptr orb)
++  : orb_(CORBA::ORB::_duplicate(orb))
++{
++}
++
++char *
++Echo::echo_operation(char const * the_input
++           ACE_ENV_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC((CORBA::SystemException))
++{
++  return CORBA::string_dup(the_input);
++}
++
++void
++Echo::shutdown(ACE_ENV_SINGLE_ARG_DECL)
++  ACE_THROW_SPEC((CORBA::SystemException))
++{
++  this->orb_->shutdown(0 ACE_ENV_ARG_PARAMETER);
++}
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo.h
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo.h:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo.h	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,31 @@
++/**
++ * @file Echo.h
++ *
++ * $Id: Echo.h,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++#ifndef Echo__h_
++#define Echo__h_
++
++#include "TestS.h"
++#include "tao/PortableServer/PortableServer.h"
++
++class Echo
++  : public POA_Test::Echo
++  , public PortableServer::RefCountServantBase
++{
++public:
++  Echo(CORBA::ORB_ptr orb);
++
++  virtual char * echo_operation(char const * the_input
++                      ACE_ENV_ARG_DECL)
++    ACE_THROW_SPEC((CORBA::SystemException));
++  virtual void shutdown(ACE_ENV_SINGLE_ARG_DECL)
++    ACE_THROW_SPEC((CORBA::SystemException));
++
++private:
++  CORBA::ORB_var orb_;
++};
++
++#endif /* Echo__h_ */
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo_Handler.cpp
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo_Handler.cpp:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo_Handler.cpp	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,41 @@
++/**
++ * @file Echo_Handler.cpp
++ *
++ * $Id: Echo_Handler.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++#include "Echo_Handler.h"
++
++ACE_RCSID(Portable_Interceptors_AMI, Echo_Handler, "$Id: Echo_Handler.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $")
++
++Echo_Handler::Echo_Handler()
++{
++}
++
++void
++Echo_Handler::echo_operation(char const *
++                             ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC((CORBA::SystemException))
++{
++}
++
++void
++Echo_Handler::echo_operation_excep(Test::AMI_EchoExceptionHolder *
++                                   ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC((CORBA::SystemException))
++{
++}
++
++void
++Echo_Handler::shutdown(ACE_ENV_SINGLE_ARG_DECL)
++  ACE_THROW_SPEC((CORBA::SystemException))
++{
++}
++
++void
++Echo_Handler::shutdown_excep(Test::AMI_EchoExceptionHolder *
++                             ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC((CORBA::SystemException))
++{
++}
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo_Handler.h
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo_Handler.h:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Echo_Handler.h	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,34 @@
++/**
++ * @file Echo_Handler.h
++ *
++ * $Id: Echo_Handler.h,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++#ifndef Echo_Handler__h_
++#define Echo_Handler__h_
++
++#include "TestS.h"
++#include "tao/PortableServer/PortableServer.h"
++
++class Echo_Handler
++  : public POA_Test::AMI_EchoHandler
++  , public PortableServer::RefCountServantBase
++{
++public:
++  Echo_Handler();
++
++  virtual void echo_operation(char const * retval
++                              ACE_ENV_ARG_DECL)
++    ACE_THROW_SPEC((CORBA::SystemException));
++  virtual void echo_operation_excep(Test::AMI_EchoExceptionHolder * h
++                                    ACE_ENV_ARG_DECL)
++    ACE_THROW_SPEC((CORBA::SystemException));
++  virtual void shutdown(ACE_ENV_SINGLE_ARG_DECL)
++    ACE_THROW_SPEC((CORBA::SystemException));
++  virtual void shutdown_excep(Test::AMI_EchoExceptionHolder * h
++                              ACE_ENV_ARG_DECL)
++    ACE_THROW_SPEC((CORBA::SystemException));
++};
++
++#endif /* Echo_Handler__h_ */
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Makefile
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Makefile:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Makefile	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,1764 @@
++#----------------------------------------------------------------------------
++#
++# $Id: Makefile,v 1.1 2002/11/08 18:31:04 coryan Exp $
++#
++#----------------------------------------------------------------------------
++
++#----------------------------------------------------------------------------
++#       Local macros
++#----------------------------------------------------------------------------
++
++ifndef TAO_ROOT
++  TAO_ROOT = $(ACE_ROOT)/TAO
++endif # ! TAO_ROOT
++
++IDL_FILES = Test
++IDL_SRC = TestC.cpp TestS.cpp
++BIN = client server
++
++SRC = $(addsuffix .cpp, $(BIN) \
++	Client_ORBInitializer \
++	Client_Interceptor \
++	Echo_Handler \
++	Echo \
++	Server_ORBInitializer \
++	Server_Interceptor \
++	) $(IDL_SRC)
++
++CLIENT_OBJS = \
++	client.o \
++	Client_ORBInitializer.o \
++	Client_Interceptor.o \
++	Echo_Handler.o \
++	$(IDL_SRC:.cpp=.o)
++
++SERVER_OBJS = \
++	server.o \
++	Echo.o \
++	Server_ORBInitializer.o \
++	Server_Interceptor.o \
++	$(IDL_SRC:.cpp=.o)
++
++TAO_IDLFLAGS += -Ge 1 -GC
++#----------------------------------------------------------------------------
++#       Include macros and targets
++#----------------------------------------------------------------------------
++
++include $(ACE_ROOT)/include/makeinclude/wrapper_macros.GNU
++include $(ACE_ROOT)/include/makeinclude/macros.GNU
++include $(TAO_ROOT)/rules.tao.GNU
++include $(ACE_ROOT)/include/makeinclude/rules.common.GNU
++include $(ACE_ROOT)/include/makeinclude/rules.nonested.GNU
++include $(ACE_ROOT)/include/makeinclude/rules.local.GNU
++include $(TAO_ROOT)/taoconfig.mk
++
++#----------------------------------------------------------------------------
++#       Local targets
++#----------------------------------------------------------------------------
++
++.PRECIOUS: $(foreach ext, $(IDL_EXT), Test$(ext))
++
++server: $(addprefix $(VDIR),$(SERVER_OBJS))
++	$(LINK.cc) $(LDFLAGS) -o $@ $^ -lTAO_Messaging $(TAO_SRVR_LIBS) $(POSTLINK)
++
++client: $(addprefix $(VDIR),$(CLIENT_OBJS))
++	$(LINK.cc) $(LDFLAGS) -o $@ $^ -lTAO_Messaging $(TAO_SRVR_LIBS) $(POSTLINK)
++
++realclean: clean
++	-$(RM) $(foreach ext, $(IDL_EXT), Test$(ext))
++
++# DO NOT DELETE THIS LINE -- g++dep uses it.
++# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
++
++
++.obj/client.o .obj/client.so .shobj/client.o .shobj/client.so: client.cpp Echo_Handler.h TestS.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS.h \
++  $(ACE_ROOT)/ace/pre.h \
++  $(TAO_ROOT)/tao/Messaging/messaging_export.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(TAO_ROOT)/tao/Messaging/Messaging.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingC.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(TAO_ROOT)/tao/ValueFactory.h \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/TimeBaseC.h \
++  $(TAO_ROOT)/tao/SmartProxies/Smart_Proxies.h \
++  $(TAO_ROOT)/tao/SmartProxies/smartproxies_export.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.cpp \
++  $(ACE_ROOT)/ace/Object_Manager.h \
++  $(ACE_ROOT)/ace/Managed_Object.h \
++  $(ACE_ROOT)/ace/Managed_Object.cpp \
++  $(ACE_ROOT)/ace/Managed_Object.i \
++  $(TAO_ROOT)/tao/TAO_Singleton_Manager.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.inl \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/PollableC.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/Messaging/TAO_ExtC.h \
++  $(TAO_ROOT)/tao/TAOC.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServer.h \
++  $(TAO_ROOT)/tao/PortableServer/portableserver_export.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServerC.h \
++  $(TAO_ROOT)/tao/PortableServer/Servant_Base.h \
++  $(TAO_ROOT)/tao/Abstract_Servant_Base.h \
++  $(ACE_ROOT)/ace/Atomic_Op.h \
++  $(ACE_ROOT)/ace/Atomic_Op.cpp \
++  $(ACE_ROOT)/ace/Atomic_Op.i \
++  $(TAO_ROOT)/tao/PortableServer/Collocated_Object.h \
++  $(TAO_ROOT)/tao/PortableServer/ThruPOA_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/Direct_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.cpp \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.i \
++  $(TAO_ROOT)/tao/TimeBaseS.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.cpp \
++  $(TAO_ROOT)/tao/TimeBaseS_T.i \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.cpp \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.i TestC.h \
++  $(TAO_ROOT)/tao/corba.h \
++  $(TAO_ROOT)/tao/NVList.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Queue.inl \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  $(TAO_ROOT)/tao/Principal.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h \
++  $(TAO_ROOT)/tao/BoundsC.h \
++  $(TAO_ROOT)/tao/AbstractBase.h \
++  $(TAO_ROOT)/tao/DomainC.h \
++  $(TAO_ROOT)/tao/WrongTransactionC.h \
++  $(TAO_ROOT)/tao/Object_KeyC.h \
++  $(TAO_ROOT)/tao/ObjectIDList.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/IOPC.h TestS_T.h TestS_T.cpp \
++  TestS_T.i Client_ORBInitializer.h Client_Interceptor.h \
++  $(TAO_ROOT)/tao/Utils/Servant_Var.h \
++  $(TAO_ROOT)/tao/Utils/Servant_Var.cpp \
++  $(TAO_ROOT)/tao/Utils/Servant_Var.inl \
++  $(ACE_ROOT)/ace/Swap.h \
++  $(ACE_ROOT)/ace/Swap.cpp \
++  $(ACE_ROOT)/ace/Swap.inl \
++  $(ACE_ROOT)/ace/Get_Opt.h \
++  $(ACE_ROOT)/ace/Containers.h \
++  $(ACE_ROOT)/ace/Containers_T.h \
++  $(ACE_ROOT)/ace/Array_Base.h \
++  $(ACE_ROOT)/ace/Array_Base.cpp \
++  $(ACE_ROOT)/ace/Array_Base.inl \
++  $(ACE_ROOT)/ace/Containers_T.cpp \
++  $(ACE_ROOT)/ace/Containers_T.i
++
++.obj/server.o .obj/server.so .shobj/server.o .shobj/server.so: server.cpp Echo.h TestS.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS.h \
++  $(ACE_ROOT)/ace/pre.h \
++  $(TAO_ROOT)/tao/Messaging/messaging_export.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(TAO_ROOT)/tao/Messaging/Messaging.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingC.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(TAO_ROOT)/tao/ValueFactory.h \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/TimeBaseC.h \
++  $(TAO_ROOT)/tao/SmartProxies/Smart_Proxies.h \
++  $(TAO_ROOT)/tao/SmartProxies/smartproxies_export.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.cpp \
++  $(ACE_ROOT)/ace/Object_Manager.h \
++  $(ACE_ROOT)/ace/Managed_Object.h \
++  $(ACE_ROOT)/ace/Managed_Object.cpp \
++  $(ACE_ROOT)/ace/Managed_Object.i \
++  $(TAO_ROOT)/tao/TAO_Singleton_Manager.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.inl \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/PollableC.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/Messaging/TAO_ExtC.h \
++  $(TAO_ROOT)/tao/TAOC.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServer.h \
++  $(TAO_ROOT)/tao/PortableServer/portableserver_export.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServerC.h \
++  $(TAO_ROOT)/tao/PortableServer/Servant_Base.h \
++  $(TAO_ROOT)/tao/Abstract_Servant_Base.h \
++  $(ACE_ROOT)/ace/Atomic_Op.h \
++  $(ACE_ROOT)/ace/Atomic_Op.cpp \
++  $(ACE_ROOT)/ace/Atomic_Op.i \
++  $(TAO_ROOT)/tao/PortableServer/Collocated_Object.h \
++  $(TAO_ROOT)/tao/PortableServer/ThruPOA_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/Direct_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.cpp \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.i \
++  $(TAO_ROOT)/tao/TimeBaseS.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.cpp \
++  $(TAO_ROOT)/tao/TimeBaseS_T.i \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.cpp \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.i TestC.h \
++  $(TAO_ROOT)/tao/corba.h \
++  $(TAO_ROOT)/tao/NVList.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Queue.inl \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  $(TAO_ROOT)/tao/Principal.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h \
++  $(TAO_ROOT)/tao/BoundsC.h \
++  $(TAO_ROOT)/tao/AbstractBase.h \
++  $(TAO_ROOT)/tao/DomainC.h \
++  $(TAO_ROOT)/tao/WrongTransactionC.h \
++  $(TAO_ROOT)/tao/Object_KeyC.h \
++  $(TAO_ROOT)/tao/ObjectIDList.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/IOPC.h TestS_T.h TestS_T.cpp \
++  TestS_T.i Server_ORBInitializer.h \
++  $(ACE_ROOT)/ace/Get_Opt.h \
++  $(ACE_ROOT)/ace/Containers.h \
++  $(ACE_ROOT)/ace/Containers_T.h \
++  $(ACE_ROOT)/ace/Array_Base.h \
++  $(ACE_ROOT)/ace/Array_Base.cpp \
++  $(ACE_ROOT)/ace/Array_Base.inl \
++  $(ACE_ROOT)/ace/Containers_T.cpp \
++  $(ACE_ROOT)/ace/Containers_T.i
++
++.obj/Client_ORBInitializer.o .obj/Client_ORBInitializer.so .shobj/Client_ORBInitializer.o .shobj/Client_ORBInitializer.so: Client_ORBInitializer.cpp \
++  Client_ORBInitializer.h $(ACE_ROOT)/ace/pre.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/IOPC.h \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  Client_Interceptor.h $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h
++
++.obj/Client_Interceptor.o .obj/Client_Interceptor.so .shobj/Client_Interceptor.o .shobj/Client_Interceptor.so: Client_Interceptor.cpp Client_Interceptor.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(ACE_ROOT)/ace/pre.h \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/IOPC.h \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h Shared_Interceptor.h
++
++.obj/Echo_Handler.o .obj/Echo_Handler.so .shobj/Echo_Handler.o .shobj/Echo_Handler.so: Echo_Handler.cpp Echo_Handler.h TestS.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS.h \
++  $(ACE_ROOT)/ace/pre.h \
++  $(TAO_ROOT)/tao/Messaging/messaging_export.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(TAO_ROOT)/tao/Messaging/Messaging.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingC.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(TAO_ROOT)/tao/ValueFactory.h \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/TimeBaseC.h \
++  $(TAO_ROOT)/tao/SmartProxies/Smart_Proxies.h \
++  $(TAO_ROOT)/tao/SmartProxies/smartproxies_export.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.cpp \
++  $(ACE_ROOT)/ace/Object_Manager.h \
++  $(ACE_ROOT)/ace/Managed_Object.h \
++  $(ACE_ROOT)/ace/Managed_Object.cpp \
++  $(ACE_ROOT)/ace/Managed_Object.i \
++  $(TAO_ROOT)/tao/TAO_Singleton_Manager.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.inl \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/PollableC.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/Messaging/TAO_ExtC.h \
++  $(TAO_ROOT)/tao/TAOC.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServer.h \
++  $(TAO_ROOT)/tao/PortableServer/portableserver_export.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServerC.h \
++  $(TAO_ROOT)/tao/PortableServer/Servant_Base.h \
++  $(TAO_ROOT)/tao/Abstract_Servant_Base.h \
++  $(ACE_ROOT)/ace/Atomic_Op.h \
++  $(ACE_ROOT)/ace/Atomic_Op.cpp \
++  $(ACE_ROOT)/ace/Atomic_Op.i \
++  $(TAO_ROOT)/tao/PortableServer/Collocated_Object.h \
++  $(TAO_ROOT)/tao/PortableServer/ThruPOA_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/Direct_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.cpp \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.i \
++  $(TAO_ROOT)/tao/TimeBaseS.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.cpp \
++  $(TAO_ROOT)/tao/TimeBaseS_T.i \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.cpp \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.i TestC.h \
++  $(TAO_ROOT)/tao/corba.h \
++  $(TAO_ROOT)/tao/NVList.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Queue.inl \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  $(TAO_ROOT)/tao/Principal.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h \
++  $(TAO_ROOT)/tao/BoundsC.h \
++  $(TAO_ROOT)/tao/AbstractBase.h \
++  $(TAO_ROOT)/tao/DomainC.h \
++  $(TAO_ROOT)/tao/WrongTransactionC.h \
++  $(TAO_ROOT)/tao/Object_KeyC.h \
++  $(TAO_ROOT)/tao/ObjectIDList.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/IOPC.h TestS_T.h TestS_T.cpp \
++  TestS_T.i
++
++.obj/Echo.o .obj/Echo.so .shobj/Echo.o .shobj/Echo.so: Echo.cpp Echo.h TestS.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS.h \
++  $(ACE_ROOT)/ace/pre.h \
++  $(TAO_ROOT)/tao/Messaging/messaging_export.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(TAO_ROOT)/tao/Messaging/Messaging.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingC.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(TAO_ROOT)/tao/ValueFactory.h \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/TimeBaseC.h \
++  $(TAO_ROOT)/tao/SmartProxies/Smart_Proxies.h \
++  $(TAO_ROOT)/tao/SmartProxies/smartproxies_export.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.cpp \
++  $(ACE_ROOT)/ace/Object_Manager.h \
++  $(ACE_ROOT)/ace/Managed_Object.h \
++  $(ACE_ROOT)/ace/Managed_Object.cpp \
++  $(ACE_ROOT)/ace/Managed_Object.i \
++  $(TAO_ROOT)/tao/TAO_Singleton_Manager.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.inl \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/PollableC.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/Messaging/TAO_ExtC.h \
++  $(TAO_ROOT)/tao/TAOC.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServer.h \
++  $(TAO_ROOT)/tao/PortableServer/portableserver_export.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServerC.h \
++  $(TAO_ROOT)/tao/PortableServer/Servant_Base.h \
++  $(TAO_ROOT)/tao/Abstract_Servant_Base.h \
++  $(ACE_ROOT)/ace/Atomic_Op.h \
++  $(ACE_ROOT)/ace/Atomic_Op.cpp \
++  $(ACE_ROOT)/ace/Atomic_Op.i \
++  $(TAO_ROOT)/tao/PortableServer/Collocated_Object.h \
++  $(TAO_ROOT)/tao/PortableServer/ThruPOA_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/Direct_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.cpp \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.i \
++  $(TAO_ROOT)/tao/TimeBaseS.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.cpp \
++  $(TAO_ROOT)/tao/TimeBaseS_T.i \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.cpp \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.i TestC.h \
++  $(TAO_ROOT)/tao/corba.h \
++  $(TAO_ROOT)/tao/NVList.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Queue.inl \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  $(TAO_ROOT)/tao/Principal.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h \
++  $(TAO_ROOT)/tao/BoundsC.h \
++  $(TAO_ROOT)/tao/AbstractBase.h \
++  $(TAO_ROOT)/tao/DomainC.h \
++  $(TAO_ROOT)/tao/WrongTransactionC.h \
++  $(TAO_ROOT)/tao/Object_KeyC.h \
++  $(TAO_ROOT)/tao/ObjectIDList.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/IOPC.h TestS_T.h TestS_T.cpp \
++  TestS_T.i
++
++.obj/Server_ORBInitializer.o .obj/Server_ORBInitializer.so .shobj/Server_ORBInitializer.o .shobj/Server_ORBInitializer.so: Server_ORBInitializer.cpp \
++  Server_ORBInitializer.h $(ACE_ROOT)/ace/pre.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/IOPC.h \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  Server_Interceptor.h $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h
++
++.obj/Server_Interceptor.o .obj/Server_Interceptor.so .shobj/Server_Interceptor.o .shobj/Server_Interceptor.so: Server_Interceptor.cpp Server_Interceptor.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(ACE_ROOT)/ace/pre.h \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/IOPC.h \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h Shared_Interceptor.h
++
++.obj/TestC.o .obj/TestC.so .shobj/TestC.o .shobj/TestC.so: TestC.cpp TestC.h $(TAO_ROOT)/tao/corba.h \
++  $(ACE_ROOT)/ace/pre.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/NVList.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Queue.inl \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  $(TAO_ROOT)/tao/Principal.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/BoundsC.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(TAO_ROOT)/tao/ValueFactory.h \
++  $(TAO_ROOT)/tao/AbstractBase.h \
++  $(TAO_ROOT)/tao/DomainC.h \
++  $(TAO_ROOT)/tao/WrongTransactionC.h \
++  $(TAO_ROOT)/tao/Object_KeyC.h \
++  $(TAO_ROOT)/tao/ObjectIDList.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/IOPC.h \
++  $(TAO_ROOT)/tao/Messaging/Messaging.h \
++  $(TAO_ROOT)/tao/Messaging/messaging_export.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingC.h \
++  $(TAO_ROOT)/tao/TimeBaseC.h \
++  $(TAO_ROOT)/tao/SmartProxies/Smart_Proxies.h \
++  $(TAO_ROOT)/tao/SmartProxies/smartproxies_export.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.cpp \
++  $(ACE_ROOT)/ace/Object_Manager.h \
++  $(ACE_ROOT)/ace/Managed_Object.h \
++  $(ACE_ROOT)/ace/Managed_Object.cpp \
++  $(ACE_ROOT)/ace/Managed_Object.i \
++  $(TAO_ROOT)/tao/TAO_Singleton_Manager.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.inl \
++  $(TAO_ROOT)/tao/PollableC.h \
++  $(TAO_ROOT)/tao/Messaging/TAO_ExtC.h \
++  $(TAO_ROOT)/tao/TAOC.h \
++  $(TAO_ROOT)/tao/Stub.h \
++  $(TAO_ROOT)/tao/MProfile.h \
++  $(TAO_ROOT)/tao/ORB_Core.h \
++  $(TAO_ROOT)/tao/Policy_Manager.h \
++  $(TAO_ROOT)/tao/Policy_Set.h \
++  $(TAO_ROOT)/tao/debug.h \
++  $(TAO_ROOT)/tao/Resource_Factory.h \
++  $(ACE_ROOT)/ace/Service_Object.h \
++  $(ACE_ROOT)/ace/Shared_Object.h \
++  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++  $(ACE_ROOT)/ace/DLL.h \
++  $(TAO_ROOT)/tao/params.h \
++  $(TAO_ROOT)/tao/Adapter.h \
++  $(TAO_ROOT)/tao/PolicyFactory_Registry.h \
++  $(ACE_ROOT)/ace/Map_Manager.h \
++  $(ACE_ROOT)/ace/Map_Manager.cpp \
++  $(ACE_ROOT)/ace/Service_Config.h \
++  $(ACE_ROOT)/ace/Service_Types.h \
++  $(ACE_ROOT)/ace/XML_Svc_Conf.h \
++  $(ACE_ROOT)/ace/Reactor.h \
++  $(ACE_ROOT)/ace/Handle_Set.h \
++  $(ACE_ROOT)/ace/Timer_Queue.h \
++  $(ACE_ROOT)/ace/Timer_Queue_T.h \
++  $(ACE_ROOT)/ace/Test_and_Set.h \
++  $(ACE_ROOT)/ace/Test_and_Set.cpp \
++  $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
++  $(ACE_ROOT)/ace/Timer_Queue_T.i \
++  $(ACE_ROOT)/ace/Map_Manager.i \
++  $(TAO_ROOT)/tao/Parser_Registry.h \
++  $(TAO_ROOT)/tao/Service_Callbacks.h \
++  $(TAO_ROOT)/tao/Fault_Tolerance_Service.h \
++  $(TAO_ROOT)/tao/Cleanup_Func_Registry.h \
++  $(ACE_ROOT)/ace/Array_Base.h \
++  $(ACE_ROOT)/ace/Array_Base.cpp \
++  $(ACE_ROOT)/ace/Array_Base.inl \
++  $(TAO_ROOT)/tao/Object_Ref_Table.h \
++  $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++  $(ACE_ROOT)/ace/Functor.h \
++  $(ACE_ROOT)/ace/Functor_T.h \
++  $(ACE_ROOT)/ace/Functor_T.cpp \
++  $(ACE_ROOT)/ace/Functor_T.i \
++  $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
++  $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++  $(TAO_ROOT)/tao/Interceptor_List.h \
++  $(TAO_ROOT)/tao/PICurrent.h \
++  $(ACE_ROOT)/ace/Thread_Manager.h \
++  $(ACE_ROOT)/ace/Containers.h \
++  $(ACE_ROOT)/ace/Containers_T.h \
++  $(ACE_ROOT)/ace/Containers_T.cpp \
++  $(ACE_ROOT)/ace/Containers_T.i \
++  $(ACE_ROOT)/ace/Singleton.h \
++  $(ACE_ROOT)/ace/Singleton.cpp \
++  $(ACE_ROOT)/ace/Singleton.i \
++  $(ACE_ROOT)/ace/Framework_Component.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.cpp \
++  $(ACE_ROOT)/ace/Framework_Component_T.inl \
++  $(TAO_ROOT)/tao/Invocation.h \
++  $(TAO_ROOT)/tao/Synch_Reply_Dispatcher.h \
++  $(TAO_ROOT)/tao/Reply_Dispatcher.h \
++  $(TAO_ROOT)/tao/LF_Event.h \
++  $(TAO_ROOT)/tao/GIOP_Message_Version.h \
++  $(TAO_ROOT)/tao/operation_details.h \
++  $(TAO_ROOT)/tao/Service_Context.h \
++  $(TAO_ROOT)/tao/target_specification.h \
++  $(TAO_ROOT)/tao/PortableInterceptor.h \
++  $(TAO_ROOT)/tao/RequestInfo_Util.h \
++  $(TAO_ROOT)/tao/ClientRequestInfo_i.h \
++  $(TAO_ROOT)/tao/ClientInterceptorAdapter.h \
++  $(TAO_ROOT)/tao/Messaging/Twoway_Asynch_Invocation.h \
++  $(TAO_ROOT)/tao/Messaging/Asynch_Reply_Dispatcher.h \
++  $(TAO_ROOT)/tao/Messaging/Asynch_Timeout_Handler.h \
++  $(TAO_ROOT)/tao/Asynch_Reply_Dispatcher_Base.h \
++  $(TAO_ROOT)/tao/Transport.h \
++  $(TAO_ROOT)/tao/Transport_Descriptor_Interface.h \
++  $(TAO_ROOT)/tao/Transport_Cache_Manager.h \
++  $(TAO_ROOT)/tao/Cache_Entries.h \
++  $(ACE_ROOT)/ace/Recyclable.h \
++  $(TAO_ROOT)/tao/Transport_Timer.h \
++  $(TAO_ROOT)/tao/Incoming_Message_Queue.h \
++  $(TAO_ROOT)/tao/Pluggable_Messaging_Utils.h \
++  $(TAO_ROOT)/tao/Synch_Refcountable.h \
++  $(ACE_ROOT)/ace/Refcountable.h \
++  $(TAO_ROOT)/tao/Asynch_Invocation.h \
++  $(TAO_ROOT)/tao/Messaging/AMI_ClientRequestInfo_i.h \
++  TestC.i
++
++.obj/TestS.o .obj/TestS.so .shobj/TestS.o .shobj/TestS.so: TestS.cpp TestS.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS.h \
++  $(ACE_ROOT)/ace/pre.h \
++  $(TAO_ROOT)/tao/Messaging/messaging_export.h \
++   \
++   \
++   \
++   \
++   \
++  $(ACE_ROOT)/ace/post.h \
++  $(ACE_ROOT)/ace/ace_wchar.h \
++  $(ACE_ROOT)/ace/ace_wchar.inl \
++  $(TAO_ROOT)/tao/Messaging/Messaging.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingC.h \
++  $(TAO_ROOT)/tao/orbconf.h \
++  $(ACE_ROOT)/ace/Basic_Types.h \
++  $(ACE_ROOT)/ace/ACE_export.h \
++  $(TAO_ROOT)/tao/corbafwd.h \
++  $(ACE_ROOT)/ace/CDR_Base.h \
++  $(ACE_ROOT)/ace/Message_Block.h \
++  $(ACE_ROOT)/ace/OS.h \
++  $(ACE_ROOT)/ace/OS_Dirent.h \
++  $(ACE_ROOT)/ace/OS_Export.h \
++  $(ACE_ROOT)/ace/OS_Errno.h \
++  $(ACE_ROOT)/ace/OS_String.h \
++  $(ACE_ROOT)/ace/OS_Memory.h \
++  $(ACE_ROOT)/ace/OS_TLI.h \
++  $(ACE_ROOT)/ace/Time_Value.h \
++  $(ACE_ROOT)/ace/Default_Constants.h \
++  $(ACE_ROOT)/ace/Global_Macros.h \
++  $(ACE_ROOT)/ace/Min_Max.h \
++  $(ACE_ROOT)/ace/streams.h \
++  $(ACE_ROOT)/ace/Trace.h \
++  $(ACE_ROOT)/ace/Message_Block_T.h \
++  $(ACE_ROOT)/ace/Message_Block_T.cpp \
++  $(ACE_ROOT)/ace/Message_Block_T.i \
++  $(ACE_ROOT)/ace/CORBA_macros.h \
++  $(TAO_ROOT)/tao/varbase.h \
++  $(TAO_ROOT)/tao/TAO_Export.h \
++  $(TAO_ROOT)/tao/ValueBase.h \
++  $(ACE_ROOT)/ace/Synch_T.h \
++  $(ACE_ROOT)/ace/Synch.h \
++  $(ACE_ROOT)/ace/Synch_T.cpp \
++  $(ACE_ROOT)/ace/Thread.h \
++  $(ACE_ROOT)/ace/Thread_Adapter.h \
++  $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++  $(ACE_ROOT)/ace/Log_Msg.h \
++  $(ACE_ROOT)/ace/Log_Priority.h \
++  $(ACE_ROOT)/ace/Synch_T.i \
++  $(TAO_ROOT)/tao/ValueFactory.h \
++  $(TAO_ROOT)/tao/Any.h \
++  $(TAO_ROOT)/tao/CDR.h \
++  $(ACE_ROOT)/ace/CDR_Stream.h \
++  $(ACE_ROOT)/ace/SString.h \
++  $(ACE_ROOT)/ace/String_Base.h \
++  $(ACE_ROOT)/ace/ACE.h \
++  $(ACE_ROOT)/ace/Flag_Manip.h \
++  $(ACE_ROOT)/ace/Flag_Manip.i \
++  $(ACE_ROOT)/ace/Handle_Ops.h \
++  $(ACE_ROOT)/ace/Handle_Ops.i \
++  $(ACE_ROOT)/ace/Lib_Find.h \
++  $(ACE_ROOT)/ace/Lib_Find.i \
++  $(ACE_ROOT)/ace/Init_ACE.h \
++  $(ACE_ROOT)/ace/Init_ACE.i \
++  $(ACE_ROOT)/ace/Sock_Connect.h \
++  $(ACE_ROOT)/ace/Sock_Connect.i \
++  $(ACE_ROOT)/ace/ACE.i \
++  $(ACE_ROOT)/ace/String_Base_Const.h \
++  $(ACE_ROOT)/ace/String_Base.cpp \
++  $(ACE_ROOT)/ace/Malloc.h \
++  $(ACE_ROOT)/ace/Malloc_T.h \
++  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++  $(ACE_ROOT)/ace/Malloc_Base.h \
++  $(ACE_ROOT)/ace/Free_List.h \
++  $(ACE_ROOT)/ace/Free_List.cpp \
++  $(ACE_ROOT)/ace/Free_List.i \
++  $(ACE_ROOT)/ace/Malloc_T.cpp \
++  $(ACE_ROOT)/ace/Malloc_T.i \
++  $(ACE_ROOT)/ace/Memory_Pool.h \
++  $(ACE_ROOT)/ace/Event_Handler.h \
++  $(ACE_ROOT)/ace/Signal.h \
++  $(ACE_ROOT)/ace/Mem_Map.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++  $(ACE_ROOT)/ace/Unbounded_Set.h \
++  $(ACE_ROOT)/ace/Node.h \
++  $(ACE_ROOT)/ace/Node.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Set.inl \
++  $(ACE_ROOT)/ace/Auto_Ptr.h \
++  $(ACE_ROOT)/ace/Auto_Ptr.cpp \
++  $(ACE_ROOT)/ace/Auto_Ptr.i \
++  $(ACE_ROOT)/ace/String_Base.i \
++  $(TAO_ROOT)/tao/Environment.h \
++  $(TAO_ROOT)/tao/Object.h \
++  $(TAO_ROOT)/tao/Policy_ForwardC.h \
++  $(TAO_ROOT)/tao/Sequence.h \
++  $(TAO_ROOT)/tao/Managed_Types.h \
++  $(TAO_ROOT)/tao/Sequence_T.h \
++  $(TAO_ROOT)/tao/Sequence_T.cpp \
++  $(TAO_ROOT)/tao/Sequence_T.i \
++  $(TAO_ROOT)/tao/Typecode.h \
++  $(TAO_ROOT)/tao/Exception.h \
++  $(TAO_ROOT)/tao/Remote_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/TimeBaseC.h \
++  $(TAO_ROOT)/tao/SmartProxies/Smart_Proxies.h \
++  $(TAO_ROOT)/tao/SmartProxies/smartproxies_export.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.cpp \
++  $(ACE_ROOT)/ace/Object_Manager.h \
++  $(ACE_ROOT)/ace/Managed_Object.h \
++  $(ACE_ROOT)/ace/Managed_Object.cpp \
++  $(ACE_ROOT)/ace/Managed_Object.i \
++  $(TAO_ROOT)/tao/TAO_Singleton_Manager.h \
++  $(TAO_ROOT)/tao/TAO_Singleton.inl \
++  $(TAO_ROOT)/tao/PolicyC.h \
++  $(TAO_ROOT)/tao/CurrentC.h \
++  $(TAO_ROOT)/tao/Encodable.h \
++  $(TAO_ROOT)/tao/PollableC.h \
++  $(TAO_ROOT)/tao/Messaging_SyncScopeC.h \
++  $(TAO_ROOT)/tao/Messaging/TAO_ExtC.h \
++  $(TAO_ROOT)/tao/TAOC.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServer.h \
++  $(TAO_ROOT)/tao/PortableServer/portableserver_export.h \
++  $(TAO_ROOT)/tao/PortableServer/PortableServerC.h \
++  $(TAO_ROOT)/tao/PortableServer/Servant_Base.h \
++  $(TAO_ROOT)/tao/Abstract_Servant_Base.h \
++  $(ACE_ROOT)/ace/Atomic_Op.h \
++  $(ACE_ROOT)/ace/Atomic_Op.cpp \
++  $(ACE_ROOT)/ace/Atomic_Op.i \
++  $(TAO_ROOT)/tao/PortableServer/Collocated_Object.h \
++  $(TAO_ROOT)/tao/PortableServer/ThruPOA_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/Direct_Object_Proxy_Impl.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.h \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.cpp \
++  $(TAO_ROOT)/tao/PortableServer/PolicyS_T.i \
++  $(TAO_ROOT)/tao/TimeBaseS.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.h \
++  $(TAO_ROOT)/tao/TimeBaseS_T.cpp \
++  $(TAO_ROOT)/tao/TimeBaseS_T.i \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.h \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.cpp \
++  $(TAO_ROOT)/tao/Messaging/MessagingS_T.i TestC.h \
++  $(TAO_ROOT)/tao/corba.h \
++  $(TAO_ROOT)/tao/NVList.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.h \
++  $(ACE_ROOT)/ace/Unbounded_Queue.cpp \
++  $(ACE_ROOT)/ace/Unbounded_Queue.inl \
++  $(TAO_ROOT)/tao/LocalObject.h \
++  $(TAO_ROOT)/tao/Principal.h \
++  $(TAO_ROOT)/tao/OctetSeqC.h \
++  $(TAO_ROOT)/tao/ORB.h \
++  $(TAO_ROOT)/tao/Services.h \
++  $(TAO_ROOT)/tao/CORBA_String.h \
++  $(TAO_ROOT)/tao/objectid.h \
++  $(TAO_ROOT)/tao/BoundsC.h \
++  $(TAO_ROOT)/tao/AbstractBase.h \
++  $(TAO_ROOT)/tao/DomainC.h \
++  $(TAO_ROOT)/tao/WrongTransactionC.h \
++  $(TAO_ROOT)/tao/Object_KeyC.h \
++  $(TAO_ROOT)/tao/ObjectIDList.h \
++  $(TAO_ROOT)/tao/StringSeqC.h \
++  $(TAO_ROOT)/tao/PortableInterceptorC.h \
++  $(TAO_ROOT)/tao/DynamicC.h \
++  $(TAO_ROOT)/tao/ObjectReferenceTemplateC.h \
++  $(TAO_ROOT)/tao/IOPC.h TestS_T.h TestS_T.cpp \
++  TestS_T.i \
++  $(TAO_ROOT)/tao/PortableServer/Object_Adapter.h \
++  $(TAO_ROOT)/tao/PortableServer/Key_Adapters.h \
++  $(ACE_ROOT)/ace/Map_T.h \
++  $(ACE_ROOT)/ace/Pair_T.h \
++  $(ACE_ROOT)/ace/Pair_T.cpp \
++  $(ACE_ROOT)/ace/Pair_T.i \
++  $(ACE_ROOT)/ace/Map_Manager.h \
++  $(ACE_ROOT)/ace/Map_Manager.cpp \
++  $(ACE_ROOT)/ace/Service_Config.h \
++  $(ACE_ROOT)/ace/Service_Types.h \
++  $(ACE_ROOT)/ace/Service_Object.h \
++  $(ACE_ROOT)/ace/Shared_Object.h \
++  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++  $(ACE_ROOT)/ace/DLL.h \
++  $(ACE_ROOT)/ace/XML_Svc_Conf.h \
++  $(ACE_ROOT)/ace/Reactor.h \
++  $(ACE_ROOT)/ace/Handle_Set.h \
++  $(ACE_ROOT)/ace/Timer_Queue.h \
++  $(ACE_ROOT)/ace/Timer_Queue_T.h \
++  $(ACE_ROOT)/ace/Test_and_Set.h \
++  $(ACE_ROOT)/ace/Test_and_Set.cpp \
++  $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
++  $(ACE_ROOT)/ace/Timer_Queue_T.i \
++  $(ACE_ROOT)/ace/Map_Manager.i \
++  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
++  $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++  $(ACE_ROOT)/ace/Functor.h \
++  $(ACE_ROOT)/ace/Functor_T.h \
++  $(ACE_ROOT)/ace/Functor_T.cpp \
++  $(ACE_ROOT)/ace/Functor_T.i \
++  $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
++  $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++  $(ACE_ROOT)/ace/Active_Map_Manager.h \
++  $(ACE_ROOT)/ace/Active_Map_Manager_T.h \
++  $(ACE_ROOT)/ace/Active_Map_Manager_T.cpp \
++  $(ACE_ROOT)/ace/Active_Map_Manager_T.i \
++  $(ACE_ROOT)/ace/Map_T.cpp \
++  $(ACE_ROOT)/ace/Map_T.i \
++  $(TAO_ROOT)/tao/PortableServer/poa_macros.h \
++  $(TAO_ROOT)/tao/PortableServer/Active_Object_Map.h \
++  $(TAO_ROOT)/tao/Server_Strategy_Factory.h \
++  $(TAO_ROOT)/tao/Adapter.h \
++  $(TAO_ROOT)/tao/PortableServer/Default_Policy_Validator.h \
++  $(TAO_ROOT)/tao/Policy_Validator.h \
++  $(TAO_ROOT)/tao/PortableServer/POA_Policy_Set.h \
++  $(TAO_ROOT)/tao/PortableServer/POA_Policies.h \
++  $(TAO_ROOT)/tao/Policy_Set.h \
++  $(TAO_ROOT)/tao/PortableServer/Operation_Table.h \
++  $(TAO_ROOT)/tao/TAO_Server_Request.h \
++  $(TAO_ROOT)/tao/Tagged_Profile.h \
++  $(TAO_ROOT)/tao/GIOPC.h \
++  $(TAO_ROOT)/tao/Service_Context.h \
++  $(TAO_ROOT)/tao/PICurrent.h \
++  $(ACE_ROOT)/ace/Array_Base.h \
++  $(ACE_ROOT)/ace/Array_Base.cpp \
++  $(ACE_ROOT)/ace/Array_Base.inl \
++  $(TAO_ROOT)/tao/ORB_Core.h \
++  $(TAO_ROOT)/tao/Policy_Manager.h \
++  $(TAO_ROOT)/tao/debug.h \
++  $(TAO_ROOT)/tao/Resource_Factory.h \
++  $(TAO_ROOT)/tao/params.h \
++  $(TAO_ROOT)/tao/PolicyFactory_Registry.h \
++  $(TAO_ROOT)/tao/Parser_Registry.h \
++  $(TAO_ROOT)/tao/Service_Callbacks.h \
++  $(TAO_ROOT)/tao/Fault_Tolerance_Service.h \
++  $(TAO_ROOT)/tao/Cleanup_Func_Registry.h \
++  $(TAO_ROOT)/tao/Object_Ref_Table.h \
++  $(TAO_ROOT)/tao/Interceptor_List.h \
++  $(ACE_ROOT)/ace/Thread_Manager.h \
++  $(ACE_ROOT)/ace/Containers.h \
++  $(ACE_ROOT)/ace/Containers_T.h \
++  $(ACE_ROOT)/ace/Containers_T.cpp \
++  $(ACE_ROOT)/ace/Containers_T.i \
++  $(ACE_ROOT)/ace/Singleton.h \
++  $(ACE_ROOT)/ace/Singleton.cpp \
++  $(ACE_ROOT)/ace/Singleton.i \
++  $(ACE_ROOT)/ace/Framework_Component.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.cpp \
++  $(ACE_ROOT)/ace/Framework_Component_T.inl \
++  $(TAO_ROOT)/tao/Stub.h \
++  $(TAO_ROOT)/tao/MProfile.h \
++  $(TAO_ROOT)/tao/IFR_Client_Adapter.h \
++  $(TAO_ROOT)/tao/PortableInterceptor.h \
++  $(TAO_ROOT)/tao/RequestInfo_Util.h \
++  $(TAO_ROOT)/tao/PortableServer/ServerRequestInfo.h \
++  $(TAO_ROOT)/tao/PortableServer/ServerInterceptorAdapter.h \
++  $(ACE_ROOT)/ace/Dynamic_Service.h \
++  $(ACE_ROOT)/ace/Dynamic_Service_Base.h \
++  $(ACE_ROOT)/ace/Dynamic_Service.cpp \
++  $(ACE_ROOT)/ace/Dynamic_Service.i TestS.i
++
++.obj/Test.o .obj/Test.so .shobj/Test.o .shobj/Test.so: Test.idl
++
++# IF YOU PUT ANYTHING HERE IT WILL GO AWAY
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_Interceptor.cpp
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_Interceptor.cpp:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_Interceptor.cpp	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,95 @@
++/**
++ * @file Server_Interceptor.cpp
++ *
++ * $Id: Server_Interceptor.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++
++#include "Server_Interceptor.h"
++#include "Shared_Interceptor.h"
++#include "tao/OctetSeqC.h"
++
++ACE_RCSID(Portable_Interceptor_AMI, Server_Interceptor, "$Id: Server_Interceptor.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $")
++
++Echo_Server_Request_Interceptor::
++Echo_Server_Request_Interceptor ()
++{
++}
++
++char *
++Echo_Server_Request_Interceptor::name (ACE_ENV_SINGLE_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  return CORBA::string_dup ("Echo_Server_Interceptor");
++}
++
++void
++Echo_Server_Request_Interceptor::destroy (ACE_ENV_SINGLE_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++}
++
++void
++Echo_Server_Request_Interceptor::receive_request_service_contexts (
++    PortableInterceptor::ServerRequestInfo_ptr ri
++    ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException,
++                   PortableInterceptor::ForwardRequest))
++{
++  CORBA::String_var operation =
++    ri->operation (ACE_ENV_SINGLE_ARG_PARAMETER);
++  ACE_CHECK;
++
++  if (ACE_OS_String::strcmp ("_is_a", operation.in ()) == 0)
++    return;
++
++  IOP::ServiceId id = ::service_id;
++  IOP::ServiceContext_var sc =
++    ri->get_request_service_context (id ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++
++  if (sc->context_data.length() != magic_cookie_len
++      || ACE_OS::memcmp(
++                magic_cookie, sc->context_data.get_buffer(),
++                magic_cookie_len) != 0)
++    {
++      ACE_THROW(CORBA::BAD_PARAM());
++    }
++}
++
++
++void
++Echo_Server_Request_Interceptor::receive_request (
++    PortableInterceptor::ServerRequestInfo_ptr
++    ACE_ENV_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC ((CORBA::SystemException,
++                   PortableInterceptor::ForwardRequest))
++{
++}
++
++void
++Echo_Server_Request_Interceptor::send_reply (
++    PortableInterceptor::ServerRequestInfo_ptr
++    ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++}
++
++void
++Echo_Server_Request_Interceptor::send_exception (
++    PortableInterceptor::ServerRequestInfo_ptr
++    ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException,
++                   PortableInterceptor::ForwardRequest))
++{
++}
++
++void
++Echo_Server_Request_Interceptor::send_other (
++             PortableInterceptor::ServerRequestInfo_ptr
++             ACE_ENV_ARG_DECL_NOT_USED)
++      ACE_THROW_SPEC ((CORBA::SystemException,
++                       PortableInterceptor::ForwardRequest))
++{
++}
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_Interceptor.h
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_Interceptor.h:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_Interceptor.h	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,54 @@
++/**
++ * @file Server_Interceptor.h
++ *
++ * $Id: Server_Interceptor.h,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++#ifndef Server_Interceptor__h_
++#define Server_Interceptor__h_
++
++#include "tao/PortableInterceptorC.h"
++#include "tao/LocalObject.h"
++#include "tao/ORB.h"
++
++class Echo_Server_Request_Interceptor
++  : public virtual PortableInterceptor::ServerRequestInterceptor
++  , public virtual TAO_Local_RefCounted_Object
++{
++public:
++  Echo_Server_Request_Interceptor ();
++
++  virtual char * name (ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  virtual void destroy (ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  virtual void receive_request (PortableInterceptor::ServerRequestInfo_ptr ri
++                                ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException,
++                     PortableInterceptor::ForwardRequest));
++
++  virtual void receive_request_service_contexts (
++        PortableInterceptor::ServerRequestInfo_ptr
++        ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++      ACE_THROW_SPEC ((CORBA::SystemException,
++                       PortableInterceptor::ForwardRequest));
++
++  virtual void send_reply (PortableInterceptor::ServerRequestInfo_ptr ri
++                           ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  virtual void send_exception (PortableInterceptor::ServerRequestInfo_ptr ri
++                               ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++    ACE_THROW_SPEC ((CORBA::SystemException,
++                     PortableInterceptor::ForwardRequest));
++
++  virtual void send_other (PortableInterceptor::ServerRequestInfo_ptr
++                           ACE_ENV_ARG_DECL_WITH_DEFAULTS)
++      ACE_THROW_SPEC ((CORBA::SystemException,
++                       PortableInterceptor::ForwardRequest));
++};
++
++#endif /* Server_Interceptor__h_ */
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_ORBInitializer.cpp
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_ORBInitializer.cpp:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_ORBInitializer.cpp	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,39 @@
++/**
++ * @file Server_ORBInitializer.cpp
++ *
++ * $Id: Server_ORBInitializer.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++
++#include "Server_ORBInitializer.h"
++#include "Server_Interceptor.h"
++
++ACE_RCSID(Portable_Interceptor_AMI, Server_ORBInitializer, "$Id: Server_ORBInitializer.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $")
++
++Server_ORBInitializer::Server_ORBInitializer ()
++{
++}
++
++void
++Server_ORBInitializer::pre_init (
++    PortableInterceptor::ORBInitInfo_ptr
++    ACE_ENV_ARG_DECL_NOT_USED)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++}
++
++void
++Server_ORBInitializer::post_init (
++    PortableInterceptor::ORBInitInfo_ptr info
++    ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  PortableInterceptor::ServerRequestInterceptor_var interceptor(
++      new Echo_Server_Request_Interceptor);
++
++  info->add_server_request_interceptor (interceptor.in ()
++                                        ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++}
++
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_ORBInitializer.h
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_ORBInitializer.h:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Server_ORBInitializer.h	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,33 @@
++/**
++ * @file Server_ORBInitializer.h
++ *
++ * $Id: Server_ORBInitializer.h,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++
++#ifndef Server_ORBInitializer__h_
++#define Server_ORBInitializer__h_
++#include "ace/pre.h"
++
++#include "tao/PortableInterceptorC.h"
++#include "tao/LocalObject.h"
++
++class Server_ORBInitializer
++  : public virtual PortableInterceptor::ORBInitializer
++  , public virtual TAO_Local_RefCounted_Object
++{
++public:
++  Server_ORBInitializer ();
++
++  virtual void pre_init (PortableInterceptor::ORBInitInfo_ptr info
++                         ACE_ENV_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  virtual void post_init (PortableInterceptor::ORBInitInfo_ptr info
++                          ACE_ENV_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++};
++
++#include "ace/post.h"
++#endif /* Client_ORBInitializer__h_ */
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Shared_Interceptor.h
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Shared_Interceptor.h:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Shared_Interceptor.h	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,18 @@
++/**
++ * @file Shared_Interceptor.h
++ *
++ * $Id: Shared_Interceptor.h,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ */
++#ifndef Shared_Interceptor__h_
++#define Shared_Interceptor__h_
++
++#include "tao/IOPC.h"
++
++// Unreserved (and probably unwanted) ServiceId
++const IOP::ServiceId service_id = 0xdeadbeef;
++
++const char magic_cookie[] = "Magic Cookie";
++const CORBA::ULong magic_cookie_len = sizeof(magic_cookie);
++
++#endif /* Shared_Interceptor__h_ */
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Test.idl
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Test.idl:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/Test.idl	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,19 @@
++/**
++ * @file Test.idl
++ *
++ * $Id: Test.idl,v 1.1 2002/11/08 18:31:04 coryan Exp $
++ *
++ * @author Carlos O'Ryan <coryan@atdesk.com>
++ */
++
++module Test
++{
++
++interface Echo
++{
++  string echo_operation(in string the_input);
++
++  void shutdown();
++};
++
++};
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/client.cpp
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/client.cpp:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/client.cpp	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,266 @@
++// $Id: client.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $
++
++#include "Echo_Handler.h"
++#include "Client_ORBInitializer.h"
++#include "Client_Interceptor.h"
++#include "tao/Utils/Servant_Var.h"
++#include "ace/Get_Opt.h"
++#include "ace/Log_Msg.h"
++
++ACE_RCSID(Portable_Interceptors_AMI, client, "$Id: client.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $")
++
++const char *ior = "file://test.ior";
++static int exit_status = 0;
++
++int
++parse_args (int argc, char *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, "k:");
++  int c;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'k':
++        ior = get_opts.opt_arg ();
++        break;
++
++      case '?':
++      default:
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "usage:  %s "
++                           "-k <ior> "
++                           "\n",
++                           argv [0]),
++                          -1);
++      }
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++static void test_synchronous(Test::Echo_ptr echo
++                             ACE_ENV_ARG_DECL);
++static void test_ami(Test::Echo_ptr echo
++                     ACE_ENV_ARG_DECL);
++static void test_ami_errors(CORBA::ORB_ptr orb,
++                            Test::Echo_ptr echo
++                            ACE_ENV_ARG_DECL);
++
++int
++main (int argc, char *argv[])
++{
++  ACE_TRY_NEW_ENV
++    {
++      {
++        PortableInterceptor::ORBInitializer_var initializer(
++            new Client_ORBInitializer);
++        PortableInterceptor::register_orb_initializer(initializer.in()
++                                                      ACE_ENV_ARG_PARAMETER);
++        ACE_TRY_CHECK;
++      }
++
++      CORBA::ORB_var orb =
++        CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      CORBA::Object_var tmp =
++        orb->string_to_object(ior ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      Test::Echo_var echo =
++        Test::Echo::_narrow(tmp.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (CORBA::is_nil (echo.in ()))
++        {
++          ACE_ERROR_RETURN ((LM_DEBUG,
++                             "Nil Test::Echo reference <%s>\n",
++                             ior),
++                            1);
++        }
++
++      test_synchronous(echo.in() ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++      test_ami(echo.in() ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      echo->shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      test_ami_errors(orb.in(), echo.in() ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      unsigned long request_count =
++        Echo_Client_Request_Interceptor::request_count;
++      unsigned long response_count =
++        Echo_Client_Request_Interceptor::reply_count
++        + Echo_Client_Request_Interceptor::other_count
++        + Echo_Client_Request_Interceptor::exception_count;
++
++      if(request_count != response_count)
++        {
++          ACE_ERROR((LM_ERROR,
++                     "ERROR: Mismatched count of requests and responses "
++                     " (request = %d, response = %d)\n",
++                     request_count, response_count));
++        }
++    }
++  ACE_CATCHANY
++    {
++      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
++                           "Exception caught:");
++      return 1;
++    }
++  ACE_ENDTRY;
++
++  return exit_status;
++}
++
++static void test_synchronous(Test::Echo_ptr echo
++                             ACE_ENV_ARG_DECL)
++{
++  unsigned long initial_request_count =
++    Echo_Client_Request_Interceptor::request_count;
++  unsigned long initial_reply_count =
++    Echo_Client_Request_Interceptor::reply_count;
++  for(int i = 0; i != 100; ++i)
++  {
++    CORBA::String_var s =
++      echo->echo_operation("dummy message" ACE_ENV_ARG_PARAMETER);
++    ACE_CHECK;
++  }
++  unsigned long total_request_count =
++    Echo_Client_Request_Interceptor::request_count - initial_request_count;
++  unsigned long total_reply_count =
++    Echo_Client_Request_Interceptor::reply_count - initial_reply_count;
++
++  if(total_request_count != 100
++     || total_reply_count != 100)
++    {
++      ACE_ERROR((LM_ERROR,
++                 "ERROR: Invalid or mismatched request/reply "
++                 "count (request = %d, reply = %d)\n",
++                 total_request_count, total_reply_count));
++      exit_status = 1;
++    }
++}
++
++static void test_ami(Test::Echo_ptr echo
++                     ACE_ENV_ARG_DECL)
++{
++  Test::AMI_EchoHandler_var echo_handler;
++  {
++    TAO::Utils::Servant_Var<Echo_Handler> echo_handler_impl(
++        new Echo_Handler);
++    echo_handler = echo_handler_impl->_this(ACE_ENV_SINGLE_ARG_PARAMETER);
++    ACE_CHECK;
++  }
++
++  unsigned long initial_request_count =
++    Echo_Client_Request_Interceptor::request_count;
++  unsigned long initial_other_count =
++    Echo_Client_Request_Interceptor::other_count;
++  for(int i = 0; i != 100; ++i)
++  {
++    echo->sendc_echo_operation(
++        echo_handler.in(), "dummy message" ACE_ENV_ARG_PARAMETER);
++    ACE_CHECK;
++  }
++  unsigned long total_request_count =
++    Echo_Client_Request_Interceptor::request_count - initial_request_count;
++  unsigned long total_other_count =
++    Echo_Client_Request_Interceptor::other_count - initial_other_count;
++
++  if(total_request_count != 100
++     || total_other_count != 100)
++    {
++      ACE_ERROR((LM_ERROR,
++                 "ERROR: In test_ami() unexpected request/other "
++                 "count (request = %d, other = %d)\n",
++                 total_request_count, total_other_count));
++      exit_status = 1;
++    }
++}
++
++static void wait_for_exception(CORBA::ORB_ptr orb,
++                               Test::Echo_ptr echo
++                               ACE_ENV_ARG_DECL)
++{
++  ACE_Time_Value tv(1, 0);
++  orb->run(tv ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++
++  bool exception_detected = false;
++  while(!exception_detected)
++    {
++      ACE_TRY
++        {
++          CORBA::String_var dummy =
++            echo->echo_operation("foo" ACE_ENV_ARG_PARAMETER);
++          ACE_TRY_CHECK;
++        }
++      ACE_CATCHANY
++        {
++          exception_detected = true;
++        }
++      ACE_ENDTRY;
++    }
++
++  tv = ACE_Time_Value(1, 0);
++  orb->run(tv ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++}
++
++static void test_ami_errors(CORBA::ORB_ptr orb,
++                            Test::Echo_ptr echo
++                            ACE_ENV_ARG_DECL)
++{
++  wait_for_exception(orb, echo ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++
++  Test::AMI_EchoHandler_var echo_handler;
++  {
++    TAO::Utils::Servant_Var<Echo_Handler> echo_handler_impl(
++        new Echo_Handler);
++    echo_handler = echo_handler_impl->_this(ACE_ENV_SINGLE_ARG_PARAMETER);
++    ACE_CHECK;
++  }
++
++  unsigned long initial_request_count =
++    Echo_Client_Request_Interceptor::request_count;
++  unsigned long initial_exception_count =
++    Echo_Client_Request_Interceptor::exception_count;
++  for(int i = 0; i != 100; ++i)
++  {
++    ACE_TRY
++      {
++        echo->sendc_echo_operation(
++            echo_handler.in(), "dummy message" ACE_ENV_ARG_PARAMETER);
++        ACE_TRY_CHECK;
++      }
++    ACE_CATCHANY
++      {
++      }
++    ACE_ENDTRY;
++  }
++  unsigned long total_request_count =
++    Echo_Client_Request_Interceptor::request_count - initial_request_count;
++  unsigned long total_exception_count =
++    Echo_Client_Request_Interceptor::exception_count - initial_exception_count;
++
++  if(total_request_count != 100
++     || total_exception_count != 100)
++    {
++      ACE_ERROR((LM_ERROR,
++                 "ERROR: In test_ami_errors() unexpected request/exception "
++                 "count (request = %d, exception = %d)\n",
++                 total_request_count, total_exception_count));
++      exit_status = 1;
++    }
++}
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/run_test.pl
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/run_test.pl:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/run_test.pl	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,42 @@
++eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
++     & eval 'exec perl -S $0 $argv:q'
++     if 0;
++
++# $Id: run_test.pl,v 1.1 2002/11/08 18:31:04 coryan Exp $
++# -*- perl -*-
++
++use lib '../../../../bin';
++use PerlACE::Run_Test;
++
++$iorfile = PerlACE::LocalFile ("server.ior");
++unlink $iorfile;
++$status = 0;
++
++$SV = new PerlACE::Process ("server", "-o $iorfile");
++$CL = new PerlACE::Process ("client", " -k file://$iorfile");
++
++$SV->Spawn ();
++
++if (PerlACE::waitforfile_timed ($iorfile, 5) == -1) {
++    print STDERR "ERROR: cannot find file <$iorfile>\n";
++    $SV->Kill (); $SV->TimedWait (1);
++    exit 1;
++} 
++
++$client = $CL->SpawnWaitKill (300);
++
++if ($client != 0) {
++    print STDERR "ERROR: client returned $client\n";
++    $status = 1;
++}
++
++$server = $SV->WaitKill (10);
++
++if ($server != 0) {
++    print STDERR "ERROR: server returned $server\n";
++    $status = 1;
++}
++
++unlink $iorfile;
++
++exit $status;
+Index: ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/server.cpp
+diff -u /dev/null ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/server.cpp:1.1
+--- /dev/null	Fri Nov  8 14:42:44 2002
++++ ACE_wrappers/TAO/tests/Portable_Interceptors/AMI/server.cpp	Fri Nov  8 13:31:04 2002
+@@ -0,0 +1,121 @@
++// $Id: server.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $
++
++#include "Echo.h"
++#include "Server_ORBInitializer.h"
++#include "ace/Get_Opt.h"
++
++ACE_RCSID(Portable_Interceptors_AMI, Echo, "$Id: server.cpp,v 1.1 2002/11/08 18:31:04 coryan Exp $")
++
++const char *ior_output_file = "test.ior";
++
++int
++parse_args (int argc, char *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, "o:");
++  int c;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'o':
++        ior_output_file = get_opts.opt_arg ();
++        break;
++
++      case '?':
++      default:
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "usage:  %s "
++                           "-o <iorfile>"
++                           "\n",
++                           argv [0]),
++                          -1);
++      }
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++int
++main (int argc, char *argv[])
++{
++  ACE_TRY_NEW_ENV
++    {
++      {
++        PortableInterceptor::ORBInitializer_var initializer(
++            new Server_ORBInitializer);
++        PortableInterceptor::register_orb_initializer(initializer.in()
++                                                      ACE_ENV_ARG_PARAMETER);
++        ACE_TRY_CHECK;
++      }
++
++      CORBA::ORB_var orb =
++        CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      CORBA::Object_var poa_object =
++        orb->resolve_initial_references("RootPOA" ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      PortableServer::POA_var root_poa =
++        PortableServer::POA::_narrow (poa_object.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (CORBA::is_nil (root_poa.in ()))
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           " (%P|%t) Panic: nil RootPOA\n"),
++                          1);
++
++      PortableServer::POAManager_var poa_manager =
++        root_poa->the_POAManager (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      Echo *echo_impl;
++      ACE_NEW_RETURN (echo_impl,
++                      Echo (orb.in ()),
++                      1);
++      PortableServer::ServantBase_var owner_transfer(echo_impl);
++
++      Test::Echo_var echo =
++        echo_impl->_this (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      CORBA::String_var ior =
++        orb->object_to_string (echo.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      // Output the IOR to the <ior_output_file>
++      FILE *output_file = ACE_OS::fopen (ior_output_file, "w");
++      if (output_file == 0)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "Cannot open output file for writing IOR: %s",
++                           ior_output_file),
++                              1);
++      ACE_OS::fprintf (output_file, "%s", ior.in ());
++      ACE_OS::fclose (output_file);
++
++      poa_manager->activate (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      orb->run (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      ACE_DEBUG ((LM_DEBUG, "(%P|%t) server - event loop finished\n"));
++
++      root_poa->destroy (1, 1 ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++    }
++  ACE_CATCHANY
++    {
++      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
++                           "Exception caught:");
++      return 1;
++    }
++  ACE_ENDTRY;
++
++  return 0;
++}
