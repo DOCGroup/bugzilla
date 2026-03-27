@@ -1,0 +1,40 @@
+*** platform_g++_common.GNU.orig	2002-10-18 19:13:40.000000000 -0700
+--- platform_g++_common.GNU	2003-02-13 17:54:55.000000000 -0800
+***************
+*** 30,36 ****
+  # Turn on the proper flags for explicit template instantiation.
+  #
+  ifeq ($(templates),explicit)
+!   ifeq ($(TEMPLATES_FLAG),) # Turn on flags if none is speficied.
+      TEMPLATES_FLAG=-fno-implicit-templates
+    endif
+    CPPFLAGS += -DACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION
+--- 30,36 ----
+  # Turn on the proper flags for explicit template instantiation.
+  #
+  ifeq ($(templates),explicit)
+!   ifeq ($(TEMPLATES_FLAG),) # Turn on flags if none is specified.
+      TEMPLATES_FLAG=-fno-implicit-templates
+    endif
+    CPPFLAGS += -DACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION
+***************
+*** 43,50 ****
+    ifeq ($(with_ld),hpux)
+      SOFLAGS += -Wl,+h -Wl,$(SONAME)
+    else
+!     ifneq ($(with_ld),aix)
+!       SOFLAGS += -Wl,-h -Wl,$(SONAME)
+      endif
+    endif
+  endif
+--- 43,52 ----
+    ifeq ($(with_ld),hpux)
+      SOFLAGS += -Wl,+h -Wl,$(SONAME)
+    else
+!     ifneq ($(with_ld),vxworks)
+!       ifneq ($(with_ld),aix)
+!         SOFLAGS += -Wl,-h -Wl,$(SONAME)
+!       endif
+      endif
+    endif
+  endif
