@@ -1,0 +1,17 @@
+ACE_Event_Handler_Handle_Timeout_Upcall<ACE_Recursive_Thread_Mutex>::timeout(ACE_Timer_Queue_T<ACE_Event_Handler *,ACE_Event_Handler_Handle_Timeout_Upcall<ACE_Recursive_Thread_Mutex>,ACE_Recursive_Thread_Mutex> & {...}, ACE_Event_Handler * 0x00da1bd4, const void * 0x00000000, const ACE_Time_Value & {...}) line 285 + 16 bytes
+ACE_Timer_Queue_T<ACE_Event_Handler *,ACE_Event_Handler_Handle_Timeout_Upcall<ACE_Recursive_Thread_Mutex>,ACE_Recursive_Thread_Mutex>::upcall(ACE_Event_Handler * & 0x00da1bd4, const void * 0x00000000, const ACE_Time_Value & {...}) line 150
+ACE_Timer_Queue_T<ACE_Event_Handler *,ACE_Event_Handler_Handle_Timeout_Upcall<ACE_Recursive_Thread_Mutex>,ACE_Recursive_Thread_Mutex>::expire(const ACE_Time_Value & {...}) line 244
+ACE_Timer_Queue_T<ACE_Event_Handler *,ACE_Event_Handler_Handle_Timeout_Upcall<ACE_Recursive_Thread_Mutex>,ACE_Recursive_Thread_Mutex>::expire() line 139 + 45 bytes
+ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::dispatch_timer_handlers(int & 0) line 1038 + 14 bytes
+ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::dispatch(int 0, ACE_Select_Reactor_Handle_Set & {...}) line 1204 + 20 bytes
+ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::handle_events_i(ACE_Time_Value * 0x00000000) line 1292 + 31 bytes
+ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value * 0x00000000) line 1274 + 12 bytes
+ACE_Reactor::handle_events(ACE_Time_Value * 0x00000000) line 158
+TAO_ORB_Core::run(ACE_Time_Value * 0x00000000, int 0, CORBA_Environment & {...}) line 1836 + 15 bytes
+CORBA_ORB::run(ACE_Time_Value * 0x00000000, CORBA_Environment & {...}) line 242
+CORBA_ORB::run(CORBA_Environment & {...}) line 226
+FactoryDriver::start(int 1, char * * 0x00d8b030) line 143
+ace_main_i(int 1, char * * 0x00d8b030) line 13
+main(int 1, char * * 0x00d8b030) line 8 + 69 bytes
+mainCRTStartup() line 338 + 17 bytes
+KERNEL32! 77f1b9ea()
