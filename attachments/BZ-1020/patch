@@ -1,0 +1,171 @@
+Index: Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Transport.cpp,v
+retrieving revision 1.69
+diff -u -r1.69 Transport.cpp
+--- Transport.cpp	22 Oct 2002 04:05:54 -0000	1.69
++++ Transport.cpp	6 Nov 2002 20:19:57 -0000
+@@ -692,7 +692,21 @@
+       return;
+     }
+ 
+-  eh->close_connection ();
++  // eh->close_connection ();
++  ACE_Time_Value tv = ACE_Time_Value::zero;
++
++
++  while (!eh->is_connection_closed ())
++    {
++      ACE_DEBUG ((LM_DEBUG,
++                  "(%P|%t) waiting to close [%d]..\n",
++                  this->id ()));
++      this->orb_core_->reactor ()->handle_events (tv);
++    }
++
++  ACE_DEBUG ((LM_DEBUG,
++              "(%P|%t) ********************* \n"));
++
+ 
+   this->send_connection_closed_notifications ();
+ 
+Index: LF_Event.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/LF_Event.cpp,v
+retrieving revision 1.4
+diff -u -r1.4 LF_Event.cpp
+--- LF_Event.cpp	27 Apr 2002 21:49:58 -0000	1.4
++++ LF_Event.cpp	6 Nov 2002 20:20:06 -0000
+@@ -80,25 +80,27 @@
+   else if (this->state_ == TAO_LF_Event::LFS_CONNECTION_WAIT)
+     {
+       // From LFS_CONNECTION_WAIT we can only move to a few states
+-      if (new_state != TAO_LF_Event::LFS_IDLE)
++      if (new_state == TAO_LF_Event::LFS_SUCCESS ||
++          new_state == TAO_LF_Event::LFS_CONNECTION_CLOSE_WAIT)
+         {
+-          if (new_state == TAO_LF_Event::LFS_CONNECTION_CLOSED)
+-            {
+-              this->state_ = TAO_LF_Event::LFS_FAILURE;
+-            }
+-          else
+-            {
+               this->state_ = new_state;
+-            }
+         }
+       return;
+     }
+-  else if (this->state_ == TAO_LF_Event::LFS_SUCCESS
+-           || this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED)
++  else if (this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSE_WAIT)
++    {
++      if (new_state == TAO_LF_Event::LFS_CONNECTION_CLOSED)
++        {
++              this->state_ = new_state;
++        }
++      return;
++    }
++  else if (this->state_ == TAO_LF_Event::LFS_SUCCESS)
+     {
+       // From the two states above we can go back to ACTIVE, as when a
+       // request is restarted.
+-      if (new_state == TAO_LF_Event::LFS_ACTIVE)
++      if (new_state == TAO_LF_Event::LFS_ACTIVE ||
++          new_state == TAO_LF_Event::LFS_CONNECTION_CLOSE_WAIT)
+         {
+           this->state_ = new_state;
+         }
+@@ -122,4 +124,10 @@
+   return (this->state_ == TAO_LF_Event::LFS_FAILURE
+           || this->state_ == TAO_LF_Event::LFS_TIMEOUT
+           || this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED);
++}
++
++int
++TAO_LF_Event::is_connection_closed (void) const
++{
++  return (this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED);
+ }
+Index: LF_Event.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/LF_Event.h,v
+retrieving revision 1.6
+diff -u -r1.6 LF_Event.h
+--- LF_Event.h	23 May 2002 22:34:10 -0000	1.6
++++ LF_Event.h	6 Nov 2002 20:20:06 -0000
+@@ -85,6 +85,8 @@
+     /// to the any of the following states, each of them being a final
+     /// state.
+     LFS_CONNECTION_WAIT,
++
++    LFS_CONNECTION_CLOSE_WAIT,
+     /// The event has completed successfully
+     LFS_SUCCESS,
+     /// A failure has been detected while the event was active
+@@ -106,6 +108,8 @@
+   /// event
+   int error_detected (void) const;
+   //@}
++
++  int is_connection_closed (void) const;
+ 
+   /// Check if we should keep waiting.
+   int keep_waiting (void);
+Index: LF_Event.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/LF_Event.inl,v
+retrieving revision 1.4
+diff -u -r1.4 LF_Event.inl
+--- LF_Event.inl	2 Nov 2001 13:10:40 -0000	1.4
++++ LF_Event.inl	6 Nov 2002 20:20:06 -0000
+@@ -19,7 +19,8 @@
+ TAO_LF_Event::is_state_final (void)
+ {
+   if (this->state_ == TAO_LF_Event::LFS_TIMEOUT ||
+-      this->state_ == TAO_LF_Event::LFS_FAILURE)
++      this->state_ == TAO_LF_Event::LFS_FAILURE ||
++      this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED)
+     return 1;
+ 
+   return 0;
+Index: Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Connection_Handler.cpp,v
+retrieving revision 1.23
+diff -u -r1.23 Connection_Handler.cpp
+--- Connection_Handler.cpp	22 Oct 2002 15:19:41 -0000	1.23
++++ Connection_Handler.cpp	6 Nov 2002 20:23:08 -0000
+@@ -138,14 +138,12 @@
+       if (TAO_debug_level > 0)
+         ACE_DEBUG ((LM_DEBUG,
+                     "TAO (%P|%t) - Connection_Handler::svc_i - "
+-                    "loop <%d>\n", current_timeout.msec ()
+-		    ));
++                    "loop <%d>\n", current_timeout.msec ()));
+     }
+ 
+   if (TAO_debug_level > 0)
+     ACE_DEBUG  ((LM_DEBUG,
+-                 "TAO (%P|%t) - Connection_Handler::svc_i end\n"
+-		 ));
++                 "TAO (%P|%t) - Connection_Handler::svc_i end\n"));
+ 
+   return result;
+ }
+@@ -261,7 +259,7 @@
+     ACE_HANDLE h, ACE_Event_Handler * eh)
+ {
+   // Increase the reference count on the upcall that have passed us.
+-  // 
++  //
+   // REFCNT: Matches decr_refcount() in this function...
+   long refcount = this->incr_refcount ();
+   ACE_ASSERT (refcount > 0);
+@@ -448,6 +446,8 @@
+     // @@ This seems silly, the reactor is a much better authority to
+     //    find out if a handle is registered...
+     this->transport ()->wait_strategy ()->is_registered (0);
++
++    this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSE_WAIT);
+ 
+     // Close the socket, implicitly this makes:
+     //   get_handle() == ACE_INVALID_HANDLE
