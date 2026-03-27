@@ -1,0 +1,44 @@
+Index: Constraint_Interpreter.cpp
+===================================================================
+RCS file: /project/ace/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/Trader/Constraint_Interpreter.cpp,v
+retrieving revision 1.17
+diff -u -r1.17 Constraint_Interpreter.cpp
+--- Constraint_Interpreter.cpp	1999/08/28 21:39:48	1.17
++++ Constraint_Interpreter.cpp	1999/08/29 02:55:48
+@@ -5,7 +5,7 @@
+ 
+ ACE_RCSID(Trader, Constraint_Interpreter, "$Id: Constraint_Interpreter.cpp,v 1.17 1999/08/28 21:39:48 pradeep Exp $")
+ 
+-ACE_Thread_Mutex TAO_Interpreter::parserMutex__;
++ACE_SYNCH_MUTEX TAO_Interpreter::parserMutex__;
+ 
+ TAO_Interpreter::TAO_Interpreter (void)
+   : root_ (0)
+@@ -20,7 +20,10 @@
+ int
+ TAO_Interpreter::build_tree (const char* constraints)
+ {
+-  ACE_Guard<ACE_Thread_Mutex> guard(parserMutex__);
++  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX,
++                    guard,
++                    parserMutex__,
++                    -1);
+ 
+   TAO_Lex_String_Input::reset ((char*)constraints);
+   int return_value = 0;
+Index: Constraint_Interpreter.h
+===================================================================
+RCS file: /project/ace/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/Trader/Constraint_Interpreter.h,v
+retrieving revision 1.19
+diff -u -r1.19 Constraint_Interpreter.h
+--- Constraint_Interpreter.h	1999/08/28 21:39:48	1.19
++++ Constraint_Interpreter.h	1999/08/29 02:41:20
+@@ -47,7 +47,7 @@
+   // The root of the expression tree, not equal to null if build_tree
+   // successfully builds a tree from the constraints.
+ private:
+-  static ACE_Thread_Mutex parserMutex__;
++  static ACE_SYNCH_MUTEX parserMutex__;
+   // This mutex protects the <build_tree> method from reentrance.
+ };
+ 
