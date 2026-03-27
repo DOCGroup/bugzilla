@@ -1,0 +1,29 @@
+[W] MLK: Memory leak of 104 bytes from 1 block allocated in TAO_ORB_Core::init(int&,char * *,CORBA_Environment&)
+    Distribution of leaked blocks
+    Allocation location
+        new(UINT)      [new.cpp:23]
+        TAO_ORB_Core::init(int&,char * *,CORBA_Environment&) [ORB_Core.cpp:969]
+
+                  ACE_NEW_THROW_EX (temp_orb,
+                                    CORBA_ORB (this),
+             =>                     CORBA::NO_MEMORY ());
+                  ACE_CHECK_RETURN (-1);
+
+                  this->orb_ = temp_orb;
+        CORBA::ORB_init(int&,char * * const,char const*,CORBA_Environment&) [ORB.cpp:1525]
+                  TAO_ORB_Core_Auto_Ptr safe_oc (oc);
+
+                  // Initialize the ORB Core instance.
+             =>   int result = safe_oc.get ()->init (argc, argv, ACE_TRY_ENV);
+                  ACE_CHECK_RETURN (CORBA::ORB::_nil ());
+
+                  // Check for errors and return 0 if error.
+        main           [server.cpp:139]
+                      CORBA::ORB_var orb = CORBA::ORB_init (argc,
+                                                            argv,
+                                                            0,
+             =>                                             ACE_TRY_ENV);
+                      ACE_TRY_CHECK;
+
+                      int result = parse_args (argc, argv);
+        mainCRTStartup [crtexe.c:338]
