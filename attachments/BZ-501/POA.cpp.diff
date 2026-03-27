@@ -1,0 +1,55 @@
+Index: POA.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/POA.cpp,v
+retrieving revision 1.122
+diff -r1.122 POA.cpp
+1350,1351c1350,1351
+<   // IMPLICIT_ACTIVATION policies; if not present, the WrongPolicy
+<   // exception is raised.
+---
+>   // IMPLICIT_ACTIVATION policies; or it requires the USE_DEFAULT_SERVANT 
+>   // policy; if not present, the WrongPolicy exception is raised.
+1354c1354,1355
+<             || this->policies ().implicit_activation () == PortableServer::IMPLICIT_ACTIVATION)))
+---
+>             || this->policies ().implicit_activation () == PortableServer::IMPLICIT_ACTIVATION))
+>       && !(this->policies ().request_processing () == PortableServer::USE_DEFAULT_SERVANT))
+1406a1408,1445
+> 
+> #if (TAO_HAS_MINIMUM_POA == 0)
+> 
+>   // If the POA has the USE_DEFAULT_SERVANT policy, the servant specified
+>   // is the default servant, and the operation is being invoked in he
+>   // context of executin a request on the default servant, then the ObjectId
+>   // associated with the current invocation is returned.
+>   if (this->policies ().request_processing () == PortableServer::USE_DEFAULT_SERVANT)
+>     {
+>       // Compare the servant specified in the parameter list to the 
+>       // default servant registered with this POA.
+>       PortableServer::Servant default_servant = this->default_servant_.in ();
+>       if (default_servant != 0)
+>         {
+>           // If they are the same servant, then check if we are in an upcall.
+>           if (servant == default_servant)
+>             {
+>               TAO_POA_Current_Impl *poa_current_impl =
+>                 TAO_TSS_RESOURCES::instance ()->poa_current_impl_;
+>               // If we are in an upcall on the default servant, return the 
+>               // ObjectId associated with the current invocation.
+>               if (poa_current_impl != 0 &&
+>                   default_servant == poa_current_impl->servant ())
+>                 {
+>                   return poa_current_impl->get_object_id(ACE_TRY_ENV);
+>                 }
+>             }
+>         }
+>       else
+>         // Otherwise, the ObjectNotActive exception is raised.
+>         {
+>           ACE_THROW_RETURN (PortableServer::POA::ObjectNotActive (),
+>                             0);
+>         }
+>     }
+> 
+> #endif /* TAO_HAS_MINIMUM_POA == 0 */
+> 
