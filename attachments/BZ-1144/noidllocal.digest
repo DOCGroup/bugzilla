@@ -1,0 +1,1988 @@
+Content-Type: MULTIPART/Digest; BOUNDARY="-930844984-1889430779-1012852482=:25560"
+Content-ID: <Pine.LNX.4.33.0202041353571D.25560@ocilap5.ociweb.com>
+Content-Description: Digest of 29 messages
+
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+  Send mail to mime@docserver.cac.washington.edu for more info.
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353570.25560@ocilap5.ociweb.com>
+Content-Description: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Date: Fri, 1 Feb 2002 14:49:24 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Ossama Othman <ossama@ece.uci.edu>,  <parsons@cs.wustl.edu>
+cc: Tom Venturella <venturella_t@ociweb.com>
+Subject: Security_PolicyFactory updates and 'any' operators for locals
+Message-ID: <Pine.LNX.4.33.0202011443420.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+Hi, Ossama & Jeff,
+
+Tom's in the middle of trying to test some stuff out using some of the
+concocted examples Ossama sent awhile back.  In one case it shows the
+following snippet of code:
+
+  SecurityLevel2::CredentialsList creds_list;
+  ...
+  CORBA::Any clany;
+  clany <<= creds_list;
+
+This fails because the IDL compiler didn't generate any insertion operators
+for CredentialsList.  Here's the salient information on Credentials and
+CredentialsList:
+
+  local interface Credentials { .... };
+  typedef sequence<Credentials> CredentialsList;
+
+Seems that the IDL compiler doesn't generate 'any' insertion operators for a
+local interface.  I've tried to find documentation to that effect in a spec
+somewhere, but haven't been able to locate it.  Can that be right?!
+
+Also, Ossama, we noticed that the Security_PolicyFactory::create_policy
+doesn't seem to do anything at all with the SecInvocationsCredentialsPolicy.
+I presume that's an oversight and I'm happy to fix that, but is it really as
+simple as mimicking the code that's in there for the other policies?
+
+Thanks!
+-cj
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353571.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id PAA26706
+	for <cleeland@localhost>; Fri, 1 Feb 2002 15:00:30 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Fri, 01 Feb 2002 15:00:30 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id PAA11750;
+	Fri, 1 Feb 2002 15:04:47 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g11Kxv1f031315;
+	Fri, 1 Feb 2002 12:59:57 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g11KxvCC031313;
+	Fri, 1 Feb 2002 12:59:57 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Fri, 1 Feb 2002 12:59:57 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Cc: parsons@cs.wustl.edu, Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+Message-ID: <20020201205957.GB26656@doc.ece.uci.edu>
+References: <Pine.LNX.4.33.0202011443420.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202011443420.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Chris,
+
+On Fri, Feb 01, 2002 at 02:49:24PM -0600, Chris Cleeland wrote:
+> This fails because the IDL compiler didn't generate any insertion operators
+> for CredentialsList.  Here's the salient information on Credentials and
+> CredentialsList:
+> 
+>   local interface Credentials { .... };
+>   typedef sequence<Credentials> CredentialsList;
+> 
+> Seems that the IDL compiler doesn't generate 'any' insertion operators for a
+> local interface.  I've tried to find documentation to that effect in a spec
+> somewhere, but haven't been able to locate it.  Can that be right?!
+
+Doh!  A "local" interface is locality constrained so it cannot be
+marshalled into another format (e.g. CDR).  However, I don't know if
+that precludes it from being inserted into an Any.
+
+> Also, Ossama, we noticed that the Security_PolicyFactory::create_policy
+> doesn't seem to do anything at all with the SecInvocationsCredentialsPolicy.
+> I presume that's an oversight and I'm happy to fix that,
+
+Yep.  Big oversight on my part.  I could have sworn that I added the
+necessary code.  I guess not.  :-)
+
+> but is it really as
+> simple as mimicking the code that's in there for the other policies?
+
+Yep.  No brainer.
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353572.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Date: Fri, 1 Feb 2002 15:09:10 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Ossama Othman <ossama@doc.ece.uci.edu>
+cc:  <parsons@cs.wustl.edu>, Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+In-Reply-To: <20020201205957.GB26656@doc.ece.uci.edu>
+Message-ID: <Pine.LNX.4.33.0202011505260.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Fri, 1 Feb 2002, Ossama Othman wrote:
+
+> > Seems that the IDL compiler doesn't generate 'any' insertion operators for a
+> > local interface.  I've tried to find documentation to that effect in a spec
+> > somewhere, but haven't been able to locate it.  Can that be right?!
+>
+> Doh!  A "local" interface is locality constrained so it cannot be
+> marshalled into another format (e.g. CDR).  However, I don't know if
+> that precludes it from being inserted into an Any.
+
+I actually checked the text of the 2.4.2 spec and the only thing that it says
+about regarding a local interface and an any is this:
+
+"Local types cannot be marshaled and references to local objects cannot be
+converted to strings. Any attempt to marshal a local object, such as via an
+unconstrained base interface, as an Object, or as the contents of an any, or
+to pass a local object to ORB::object_to_string, shall result in a MARSHAL
+system exception with OMG minor code 2."
+
+This implies that it *can* be part of an any.  Jeff, can you advise us on why
+the any insertion operators aren't generated for a local interface?
+
+> > Also, Ossama, we noticed that the Security_PolicyFactory::create_policy
+> > doesn't seem to do anything at all with the SecInvocationsCredentialsPolicy.
+> > I presume that's an oversight and I'm happy to fix that,
+>
+> Yep.  Big oversight on my part.  I could have sworn that I added the
+> necessary code.  I guess not.  :-)
+
+Yep:-)
+
+> > but is it really as
+> > simple as mimicking the code that's in there for the other policies?
+>
+> Yep.  No brainer.
+
+Of course, the code won't compile at this point since we don't have any
+insertion/extraction operators.
+
+I guess one possible workaround (for now) is to remove the locality
+constraint from Credentials.  That means that we need more caution in the
+code, but it would at least let us continue working.
+
+-cj
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353573.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id PAA26769
+	for <cleeland@localhost>; Fri, 1 Feb 2002 15:18:50 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Fri, 01 Feb 2002 15:18:50 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id PAA18666;
+	Fri, 1 Feb 2002 15:22:33 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g11LHd1f032077;
+	Fri, 1 Feb 2002 13:17:39 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g11LHdpw032075;
+	Fri, 1 Feb 2002 13:17:39 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Fri, 1 Feb 2002 13:17:38 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Cc: parsons@cs.wustl.edu, Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+Message-ID: <20020201211738.GE26656@doc.ece.uci.edu>
+References: <20020201205957.GB26656@doc.ece.uci.edu> <Pine.LNX.4.33.0202011505260.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202011505260.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Chris,
+
+On Fri, Feb 01, 2002 at 03:09:10PM -0600, Chris Cleeland wrote:
+> "Local types cannot be marshaled and references to local objects cannot be
+> converted to strings. Any attempt to marshal a local object, such as via an
+> unconstrained base interface, as an Object, or as the contents of an any, or
+> to pass a local object to ORB::object_to_string, shall result in a MARSHAL
+> system exception with OMG minor code 2."
+
+The CCM spec says minor code 4.  Why can't specs live together in
+peace?:-)
+
+In any case, TAO adheres to this part of the spec, including throwing
+the appropriate exception.
+
+> This implies that it *can* be part of an any.  Jeff, can you advise us on why
+> the any insertion operators aren't generated for a local interface?
+
+BTW, it would really suck if the spec did indeed disallow this since
+there would be no way to portably initialize a
+SecurityLevel2::InvocationCredentialsPolicy policy.
+
+> I guess one possible workaround (for now) is to remove the locality
+> constraint from Credentials.  That means that we need more caution in the
+> code, but it would at least let us continue working.
+
+Yuck!  I guess that we don't have a choice, unless of course we're
+missing something really fundamental about initializing a policy that
+contains locality-constrained objects.
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353574.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for  locals (fwd)
+
+Return-Path: <parsons@cs.wustl.edu>
+Received: from localhost (IDENT:cleeland@localhost [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id VAA28548
+	for <cleeland@localhost>; Fri, 1 Feb 2002 21:33:33 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Fri, 01 Feb 2002 21:33:33 -0600 (CST)
+Received: from taumsauk.cs.wustl.edu (cs.wustl.edu [128.252.165.15])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id VAA13222;
+	Fri, 1 Feb 2002 21:02:47 -0600
+Received: from ATHENA.cs.wustl.edu (athena.doc.wustl.edu [128.252.160.180])
+	by taumsauk.cs.wustl.edu (8.9.1/8.9.1) with ESMTP id VAA01300;
+	Fri, 1 Feb 2002 21:01:49 -0600 (CST)
+Message-Id: <5.1.0.14.0.20020201204617.06d269a0@mail.cs.wustl.edu>
+X-Sender: parsons@mail.cs.wustl.edu
+X-Mailer: QUALCOMM Windows Eudora Version 5.1
+Date: Fri, 01 Feb 2002 21:01:49 -0600
+To: Chris Cleeland <cleeland@ociweb.com>,
+        Ossama Othman <ossama@doc.ece.uci.edu>
+From: Jeff Parsons <parsons@cs.wustl.edu>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for
+  locals
+Cc: Tom Venturella <venturella_t@ociweb.com>
+In-Reply-To: <Pine.LNX.4.33.0202011505260.25560-100000@ocilap5.ociweb.co
+ m>
+References: <20020201205957.GB26656@doc.ece.uci.edu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; format=flowed
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi,
+
+
+> > > Seems that the IDL compiler doesn't generate 'any' insertion 
+> operators for a
+> > > local interface.  I've tried to find documentation to that effect in 
+> a spec
+> > > somewhere, but haven't been able to locate it.  Can that be right?!
+> >
+> > Doh!  A "local" interface is locality constrained so it cannot be
+> > marshalled into another format (e.g. CDR).  However, I don't know if
+> > that precludes it from being inserted into an Any.
+>
+>I actually checked the text of the 2.4.2 spec and the only thing that it says
+>about regarding a local interface and an any is this:
+>
+>"Local types cannot be marshaled and references to local objects cannot be
+>converted to strings. Any attempt to marshal a local object, such as via an
+>unconstrained base interface, as an Object, or as the contents of an any, or
+>to pass a local object to ORB::object_to_string, shall result in a MARSHAL
+>system exception with OMG minor code 2."
+>
+>This implies that it *can* be part of an any.  Jeff, can you advise us on why
+>the any insertion operators aren't generated for a local interface?
+
+Our implementation of Any operators uses the CDR operators. To generate
+the Any operators for local interfaces, we would have to also generate the
+CDR operators. I guess it seemed like it would be tough to always throw
+that MARSHAL exception with the CDR operators there.
+However, it looks like they're going to have to get generated, and some kind
+of way to prevent someone from marshaling a local interface will have to be
+found.
+
+In the case where a local interface is marshaled inside an Any, I don't think
+it would be too bad -- we could check the typecode inside the Any << operator.
+Not sure about the case where we marshal a bare local interface though. How
+do you tell whether you're using the CDR operator to marshal it or to put it
+into an Any?
+
+
+Jeff
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353575.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id VAA28551
+	for <cleeland@localhost>; Fri, 1 Feb 2002 21:33:34 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Fri, 01 Feb 2002 21:33:34 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id VAA13752;
+	Fri, 1 Feb 2002 21:17:04 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g123CA1f015797;
+	Fri, 1 Feb 2002 19:12:10 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g123CApx015795;
+	Fri, 1 Feb 2002 19:12:10 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Fri, 1 Feb 2002 19:12:09 -0800
+To: Jeff Parsons <parsons@cs.wustl.edu>
+Cc: Chris Cleeland <cleeland@ociweb.com>,
+        Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+Message-ID: <20020202031209.GA15488@doc.ece.uci.edu>
+References: <20020201205957.GB26656@doc.ece.uci.edu> <5.1.0.14.0.20020201204617.06d269a0@mail.cs.wustl.edu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5.1.0.14.0.20020201204617.06d269a0@mail.cs.wustl.edu>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Jeff,
+
+On Fri, Feb 01, 2002 at 09:01:49PM -0600, Jeff Parsons wrote:
+> In the case where a local interface is marshaled inside an Any, I don't 
+> think
+> it would be too bad -- we could check the typecode inside the Any << 
+> operator.
+> Not sure about the case where we marshal a bare local interface though. How
+> do you tell whether you're using the CDR operator to marshal it or to put it
+> into an Any?
+
+The CCM spec seems to imply that attempting to insert a locality
+constrained interface into Any is illegal.  I'm not sure if this is
+too restrictive, but it seems like we're out of luck in any case.
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353576.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Date: Fri, 1 Feb 2002 21:43:38 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Ossama Othman <ossama@doc.ece.uci.edu>
+cc: Jeff Parsons <parsons@cs.wustl.edu>, 
+    Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+In-Reply-To: <20020202031209.GA15488@doc.ece.uci.edu>
+Message-ID: <Pine.LNX.4.33.0202012142090.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Fri, 1 Feb 2002, Ossama Othman wrote:
+
+> Hi Jeff,
+>
+> On Fri, Feb 01, 2002 at 09:01:49PM -0600, Jeff Parsons wrote:
+> > In the case where a local interface is marshaled inside an Any, I don't
+> > think
+> > it would be too bad -- we could check the typecode inside the Any <<
+> > operator.
+> > Not sure about the case where we marshal a bare local interface though. How
+> > do you tell whether you're using the CDR operator to marshal it or to put it
+> > into an Any?
+>
+> The CCM spec seems to imply that attempting to insert a locality
+> constrained interface into Any is illegal.  I'm not sure if this is
+> too restrictive, but it seems like we're out of luck in any case.
+
+No, I interpret it differently.  What the spec is saying (and, btw, the 2.4.2
+spec had the same thing in it that you put in, Ossama) is that, if you try to
+marshal an any which contains a local interface, then you're out of luck.
+
+If you accept that interpretation, then it should be okay to insert a local
+interface into an any; just don't try to pass it across the wire.
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353577.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id XAA28891
+	for <cleeland@localhost>; Fri, 1 Feb 2002 23:39:25 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Fri, 01 Feb 2002 23:39:26 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id XAA24834;
+	Fri, 1 Feb 2002 23:44:11 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g125dF1f005612;
+	Fri, 1 Feb 2002 21:39:15 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g125dFA5005610;
+	Fri, 1 Feb 2002 21:39:15 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Fri, 1 Feb 2002 21:39:15 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Cc: Jeff Parsons <parsons@cs.wustl.edu>,
+        Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+Message-ID: <20020202053915.GA3157@doc.ece.uci.edu>
+References: <20020202031209.GA15488@doc.ece.uci.edu> <Pine.LNX.4.33.0202012142090.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202012142090.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Chris,
+
+On Fri, Feb 01, 2002 at 09:43:38PM -0600, Chris Cleeland wrote:
+> No, I interpret it differently.  What the spec is saying (and, btw, the 2.4.2
+> spec had the same thing in it that you put in, Ossama) is that, if you try to
+> marshal an any which contains a local interface, then you're out of luck.
+> 
+> If you accept that interpretation, then it should be okay to insert a local
+> interface into an any; just don't try to pass it across the wire.
+
+Yes, I like your interpretation, especially since it is more useful.
+;-)
+
+So it seems that we've found a bug in TAO.  Yes?
+
+My Yoda interpretation isn't very good.  Get better without practice,
+I will not.  :-)
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353578.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Date: Fri, 1 Feb 2002 23:52:26 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Ossama Othman <ossama@doc.ece.uci.edu>
+cc: Jeff Parsons <parsons@cs.wustl.edu>, 
+    Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+In-Reply-To: <20020202053915.GA3157@doc.ece.uci.edu>
+Message-ID: <Pine.LNX.4.33.0202012349210.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Fri, 1 Feb 2002, Ossama Othman wrote:
+
+> On Fri, Feb 01, 2002 at 09:43:38PM -0600, Chris Cleeland wrote:
+> > No, I interpret it differently.  What the spec is saying (and, btw, the 2.4.2
+> > spec had the same thing in it that you put in, Ossama) is that, if you try to
+> > marshal an any which contains a local interface, then you're out of luck.
+> >
+> > If you accept that interpretation, then it should be okay to insert a local
+> > interface into an any; just don't try to pass it across the wire.
+>
+> Yes, I like your interpretation, especially since it is more useful.
+> ;-)
+
+<yoda>like YOUR interpretation better, do I.  More useful...it is!</yoda>
+
+> So it seems that we've found a bug in TAO.  Yes?
+
+Yes.  I'm not sure what to do about the CDR thing, Jeff.  I started hacking
+on the IDL compiler and ran into that this evening.  Seems that what we'd
+have to do is somehow mark the CDR stream as "blessed" to hold a local.  If
+we mark the stream, we'll also be able to easily detect that an any is
+holding a local without interpreting the type.
+
+Would that work?  Or is there a better way to solve this problem?
+
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353579.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id JAA29840
+	for <cleeland@localhost>; Sat, 2 Feb 2002 09:48:22 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Sat, 02 Feb 2002 09:48:22 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id JAA28312;
+	Sat, 2 Feb 2002 09:52:59 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g12Fm61f029488;
+	Sat, 2 Feb 2002 07:48:06 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g12Flu02029482;
+	Sat, 2 Feb 2002 07:47:56 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Sat, 2 Feb 2002 07:47:56 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Cc: Jeff Parsons <parsons@cs.wustl.edu>,
+        Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+Message-ID: <20020202154756.GA29273@doc.ece.uci.edu>
+References: <20020202053915.GA3157@doc.ece.uci.edu> <Pine.LNX.4.33.0202012349210.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202012349210.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Chris,
+
+On Fri, Feb 01, 2002 at 11:52:26PM -0600, Chris Cleeland wrote:
+> <yoda>like YOUR interpretation better, do I.  More useful...it is!</yoda>
+
+Strong is the force with you Master Yoda.  :-)
+
+> Yes.  I'm not sure what to do about the CDR thing, Jeff.  I started hacking
+> on the IDL compiler and ran into that this evening.  Seems that what we'd
+> have to do is somehow mark the CDR stream as "blessed" to hold a local.  If
+> we mark the stream, we'll also be able to easily detect that an any is
+> holding a local without interpreting the type.
+> 
+> Would that work?  Or is there a better way to solve this problem?
+
+Couldn't we just add another Any::_tao_replace() method that only
+accepts a TypeCode and the value?  That method wouldn't instantiate a
+message block as the existing code does.  The IDL compiler would
+only need to generate the Any insertion/extraction operators that
+set/get value and compare the TypeCodes when appropriate.  No need
+for the CDR stream insertion/extraction operators.
+
+Of course, I haven't looked into how this would be implemented so I
+may be entirely off base here.
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.020204135357A.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Date: Sat, 2 Feb 2002 14:18:13 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Ossama Othman <ossama@doc.ece.uci.edu>
+cc: Jeff Parsons <parsons@cs.wustl.edu>, 
+    Tom Venturella <venturella_t@ociweb.com>, 
+    Steve Totten <totten_s@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+In-Reply-To: <20020202154756.GA29273@doc.ece.uci.edu>
+Message-ID: <Pine.LNX.4.33.0202021355460.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Sat, 2 Feb 2002, Ossama Othman wrote:
+
+> Couldn't we just add another Any::_tao_replace() method that only
+> accepts a TypeCode and the value?  That method wouldn't instantiate a
+> message block as the existing code does.  The IDL compiler would
+> only need to generate the Any insertion/extraction operators that
+> set/get value and compare the TypeCodes when appropriate.  No need
+> for the CDR stream insertion/extraction operators.
+
+Hey, that's a good point.  I could just make a C++ copy of the object.  So
+the any insertion operators would be implemented differently, and the any
+would just hold a copy of the object.  It would be pretty easy to catch
+marshalling and stop it in that case since there'd be no message block or cdr
+stream to manipulate, eh?
+
+> Of course, I haven't looked into how this would be implemented so I may
+> be entirely off base here.
+
+Let's hope not!  Jeff whaddya think?
+
+I will now formally ask, Jeff, that if you undertake this that you insure
+that it's not boudn up with other pending changes so that we can integrate it
+back into our release more easily.
+
+Thanks!
+-cj
+
+PS  Should I enter a bugzilla bug for this?  You want me to record all our
+conversation on the topic?
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.020204135357B.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id OAA30323
+	for <cleeland@localhost>; Sat, 2 Feb 2002 14:52:17 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Sat, 02 Feb 2002 14:52:18 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id OAA32242;
+	Sat, 2 Feb 2002 14:56:54 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g12Kpw1f003499;
+	Sat, 2 Feb 2002 12:51:58 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g12Kpw98003497;
+	Sat, 2 Feb 2002 12:51:58 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Sat, 2 Feb 2002 12:51:58 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Cc: Jeff Parsons <parsons@cs.wustl.edu>,
+        Tom Venturella <venturella_t@ociweb.com>,
+        Steve Totten <totten_s@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+Message-ID: <20020202205158.GC2748@doc.ece.uci.edu>
+References: <20020202154756.GA29273@doc.ece.uci.edu> <Pine.LNX.4.33.0202021355460.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202021355460.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Chris,
+
+On Sat, Feb 02, 2002 at 02:18:13PM -0600, Chris Cleeland wrote:
+> Hey, that's a good point.  I could just make a C++ copy of the object.  So
+> the any insertion operators would be implemented differently, and the any
+> would just hold a copy of the object.  It would be pretty easy to catch
+> marshalling and stop it in that case since there'd be no message block or cdr
+> stream to manipulate, eh?
+
+I believe so.  Incidentally, wouldn't this stuff have to be a shallow
+copy?  Is it possible to perform a deep copy on a locality constrained
+interface?  In any case, there are two version of the Any insertion
+operator, a copying one and a non-copying one.  Right Jeff?
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.020204135357C.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for  locals (fwd)
+
+Return-Path: <parsons@cs.wustl.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id KAA04624
+	for <cleeland@localhost>; Mon, 4 Feb 2002 10:21:51 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 10:21:51 -0600 (CST)
+Received: from taumsauk.cs.wustl.edu (cs.wustl.edu [128.252.165.15])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id KAA12189;
+	Mon, 4 Feb 2002 10:26:01 -0600
+Received: from ATHENA.cs.wustl.edu (athena.doc.wustl.edu [128.252.160.180])
+	by taumsauk.cs.wustl.edu (8.9.1/8.9.1) with ESMTP id KAA17088;
+	Mon, 4 Feb 2002 10:25:14 -0600 (CST)
+Message-Id: <5.1.0.14.0.20020204101838.06d23920@mail.cs.wustl.edu>
+X-Sender: parsons@mail.cs.wustl.edu
+X-Mailer: QUALCOMM Windows Eudora Version 5.1
+Date: Mon, 04 Feb 2002 10:25:14 -0600
+To: Chris Cleeland <cleeland@ociweb.com>,
+        Ossama Othman <ossama@doc.ece.uci.edu>
+From: Jeff Parsons <parsons@cs.wustl.edu>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for
+  locals
+Cc: Tom Venturella <venturella_t@ociweb.com>
+In-Reply-To: <Pine.LNX.4.33.0202012349210.25560-100000@ocilap5.ociweb.co
+ m>
+References: <20020202053915.GA3157@doc.ece.uci.edu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; format=flowed
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi,
+
+
+>Yes.  I'm not sure what to do about the CDR thing, Jeff.  I started hacking
+>on the IDL compiler and ran into that this evening.  Seems that what we'd
+>have to do is somehow mark the CDR stream as "blessed" to hold a local.  If
+>we mark the stream, we'll also be able to easily detect that an any is
+>holding a local without interpreting the type.
+>
+>Would that work?  Or is there a better way to solve this problem?
+
+
+Here's an approach that I though of over the weekend, while I was practicing
+my couch potato act ;-).
+
+CDR operators for non-local interfaces just call the ones for CORBA::Object.
+What if we just put code like that inside the generated Any operators for
+local interfaces. That way there would be no CDR operators generated for
+local interfaces, and the question of marshaling one would be caught by the
+compiler. Then in the CDR operators for Anys, we'd have to have a check
+for the typecode kind being tk_local_interface, and throw the exception if
+it is seen -- not a big deal to check since the Any would just be accessing
+its own typecode member. Of course, we still have to generate a typecode
+for local interfaces, but we would have to do in order to deal with Anys no
+matter what approach is used.
+
+What say?
+
+Jeff
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.020204135357D.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for  locals (fwd)
+
+Date: Mon, 4 Feb 2002 10:39:46 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Jeff Parsons <parsons@cs.wustl.edu>
+cc: Ossama Othman <ossama@doc.ece.uci.edu>, 
+    Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for  locals
+In-Reply-To: <5.1.0.14.0.20020204101838.06d23920@mail.cs.wustl.edu>
+Message-ID: <Pine.LNX.4.33.0202041036170.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Mon, 4 Feb 2002, Jeff Parsons wrote:
+
+> >Would that work?  Or is there a better way to solve this problem?
+>
+> Here's an approach that I though of over the weekend, while I was practicing
+> my couch potato act ;-).
+>
+> CDR operators for non-local interfaces just call the ones for CORBA::Object.
+> What if we just put code like that inside the generated Any operators for
+> local interfaces. That way there would be no CDR operators generated for
+> local interfaces, and the question of marshaling one would be caught by the
+> compiler. Then in the CDR operators for Anys, we'd have to have a check
+> for the typecode kind being tk_local_interface, and throw the exception if
+> it is seen -- not a big deal to check since the Any would just be accessing
+> its own typecode member. Of course, we still have to generate a typecode
+> for local interfaces, but we would have to do in order to deal with Anys no
+> matter what approach is used.
+>
+> What say?
+
+Sounds interesting.  I really like the idea of not marshalling at all,
+though; I mean, it can't go over the wire, so why even bother marshalling?
+We could instead just hold a copy of the object in native form, right?  Seems
+that might work better for performance.  For that matter, couldn't you apply
+the same thing to non-local objects, and only do the marshalling when the any
+itself gets marshalled?  That might make 'any' operations less costly (then
+again, maybe not).
+
+Your proposal definitely mirrors the way that things work now better.  And if
+it's easier to implement, then I say go for it.  Do you think you'll be able
+to keep it separate from other changes so that we can more easily fold it
+into the OCI repository?
+
+Thanks!
+-cj
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.020204135357E.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for  locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id LAA05075
+	for <cleeland@localhost>; Mon, 4 Feb 2002 11:10:46 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 11:10:47 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id LAA10527;
+	Mon, 4 Feb 2002 11:15:02 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g14HA21f029851;
+	Mon, 4 Feb 2002 09:10:02 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g14HA2G1029849;
+	Mon, 4 Feb 2002 09:10:02 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Mon, 4 Feb 2002 09:10:01 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Cc: Jeff Parsons <parsons@cs.wustl.edu>,
+        Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for  locals
+Message-ID: <20020204171001.GB29546@doc.ece.uci.edu>
+References: <5.1.0.14.0.20020204101838.06d23920@mail.cs.wustl.edu> <Pine.LNX.4.33.0202041036170.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202041036170.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi guys,
+
+On Mon, Feb 04, 2002 at 10:39:46AM -0600, Chris Cleeland wrote:
+> On Mon, 4 Feb 2002, Jeff Parsons wrote:
+> 
+> > >Would that work?  Or is there a better way to solve this problem?
+> >
+> > Here's an approach that I though of over the weekend, while I was practicing
+> > my couch potato act ;-).
+> >
+> > CDR operators for non-local interfaces just call the ones for CORBA::Object.
+
+BTW, I finally learned what the "proper" term is for non-locality
+constrained interfaces after running through some specs this past
+weekend.  You'd never guess...  "unconstrained interfaces."  Who'd of
+thunk?:)
+
+> Sounds interesting.  I really like the idea of not marshalling at all,
+> though; I mean, it can't go over the wire, so why even bother marshalling?
+> We could instead just hold a copy of the object in native form, right?  Seems
+> that might work better for performance.  For that matter, couldn't you apply
+> the same thing to non-local objects, and only do the marshalling when the any
+                    ^^^^^^^^^^^^^^^^^
+"Unconstrained objects."  :-)
+
+> itself gets marshalled?  That might make 'any' operations less costly (then
+> again, maybe not).
+
+It would, particularly if the Any is never sent over the wire.
+Insertion and extraction would be "wicked" fast.  :-)  Memory
+requirements would be less since there would be no need to marshal the
+value into a CDR stream until sending it over the wire.  I know that
+this has been suggested in the past but I seem to recall that this
+wasn't as easy as it seemed.  Jeff?
+
+> into the OCI repository?
+
+-Ossama
+
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.020204135357F.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for  locals (fwd)
+
+Date: Mon, 4 Feb 2002 11:17:30 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Ossama Othman <ossama@doc.ece.uci.edu>
+cc: Jeff Parsons <parsons@cs.wustl.edu>, 
+    Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for  locals
+In-Reply-To: <20020204171001.GB29546@doc.ece.uci.edu>
+Message-ID: <Pine.LNX.4.33.0202041112260.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Mon, 4 Feb 2002, Ossama Othman wrote:
+
+> > > CDR operators for non-local interfaces just call the ones for CORBA::Object.
+>
+> BTW, I finally learned what the "proper" term is for non-locality
+> constrained interfaces after running through some specs this past
+> weekend.  You'd never guess...  "unconstrained interfaces."  Who'd of
+> thunk?:)
+
+Ooooo...where'd you dig up *that* nugget?
+
+> > itself gets marshalled?  That might make 'any' operations less costly (then
+> > again, maybe not).
+>
+> It would, particularly if the Any is never sent over the wire.
+> Insertion and extraction would be "wicked" fast.  :-)
+
+"wicked"...you from Boston now or something?  Been watching some Patriot
+fans' celebrations on all-night TV?
+
+> Memory requirements would be less since there would be no need to marshal
+> the value into a CDR stream until sending it over the wire.  I know that
+> this has been suggested in the past but I seem to recall that this wasn't
+> as easy as it seemed.  Jeff?
+
+It'd be good to know why this isn't a No Brainer(TM).
+
+BTW, I'm in the process of redoing the SecurityLevel2 interface to be, eh,
+"unconstrained interfaces", at least the ones that have to get stuffed into
+any's.  Another alternative is to provide a hack method that allows one to
+create the policy object WITHOUT going through the policy factory and, thus,
+not requiring one to shove the Credentials into an 'any'.  I'm not sure how
+easy this would be, though, and it would be really icky in the long term.
+
+One thing I don't like about making Credentials unconstrained is that
+somebody could then conceivably pass it across the wire.  Can anybody think
+of a way that I could easily prevent that, even if it means going in and
+temporarily hacking the generated code (there is precedence for that, at
+least)?
+
+Thanks!
+-cj
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535710.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for  locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id LAA05142
+	for <cleeland@localhost>; Mon, 4 Feb 2002 11:29:12 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 11:29:13 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id LAA27479;
+	Mon, 4 Feb 2002 11:35:40 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g14HUe1f030457;
+	Mon, 4 Feb 2002 09:30:40 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g14HUesG030455;
+	Mon, 4 Feb 2002 09:30:40 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Mon, 4 Feb 2002 09:30:40 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Cc: Jeff Parsons <parsons@cs.wustl.edu>,
+        Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for  locals
+Message-ID: <20020204173040.GA30165@doc.ece.uci.edu>
+References: <20020204171001.GB29546@doc.ece.uci.edu> <Pine.LNX.4.33.0202041112260.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202041112260.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Chris,
+
+On Mon, Feb 04, 2002 at 11:17:30AM -0600, Chris Cleeland wrote:
+> On Mon, 4 Feb 2002, Ossama Othman wrote:
+> > BTW, I finally learned what the "proper" term is for non-locality
+> > constrained interfaces after running through some specs this past
+> > weekend.  You'd never guess...  "unconstrained interfaces."  Who'd of
+> > thunk?:)
+> 
+> Ooooo...where'd you dig up *that* nugget?
+
+Section 3.7.6.1 (Local Interface Semantics) in the CORBA 2.6 spec:
+
+-------
+An interface declaration containing the keyword local declares a local
+interface.  An interface declaration not containing the keyword local
+is referred to as an unconstrained interface. An object implementing a
+local interfaces is referred to as a local object.
+-------
+
+It's nice to know this since I always came up with my own make-shift
+terms in the past.  :-)
+
+> > It would, particularly if the Any is never sent over the wire.
+> > Insertion and extraction would be "wicked" fast.  :-)
+> 
+> "wicked"...you from Boston now or something?  Been watching some Patriot
+> fans' celebrations on all-night TV?
+
+Is that a Boston thing?  I didn't know that.  I just was just trying
+to be "cool."  :-)
+
+> BTW, I'm in the process of redoing the SecurityLevel2 interface to be, eh,
+> "unconstrained interfaces",
+
+Knowledge is power!
+
+> at least the ones that have to get stuffed into
+> any's.  Another alternative is to provide a hack method that allows one to
+> create the policy object WITHOUT going through the policy factory and, thus,
+> not requiring one to shove the Credentials into an 'any'.  I'm not sure how
+> easy this would be, though, and it would be really icky in the long term.
+> 
+> One thing I don't like about making Credentials unconstrained is that
+> somebody could then conceivably pass it across the wire.  Can anybody think
+> of a way that I could easily prevent that, even if it means going in and
+> temporarily hacking the generated code (there is precedence for that, at
+> least)?
+
+The implementation would still inherit from CORBA::LocalObject.  That
+would prevent object_to_string() from working, but I'm not sure about
+the CDR stream insertion operator.
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535711.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for  locals (fwd)
+
+Date: Mon, 4 Feb 2002 11:53:14 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Ossama Othman <ossama@doc.ece.uci.edu>
+cc: Jeff Parsons <parsons@cs.wustl.edu>, 
+    Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for  locals
+In-Reply-To: <20020204173040.GA30165@doc.ece.uci.edu>
+Message-ID: <Pine.LNX.4.33.0202041135540.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Mon, 4 Feb 2002, Ossama Othman wrote:
+
+> > > It would, particularly if the Any is never sent over the wire.
+> > > Insertion and extraction would be "wicked" fast.  :-)
+> >
+> > "wicked"...you from Boston now or something?  Been watching some Patriot
+> > fans' celebrations on all-night TV?
+>
+> Is that a Boston thing?  I didn't know that.  I just was just trying
+> to be "cool."  :-)
+
+Yup.  Totally Boston and New Hampshire.  Used to date a girl from that area;
+everything was "wicked _____".  Come to think of it she was pretty "wicked",
+too ;-)
+
+> > at least the ones that have to get stuffed into
+> > any's.  Another alternative is to provide a hack method that allows one to
+> > create the policy object WITHOUT going through the policy factory and, thus,
+> > not requiring one to shove the Credentials into an 'any'.  I'm not sure how
+> > easy this would be, though, and it would be really icky in the long term.
+> >
+> > One thing I don't like about making Credentials unconstrained is that
+> > somebody could then conceivably pass it across the wire.  Can anybody think
+> > of a way that I could easily prevent that, even if it means going in and
+> > temporarily hacking the generated code (there is precedence for that, at
+> > least)?
+>
+> The implementation would still inherit from CORBA::LocalObject.  That
+> would prevent object_to_string() from working, but I'm not sure about
+> the CDR stream insertion operator.
+
+Hmmmm...well, if it prevented CDR stream insertion, then I'd have to change
+the implementation b/c that would make the any insertion operator fail.
+
+Does LocalObject ultimately inherit from Object.
+
+-cj
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535712.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for  locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id MAA05269
+	for <cleeland@localhost>; Mon, 4 Feb 2002 12:06:05 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 12:06:05 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id MAA21537;
+	Mon, 4 Feb 2002 12:12:27 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g14I7N1f031404;
+	Mon, 4 Feb 2002 10:07:23 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g14I7Ma5031402;
+	Mon, 4 Feb 2002 10:07:22 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Mon, 4 Feb 2002 10:07:22 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Cc: Jeff Parsons <parsons@cs.wustl.edu>,
+        Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for  locals
+Message-ID: <20020204180722.GB30978@doc.ece.uci.edu>
+References: <20020204173040.GA30165@doc.ece.uci.edu> <Pine.LNX.4.33.0202041135540.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202041135540.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Chris,
+
+On Mon, Feb 04, 2002 at 11:53:14AM -0600, Chris Cleeland wrote:
+> Does LocalObject ultimately inherit from Object.
+
+Yes it does, which is why I've had problems with the multiple virtual
+inheritance "diamond of death" in the past when trying to do "wicked"
+cool optimizations for instantiations of local objects in the critical
+path.
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535713.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for   locals (fwd)
+
+Return-Path: <parsons@cs.wustl.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id LAA05204
+	for <cleeland@localhost>; Mon, 4 Feb 2002 11:44:32 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 11:44:35 -0600 (CST)
+Received: from taumsauk.cs.wustl.edu (cs.wustl.edu [128.252.165.15])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id LAA11015;
+	Mon, 4 Feb 2002 11:48:42 -0600
+Received: from ATHENA.cs.wustl.edu (athena.doc.wustl.edu [128.252.160.180])
+	by taumsauk.cs.wustl.edu (8.9.1/8.9.1) with ESMTP id LAA23974;
+	Mon, 4 Feb 2002 11:47:54 -0600 (CST)
+Message-Id: <5.1.0.14.0.20020204114442.06d35828@mail.cs.wustl.edu>
+X-Sender: parsons@mail.cs.wustl.edu
+X-Mailer: QUALCOMM Windows Eudora Version 5.1
+Date: Mon, 04 Feb 2002 11:47:54 -0600
+To: Ossama Othman <ossama@doc.ece.uci.edu>,
+        Chris Cleeland <cleeland@ociweb.com>
+From: Jeff Parsons <parsons@cs.wustl.edu>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for 
+  locals
+Cc: Tom Venturella <venturella_t@ociweb.com>
+In-Reply-To: <20020204173040.GA30165@doc.ece.uci.edu>
+References: <Pine.LNX.4.33.0202041112260.25560-100000@ocilap5.ociweb.com>
+ <20020204171001.GB29546@doc.ece.uci.edu>
+ <Pine.LNX.4.33.0202041112260.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; format=flowed
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi,
+
+>The implementation would still inherit from CORBA::LocalObject.  That
+>would prevent object_to_string() from working, but I'm not sure about
+>the CDR stream insertion operator.
+
+
+Maybe I missed something about the security implementation, but FYI,
+the IDL compiler generates local interfaces as inheriting from
+CORBA::Object. As I understand it, if the user wants things like
+reference counting, she can mixin TAO_Local_Refcounted_Object, which
+inherits from CORBA::LocalObject.
+
+Jeff
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535714.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for   locals (fwd)
+
+Return-Path: <parsons@cs.wustl.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id LAA05094
+	for <cleeland@localhost>; Mon, 4 Feb 2002 11:16:57 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 11:16:58 -0600 (CST)
+Received: from taumsauk.cs.wustl.edu (cs.wustl.edu [128.252.165.15])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id LAA15977;
+	Mon, 4 Feb 2002 11:20:45 -0600
+Received: from ATHENA.cs.wustl.edu (athena.doc.wustl.edu [128.252.160.180])
+	by taumsauk.cs.wustl.edu (8.9.1/8.9.1) with ESMTP id LAA21535;
+	Mon, 4 Feb 2002 11:19:58 -0600 (CST)
+Message-Id: <5.1.0.14.0.20020204110035.06d26ae8@mail.cs.wustl.edu>
+X-Sender: parsons@mail.cs.wustl.edu
+X-Mailer: QUALCOMM Windows Eudora Version 5.1
+Date: Mon, 04 Feb 2002 11:19:58 -0600
+To: Chris Cleeland <cleeland@ociweb.com>
+From: Jeff Parsons <parsons@cs.wustl.edu>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for 
+  locals
+Cc: Ossama Othman <ossama@doc.ece.uci.edu>,
+        Tom Venturella <venturella_t@ociweb.com>
+In-Reply-To: <Pine.LNX.4.33.0202041036170.25560-100000@ocilap5.ociweb.co
+ m>
+References: <5.1.0.14.0.20020204101838.06d23920@mail.cs.wustl.edu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; format=flowed
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi,
+
+> > >Would that work?  Or is there a better way to solve this problem?
+> >
+> > Here's an approach that I though of over the weekend, while I was 
+> practicing
+> > my couch potato act ;-).
+> >
+> > CDR operators for non-local interfaces just call the ones for 
+> CORBA::Object.
+> > What if we just put code like that inside the generated Any operators for
+> > local interfaces. That way there would be no CDR operators generated for
+> > local interfaces, and the question of marshaling one would be caught by the
+> > compiler. Then in the CDR operators for Anys, we'd have to have a check
+> > for the typecode kind being tk_local_interface, and throw the exception if
+> > it is seen -- not a big deal to check since the Any would just be accessing
+> > its own typecode member. Of course, we still have to generate a typecode
+> > for local interfaces, but we would have to do in order to deal with Anys no
+> > matter what approach is used.
+> >
+> > What say?
+>
+>Sounds interesting.  I really like the idea of not marshalling at all,
+>though; I mean, it can't go over the wire, so why even bother marshalling?
+>We could instead just hold a copy of the object in native form, right?  Seems
+>that might work better for performance.  For that matter, couldn't you apply
+>the same thing to non-local objects, and only do the marshalling when the any
+>itself gets marshalled?  That might make 'any' operations less costly (then
+>again, maybe not).
+
+I like that idea for local interfaces -- just cast to and from void*, 
+right? For
+non-local interfaces, maybe, I'm not sure -- seems like it would hurt the
+performance in the critical path, right where we want it to be optimal. But
+I'll think about it some more.
+
+
+>Your proposal definitely mirrors the way that things work now better.  And if
+>it's easier to implement, then I say go for it.  Do you think you'll be able
+>to keep it separate from other changes so that we can more easily fold it
+>into the OCI repository?
+
+
+I don't think it would be too bad. The Any extraction operator checks for type
+equivalence with a call that uses the environment parameter, and that is now
+different in the two repositories, but otherwise I don't see any conflicts. The
+IDL compiler changes would just involve removing the 'local' guards for 
+typecode
+generation, and for Any operators, and adding the new code for
+the Any operator implementation.
+
+Jeff
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535715.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for   locals (fwd)
+
+Date: Mon, 4 Feb 2002 11:25:10 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Jeff Parsons <parsons@cs.wustl.edu>
+cc: Ossama Othman <ossama@doc.ece.uci.edu>, 
+    Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for   locals
+In-Reply-To: <5.1.0.14.0.20020204110035.06d26ae8@mail.cs.wustl.edu>
+Message-ID: <Pine.LNX.4.33.0202041118020.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Mon, 4 Feb 2002, Jeff Parsons wrote:
+
+> >Sounds interesting.  I really like the idea of not marshalling at all,
+> >though; I mean, it can't go over the wire, so why even bother marshalling?
+> >We could instead just hold a copy of the object in native form, right?  Seems
+> >that might work better for performance.  For that matter, couldn't you apply
+> >the same thing to non-local objects, and only do the marshalling when the any
+> >itself gets marshalled?  That might make 'any' operations less costly (then
+> >again, maybe not).
+>
+> I like that idea for local interfaces -- just cast to and from void*,
+> right?
+
+Yup.  Just have to know what you're casting to/from, so you'd have to keep
+that information around.
+
+Do locality-constrained interfaces derive from CORBA::Object or from
+CORBA::LocalObject?  I would hope that, ultimately, they'd derive from
+Object, otherwise there'd be some major interface upheavals!
+
+> For non-local interfaces, maybe, I'm not sure -- seems like it would hurt
+> the performance in the critical path, right where we want it to be
+> optimal. But I'll think about it some more.
+
+Which path is the critical path in this case?  Making a remote invocation?
+
+Seems that you'll spend the time marshalling one way or another, and it just
+depends on when you want to pay for it.  You can do the "installment plan",
+i.e., marshal into the any, then just copy that premarshalled stuff into the
+CDR stream when/if the any hits the wire, or you can do a "lump sum payment"
+where you marshal everything if/when the any hits the wire.  Or, am I missing
+something (which is quite probable)?
+
+> >Your proposal definitely mirrors the way that things work now better.  And if
+> >it's easier to implement, then I say go for it.  Do you think you'll be able
+> >to keep it separate from other changes so that we can more easily fold it
+> >into the OCI repository?
+>
+>
+> I don't think it would be too bad. The Any extraction operator checks for
+> type equivalence with a call that uses the environment parameter, and
+> that is now different in the two repositories, but otherwise I don't see
+> any conflicts.
+
+Actually, we're updating our repo today to use the ACE_ENV... arg macros
+rather than TAO_ENV..., so after that, the macros will be identical.  Have
+there been many IDL compiler changes since 1.2.1 got released?
+
+> The IDL compiler changes would just involve removing the 'local' guards
+> for typecode generation, and for Any operators,
+
+And you know what I did on Friday?  I did most of that...
+
+> and adding the new code for the Any operator implementation.
+
+Didn't do this.
+
+Wouldn't you also have to modify the 'any' implementation that hangs on to
+the void*, or was that the "new code for the Any operator implementation"?
+
+-cj
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535716.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for   locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id LAA05177
+	for <cleeland@localhost>; Mon, 4 Feb 2002 11:38:23 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 11:38:24 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id LAA01899;
+	Mon, 4 Feb 2002 11:43:21 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g14HcK1f030612;
+	Mon, 4 Feb 2002 09:38:20 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g14HcKdS030610;
+	Mon, 4 Feb 2002 09:38:20 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Mon, 4 Feb 2002 09:38:20 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Cc: Jeff Parsons <parsons@cs.wustl.edu>,
+        Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for   locals
+Message-ID: <20020204173820.GB30165@doc.ece.uci.edu>
+References: <5.1.0.14.0.20020204110035.06d26ae8@mail.cs.wustl.edu> <Pine.LNX.4.33.0202041118020.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202041118020.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Chris,
+
+On Mon, Feb 04, 2002 at 11:25:10AM -0600, Chris Cleeland wrote:
+> Do locality-constrained interfaces derive from CORBA::Object or from
+> CORBA::LocalObject?  I would hope that, ultimately, they'd derive from
+> Object, otherwise there'd be some major interface upheavals!
+
+Both.  Local object implementations must explicitly/manually inherit
+from CORBA::LocalObject.  For example:
+
+IDL:
+	local interface Foo {};
+
+C++:
+	class Foo_i
+	  : public virtual Foo,
+	    public virtual CORBA::LocalObject
+	{
+	  //
+	};
+
+The Foo object inherits from CORBA::Object in the generated stub.
+
+> > For non-local interfaces, maybe, I'm not sure -- seems like it would hurt
+> > the performance in the critical path, right where we want it to be
+> > optimal. But I'll think about it some more.
+
+That's a good point.  Instead of pre-marshaling the value, we'd be
+doing the actual marshaling in the critical path.  We could optimize
+things so that the marshaling occurs once, but I guess that's still
+expensive if the cost of that marsharling is greater than the
+aggregate cost of a given number of remote method invocations.
+
+> Actually, we're updating our repo today to use the ACE_ENV... arg macros
+> rather than TAO_ENV..., so after that, the macros will be identical.  Have
+> there been many IDL compiler changes since 1.2.1 got released?
+
+You might want to check the ChangeLog.  The number of changes have
+been large.  Jeff wasted no time in beefing up the IDL compiler after
+1.2.1.  Go jeff!  :-)
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535717.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for    locals (fwd)
+
+Return-Path: <parsons@cs.wustl.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id LAA05207
+	for <cleeland@localhost>; Mon, 4 Feb 2002 11:44:35 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 11:44:35 -0600 (CST)
+Received: from taumsauk.cs.wustl.edu (cs.wustl.edu [128.252.165.15])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id LAA11557;
+	Mon, 4 Feb 2002 11:50:38 -0600
+Received: from ATHENA.cs.wustl.edu (athena.doc.wustl.edu [128.252.160.180])
+	by taumsauk.cs.wustl.edu (8.9.1/8.9.1) with ESMTP id LAA24133;
+	Mon, 4 Feb 2002 11:49:50 -0600 (CST)
+Message-Id: <5.1.0.14.0.20020204114842.06d3e870@mail.cs.wustl.edu>
+X-Sender: parsons@mail.cs.wustl.edu
+X-Mailer: QUALCOMM Windows Eudora Version 5.1
+Date: Mon, 04 Feb 2002 11:49:50 -0600
+To: Ossama Othman <ossama@doc.ece.uci.edu>,
+        Chris Cleeland <cleeland@ociweb.com>
+From: Jeff Parsons <parsons@cs.wustl.edu>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for  
+  locals
+Cc: Tom Venturella <venturella_t@ociweb.com>
+In-Reply-To: <20020204173820.GB30165@doc.ece.uci.edu>
+References: <Pine.LNX.4.33.0202041118020.25560-100000@ocilap5.ociweb.com>
+ <5.1.0.14.0.20020204110035.06d26ae8@mail.cs.wustl.edu>
+ <Pine.LNX.4.33.0202041118020.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; format=flowed
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi,
+
+>Both.  Local object implementations must explicitly/manually inherit
+>from CORBA::LocalObject.  For example:
+>
+>IDL:
+>         local interface Foo {};
+>
+>C++:
+>         class Foo_i
+>: public virtual Foo,
+>             public virtual CORBA::LocalObject
+>         {
+>           //
+>         };
+>
+>The Foo object inherits from CORBA::Object in the generated stub.
+
+Ah, I missed this when I sent my previous email. Disregard.
+
+
+> > > For non-local interfaces, maybe, I'm not sure -- seems like it would hurt
+> > > the performance in the critical path, right where we want it to be
+> > > optimal. But I'll think about it some more.
+>
+>That's a good point.  Instead of pre-marshaling the value, we'd be
+>doing the actual marshaling in the critical path.  We could optimize
+>things so that the marshaling occurs once, but I guess that's still
+>expensive if the cost of that marsharling is greater than the
+>aggregate cost of a given number of remote method invocations.
+>
+> > Actually, we're updating our repo today to use the ACE_ENV... arg macros
+> > rather than TAO_ENV..., so after that, the macros will be identical.  Have
+> > there been many IDL compiler changes since 1.2.1 got released?
+>
+>You might want to check the ChangeLog.  The number of changes have
+>been large.  Jeff wasted no time in beefing up the IDL compiler after
+>1.2.1.  Go jeff!  :-)
+
+
+As I said earlier, I don't think that stuff will overlap the IDL compiler 
+changes
+necessary here.
+
+Jeff
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535718.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id LAA05245
+	for <cleeland@localhost>; Mon, 4 Feb 2002 11:59:57 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 11:59:58 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id MAA18541;
+	Mon, 4 Feb 2002 12:03:48 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g14Hwk1f031135;
+	Mon, 4 Feb 2002 09:58:46 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g14Hwktj031133;
+	Mon, 4 Feb 2002 09:58:46 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Mon, 4 Feb 2002 09:58:46 -0800
+To: Jeff Parsons <parsons@cs.wustl.edu>
+Cc: Chris Cleeland <cleeland@ociweb.com>,
+        Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+Message-ID: <20020204175846.GA30978@doc.ece.uci.edu>
+References: <Pine.LNX.4.33.0202041118020.25560-100000@ocilap5.ociweb.com> <5.1.0.14.0.20020204110035.06d26ae8@mail.cs.wustl.edu> <Pine.LNX.4.33.0202041118020.25560-100000@ocilap5.ociweb.com> <5.1.0.14.0.20020204114842.06d3e870@mail.cs.wustl.edu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5.1.0.14.0.20020204114842.06d3e870@mail.cs.wustl.edu>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Jeff,
+
+> >The Foo object inherits from CORBA::Object in the generated stub.
+> 
+> Ah, I missed this when I sent my previous email. Disregard.
+
+Disregarded.:-)
+
+> >You might want to check the ChangeLog.  The number of changes have
+> >been large.  Jeff wasted no time in beefing up the IDL compiler after
+> >1.2.1.  Go jeff!  :-)
+> 
+> 
+> As I said earlier, I don't think that stuff will overlap the IDL compiler 
+> changes
+> necessary here.
+
+Awesome.  You are wise Jeff!
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.02020413535719.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for    locals (fwd)
+
+Return-Path: <parsons@cs.wustl.edu>
+Received: from localhost (IDENT:cleeland@localhost.ociweb.com [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id LAA05175
+	for <cleeland@localhost>; Mon, 4 Feb 2002 11:38:23 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Mon, 04 Feb 2002 11:38:23 -0600 (CST)
+Received: from taumsauk.cs.wustl.edu (cs.wustl.edu [128.252.165.15])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id LAA01719;
+	Mon, 4 Feb 2002 11:43:16 -0600
+Received: from ATHENA.cs.wustl.edu (athena.doc.wustl.edu [128.252.160.180])
+	by taumsauk.cs.wustl.edu (8.9.1/8.9.1) with ESMTP id LAA23375;
+	Mon, 4 Feb 2002 11:42:29 -0600 (CST)
+Message-Id: <5.1.0.14.0.20020204113550.06d14b30@mail.cs.wustl.edu>
+X-Sender: parsons@mail.cs.wustl.edu
+X-Mailer: QUALCOMM Windows Eudora Version 5.1
+Date: Mon, 04 Feb 2002 11:42:29 -0600
+To: Chris Cleeland <cleeland@ociweb.com>
+From: Jeff Parsons <parsons@cs.wustl.edu>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for  
+  locals
+Cc: Ossama Othman <ossama@doc.ece.uci.edu>,
+        Tom Venturella <venturella_t@ociweb.com>
+In-Reply-To: <Pine.LNX.4.33.0202041118020.25560-100000@ocilap5.ociweb.co
+ m>
+References: <5.1.0.14.0.20020204110035.06d26ae8@mail.cs.wustl.edu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; format=flowed
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+At 11:25 AM 2/4/2002 -0600, Chris Cleeland wrote:
+>On Mon, 4 Feb 2002, Jeff Parsons wrote:
+>
+> > >Sounds interesting.  I really like the idea of not marshalling at all,
+> > >though; I mean, it can't go over the wire, so why even bother marshalling?
+> > >We could instead just hold a copy of the object in native form, 
+> right?  Seems
+> > >that might work better for performance.  For that matter, couldn't you 
+> apply
+> > >the same thing to non-local objects, and only do the marshalling when 
+> the any
+> > >itself gets marshalled?  That might make 'any' operations less costly 
+> (then
+> > >again, maybe not).
+> >
+> > I like that idea for local interfaces -- just cast to and from void*,
+> > right?
+>
+>Yup.  Just have to know what you're casting to/from, so you'd have to keep
+>that information around.
+
+The Any operators are generated in the IDL compiler, which knows all about
+the type.
+
+
+>Do locality-constrained interfaces derive from CORBA::Object or from
+>CORBA::LocalObject?  I would hope that, ultimately, they'd derive from
+>Object, otherwise there'd be some major interface upheavals!
+
+I recently learned that they are indeed derived from CORBA::Object, and
+that the 'local' part can be added by the user as a mixin class -- and for
+things like reference counting, we have some 'local' base classes in TAO
+to help out.
+
+
+> > For non-local interfaces, maybe, I'm not sure -- seems like it would hurt
+> > the performance in the critical path, right where we want it to be
+> > optimal. But I'll think about it some more.
+>
+>Which path is the critical path in this case?  Making a remote invocation?
+
+Right. If the Any is created right before it is marshaled, there won't be a lot
+of difference, but if the Anys are created elsewhere (perhaps by a different
+thread or process), there would be a considerable slowdown in the marshaling
+of Anys with non-local interfaces, since the Any's internal 'marshaling' 
+would now
+be done at invocation time instead of at Any creation time.
+
+
+>Seems that you'll spend the time marshalling one way or another, and it just
+>depends on when you want to pay for it.  You can do the "installment plan",
+>i.e., marshal into the any, then just copy that premarshalled stuff into the
+>CDR stream when/if the any hits the wire, or you can do a "lump sum payment"
+>where you marshal everything if/when the any hits the wire.  Or, am I missing
+>something (which is quite probable)?
+>
+> > >Your proposal definitely mirrors the way that things work now 
+> better.  And if
+> > >it's easier to implement, then I say go for it.  Do you think you'll 
+> be able
+> > >to keep it separate from other changes so that we can more easily fold it
+> > >into the OCI repository?
+> >
+> >
+> > I don't think it would be too bad. The Any extraction operator checks for
+> > type equivalence with a call that uses the environment parameter, and
+> > that is now different in the two repositories, but otherwise I don't see
+> > any conflicts.
+>
+>Actually, we're updating our repo today to use the ACE_ENV... arg macros
+>rather than TAO_ENV..., so after that, the macros will be identical.  Have
+>there been many IDL compiler changes since 1.2.1 got released?
+
+I recently checked in a bunch of changes, but it was all around visitors and
+iterators -- I don't think it will overlap with any of this stuff.
+
+
+> > The IDL compiler changes would just involve removing the 'local' guards
+> > for typecode generation, and for Any operators,
+>
+>And you know what I did on Friday?  I did most of that...
+
+In which repository, though?
+
+
+> > and adding the new code for the Any operator implementation.
+>
+>Didn't do this.
+>
+>Wouldn't you also have to modify the 'any' implementation that hangs on to
+>the void*, or was that the "new code for the Any operator implementation"?
+
+Right.
+
+
+
+Jeff
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353571A.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for    locals (fwd)
+
+Date: Mon, 4 Feb 2002 11:56:56 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Jeff Parsons <parsons@cs.wustl.edu>
+cc: Ossama Othman <ossama@doc.ece.uci.edu>, 
+    Tom Venturella <venturella_t@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for    locals
+In-Reply-To: <5.1.0.14.0.20020204113550.06d14b30@mail.cs.wustl.edu>
+Message-ID: <Pine.LNX.4.33.0202041155080.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Mon, 4 Feb 2002, Jeff Parsons wrote:
+
+> > > The IDL compiler changes would just involve removing the 'local' guards
+> > > for typecode generation, and for Any operators,
+> >
+> >And you know what I did on Friday?  I did most of that...
+>
+> In which repository, though?
+
+In my local workspace.  I've since reverted my changes, but kept what I'd
+started in a tar file.  I'd be happy to send it to you if you like, but it
+sounds like overlaying it might not be the easiest for you.
+
+However, the fact that I did it Friday afternoon btw. 4 and 5pm might also
+suggest that you could duplicate the work just as quickly and probably more
+completely than me :-)
+
+> > > and adding the new code for the Any operator implementation.
+> >
+> >Didn't do this.
+> >
+> >Wouldn't you also have to modify the 'any' implementation that hangs on to
+> >the void*, or was that the "new code for the Any operator implementation"?
+>
+> Right.
+
+Okay.
+
+-cj
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353571B.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Date: Fri, 1 Feb 2002 15:28:01 -0600 (CST)
+From: Chris Cleeland <cleeland@ociweb.com>
+To: Ossama Othman <ossama@doc.ece.uci.edu>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+In-Reply-To: <20020201212330.GG26656@doc.ece.uci.edu>
+Message-ID: <Pine.LNX.4.33.0202011526230.25560-100000@ocilap5.ociweb.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+On Fri, 1 Feb 2002, Ossama Othman wrote:
+
+> On Fri, Feb 01, 2002 at 03:09:10PM -0600, Chris Cleeland wrote:
+> > I actually checked the text of the 2.4.2 spec and the only thing that it says
+> > about regarding a local interface and an any is this:
+>
+> BTW, the latest spec is 2.6, not 2.4.2.  Acknowledge and move on,
+> dude.:-)
+
+Yes, I know, but I hadn't downloaded it yet.  I downloaded it while I was
+looking it up in 2.4.2.
+
+Besides, it had just come out, and I doubted that Jeff would've had time to
+digest the whole thing.  If 2.4.2 (which has been out for awhile) permitted
+insertion of a local into an 'any' then I thought I had some ammunition.
+
+You don't know Jeff's ph# by any chance, do you?
+
+-- 
+  Chris Cleeland, cleeland_c @ ociweb.com, http://www.milodesigns.com/~chris
+     Principal Software Engineer, Object Computing, Inc., +1 314 579 0066
+      Support Me Supporting Cancer Survivors in Ride for the Roses 2002
+    >>>>>>>>>    Donate at http://www.milodesigns.com/donate    <<<<<<<<<
+
+
+---930844984-1889430779-1012852482=:25560
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <Pine.LNX.4.33.0202041353571C.25560@ocilap5.ociweb.com>
+Content-Description: Re: Security_PolicyFactory updates and 'any' operators for locals (fwd)
+
+Return-Path: <ossama@doc.ece.uci.edu>
+Received: from localhost (IDENT:cleeland@localhost [127.0.0.1])
+	by ocilap5.ociweb.com (8.9.3/8.8.7) with ESMTP id VAA28533
+	for <cleeland@localhost>; Fri, 1 Feb 2002 21:33:31 -0600
+Received: from armstrong.ociweb.com
+	by localhost with POP3 (fetchmail-5.1.0)
+	for cleeland@localhost (single-drop); Fri, 01 Feb 2002 21:33:31 -0600 (CST)
+Received: from doc.ece.uci.edu (doc.ece.uci.edu [128.195.174.34])
+	by armstrong.ociweb.com (8.9.3/8.9.3) with ESMTP id SAA00646
+	for <cleeland@ociweb.com>; Fri, 1 Feb 2002 18:04:52 -0600
+Received: from doc.ece.uci.edu (localhost [127.0.0.1])
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) with ESMTP id g120011f006410
+	for <cleeland@ociweb.com>; Fri, 1 Feb 2002 16:00:01 -0800
+Received: (from ossama@localhost)
+	by doc.ece.uci.edu (8.12.1/8.12.1/Debian -5) id g12001eH006408
+	for cleeland@ociweb.com; Fri, 1 Feb 2002 16:00:01 -0800
+From: Ossama Othman <ossama@doc.ece.uci.edu>
+Date: Fri, 1 Feb 2002 16:00:01 -0800
+To: Chris Cleeland <cleeland@ociweb.com>
+Subject: Re: Security_PolicyFactory updates and 'any' operators for locals
+Message-ID: <20020202000001.GA5988@doc.ece.uci.edu>
+References: <20020201212330.GG26656@doc.ece.uci.edu> <Pine.LNX.4.33.0202011526230.25560-100000@ocilap5.ociweb.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0202011526230.25560-100000@ocilap5.ociweb.com>
+User-Agent: Mutt/1.3.25i
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+
+
+Hi Chris,
+
+On Fri, Feb 01, 2002 at 03:28:01PM -0600, Chris Cleeland wrote:
+> Besides, it had just come out, and I doubted that Jeff would've had time to
+> digest the whole thing.  If 2.4.2 (which has been out for awhile) permitted
+> insertion of a local into an 'any' then I thought I had some ammunition.
+
+The CORBA spec doesn't deal with the "local" keyword yet.  It just
+mentions "locality constrained" interfaces.  The stuff we want is
+dealt with in the CCM / CORBA 3.0 spec.  Here's what I found in
+section 3.8.6.1 of that document (ptc/99-10-03  ---  is there a more
+recent version?):
+
+-----
+Local types cannot be marshaled and references to local objects cannot
+be converted to strings. Any attempt to marshal a local object, such
+as via an unconstrained base interface, as an Object, or as the
+contents of an any, or to pass a local object to
+ORB::object_to_string, shall result in a MARSHAL system exception with
+OMG minor code 2.
+-----
+
+Looks like we're out of luck!  I'll run through the Security spec
+again.  I must have missed something.  This is annoying.
+
+> You don't know Jeff's ph# by any chance, do you?
+
+Nope.
+
+-Ossama
+-- 
+Ossama Othman <ossama@ece.uci.edu>
+Distributed Object Computing Laboratory, Univ. of California at Irvine
+1024D/F7A394A8 - 84ED AA0B 1203 99E4 1068  70E6 5EB7 5E71 F7A3 94A8
+
+---930844984-1889430779-1012852482=:25560--
