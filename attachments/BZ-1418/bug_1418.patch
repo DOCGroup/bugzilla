@@ -1,0 +1,31 @@
+Index: tao/PortableServer/POA.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/PortableServer/POA.cpp,v
+retrieving revision 1.2
+diff -u -r1.2 POA.cpp
+--- tao/PortableServer/POA.cpp	31 Dec 2002 22:14:39 -0000	1.2
++++ tao/PortableServer/POA.cpp	8 Jan 2003 23:27:18 -0000
+@@ -2428,16 +2428,13 @@
+                                                                            system_id.out (),
+                                                                            priority) == 0)
+     {
+-      // Create object key.
+-      TAO_ObjectKey_var key = this->create_object_key (system_id.in ());
+-
+-      // Ask the ORB to create you a reference
+-      return this->key_to_object (key.in (),
+-                                  servant->_interface_repository_id (),
+-                                  servant,
+-                                  1,
+-                                  priority
+-                                  ACE_ENV_ARG_PARAMETER);
++      // Ask the ORT to create a reference
++      PortableInterceptor::ObjectId oid(
++          id.length(), id.length(),
++          ACE_const_cast(CORBA::Octet*,id.get_buffer()), 0);
++      return this->obj_ref_factory_->make_object(
++          servant->_interface_repository_id (), oid
++          ACE_ENV_ARG_PARAMETER);
+     }
+   else
+     // If the Object Id value is not active in the POA, an
