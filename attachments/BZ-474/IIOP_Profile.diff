@@ -1,0 +1,20 @@
+*** IIOP_Profile.cpp	2000/02/25 10:17:01	1.1
+--- IIOP_Profile.cpp	2000/02/25 10:17:38	1.2
+***************
+*** 176,182 ****
+        return -1;
+      }
+  
+!   this->object_addr_.set (this->port_, this->host_.in ());
+  
+    // ... and object key.
+  
+--- 176,183 ----
+        return -1;
+      }
+  
+!   if (this->object_addr_.set (this->port_, this->host_.in ()) == -1)
+!     return -1;
+  
+    // ... and object key.
+  
