@@ -1,0 +1,61 @@
+// -*- Mode: IDL; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+//
+// Copyright (c) 2002 Ken Sedgwick.  All rights reserved.
+
+#ifndef __Param_idl
+#define __Param_idl
+
+#pragma prefix "xvros.org"
+
+module XVROS
+{
+    union ParamValue;
+    struct ParamBind;
+
+    typedef sequence<ParamValue> ParamVector;
+
+    typedef sequence<ParamBind> ParamMap;
+
+    enum ParamValueType
+    {
+        PVLong,
+        PVLLong,
+        PVULong,
+        PVULLong,
+        PVFloat,
+        PVDouble,
+        PVString,
+        PVMap,
+        PVVector
+    };
+
+    union ParamValue switch(ParamValueType)
+    {
+    case PVLong:
+        long					u_long;
+    case PVLLong:
+        long long				u_longlong;
+    case PVULong:
+        unsigned long			u_ulong;
+    case PVULLong:
+        unsigned long long		u_ulonglong;
+    case PVFloat:
+        float					u_float;
+    case PVDouble:
+        double					u_double;
+    case PVString:
+        string					u_string;
+    case PVMap:
+        ParamMap				u_map;
+    case PVVector:
+        ParamVector				u_vector;
+    };
+
+    struct ParamBind
+    {
+        string					name;
+        ParamValue				value;
+    };
+};
+
+#endif // __Param_idl
