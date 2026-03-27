@@ -1,0 +1,52 @@
+I have noticed a huge difference in throughput performance with TAO on post TAO 1.1.18 releases (most of my testing has been with TAO  1.2).  With TAO 1.1.16 and running the TAO/performance-tests/Throughput test across gigabit ethernet between two Sun Ultrasparc III SMP servers, I see single thread Throughputs of 70 MBytes/sec and I see and aggregate 100 MBytes/sec if I run two instances of the benchmark at the same time.  With TAO 1.2 (and TAO 1.2.2) that number drops to 10 MBytes/sec single threaded.  This is caused by a huge increase of CPU time consumed by the server receiving the data stream in TAO 1.2
+
+It seems that in TAO 1.1.19 and beyond the infrastructure of how TAO deals with receiving messages changed dramatically. I have narrowed it down to the following general changes.  The following is the call stack for the server receiving data for the TAO/performance-tests/Throughput test sending 1MB message blocks.  As you can see, the 1.2 version does a ACE_SOCK_IO::recv on only 1k of data.  So the entire 1 MB block being sent (or any size message for that matter) seems to be received in 1K blocks.  Combined with other changes in the way uses the ACE_Select_Reactor, it seems that many classes are created and destroyed for each of those received 1K blocks and this sends the CPU usage through the roof.  None of this appears to happen in pre TAO 1.1.19 releases.
+
+TAO 1.2:
+
+   main()
+   CORBA_ORB::run()
+   CORBA_ORB::run()
+   TAO_ORB_Core::run()
+   ACE_Reactor::handle_events()
+   ACE_Select_Reactor_T >::handle_events()
+   ACE_Select_Reactor_T >::handle_events_i()
+   ACE_Select_Reactor_T >::dispatch()
+   ACE_Select_Reactor_T >::dispatch_io_handlers()
+   ACE_Select_Reactor_T >::dispatch_io_set()
+   ACE_Select_Reactor_T >::notify_handle()
+   TAO_IIOP_Connection_Handler::handle_input()
+   TAO_Transport::handle_input_i()
+   TAO_Transport::recv()
+   TAO_IIOP_Transport::recv_i()
+   ACE_SOCK_IO::recv(this = 0x1002856a0, buf = 0xffffffff7fff7f88, len = 1024U, timeout = (nil))
+
+
+TAO 1.1.16:
+
+   main()
+   CORBA_ORB::run()
+   CORBA_ORB::run()
+   TAO_ORB_Core::run()
+   ACE_Reactor::handle_events()
+   ACE_TP_Reactor::handle_events()
+   ACE_TP_Reactor::notify_handle()
+   TAO_IIOP_Connection_Handler::handle_input()
+   TAO_IIOP_Connection_Handler::handle_input_i()
+   TAO_IIOP_Transport::read_process_message()
+   TAO_GIOP_Message_Base::read_message()
+   TAO_GIOP_Message_Handler::read_messages()
+   TAO_Transport::recv()
+   TAO_IIOP_Transport::recv_i()
+   ACE_SOCK_IO::recv(this = 0x1002689c0, buf = 0x1002bfff0, len = 9721480U, timeout = (nil))
+
+
+TAO 1.1.19 and beyond uses the following buffer to receive messages:
+
+char buf [TAO_CONNECTION_HANDLER_STACK_BUF_SIZE];  -- from TAO/tao/Transport.cpp (shows up in TAO 1.1.19 and beyond)
+define TAO_CONNECTION_HANDLER_STACK_BUF_SIZE 1024 -- from TAO/tao/orbconf.h (shows up in TAO 1.1.19 and beyond)
+
+to receive each 1K block off the socket.  To see if I could increase the performance of TAO 1.2 I bumped TAO_CONNECTION_HANDLER_STACK_BUF_SIZE to 128K and it increases the performance to about 90% of TAO 1.1.16, but I don't think I want to be creating a 128K block on the stack for every message received.
+
+Any ideas why The TAO infrastructure has changed so dramatically and how the performance can be increased to pre TAO 1.1.19 levels?
+
