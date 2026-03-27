@@ -1,0 +1,316 @@
+diff -c -r Thread_Per_Connection_Latency/Client_Task.cpp new/Client_Task.cpp
+*** Thread_Per_Connection_Latency/Client_Task.cpp	Wed May  9 15:38:26 2001
+--- new/Client_Task.cpp	Wed Oct  3 11:32:27 2001
+***************
+*** 12,43 ****
+  {
+  }
+  
+  int
+  Client_Task::svc (void)
+  {
+!   ACE_DECLARE_NEW_CORBA_ENV;
+!   ACE_TRY
+!     {
+!       this->validate_connection (ACE_TRY_ENV);
+!       ACE_TRY_CHECK;
+! 
+!       for (int i = 0; i != this->niterations_; ++i)
+!         {
+!           CORBA::ULongLong start = ACE_OS::gethrtime ();
+! 
+!           (void) this->roundtrip_->test_method (start, ACE_TRY_ENV);
+!           ACE_TRY_CHECK;
+! 
+!           ACE_hrtime_t now = ACE_OS::gethrtime ();
+!           this->latency_.sample (now - start);
+!         }
+!     }
+!   ACE_CATCHANY
+!     {
+!       return 0;
+!     }
+!   ACE_ENDTRY;
+!   return 0;
+  }
+  
+  void
+--- 12,61 ----
+  {
+  }
+  
++ int x = -1;
++ 
++ extern CORBA::ORB_var the_orb;
++ 
+  int
+  Client_Task::svc (void)
+  {
+! 	x++;
+! 	
+! 	if( x == 0 )
+! 	{
+! 		the_orb->run();
+! 	}
+! 	else
+! 	{
+! 		
+! 		
+! 		ACE_OS::sleep( x );
+! 		
+! 		ACE_DECLARE_NEW_CORBA_ENV;
+! 		ACE_TRY
+! 		{
+! 			//this->validate_connection (ACE_TRY_ENV);
+! 			ACE_TRY_CHECK;
+! 			
+! 			for (int i = 0; i != this->niterations_; ++i)
+! 			{
+! 				CORBA::ULongLong start = ACE_OS::gethrtime ();	
+! 				
+! 				(void) this->roundtrip_->test_method (start, ACE_TRY_ENV);
+! 				ACE_TRY_CHECK;
+! 				
+! 				//ACE_hrtime_t now = ACE_OS::gethrtime ();
+! 				//this->latency_.sample (now - start);
+! 			}
+! 		}
+! 		ACE_CATCHANY
+! 		{
+! 			return 0;
+! 		}
+! 		ACE_ENDTRY;
+! 		return 0;
+! 	}
+! 	return 0;
+  }
+  
+  void
+diff -c -r Thread_Per_Connection_Latency/Roundtrip.cpp new/Roundtrip.cpp
+*** Thread_Per_Connection_Latency/Roundtrip.cpp	Wed May  9 15:38:26 2001
+--- new/Roundtrip.cpp	Wed Oct  3 11:36:39 2001
+***************
+*** 15,20 ****
+--- 15,21 ----
+                          CORBA::Environment &)
+    ACE_THROW_SPEC ((CORBA::SystemException))
+  {
++   ACE_OS::sleep(100);
+    return send_time;
+  }
+  
+diff -c -r Thread_Per_Connection_Latency/client.cpp new/client.cpp
+*** Thread_Per_Connection_Latency/client.cpp	Thu May 10 17:02:17 2001
+--- new/client.cpp	Wed Oct  3 12:01:05 2001
+***************
+*** 50,82 ****
+    return 0;
+  }
+  
+  int
+  main (int argc, char *argv[])
+  {
+-   int priority =
+-     (ACE_Sched_Params::priority_min (ACE_SCHED_FIFO)
+-      + ACE_Sched_Params::priority_max (ACE_SCHED_FIFO)) / 2;
+-   // Enable FIFO scheduling, e.g., RT scheduling class on Solaris.
+  
+-   if (ACE_OS::sched_params (ACE_Sched_Params (ACE_SCHED_FIFO,
+-                                               priority,
+-                                               ACE_SCOPE_PROCESS)) != 0)
+-     {
+-       if (ACE_OS::last_error () == EPERM)
+-         {
+-           ACE_DEBUG ((LM_DEBUG,
+-                       "client (%P|%t): user is not superuser, "
+-                       "test runs in time-shared class\n"));
+-         }
+-       else
+-         ACE_ERROR ((LM_ERROR,
+-                     "client (%P|%t): sched_params failed\n"));
+-     }
+  
+    ACE_TRY_NEW_ENV
+      {
+        CORBA::ORB_var orb =
+          CORBA::ORB_init (argc, argv, "", ACE_TRY_ENV);
+        ACE_TRY_CHECK;
+  
+        if (parse_args (argc, argv) != 0)
+--- 50,67 ----
+    return 0;
+  }
+  
++ CORBA::ORB_var the_orb;
++ 
+  int
+  main (int argc, char *argv[])
+  {
+  
+  
+    ACE_TRY_NEW_ENV
+      {
+        CORBA::ORB_var orb =
+          CORBA::ORB_init (argc, argv, "", ACE_TRY_ENV);
++ 	  the_orb = orb;
+        ACE_TRY_CHECK;
+  
+        if (parse_args (argc, argv) != 0)
+***************
+*** 92,138 ****
+  
+        if (CORBA::is_nil (roundtrip.in ()))
+          {
+!           ACE_ERROR_RETURN ((LM_ERROR,
+!                              "Nil Test::Roundtrip reference <%s>\n",
+!                              ior),
+!                             1);
+          }
+  
+-       ACE_DEBUG ((LM_DEBUG, "Starting threads\n"));
+  
+!       Client_Task task0(roundtrip.in (), niterations);
+!       Client_Task task1(roundtrip.in (), niterations);
+!       Client_Task task2(roundtrip.in (), niterations);
+!       Client_Task task3(roundtrip.in (), niterations);
+  
+-       ACE_hrtime_t test_start = ACE_OS::gethrtime ();
+-       task0.activate(THR_NEW_LWP | THR_JOINABLE);
+-       task1.activate(THR_NEW_LWP | THR_JOINABLE);
+-       task2.activate(THR_NEW_LWP | THR_JOINABLE);
+-       task3.activate(THR_NEW_LWP | THR_JOINABLE);
+  
+        task0.thr_mgr()->wait ();
+-       ACE_hrtime_t test_end = ACE_OS::gethrtime ();
+  
+-       ACE_DEBUG ((LM_DEBUG, "Threads finished\n"));
+  
+!       ACE_DEBUG ((LM_DEBUG, "High resolution timer calibration...."));
+!       ACE_UINT32 gsf = ACE_High_Res_Timer::global_scale_factor ();
+!       ACE_DEBUG ((LM_DEBUG, "done\n"));
+! 
+!       ACE_Basic_Stats totals;
+!       task0.accumulate_and_dump (totals, "Task[0]", gsf);
+!       task1.accumulate_and_dump (totals, "Task[1]", gsf);
+!       task2.accumulate_and_dump (totals, "Task[2]", gsf);
+!       task3.accumulate_and_dump (totals, "Task[3]", gsf);
+! 
+!       totals.dump_results ("Total", gsf);
+! 
+!       ACE_Throughput_Stats::dump_throughput ("Total", gsf,
+!                                              test_end - test_start,
+!                                              totals.samples_count ());
+! 
+!       if (do_shutdown)
+          {
+            roundtrip->shutdown (ACE_TRY_ENV);
+            ACE_TRY_CHECK;
+--- 77,100 ----
+  
+        if (CORBA::is_nil (roundtrip.in ()))
+          {
+! 			cerr << "Narrow failed on roundtrip object\n";
+          }
++  		
++ 		cerr << "Starting threads\n";
+  
+  
+! 		Client_Task task0(roundtrip.in (), niterations);
+! 		
+! 		task0.activate(THR_NEW_LWP | THR_JOINABLE, 20);
+  
+  
++ 
+        task0.thr_mgr()->wait ();
+  
+  
+! 		cerr << "Threads finished\n";
+! 		
+! 		if (do_shutdown)
+          {
+            roundtrip->shutdown (ACE_TRY_ENV);
+            ACE_TRY_CHECK;
+diff -c -r Thread_Per_Connection_Latency/server.cpp new/server.cpp
+*** Thread_Per_Connection_Latency/server.cpp	Wed May  9 15:38:26 2001
+--- new/server.cpp	Wed Oct  3 11:50:05 2001
+***************
+*** 3,8 ****
+--- 3,9 ----
+  #include "Roundtrip.h"
+  #include "ace/Get_Opt.h"
+  #include "ace/Sched_Params.h"
++ #include "tao/TAO_Internal.h"
+  
+  #include "tao/Strategies/advanced_resource.h"
+  
+***************
+*** 39,44 ****
+--- 40,47 ----
+  int
+  main (int argc, char *argv[])
+  {
++ /*
++ 
+    int priority =
+      (ACE_Sched_Params::priority_min (ACE_SCHED_FIFO)
+       + ACE_Sched_Params::priority_max (ACE_SCHED_FIFO)) / 2;
+***************
+*** 60,68 ****
+          ACE_ERROR ((LM_ERROR,
+                      "server (%P|%t): sched_params failed\n"));
+      }
+! 
+    ACE_TRY_NEW_ENV
+      {
+        CORBA::ORB_var orb =
+          CORBA::ORB_init (argc, argv, "", ACE_TRY_ENV);
+        ACE_TRY_CHECK;
+--- 63,82 ----
+          ACE_ERROR ((LM_ERROR,
+                      "server (%P|%t): sched_params failed\n"));
+      }
+! */ 
+    ACE_TRY_NEW_ENV
+      {
++ 
++ 		// Setup the Server for thread per connection. Don't use svc.conf
++ 		static const char* resource_factory_args = "";
++ 		static const char* server_strategy_args  = "static Server_Strategy_Factory \"-ORBconcurrency thread-per-connection\"";
++ 		static const char* client_strategy_args  = "";
++ 		
++ 		TAO_Internal::default_svc_conf_entries(
++ 			resource_factory_args,
++ 			server_strategy_args,
++ 			client_strategy_args );
++ 
+        CORBA::ORB_var orb =
+          CORBA::ORB_init (argc, argv, "", ACE_TRY_ENV);
+        ACE_TRY_CHECK;
+***************
+*** 113,118 ****
+--- 127,134 ----
+  
+        poa_manager->activate (ACE_TRY_ENV);
+        ACE_TRY_CHECK;
++ 
++ 	  cerr << "Ready...\n";
+  
+        orb->run (ACE_TRY_ENV);
+        ACE_TRY_CHECK;
+*** Thread_Per_Connection_Latency/svc.conf	Wed Aug  8 10:24:07 2001
+--- new/svc.conf	Wed Oct  3 11:50:30 2001
+***************
+*** 1,6 ****
+  #
+  # svc.conf,v 1.3 2001/08/08 17:24:07 bala Exp
+  #
+! static Advanced_Resource_Factory "-ORBReactorType select_mt -ORBReactorMaskSignals 0 -ORBFlushingStrategy blocking"
+! static Client_Strategy_Factory "-ORBTransportMuxStrategy EXCLUSIVE -ORBClientConnectionHandler RW"
+! static Server_Strategy_Factory "-ORBConcurrency thread-per-connection"
+--- 1,6 ----
+  #
+  # svc.conf,v 1.3 2001/08/08 17:24:07 bala Exp
+  #
+! #static Advanced_Resource_Factory "-ORBReactorType select_mt -ORBReactorMaskSignals 0 -ORBFlushingStrategy blocking"
+! #static Client_Strategy_Factory "-ORBTransportMuxStrategy EXCLUSIVE -ORBClientConnectionHandler RW"
+! #static Server_Strategy_Factory "-ORBConcurrency thread-per-connection"
