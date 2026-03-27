@@ -1,0 +1,101 @@
+Index: Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Transport.cpp,v
+retrieving revision 1.55
+diff -u -u -r1.55 Transport.cpp
+--- Transport.cpp	2 May 2002 03:24:35 -0000	1.55
++++ Transport.cpp	8 May 2002 23:47:41 -0000
+@@ -687,6 +687,7 @@
+     {
+       i->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+     }
++  this->tms_->connection_closed ();
+ }
+ 
+ ssize_t
+@@ -791,7 +792,7 @@
+                         ACE_LIB_TEXT("TAO (%P|%t) Transport::handle_input_i,")
+                         ACE_LIB_TEXT("error while parsing the head of the queue \n")));
+ 
+-          this->tms_->connection_closed ();
++          this->close_connection_i();
+         }
+       return retval;
+     }
+@@ -838,7 +839,9 @@
+   if (n <= 0)
+     {
+       if (n == -1)
+-        this->tms_->connection_closed ();
++        {
++          this->close_connection_i();
++        }
+ 
+       return n;
+     }
+@@ -888,8 +891,7 @@
+     }
+ 
+   // Process the message
+-  return this->process_parsed_messages (&qd,
+-                                        rh);
++  return this->process_parsed_messages (&qd, rh);
+ }
+ 
+ int
+@@ -945,7 +947,7 @@
+             ACE_DEBUG ((LM_DEBUG,
+                         ACE_LIB_TEXT ("TAO (%P|%t) - error in incoming message \n")));
+ 
+-          this->tms_->connection_closed ();
++          this->close_connection_i();
+           return -1;
+         }
+     }
+@@ -1036,7 +1038,7 @@
+                       ACE_LIB_TEXT("TAO (%P|%t) - TAO_Trasport::consolidate_message,")
+                       ACE_LIB_TEXT("error while trying to consolidate \n")));
+         }
+-      this->tms_->connection_closed ();
++      this->close_connection_i();
+       return -1;
+     }
+ 
+@@ -1354,8 +1356,7 @@
+                     ACE_LIB_TEXT ("TAO (%P|%t) - %p\n"),
+                     ACE_LIB_TEXT ("Close Connection Message recd \n")));
+ 
+-      // Close the TMS
+-      this->tms_->connection_closed ();
++      this->close_connection_i();
+ 
+       // Return a "-1" so that the next stage can take care of
+       // closing connection and the necessary memory management.
+@@ -1372,8 +1373,7 @@
+             this,
+             qd) == -1)
+         {
+-          // Close the TMS
+-          this->tms_->connection_closed ();
++          this->close_connection_i();
+ 
+           // Return a "-1" so that the next stage can take care of
+           // closing connection and the necessary memory management.
+@@ -1400,7 +1400,7 @@
+                         ACE_LIB_TEXT ("process_reply_message ()")));
+ 
+           this->messaging_object ()->reset ();
+-          this->tms_->connection_closed ();
++          this->close_connection_i ();
+           return -1;
+         }
+ 
+@@ -1417,7 +1417,7 @@
+                         ACE_LIB_TEXT ("dispatch reply failed\n")));
+ 
+           this->messaging_object ()->reset ();
+-          this->tms_->connection_closed ();
++          this->close_connection_i ();
+           return -1;
+         }
+ 
