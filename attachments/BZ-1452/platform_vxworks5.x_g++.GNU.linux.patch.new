@@ -1,0 +1,59 @@
+*** platform_vxworks5.x_g++.GNU.orig	2002-12-23 04:01:14.000000000 -0800
+--- platform_vxworks5.x_g++.GNU	2003-02-13 18:15:14.000000000 -0800
+***************
+*** 30,50 ****
+  ifndef rtti
+    rtti = 0
+  endif # ! rtti
+  
+  shared_libs =
+  static_libs = 1
+  
+- # I (kitty) don't want to touch this file with regard to template
+- # instantiation. If somebody has access to the platforms specified here,
+- # they are welcome to check the instantiation problem. Overriding it to be
+- # explicit.
+- #
+- templates = "explicit"
+- 
+- # Test for template instantiation.
+- #
+- include $(ACE_ROOT)/include/makeinclude/platform_g++_common.GNU
+- 
+  ifeq (,$(WIND_BASE))
+    default:
+  	@ERROR: you must set your WIND_BASE environment variable
+--- 30,42 ----
+  ifndef rtti
+    rtti = 0
+  endif # ! rtti
++ ifndef with_ld
++   with_ld = vxworks
++ endif # ! with_ld
+  
+  shared_libs =
+  static_libs = 1
+  
+  ifeq (,$(WIND_BASE))
+    default:
+  	@ERROR: you must set your WIND_BASE environment variable
+***************
+*** 257,262 ****
+--- 249,265 ----
+  endif # simso
+  endif # x86-win32
+  
++ # I (kitty) don't want to touch this file with regard to template
++ # instantiation. If somebody has access to the platforms specified here,
++ # they are welcome to check the instantiation problem. Overriding it to be
++ # explicit.
++ #
++ templates = "explicit"
++ 
++ # Test for template instantiation.
++ #
++ include $(ACE_ROOT)/include/makeinclude/platform_g++_common.GNU
++ 
+  ifeq ($(shared_libs),1)
+    SHARED_LIBS = 1
+  endif
