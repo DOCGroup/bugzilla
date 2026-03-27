@@ -1,0 +1,34 @@
+To: ace-bugs@cs.wustl.edu
+Subject: Error building ACE+TAO in Tru64 5.1
+
+    ACE VERSION: 5.2a-OCI
+
+    HOST MACHINE and OPERATING SYSTEM: OSF1 pptopt1 V5.1 1885 alpha
+    TARGET MACHINE and OPERATING SYSTEM, if different from HOST:
+    COMPILER NAME AND VERSION (AND PATCHLEVEL): gcc version 2.97-tru64-010710
+
+    AREA/CLASS/EXAMPLE AFFECTED: ACE
+
+    DOES THE PROBLEM AFFECT:
+        COMPILATION? yes.
+            If so, what do your $ACE_ROOT/ace/config.h and
+            config.h -> config-tru64.h
+
+            $ACE_ROOT/include/makeinclude/platform_macros.GNU contain?
+            platform_macros.GNU -> platform_tru64_g++.GNU           
+
+    SYNOPSIS:
+            I cannot build ACE in Tru64 5.1.
+
+    DESCRIPTION:
+            I run make from $ACE_ROOT/ace and I get the following error when compilinc OS.cpp:
+
+                OS.cpp: In static member function `static int
+                ACE_OS::thr_create(void*(*)(void*), void*, long int, __pthreadTeb_tag**,
+                __pthreadTeb_tag**, long int, void*, long unsigned int,
+                ACE_Base_Thread_Adapter*)':
+                OS.cpp:3643: Internal error: Segmentation fault.
+                make: *** [.shobj/OS.o] Error 1
+
+    REPEAT BY:
+
