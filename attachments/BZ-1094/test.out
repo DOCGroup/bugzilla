@@ -1,0 +1,70 @@
+1888372598 | Scheduling timer
+1888372599 | Scheduled timer - result:1
+1888372599 | Handling events
+1888373598 | Number of events processed: 0
+1888373598 | Handling events
+1888373608 | MyTimerHandler::handle_timeout
+1888373608 | Number of events processed: 1
+1888373608 | Scheduling timer
+1888373608 | Scheduled timer - result:2
+1888373608 | Handling events
+1888374608 | Number of events processed: 0
+1888374608 | Handling events
+1888374618 | MyTimerHandler::handle_timeout
+1888374618 | Number of events processed: 1
+1888374618 | Scheduling timer
+1888374618 | Scheduled timer - result:3
+1888374618 | Handling events
+1888375618 | Number of events processed: 0
+1888375618 | Handling events
+1888375618 | MyTimerHandler::handle_timeout
+1888375618 | Number of events processed: 1
+1888375618 | Scheduling timer
+1888375618 | Scheduled timer - result:4
+1888375618 | Handling events
+1888376618 | Number of events processed: 0
+1888376618 | Handling events
+1888376628 | MyTimerHandler::handle_timeout
+1888376628 | Number of events processed: 1
+1888376628 | Scheduling timer
+1888376628 | Scheduled timer - result:5
+1888376628 | Handling events
+1888377628 | Number of events processed: 0
+1888377628 | Handling events
+1888377628 | MyTimerHandler::handle_timeout
+1888377628 | Number of events processed: 1
+1888377628 | Scheduling timer
+1888377628 | Scheduled timer - result:6
+1888377628 | Handling events
+1888378628 | Number of events processed: 0
+1888378628 | Handling events
+1888378638 | MyTimerHandler::handle_timeout
+1888378638 | Number of events processed: 1
+1888378638 | Scheduling timer
+1888378638 | Scheduled timer - result:7
+1888378638 | Handling events
+1888379638 | Number of events processed: 0
+1888379638 | Handling events
+1888379638 | MyTimerHandler::handle_timeout
+1888379638 | Number of events processed: 1
+1888379638 | Scheduling timer
+1888379638 | Scheduled timer - result:8
+1888379638 | Handling events
+1888380638 | Number of events processed: 0
+1888380638 | Handling events
+1888380648 | MyTimerHandler::handle_timeout
+1888380648 | Number of events processed: 1
+1888380648 | Scheduling timer
+1888380648 | Scheduled timer - result:9
+1888380648 | Handling events
+1888381648 | Number of events processed: 0
+1888381648 | Handling events
+1888381648 | MyTimerHandler::handle_timeout
+1888381648 | Number of events processed: 1
+1888381648 | Scheduling timer
+1888381648 | Scheduled timer - result:10
+1888381648 | Handling events
+1888382648 | Number of events processed: 0
+1888382648 | Handling events
+1888382648 | MyTimerHandler::handle_timeout
+1888382648 | Number of events processed: 1
