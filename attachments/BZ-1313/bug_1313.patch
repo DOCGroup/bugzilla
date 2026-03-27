@@ -1,0 +1,33 @@
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp,v
+retrieving revision 1.10
+diff -u -u -r1.10 UIPMC_Connector.cpp
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp	1 Jun 2002 00:46:09 -0000	1.10
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp	25 Sep 2002 15:18:10 -0000
+@@ -82,7 +82,7 @@
+   while (!iter.done ())
+     {
+       // Delete the connection handler
+-      delete (*iter).int_id_;
++      (*iter).int_id_->decr_refcount();
+       iter++;
+     }
+ 
+Index: tao/Strategies/DIOP_Connector.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Connector.cpp,v
+retrieving revision 1.14
+diff -u -u -r1.14 DIOP_Connector.cpp
+--- tao/Strategies/DIOP_Connector.cpp	29 May 2002 23:30:02 -0000	1.14
++++ tao/Strategies/DIOP_Connector.cpp	25 Sep 2002 15:18:10 -0000
+@@ -86,8 +86,7 @@
+ 
+   while (!iter.done ())
+     {
+-      // Delete the connection handler
+-      delete (*iter).int_id_;
++      (*iter).int_id_->decr_refcount();
+       iter++;
+     }
+ 
