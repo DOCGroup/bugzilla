@@ -1,0 +1,382 @@
+#include "LF_CH_Event.h"
+#include "ace/Log_Msg.h"
+
+
+#if !defined (__ACE_INLINE__)
+# include "LF_CH_Event.inl"
+#endif /* __ACE_INLINE__ */
+
+ACE_RCSID(tao,
+          LF_Invocation_Event,
+          "$Id: LF_Event.cpp,v 1.4 2002/04/27 21:49:58 bala Exp $")
+
+TAO_LF_CH_Event::TAO_LF_CH_Event (void)
+  : TAO_LF_Event (),
+    prev_state_ (TAO_LF_Event::LFS_IDLE)
+
+{
+}
+
+TAO_LF_CH_Event::~TAO_LF_CH_Event (void)
+{
+}
+
+void
+TAO_LF_CH_Event::state_changed_i (int new_state)
+{
+  if (this->state_ == new_state)
+    return;
+
+    // Validate the state change
+  if (this->state_ == TAO_LF_Event::LFS_IDLE)
+    {
+      // From the LFS_IDLE state we can only become active.
+      if (new_state == TAO_LF_Event::LFS_CONNECTION_WAIT)
+        {
+          this->prev_state_ = this->state_;
+          this->state_ = new_state;
+        }
+      return;
+    }
+  else if (this->state_ == TAO_LF_Event::LFS_CONNECTION_WAIT)
+    {
+      // Only a few states are possible from CONNECTION_WAIT states
+      if (new_state == TAO_LF_Event::LFS_CONNECTION_CLOSED
+          || new_state == TAO_LF_Event::LFS_SUCCESS)
+        {
+          this->prev_state_ = this->state_;
+          this->state_ = new_state;
+        }
+
+      return;
+    }
+  else if (this->state_ == TAO_LF_Event::LFS_SUCCESS)
+    {
+      if (new_state == TAO_LF_Event::LFS_CONNECTION_CLOSED)
+        {
+          this->prev_state_ = this->state_;
+          this->state_ = new_state;
+        }
+      return;
+    }
+
+  return;
+}
+
+
+int
+TAO_LF_CH_Event::successful (void) const
+{
+  if (this->prev_state_ == TAO_LF_Event::LFS_CONNECTION_WAIT)
+    return this->state_ == TAO_LF_Event::LFS_SUCCESS;
+  else if (this->prev_state_ == TAO_LF_Event::LFS_SUCCESS)
+    return this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED;
+
+  return 0;
+}
+
+int
+TAO_LF_CH_Event::error_detected (void) const
+{
+  if (this->prev_state_ == TAO_LF_Event::LFS_CONNECTION_WAIT)
+    return this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED;
+  else if (this->prev_state_ == TAO_LF_Event::LFS_SUCCESS)
+    return (this->state_ != TAO_LF_Event::LFS_CONNECTION_CLOSED);
+
+  return 0;
+}
+
+void
+TAO_LF_CH_Event::set_state (int new_state)
+{
+  this->prev_state_ = this->state_;
+  this->state_ = new_state;
+}
+
+
+int
+TAO_LF_CH_Event::is_state_final (void)
+{
+  return this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED;
+}
+// -*- C++ -*-
+
+//=============================================================================
+/**
+ *  @file LF_CH_Event.h
+ *
+ *  $Id: LF_Event.h,v 1.6 2002/05/23 22:34:10 ossama Exp $
+ *
+ *  @author Balachandran Natarajan <bala@cs.wustl.edu>
+ */
+//=============================================================================
+#ifndef TAO_LF_CH_EVENT_H
+#define TAO_LF_CH_EVENT_H
+#include "ace/pre.h"
+
+#include "LF_Event.h"
+
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+# pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+/**
+ * @class TAO_LF_CH_Event
+ *
+ * @brief Use the Leader/Follower loop to wait for one specific event
+ * in the invocation path.
+ *
+ * Concrete event types and manipulation class which is used for
+ * connection handleing purposes.
+ */
+class TAO_Export TAO_LF_CH_Event: public TAO_LF_Event
+{
+public:
+  /// Constructor
+  TAO_LF_CH_Event (void);
+
+  /// Destructor
+  virtual ~TAO_LF_CH_Event (void);
+
+  /// Return 1 if the condition was satisfied successfully, 0 if it
+  /// has not
+  int successful (void) const;
+
+  /// Return 1 if an error was detected while waiting for the
+  /// event
+  int error_detected (void) const;
+  //@}
+
+  /// Reset the state, irrespective of the previous states
+  void reset_state (int new_state);
+
+
+private:
+  /// Validate and change the state
+  /*
+   * This concrete class uses the following states declared in the
+   * class TAO_LF_Event to transition states
+   *
+   * LFS_IDLE              - The event is created, and is in initial
+   *                         state.
+   * LFS_CONNECTION_WAIT   - The event is waiting for connection
+   *                         completion and it can transition to any of
+   *                         the following states, all the states are
+   *                         final.
+   * LFS_SUCCESS           - The event, connection establishment, has
+   *                         completed successfully.
+   * LFS_TIMEOUT           - The event has timed out.
+   * LFS_CONNECTION_CLOSED - The connection was closed since an error
+   *                         occured while trying to establish
+   *                         connection
+   *
+   */
+  virtual void state_changed_i (int new_state);
+
+  /// Check whether we have reached the final state..
+  virtual int is_state_final (void);
+
+  /// Set the state irrespective of anything.
+  virtual void set_state (int new_state);
+
+private:
+
+  /// The previous state that the LF_CH_Event was in
+  int prev_state_;
+};
+
+#if defined (__ACE_INLINE__)
+# include "LF_Invocation_Event.inl"
+#endif /* __ACE_INLINE__ */
+
+#include "ace/post.h"
+#endif  /* TAO_LF_CH_EVENT_H */
+// -*- C++ -*-
+#include "LF_Invocation_Event.h"
+
+
+#if !defined (__ACE_INLINE__)
+# include "tao/LF_Invocation_Event.inl"
+#endif /* __ACE_INLINE__ */
+
+ACE_RCSID(tao,
+          LF_Invocation_Event,
+          "$Id: LF_Event.cpp,v 1.4 2002/04/27 21:49:58 bala Exp $")
+
+TAO_LF_Invocation_Event::TAO_LF_Invocation_Event (void)
+  : TAO_LF_Event ()
+{
+}
+
+TAO_LF_Invocation_Event::~TAO_LF_Invocation_Event (void)
+{
+}
+
+void
+TAO_LF_Invocation_Event::state_changed_i (int new_state)
+{
+  if (this->state_ == new_state)
+    return;
+
+  // Validate the state change
+  if (this->state_ == TAO_LF_Event::LFS_IDLE)
+    {
+      // From the LFS_IDLE state we can only become active.
+      if (new_state == TAO_LF_Event::LFS_ACTIVE
+          || new_state == TAO_LF_Event::LFS_CONNECTION_CLOSED)
+        this->state_ = new_state;
+      return;
+    }
+  else if (this->state_ == TAO_LF_Event::LFS_ACTIVE)
+    {
+      // From LFS_ACTIVE we can only move to a few states
+      if (new_state != TAO_LF_Event::LFS_IDLE)
+        {
+          if (new_state == TAO_LF_Event::LFS_CONNECTION_CLOSED)
+            {
+              this->state_ = TAO_LF_Event::LFS_FAILURE;
+            }
+          else
+            {
+              this->state_ = new_state;
+            }
+        }
+      return;
+    }
+  else if (this->state_ == TAO_LF_Event::LFS_SUCCESS
+           || this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED)
+    {
+      // From the two states above we can go back to ACTIVE, as when a
+      // request is restarted.
+      if (new_state == TAO_LF_Event::LFS_ACTIVE)
+        {
+          this->state_ = new_state;
+        }
+      return;
+    }
+  else/* if (this->state_ == TAO_LF_Event::LFS_TIMEOUT || FAILURE */
+    {
+      // Other states are final..
+    }
+
+}
+
+int
+TAO_LF_Invocation_Event::successful (void) const
+{
+  return this->state_ == TAO_LF_Event::LFS_SUCCESS;
+}
+
+int
+TAO_LF_Invocation_Event::error_detected (void) const
+{
+  return (this->state_ == TAO_LF_Event::LFS_FAILURE
+          || this->state_ == TAO_LF_Event::LFS_TIMEOUT
+          || this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED);
+}
+
+int
+TAO_LF_Invocation_Event::is_state_final (void)
+{
+  if (this->state_ == TAO_LF_Event::LFS_TIMEOUT ||
+      this->state_ == TAO_LF_Event::LFS_FAILURE)
+    return 1;
+
+  return 0;
+}
+// -*- C++ -*-
+
+//=============================================================================
+/**
+ *  @file LF_Invocation_Event.h
+ *
+ *  $Id: LF_Event.h,v 1.6 2002/05/23 22:34:10 ossama Exp $
+ *
+ *  @author Carlos O'Ryan <coryan@uci.edu>
+ */
+//=============================================================================
+
+#ifndef TAO_LF_INVOCATION_EVENT_H
+#define TAO_LF_INVOCATION_EVENT_H
+#include "ace/pre.h"
+
+#include "LF_Event.h"
+
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+# pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+/**
+ * @class TAO_LF_Invocation_Event
+ *
+ * @brief Use the Leader/Follower loop to wait for one specific event
+ * in the invocation path.
+ *
+ * Concrete event types and manipulation class through which the
+ * invocation data path would flow. Typically state changes of
+ * interest include whether a message has arrived, or timedout waiting
+ * for a message or if the cionnection is closed waiting for a
+ * message. Details of the states are documented within the class.
+ *
+ */
+class TAO_Export TAO_LF_Invocation_Event: public TAO_LF_Event
+{
+public:
+  /// Constructor
+  TAO_LF_Invocation_Event (void);
+
+  /// Destructor
+  virtual ~TAO_LF_Invocation_Event (void);
+
+  /// Return 1 if the condition was satisfied successfully, 0 if it
+  /// has not
+  int successful (void) const;
+
+  /// Return 1 if an error was detected while waiting for the
+  /// event
+  int error_detected (void) const;
+  //@}
+
+protected:
+
+  /// Validate and perform the state change
+  /*
+   * This concrete class uses the following states declared in the
+   * class TAO_LF_Event
+   *
+   * LFS_IDLE    - The event is created, and is in initial state.
+   * LFS_ACTIVE  - The event is active and it can transition to any of
+   *               the following states, all the states are final.
+   * LFS_SUCCESS - The event has completed successfully.
+   * LFS_FAILURE - A failure has been detected while the event was
+   *               active.
+   * LFS_TIMEOUT - The event has timed out.
+   * LFS_CONNECTION_CLOSED - The connection was closed when the state
+   *                         was active.
+   *
+   */
+  virtual void state_changed_i (int new_state);
+
+private:
+  /// Check whether we have reached the final state..
+  int is_state_final (void);
+};
+
+#if defined (__ACE_INLINE__)
+# include "LF_Invocation_Event.inl"
+#endif /* __ACE_INLINE__ */
+
+#include "ace/post.h"
+#endif  /* TAO_LF_INVOCATION_EVENT_H */
+// -*- C++ -*-
+// $Id: LF_Event.inl,v 1.4 2001/11/02 13:10:40 bala Exp $
+ACE_INLINE int
+TAO_LF_Event::is_state_final (void)
+{
+  if (this->state_ == TAO_LF_Event::LFS_TIMEOUT ||
+      this->state_ == TAO_LF_Event::LFS_FAILURE ||
+      this->state_ == TAO_LF_Event::LFS_CONNECTION_CLOSED)
+    return 1;
+
+  return 0;
+}
