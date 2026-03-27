@@ -1,0 +1,15 @@
+Index: Connector.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Connector.cpp,v
+retrieving revision 4.81
+diff -u -r4.81 Connector.cpp
+--- Connector.cpp	26 Aug 2002 06:28:16 -0000	4.81
++++ Connector.cpp	9 Sep 2002 21:07:14 -0000
+@@ -271,6 +271,7 @@
+       // Error, entry not found in map.
+       errno = ENOENT;
+       ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_LIB_TEXT ("ACE (%P|%t) - Connector<>::cleanup_AST")
+                          ACE_LIB_TEXT ("%p %d not found in map\n"),
+                          ACE_LIB_TEXT ("find"),
+                          handle),
