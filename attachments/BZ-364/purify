@@ -1,0 +1,25 @@
+[W] MLK: Memory leak of 0 bytes from 1 block allocated in TAO_Unbounded_Sequence<UINT>::allocbuf(UINT)
+    Distribution of leaked blocks
+    Allocation location
+        new(UINT)      [new.cpp:23]
+        TAO_Unbounded_Sequence<UINT>::allocbuf(UINT) [Sequence_T.i:11]
+                template <class T> ACE_INLINE T *
+                TAO_Unbounded_Sequence<T>::allocbuf (CORBA::ULong size)
+                {
+             =>   return new T[size];
+                }
+
+                template <class T> ACE_INLINE void
+        TAO_Unbounded_Sequence<UINT>::get_buffer(BYTE) [Sequence_T.i:51]
+        >>(TAO_InputCDR&,_tao_seq_CodeSetId::CodeSetComponent::CONV_FRAME&) [CONV_FRAMEC.cpp:491]
+        >>(TAO_InputCDR&,CodeSetComponent::CONV_FRAME&) [CONV_FRAMEC.i:840]
+        >>(TAO_InputCDR&,CodeSetComponentInfo::CONV_FRAME&) [CONV_FRAMEC.i:864]
+        TAO_Tagged_Components::set_known_component_i(TaggedComponent::IOP const&) [Tagged_Components.cpp:152]
+        TAO_Tagged_Components::decode(TAO_InputCDR&) [Tagged_Components.cpp:269]
+        TAO_IIOP_Profile::decode(TAO_InputCDR&) [IIOP_Profile.cpp:184]
+        TAO_IIOP_Connector::create_profile(TAO_InputCDR&) [IIOP_Connector.cpp:668]
+        TAO_Connector_Registry::create_profile(TAO_InputCDR&) [Connector_Registry.cpp:374]
+        >>(TAO_InputCDR&,CORBA_Object *&) [Object.cpp:630]
+        CORBA_ORB::ior_string_to_object(char const*,CORBA_Environment&) [ORB.cpp:1820]
+        CORBA_ORB::string_to_object(char const*,CORBA_Environment&) [ORB.cpp:1701]
+        main           [client.cpp:183]
