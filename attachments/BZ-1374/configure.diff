@@ -1,0 +1,450 @@
+Index: Configuration.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Configuration.cpp,v
+retrieving revision 4.70
+diff -u -r4.70 Configuration.cpp
+--- Configuration.cpp   5 Oct 2002 00:25:52 -0000       4.70
++++ Configuration.cpp   24 Nov 2002 23:56:15 -0000
+@@ -149,0 +149,0 @@
+
+ //////////////////////////////////////////////////////////////////////////////
+
++ACE_TCHAR ACE_Configuration::NULL_String_ = '\0';
++
+ ACE_Configuration::ACE_Configuration (void)
+   : root_ ()
+ {
+@@ -245,2 +247,2 @@
+   return 0;
+ }
+
++int
++ACE_Configuration::validate_value_name (const ACE_TCHAR* name)
++{
++  if (name == 0 || *name == this->NULL_String_)
++    return 0;
++
++  return this->validate_name (name);
++}
+
+ const ACE_Configuration_Section_Key&
+ ACE_Configuration::root_section (void) const
+@@ -479,0 +489,0 @@
+
+ static const int ACE_DEFAULT_BUFSIZE = 256;
+
++static ACE_TCHAR *temp_name (ACE_TCHAR *name)
++{
++  if (name && *name == this->NULL_String_)
++    return 0;
++  return name;
++}
++
+ ACE_Section_Key_Win32::ACE_Section_Key_Win32 (HKEY hKey)
+   : hKey_ (hKey)
+ {
+@@ -723,5 +740,6 @@
+                                                    const ACE_TCHAR* name,
+                                                    const ACE_TString& value)
+ {
+-  if (validate_name (name))
++  ACE_TCHAR *t_name = temp_name (name);
++  if (validate_value_name (t_name))
+     return -1;
+
+   HKEY base_key;
+@@ -733,7 +751,7 @@
+   DWORD len = ACE_static_cast (DWORD, value.length () + 1);
+   len *= sizeof (ACE_TCHAR);
+   if (ACE_TEXT_RegSetValueEx (base_key,
+-                              name,
++                              t_name,
+                               0,
+                               REG_SZ,
+                               (BYTE *) value.fast_rep (),
+@@ -749,5 +767,6 @@
+                                                     const ACE_TCHAR* name,
+                                                     u_int value)
+ {
+-  if (validate_name (name))
++  ACE_TCHAR *t_name = temp_name (name);
++  if (validate_value_name (t_name))
+     return -1;
+
+   HKEY base_key;
+@@ -757,1 +776,1 @@
+     return -1;
+
+   if (ACE_TEXT_RegSetValueEx (base_key,
+-                              name,
++                              t_name,
+                               0,
+                               REG_DWORD,
+                               (BYTE *) &value,
+@@ -773,5 +792,6 @@
+                                                    const void* data,
+                                                    size_t length)
+ {
+-  if (validate_name (name))
++  ACE_TCHAR *t_name = temp_name (name);
++  if (validate_value_name (t_name))
+     return -1;
+
+   HKEY base_key;
+@@ -781,1 +801,1 @@
+     return -1;
+
+   if (ACE_TEXT_RegSetValueEx (base_key,
+-                              name,
++                              t_name,
+                               0,
+                               REG_BINARY,
+                               (BYTE *) data,
+@@ -797,5 +817,6 @@
+                                                    const ACE_TCHAR* name,
+                                                    ACE_TString& value)
+ {
+-  if (validate_name (name))
++  ACE_TCHAR *t_name = temp_name (name);
++  if (validate_value_name (t_name))
+     return -1;
+
+   HKEY base_key;
+@@ -808,7 +829,7 @@
+   DWORD buffer_length = 0;
+   DWORD type;
+   if (ACE_TEXT_RegQueryValueEx (base_key,
+-                                name,
++                                t_name,
+                                 0,
+                                 &type,
+                                 (BYTE *) 0,
+@@ -829,1 +850,1 @@
+   ACE_Auto_Basic_Array_Ptr<ACE_TCHAR> buffer (temp);
+
+   if (ACE_TEXT_RegQueryValueEx (base_key,
+-                                name,
++                                t_name,
+                                 0,
+                                 &type,
+                                 (BYTE *) buffer.get (),
+@@ -847,5 +868,6 @@
+                                                     const ACE_TCHAR* name,
+                                                     u_int& value)
+ {
+-  if (validate_name (name))
++  ACE_TCHAR *t_name = temp_name (name);
++  if (validate_value_name (t_name))
+     return -1;
+
+   HKEY base_key;
+@@ -857,7 +879,7 @@
+   DWORD length = sizeof (value);
+   DWORD type;
+   if (ACE_TEXT_RegQueryValueEx (base_key,
+-                                name,
++                                t_name,
+                                 0,
+                                 &type,
+                                 (BYTE *) &value,
+@@ -879,5 +901,6 @@
+                                                    void *&data,
+                                                    size_t &length)
+ {
+-  if (validate_name (name))
++  ACE_TCHAR *t_name = temp_name (name);
++  if (validate_value_name (t_name))
+     return -1;
+
+   HKEY base_key;
+@@ -890,7 +913,7 @@
+   DWORD buffer_length = 0;
+   DWORD type;
+   if (ACE_TEXT_RegQueryValueEx (base_key,
+-                                name,
++                                t_name,
+                                 0,
+                                 &type,
+                                 (BYTE *) 0,
+@@ -908,1 +931,1 @@
+   ACE_NEW_RETURN (data, BYTE[length], -1);
+
+   if (ACE_TEXT_RegQueryValueEx (base_key,
+-                                name,
++                                t_name,
+                                 0,
+                                 &type,
+                                 (BYTE *) data,
+@@ -927,5 +950,6 @@
+                                              const ACE_TCHAR* name,
+                                              VALUETYPE& type_out)
+ {
+-  if (validate_name (name))
++  ACE_TCHAR *t_name = temp_name (name);
++  if (validate_value_name (t_name))
+     return -1;
+
+   HKEY base_key;
+@@ -937,7 +961,7 @@
+   DWORD buffer_length=0;
+   DWORD type;
+   int result=ACE_TEXT_RegQueryValueEx (base_key,
+-                                       name,
++                                       t_name,
+                                        0,
+                                        &type,
+                                        0,
+@@ -967,5 +991,6 @@
+ ACE_Configuration_Win32Registry::remove_value (const ACE_Configuration_Section_Key& key,
+                                                const ACE_TCHAR* name)
+ {
+-  if (validate_name (name))
++  ACE_TCHAR *t_name = temp_name (name);
++  if (validate_value_name (t_name))
+     return -1;
+
+   HKEY base_key;
+   if (load_key (key, base_key))
+     return -1;
+
+-  if (ACE_TEXT_RegDeleteValue (base_key, name) != ERROR_SUCCESS)
++  if (ACE_TEXT_RegDeleteValue (base_key, t_name) != ERROR_SUCCESS)
+     return -1;
+
+   return 0;
+@@ -1794,5 +1819,6 @@
+                                           const ACE_TString& value)
+ {
+   ACE_ASSERT (this->allocator_);
+-  if (validate_name (name))
++  const ACE_TCHAR *t_name = name ? name : &this->NULL_String_;
++  if (validate_value_name (t_name))
+     return -1;
+
+   ACE_TString section;
+@@ -1808,0 +1834,0 @@
+
+   // Get the entry for this item (if it exists)
+   VALUE_ENTRY* entry;
+-  ACE_Configuration_ExtId item_name (name);
++  ACE_Configuration_ExtId item_name (t_name);
+   if (section_int.value_hash_map_->VALUE_HASH::find (item_name, entry) == 0)
+     {
+       // found item, replace it
+@@ -1824,9 +1850,9 @@
+   else
+     {
+       // it doesn't exist, bind it
+-      ACE_TCHAR* pers_name =
+- (ACE_TCHAR *) allocator_->malloc ((ACE_OS::strlen (name) + 1) * sizeof (ACE_TCHAR));
+-      ACE_OS::strcpy (pers_name, name);
++      ACE_TCHAR* pers_name =
++ (ACE_TCHAR *) allocator_->malloc ((ACE_OS::strlen (t_name) + 1) * sizeof (ACE_TCHAR));
++      ACE_OS::strcpy (pers_name, t_name);
+       ACE_TCHAR* pers_value =
+  (ACE_TCHAR *) allocator_->malloc ((value.length () + 1) * sizeof (ACE_TCHAR));
+       ACE_OS::strcpy (pers_value, value.fast_rep ());
+@@ -1850,5 +1876,6 @@
+                                            u_int value)
+ {
+   ACE_ASSERT (this->allocator_);
+-  if (validate_name (name))
++  const ACE_TCHAR *t_name = name ? name : &this->NULL_String_;
++  if (validate_value_name (t_name))
+     return -1;
+
+   // Get the section name from the key
+@@ -1866,0 +1893,0 @@
+
+   // Get the entry for this item (if it exists)
+   VALUE_ENTRY* entry;
+-  ACE_Configuration_ExtId item_name (name);
++  ACE_Configuration_ExtId item_name (t_name);
+   if (section_int.value_hash_map_->VALUE_HASH::find (item_name, entry) == 0)
+     {
+       // found item, replace it
+@@ -1877,8 +1904,8 @@
+     {
+       // it doesn't exist, bind it
+       ACE_TCHAR* pers_name =
+- (ACE_TCHAR *) allocator_->malloc ((ACE_OS::strlen (name) + 1) * sizeof (ACE_TCHAR));
+-      ACE_OS::strcpy (pers_name, name);
++ (ACE_TCHAR *) allocator_->malloc ((ACE_OS::strlen (t_name) + 1) * sizeof (ACE_TCHAR));
++      ACE_OS::strcpy (pers_name, t_name);
+       ACE_Configuration_ExtId item_name (pers_name);
+       ACE_Configuration_Value_IntId item_value (value);
+       if (section_int.value_hash_map_->bind (item_name, item_value, allocator_))
+@@ -1899,5 +1926,6 @@
+                                           size_t length)
+ {
+   ACE_ASSERT (this->allocator_);
+-  if (validate_name (name))
++  const ACE_TCHAR *t_name = name ? name : &this->NULL_String_;
++  if (validate_value_name (t_name))
+     return -1;
+
+   // Get the section name from the key
+@@ -1915,0 +1943,0 @@
+
+   // Get the entry for this item (if it exists)
+   VALUE_ENTRY* entry;
+-  ACE_Configuration_ExtId item_name (name);
++  ACE_Configuration_ExtId item_name (t_name);
+   if (section_int.value_hash_map_->VALUE_HASH::find (item_name, entry) == 0)
+     {
+       // found item, replace it
+@@ -1931,8 +1959,8 @@
+     {
+       // it doesn't exist, bind it
+       ACE_TCHAR* pers_name =
+- (ACE_TCHAR *) allocator_->malloc ((ACE_OS::strlen (name) + 1) * sizeof (ACE_TCHAR));
+-      ACE_OS::strcpy (pers_name, name);
++ (ACE_TCHAR *) allocator_->malloc ((ACE_OS::strlen (t_name) + 1) * sizeof (ACE_TCHAR));
++      ACE_OS::strcpy (pers_name, t_name);
+       ACE_TCHAR* pers_value = (ACE_TCHAR *) allocator_->malloc (length);
+       ACE_OS::memcpy (pers_value, data, length);
+       ACE_Configuration_ExtId item_name (pers_name);
+@@ -1994,5 +2022,6 @@
+                                           ACE_TString& value)
+ {
+   ACE_ASSERT (this->allocator_);
+-  if (validate_name (name))
++  const ACE_TCHAR *t_name = name ? name : &this->NULL_String_;
++  if (validate_value_name (t_name))
+     return -1;
+
+   // Get the section name from the key
+@@ -2009,1 +2038,1 @@
+     return -1;    // section does not exist
+
+   // See if it exists first
+-  ACE_Configuration_ExtId VExtId (name);
++  ACE_Configuration_ExtId VExtId (t_name);
+   ACE_Configuration_Value_IntId VIntId;
+   if (IntId.value_hash_map_->find (VExtId, VIntId, allocator_))
+     return -1;    // unknown value
+@@ -2032,5 +2061,6 @@
+                                            u_int& value)
+ {
+   ACE_ASSERT (this->allocator_);
+-  if (validate_name (name))
++  const ACE_TCHAR *t_name = name ? name : &this->NULL_String_;
++  if (validate_value_name (t_name))
+     return -1;
+
+   // Get the section name from the key
+@@ -2048,0 +2078,0 @@
+
+
+   // See if it exists first
+-  ACE_Configuration_ExtId VExtId (name);
++  ACE_Configuration_ExtId VExtId (t_name);
+   ACE_Configuration_Value_IntId VIntId;
+   if (IntId.value_hash_map_->find (VExtId, VIntId, allocator_))
+     return -1;    // unknown value
+@@ -2072,5 +2102,6 @@
+                                           size_t& length)
+ {
+   ACE_ASSERT (this->allocator_);
+-  if (validate_name (name))
++  const ACE_TCHAR *t_name = name ? name : &this->NULL_String_;
++  if (validate_value_name (t_name))
+     return -1;
+
+   // Get the section name from the key
+@@ -2086,2 +2117,2 @@
+   if (index_->find (ExtId, IntId, allocator_))
+     return -1;    // section does not exist
+
+-  ACE_Configuration_ExtId VExtId (name);
++  ACE_Configuration_ExtId VExtId (t_name);
+   ACE_Configuration_Value_IntId VIntId;
+   // See if it exists first
+   if (IntId.value_hash_map_->find (VExtId, VIntId, allocator_))
+@@ -2112,5 +2143,6 @@
+                                     VALUETYPE& type_out)
+ {
+   ACE_ASSERT (this->allocator_);
+-  if (validate_name (name))
++  const ACE_TCHAR *t_name = name ? name : &this->NULL_String_;
++  if (validate_value_name (t_name))
+     return -1;
+
+   // Get the section name from the key
+@@ -2127,1 +2159,1 @@
+     return -1;    // section does not exist
+
+   // Find it
+-  ACE_Configuration_ExtId ValueExtId (name);
++  ACE_Configuration_ExtId ValueExtId (t_name);
+   VALUE_ENTRY* value_entry;
+   if (((VALUE_HASH *) IntId.value_hash_map_)->find (ValueExtId, value_entry))
+     return -1;  // value does not exist
+@@ -2141,5 +2173,6 @@
+                                       const ACE_TCHAR* name)
+ {
+   ACE_ASSERT (this->allocator_);
+-  if (validate_name (name))
++  const ACE_TCHAR *t_name = name ? name : &this->NULL_String_;
++  if (validate_value_name (t_name))
+     return -1;
+
+   // Get the section name from the key
+@@ -2156,1 +2189,1 @@
+     return -1;    // section does not exist
+
+   // Find it
+-  ACE_Configuration_ExtId ValueExtId (name);
++  ACE_Configuration_ExtId ValueExtId (t_name);
+   VALUE_ENTRY* value_entry;
+   if (((VALUE_HASH *) IntId.value_hash_map_)->find (ValueExtId, value_entry))
+     return -1;
+Index: Configuration.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Configuration.h,v
+retrieving revision 4.41
+diff -u -r4.41 Configuration.h
+--- Configuration.h     5 Oct 2002 00:25:52 -0000       4.41
++++ Configuration.h     24 Nov 2002 23:56:53 -0000
+@@ -402,2 +402,2 @@
+    */
+   int validate_name (const ACE_TCHAR* name, int allow_path = 0);
+
++  /**
++   * Test to see if <name> is valid.  The default value for a key can be
++   * unnamed, which means either <name> is == 0 or <name> == '\0` is
++   * valid.  Otherwise, it calls validate_name() to test <name> for the
++   * same rules that apply to keys.
++   */
++  int validate_value_name (const ACE_TCHAR* name);
++
++  /**
++   *  Represents the "NULL" string to simplify the internal logic.
++   */
++  static ACE_TCHAR NULL_String_;
++
+   // Not used
+   ACE_Configuration (const ACE_Configuration& rhs);
+   ACE_Configuration& operator= (const ACE_Configuration& rhs);
+Index: Configuration_Import_Export.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Configuration_Import_Export.cpp,v
+retrieving revision 4.23
+diff -u -r4.23 Configuration_Import_Export.cpp
+--- Configuration_Import_Export.cpp     5 Oct 2002 00:25:52 -0000       4.23
++++ Configuration_Import_Export.cpp     24 Nov 2002 23:57:31 -0000
+@@ -399,12 +399,13 @@
+         }
+       *end++ = '\0';
+       ACE_TCHAR *name = this->squish (line);
++#if 0
+       if (ACE_OS::strlen (name) == 0)          // No name; just an '='
+         {
+           ACE_OS::fclose (in);
+           return -3;
+         }
+-
++#endif
+       // Now find the start of the value
+       ACE_TCHAR *value = this->squish (end);
+       size_t value_len = ACE_OS::strlen (value);
