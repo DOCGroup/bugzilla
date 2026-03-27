@@ -1,0 +1,44 @@
+#ifndef _G123_IDL_
+#define _G123_IDL_
+
+
+/*
+ With this idl file we test problem with forward declration of structure that is than used in sequence and union
+*/
+
+struct ET; 
+
+union UT;
+
+typedef sequence<ET> LinkedList;
+
+typedef sequence<UT> UnionLinkedList;
+
+struct ET
+{
+    double value;
+};
+
+
+
+union UT switch(long)
+{
+case 0:
+    double value;
+case 1:
+    string b;
+};
+
+
+
+
+interface Ex
+{
+    LinkedList testOp1();
+    UnionLinkedList testOp2();
+};
+
+
+
+
+#endif
