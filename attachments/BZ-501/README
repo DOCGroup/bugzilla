@@ -1,0 +1,44 @@
+Tue Mar 21 14:44:41 2000  Steve Totten  <totten_s@ociweb.com>
+
+The files in this directory demonstrate a possible bug in TAO's
+implementation of PortableServer::POA::servant_to_id() when the POA has
+the USE_DEFAULT_SERVANT policy.
+
+The idea is to run the server, then run the client.  The client passes a
+string to the server and the server echos it back to the client.  The
+client then exits.
+
+Echo.idl
+
+  A simple Echo interface specification.
+
+DefaultEcho_i.{h,cpp}
+
+  Implementation class for the Echo interface, used as a Default
+  Servant.
+  
+EchoServer.cpp
+
+  Server mainline which creates a child POA with the appropriate
+  policies and sets an instance of DefaultEcho_i as the default servant
+  on the child POA.  Then, the server generates two unique object
+  references, stringifies them, and writes them to two files in the
+  current directory (hardcoded):  EchoObject_1.ior and EchoObject_2.ior.
+
+client.cpp
+
+  A simple client to test the behavior of the EchoServer.
+
+Makefile
+
+  A Makefile to build the whole mess.
+
+
+To run the test:
+
+  The test assumes a build of ACE+TAO with exceptions=1.
+
+  ./EchoServer &  # writes the files EchoObject_1.ior and EchoObject_2.ior
+
+  ./client file://EchoObject_1.ior <optional quoted string>
+
