@@ -1,0 +1,4 @@
+I see similar NS problems with MICO clients and TAO servers. TAO-1.0.7
+and earlier work just fine (except for a tclmico problem, which I
+think is tclmico's fault), while TAO-1.0.9 fails to interoperate. 
+All tests were run on on Linux boxes (RH-5.2, Mandrake-6.1).
