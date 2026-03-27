@@ -1,0 +1,37 @@
+/* -*- C++ -*-
+ * $Id: $
+ * 
+ * CDBIResult.idl - 
+ *
+ * Copyright (c) 1990 - 2000 by CONTACT Software GmbH.
+ * All rights reserved.
+ */
+
+/*
+ * File: CDBIResult.idl
+ * Author: ch
+ * Creation: 26.03.01
+ * Purpose:
+ *
+ */
+
+#ifndef CDBIRESULT_IDL
+#define CDBIRESULT_IDL
+
+
+enum ResultKind {
+  kResOk,           // Success
+  kResInfo,         // Warning, Info etc.
+  kResFatal         // Fatal
+};
+
+struct CDBIResult {
+  ResultKind the_kind;
+  string the_message;
+};
+
+interface OutParameterTest {
+  string mytest (out CDBIResult the_info);
+};
+
+#endif // CDBIRESULT_IDL
