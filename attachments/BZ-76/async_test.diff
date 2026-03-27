@@ -1,0 +1,52 @@
+Fix 1:  I don't know why, but "printf" helps
+	and "cout << "foo" << endl;" doesn't.
+	I also tried fflush(NULL), but it didn't work.
+
+- ----8<----
+*** 7595,7600 ****
+--- 7595,7601 ----
+    int return_val = 0; 
+    while (!done) 
+      {
++	printf("Testing...\n"); 
+        return_val = aio_suspend (list_aiocb,
+                                  2,
+                                  0); 
+- ----8<----
+
+
+Fix 2:  Using timeouts.
+
+- ----8<----
+
+***************
+*** 7593,7603 ****
+    // Do suspend till all the aiocbs in the list are done. 
+    int done = 0; 
+    int return_val = 0; 
+    while (!done) 
+      {
+        return_val = aio_suspend (list_aiocb,
+                                  2, 
+!				  0); 
+        cerr << "Return value :" << return_val << endl; 
+  
+        // Analyze return and error values.
+--- 7593,7607 ----
+    // Do suspend till all the aiocbs in the list are done. 
+    int done = 0; 
+    int return_val = 0;
++
++   timespec_t timeout;
++   timeout.tv_sec = 3;  // portable ?
++
+    while (!done) 
+      {
+        return_val = aio_suspend (list_aiocb,
+                                  2,
+!				  &timeout); 
+        cerr << "Return value :" << return_val << endl; 
+  
+        // Analyze return and error values. 
+- ----8<----
+
