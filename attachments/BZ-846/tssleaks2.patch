@@ -1,0 +1,3879 @@
+Index: Makefile
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Makefile,v
+retrieving revision 1.340
+diff -u -r1.340 Makefile
+--- Makefile	2001/03/17 00:53:28	1.340
++++ Makefile	2001/04/17 17:51:30
+@@ -42,6 +42,7 @@
+   Server_Strategy_Factory \
+   Client_Strategy_Factory \
+   ORB_Core \
++  TSS_Object \
+   ORB_Table \
+   Leader_Follower \
+   Reactor_Holder \
+@@ -176,6 +177,7 @@
+   OctetSeqC \
+   StringSeqC \
+   ORB_Core \
++  TSS_Object \
+   ORB_Table \
+   Leader_Follower \
+   Reactor_Registry \
+@@ -707,6 +709,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -731,7 +735,8 @@
+  target_specification.i
+ 
+ .obj/Transport.o .obj/Transport.so .shobj/Transport.o .shobj/Transport.so: Transport.cpp Transport.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -831,13 +836,19 @@
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+- $(ACE_ROOT)/ace/Message_Queue.h \
+- $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.i \
+- $(ACE_ROOT)/ace/Message_Queue_T.cpp \
+- $(ACE_ROOT)/ace/Strategies.h \
+- $(ACE_ROOT)/ace/Strategies_T.h \
++ Transport_Descriptor_Interface.h \
++ Endpoint.h \
++ Endpoint.i \
++ Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++ $(ACE_ROOT)/ace/Functor.h \
++ $(ACE_ROOT)/ace/Functor.i \
++ $(ACE_ROOT)/ace/Functor_T.h \
++ $(ACE_ROOT)/ace/Functor_T.i \
++ $(ACE_ROOT)/ace/Functor_T.cpp \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Service_Config.h \
+  $(ACE_ROOT)/ace/Service_Object.h \
+  $(ACE_ROOT)/ace/Shared_Object.h \
+@@ -857,6 +868,17 @@
+  $(ACE_ROOT)/ace/Reactor.i \
+  $(ACE_ROOT)/ace/Reactor_Impl.h \
+  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++ Cache_Entries.h \
++ Transport_Descriptor_Interface.h \
++ Cache_Entries.inl \
++ Transport_Cache_Manager.inl \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
+  $(ACE_ROOT)/ace/Synch_Options.h \
+  $(ACE_ROOT)/ace/Synch_Options.i \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+@@ -870,14 +892,6 @@
+  $(ACE_ROOT)/ace/Managed_Object.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+- $(ACE_ROOT)/ace/Functor.h \
+- $(ACE_ROOT)/ace/Functor.i \
+- $(ACE_ROOT)/ace/Functor_T.h \
+- $(ACE_ROOT)/ace/Functor_T.i \
+- $(ACE_ROOT)/ace/Functor_T.cpp \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Strategies_T.i \
+  $(ACE_ROOT)/ace/Strategies_T.cpp \
+  $(ACE_ROOT)/ace/Service_Repository.h \
+@@ -890,9 +904,7 @@
+  $(ACE_ROOT)/ace/WFMO_Reactor.i \
+  $(ACE_ROOT)/ace/Strategies.i \
+  $(ACE_ROOT)/ace/Message_Queue.i \
+- Transport.inl ORB_Core.h ORB.h \
+- Exception.h \
+- Services.h \
++ Transport.inl ORB_Core.h ORB.h Services.h \
+  Sequence.h \
+  Managed_Types.h \
+  Managed_Types.i \
+@@ -914,6 +926,7 @@
+  Object.i \
+  CurrentC.i \
+  Encodable.h \
++ Exception.h \
+  CDR.h \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+@@ -925,6 +938,7 @@
+  Environment.h Policy_Manager.h \
+  LocalObject.h \
+  LocalObject.i \
++ PolicyC.h \
+  Policy_Manager.i \
+  Resource_Factory.h \
+  Pluggable.h \
+@@ -934,7 +948,9 @@
+  IOPC.i \
+  Pluggable.i \
+  Protocol_Factory.h \
+- params.h params.i \
++ params.h \
++ CORBA_String.h \
++ params.i \
+  TAO_Singleton_Manager.h \
+  TAO_Singleton_Manager.inl \
+  TAO_Singleton.h \
+@@ -952,7 +968,7 @@
+  TimeBaseC.i \
+  PollableC.h \
+  PollableC.i \
+- MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i PolicyC.h \
++ MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i \
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+@@ -962,21 +978,16 @@
+  Service_Callbacks.i \
+  Fault_Tolerance_Service.h \
+  Fault_Tolerance_Service.i \
+- Transport_Cache_Manager.h \
+- Cache_Entries.h \
+- Transport_Descriptor_Interface.h \
+- Endpoint.h \
+- Endpoint.i \
+- Transport_Descriptor_Interface.inl \
+- Cache_Entries.inl \
+- Transport_Cache_Manager.inl \
+  Cleanup_Func_Registry.h Cleanup_Func_Registry.inl Object_Ref_Table.h \
+- Interceptor_List.h Interceptor_List.inl RT_Policy_i.h \
++ TSS_Object.h TSS_Object.inl Interceptor_List.h Interceptor_List.inl \
++ RT_Policy_i.h \
+  RTCORBAC.h \
+  RTCORBAC.i \
+  RT_Policy_i.i \
+- Protocols_Hooks.h RTCORBAC.h ORB_Core.i Client_Strategy_Factory.h \
+- TAO_Export.h Wait_Strategy.h Transport_Mux_Strategy.h Stub.h \
++ Protocols_Hooks.h \
++ ORB_Core.h \
++ ORB_Core.i Client_Strategy_Factory.h TAO_Export.h Wait_Strategy.h \
++ Transport_Mux_Strategy.h Stub.h \
+  MProfile.h \
+  Profile.h \
+  Tagged_Components.h \
+@@ -988,7 +999,6 @@
+  Profile.i \
+  MProfile.i \
+  ORB.h \
+- ORB_Core.h \
+  Stub.i \
+  Sync_Strategies.h \
+  Transport.h \
+@@ -998,10 +1008,22 @@
+  Priority_Mapping.i \
+  Priority_Mapping_Manager.i \
+  TAOC.i \
+- Sync_Strategies.i
++ Sync_Strategies.i \
++ Connection_Handler.h \
++ $(ACE_ROOT)/ace/SOCK.h \
++ $(ACE_ROOT)/ace/Addr.h \
++ $(ACE_ROOT)/ace/Addr.i \
++ $(ACE_ROOT)/ace/IPC_SAP.h \
++ $(ACE_ROOT)/ace/IPC_SAP.i \
++ $(ACE_ROOT)/ace/QoS_Session.h \
++ $(ACE_ROOT)/ace/INET_Addr.h \
++ $(ACE_ROOT)/ace/INET_Addr.i \
++ $(ACE_ROOT)/ace/SOCK.i \
++ Connection_Handler.inl
+ 
+ .obj/Profile.o .obj/Profile.so .shobj/Profile.o .shobj/Profile.so: Profile.cpp Profile.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -1234,6 +1256,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -1248,7 +1272,8 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Stub.i debug.h
++ Stub.i \
++ debug.h
+ 
+ .obj/Endpoint.o .obj/Endpoint.so .shobj/Endpoint.o .shobj/Endpoint.so: Endpoint.cpp \
+  Endpoint.h \
+@@ -1574,6 +1599,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -1645,20 +1672,19 @@
+  $(ACE_ROOT)/ace/INET_Addr.h \
+  $(ACE_ROOT)/ace/INET_Addr.i \
+  $(ACE_ROOT)/ace/SOCK.i \
+- Transport_Cache_Manager.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
+- $(ACE_ROOT)/ace/Functor.h \
+- $(ACE_ROOT)/ace/Functor.i \
+- $(ACE_ROOT)/ace/Functor_T.h \
+- $(ACE_ROOT)/ace/Functor_T.i \
+- $(ACE_ROOT)/ace/Functor_T.cpp \
++ Transport.h \
++ corbafwd.h \
++ $(ACE_ROOT)/ace/CDR_Base.h \
++ $(ACE_ROOT)/ace/Message_Block.h \
++ $(ACE_ROOT)/ace/Malloc.h \
+  $(ACE_ROOT)/ace/Log_Msg.h \
+  $(ACE_ROOT)/ace/Log_Record.h \
+  $(ACE_ROOT)/ace/Log_Priority.h \
+  $(ACE_ROOT)/ace/Log_Record.i \
+  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
+  $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.inl \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Malloc.i \
++ $(ACE_ROOT)/ace/Malloc_T.h \
+  $(ACE_ROOT)/ace/Synch.h \
+  $(ACE_ROOT)/ace/Synch.i \
+  $(ACE_ROOT)/ace/Synch_T.h \
+@@ -1671,25 +1697,8 @@
+  $(ACE_ROOT)/ace/Thread.i \
+  $(ACE_ROOT)/ace/Atomic_Op.i \
+  $(ACE_ROOT)/ace/Synch_T.cpp \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+- $(ACE_ROOT)/ace/Service_Config.h \
+- $(ACE_ROOT)/ace/Service_Object.h \
+- $(ACE_ROOT)/ace/Shared_Object.h \
+- $(ACE_ROOT)/ace/Shared_Object.i \
+- $(ACE_ROOT)/ace/Event_Handler.h \
+- $(ACE_ROOT)/ace/Event_Handler.i \
+- $(ACE_ROOT)/ace/Service_Object.i \
+- $(ACE_ROOT)/ace/Signal.h \
+- $(ACE_ROOT)/ace/Containers.h \
+- $(ACE_ROOT)/ace/Malloc_Base.h \
+- $(ACE_ROOT)/ace/Containers.i \
+- $(ACE_ROOT)/ace/Containers_T.h \
+- $(ACE_ROOT)/ace/Containers_T.i \
+- $(ACE_ROOT)/ace/Containers_T.cpp \
+- $(ACE_ROOT)/ace/Malloc.h \
+- $(ACE_ROOT)/ace/Malloc.i \
+- $(ACE_ROOT)/ace/Malloc_T.h \
+  $(ACE_ROOT)/ace/Malloc_Allocator.h \
++ $(ACE_ROOT)/ace/Malloc_Base.h \
+  $(ACE_ROOT)/ace/Malloc_Allocator.i \
+  $(ACE_ROOT)/ace/Free_List.h \
+  $(ACE_ROOT)/ace/Free_List.i \
+@@ -1697,6 +1706,15 @@
+  $(ACE_ROOT)/ace/Malloc_T.i \
+  $(ACE_ROOT)/ace/Malloc_T.cpp \
+  $(ACE_ROOT)/ace/Memory_Pool.h \
++ $(ACE_ROOT)/ace/Event_Handler.h \
++ $(ACE_ROOT)/ace/Event_Handler.i \
++ $(ACE_ROOT)/ace/Signal.h \
++ $(ACE_ROOT)/ace/Containers.h \
++ $(ACE_ROOT)/ace/Containers.i \
++ $(ACE_ROOT)/ace/Containers_T.h \
++ $(ACE_ROOT)/ace/Containers_T.i \
++ $(ACE_ROOT)/ace/Containers_T.cpp \
++ $(ACE_ROOT)/ace/Signal.i \
+  $(ACE_ROOT)/ace/Mem_Map.h \
+  $(ACE_ROOT)/ace/Mem_Map.i \
+  $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
+@@ -1704,9 +1722,39 @@
+  $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
+  $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
+  $(ACE_ROOT)/ace/Memory_Pool.i \
+- $(ACE_ROOT)/ace/Signal.i \
++ $(ACE_ROOT)/ace/Message_Block.i \
++ $(ACE_ROOT)/ace/Message_Block_T.h \
++ $(ACE_ROOT)/ace/Message_Block_T.i \
++ $(ACE_ROOT)/ace/Message_Block_T.cpp \
++ $(ACE_ROOT)/ace/CDR_Base.inl \
++ try_macros.h \
++ orbconf.h \
++ $(ACE_ROOT)/ace/CORBA_macros.h \
++ varbase.h \
++ TAO_Export.h \
++ corbafwd.i \
++ Exception.h \
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
++ Exception.i \
++ Transport_Descriptor_Interface.h \
++ Endpoint.h \
++ Endpoint.i \
++ Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++ $(ACE_ROOT)/ace/Functor.h \
++ $(ACE_ROOT)/ace/Functor.i \
++ $(ACE_ROOT)/ace/Functor_T.h \
++ $(ACE_ROOT)/ace/Functor_T.i \
++ $(ACE_ROOT)/ace/Functor_T.cpp \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
++ $(ACE_ROOT)/ace/Service_Config.h \
++ $(ACE_ROOT)/ace/Service_Object.h \
++ $(ACE_ROOT)/ace/Shared_Object.h \
++ $(ACE_ROOT)/ace/Shared_Object.i \
++ $(ACE_ROOT)/ace/Service_Object.i \
+  $(ACE_ROOT)/ace/Service_Config.i \
+  $(ACE_ROOT)/ace/Reactor.h \
+  $(ACE_ROOT)/ace/Handle_Set.h \
+@@ -1721,32 +1769,45 @@
+  $(ACE_ROOT)/ace/Reactor.i \
+  $(ACE_ROOT)/ace/Reactor_Impl.h \
+  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
+- TAO_Export.h \
+  Cache_Entries.h \
+- Transport_Descriptor_Interface.h \
+- Endpoint.h \
+- corbafwd.h \
+- $(ACE_ROOT)/ace/CDR_Base.h \
+- $(ACE_ROOT)/ace/Message_Block.h \
+- $(ACE_ROOT)/ace/Message_Block.i \
+- $(ACE_ROOT)/ace/Message_Block_T.h \
+- $(ACE_ROOT)/ace/Message_Block_T.i \
+- $(ACE_ROOT)/ace/Message_Block_T.cpp \
+- $(ACE_ROOT)/ace/CDR_Base.inl \
+- try_macros.h \
+- orbconf.h \
+- $(ACE_ROOT)/ace/CORBA_macros.h \
+- varbase.h \
+- corbafwd.i \
+- Endpoint.i \
+- Transport_Descriptor_Interface.inl \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
++ $(ACE_ROOT)/ace/Synch_Options.h \
++ $(ACE_ROOT)/ace/Synch_Options.i \
++ $(ACE_ROOT)/ace/Thread_Manager.h \
++ $(ACE_ROOT)/ace/Singleton.h \
++ $(ACE_ROOT)/ace/Singleton.i \
++ $(ACE_ROOT)/ace/Singleton.cpp \
++ $(ACE_ROOT)/ace/Object_Manager.h \
++ $(ACE_ROOT)/ace/Object_Manager.i \
++ $(ACE_ROOT)/ace/Managed_Object.h \
++ $(ACE_ROOT)/ace/Managed_Object.i \
++ $(ACE_ROOT)/ace/Managed_Object.cpp \
++ $(ACE_ROOT)/ace/Thread_Manager.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager.h \
++ $(ACE_ROOT)/ace/Strategies_T.i \
++ $(ACE_ROOT)/ace/Strategies_T.cpp \
++ $(ACE_ROOT)/ace/Service_Repository.h \
++ $(ACE_ROOT)/ace/Service_Types.h \
++ $(ACE_ROOT)/ace/Service_Types.i \
++ $(ACE_ROOT)/ace/Service_Repository.i \
++ $(ACE_ROOT)/ace/WFMO_Reactor.h \
++ $(ACE_ROOT)/ace/Process_Mutex.h \
++ $(ACE_ROOT)/ace/Process_Mutex.inl \
++ $(ACE_ROOT)/ace/WFMO_Reactor.i \
++ $(ACE_ROOT)/ace/Strategies.i \
++ $(ACE_ROOT)/ace/Message_Queue.i \
++ Transport.inl \
+  Connection_Handler.inl \
+  ORB_Core.h \
+  ORB.h \
+- Exception.h \
+- Exception.i \
+  Services.h \
+  Sequence.h \
+  Managed_Types.h \
+@@ -1796,11 +1857,6 @@
+  TAO_Singleton.h \
+  TAO_Singleton.inl \
+  TAO_Singleton.cpp \
+- $(ACE_ROOT)/ace/Object_Manager.h \
+- $(ACE_ROOT)/ace/Object_Manager.i \
+- $(ACE_ROOT)/ace/Managed_Object.h \
+- $(ACE_ROOT)/ace/Managed_Object.i \
+- $(ACE_ROOT)/ace/Managed_Object.cpp \
+  Adapter.h \
+  Adapter.i \
+  PolicyFactory_Registry.h \
+@@ -1831,6 +1887,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -1838,12 +1896,6 @@
+  RTCORBAC.i \
+  RT_Policy_i.i \
+  Protocols_Hooks.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+- $(ACE_ROOT)/ace/Thread_Manager.h \
+- $(ACE_ROOT)/ace/Singleton.h \
+- $(ACE_ROOT)/ace/Singleton.i \
+- $(ACE_ROOT)/ace/Singleton.cpp \
+- $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+  Server_Strategy_Factory.h \
+  debug.h \
+@@ -2082,6 +2134,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -2654,18 +2708,18 @@
+  $(ACE_ROOT)/ace/INET_Addr.h \
+  $(ACE_ROOT)/ace/INET_Addr.i \
+  $(ACE_ROOT)/ace/SOCK.i \
+- Transport_Cache_Manager.h \
+- Cache_Entries.h \
++ Transport.h \
+  Transport_Descriptor_Interface.h \
+  Endpoint.h \
+  Endpoint.i \
+  Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ Cache_Entries.h \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
++ Transport.inl \
+  Connection_Handler.inl \
+  IIOP_Transport.h \
+- Transport.h \
+- Transport.inl \
+  $(ACE_ROOT)/ace/SOCK_Stream.h \
+  $(ACE_ROOT)/ace/SOCK_IO.h \
+  $(ACE_ROOT)/ace/SOCK_IO.i \
+@@ -2731,6 +2785,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -2977,18 +3033,18 @@
+  $(ACE_ROOT)/ace/INET_Addr.h \
+  $(ACE_ROOT)/ace/INET_Addr.i \
+  $(ACE_ROOT)/ace/SOCK.i \
+- Transport_Cache_Manager.h \
+- Cache_Entries.h \
++ Transport.h \
+  Transport_Descriptor_Interface.h \
+  Endpoint.h \
+  Endpoint.i \
+  Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ Cache_Entries.h \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
++ Transport.inl \
+  Connection_Handler.inl \
+  IIOP_Transport.h \
+- Transport.h \
+- Transport.inl \
+  $(ACE_ROOT)/ace/SOCK_Stream.h \
+  $(ACE_ROOT)/ace/SOCK_IO.h \
+  $(ACE_ROOT)/ace/SOCK_IO.i \
+@@ -3054,6 +3110,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -3329,6 +3387,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -3450,13 +3510,19 @@
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+- $(ACE_ROOT)/ace/Message_Queue.h \
+- $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.i \
+- $(ACE_ROOT)/ace/Message_Queue_T.cpp \
+- $(ACE_ROOT)/ace/Strategies.h \
+- $(ACE_ROOT)/ace/Strategies_T.h \
++ Transport_Descriptor_Interface.h \
++ Endpoint.h \
++ Endpoint.i \
++ Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++ $(ACE_ROOT)/ace/Functor.h \
++ $(ACE_ROOT)/ace/Functor.i \
++ $(ACE_ROOT)/ace/Functor_T.h \
++ $(ACE_ROOT)/ace/Functor_T.i \
++ $(ACE_ROOT)/ace/Functor_T.cpp \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Service_Config.h \
+  $(ACE_ROOT)/ace/Service_Object.h \
+  $(ACE_ROOT)/ace/Shared_Object.h \
+@@ -3476,6 +3542,16 @@
+  $(ACE_ROOT)/ace/Reactor.i \
+  $(ACE_ROOT)/ace/Reactor_Impl.h \
+  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++ Cache_Entries.h \
++ Cache_Entries.inl \
++ Transport_Cache_Manager.inl \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
+  $(ACE_ROOT)/ace/Synch_Options.h \
+  $(ACE_ROOT)/ace/Synch_Options.i \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+@@ -3489,14 +3565,6 @@
+  $(ACE_ROOT)/ace/Managed_Object.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+- $(ACE_ROOT)/ace/Functor.h \
+- $(ACE_ROOT)/ace/Functor.i \
+- $(ACE_ROOT)/ace/Functor_T.h \
+- $(ACE_ROOT)/ace/Functor_T.i \
+- $(ACE_ROOT)/ace/Functor_T.cpp \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Strategies_T.i \
+  $(ACE_ROOT)/ace/Strategies_T.cpp \
+  $(ACE_ROOT)/ace/Service_Repository.h \
+@@ -3558,14 +3626,6 @@
+  $(ACE_ROOT)/ace/Acceptor.cpp \
+  Wait_Strategy.h \
+  Connection_Handler.h \
+- Transport_Cache_Manager.h \
+- Cache_Entries.h \
+- Transport_Descriptor_Interface.h \
+- Endpoint.h \
+- Endpoint.i \
+- Transport_Descriptor_Interface.inl \
+- Cache_Entries.inl \
+- Transport_Cache_Manager.inl \
+  Connection_Handler.inl \
+  IIOP_Connection_Handler.i \
+  IIOP_Acceptor.h \
+@@ -3640,6 +3700,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -3948,18 +4010,18 @@
+  $(ACE_ROOT)/ace/Acceptor.cpp \
+  Wait_Strategy.h \
+  Connection_Handler.h \
+- Transport_Cache_Manager.h \
+- Cache_Entries.h \
++ Transport.h \
+  Transport_Descriptor_Interface.h \
+  Endpoint.h \
+  Endpoint.i \
+  Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ Cache_Entries.h \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
++ Transport.inl \
+  Connection_Handler.inl \
+  IIOP_Transport.h \
+- Transport.h \
+- Transport.inl \
+  IIOPC.h \
+  IIOPC.i \
+  IIOP_Transport.i \
+@@ -4031,6 +4093,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -4261,18 +4325,18 @@
+  $(ACE_ROOT)/ace/INET_Addr.h \
+  $(ACE_ROOT)/ace/INET_Addr.i \
+  $(ACE_ROOT)/ace/SOCK.i \
+- Transport_Cache_Manager.h \
+- Cache_Entries.h \
++ Transport.h \
+  Transport_Descriptor_Interface.h \
+  Endpoint.h \
+  Endpoint.i \
+  Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ Cache_Entries.h \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
++ Transport.inl \
+  Connection_Handler.inl \
+  IIOP_Transport.h \
+- Transport.h \
+- Transport.inl \
+  $(ACE_ROOT)/ace/SOCK_Stream.h \
+  $(ACE_ROOT)/ace/SOCK_IO.h \
+  $(ACE_ROOT)/ace/SOCK_IO.i \
+@@ -4339,6 +4403,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -4563,20 +4629,20 @@
+  $(ACE_ROOT)/ace/INET_Addr.h \
+  $(ACE_ROOT)/ace/INET_Addr.i \
+  $(ACE_ROOT)/ace/SOCK.i \
+- Transport_Cache_Manager.h \
+- Cache_Entries.h \
++ Transport.h \
++ Exception.h \
++ Exception.i \
+  Transport_Descriptor_Interface.h \
+  Endpoint.h \
+  Endpoint.i \
+  Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ Cache_Entries.h \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
++ Transport.inl \
+  Connection_Handler.inl \
+  IIOP_Transport.h \
+- Transport.h \
+- Exception.h \
+- Exception.i \
+- Transport.inl \
+  $(ACE_ROOT)/ace/SOCK_Stream.h \
+  $(ACE_ROOT)/ace/SOCK_IO.h \
+  $(ACE_ROOT)/ace/SOCK_IO.i \
+@@ -4669,6 +4735,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -4908,16 +4976,16 @@
+  $(ACE_ROOT)/ace/IPC_SAP.i \
+  $(ACE_ROOT)/ace/QoS_Session.h \
+  $(ACE_ROOT)/ace/SOCK.i \
+- Transport_Cache_Manager.h \
+- Cache_Entries.h \
++ Transport.h \
+  Transport_Descriptor_Interface.h \
+  Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ Cache_Entries.h \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
++ Transport.inl \
+  Connection_Handler.inl \
+  IIOP_Transport.h \
+- Transport.h \
+- Transport.inl \
+  $(ACE_ROOT)/ace/SOCK_Stream.h \
+  $(ACE_ROOT)/ace/SOCK_IO.h \
+  $(ACE_ROOT)/ace/SOCK_IO.i \
+@@ -5279,6 +5347,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -5526,6 +5596,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -5765,6 +5837,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -6905,6 +6979,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -7361,6 +7437,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -7708,6 +7786,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -7956,6 +8036,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -8236,6 +8318,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -8496,6 +8580,7 @@
+  TAO_Export.h \
+  corbafwd.i \
+  Exception.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+@@ -8521,6 +8606,7 @@
+  Object.i \
+  CurrentC.i \
+  Encodable.h \
++ Exception.h \
+  CDR.h \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+@@ -8528,7 +8614,8 @@
+  Typecode.h \
+  Typecode.i \
+  PolicyC.i \
+- ORB.i ORB_Table.h \
++ ORB.i \
++ ORB_Table.h \
+  TAO_Singleton.h \
+  TAO_Singleton.inl \
+  TAO_Singleton.cpp \
+@@ -8575,6 +8662,7 @@
+  IOPC.i \
+  Pluggable.i \
+  params.h \
++ CORBA_String.h \
+  params.i \
+  Connector_Registry.i \
+  IOR_Parser.h \
+@@ -8588,6 +8676,7 @@
+  CONV_FRAMEC.h \
+  CONV_FRAMEC.i \
+  Tagged_Components.i \
++ PolicyC.h \
+  GIOP_Message_State.h \
+  GIOP_Message_State.i \
+  Profile.i \
+@@ -8637,6 +8726,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -8651,9 +8742,10 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Stub.i ORB_Core.h \
+- Server_Strategy_Factory.h debug.h TAO_Internal.h TAO_Export.h \
+- NVList.h NVList.i \
++ Stub.i \
++ ORB_Core.h Server_Strategy_Factory.h debug.h TAO_Internal.h \
++ TAO_Export.h NVList.h \
++ NVList.i \
+  Dynamic_Adapter.h CDR.h MProfile.h RT_ORB.h \
+  RT_ORB.i \
+  Priority_Mapping_Manager.h \
+@@ -8662,8 +8754,8 @@
+  Priority_Mapping_Manager.i \
+  RT_Current.h \
+  RT_Current.i \
+- ORBInitInfo.h corbafwd.h PortableInterceptorC.h LocalObject.h \
+- StringSeqC.h Sequence.h StringSeqC.i CodecFactory.h IOPC.h \
++ ORBInitInfo.h PortableInterceptorC.h LocalObject.h StringSeqC.h \
++ Sequence.h StringSeqC.i CodecFactory.h IOPC.h \
+  ORBInitializer_Registry.h TAO_Singleton.h \
+  ORBInitializer_Registry.inl \
+  CodecFactory_ORBInitializer.h RT_ORBInitializer.h \
+@@ -9036,6 +9128,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -9805,6 +9899,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -9843,7 +9939,8 @@
+  Invocation.i
+ 
+ .obj/DomainC.o .obj/DomainC.so .shobj/DomainC.o .shobj/DomainC.so: DomainC.cpp DomainC.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -9970,8 +10067,8 @@
+  PolicyC.i \
+  ClientRequestInfo.h PortableInterceptorC.h DynamicC.h \
+  Any.h \
+- Any.i DynamicC.i \
+- MessagingC.h Remote_Object_Proxy_Impl.h \
++ Any.i \
++ DynamicC.i MessagingC.h Remote_Object_Proxy_Impl.h \
+  ValueBase.h \
+  ValueBase.i \
+  ValueFactory.h \
+@@ -10073,6 +10170,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -10087,8 +10186,8 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Stub.i Any.h \
+- Synch_Reply_Dispatcher.h \
++ Stub.i \
++ Any.h Synch_Reply_Dispatcher.h \
+  Reply_Dispatcher.h \
+  Reply_Dispatcher.i \
+  TAOC.h \
+@@ -10697,7 +10796,8 @@
+  varbase.h \
+  TAO_Export.h \
+  corbafwd.i \
+- Endpoint.i Stub.h \
++ Endpoint.i \
++ Stub.h \
+  Pluggable.h \
+  Sequence.h \
+  Managed_Types.h \
+@@ -10832,6 +10932,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -10846,8 +10948,8 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Stub.i Sequence.h \
+- Object.h Invocation.h CDR.h Any.h Synch_Reply_Dispatcher.h \
++ Stub.i \
++ Sequence.h Object.h Invocation.h CDR.h Any.h Synch_Reply_Dispatcher.h \
+  Reply_Dispatcher.h \
+  Reply_Dispatcher.i \
+  TAOC.h \
+@@ -10868,9 +10970,6 @@
+  Invocation.i Asynch_Invocation.h \
+  Invocation.h \
+  Asynch_Reply_Dispatcher.h \
+- Asynch_Reply_Dispatcher.i \
+- Asynch_Invocation.i \
+- ORB_Core.h Client_Strategy_Factory.h TAO_Export.h Sync_Strategies.h \
+  Transport.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+@@ -10894,6 +10993,10 @@
+  $(ACE_ROOT)/ace/Strategies.i \
+  $(ACE_ROOT)/ace/Message_Queue.i \
+  Transport.inl \
++ Asynch_Timeout_Handler.h \
++ Asynch_Reply_Dispatcher.i \
++ Asynch_Invocation.i \
++ ORB_Core.h Client_Strategy_Factory.h TAO_Export.h Sync_Strategies.h \
+  TAOC.h \
+  Sync_Strategies.i \
+  Buffering_Constraint_Policy.h \
+@@ -11271,6 +11374,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -11785,6 +11890,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -12061,8 +12168,10 @@
+  Typecode.i
+ 
+ .obj/Protocols_Hooks.o .obj/Protocols_Hooks.so .shobj/Protocols_Hooks.o .shobj/Protocols_Hooks.so: Protocols_Hooks.cpp Protocols_Hooks.h \
+- $(ACE_ROOT)/ace/pre.h ORB_Core.h \
+- corbafwd.h $(ACE_ROOT)/ace/CDR_Base.h \
++ $(ACE_ROOT)/ace/pre.h \
++ ORB_Core.h \
++ corbafwd.h \
++ $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+  $(ACE_ROOT)/ace/svc_export.h \
+@@ -12155,8 +12264,8 @@
+  $(ACE_ROOT)/ace/CORBA_macros.h \
+  varbase.h \
+  TAO_Export.h \
+- corbafwd.i ORB.h \
+- corbafwd.h \
++ corbafwd.i \
++ ORB.h \
+  Exception.h \
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
+@@ -12191,7 +12300,7 @@
+  Typecode.i \
+  PolicyC.i \
+  ORB.i \
+- Environment.h Policy_Manager.h \
++ Policy_Manager.h \
+  LocalObject.h \
+  LocalObject.i \
+  Policy_Manager.i \
+@@ -12207,21 +12316,26 @@
+  IOPC.i \
+  Pluggable.i \
+  Protocol_Factory.h \
+- params.h params.i \
++ params.h \
++ params.i \
+  TAO_Singleton_Manager.h \
+  TAO_Singleton_Manager.inl \
+  TAO_Singleton.h \
+  TAO_Singleton.inl \
+  TAO_Singleton.cpp \
+- TAO_Singleton.h \
+  $(ACE_ROOT)/ace/Object_Manager.h \
+  $(ACE_ROOT)/ace/Object_Manager.i \
+  $(ACE_ROOT)/ace/Managed_Object.h \
+  $(ACE_ROOT)/ace/Managed_Object.i \
+  $(ACE_ROOT)/ace/Managed_Object.cpp \
+- TAO_Singleton_Manager.h \
+- Adapter.h Adapter.i PolicyFactory_Registry.h PortableInterceptorC.h \
+- DynamicC.h DynamicC.i MessagingC.h Remote_Object_Proxy_Impl.h \
++ Adapter.h \
++ Adapter.i \
++ PolicyFactory_Registry.h \
++ PortableInterceptorC.h \
++ DynamicC.h \
++ DynamicC.i \
++ MessagingC.h \
++ Remote_Object_Proxy_Impl.h \
+  ValueBase.h \
+  ValueBase.i \
+  ValueFactory.h \
+@@ -12230,7 +12344,8 @@
+  TimeBaseC.i \
+  PollableC.h \
+  PollableC.i \
+- MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i PolicyC.h \
++ MessagingC.i \
++ PortableInterceptorC.i \
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+@@ -12271,18 +12386,25 @@
+  Transport_Descriptor_Interface.inl \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
+- Cleanup_Func_Registry.h Cleanup_Func_Registry.inl Object_Ref_Table.h \
+- Interceptor_List.h Interceptor_List.inl RT_Policy_i.h \
++ Cleanup_Func_Registry.h \
++ Cleanup_Func_Registry.inl \
++ Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
++ Interceptor_List.h \
++ Interceptor_List.inl \
++ RT_Policy_i.h \
+  RTCORBAC.h \
+  RTCORBAC.i \
+  RT_Policy_i.i \
++ Protocols_Hooks.h \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+  $(ACE_ROOT)/ace/Singleton.h \
+  $(ACE_ROOT)/ace/Singleton.i \
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+- ORB_Core.i RTCORBAC.h \
++ ORB_Core.i \
+  $(ACE_ROOT)/ace/Dynamic_Service.h \
+  $(ACE_ROOT)/ace/Dynamic_Service_Base.h \
+  $(ACE_ROOT)/ace/Dynamic_Service.i \
+@@ -12291,7 +12413,9 @@
+ .obj/Default_Protocols_Hooks.o .obj/Default_Protocols_Hooks.so .shobj/Default_Protocols_Hooks.o .shobj/Default_Protocols_Hooks.so: Default_Protocols_Hooks.cpp \
+  Default_Protocols_Hooks.h \
+  $(ACE_ROOT)/ace/pre.h \
+- Protocols_Hooks.h ORB_Core.h corbafwd.h \
++ Protocols_Hooks.h \
++ ORB_Core.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -12385,8 +12509,8 @@
+  $(ACE_ROOT)/ace/CORBA_macros.h \
+  varbase.h \
+  TAO_Export.h \
+- corbafwd.i ORB.h \
+- corbafwd.h \
++ corbafwd.i \
++ ORB.h \
+  Exception.h \
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
+@@ -12421,7 +12545,7 @@
+  Typecode.i \
+  PolicyC.i \
+  ORB.i \
+- Environment.h Policy_Manager.h \
++ Policy_Manager.h \
+  LocalObject.h \
+  LocalObject.i \
+  Policy_Manager.i \
+@@ -12437,21 +12561,26 @@
+  IOPC.i \
+  Pluggable.i \
+  Protocol_Factory.h \
+- params.h params.i \
++ params.h \
++ params.i \
+  TAO_Singleton_Manager.h \
+  TAO_Singleton_Manager.inl \
+  TAO_Singleton.h \
+  TAO_Singleton.inl \
+  TAO_Singleton.cpp \
+- TAO_Singleton.h \
+  $(ACE_ROOT)/ace/Object_Manager.h \
+  $(ACE_ROOT)/ace/Object_Manager.i \
+  $(ACE_ROOT)/ace/Managed_Object.h \
+  $(ACE_ROOT)/ace/Managed_Object.i \
+  $(ACE_ROOT)/ace/Managed_Object.cpp \
+- TAO_Singleton_Manager.h \
+- Adapter.h Adapter.i PolicyFactory_Registry.h PortableInterceptorC.h \
+- DynamicC.h DynamicC.i MessagingC.h Remote_Object_Proxy_Impl.h \
++ Adapter.h \
++ Adapter.i \
++ PolicyFactory_Registry.h \
++ PortableInterceptorC.h \
++ DynamicC.h \
++ DynamicC.i \
++ MessagingC.h \
++ Remote_Object_Proxy_Impl.h \
+  ValueBase.h \
+  ValueBase.i \
+  ValueFactory.h \
+@@ -12460,7 +12589,8 @@
+  TimeBaseC.i \
+  PollableC.h \
+  PollableC.i \
+- MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i PolicyC.h \
++ MessagingC.i \
++ PortableInterceptorC.i \
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+@@ -12501,18 +12631,25 @@
+  Transport_Descriptor_Interface.inl \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
+- Cleanup_Func_Registry.h Cleanup_Func_Registry.inl Object_Ref_Table.h \
+- Interceptor_List.h Interceptor_List.inl RT_Policy_i.h \
++ Cleanup_Func_Registry.h \
++ Cleanup_Func_Registry.inl \
++ Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
++ Interceptor_List.h \
++ Interceptor_List.inl \
++ RT_Policy_i.h \
+  RTCORBAC.h \
+  RTCORBAC.i \
+  RT_Policy_i.i \
++ Protocols_Hooks.h \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+  $(ACE_ROOT)/ace/Singleton.h \
+  $(ACE_ROOT)/ace/Singleton.i \
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+- ORB_Core.i RTCORBAC.h \
++ ORB_Core.i \
+  Default_Protocols_Hooks.i \
+  $(ACE_ROOT)/ace/Dynamic_Service.h \
+  $(ACE_ROOT)/ace/Dynamic_Service_Base.h \
+@@ -12520,7 +12657,8 @@
+  $(ACE_ROOT)/ace/Dynamic_Service.cpp
+ 
+ .obj/Invocation.o .obj/Invocation.so .shobj/Invocation.o .shobj/Invocation.so: Invocation.cpp Invocation.h \
+- $(ACE_ROOT)/ace/pre.h CDR.h \
++ $(ACE_ROOT)/ace/pre.h \
++ CDR.h \
+  corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+@@ -12618,7 +12756,8 @@
+  corbafwd.i \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+- CDR.i Stub.h \
++ CDR.i \
++ Stub.h \
+  Pluggable.h \
+  Sequence.h \
+  Managed_Types.h \
+@@ -12751,6 +12890,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -12765,8 +12906,8 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Stub.i Any.h \
+- Synch_Reply_Dispatcher.h \
++ Stub.i \
++ Any.h Synch_Reply_Dispatcher.h \
+  Reply_Dispatcher.h \
+  Reply_Dispatcher.i \
+  TAOC.h \
+@@ -12790,6 +12931,7 @@
+  Timeprobe.h \
+  $(ACE_ROOT)/ace/Timeprobe.h \
+  Dynamic_Adapter.h Object_KeyC.h debug.h Transport.h Exception.h \
++ Transport_Descriptor_Interface.h Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -13067,6 +13209,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -13344,6 +13488,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -13615,6 +13761,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -13651,11 +13799,6 @@
+  Invocation_Endpoint_Selectors.i \
+  Invocation.i \
+  Asynch_Reply_Dispatcher.h \
+- Asynch_Reply_Dispatcher.i \
+- Asynch_Invocation.i \
+- Timeprobe.h \
+- $(ACE_ROOT)/ace/Timeprobe.h \
+- Transport_Mux_Strategy.h \
+  Transport.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+@@ -13679,7 +13822,12 @@
+  $(ACE_ROOT)/ace/Strategies.i \
+  $(ACE_ROOT)/ace/Message_Queue.i \
+  Transport.inl \
+- Asynch_Timeout_Handler.h
++ Asynch_Timeout_Handler.h \
++ Asynch_Reply_Dispatcher.i \
++ Asynch_Invocation.i \
++ Timeprobe.h \
++ $(ACE_ROOT)/ace/Timeprobe.h \
++ Transport_Mux_Strategy.h
+ 
+ .obj/operation_details.o .obj/operation_details.so .shobj/operation_details.o .shobj/operation_details.so: operation_details.cpp \
+  operation_details.h \
+@@ -13966,7 +14114,8 @@
+  PortableInterceptor.i
+ 
+ .obj/ClientRequestInfo.o .obj/ClientRequestInfo.so .shobj/ClientRequestInfo.o .shobj/ClientRequestInfo.so: ClientRequestInfo.cpp ClientRequestInfo.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -14195,6 +14344,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -14209,8 +14360,8 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Stub.i Any.h \
+- Synch_Reply_Dispatcher.h \
++ Stub.i \
++ Any.h Synch_Reply_Dispatcher.h \
+  Reply_Dispatcher.h \
+  Reply_Dispatcher.i \
+  TAOC.h \
+@@ -14231,7 +14382,8 @@
+  Invocation.i ClientRequestInfo.inl Tagged_Components.h
+ 
+ .obj/RequestInfo_Util.o .obj/RequestInfo_Util.so .shobj/RequestInfo_Util.o .shobj/RequestInfo_Util.so: RequestInfo_Util.cpp RequestInfo_Util.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -14358,7 +14510,8 @@
+ 
+ .obj/PortableInterceptorC.o .obj/PortableInterceptorC.so .shobj/PortableInterceptorC.o .shobj/PortableInterceptorC.so: PortableInterceptorC.cpp \
+  PortableInterceptorC.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -14628,7 +14781,8 @@
+  StringSeqC.i
+ 
+ .obj/OctetSeqC.o .obj/OctetSeqC.so .shobj/OctetSeqC.o .shobj/OctetSeqC.so: OctetSeqC.cpp OctetSeqC.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -14750,11 +14904,12 @@
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+  Typecode.i \
+- Any.i CDR.h \
+- Typecode.h
++ Any.i \
++ CDR.h Typecode.h
+ 
+ .obj/StringSeqC.o .obj/StringSeqC.so .shobj/StringSeqC.o .shobj/StringSeqC.so: StringSeqC.cpp StringSeqC.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -14876,11 +15031,12 @@
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+  Typecode.i \
+- Any.i CDR.h \
+- Typecode.h
++ Any.i \
++ CDR.h Typecode.h
+ 
+ .obj/ORB_Core.o .obj/ORB_Core.so .shobj/ORB_Core.o .shobj/ORB_Core.so: ORB_Core.cpp ORB_Core.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -14974,9 +15130,9 @@
+  $(ACE_ROOT)/ace/CORBA_macros.h \
+  varbase.h \
+  TAO_Export.h \
+- corbafwd.i ORB.h \
++ corbafwd.i \
++ ORB.h Exception.h \
+  corbafwd.h \
+- Exception.h \
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+@@ -15002,6 +15158,7 @@
+  Object.i \
+  CurrentC.i \
+  Encodable.h \
++ Exception.h \
+  CDR.h \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+@@ -15013,6 +15170,7 @@
+  Environment.h Policy_Manager.h \
+  LocalObject.h \
+  LocalObject.i \
++ PolicyC.h \
+  Policy_Manager.i \
+  Resource_Factory.h \
+  $(ACE_ROOT)/ace/Service_Object.h \
+@@ -15026,7 +15184,9 @@
+  IOPC.i \
+  Pluggable.i \
+  Protocol_Factory.h \
+- params.h params.i \
++ params.h \
++ CORBA_String.h \
++ params.i \
+  TAO_Singleton_Manager.h \
+  TAO_Singleton_Manager.inl \
+  TAO_Singleton.h \
+@@ -15049,7 +15209,7 @@
+  TimeBaseC.i \
+  PollableC.h \
+  PollableC.i \
+- MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i PolicyC.h \
++ MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i \
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+@@ -15091,11 +15251,13 @@
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
+  Cleanup_Func_Registry.h Cleanup_Func_Registry.inl Object_Ref_Table.h \
+- Interceptor_List.h Interceptor_List.inl RT_Policy_i.h \
++ TSS_Object.h TSS_Object.inl Interceptor_List.h Interceptor_List.inl \
++ RT_Policy_i.h \
+  RTCORBAC.h \
+  RTCORBAC.i \
+  RT_Policy_i.i \
+- Protocols_Hooks.h RTCORBAC.h \
++ Protocols_Hooks.h \
++ ORB_Core.h \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+  $(ACE_ROOT)/ace/Singleton.h \
+@@ -15122,10 +15284,10 @@
+  GIOP_Message_State.h \
+  GIOP_Message_State.i \
+  Profile.i \
+- MProfile.i Stub.h \
++ MProfile.i \
++ Stub.h \
+  MProfile.h \
+  ORB.h \
+- ORB_Core.h \
+  Stub.i \
+  Reactor_Registry.h \
+  Reactor_Registry.i \
+@@ -15138,6 +15300,7 @@
+  Acceptor_Registry.i \
+  Sync_Strategies.h \
+  Transport.h \
++ Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -15195,6 +15358,91 @@
+  RT_Invocation_Endpoint_Selectors.i \
+  IORInfo.h LocalObject.h
+ 
++.obj/TSS_Object.o .obj/TSS_Object.so .shobj/TSS_Object.o .shobj/TSS_Object.so: TSS_Object.cpp TSS_Object.h \
++ $(ACE_ROOT)/ace/pre.h \
++ $(ACE_ROOT)/ace/Synch_T.h \
++ $(ACE_ROOT)/ace/Synch.h \
++ $(ACE_ROOT)/ace/ACE.h \
++ $(ACE_ROOT)/ace/OS.h \
++ $(ACE_ROOT)/ace/post.h \
++ $(ACE_ROOT)/ace/ACE_export.h \
++ $(ACE_ROOT)/ace/svc_export.h \
++ $(ACE_ROOT)/ace/ace_wchar.h \
++ $(ACE_ROOT)/ace/ace_wchar.inl \
++ $(ACE_ROOT)/ace/OS_Errno.h \
++ $(ACE_ROOT)/ace/OS_Export.h \
++ $(ACE_ROOT)/ace/OS_Errno.inl \
++ $(ACE_ROOT)/ace/OS_Dirent.h \
++ $(ACE_ROOT)/ace/OS_Dirent.inl \
++ $(ACE_ROOT)/ace/OS_String.h \
++ $(ACE_ROOT)/ace/OS_String.inl \
++ $(ACE_ROOT)/ace/OS_Memory.h \
++ $(ACE_ROOT)/ace/OS_Memory.inl \
++ $(ACE_ROOT)/ace/OS_TLI.h \
++ $(ACE_ROOT)/ace/OS_TLI.inl \
++ $(ACE_ROOT)/ace/Min_Max.h \
++ $(ACE_ROOT)/ace/streams.h \
++ $(ACE_ROOT)/ace/Basic_Types.h \
++ $(ACE_ROOT)/ace/Basic_Types.i \
++ $(ACE_ROOT)/ace/Trace.h \
++ $(ACE_ROOT)/ace/OS.i \
++ $(ACE_ROOT)/ace/Flag_Manip.h \
++ $(ACE_ROOT)/ace/Flag_Manip.i \
++ $(ACE_ROOT)/ace/Handle_Ops.h \
++ $(ACE_ROOT)/ace/Handle_Ops.i \
++ $(ACE_ROOT)/ace/Lib_Find.h \
++ $(ACE_ROOT)/ace/Lib_Find.i \
++ $(ACE_ROOT)/ace/Init_ACE.h \
++ $(ACE_ROOT)/ace/Init_ACE.i \
++ $(ACE_ROOT)/ace/Sock_Connect.h \
++ $(ACE_ROOT)/ace/Sock_Connect.i \
++ $(ACE_ROOT)/ace/ACE.i \
++ $(ACE_ROOT)/ace/Synch.i \
++ $(ACE_ROOT)/ace/Synch_T.i \
++ $(ACE_ROOT)/ace/Thread.h \
++ $(ACE_ROOT)/ace/Thread_Adapter.h \
++ $(ACE_ROOT)/ace/Base_Thread_Adapter.h \
++ $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.h \
++ $(ACE_ROOT)/ace/OS_Log_Msg_Attributes.inl \
++ $(ACE_ROOT)/ace/Base_Thread_Adapter.inl \
++ $(ACE_ROOT)/ace/Thread_Adapter.inl \
++ $(ACE_ROOT)/ace/Thread.i \
++ $(ACE_ROOT)/ace/Atomic_Op.i \
++ $(ACE_ROOT)/ace/Synch_T.cpp \
++ $(ACE_ROOT)/ace/Log_Msg.h \
++ $(ACE_ROOT)/ace/Log_Record.h \
++ $(ACE_ROOT)/ace/Log_Priority.h \
++ $(ACE_ROOT)/ace/Log_Record.i \
++ $(ACE_ROOT)/ace/Containers_T.h \
++ $(ACE_ROOT)/ace/Containers.h \
++ $(ACE_ROOT)/ace/Malloc_Base.h \
++ $(ACE_ROOT)/ace/Containers.i \
++ $(ACE_ROOT)/ace/Containers_T.i \
++ $(ACE_ROOT)/ace/Containers_T.cpp \
++ $(ACE_ROOT)/ace/Malloc.h \
++ $(ACE_ROOT)/ace/Malloc.i \
++ $(ACE_ROOT)/ace/Malloc_T.h \
++ $(ACE_ROOT)/ace/Malloc_Allocator.h \
++ $(ACE_ROOT)/ace/Malloc_Allocator.i \
++ $(ACE_ROOT)/ace/Free_List.h \
++ $(ACE_ROOT)/ace/Free_List.i \
++ $(ACE_ROOT)/ace/Free_List.cpp \
++ $(ACE_ROOT)/ace/Malloc_T.i \
++ $(ACE_ROOT)/ace/Malloc_T.cpp \
++ $(ACE_ROOT)/ace/Memory_Pool.h \
++ $(ACE_ROOT)/ace/Event_Handler.h \
++ $(ACE_ROOT)/ace/Event_Handler.i \
++ $(ACE_ROOT)/ace/Signal.h \
++ $(ACE_ROOT)/ace/Signal.i \
++ $(ACE_ROOT)/ace/Mem_Map.h \
++ $(ACE_ROOT)/ace/Mem_Map.i \
++ $(ACE_ROOT)/ace/SV_Semaphore_Complex.h \
++ $(ACE_ROOT)/ace/SV_Semaphore_Simple.h \
++ $(ACE_ROOT)/ace/SV_Semaphore_Simple.i \
++ $(ACE_ROOT)/ace/SV_Semaphore_Complex.i \
++ $(ACE_ROOT)/ace/Memory_Pool.i \
++ TSS_Object.inl
++
+ .obj/ORB_Table.o .obj/ORB_Table.so .shobj/ORB_Table.o .shobj/ORB_Table.so: ORB_Table.cpp ORB_Table.h \
+  $(ACE_ROOT)/ace/pre.h \
+  TAO_Export.h \
+@@ -15331,9 +15579,9 @@
+  try_macros.h \
+  $(ACE_ROOT)/ace/CORBA_macros.h \
+  varbase.h \
+- corbafwd.i ORB.h \
++ corbafwd.i \
++ ORB.h Exception.h \
+  corbafwd.h \
+- Exception.h \
+  Exception.i \
+  Services.h \
+  Sequence.h \
+@@ -15357,6 +15605,7 @@
+  Object.i \
+  CurrentC.i \
+  Encodable.h \
++ Exception.h \
+  CDR.h \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+@@ -15368,6 +15617,7 @@
+  Environment.h Policy_Manager.h \
+  LocalObject.h \
+  LocalObject.i \
++ PolicyC.h \
+  Policy_Manager.i \
+  Resource_Factory.h \
+  Pluggable.h \
+@@ -15377,7 +15627,9 @@
+  IOPC.i \
+  Pluggable.i \
+  Protocol_Factory.h \
+- params.h params.i \
++ params.h \
++ CORBA_String.h \
++ params.i \
+  TAO_Singleton_Manager.h TAO_Singleton.h Adapter.h Adapter.i \
+  PolicyFactory_Registry.h PortableInterceptorC.h DynamicC.h DynamicC.i \
+  MessagingC.h Remote_Object_Proxy_Impl.h \
+@@ -15389,7 +15641,7 @@
+  TimeBaseC.i \
+  PollableC.h \
+  PollableC.i \
+- MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i PolicyC.h \
++ MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i \
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+@@ -15408,11 +15660,13 @@
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
+  Cleanup_Func_Registry.h Cleanup_Func_Registry.inl Object_Ref_Table.h \
+- Interceptor_List.h Interceptor_List.inl RT_Policy_i.h \
++ TSS_Object.h TSS_Object.inl Interceptor_List.h Interceptor_List.inl \
++ RT_Policy_i.h \
+  RTCORBAC.h \
+  RTCORBAC.i \
+  RT_Policy_i.i \
+- Protocols_Hooks.h RTCORBAC.h \
++ Protocols_Hooks.h \
++ ORB_Core.h \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+  $(ACE_ROOT)/ace/Singleton.h \
+@@ -15643,6 +15897,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -16093,6 +16349,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -16315,13 +16573,19 @@
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+- $(ACE_ROOT)/ace/Message_Queue.h \
+- $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.i \
+- $(ACE_ROOT)/ace/Message_Queue_T.cpp \
+- $(ACE_ROOT)/ace/Strategies.h \
+- $(ACE_ROOT)/ace/Strategies_T.h \
++ Transport_Descriptor_Interface.h \
++ Endpoint.h \
++ Endpoint.i \
++ Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++ $(ACE_ROOT)/ace/Functor.h \
++ $(ACE_ROOT)/ace/Functor.i \
++ $(ACE_ROOT)/ace/Functor_T.h \
++ $(ACE_ROOT)/ace/Functor_T.i \
++ $(ACE_ROOT)/ace/Functor_T.cpp \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Service_Config.h \
+  $(ACE_ROOT)/ace/Service_Object.h \
+  $(ACE_ROOT)/ace/Shared_Object.h \
+@@ -16341,6 +16605,16 @@
+  $(ACE_ROOT)/ace/Reactor.i \
+  $(ACE_ROOT)/ace/Reactor_Impl.h \
+  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++ Cache_Entries.h \
++ Cache_Entries.inl \
++ Transport_Cache_Manager.inl \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
+  $(ACE_ROOT)/ace/Synch_Options.h \
+  $(ACE_ROOT)/ace/Synch_Options.i \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+@@ -16354,14 +16628,6 @@
+  $(ACE_ROOT)/ace/Managed_Object.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+- $(ACE_ROOT)/ace/Functor.h \
+- $(ACE_ROOT)/ace/Functor.i \
+- $(ACE_ROOT)/ace/Functor_T.h \
+- $(ACE_ROOT)/ace/Functor_T.i \
+- $(ACE_ROOT)/ace/Functor_T.cpp \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Strategies_T.i \
+  $(ACE_ROOT)/ace/Strategies_T.cpp \
+  $(ACE_ROOT)/ace/Service_Repository.h \
+@@ -16475,17 +16741,11 @@
+  Service_Callbacks.i \
+  Fault_Tolerance_Service.h \
+  Fault_Tolerance_Service.i \
+- Transport_Cache_Manager.h \
+- Cache_Entries.h \
+- Transport_Descriptor_Interface.h \
+- Endpoint.h \
+- Endpoint.i \
+- Transport_Descriptor_Interface.inl \
+- Cache_Entries.inl \
+- Transport_Cache_Manager.inl \
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -16905,6 +17165,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -16928,7 +17190,8 @@
+  Pluggable_Messaging.i \
+  GIOP_Utils.h \
+  GIOP_Utils.i \
+- Transport.h corbafwd.h Exception.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -17192,6 +17455,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -17459,6 +17724,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -17678,13 +17945,19 @@
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+- $(ACE_ROOT)/ace/Message_Queue.h \
+- $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.i \
+- $(ACE_ROOT)/ace/Message_Queue_T.cpp \
+- $(ACE_ROOT)/ace/Strategies.h \
+- $(ACE_ROOT)/ace/Strategies_T.h \
++ Transport_Descriptor_Interface.h \
++ Endpoint.h \
++ Endpoint.i \
++ Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++ $(ACE_ROOT)/ace/Functor.h \
++ $(ACE_ROOT)/ace/Functor.i \
++ $(ACE_ROOT)/ace/Functor_T.h \
++ $(ACE_ROOT)/ace/Functor_T.i \
++ $(ACE_ROOT)/ace/Functor_T.cpp \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Service_Config.h \
+  $(ACE_ROOT)/ace/Service_Object.h \
+  $(ACE_ROOT)/ace/Shared_Object.h \
+@@ -17704,6 +17977,17 @@
+  $(ACE_ROOT)/ace/Reactor.i \
+  $(ACE_ROOT)/ace/Reactor_Impl.h \
+  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++ Cache_Entries.h \
++ Transport_Descriptor_Interface.h \
++ Cache_Entries.inl \
++ Transport_Cache_Manager.inl \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
+  $(ACE_ROOT)/ace/Synch_Options.h \
+  $(ACE_ROOT)/ace/Synch_Options.i \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+@@ -17717,14 +18001,6 @@
+  $(ACE_ROOT)/ace/Managed_Object.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+- $(ACE_ROOT)/ace/Functor.h \
+- $(ACE_ROOT)/ace/Functor.i \
+- $(ACE_ROOT)/ace/Functor_T.h \
+- $(ACE_ROOT)/ace/Functor_T.i \
+- $(ACE_ROOT)/ace/Functor_T.cpp \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Strategies_T.i \
+  $(ACE_ROOT)/ace/Strategies_T.cpp \
+  $(ACE_ROOT)/ace/Service_Repository.h \
+@@ -17963,6 +18239,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -17977,7 +18255,8 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Transport.h corbafwd.h Exception.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -18225,6 +18504,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -18242,7 +18523,8 @@
+  Leader_Follower.h \
+  Leader_Follower.i \
+  debug.h \
+- Transport.h corbafwd.h Exception.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -18527,14 +18809,19 @@
+  Pluggable_Messaging_Utils.h \
+  Pluggable_Messaging_Utils.i \
+  debug.h \
+- Transport.h corbafwd.h Exception.h \
+- $(ACE_ROOT)/ace/Message_Queue.h \
+- $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.i \
+- $(ACE_ROOT)/ace/Message_Queue_T.cpp \
+- $(ACE_ROOT)/ace/Strategies.h \
+- $(ACE_ROOT)/ace/Strategies_T.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Endpoint.h \
++ Endpoint.i \
++ Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++ $(ACE_ROOT)/ace/Functor.h \
++ $(ACE_ROOT)/ace/Functor.i \
++ $(ACE_ROOT)/ace/Functor_T.h \
++ $(ACE_ROOT)/ace/Functor_T.i \
++ $(ACE_ROOT)/ace/Functor_T.cpp \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Service_Config.h \
+  $(ACE_ROOT)/ace/Service_Object.h \
+  $(ACE_ROOT)/ace/Shared_Object.h \
+@@ -18554,6 +18841,17 @@
+  $(ACE_ROOT)/ace/Reactor.i \
+  $(ACE_ROOT)/ace/Reactor_Impl.h \
+  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++ Cache_Entries.h \
++ Transport_Descriptor_Interface.h \
++ Cache_Entries.inl \
++ Transport_Cache_Manager.inl \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
+  $(ACE_ROOT)/ace/Synch_Options.h \
+  $(ACE_ROOT)/ace/Synch_Options.i \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+@@ -18567,14 +18865,6 @@
+  $(ACE_ROOT)/ace/Managed_Object.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+- $(ACE_ROOT)/ace/Functor.h \
+- $(ACE_ROOT)/ace/Functor.i \
+- $(ACE_ROOT)/ace/Functor_T.h \
+- $(ACE_ROOT)/ace/Functor_T.i \
+- $(ACE_ROOT)/ace/Functor_T.cpp \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+  $(ACE_ROOT)/ace/Strategies_T.i \
+  $(ACE_ROOT)/ace/Strategies_T.cpp \
+  $(ACE_ROOT)/ace/Service_Repository.h \
+@@ -18751,7 +19041,15 @@
+  debug.h \
+  Pluggable_Messaging_Utils.h \
+  Pluggable_Messaging_Utils.i \
+- Transport.h corbafwd.h Exception.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Endpoint.h \
++ Endpoint.i \
++ Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ Cache_Entries.h \
++ Transport_Descriptor_Interface.h \
++ Cache_Entries.inl \
++ Transport_Cache_Manager.inl \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -19140,6 +19438,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -19157,7 +19457,8 @@
+  Wait_Strategy.h \
+  Pluggable_Messaging_Utils.h \
+  Pluggable_Messaging_Utils.i \
+- Transport.h corbafwd.h Exception.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -19208,11 +19509,7 @@
+  $(ACE_ROOT)/ace/Basic_Types.i \
+  $(ACE_ROOT)/ace/Trace.h \
+  $(ACE_ROOT)/ace/OS.i \
+- Reply_Dispatcher.h \
+- IOPC.h \
+- TAO_Export.h \
+- Any.h \
+- CDR.h \
++ Transport.h \
+  corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/Message_Block.h \
+@@ -19282,7 +19579,84 @@
+  try_macros.h \
+  $(ACE_ROOT)/ace/CORBA_macros.h \
+  varbase.h \
++ TAO_Export.h \
+  corbafwd.i \
++ Exception.h \
++ $(ACE_ROOT)/ace/SString.h \
++ $(ACE_ROOT)/ace/SString.i \
++ Exception.i \
++ Transport_Descriptor_Interface.h \
++ Endpoint.h \
++ Endpoint.i \
++ Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++ $(ACE_ROOT)/ace/Functor.h \
++ $(ACE_ROOT)/ace/Functor.i \
++ $(ACE_ROOT)/ace/Functor_T.h \
++ $(ACE_ROOT)/ace/Functor_T.i \
++ $(ACE_ROOT)/ace/Functor_T.cpp \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
++ $(ACE_ROOT)/ace/Service_Config.h \
++ $(ACE_ROOT)/ace/Service_Object.h \
++ $(ACE_ROOT)/ace/Shared_Object.h \
++ $(ACE_ROOT)/ace/Shared_Object.i \
++ $(ACE_ROOT)/ace/Service_Object.i \
++ $(ACE_ROOT)/ace/Service_Config.i \
++ $(ACE_ROOT)/ace/Reactor.h \
++ $(ACE_ROOT)/ace/Handle_Set.h \
++ $(ACE_ROOT)/ace/Handle_Set.i \
++ $(ACE_ROOT)/ace/Timer_Queue.h \
++ $(ACE_ROOT)/ace/Timer_Queue_T.h \
++ $(ACE_ROOT)/ace/Test_and_Set.h \
++ $(ACE_ROOT)/ace/Test_and_Set.i \
++ $(ACE_ROOT)/ace/Test_and_Set.cpp \
++ $(ACE_ROOT)/ace/Timer_Queue_T.i \
++ $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Reactor.i \
++ $(ACE_ROOT)/ace/Reactor_Impl.h \
++ $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++ Cache_Entries.h \
++ Cache_Entries.inl \
++ Transport_Cache_Manager.inl \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
++ $(ACE_ROOT)/ace/Synch_Options.h \
++ $(ACE_ROOT)/ace/Synch_Options.i \
++ $(ACE_ROOT)/ace/Thread_Manager.h \
++ $(ACE_ROOT)/ace/Singleton.h \
++ $(ACE_ROOT)/ace/Singleton.i \
++ $(ACE_ROOT)/ace/Singleton.cpp \
++ $(ACE_ROOT)/ace/Object_Manager.h \
++ $(ACE_ROOT)/ace/Object_Manager.i \
++ $(ACE_ROOT)/ace/Managed_Object.h \
++ $(ACE_ROOT)/ace/Managed_Object.i \
++ $(ACE_ROOT)/ace/Managed_Object.cpp \
++ $(ACE_ROOT)/ace/Thread_Manager.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager.h \
++ $(ACE_ROOT)/ace/Strategies_T.i \
++ $(ACE_ROOT)/ace/Strategies_T.cpp \
++ $(ACE_ROOT)/ace/Service_Repository.h \
++ $(ACE_ROOT)/ace/Service_Types.h \
++ $(ACE_ROOT)/ace/Service_Types.i \
++ $(ACE_ROOT)/ace/Service_Repository.i \
++ $(ACE_ROOT)/ace/WFMO_Reactor.h \
++ $(ACE_ROOT)/ace/Process_Mutex.h \
++ $(ACE_ROOT)/ace/Process_Mutex.inl \
++ $(ACE_ROOT)/ace/WFMO_Reactor.i \
++ $(ACE_ROOT)/ace/Strategies.i \
++ $(ACE_ROOT)/ace/Message_Queue.i \
++ Transport.inl \
++ Reply_Dispatcher.h \
++ IOPC.h \
++ Any.h \
++ CDR.h \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+  CDR.i \
+@@ -19294,10 +19668,6 @@
+  Object_Proxy_Impl.h \
+  Object.i \
+  Typecode.h \
+- Exception.h \
+- $(ACE_ROOT)/ace/SString.h \
+- $(ACE_ROOT)/ace/SString.i \
+- Exception.i \
+  Typecode.i \
+  Any.i \
+  Sequence.h \
+@@ -19309,6 +19679,7 @@
+  Sequence_T.cpp \
+  IOPC.i \
+  Reply_Dispatcher.i \
++ Asynch_Timeout_Handler.h \
+  MessagingC.h \
+  Remote_Object_Proxy_Impl.h \
+  ValueBase.h \
+@@ -19340,10 +19711,6 @@
+  LocalObject.i \
+  Policy_Manager.i \
+  Resource_Factory.h \
+- $(ACE_ROOT)/ace/Service_Object.h \
+- $(ACE_ROOT)/ace/Shared_Object.h \
+- $(ACE_ROOT)/ace/Shared_Object.i \
+- $(ACE_ROOT)/ace/Service_Object.i \
+  Pluggable.h \
+  Pluggable.i \
+  Protocol_Factory.h \
+@@ -19354,11 +19721,6 @@
+  TAO_Singleton.h \
+  TAO_Singleton.inl \
+  TAO_Singleton.cpp \
+- $(ACE_ROOT)/ace/Object_Manager.h \
+- $(ACE_ROOT)/ace/Object_Manager.i \
+- $(ACE_ROOT)/ace/Managed_Object.h \
+- $(ACE_ROOT)/ace/Managed_Object.i \
+- $(ACE_ROOT)/ace/Managed_Object.cpp \
+  Adapter.h \
+  Adapter.i \
+  PolicyFactory_Registry.h \
+@@ -19369,46 +19731,17 @@
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+- $(ACE_ROOT)/ace/Service_Config.h \
+- $(ACE_ROOT)/ace/Service_Config.i \
+- $(ACE_ROOT)/ace/Reactor.h \
+- $(ACE_ROOT)/ace/Handle_Set.h \
+- $(ACE_ROOT)/ace/Handle_Set.i \
+- $(ACE_ROOT)/ace/Timer_Queue.h \
+- $(ACE_ROOT)/ace/Timer_Queue_T.h \
+- $(ACE_ROOT)/ace/Test_and_Set.h \
+- $(ACE_ROOT)/ace/Test_and_Set.i \
+- $(ACE_ROOT)/ace/Test_and_Set.cpp \
+- $(ACE_ROOT)/ace/Timer_Queue_T.i \
+- $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
+- $(ACE_ROOT)/ace/Reactor.i \
+- $(ACE_ROOT)/ace/Reactor_Impl.h \
+- $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
+  Parser_Registry.h \
+  Parser_Registry.i \
+  Service_Callbacks.h \
+  Service_Callbacks.i \
+  Fault_Tolerance_Service.h \
+  Fault_Tolerance_Service.i \
+- Transport_Cache_Manager.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
+- $(ACE_ROOT)/ace/Functor.h \
+- $(ACE_ROOT)/ace/Functor.i \
+- $(ACE_ROOT)/ace/Functor_T.h \
+- $(ACE_ROOT)/ace/Functor_T.i \
+- $(ACE_ROOT)/ace/Functor_T.cpp \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
+- $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
+- Cache_Entries.h \
+- Transport_Descriptor_Interface.h \
+- Endpoint.h \
+- Endpoint.i \
+- Transport_Descriptor_Interface.inl \
+- Cache_Entries.inl \
+- Transport_Cache_Manager.inl \
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -19416,40 +19749,10 @@
+  RTCORBAC.i \
+  RT_Policy_i.i \
+  Protocols_Hooks.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+- $(ACE_ROOT)/ace/Thread_Manager.h \
+- $(ACE_ROOT)/ace/Singleton.h \
+- $(ACE_ROOT)/ace/Singleton.i \
+- $(ACE_ROOT)/ace/Singleton.cpp \
+- $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+  Leader_Follower.h \
+  Leader_Follower.i \
+- debug.h \
+- Transport.h \
+- $(ACE_ROOT)/ace/Message_Queue.h \
+- $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.h \
+- $(ACE_ROOT)/ace/Message_Queue_T.i \
+- $(ACE_ROOT)/ace/Message_Queue_T.cpp \
+- $(ACE_ROOT)/ace/Strategies.h \
+- $(ACE_ROOT)/ace/Strategies_T.h \
+- $(ACE_ROOT)/ace/Synch_Options.h \
+- $(ACE_ROOT)/ace/Synch_Options.i \
+- $(ACE_ROOT)/ace/Strategies_T.i \
+- $(ACE_ROOT)/ace/Strategies_T.cpp \
+- $(ACE_ROOT)/ace/Service_Repository.h \
+- $(ACE_ROOT)/ace/Service_Types.h \
+- $(ACE_ROOT)/ace/Service_Types.i \
+- $(ACE_ROOT)/ace/Service_Repository.i \
+- $(ACE_ROOT)/ace/WFMO_Reactor.h \
+- $(ACE_ROOT)/ace/Process_Mutex.h \
+- $(ACE_ROOT)/ace/Process_Mutex.inl \
+- $(ACE_ROOT)/ace/WFMO_Reactor.i \
+- $(ACE_ROOT)/ace/Strategies.i \
+- $(ACE_ROOT)/ace/Message_Queue.i \
+- Transport.inl \
+- Asynch_Timeout_Handler.h
++ debug.h
+ 
+ .obj/Asynch_Timeout_Handler.o .obj/Asynch_Timeout_Handler.so .shobj/Asynch_Timeout_Handler.o .shobj/Asynch_Timeout_Handler.so: Asynch_Timeout_Handler.cpp \
+  Asynch_Timeout_Handler.h \
+@@ -19562,6 +19865,67 @@
+  $(ACE_ROOT)/ace/Reactor.i \
+  $(ACE_ROOT)/ace/Reactor_Impl.h \
+  Asynch_Reply_Dispatcher.h \
++ Transport.h \
++ Exception.h \
++ $(ACE_ROOT)/ace/SString.h \
++ $(ACE_ROOT)/ace/SString.i \
++ Exception.i \
++ Transport_Descriptor_Interface.h \
++ Endpoint.h \
++ Endpoint.i \
++ Transport_Descriptor_Interface.inl \
++ Transport_Cache_Manager.h \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++ $(ACE_ROOT)/ace/Functor.h \
++ $(ACE_ROOT)/ace/Functor.i \
++ $(ACE_ROOT)/ace/Functor_T.h \
++ $(ACE_ROOT)/ace/Functor_T.i \
++ $(ACE_ROOT)/ace/Functor_T.cpp \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
++ $(ACE_ROOT)/ace/Service_Config.h \
++ $(ACE_ROOT)/ace/Service_Object.h \
++ $(ACE_ROOT)/ace/Shared_Object.h \
++ $(ACE_ROOT)/ace/Shared_Object.i \
++ $(ACE_ROOT)/ace/Service_Object.i \
++ $(ACE_ROOT)/ace/Service_Config.i \
++ $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++ Cache_Entries.h \
++ Cache_Entries.inl \
++ Transport_Cache_Manager.inl \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
++ $(ACE_ROOT)/ace/Synch_Options.h \
++ $(ACE_ROOT)/ace/Synch_Options.i \
++ $(ACE_ROOT)/ace/Thread_Manager.h \
++ $(ACE_ROOT)/ace/Singleton.h \
++ $(ACE_ROOT)/ace/Singleton.i \
++ $(ACE_ROOT)/ace/Singleton.cpp \
++ $(ACE_ROOT)/ace/Object_Manager.h \
++ $(ACE_ROOT)/ace/Object_Manager.i \
++ $(ACE_ROOT)/ace/Managed_Object.h \
++ $(ACE_ROOT)/ace/Managed_Object.i \
++ $(ACE_ROOT)/ace/Managed_Object.cpp \
++ $(ACE_ROOT)/ace/Thread_Manager.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager.h \
++ $(ACE_ROOT)/ace/Strategies_T.i \
++ $(ACE_ROOT)/ace/Strategies_T.cpp \
++ $(ACE_ROOT)/ace/Service_Repository.h \
++ $(ACE_ROOT)/ace/Service_Types.h \
++ $(ACE_ROOT)/ace/Service_Types.i \
++ $(ACE_ROOT)/ace/Service_Repository.i \
++ $(ACE_ROOT)/ace/WFMO_Reactor.h \
++ $(ACE_ROOT)/ace/Process_Mutex.h \
++ $(ACE_ROOT)/ace/Process_Mutex.inl \
++ $(ACE_ROOT)/ace/WFMO_Reactor.i \
++ $(ACE_ROOT)/ace/Strategies.i \
++ $(ACE_ROOT)/ace/Message_Queue.i \
++ Transport.inl \
+  Reply_Dispatcher.h \
+  IOPC.h \
+  Any.h \
+@@ -19577,10 +19941,6 @@
+  Object_Proxy_Impl.h \
+  Object.i \
+  Typecode.h \
+- Exception.h \
+- $(ACE_ROOT)/ace/SString.h \
+- $(ACE_ROOT)/ace/SString.i \
+- Exception.i \
+  Typecode.i \
+  Any.i \
+  Sequence.h \
+@@ -19612,7 +19972,8 @@
+  Transport_Mux_Strategy.h
+ 
+ .obj/IOPC.o .obj/IOPC.so .shobj/IOPC.o .shobj/IOPC.so: IOPC.cpp IOPC.h \
+- $(ACE_ROOT)/ace/pre.h TAO_Export.h \
++ $(ACE_ROOT)/ace/pre.h \
++ TAO_Export.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+  $(ACE_ROOT)/ace/svc_export.h \
+@@ -19620,7 +19981,8 @@
+  $(ACE_ROOT)/ace/ace_wchar.inl \
+  $(ACE_ROOT)/ace/OS_Errno.h \
+  $(ACE_ROOT)/ace/OS_Export.h \
+- $(ACE_ROOT)/ace/OS_Errno.inl Any.h \
++ $(ACE_ROOT)/ace/OS_Errno.inl \
++ Any.h \
+  CDR.h \
+  corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+@@ -19725,8 +20087,8 @@
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+  Typecode.i \
+- Any.i Object.h \
+- Exception.h CDR.h Sequence.h \
++ Any.i \
++ Object.h Exception.h CDR.h Sequence.h \
+  Managed_Types.h \
+  Managed_Types.i \
+  Sequence.i \
+@@ -19845,7 +20207,8 @@
+  CDR.h \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+- CDR.i PollableC.i \
++ CDR.i \
++ PollableC.i \
+  Stub.h \
+  Pluggable.h \
+  Sequence.h \
+@@ -19968,6 +20331,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -20361,6 +20726,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -21553,6 +21920,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -22036,6 +22405,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -22589,8 +22960,7 @@
+  $(ACE_ROOT)/ace/Reactor.i \
+  $(ACE_ROOT)/ace/Reactor_Impl.h \
+  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
+- CORBALOC_Parser.i ORB_Core.h corbafwd.h ORB.h \
+- Services.h \
++ CORBALOC_Parser.i ORB_Core.h corbafwd.h ORB.h Exception.h Services.h \
+  Sequence.h \
+  Managed_Types.h \
+  Managed_Types.i \
+@@ -22623,6 +22993,7 @@
+  Environment.h Policy_Manager.h \
+  LocalObject.h \
+  LocalObject.i \
++ PolicyC.h \
+  Policy_Manager.i \
+  Resource_Factory.h \
+  Pluggable.h \
+@@ -22632,7 +23003,9 @@
+  IOPC.i \
+  Pluggable.i \
+  Protocol_Factory.h \
+- params.h params.i \
++ params.h \
++ CORBA_String.h \
++ params.i \
+  TAO_Singleton_Manager.h \
+  TAO_Singleton_Manager.inl \
+  TAO_Singleton.h \
+@@ -22655,7 +23028,7 @@
+  TimeBaseC.i \
+  PollableC.h \
+  PollableC.i \
+- MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i PolicyC.h \
++ MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i \
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+@@ -22682,11 +23055,13 @@
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
+  Cleanup_Func_Registry.h Cleanup_Func_Registry.inl Object_Ref_Table.h \
+- Interceptor_List.h Interceptor_List.inl RT_Policy_i.h \
++ TSS_Object.h TSS_Object.inl Interceptor_List.h Interceptor_List.inl \
++ RT_Policy_i.h \
+  RTCORBAC.h \
+  RTCORBAC.i \
+  RT_Policy_i.i \
+- Protocols_Hooks.h RTCORBAC.h \
++ Protocols_Hooks.h \
++ ORB_Core.h \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+  $(ACE_ROOT)/ace/Singleton.h \
+@@ -22705,9 +23080,8 @@
+  Profile.i \
+  MProfile.i \
+  ORB.h \
+- ORB_Core.h \
+- Stub.i MProfile.h \
+- Connector_Registry.h \
++ Stub.i \
++ MProfile.h Connector_Registry.h \
+  params.h \
+  Connector_Registry.i
+ 
+@@ -22836,7 +23210,8 @@
+  CORBANAME_Parser.i Invocation.h CDR.h \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+- CDR.i Stub.h \
++ CDR.i \
++ Stub.h \
+  Pluggable.h \
+  Sequence.h \
+  Managed_Types.h \
+@@ -22946,6 +23321,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -22960,8 +23337,8 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Stub.i Any.h \
+- Synch_Reply_Dispatcher.h \
++ Stub.i \
++ Any.h Synch_Reply_Dispatcher.h \
+  Reply_Dispatcher.h \
+  Reply_Dispatcher.i \
+  TAOC.h \
+@@ -23339,6 +23716,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -23506,7 +23885,8 @@
+  CORBA_String.inl
+ 
+ .obj/ORBInitInfo.o .obj/ORBInitInfo.so .shobj/ORBInitInfo.o .shobj/ORBInitInfo.so: ORBInitInfo.cpp ORBInitInfo.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -23648,11 +24028,11 @@
+  MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i LocalObject.h \
+  LocalObject.i \
+  StringSeqC.h Sequence.h StringSeqC.i CodecFactory.h TAO_Export.h \
+- ORB_Core.h ORB.h \
+- Services.h \
++ ORB_Core.h ORB.h Exception.h Services.h \
+  Services.i \
+  CORBA_String.h \
+  CORBA_String.inl \
++ PolicyC.h \
+  ORB.i \
+  Environment.h Policy_Manager.h \
+  LocalObject.h \
+@@ -23665,7 +24045,9 @@
+  Pluggable.h \
+  Pluggable.i \
+  Protocol_Factory.h \
+- params.h params.i \
++ params.h \
++ CORBA_String.h \
++ params.i \
+  TAO_Singleton_Manager.h \
+  TAO_Singleton_Manager.inl \
+  TAO_Singleton.h \
+@@ -23678,7 +24060,7 @@
+  $(ACE_ROOT)/ace/Managed_Object.i \
+  $(ACE_ROOT)/ace/Managed_Object.cpp \
+  TAO_Singleton_Manager.h \
+- Adapter.h Adapter.i PolicyFactory_Registry.h PolicyC.h \
++ Adapter.h Adapter.i PolicyFactory_Registry.h \
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+@@ -23720,11 +24102,13 @@
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
+  Cleanup_Func_Registry.h Cleanup_Func_Registry.inl Object_Ref_Table.h \
+- Interceptor_List.h Interceptor_List.inl RT_Policy_i.h \
++ TSS_Object.h TSS_Object.inl Interceptor_List.h Interceptor_List.inl \
++ RT_Policy_i.h \
+  RTCORBAC.h \
+  RTCORBAC.i \
+  RT_Policy_i.i \
+- Protocols_Hooks.h RTCORBAC.h \
++ Protocols_Hooks.h \
++ ORB_Core.h \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+  $(ACE_ROOT)/ace/Singleton.h \
+@@ -23735,7 +24119,8 @@
+ 
+ .obj/ORBInitializer_Registry.o .obj/ORBInitializer_Registry.so .shobj/ORBInitializer_Registry.o .shobj/ORBInitializer_Registry.so: ORBInitializer_Registry.cpp \
+  ORBInitializer_Registry.h \
+- $(ACE_ROOT)/ace/pre.h TAO_Export.h \
++ $(ACE_ROOT)/ace/pre.h \
++ TAO_Export.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+  $(ACE_ROOT)/ace/svc_export.h \
+@@ -23887,16 +24272,18 @@
+  TAO_Singleton_Manager.h \
+  TAO_Singleton_Manager.inl \
+  ORBInitializer_Registry.inl \
+- ORB.h Services.h \
++ ORB.h Exception.h Services.h \
+  Services.i \
+  CORBA_String.h \
+  CORBA_String.inl \
++ PolicyC.h \
+  ORB.i \
+  TAO_Singleton_Manager.h
+ 
+ .obj/PolicyFactory_Registry.o .obj/PolicyFactory_Registry.so .shobj/PolicyFactory_Registry.o .shobj/PolicyFactory_Registry.so: PolicyFactory_Registry.cpp \
+  PolicyFactory_Registry.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -24161,7 +24548,74 @@
+  corbafwd.i \
+  Endpoint.i \
+  Transport_Descriptor_Interface.inl \
+- Cache_Entries.inl
++ Cache_Entries.inl \
++ Transport.h \
++ Exception.h \
++ $(ACE_ROOT)/ace/SString.h \
++ $(ACE_ROOT)/ace/SString.i \
++ Exception.i \
++ Transport_Cache_Manager.h \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
++ $(ACE_ROOT)/ace/Functor.h \
++ $(ACE_ROOT)/ace/Functor.i \
++ $(ACE_ROOT)/ace/Functor_T.h \
++ $(ACE_ROOT)/ace/Functor_T.i \
++ $(ACE_ROOT)/ace/Functor_T.cpp \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager_T.cpp \
++ $(ACE_ROOT)/ace/Service_Config.h \
++ $(ACE_ROOT)/ace/Service_Object.h \
++ $(ACE_ROOT)/ace/Shared_Object.h \
++ $(ACE_ROOT)/ace/Shared_Object.i \
++ $(ACE_ROOT)/ace/Service_Object.i \
++ $(ACE_ROOT)/ace/Service_Config.i \
++ $(ACE_ROOT)/ace/Reactor.h \
++ $(ACE_ROOT)/ace/Handle_Set.h \
++ $(ACE_ROOT)/ace/Handle_Set.i \
++ $(ACE_ROOT)/ace/Timer_Queue.h \
++ $(ACE_ROOT)/ace/Timer_Queue_T.h \
++ $(ACE_ROOT)/ace/Test_and_Set.h \
++ $(ACE_ROOT)/ace/Test_and_Set.i \
++ $(ACE_ROOT)/ace/Test_and_Set.cpp \
++ $(ACE_ROOT)/ace/Timer_Queue_T.i \
++ $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Reactor.i \
++ $(ACE_ROOT)/ace/Reactor_Impl.h \
++ $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++ Transport_Cache_Manager.inl \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
++ $(ACE_ROOT)/ace/Synch_Options.h \
++ $(ACE_ROOT)/ace/Synch_Options.i \
++ $(ACE_ROOT)/ace/Thread_Manager.h \
++ $(ACE_ROOT)/ace/Singleton.h \
++ $(ACE_ROOT)/ace/Singleton.i \
++ $(ACE_ROOT)/ace/Singleton.cpp \
++ $(ACE_ROOT)/ace/Object_Manager.h \
++ $(ACE_ROOT)/ace/Object_Manager.i \
++ $(ACE_ROOT)/ace/Managed_Object.h \
++ $(ACE_ROOT)/ace/Managed_Object.i \
++ $(ACE_ROOT)/ace/Managed_Object.cpp \
++ $(ACE_ROOT)/ace/Thread_Manager.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager.h \
++ $(ACE_ROOT)/ace/Strategies_T.i \
++ $(ACE_ROOT)/ace/Strategies_T.cpp \
++ $(ACE_ROOT)/ace/Service_Repository.h \
++ $(ACE_ROOT)/ace/Service_Types.h \
++ $(ACE_ROOT)/ace/Service_Types.i \
++ $(ACE_ROOT)/ace/Service_Repository.i \
++ $(ACE_ROOT)/ace/WFMO_Reactor.h \
++ $(ACE_ROOT)/ace/Process_Mutex.h \
++ $(ACE_ROOT)/ace/Process_Mutex.inl \
++ $(ACE_ROOT)/ace/WFMO_Reactor.i \
++ $(ACE_ROOT)/ace/Strategies.i \
++ $(ACE_ROOT)/ace/Message_Queue.i \
++ Transport.inl
+ 
+ .obj/Base_Transport_Property.o .obj/Base_Transport_Property.so .shobj/Base_Transport_Property.o .shobj/Base_Transport_Property.so: Base_Transport_Property.cpp \
+  Base_Transport_Property.h \
+@@ -24401,22 +24855,45 @@
+  Transport_Descriptor_Interface.inl \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
+- Connection_Handler.h \
+- $(ACE_ROOT)/ace/SOCK.h \
+- $(ACE_ROOT)/ace/Addr.h \
+- $(ACE_ROOT)/ace/Addr.i \
+- $(ACE_ROOT)/ace/IPC_SAP.h \
+- $(ACE_ROOT)/ace/IPC_SAP.i \
+- $(ACE_ROOT)/ace/QoS_Session.h \
+- $(ACE_ROOT)/ace/INET_Addr.h \
+- $(ACE_ROOT)/ace/INET_Addr.i \
+- $(ACE_ROOT)/ace/SOCK.i \
+- Connection_Handler.inl \
++ Transport.h \
++ Exception.h \
++ Exception.i \
++ $(ACE_ROOT)/ace/Message_Queue.h \
++ $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.h \
++ $(ACE_ROOT)/ace/Message_Queue_T.i \
++ $(ACE_ROOT)/ace/Message_Queue_T.cpp \
++ $(ACE_ROOT)/ace/Strategies.h \
++ $(ACE_ROOT)/ace/Strategies_T.h \
++ $(ACE_ROOT)/ace/Synch_Options.h \
++ $(ACE_ROOT)/ace/Synch_Options.i \
++ $(ACE_ROOT)/ace/Thread_Manager.h \
++ $(ACE_ROOT)/ace/Singleton.h \
++ $(ACE_ROOT)/ace/Singleton.i \
++ $(ACE_ROOT)/ace/Singleton.cpp \
++ $(ACE_ROOT)/ace/Object_Manager.h \
++ $(ACE_ROOT)/ace/Object_Manager.i \
++ $(ACE_ROOT)/ace/Managed_Object.h \
++ $(ACE_ROOT)/ace/Managed_Object.i \
++ $(ACE_ROOT)/ace/Managed_Object.cpp \
++ $(ACE_ROOT)/ace/Thread_Manager.i \
++ $(ACE_ROOT)/ace/Hash_Map_Manager.h \
++ $(ACE_ROOT)/ace/Strategies_T.i \
++ $(ACE_ROOT)/ace/Strategies_T.cpp \
++ $(ACE_ROOT)/ace/Service_Repository.h \
++ $(ACE_ROOT)/ace/Service_Types.h \
++ $(ACE_ROOT)/ace/Service_Types.i \
++ $(ACE_ROOT)/ace/Service_Repository.i \
++ $(ACE_ROOT)/ace/WFMO_Reactor.h \
++ $(ACE_ROOT)/ace/Process_Mutex.h \
++ $(ACE_ROOT)/ace/Process_Mutex.inl \
++ $(ACE_ROOT)/ace/WFMO_Reactor.i \
++ $(ACE_ROOT)/ace/Strategies.i \
++ $(ACE_ROOT)/ace/Message_Queue.i \
++ Transport.inl \
+  debug.h \
+  ORB_Core.h \
+  ORB.h \
+- Exception.h \
+- Exception.i \
+  Services.h \
+  Sequence.h \
+  Managed_Types.h \
+@@ -24466,11 +24943,6 @@
+  TAO_Singleton.h \
+  TAO_Singleton.inl \
+  TAO_Singleton.cpp \
+- $(ACE_ROOT)/ace/Object_Manager.h \
+- $(ACE_ROOT)/ace/Object_Manager.i \
+- $(ACE_ROOT)/ace/Managed_Object.h \
+- $(ACE_ROOT)/ace/Managed_Object.i \
+- $(ACE_ROOT)/ace/Managed_Object.cpp \
+  Adapter.h \
+  Adapter.i \
+  PolicyFactory_Registry.h \
+@@ -24501,6 +24973,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -24508,17 +24982,12 @@
+  RTCORBAC.i \
+  RT_Policy_i.i \
+  Protocols_Hooks.h \
+- $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+- $(ACE_ROOT)/ace/Thread_Manager.h \
+- $(ACE_ROOT)/ace/Singleton.h \
+- $(ACE_ROOT)/ace/Singleton.i \
+- $(ACE_ROOT)/ace/Singleton.cpp \
+- $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i
+ 
+ .obj/Cleanup_Func_Registry.o .obj/Cleanup_Func_Registry.so .shobj/Cleanup_Func_Registry.o .shobj/Cleanup_Func_Registry.so: Cleanup_Func_Registry.cpp \
+  Cleanup_Func_Registry.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -24718,7 +25187,8 @@
+  Transport_Descriptor_Interface.inl
+ 
+ .obj/IORInfo.o .obj/IORInfo.so .shobj/IORInfo.o .shobj/IORInfo.so: IORInfo.cpp IORInfo.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -24871,7 +25341,8 @@
+  MProfile.i
+ 
+ .obj/Object_Ref_Table.o .obj/Object_Ref_Table.so .shobj/Object_Ref_Table.o .shobj/Object_Ref_Table.so: Object_Ref_Table.cpp Object_Ref_Table.h \
+- $(ACE_ROOT)/ace/pre.h corbafwd.h \
++ $(ACE_ROOT)/ace/pre.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -25363,6 +25834,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -25768,6 +26241,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -25786,7 +26261,8 @@
+  debug.h
+ 
+ .obj/CodecFactory.o .obj/CodecFactory.so .shobj/CodecFactory.o .shobj/CodecFactory.so: CodecFactory.cpp CodecFactory.h \
+- $(ACE_ROOT)/ace/pre.h TAO_Export.h \
++ $(ACE_ROOT)/ace/pre.h \
++ TAO_Export.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+  $(ACE_ROOT)/ace/svc_export.h \
+@@ -25794,8 +26270,9 @@
+  $(ACE_ROOT)/ace/ace_wchar.inl \
+  $(ACE_ROOT)/ace/OS_Errno.h \
+  $(ACE_ROOT)/ace/OS_Export.h \
+- $(ACE_ROOT)/ace/OS_Errno.inl IOPC.h \
+- Any.h CDR.h \
++ $(ACE_ROOT)/ace/OS_Errno.inl \
++ IOPC.h Any.h \
++ CDR.h \
+  corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/Basic_Types.h \
+@@ -25899,8 +26376,8 @@
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+  Typecode.i \
+- Any.i Object.h \
+- Exception.h CDR.h Sequence.h \
++ Any.i \
++ Object.h Exception.h CDR.h Sequence.h \
+  Managed_Types.h \
+  Managed_Types.i \
+  Sequence.i \
+@@ -25914,7 +26391,8 @@
+ 
+ .obj/CodecFactory_ORBInitializer.o .obj/CodecFactory_ORBInitializer.so .shobj/CodecFactory_ORBInitializer.o .shobj/CodecFactory_ORBInitializer.so: CodecFactory_ORBInitializer.cpp \
+  CodecFactory_ORBInitializer.h \
+- $(ACE_ROOT)/ace/pre.h TAO_Export.h \
++ $(ACE_ROOT)/ace/pre.h \
++ TAO_Export.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+  $(ACE_ROOT)/ace/svc_export.h \
+@@ -26157,8 +26635,8 @@
+  corbafwd.i \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+- CDR.i OctetSeqC.h \
+- corbafwd.h Sequence.h \
++ CDR.i \
++ OctetSeqC.h corbafwd.h Sequence.h \
+  Managed_Types.h \
+  Managed_Types.i \
+  Sequence.i \
+@@ -26181,8 +26659,8 @@
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+  Typecode.i \
+- Any.i Typecode.h \
+- Marshal.h \
++ Any.i \
++ Typecode.h Marshal.h \
+  Principal.h \
+  OctetSeqC.h \
+  Principal.i \
+@@ -26808,6 +27286,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -27060,6 +27540,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -27319,6 +27801,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -27581,6 +28065,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -28161,6 +28647,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -28691,6 +29179,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -29100,6 +29590,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  Protocols_Hooks.h \
+@@ -29502,6 +29994,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -29518,13 +30012,16 @@
+  ORB_Core.i \
+  Object_Loader.h \
+  Object_Loader.i \
+- RT_ORB.h RT_ORB.i \
++ RT_ORB.h \
++ RT_ORB.i \
+  RT_Current.h \
+  RT_Current.i
+ 
+ .obj/RT_Protocols_Hooks.o .obj/RT_Protocols_Hooks.so .shobj/RT_Protocols_Hooks.o .shobj/RT_Protocols_Hooks.so: RT_Protocols_Hooks.cpp RT_Protocols_Hooks.h \
+  $(ACE_ROOT)/ace/pre.h \
+- Protocols_Hooks.h ORB_Core.h corbafwd.h \
++ Protocols_Hooks.h \
++ ORB_Core.h \
++ corbafwd.h \
+  $(ACE_ROOT)/ace/CDR_Base.h \
+  $(ACE_ROOT)/ace/post.h \
+  $(ACE_ROOT)/ace/ACE_export.h \
+@@ -29618,8 +30115,8 @@
+  $(ACE_ROOT)/ace/CORBA_macros.h \
+  varbase.h \
+  TAO_Export.h \
+- corbafwd.i ORB.h \
+- corbafwd.h \
++ corbafwd.i \
++ ORB.h \
+  Exception.h \
+  $(ACE_ROOT)/ace/SString.h \
+  $(ACE_ROOT)/ace/SString.i \
+@@ -29654,7 +30151,7 @@
+  Typecode.i \
+  PolicyC.i \
+  ORB.i \
+- Environment.h Policy_Manager.h \
++ Policy_Manager.h \
+  LocalObject.h \
+  LocalObject.i \
+  Policy_Manager.i \
+@@ -29670,21 +30167,26 @@
+  IOPC.i \
+  Pluggable.i \
+  Protocol_Factory.h \
+- params.h params.i \
++ params.h \
++ params.i \
+  TAO_Singleton_Manager.h \
+  TAO_Singleton_Manager.inl \
+  TAO_Singleton.h \
+  TAO_Singleton.inl \
+  TAO_Singleton.cpp \
+- TAO_Singleton.h \
+  $(ACE_ROOT)/ace/Object_Manager.h \
+  $(ACE_ROOT)/ace/Object_Manager.i \
+  $(ACE_ROOT)/ace/Managed_Object.h \
+  $(ACE_ROOT)/ace/Managed_Object.i \
+  $(ACE_ROOT)/ace/Managed_Object.cpp \
+- TAO_Singleton_Manager.h \
+- Adapter.h Adapter.i PolicyFactory_Registry.h PortableInterceptorC.h \
+- DynamicC.h DynamicC.i MessagingC.h Remote_Object_Proxy_Impl.h \
++ Adapter.h \
++ Adapter.i \
++ PolicyFactory_Registry.h \
++ PortableInterceptorC.h \
++ DynamicC.h \
++ DynamicC.i \
++ MessagingC.h \
++ Remote_Object_Proxy_Impl.h \
+  ValueBase.h \
+  ValueBase.i \
+  ValueFactory.h \
+@@ -29693,7 +30195,8 @@
+  TimeBaseC.i \
+  PollableC.h \
+  PollableC.i \
+- MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i PolicyC.h \
++ MessagingC.i \
++ PortableInterceptorC.i \
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+@@ -29734,18 +30237,26 @@
+  Transport_Descriptor_Interface.inl \
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
+- Cleanup_Func_Registry.h Cleanup_Func_Registry.inl Object_Ref_Table.h \
+- Interceptor_List.h Interceptor_List.inl RT_Policy_i.h \
++ Cleanup_Func_Registry.h \
++ Cleanup_Func_Registry.inl \
++ Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
++ Interceptor_List.h \
++ Interceptor_List.inl \
++ RT_Policy_i.h \
+  RTCORBAC.h \
+  RTCORBAC.i \
+  RT_Policy_i.i \
++ Protocols_Hooks.h \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+  $(ACE_ROOT)/ace/Singleton.h \
+  $(ACE_ROOT)/ace/Singleton.i \
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+- ORB_Core.i RTCORBAC.h RT_Protocols_Hooks.i Invocation.h CDR.h Stub.h \
++ ORB_Core.i \
++ RT_Protocols_Hooks.i RT_Policy_i.h Invocation.h CDR.h Stub.h \
+  MProfile.h \
+  Profile.h \
+  Tagged_Components.h \
+@@ -29756,10 +30267,8 @@
+  GIOP_Message_State.i \
+  Profile.i \
+  MProfile.i \
+- ORB.h \
+- ORB_Core.h \
+- Stub.i Any.h \
+- Synch_Reply_Dispatcher.h \
++ Stub.i \
++ Any.h Synch_Reply_Dispatcher.h \
+  Reply_Dispatcher.h \
+  Reply_Dispatcher.i \
+  TAOC.h \
+@@ -30044,6 +30553,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -30158,8 +30669,8 @@
+  $(ACE_ROOT)/ace/CORBA_macros.h \
+  varbase.h \
+  TAO_Export.h \
+- corbafwd.i IOPC.h \
+- TAO_Export.h Any.h \
++ corbafwd.i \
++ IOPC.h TAO_Export.h Any.h \
+  CDR.h \
+  $(ACE_ROOT)/ace/CDR_Stream.h \
+  $(ACE_ROOT)/ace/CDR_Stream.i \
+@@ -30177,8 +30688,8 @@
+  $(ACE_ROOT)/ace/SString.i \
+  Exception.i \
+  Typecode.i \
+- Any.i Object.h \
+- Exception.h CDR.h Sequence.h \
++ Any.i \
++ Object.h Exception.h CDR.h Sequence.h \
+  Managed_Types.h \
+  Managed_Types.i \
+  Sequence.i \
+@@ -30186,12 +30697,14 @@
+  Sequence.h \
+  Sequence_T.i \
+  Sequence_T.cpp \
+- IOPC.i PolicyC.h \
++ IOPC.i \
++ PolicyC.h \
+  CurrentC.h \
+  CurrentC.i \
+  Encodable.h \
+  PolicyC.i \
+- TimeBaseC.h Any.h \
++ TimeBaseC.h \
++ Any.h \
+  TimeBaseC.i \
+  RTCORBAC.i
+ 
+@@ -30578,6 +31091,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+@@ -31164,6 +31679,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -31335,8 +31852,7 @@
+  operation_details.i \
+  GIOP_Utils.h Pluggable.h \
+  Pluggable.i \
+- debug.h ORB_Core.h corbafwd.h ORB.h \
+- Services.h \
++ debug.h ORB_Core.h corbafwd.h ORB.h Exception.h Services.h \
+  Services.i \
+  CORBA_String.h \
+  CORBA_String.inl \
+@@ -31349,6 +31865,7 @@
+  Environment.h Policy_Manager.h \
+  LocalObject.h \
+  LocalObject.i \
++ PolicyC.h \
+  Policy_Manager.i \
+  Resource_Factory.h \
+  $(ACE_ROOT)/ace/Service_Object.h \
+@@ -31357,7 +31874,9 @@
+  $(ACE_ROOT)/ace/Service_Object.i \
+  Pluggable.h \
+  Protocol_Factory.h \
+- params.h params.i \
++ params.h \
++ CORBA_String.h \
++ params.i \
+  TAO_Singleton_Manager.h \
+  TAO_Singleton_Manager.inl \
+  TAO_Singleton.h \
+@@ -31380,7 +31899,7 @@
+  TimeBaseC.i \
+  PollableC.h \
+  PollableC.i \
+- MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i PolicyC.h \
++ MessagingC.i CurrentC.h IOPC.h PortableInterceptorC.i \
+  $(ACE_ROOT)/ace/Map_Manager.h \
+  $(ACE_ROOT)/ace/Map_Manager.i \
+  $(ACE_ROOT)/ace/Map_Manager.cpp \
+@@ -31422,11 +31941,13 @@
+  Cache_Entries.inl \
+  Transport_Cache_Manager.inl \
+  Cleanup_Func_Registry.h Cleanup_Func_Registry.inl Object_Ref_Table.h \
+- Interceptor_List.h Interceptor_List.inl RT_Policy_i.h \
++ TSS_Object.h TSS_Object.inl Interceptor_List.h Interceptor_List.inl \
++ RT_Policy_i.h \
+  RTCORBAC.h \
+  RTCORBAC.i \
+  RT_Policy_i.i \
+- Protocols_Hooks.h RTCORBAC.h \
++ Protocols_Hooks.h \
++ ORB_Core.h \
+  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+  $(ACE_ROOT)/ace/Thread_Manager.h \
+  $(ACE_ROOT)/ace/Singleton.h \
+@@ -31434,7 +31955,6 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i Leader_Follower.h \
+- ORB_Core.h \
+  Leader_Follower.i \
+  TAO_Server_Request.h Tagged_Profile.h \
+  GIOPC.h \
+@@ -31444,7 +31964,7 @@
+  TAO_Server_Request.i GIOP_Message_Locate_Header.h \
+  Tagged_Profile.h \
+  GIOP_Message_Locate_Header.i \
+- Transport.h Exception.h \
++ Transport.h Transport_Descriptor_Interface.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -31709,6 +32229,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -31741,7 +32263,8 @@
+  GIOP_Message_Locate_Header.i \
+  Leader_Follower.h \
+  Leader_Follower.i \
+- Transport.h corbafwd.h Exception.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -32001,6 +32524,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -32024,7 +32549,8 @@
+  GIOP_Utils.h \
+  GIOP_Utils.i \
+  GIOP_Message_Base.i \
+- Transport.h corbafwd.h Exception.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -32711,6 +33237,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -32723,7 +33251,8 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Transport.h corbafwd.h Exception.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -33085,6 +33614,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -33099,7 +33630,8 @@
+  $(ACE_ROOT)/ace/Singleton.cpp \
+  $(ACE_ROOT)/ace/Thread_Manager.i \
+  ORB_Core.i \
+- Transport.h corbafwd.h Exception.h \
++ Transport.h corbafwd.h Exception.h Transport_Descriptor_Interface.h \
++ Transport_Cache_Manager.h \
+  $(ACE_ROOT)/ace/Message_Queue.h \
+  $(ACE_ROOT)/ace/IO_Cntl_Msg.h \
+  $(ACE_ROOT)/ace/Message_Queue_T.h \
+@@ -33613,6 +34145,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+@@ -33856,6 +34390,8 @@
+  Cleanup_Func_Registry.h \
+  Cleanup_Func_Registry.inl \
+  Object_Ref_Table.h \
++ TSS_Object.h \
++ TSS_Object.inl \
+  Interceptor_List.h \
+  Interceptor_List.inl \
+  RT_Policy_i.h \
+Index: ORB_Core.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.h,v
+retrieving revision 1.175
+diff -u -r1.175 ORB_Core.h
+--- ORB_Core.h	2001/03/17 00:53:35	1.175
++++ ORB_Core.h	2001/04/17 17:51:39
+@@ -36,6 +36,7 @@
+ #include "Transport_Cache_Manager.h"
+ #include "Cleanup_Func_Registry.h"
+ #include "Object_Ref_Table.h"
++#include "TSS_Object.h"
+ 
+ // Interceptor definitions.
+ #include "PortableInterceptorC.h"
+@@ -107,12 +108,19 @@
+ {
+ public:
+ 
+-  /// onstructor
++  /// constructor
+   TAO_ORB_Core_TSS_Resources (void);
+ 
+-  /// destructor
++  /// Calls cleanup if it hasn't been done yet.
+   ~TAO_ORB_Core_TSS_Resources (void);
+ 
++  /// Clean up any resources held by this, but don't
++  /// actually kill this instance.
++  void cleanup (void);
++
++  /// Deletion function for the TSS allocation list
++  static void clean_me (void *p);
++
+ private:
+ 
+   /// The ORB Core TSS resources should not be copied
+@@ -127,6 +135,7 @@
+    */
+ 
+   /// The allocators for the output CDR streams.
++  // CLEANUP
+   //@{
+   ACE_Allocator *output_cdr_dblock_allocator_;
+   ACE_Allocator *output_cdr_buffer_allocator_;
+@@ -134,6 +143,7 @@
+   //@}
+ 
+   /// The allocators for the input CDR streams.
++  // CLEANUP
+   //@{
+   ACE_Allocator *input_cdr_dblock_allocator_;
+   ACE_Allocator *input_cdr_buffer_allocator_;
+@@ -142,6 +152,7 @@
+   /// This is is just a place holder, in the future the transport
+   /// cache will be separated from the connectors and it will be a
+   /// (potentially) TSS object.
++  // CLEANUP
+   TAO_Transport_Cache *transport_cache_;
+ 
+   /// Counter for how (nested) calls this thread has made to run the
+@@ -153,22 +164,34 @@
+   int client_leader_thread_;
+ 
+   /// Condition variable for the leader follower model.
++  // CLEANUP
+   TAO_SYNCH_CONDITION* leader_follower_condition_variable_;
+ 
+   /// The Reactor Holder that we should callback when destroying the
+   /// cookie.
++  // CLEANUP
+   TAO_Reactor_Registry *reactor_registry_;
+ 
+   /// A TSS magic cookie used by the Reactor_Registry
++  // CLEANUP
+   void *reactor_registry_cookie_;
+ 
+   /// Generic container for thread-specific objects.
++  // @@Does this need to be cleaned up?!?!?!
+   ACE_Array_Base<void *> ts_objects_;
+ 
+   /// Pointer to the ORB core.  Needed to get access to the TSS
+   /// cleanup functions for the TSS objects stored in the TSS object
+   /// array in this class.
+   TAO_ORB_Core *orb_core_;
++
++  /// Computed flag indicating that this instance holds a pointer to
++  /// something that needs to be cleaned up.  This is cleared
++  /// by cleanup().
++  int needs_cleanup (void) ;
++
++  /// Number of times this has been cleaned.
++  int times_cleaned_;
+ };
+ 
+ // ****************************************************************
+@@ -190,6 +213,7 @@
+  */
+ class TAO_Export TAO_ORB_Core
+ {
++  friend class TAO_ORB_Core_TSS_Resources;
+   friend class TAO_ORB_Core_Auto_Ptr;
+   friend class TAO_ORB_Table;
+   friend CORBA::ORB_ptr CORBA::ORB_init (int &,
+@@ -1113,6 +1137,13 @@
+ 
+   /// This is where the tss resources for this ORB are stored.
+   ACE_TSS_TYPE (TAO_ORB_Core_TSS_Resources) tss_resources_;
++
++  /// List of all TSS-allocated resources
++  /**
++   * This is typically just all the pointers returned from
++   * this->get_tss_resources ().
++   */
++  TAO_TSS_Allocation_List tss_allocation_list_;
+ 
+   /// If the resources are per-ORB (as opposed to per-ORB-per-thread)
+   /// then they are stored here...
+Index: ORB_Core.i
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.i,v
+retrieving revision 1.102
+diff -u -r1.102 ORB_Core.i
+--- ORB_Core.i	2001/03/19 17:32:33	1.102
++++ ORB_Core.i	2001/04/17 17:51:43
+@@ -353,7 +353,22 @@
+ ACE_INLINE TAO_ORB_Core_TSS_Resources*
+ TAO_ORB_Core::get_tss_resources (void)
+ {
+-  return ACE_TSS_GET (&this->tss_resources_,TAO_ORB_Core_TSS_Resources);
++  TAO_ORB_Core_TSS_Resources *tssr =
++    ACE_TSS_GET (&this->tss_resources_,TAO_ORB_Core_TSS_Resources);
++  if (tssr != &this->orb_resources_)
++    {
++      // Make sure we only register dynamically-allocated instances
++      if (this->tss_allocation_list_.register_alloc (tssr, &TAO_ORB_Core_TSS_Resources::clean_me) == -1)
++        {
++          delete tssr;
++          tssr = 0;
++        }
++      // Set the pointer to the orb core...wish we could only do this *ONCE*
++      // at creation time.
++      tssr->orb_core_ = this;
++    }
++
++  return tssr;
+ }
+ 
+ ACE_INLINE void *
+@@ -833,3 +848,16 @@
+   // @@ Potential problem if this->p_ is zero!
+   return *this->get ();
+ }
++
++ACE_INLINE int
++TAO_ORB_Core_TSS_Resources::needs_cleanup (void)
++{
++  return (this->output_cdr_dblock_allocator_
++          || this->output_cdr_buffer_allocator_
++          || this->output_cdr_msgblock_allocator_
++          || this->input_cdr_dblock_allocator_
++          || this->input_cdr_buffer_allocator_
++          || this->leader_follower_condition_variable_
++          || this->reactor_registry_);
++}
++
+Index: ORB_Core.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.cpp,v
+retrieving revision 1.365
+diff -u -r1.365 ORB_Core.cpp
+--- ORB_Core.cpp	2001/03/23 03:38:39	1.365
++++ ORB_Core.cpp	2001/04/17 17:51:57
+@@ -1241,6 +1241,10 @@
+   if (!this->server_factory_from_service_config_)
+     delete server_factory_;
+ 
++  // Delete ORB_Core_TSS_Resources instances and clean up any
++  // straggling resources held by them.
++  this->tss_allocation_list_.delete_and_clean ();
++
+   delete this;
+ 
+   return 0;
+@@ -2010,6 +2014,9 @@
+       // Invoke Interceptor::destroy() on all registered interceptors.
+       this->destroy_interceptors (ACE_TRY_ENV);
+       ACE_CHECK;
++
++      // This should *really* be the last thing done...just in case
++      this->tss_allocation_list_.cleanup ();
+     }
+ }
+ 
+@@ -2451,8 +2458,10 @@
+                           0);
+ 
+       if (tss->output_cdr_dblock_allocator_ == 0)
+-        tss->output_cdr_dblock_allocator_ =
+-          this->resource_factory ()->output_cdr_dblock_allocator ();
++        {
++          tss->output_cdr_dblock_allocator_ =
++            this->resource_factory ()->output_cdr_dblock_allocator ();
++        }
+ 
+       return tss->output_cdr_dblock_allocator_;
+     }
+@@ -2481,13 +2490,15 @@
+       if (tss == 0)
+         ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT ("(%P|%t) %p\n"),
+-                           ACE_TEXT ("TAO_ORB_Core::input_cdr_buffer_allocator (); ")
++                           ACE_TEXT ("TAO_ORB_Core::output_cdr_buffer_allocator (); ")
+                            ACE_TEXT ("no more TSS keys")),
+                           0);
+ 
+       if (tss->output_cdr_buffer_allocator_ == 0)
+-        tss->output_cdr_buffer_allocator_ =
+-          this->resource_factory ()->output_cdr_buffer_allocator ();
++        {
++          tss->output_cdr_buffer_allocator_ =
++            this->resource_factory ()->output_cdr_buffer_allocator ();
++        }
+ 
+       return tss->output_cdr_buffer_allocator_;
+     }
+@@ -2846,43 +2857,48 @@
+ // ****************************************************************
+ 
+ TAO_ORB_Core_TSS_Resources::TAO_ORB_Core_TSS_Resources (void)
+-  : output_cdr_dblock_allocator_ (0),
+-    output_cdr_buffer_allocator_ (0),
+-    output_cdr_msgblock_allocator_ (0),
+-    input_cdr_dblock_allocator_ (0),
+-    input_cdr_buffer_allocator_ (0),
+-    transport_cache_ (0),
+-    event_loop_thread_ (0),
+-    client_leader_thread_ (0),
+-    leader_follower_condition_variable_ (0),
+-    reactor_registry_ (0),
+-    reactor_registry_cookie_ (0),
+-    ts_objects_ (),
+-    orb_core_ (0)
++  : output_cdr_dblock_allocator_ (0)
++  , output_cdr_buffer_allocator_ (0)
++  , output_cdr_msgblock_allocator_ (0)
++  , input_cdr_dblock_allocator_ (0)
++  , input_cdr_buffer_allocator_ (0)
++  , transport_cache_ (0)
++  , event_loop_thread_ (0)
++  , client_leader_thread_ (0)
++  , leader_follower_condition_variable_ (0)
++  , reactor_registry_ (0)
++  , reactor_registry_cookie_ (0)
++  , ts_objects_ ()
++  , orb_core_ (0)
++  , times_cleaned_ (0)
+ {
+ }
+ 
+ TAO_ORB_Core_TSS_Resources::~TAO_ORB_Core_TSS_Resources (void)
++{
++  // Need to remove 'this' from the tss_allocation_list!
++  if (this->orb_core_)
++    this->orb_core_->tss_allocation_list_.unregister_alloc (this);
++
++  if (this->needs_cleanup ())
++    this->cleanup ();
++}
++
++#define REMOVE_DELETE_AND_ZERO(ptr) \
++    if ((ptr) != 0) (ptr)->remove (); \
++    delete (ptr); \
++    (ptr) = 0;
++
++void
++TAO_ORB_Core_TSS_Resources::cleanup (void)
+ {
+-  if (this->output_cdr_dblock_allocator_ != 0)
+-    this->output_cdr_dblock_allocator_->remove ();
+-  delete this->output_cdr_dblock_allocator_;
+-
+-  if (this->output_cdr_buffer_allocator_ != 0)
+-    this->output_cdr_buffer_allocator_->remove ();
+-  delete this->output_cdr_buffer_allocator_;
+-
+-  if (this->output_cdr_msgblock_allocator_ != 0)
+-    this->output_cdr_msgblock_allocator_->remove ();
+-  delete this->output_cdr_msgblock_allocator_;
+-
+-  if (this->input_cdr_dblock_allocator_ != 0)
+-    this->input_cdr_dblock_allocator_->remove ();
+-  delete this->input_cdr_dblock_allocator_;
+-
+-  if (this->input_cdr_buffer_allocator_ != 0)
+-    this->input_cdr_buffer_allocator_->remove ();
+-  delete this->input_cdr_buffer_allocator_;
++  ++this->times_cleaned_;
++
++  REMOVE_DELETE_AND_ZERO (this->output_cdr_dblock_allocator_)
++  REMOVE_DELETE_AND_ZERO (this->output_cdr_buffer_allocator_)
++  REMOVE_DELETE_AND_ZERO (this->output_cdr_msgblock_allocator_)
++  REMOVE_DELETE_AND_ZERO (this->input_cdr_dblock_allocator_)
++  REMOVE_DELETE_AND_ZERO (this->input_cdr_buffer_allocator_)
+ 
+   // UNIMPLEMENTED delete this->transport_cache_;
+   this->transport_cache_ = 0;
+@@ -2891,8 +2907,7 @@
+   this->leader_follower_condition_variable_ = 0;
+ 
+   if (this->reactor_registry_ != 0)
+-    this->reactor_registry_->destroy_tss_cookie (
+-      this->reactor_registry_cookie_);
++    this->reactor_registry_->destroy_tss_cookie (this->reactor_registry_cookie_);
+ 
+   //@@ This is broken on platforms that use TSS emulation since this
+   //   destructor is invoked after the ORB.  Since we're under
+@@ -2906,6 +2921,15 @@
+   // if (this->orb_core_ != 0)
+   //   this->orb_core_->tss_cleanup_funcs ()->cleanup (this->ts_objects_);
+ }
++
++void
++TAO_ORB_Core_TSS_Resources::clean_me (void *p)
++{
++  TAO_ORB_Core_TSS_Resources *tssr = 
++    ACE_reinterpret_cast (TAO_ORB_Core_TSS_Resources *, p);
++  tssr->cleanup ();
++}
++
+ 
+ // ****************************************************************
+ 
+Index: TSS_Object.cpp
+===================================================================
+--- /dev/null	Tue May  5 15:32:27 1998
++++ TSS_Object.cpp	Mon Apr 16 14:16:26 2001
+@@ -0,0 +1,98 @@
++// -*- C++ -*-
++// $Id$
++
++#include "TSS_Object.h"
++
++ACE_RCSID (tao, TSS_Object, "$Id$")
++
++TAO_TSS_Allocation_List::TAO_TSS_Allocation_List (void)
++{
++}
++
++TAO_TSS_Allocation_List::~TAO_TSS_Allocation_List (void)
++{
++  this->cleanup ();
++}
++
++TAO_TSS_Allocation_Record::TAO_TSS_Allocation_Record (void* allocation = 0, TAO_TSS_Deletion_Func dfunc = 0)
++  : allocation_ (allocation)
++  , dfunc_ (dfunc)
++{
++}
++
++int
++TAO_TSS_Allocation_Record::operator== (const TAO_TSS_Allocation_Record &r) const
++{
++  return (this->allocation_ == r.allocation_);
++}
++
++int
++TAO_TSS_Allocation_List::register_alloc (void *allocation, TAO_TSS_Deletion_Func dfunc)
++{
++  TAO_TSS_Allocation_Record r (allocation, dfunc);
++  return (this->table_.insert (r) == -1) ? -1 : 0;
++}
++
++int
++TAO_TSS_Allocation_List::unregister_alloc (void *allocation, int call_dfunc = 0)
++{       
++  int retval = -1;
++  // Need to use the iterator to find the thing b/c we need to
++  // access the real item in case we have to call the dfunc
++  ITERATOR i (this->table_);
++  TAO_TSS_Allocation_Record recinlist;
++  
++  for (i.first (); ! i.done (); i++)
++    {
++      recinlist = *i;
++      if (recinlist.allocation_ == allocation)
++        {
++          retval = 0;
++          if (call_dfunc)
++            (*recinlist.dfunc_) (recinlist.allocation_);
++          break;
++        }
++    }
++  return (retval == 0) ? (this->table_.remove (recinlist)) : retval;
++}
++
++int
++TAO_TSS_Allocation_List::cleanup (void)
++{
++  int cleanups = 0;
++  ITERATOR i (this->table_);
++  for (i.first (); ! i.done (); i++)
++    {
++      TAO_TSS_Allocation_Record recinlist = *i;
++      if (recinlist.dfunc_)
++        (*recinlist.dfunc_) (recinlist.allocation_);
++      ++cleanups;
++    }
++  return cleanups;
++}
++
++int
++TAO_TSS_Allocation_List::delete_and_clean (void)
++{
++  int deletes = 0;
++  ITERATOR i (this->table_);
++  for (i.first (); ! i.done (); i++)
++    {
++      TAO_TSS_Allocation_Record recinlist = *i;
++      delete recinlist.allocation_;
++      ++deletes;
++    }
++  this->table_.reset ();
++  return deletes;
++}
++
++
++#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
++template class ACE_Unbounded_Set<TAO_TSS_Allocation_Record>;
++template class ACE_Node<TAO_TSS_Allocation_Record>;
++template class ACE_Unbounded_Set_Iterator<TAO_TSS_Allocation_Record>;
++#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
++#pragma instantiate ACE_Unbounded_Set<TAO_TSS_Allocation_Record>
++#pragma instantiate ACE_Node<TAO_TSS_Allocation_Record>
++#pragma instantiate ACE_Unbounded_Set_Iterator<TAO_TSS_Allocation_Record>
++#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
+Index: TSS_Object.h
+===================================================================
+--- /dev/null	Tue May  5 15:32:27 1998
++++ TSS_Object.h	Mon Apr  9 14:53:45 2001
+@@ -0,0 +1,162 @@
++// This may look like C, but it's really -*- C++ -*-
++
++//=============================================================================
++/**
++ *  @file TSS_Object.h
++ *
++ *  $Id$
++ *
++ *  Define a TAO version of ACE_TSS.  This one tracks all allocations
++ *  stuffed into TSS in a container, and makes it possible to clean them
++ *  up.
++ *
++ *  @author  Chris Cleeland <cleeland_c@ociweb.com>
++ */
++//=============================================================================
++
++
++#ifndef TAO_TSS_OBJECT_H
++#define TAO_TSS_OBJECT_H
++#include "ace/pre.h"
++
++#include "ace/Synch_T.h"
++#include "ace/Containers_T.h"
++
++/**
++ * @class TAO_TSS_Allocation_Record
++ *
++ * @brief Holds a record of a TSS allocation so that it can
++ * get cleaned up later.
++ *
++ * @see TAO_TSS_Object
++ */
++typedef void (*TAO_TSS_Deletion_Func) (void* p);
++struct TAO_TSS_Allocation_Record
++{
++  /// Pointer to the thing that got allocated.  This will get
++  /// cast back to the appropriate type in the deletion function.
++  void *allocation_;
++
++  /// Function called to delete the object pointer to by allocation_.
++  TAO_TSS_Deletion_Func dfunc_;
++
++  /// Convenience constructor to create a record
++  TAO_TSS_Allocation_Record (void *allocation, TAO_TSS_Deletion_Func dfunc);
++
++  /// Comparison operator; we only care that the allocation_ matches
++  int operator== (const TAO_TSS_Allocation_Record &r) const;
++};
++
++
++/**
++ * @class TAO_TSS_Allocation_List
++ *
++ * @brief Container for TAO_TSS_Allocation_Record instances.
++ *
++ */
++class TAO_TSS_Allocation_List
++{
++public:
++  /// Constructor
++  TAO_TSS_Allocation_List (void);
++
++  /// Destructor
++  ~TAO_TSS_Allocation_List (void);
++
++  /// Traits
++  typedef ACE_Unbounded_Set<TAO_TSS_Allocation_Record> TABLE;
++  typedef TABLE::ITERATOR ITERATOR;
++
++  /// Register an allocation based on the pointer and the deletion func.
++  /**
++   * Multiple registrations having the same allocation
++   * pointer <em>do not</em> result in multiple records.
++   *
++   * @return 0 on success, nonzero on failure.
++   */
++  int register_alloc (void *allocation, TAO_TSS_Deletion_Func dfunc);
++
++  /// Unregister an allocation from the list, possibly calling the
++  /// deletion func.
++  /**
++   *  
++   * Deregister the allocation from the list, calling the deletion
++   * func if call_dfunc != 0.
++   */
++  int unregister_alloc (void *allocation, int call_dfunc = 0);
++
++  /// Clean up (i.e., call cleanup func) on all the allocations
++  /// in the list, returning the number cleaned up.
++  int cleanup (void);
++
++  /// Delete all the allocations in the list.  Call this ONLY when
++  /// the ORB itself is going away, i.e., in fini().
++  int delete_and_clean (void);
++
++protected:
++
++private:
++  /// Copy prevention
++  ACE_UNIMPLEMENTED_FUNC (TAO_TSS_Allocation_List (const TAO_TSS_Allocation_List &))
++  ACE_UNIMPLEMENTED_FUNC (void operator= (const TAO_TSS_Allocation_List &))
++
++  TABLE table_;
++};
++
++
++#if 0
++/**
++ * @class TAO_TSS
++ *
++ * @brief Extensions of ACE_TSS which tracks objects held in
++ * thread-specific storage so that they can be cleaned up efficiently
++ * across all threads later.
++ *
++ * @see ACE_TSS
++ */
++template <class TYPE>
++class TAO_TSS : public class
++{
++public:
++  /// Initialize with the <code>ts_obj</code> value, possibly allocating
++  /// a new instance of TYPE.
++  /**
++   * If caller has passed us a non-NULL ts_obj *, then we'll just use
++   * this to initialize the thread-specific value (but only for the
++   * calling thread).  Thus, subsequent calls to <operator->> in this
++   * thread will return this value.  This is useful since it enables
++   * us to assign objects to thread-specific data that have
++   * arbitrarily complex constructors.
++   *
++   * If ts_obj is NULL, then this gets added to the list of allocated
++   * resources to get cleaned up, otherwise not.
++   */
++  TAO_TSS (TYPE *ts_obj = 0);
++
++  /// Deregister with thread-key administration.
++  virtual ~TAO_TSS (void);
++
++  /// Manufactures a new instance of TYPE
++  /**
++   * Manufactures a new instance of TYPE and also stores it
++   * in the list.
++   */
++  virtual TYPE *make_TSS_TYPE (void) const;
++
++  /// Type-safe deletion "function"
++  static delete_TSS_TYPE (void*);
++
++private:
++  // = Disallow copying...
++  ACE_UNIMPLEMENTED_FUNC (void operator= (const ACE_TSS<TYPE> &))
++  ACE_UNIMPLEMENTED_FUNC (ACE_TSS (const ACE_TSS<TYPE> &))
++}
++#endif
++
++
++#if defined (__ACE_INLINE__)
++# include "TSS_Object.inl"
++#endif /* __ACE_INLINE__ */
++
++#include "ace/post.h"
++#endif /* TAO_TSS_OBJECT_H */
+Index: TSS_Object.inl
+===================================================================
+--- /dev/null	Tue May  5 15:32:27 1998
++++ TSS_Object.inl	Fri Apr  6 13:36:01 2001
+@@ -0,0 +1 @@
++
