@@ -1,0 +1,155 @@
+
+    TAO VERSION: 1.2.4 (fresh checkout on Oct  8 2002 around 13:29)
+    ACE VERSION: 5.2.4 (fresh checkout on Oct  8 2002 around 13:29)
+
+    HOST MACHINE and OPERATING SYSTEM:
+
+      client: Red Hat 7.2
+      server: Red Hat 6.2
+
+    TARGET MACHINE and OPERATING SYSTEM, if different from HOST:
+    COMPILER NAME AND VERSION (AND PATCHLEVEL):
+
+      gcc 2.95.3 on both client and server
+
+    AREA/CLASS/EXAMPLE AFFECTED:
+
+      Modified TAO/tests/Hello/client to test large oneway requests to a
+      slow server on a simulated narrow-bandwidth network.
+
+    DOES THE PROBLEM AFFECT:
+        COMPILATION?
+          No
+
+        LINKING?
+          No
+
+        EXECUTION?
+          Yes
+
+        OTHER (please specify)?
+
+    SYNOPSIS:
+
+      Calling big oneway requests from a fast client to a slow server
+      over narrow bandwidth (simulated with small socket buffers) causes
+      the client to deadlock.  Client remains deadlocked even after the
+      server has caught up.
+
+    DESCRIPTION:
+
+      Here's the README from the attached test:
+
+/**
+
+@page Slow_Receiver Test README File
+
+    This is a very simple test for TAO to demonstrate how a slow
+    receiver (server) and narrow bandwidth can cause a sender
+    (client) to deadlock.  It is based on the simple Hello test in
+    TAO but adds a oneway operation that takes a sequence of longs.
+
+    The client invokes this oneway operation in a for loop for
+    <iteration> times passing it a sequence of longs of length
+    <num_longs>.
+
+    The server is made much slower than the client by sleeping for
+    one second upon receiving each request.
+
+    The test demonstrates the problem best when the client and
+    server are running on two different nodes on a network--the
+    slower the network, the better.  Nevertheless, a run_test.pl
+    script is provided that will run the test on the same host, but
+    it may not demonstrate the problem in that configuration.
+
+RUNNING THE TEST
+
+    To run the test on two different nodes (PREFERRED):
+
+    - Run the server first on one node:
+
+$ ./server -o test.ior
+
+    - Copy or ftp the "test.ior" file to a second node.
+
+    - Run the client on the second node:
+
+$ ./client -k file://test.ior
+
+    To make the problem worse, increase the number of times the
+    client invokes the oneway operation on the server using the -i
+    option and increase the length of each message by increasing the
+    number of longs in the sequence with the -n option:
+
+$ ./client -k file://test.ior -i <iterations> -n <num_longs>
+
+    To narrow the bandwidth artificially, restrict the send and recv
+    socket buffer sizes using the -ORBRcvSock option on the server
+    and the -ORBSndSock option on the client.  It seems to be most
+    effective to set the -ORBRcvSock option to something small on
+    the server side.  A value of 512 seems to work pretty well.
+
+    For example:
+
+$ ./server -o test.ior -ORBRcvSock 512
+$ ./client -k file://test.ior -i 100 -n 1000
+
+
+    To run the test using the run_test.pl script (NOT PREFERRED):
+
+$ ./run_test.pl
+
+    the script returns 0 if the test was successful.
+
+EXPECTED RESULTS
+
+    The server simply prints "Server is ready." then blocks in
+    orb->run() waiting for client requests.
+
+    The client will print "client: Calling Hello::take_sequence()"
+    for each iteration through the loop.  It will start out quickly,
+    then slows down, then eventually deadlocks.  "netstat -a" on the
+    server node will verify that the server has "drained down" its
+    TCP receive buffer, but "netstat -a" on the client node will
+    show that bytes remain in the client's TCP send buffer.
+
+    For example (on client node):
+
+$ netstat -a
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+
+... (stuff not of interest)
+
+tcp        0  69504 xi.ociweb.com:43828     vivaldi.ociweb.co:39333 ESTABLISHED
+              ^^^^^
+
+    If the client makes it through the loop without deadlocking, it
+    calls a shutdown operation on the server and the server will
+    eventually exit after processing all the requests.
+
+*/
+
+
+    REPEAT BY:
+
+      See the attached test that is adapted from the Hello test
+      (attached filename: Slow_Receiver.tar.gz).
+
+      I have only tested this on Linux (RH 7.2->RH 6.2).  I included
+      Borland Makefiles, VC++ project/workspace files, and an MPC file,
+      but I haven't tried to build it yet on other platforms.
+
+    SAMPLE FIX/WORKAROUND:
+
+      I could probably use the RelativeRoundtripTimeout policy in the
+      client to timeout on the sends, reconnect to the server, and start
+      sending again.  But, that would cause loss of messages and a
+      resource leak.
+
+      What would be cool would be to have some sort of policy to
+      "throttle" the client until the server catches up.  I thought that
+      would happen with the outgoing message queueing in
+      tao/Transport.cpp.  The client does slow down for awhile, but then
+      it deadlocks.
+
