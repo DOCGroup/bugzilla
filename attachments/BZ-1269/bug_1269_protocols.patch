@@ -1,0 +1,576 @@
+Index: TAO/tao/Strategies/DIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Connection_Handler.cpp,v
+retrieving revision 1.23
+diff -u -r1.23 DIOP_Connection_Handler.cpp
+--- TAO/tao/Strategies/DIOP_Connection_Handler.cpp	13 Sep 2002 13:41:37 -0000	1.23
++++ TAO/tao/Strategies/DIOP_Connection_Handler.cpp	14 Oct 2002 00:24:05 -0000
+@@ -208,6 +208,12 @@
+ }
+ 
+ int
++TAO_DIOP_Connection_Handler::close_connection (void)
++{
++  return this->close_connection_eh (this);
++}
++
++int
+ TAO_DIOP_Connection_Handler::handle_input (ACE_HANDLE h)
+ {
+   return this->handle_input_eh (h, this);
+@@ -224,12 +230,6 @@
+                                            ACE_Reactor_Mask rm)
+ {
+   return this->handle_close_eh (handle, rm, this);
+-}
+-
+-void
+-TAO_DIOP_Connection_Handler::handle_close_i (void)
+-{
+-  this->handle_close_i_eh (this);
+ }
+ 
+ int
+Index: TAO/tao/Strategies/DIOP_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Connection_Handler.h,v
+retrieving revision 1.11
+diff -u -r1.11 DIOP_Connection_Handler.h
+--- TAO/tao/Strategies/DIOP_Connection_Handler.h	13 Sep 2002 13:41:37 -0000	1.11
++++ TAO/tao/Strategies/DIOP_Connection_Handler.h	14 Oct 2002 00:24:05 -0000
+@@ -115,6 +115,7 @@
+   /** @name Event Handler overloads
+    */
+   virtual int resume_handler (void);
++  virtual int close_connection (void);
+   virtual int handle_input (ACE_HANDLE);
+   virtual int handle_output (ACE_HANDLE);
+   virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
+@@ -159,7 +160,6 @@
+   /**
+    * @name TAO_Connection Handler overloads
+    */
+-  void handle_close_i (void);
+   virtual int release_os_resources (void);
+   //@}
+ 
+Index: TAO/tao/Strategies/DIOP_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Transport.cpp,v
+retrieving revision 1.13
+diff -u -r1.13 DIOP_Transport.cpp
+--- TAO/tao/Strategies/DIOP_Transport.cpp	28 Jul 2002 14:48:44 -0000	1.13
++++ TAO/tao/Strategies/DIOP_Transport.cpp	14 Oct 2002 00:24:05 -0000
+@@ -36,6 +36,13 @@
+   , connection_handler_ (handler)
+   , messaging_object_ (0)
+ {
++  if (connection_handler_ != 0)
++    {
++      // REFCNT: Matches one of
++      // TAO_Transport::connection_handler_close() or
++      // TAO_Transport::close_connection_shared.
++      this->connection_handler_->incr_refcount();
++    }
+   // @@ Michael: Set the input CDR size to ACE_MAX_DGRAM_SIZE so that
+   //             we read the whole UDP packet on a single read.
+   if (flag)
+@@ -56,6 +63,7 @@
+ 
+ TAO_DIOP_Transport::~TAO_DIOP_Transport (void)
+ {
++  ACE_ASSERT(this->connection_handler_ == 0);
+   delete this->messaging_object_;
+ }
+ 
+@@ -470,10 +478,10 @@
+ }
+ */
+ 
+-ACE_Event_Handler *
++TAO_Connection_Handler *
+ TAO_DIOP_Transport::invalidate_event_handler_i (void)
+ {
+-  ACE_Event_Handler * eh = this->connection_handler_;
++  TAO_Connection_Handler * eh = this->connection_handler_;
+   this->connection_handler_ = 0;
+   return eh;
+ }
+Index: TAO/tao/Strategies/DIOP_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Transport.h,v
+retrieving revision 1.7
+diff -u -r1.7 DIOP_Transport.h
+--- TAO/tao/Strategies/DIOP_Transport.h	28 Jul 2002 14:48:44 -0000	1.7
++++ TAO/tao/Strategies/DIOP_Transport.h	14 Oct 2002 00:24:05 -0000
+@@ -75,7 +75,7 @@
+ 
+   virtual ACE_Event_Handler * event_handler_i (void);
+   virtual TAO_Connection_Handler *connection_handler_i (void);
+-  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
++  virtual TAO_Connection_Handler * invalidate_event_handler_i (void);
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
+   /// Write the complete Message_Block chain to the connection.
+Index: TAO/tao/Strategies/SHMIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/SHMIOP_Connection_Handler.cpp,v
+retrieving revision 1.49
+diff -u -r1.49 SHMIOP_Connection_Handler.cpp
+--- TAO/tao/Strategies/SHMIOP_Connection_Handler.cpp	13 Sep 2002 13:41:37 -0000	1.49
++++ TAO/tao/Strategies/SHMIOP_Connection_Handler.cpp	14 Oct 2002 00:24:05 -0000
+@@ -169,6 +169,12 @@
+ }
+ 
+ int
++TAO_SHMIOP_Connection_Handler::close_connection (void)
++{
++  return this->close_connection_eh (this);
++}
++
++int
+ TAO_SHMIOP_Connection_Handler::handle_input (ACE_HANDLE h)
+ {
+   return this->handle_input_eh (h, this);
+@@ -185,12 +191,6 @@
+                                            ACE_Reactor_Mask rm)
+ {
+   return this->handle_close_eh (handle, rm, this);
+-}
+-
+-void
+-TAO_SHMIOP_Connection_Handler::handle_close_i (void)
+-{
+-  this->handle_close_i_eh (this);
+ }
+ 
+ int
+Index: TAO/tao/Strategies/SHMIOP_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/SHMIOP_Connection_Handler.h,v
+retrieving revision 1.13
+diff -u -r1.13 SHMIOP_Connection_Handler.h
+--- TAO/tao/Strategies/SHMIOP_Connection_Handler.h	13 Sep 2002 13:41:37 -0000	1.13
++++ TAO/tao/Strategies/SHMIOP_Connection_Handler.h	14 Oct 2002 00:24:05 -0000
+@@ -85,6 +85,7 @@
+   /** @name Event Handler overloads
+    */
+   virtual int resume_handler (void);
++  virtual int close_connection (void);
+   virtual int handle_input (ACE_HANDLE);
+   virtual int handle_output (ACE_HANDLE);
+   virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
+@@ -99,7 +100,6 @@
+   /**
+    * @name TAO_Connection Handler overloads
+    */
+-  void handle_close_i (void);
+   virtual int release_os_resources (void);
+   //@}
+ 
+Index: TAO/tao/Strategies/SHMIOP_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/SHMIOP_Transport.cpp,v
+retrieving revision 1.27
+diff -u -r1.27 SHMIOP_Transport.cpp
+--- TAO/tao/Strategies/SHMIOP_Transport.cpp	28 Jul 2002 14:48:44 -0000	1.27
++++ TAO/tao/Strategies/SHMIOP_Transport.cpp	14 Oct 2002 00:24:05 -0000
+@@ -34,6 +34,13 @@
+     connection_handler_ (handler),
+     messaging_object_ (0)
+ {
++  if (connection_handler_ != 0)
++    {
++      // REFCNT: Matches one of
++      // TAO_Transport::connection_handler_close() or
++      // TAO_Transport::close_connection_shared.
++      this->connection_handler_->incr_refcount();
++    }
+   if (flag)
+     {
+       // Use the lite version of the protocol
+@@ -50,6 +57,7 @@
+ 
+ TAO_SHMIOP_Transport::~TAO_SHMIOP_Transport (void)
+ {
++  ACE_ASSERT(this->connection_handler_ == 0);
+   delete this->messaging_object_;
+ }
+ 
+@@ -281,10 +289,10 @@
+   return 1;
+ }
+ 
+-ACE_Event_Handler *
++TAO_Connection_Handler *
+ TAO_SHMIOP_Transport::invalidate_event_handler_i (void)
+ {
+-  ACE_Event_Handler * eh = this->connection_handler_;
++  TAO_Connection_Handler * eh = this->connection_handler_;
+   this->connection_handler_ = 0;
+   return eh;
+ }
+Index: TAO/tao/Strategies/SHMIOP_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/SHMIOP_Transport.h,v
+retrieving revision 1.18
+diff -u -r1.18 SHMIOP_Transport.h
+--- TAO/tao/Strategies/SHMIOP_Transport.h	28 Jul 2002 14:48:44 -0000	1.18
++++ TAO/tao/Strategies/SHMIOP_Transport.h	14 Oct 2002 00:24:06 -0000
+@@ -69,8 +69,7 @@
+   //@{
+   virtual ACE_Event_Handler * event_handler_i (void);
+   virtual TAO_Connection_Handler *connection_handler_i (void);
+-  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
+-
++  virtual TAO_Connection_Handler * invalidate_event_handler_i (void);
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
+   /// Write the complete Message_Block chain to the connection.
+Index: TAO/tao/Strategies/UIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/UIOP_Connection_Handler.cpp,v
+retrieving revision 1.47
+diff -u -r1.47 UIOP_Connection_Handler.cpp
+--- TAO/tao/Strategies/UIOP_Connection_Handler.cpp	13 Sep 2002 13:41:37 -0000	1.47
++++ TAO/tao/Strategies/UIOP_Connection_Handler.cpp	14 Oct 2002 00:24:06 -0000
+@@ -152,6 +152,12 @@
+ }
+ 
+ int
++TAO_UIOP_Connection_Handler::close_connection (void)
++{
++  return this->close_connection_eh (this);
++}
++
++int
+ TAO_UIOP_Connection_Handler::handle_input (ACE_HANDLE h)
+ {
+   return this->handle_input_eh (h, this);
+@@ -168,12 +174,6 @@
+                                            ACE_Reactor_Mask rm)
+ {
+   return this->handle_close_eh (handle, rm, this);
+-}
+-
+-void
+-TAO_UIOP_Connection_Handler::handle_close_i (void)
+-{
+-  this->handle_close_i_eh (this);
+ }
+ 
+ int
+Index: TAO/tao/Strategies/UIOP_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/UIOP_Connection_Handler.h,v
+retrieving revision 1.13
+diff -u -r1.13 UIOP_Connection_Handler.h
+--- TAO/tao/Strategies/UIOP_Connection_Handler.h	13 Sep 2002 13:41:37 -0000	1.13
++++ TAO/tao/Strategies/UIOP_Connection_Handler.h	14 Oct 2002 00:24:06 -0000
+@@ -104,6 +104,7 @@
+   /** @name Event Handler overloads
+    */
+   virtual int resume_handler (void);
++  virtual int close_connection (void);
+   virtual int handle_input (ACE_HANDLE);
+   virtual int handle_output (ACE_HANDLE);
+   virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
+@@ -118,7 +119,6 @@
+   /**
+    * @name TAO_Connection Handler overloads
+    */
+-  void handle_close_i (void);
+   virtual int release_os_resources (void);
+   //@}
+ 
+Index: TAO/tao/Strategies/UIOP_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/UIOP_Transport.cpp,v
+retrieving revision 1.26
+diff -u -r1.26 UIOP_Transport.cpp
+--- TAO/tao/Strategies/UIOP_Transport.cpp	28 Jul 2002 14:48:44 -0000	1.26
++++ TAO/tao/Strategies/UIOP_Transport.cpp	14 Oct 2002 00:24:06 -0000
+@@ -33,6 +33,13 @@
+   , connection_handler_ (handler)
+   , messaging_object_ (0)
+ {
++  if (connection_handler_ != 0)
++    {
++      // REFCNT: Matches one of
++      // TAO_Transport::connection_handler_close() or
++      // TAO_Transport::close_connection_shared.
++      this->connection_handler_->incr_refcount();
++    }
+   if (flag)
+     {
+       // Use the lite version of the protocol
+@@ -49,6 +56,7 @@
+ 
+ TAO_UIOP_Transport::~TAO_UIOP_Transport (void)
+ {
++  ACE_ASSERT(this->connection_handler_ == 0);
+   delete this->messaging_object_;
+ }
+ 
+@@ -211,10 +219,10 @@
+   return 1;
+ }
+ 
+-ACE_Event_Handler *
++TAO_Connection_Handler *
+ TAO_UIOP_Transport::invalidate_event_handler_i (void)
+ {
+-  ACE_Event_Handler * eh = this->connection_handler_;
++  TAO_Connection_Handler * eh = this->connection_handler_;
+   this->connection_handler_ = 0;
+   return eh;
+ }
+Index: TAO/tao/Strategies/UIOP_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/UIOP_Transport.h,v
+retrieving revision 1.15
+diff -u -r1.15 UIOP_Transport.h
+--- TAO/tao/Strategies/UIOP_Transport.h	28 Jul 2002 14:48:44 -0000	1.15
++++ TAO/tao/Strategies/UIOP_Transport.h	14 Oct 2002 00:24:06 -0000
+@@ -68,8 +68,7 @@
+ 
+   virtual ACE_Event_Handler * event_handler_i (void);
+   virtual TAO_Connection_Handler *connection_handler_i (void);
+-  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
+-
++  virtual TAO_Connection_Handler * invalidate_event_handler_i (void);
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
+   /// Write the complete Message_Block chain to the connection.
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp,v
+retrieving revision 1.11
+diff -u -r1.11 UIPMC_Connection_Handler.cpp
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	13 Sep 2002 13:41:37 -0000	1.11
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	14 Oct 2002 00:24:06 -0000
+@@ -221,6 +221,12 @@
+ }
+ 
+ int
++TAO_UIPMC_Connection_Handler::close_connection (void)
++{
++  return this->close_connection_eh (this);
++}
++
++int
+ TAO_UIPMC_Connection_Handler::handle_input (ACE_HANDLE h)
+ {
+   return this->handle_input_eh (h, this);
+@@ -237,12 +243,6 @@
+                                            ACE_Reactor_Mask rm)
+ {
+   return this->handle_close_eh (handle, rm, this);
+-}
+-
+-void
+-TAO_UIPMC_Connection_Handler::handle_close_i (void)
+-{
+-  this->handle_close_i_eh (this);
+ }
+ 
+ int
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h,v
+retrieving revision 1.3
+diff -u -r1.3 UIPMC_Connection_Handler.h
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h	13 Sep 2002 13:41:37 -0000	1.3
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h	14 Oct 2002 00:24:06 -0000
+@@ -111,6 +111,7 @@
+   /** @name Event Handler overloads
+    */
+   virtual int resume_handler (void);
++  virtual int close_connection (void);
+   virtual int handle_input (ACE_HANDLE);
+   virtual int handle_output (ACE_HANDLE);
+   virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
+@@ -164,7 +165,6 @@
+   /**
+    * @name TAO_Connection Handler overloads
+    */
+-  void handle_close_i (void);
+   virtual int release_os_resources (void);
+   //@}
+ 
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp,v
+retrieving revision 1.8
+diff -u -r1.8 UIPMC_Transport.cpp
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp	28 Jul 2002 14:48:44 -0000	1.8
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp	14 Oct 2002 00:24:06 -0000
+@@ -35,6 +35,14 @@
+   , connection_handler_ (handler)
+   , messaging_object_ (0)
+ {
++  if (connection_handler_ != 0)
++    {
++      // REFCNT: Matches one of
++      // TAO_Transport::connection_handler_close() or
++      // TAO_Transport::close_connection_shared.
++      this->connection_handler_->incr_refcount();
++    }
++
+   // Use the normal GIOP object
+   ACE_NEW (this->messaging_object_,
+            TAO_GIOP_Message_Base (orb_core,
+@@ -49,8 +57,8 @@
+ 
+ TAO_UIPMC_Transport::~TAO_UIPMC_Transport (void)
+ {
++  ACE_ASSERT(this->connection_handler_ == 0);
+   delete this->messaging_object_;
+-  this->messaging_object_ = 0;
+ }
+ 
+ ACE_Event_Handler *
+@@ -544,10 +552,10 @@
+   return 1;
+ }
+ 
+-ACE_Event_Handler *
++TAO_Connection_Handler *
+ TAO_UIPMC_Transport::invalidate_event_handler_i (void)
+ {
+-  ACE_Event_Handler * eh = this->connection_handler_;
++  TAO_Connection_Handler * eh = this->connection_handler_;
+   this->connection_handler_ = 0;
+   return eh;
+ }
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h,v
+retrieving revision 1.6
+diff -u -r1.6 UIPMC_Transport.h
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h	28 Jul 2002 14:48:44 -0000	1.6
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h	14 Oct 2002 00:24:06 -0000
+@@ -72,7 +72,7 @@
+ 
+   virtual ACE_Event_Handler * event_handler_i (void);
+   virtual TAO_Connection_Handler *connection_handler_i (void);
+-  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
++  virtual TAO_Connection_Handler * invalidate_event_handler_i (void);
+ 
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
+Index: TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp,v
+retrieving revision 1.61
+diff -u -r1.61 SSLIOP_Connection_Handler.cpp
+--- TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	13 Sep 2002 13:41:37 -0000	1.61
++++ TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	14 Oct 2002 00:24:06 -0000
+@@ -213,6 +213,12 @@
+ }
+ 
+ int
++TAO_SSLIOP_Connection_Handler::close_connection (void)
++{
++  return this->close_connection_eh (this);
++}
++
++int
+ TAO_SSLIOP_Connection_Handler::handle_input (ACE_HANDLE h)
+ {
+   return this->handle_input_eh (h, this);
+@@ -229,12 +235,6 @@
+                                            ACE_Reactor_Mask rm)
+ {
+   return this->handle_close_eh (handle, rm, this);
+-}
+-
+-void
+-TAO_SSLIOP_Connection_Handler::handle_close_i (void)
+-{
+-  this->handle_close_i_eh (this);
+ }
+ 
+ int
+Index: TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h,v
+retrieving revision 1.17
+diff -u -r1.17 SSLIOP_Connection_Handler.h
+--- TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h	13 Sep 2002 13:41:37 -0000	1.17
++++ TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h	14 Oct 2002 00:24:06 -0000
+@@ -85,6 +85,7 @@
+   /** @name Event Handler overloads
+    */
+   virtual int resume_handler (void);
++  virtual int close_connection (void);
+   virtual int handle_input (ACE_HANDLE);
+   virtual int handle_output (ACE_HANDLE);
+   virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
+@@ -112,7 +113,6 @@
+   /**
+    * @name TAO_Connection Handler overloads
+    */
+-  void handle_close_i (void);
+   virtual int release_os_resources (void);
+   virtual void pos_io_hook (int & return_value);
+   //@}
+Index: TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.cpp,v
+retrieving revision 1.61
+diff -u -r1.61 SSLIOP_Transport.cpp
+--- TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.cpp	28 Jul 2002 14:48:44 -0000	1.61
++++ TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.cpp	14 Oct 2002 00:24:06 -0000
+@@ -29,6 +29,14 @@
+     connection_handler_ (handler),
+     messaging_object_ (0)
+ {
++  if (connection_handler_ != 0)
++    {
++      // REFCNT: Matches one of
++      // TAO_Transport::connection_handler_close() or
++      // TAO_Transport::close_connection_shared.
++      this->connection_handler_->incr_refcount();
++    }
++
+   // Use the normal GIOP object
+   ACE_NEW (this->messaging_object_,
+            TAO_GIOP_Message_Base (orb_core));
+@@ -37,6 +45,7 @@
+ 
+ TAO_SSLIOP_Transport::~TAO_SSLIOP_Transport (void)
+ {
++  ACE_ASSERT(this->connection_handler_ == 0);
+   delete this->messaging_object_;
+ }
+ 
+@@ -402,10 +411,10 @@
+   return 1;
+ }
+ 
+-ACE_Event_Handler *
++TAO_Connection_Handler *
+ TAO_SSLIOP_Transport::invalidate_event_handler_i (void)
+ {
+-  ACE_Event_Handler * eh = this->connection_handler_;
++  TAO_Connection_Handler * eh = this->connection_handler_;
+   this->connection_handler_ = 0;
+   return eh;
+ }
+Index: TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.h,v
+retrieving revision 1.28
+diff -u -r1.28 SSLIOP_Transport.h
+--- TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.h	28 Jul 2002 14:48:44 -0000	1.28
++++ TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.h	14 Oct 2002 00:24:06 -0000
+@@ -88,7 +88,7 @@
+ 
+   virtual ACE_Event_Handler * event_handler_i (void);
+   virtual TAO_Connection_Handler *connection_handler_i (void);
+-  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
++  virtual TAO_Connection_Handler * invalidate_event_handler_i (void);
+ 
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
