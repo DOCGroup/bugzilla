@@ -1,0 +1,73 @@
+*** IIOP_Acceptor.cpp	2000/03/30 16:15:56	1.1
+--- IIOP_Acceptor.cpp	2000/03/30 16:24:53
+***************
+*** 425,437 ****
+                               ACE_INET_Addr &addr,
+                               ACE_CString &host)
+  {
+!   if (orb_core->orb_params ()->use_dotted_decimal_addresses ())
+      {
+        const char *tmp = addr.get_host_addr ();
+        if (tmp == 0)
+          {
+            if (TAO_debug_level > 0)
+              ACE_DEBUG ((LM_DEBUG,
+                          ASYS_TEXT ("\n\nTAO (%P|%t) ")
+                          ASYS_TEXT ("IIOP_Acceptor::hostname ")
+                          ASYS_TEXT ("- %p\n\n"),
+--- 425,440 ----
+                               ACE_INET_Addr &addr,
+                               ACE_CString &host)
+  {
+!   char tmp_host[MAXHOSTNAMELEN + 1];
+!   if (   orb_core->orb_params ()->use_dotted_decimal_addresses ()
+!       || (addr.get_host_name (tmp_host, sizeof (tmp_host)) != 0))
+      {
+        const char *tmp = addr.get_host_addr ();
+        if (tmp == 0)
+          {
+            if (TAO_debug_level > 0)
+              ACE_DEBUG ((LM_DEBUG,
++ 
+                          ASYS_TEXT ("\n\nTAO (%P|%t) ")
+                          ASYS_TEXT ("IIOP_Acceptor::hostname ")
+                          ASYS_TEXT ("- %p\n\n"),
+***************
+*** 443,466 ****
+      }
+    else
+      {
+-       char tmp_host[MAXHOSTNAMELEN + 1];
+-       if (addr.get_host_name (tmp_host,
+-                               sizeof (tmp_host)) != 0)
+-         {
+-           if (TAO_debug_level > 0)
+-             ACE_DEBUG ((LM_DEBUG,
+-                         ASYS_TEXT ("\n\nTAO (%P|%t) ")
+-                         ASYS_TEXT ("IIOP_Acceptor::hostname ")
+-                         ASYS_TEXT ("- %p\n\n"),
+-                         ASYS_TEXT ("cannot cache hostname")));
+-           return -1;
+-         }
+- 
+        host = tmp_host;
+      }
+  
+    return 0;
+  }
+  
+  CORBA::ULong
+  TAO_IIOP_Acceptor::endpoint_count (void)
+--- 446,457 ----
+      }
+    else
+      {
+        host = tmp_host;
+      }
+  
+    return 0;
+  }
++ 
+  
+  CORBA::ULong
+  TAO_IIOP_Acceptor::endpoint_count (void)
