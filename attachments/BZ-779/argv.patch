@@ -1,0 +1,273 @@
+Index: OS_NS_stdlib.inl
+===================================================================
+--- OS_NS_stdlib.inl	(.../vendor/ACE/release-5.5.3/ace)	(revision 335)
++++ OS_NS_stdlib.inl	(.../trunk/ACE_wrappers/ace)	(revision 335)
+@@ -6,6 +6,7 @@
+ #include "ace/Object_Manager_Base.h"
+ #include "ace/OS_NS_string.h"
+ #include "ace/Global_Macros.h"
++#include "ace/Default_Constants.h"
+ #include "ace/os_include/os_errno.h"
+ #include "ace/os_include/os_search.h"
+ 
+@@ -422,20 +423,54 @@
+   ACE_UNUSED_ARG (str);
+   ACE_NOTSUP_RETURN (0);
+ #else
+-  if (str[0] == ACE_LIB_TEXT ('$'))
++  const ACE_TCHAR * start = 0;
++  if ((start = ACE_OS::strchr (str, ACE_LIB_TEXT ('$'))) != 0)
+     {
++      ACE_TCHAR buf[ACE_DEFAULT_ARGV_BUFSIZ];
++      size_t var_len = ACE_OS::strcspn (&start[1],
++        ACE_LIB_TEXT ("$~!#%^&*()-+=\\|/?,.;:'\"`[]{} \t\n\r"));
++      ACE_OS::strncpy (buf, &start[1], var_len);
++      buf[var_len++] = ACE_LIB_TEXT ('\0');
+ #  if defined (ACE_WIN32)
+       // Always use the ACE_TCHAR for Windows.
+-      ACE_TCHAR *temp = 0;
+-      if ((temp = ACE_OS::getenv (&str[1])) != 0)
+-        return ACE_OS::strdup (temp);
++      ACE_TCHAR *temp = ACE_OS::getenv (buf);
+ #  else
+       // Use char * for environment on non-Windows.
+-      char *temp = 0;
+-      if ((temp = ACE_OS::getenv (ACE_TEXT_ALWAYS_CHAR (&str[1]))) != 0)
+-        return ACE_OS::strdup (ACE_TEXT_CHAR_TO_TCHAR (temp));
++      char *temp = ACE_OS::getenv (ACE_TEXT_ALWAYS_CHAR (buf));
+ #  endif /* ACE_WIN32 */
+-      return ACE_OS::strdup (str);
++      size_t buf_len = ACE_OS::strlen(str) + 1;
++      if (temp != 0)
++        buf_len += ACE_OS::strlen(temp) - var_len;
++      ACE_TCHAR * buf_p = buf;
++      if (buf_len > ACE_DEFAULT_ARGV_BUFSIZ)
++        {
++          buf_p = (ACE_TCHAR *)ACE_OS::malloc(buf_len * sizeof(ACE_TCHAR));
++          if (buf_p == 0)
++            {
++              errno = ENOMEM;
++              return 0;
++            }
++        }
++      ACE_TCHAR * p = buf_p;
++      size_t len = start - str;
++      ACE_OS::strncpy (p, str, len);
++      p += len;
++      if (temp != 0)
++        {
++#  if defined (ACE_WIN32)
++          p = ACE_OS::strecpy (p, temp) - 1;
++#  else
++          p = ACE_OS::strecpy (p, ACE_TEXT_CHAR_TO_TCHAR (temp)) - 1;
++#  endif /* ACE_WIN32 */
++        }
++      else
++        {
++          ACE_OS::strncpy (p, start, var_len);
++          p += var_len;
++          *p = ACE_LIB_TEXT ('\0');
++        }
++      ACE_OS::strcpy (p, &start[var_len]);
++      return (buf_p == buf) ? ACE_OS::strdup (buf) : buf_p;
+     }
+   else
+     return ACE_OS::strdup (str);
+
+Index: OS_NS_unistd.cpp
+===================================================================
+--- OS_NS_unistd.cpp	(.../vendor/ACE/release-5.5.3/ace/OS_NS_unistd.cpp)	(revision 335)
++++ OS_NS_unistd.cpp	(.../trunk/ACE_wrappers/ace/OS_NS_unistd.cpp)	(revision 335)
+@@ -48,35 +48,82 @@
+ 
+   // Determine the length of the buffer.
+ 
+-  for (int i = 0; argv[i] != 0; i++)
++  int argc;
++  for (argc = 0; argv[argc] != 0; ) ++argc;
++  ACE_TCHAR **argv_p = argv;
++
++  for (int i = 0; i < argc; ++i)
+     {
+ #if !defined (ACE_LACKS_ENV)
+       // Account for environment variables.
+-      if (substitute_env_args && argv[i][0] == ACE_LIB_TEXT ('$'))
++      if (substitute_env_args && ACE_OS::strchr (argv[i], ACE_LIB_TEXT ('$')) != 0)
+         {
+-#  if defined (ACE_WIN32) || !defined (ACE_HAS_WCHAR)
+-          ACE_TCHAR *temp = 0;
+-          // Win32 is the only platform with a wide-char ACE_OS::getenv().
+-          if ((temp = ACE_OS::getenv (&argv[i][1])) != 0)
+-            buf_len += ACE_OS::strlen (temp);
++          if (argv_p == argv)
++            {
++              argv_p = (ACE_TCHAR **)ACE_OS::malloc(argc * sizeof (ACE_TCHAR *));
++              if (argv_p == 0)
++                {
++                  errno = ENOMEM;
++                  return 0;
++                }
++              ACE_OS::memcpy(argv_p, argv, argc * sizeof (ACE_TCHAR *));
++            }
++          argv_p[i] = ACE_OS::strenvdup (argv[i]);
++          if (argv_p[i] == 0)
++            {
++              ACE_OS::free (argv_p);
++              errno = ENOMEM;
++              return 0;
++            }
++        }
++#endif /* ACE_LACKS_ENV */
++      if (ACE_OS::strchr (argv_p[i], ACE_LIB_TEXT (' ')) != 0)
++        {
++          if (argv_p == argv)
++            {
++              argv_p = (ACE_TCHAR **)ACE_OS::malloc(argc * sizeof (ACE_TCHAR *));
++              if (argv_p == 0)
++                {
++                  errno = ENOMEM;
++                  return 0;
++                }
++              ACE_OS::memcpy(argv_p, argv, argc * sizeof (ACE_TCHAR *));
++            }
++          int quotes = 0;
++          ACE_TCHAR *temp = argv_p[i];
++          if (ACE_OS::strchr (temp, ACE_LIB_TEXT ('"')) != 0)
++            {
++              for (int j = 0; temp[j] != 0; ++j)
++                if (temp[j] == ACE_LIB_TEXT ('"')) ++quotes;
++            }
++          argv_p[i] = (ACE_TCHAR *)ACE_OS::malloc(
++            ACE_OS::strlen (temp) * sizeof (ACE_TCHAR) + quotes + 3);
++          if (argv_p[i] == 0)
++            {
++              ACE_OS::free (argv_p);
++              errno = ENOMEM;
++              return 0;
++            }
++          ACE_TCHAR *end = argv_p[i];
++          *end++ = ACE_LIB_TEXT ('"');
++          if (quotes > 0)
++            {
++              ACE_TCHAR *p = temp;
++              while (*p != 0)
++                {
++                  if (*p == ACE_LIB_TEXT ('"')) *end++ = ACE_LIB_TEXT ('\\');
++                  *end++ = *p++;
++                }
++              *end++ = ACE_LIB_TEXT ('\0');
++            }
+           else
+-            buf_len += ACE_OS::strlen (argv[i]);
+-#  else
+-          // This is an ACE_HAS_WCHAR platform and not ACE_WIN32.
+-          // Convert the env variable name for getenv(), then add
+-          // the length of the returned char *string. Later, when we
+-          // actually use the returned env variable value, convert it
+-          // as well.
+-          char *ctemp = ACE_OS::getenv (ACE_TEXT_ALWAYS_CHAR (&argv[i][1]));
+-          if (ctemp == 0)
+-            buf_len += ACE_OS::strlen (argv[i]);
+-          else
+-            buf_len += ACE_OS::strlen (ctemp);
+-#  endif /* ACE_WIN32 || !ACE_HAS_WCHAR */
++            end = ACE_OS::strecpy(end, temp);
++          end[-1] = ACE_LIB_TEXT ('"');
++          *end = ACE_LIB_TEXT ('\0');
++          if (temp != argv[i])
++            ACE_OS::free(temp);
+         }
+-      else
+-#endif /* ACE_LACKS_ENV */
+-        buf_len += ACE_OS::strlen (argv[i]);
++      buf_len += ACE_OS::strlen (argv_p[i]);
+ 
+       // Add one for the extra space between each string.
+       buf_len++;
+@@ -90,48 +137,27 @@
+                   0);
+ 
+   // Initial null charater to make it a null string.
+-  buf[0] = '\0';
++  buf[0] = ACE_LIB_TEXT ('\0');
+   ACE_TCHAR *end = buf;
+-  int j;
+ 
+-  for (j = 0; argv[j] != 0; j++)
++  for (int i = 0; i < argc; ++i)
+     {
++      end = ACE_OS::strecpy (end, argv_p[i]);
++      if (argv_p[i] != argv[i])
++        ACE_OS::free(argv_p[i]);
+ 
+-#if !defined (ACE_LACKS_ENV)
+-      // Account for environment variables.
+-      if (substitute_env_args && argv[j][0] == ACE_LIB_TEXT ('$'))
+-        {
+-#  if defined (ACE_WIN32) || !defined (ACE_HAS_WCHAR)
+-          // Win32 is the only platform with a wide-char ACE_OS::getenv().
+-          ACE_TCHAR *temp = ACE_OS::getenv (&argv[j][1]);
+-          if (temp != 0)
+-            end = ACE_OS::strecpy (end, temp);
+-          else
+-            end = ACE_OS::strecpy (end, argv[j]);
+-#  else
+-          // This is an ACE_HAS_WCHAR platform and not ACE_WIN32.
+-          // Convert the env variable name for getenv(), then convert
+-          // the returned char *string back to wchar_t.
+-          char *ctemp = ACE_OS::getenv (ACE_TEXT_ALWAYS_CHAR (&argv[j][1]));
+-          if (ctemp == 0)
+-            end = ACE_OS::strecpy (end, argv[j]);
+-          else
+-            end = ACE_OS::strecpy (end, ACE_TEXT_CHAR_TO_TCHAR (ctemp));
+-#  endif /* ACE_WIN32 || !ACE_HAS_WCHAR */
+-        }
+-      else
+-#endif /* ACE_LACKS_ENV */
+-        end = ACE_OS::strecpy (end, argv[j]);
+-
+       // Replace the null char that strecpy put there with white
+       // space.
+-      end[-1] = ' ';
++      end[-1] = ACE_LIB_TEXT (' ');
+     }
++  // Null terminate the string.
++  *end = ACE_LIB_TEXT ('\0');
+ 
+-  // Null terminate the string.
+-  *end = '\0';
++  if (argv_p != argv)
++    ACE_OS::free(argv_p);
++
+   // The number of arguments.
+-  return j;
++  return argc;
+ }
+ 
+ int
+@@ -646,7 +672,8 @@
+               ACE_TCHAR quote = *cp;
+ 
+               // Scan past the string..
+-              for (cp++; *cp != ACE_LIB_TEXT ('\0') && *cp != quote; cp++)
++              for (cp++; *cp != ACE_LIB_TEXT ('\0')
++                   && (*cp != quote || cp[-1] == ACE_LIB_TEXT ('\\')); cp++)
+                 continue;
+ 
+               // '\0' implies unmatched quote..
+@@ -694,8 +721,12 @@
+           {
+             ACE_TCHAR quote = *ptr++;
+ 
+-            while (*ptr != ACE_LIB_TEXT ('\0') && *ptr != quote)
+-              *cp++ = *ptr++;
++            while (*ptr != ACE_LIB_TEXT ('\0')
++                   && (*ptr != quote || ptr[-1] == ACE_LIB_TEXT ('\\')))
++              {
++                if (*ptr == quote && ptr[-1] == ACE_LIB_TEXT ('\\')) --cp;
++                *cp++ = *ptr++;
++              }
+ 
+             if (*ptr == quote)
+               ptr++;
+
