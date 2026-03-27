@@ -1,0 +1,214 @@
+here is the source code (Yahoooooo SOURCE CODE!!!!)
+#include "isdxcorba.h" <- hdr for the templatized routines for NS in
+Vinkoski's book
+#include "hello_i.h"
+const char * HelloWorld_oid = "HelloWorld";
+int main(int argc, char * argv[])
+{
+    CORBA::ORB_var orb;
+  try {
+      // Initialize orb
+      orb = CORBA::ORB_init(argc, argv);
+
+      // Get reference to Root POA.
+      CORBA::Object_var obj
+          = orb->resolve_initial_references("RootPOA");
+      PortableServer::POA_var poa
+          = PortableServer::POA::_narrow(obj.in());
+      // Get POA manager
+      PortableServer::POAManager_var poa_mgr = poa->the_POAManager();
+      /*
+       *  Activate object
+       */
+      poa_mgr->activate();
+      // Create a policy list. We use persistent objects with
+      // user-assigned IDs, and explicit activation.
+      CORBA::PolicyList policy_list;
+      policy_list.length(2);
+      policy_list[0] = poa->create_lifespan_policy(
+                          PortableServer::PERSISTENT
+                       );
+      policy_list[1] = poa->create_id_assignment_policy(
+                          PortableServer::USER_ID
+                       );
+      // Create a POA for HelloWorld
+      PortableServer::POA_var HelloWorld_poa
+          = poa->create_POA("HelloWorld", poa_mgr.in(), policy_list);
+      // Create a sevant for the HelloWorld
+      HelloWorld_impl HelloWorld_servant;
+      // Create a reference for HelloWorld and
+      // create the corresponding CORBA object.
+      PortableServer::ObjectId_var oid
+          = PortableServer::string_to_ObjectId(HelloWorld_oid);
+      CORBA::Object_var ctrl
+          = HelloWorld_poa->create_reference_with_id(
+              oid.in(), "IDL:beaconnetworks.com/ISDX/HelloWorld:1.0"
+            );
+    HelloWorld_poa->activate_object_with_id(oid, &HelloWorld_servant);
+      // Get reference to initial naming context.
+      CosNaming::NamingContext_var inc
+          = resolve_init<CosNaming::NamingContext>(
+                  orb.in(), "NameService"
+            );
+      // Attempt to create CCS context.
+      CosNaming::Name n;
+      n.length(1);
+      n[0].id = CORBA::string_dup("ISDX");
+      try {
+          CosNaming::NamingContext_var nc
+              = inc->bind_new_context(n);
+      } catch (const CosNaming::NamingContext::AlreadyBound &) {
+          // Fine, HelloWorld context already exists.
+      }
+      // Force binding of controller reference to make
+      // sure it is always up-to-date.
+      n.length(2);
+      n[1].id = CORBA::string_dup("HelloWorld");
+      inc->rebind(n, ctrl.in());
+      while (HelloWorld_servant.getState() != ISDX::STOPPING)
+      {
+        orb->perform_work();
+      }
+      inc->unbind(n);
+      poa->destroy(1,1);  //  let the adaptor clean up, letting everything
+finish
+      orb->shutdown();    //  tell the ORB to shutdown
+  }
+  catch (const CORBA::Exception & e)
+  {
+      cerr << "Uncaught CORBA exception: " << e << endl;
+      return 0;
+  }
+  catch (...)
+  {
+      assert(0);  // Uncaught exception, dump core
+  }
+  return 1;
+}
+______________________________________________________________________
+
+The IDL is uninteresting, it could do anything, as it happens it returns the
+string hello
+The application DOES register fine but during activation enters a softwait,
+I believe, in
+the create_POA() routine. I speculate this as the code that follows
+(registering with the INS never
+occurs. I did discover a problem in that since TAO does not support queued
+msgs if the create_POA is
+issued prior to the poa_manager->activate() the IMRfication fails since the
+POAManager is in a hold
+state. It appears there is a handshake between the ImplRepo and the sample
+app. Here is the last part
+of the dialog between the two. Notice it ends on the ping. but also notice
+the text..
+successful server_is_running() of <HelloWorld>
+_____________________________________________________________________
+47 49 4f 50 01 02 00 00  00 00 00 73 00 00 00 02   GIOP.......s....
+03 00 00 00 00 00 ff ff  00 00 00 3b 14 01 0f 00   ...........;....
+4e 55 50 00 00 00 19 00  00 00 00 00 00 00 01 00   NUP.............
+49 6d 70 6c 52 65 70 6f  53 65 72 76 69 63 65 00   ImplRepoService.
+00 00 00 00 00 00 00 01  49 6d 70 6c 52 65 70 6f   ........ImplRepo
+53 65 72 76 69 63 65 04  00 00 00 10 61 63 74 69   Service.....acti
+76 61 74 65 5f 73 65 72  76 65 72 00 00 00 00 00   vate_server.....
+00 00 00 0b 48 65 6c 6c  6f 57 6f 72 6c 64 00      ....HelloWorld.
+Activating Server: HelloWorld
+Starting HelloWorld
+TAO (10992|1) IIOP connection from client<127.0.0.1:60398> on 12
+TAO (10992|1) Parsed header = <1,2,0,0,104>
+(10992 | 1):recv GIOP v1.2 msg, 104 data bytes, my endian, Request = 0
+GIOP message - HEXDUMP 116 bytes
+47 49 4f 50 01 02 00 00  00 00 00 68 00 00 00 00   GIOP.......h....
+03 00 00 00 00 00 c4 44  00 00 00 0f 49 6d 70 6c   ......ÄD....Impl
+52 65 70 6f 53 65 72 76  69 63 65 80 00 00 00 06   RepoService....
+5f 69 73 5f 61 00 98 d4  00 00 00 00 00 00 00 00   _is_a..Ô........
+00 00 00 30 49 44 4c 3a  49 6d 70 6c 65 6d 65 6e   ...0IDL:Implemen
+74 61 74 69 6f 6e 52 65  70 6f 73 69 74 6f 72 79   tationRepository
+2f 41 64 6d 69 6e 69 73  74 72 61 74 69 6f 6e 3a   /Administration:
+31 2e 30 00                                       1.0.
+(10992 | 1):send GIOP v1.2 msg, 12 data bytes, my endian, Reply = 0
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 00 01  00 00 00 f2 00 00 00 00   GIOP.......ò....
+00 00 00 03 00 00 00 00                            ........
+TAO (10992|1) Parsed header = <1,2,0,0,144>
+(10992 | 1):recv GIOP v1.2 msg, 144 data bytes, my endian, Request = 1
+GIOP message - HEXDUMP 156 bytes
+47 49 4f 50 01 02 00 00  00 00 00 90 00 00 00 01   GIOP...........
+03 00 00 00 00 00 c4 44  00 00 00 3b 14 01 0f 00   ......ÄD...;....
+4e 55 50 00 00 00 19 00  00 00 00 00 00 00 01 00   NUP.............
+49 6d 70 6c 52 65 70 6f  53 65 72 76 69 63 65 00   ImplRepoService.
+00 00 00 00 00 00 00 01  49 6d 70 6c 52 65 70 6f   ........ImplRepo
+53 65 72 76 69 63 65 00  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 00 00 00 00 00 00  00 00 00 30 49 44 4c 3a   a..........0IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 41 64 6d 69 6e 69 73   pository/Adminis
+74 72 61 74 69 6f 6e 3a  31 2e 30 00               tration:1.0.
+(10992 | 1):send GIOP v1.2 msg, 12 data bytes, my endian, Reply = 1
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 00 01  00 00 00 0d 00 00 00 01   GIOP............
+00 00 00 00 00 00 00 00                            ........
+TAO (10992|1) Parsed header = <1,2,0,0,394>
+(10992 | 1):recv GIOP v1.2 msg, 394 data bytes, my endian, Request = 2
+GIOP message - HEXDUMP 406 bytes
+47 49 4f 50 01 02 00 00  00 00 01 8a 00 00 00 02   GIOP...........
+03 00 00 00 00 00 5b a1  00 00 00 3b 14 01 0f 00   ......[¡...;....
+4e 55 50 00 00 00 19 00  00 00 00 00 00 00 01 00   NUP.............
+49 6d 70 6c 52 65 70 6f  53 65 72 76 69 63 65 00   ImplRepoService.
+00 00 00 00 00 00 00 01  49 6d 70 6c 52 65 70 6f   ........ImplRepo
+53 65 72 76 69 63 65 02  00 00 00 12 73 65 72 76   Service.....serv
+65 72 5f 69 73 5f 72 75  6e 6e 69 6e 67 00 00 00   er_is_running...
+00 00 00 00 49 44 4c 3a  00 00 00 0b 48 65 6c 6c   ....IDL:....Hell
+6f 57 6f 72 6c 64 00 65  00 00 00 2b 69 69 6f 70   oWorld.e...+iiop
+00 00 00 00 00 00 00 01  49 6d 70 6c 52 65 70 6f   ........ImplRepo
+53 65 72 76 69 63 65 00  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 00 00 00 00 00 00  00 00 00 30 49 44 4c 3a   a..........0IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 41 64 6d 69 6e 69 73   pository/Adminis
+74 72 61 74 69 6f 6e 3a  31 2e 30 00               tration:1.0.
+(10992 | 1):send GIOP v1.2 msg, 12 data bytes, my endian, Reply = 1
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 00 01  00 00 00 0d 00 00 00 01   GIOP............
+00 00 00 00 00 00 00 00                            ........
+TAO (10992|1) Parsed header = <1,2,0,0,394>
+(10992 | 1):recv GIOP v1.2 msg, 394 data bytes, my endian, Request = 2
+GIOP message - HEXDUMP 406 bytes
+47 49 4f 50 01 02 00 00  00 00 01 8a 00 00 00 02   GIOP...........
+03 00 00 00 00 00 5b a1  00 00 00 3b 14 01 0f 00   ......[¡...;....
+4e 55 50 00 00 00 19 00  00 00 00 00 00 00 01 00   NUP.............
+49 6d 70 6c 52 65 70 6f  53 65 72 76 69 63 65 00   ImplRepoService.
+00 00 00 00 00 00 00 01  49 6d 70 6c 52 65 70 6f   ........ImplRepo
+53 65 72 76 69 63 65 02  00 00 00 12 73 65 72 76   Service.....serv
+65 72 5f 69 73 5f 72 75  6e 6e 69 6e 67 00 00 00   er_is_running...
+00 00 00 00 49 44 4c 3a  00 00 00 0b 48 65 6c 6c   ....IDL:....Hell
+6f 57 6f 72 6c 64 00 65  00 00 00 2b 69 69 6f 70   oWorld.e...+iiop
+6c 6f 63 3a 2f 2f 31 2e  32 40 66 6f 67 68 6f 72   loc://1.2@foghor
+6e 2e 70 65 6c 61 67 6f  6e 65 74 2e 63 6f 6d 3a   n.pelagonet.com:
+36 30 33 39 37 2f 00 00  00 00 00 2e 49 44 4c 3a   60397/......IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 53 65 72 76 65 72 4f   pository/ServerO
+62 6a 65 63 74 3a 31 2e  30 00 00 00 00 00 00 01   bject:1.0.......
+00 00 00 00 00 00 00 9e  00 01 02 00 00 00 00 16   ................
+66 6f 67 68 6f 72 6e 2e  70 65 6c 61 67 6f 6e 65   foghorn.pelagone
+74 2e 63 6f 6d 00 eb ed  00 00 00 1b 14 01 0f 00   t.com.ëí........
+52 53 54 3a 96 e7 fa 00  02 65 0c 00 00 00 00 00   RST:çú..e......
+00 00 01 00 00 00 01 00  00 00 00 03 00 00 00 00   ................
+00 00 00 08 00 00 00 00  54 41 4f 00 00 00 00 01   ........TAO.....
+00 00 00 14 00 00 00 00  00 01 00 01 00 00 00 00   ................
+00 01 01 09 00 00 00 00  54 41 4f 02 00 00 00 26   ........TAO....&
+00 00 00 00 00 00 00 01  00 00 00 16 66 6f 67 68   ............fogh
+6f 72 6e 2e 70 65 6c 61  67 6f 6e 65 74 2e 63 6f   orn.pelagonet.co
+6d 00 eb ed 00 00                                 m.ëí..
+Server <HelloWorld> is running
+Successful server_is_running () of <HelloWorld>
+(10992 | 1):send GIOP v1.2 msg, 12 data bytes, my endian, Reply = 2
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 00 01  00 00 00 2e 00 00 00 02   GIOP............
+00 00 00 00 00 00 00 00                            ........
+TAO (10992|1) IIOP connection to server <192.168.2.53:60397> on 13
+(10992 | 1):send GIOP v1.2 msg, 60 data bytes, my endian, Request = 0
+GIOP message - HEXDUMP 72 bytes
+47 49 4f 50 01 02 00 00  00 00 00 3c 00 00 00 00   GIOP.......<....
+03 00 00 00 00 00 00 00  00 00 00 1b 14 01 0f 00   ................
+52 53 54 3a 96 e7 fa 00  02 65 0c 00 00 00 00 00   RST:çú..e......
+00 00 01 00 00 00 01 0c  00 00 00 05 70 69 6e 67   ............ping
+00 43 b2 38 00 00 00 00                            .C²8....
+TAO (10992|1) - wait (leader):to enter reactor event loop on <159158>
