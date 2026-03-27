@@ -1,0 +1,613 @@
+Index: Connection_Manager.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/tests/AVStreams/Asynch_Three_Stage/Connection_Manager.cpp,v
+retrieving revision 1.9
+retrieving revision 1.9.30.3
+diff -u -r1.9 -r1.9.30.3
+--- Connection_Manager.cpp	25 Oct 2002 00:40:19 -0000	1.9
++++ Connection_Manager.cpp	24 Apr 2003 18:37:30 -0000	1.9.30.3
+@@ -1,4 +1,4 @@
+-//$Id: Connection_Manager.cpp,v 1.9 2002/10/25 00:40:19 bala Exp $
++//$Id: Connection_Manager.cpp,v 1.9.30.3 2003/04/24 18:37:30 yamuna Exp $
+ 
+ #include "Connection_Manager.h"
+ 
+@@ -10,6 +10,95 @@
+ {
+ }
+ 
++void
++Connection_Manager::load_ep_addr (const char* file_name)
++{
++  FILE* addr_file = ACE_OS::fopen (file_name, "r");
++  
++  if (addr_file == 0)
++    {
++      ACE_ERROR ((LM_DEBUG,
++		  "Cannot open addr file %s\n",
++		  file_name));
++      return;
++    }
++  else
++    ACE_DEBUG ((LM_DEBUG,
++                "Addr file opened successfully\n"));
++
++  while (1)
++    {
++      char buf [BUFSIZ];
++      
++      // Read from the file into a buffer
++
++      
++      /*
++      int n = ACE_OS::fread (buf,
++			     1,
++			     BUFSIZ,
++			     addr_file);
++      */
++
++      if ((ACE_OS::fgets (buf,BUFSIZ,addr_file)) == NULL)
++	{
++	  // At end of file break the loop and end the sender.
++	  if (TAO_debug_level > 0)
++	    ACE_DEBUG ((LM_DEBUG,"End of Addr file\n"));
++	  break;
++	}
++	
++
++      if (TAO_debug_level > 0)
++	ACE_DEBUG ((LM_DEBUG,
++		    "%s\n",
++		    buf));
++
++      Endpoint_Addresses* addr;
++      ACE_NEW (addr,
++	       Endpoint_Addresses);
++
++      TAO_Tokenizer addr_tokenizer (buf,'/');
++
++      ACE_CString flowname;
++
++      if (addr_tokenizer [0] == 0)
++	{
++	  ACE_ERROR ((LM_ERROR,
++		      "Corresponding flow name not specified for endpoint addresses\n"));
++	  return;
++	}
++      else
++	flowname += addr_tokenizer [0];
++      
++      if (addr_tokenizer [1] != 0)
++	addr->sender_addr += CORBA::string_dup (addr_tokenizer [1]);
++
++      if (addr_tokenizer [2] != 0)
++	addr->receiver_addr += CORBA::string_dup (addr_tokenizer [2]);
++
++      int result = ep_addr_.bind (flowname,
++				  addr);
++      if (result == 0)
++	{
++	if (TAO_debug_level > 0)
++	  ACE_DEBUG ((LM_DEBUG,
++		      "Flowname %s Bound Successfully\n",
++		      flowname.c_str ()));
++	}
++      else if (result == 1)
++	ACE_DEBUG ((LM_DEBUG,
++		    "Flowname %s already exists\n",
++		    flowname.c_str ()));
++      else ACE_DEBUG ((LM_DEBUG,
++		       "Flowname %s Bound Failed\n",
++		       flowname.c_str ()));
++
++      
++    }
++
++}
++
+ int
+ Connection_Manager::init (CORBA::ORB_ptr orb)
+ {
+@@ -30,9 +119,11 @@
+   this->sender_name_ =
+     sender_name;
+ 
++  /* 
+   this->sender_ =
+     AVStreams::MMDevice::_duplicate (sender);
+-
++  */
++ 
+   CosNaming::Name name (1);
+   name.length (1);
+ 
+@@ -184,7 +275,8 @@
+ }
+ 
+ void
+-Connection_Manager::connect_to_receivers (ACE_ENV_SINGLE_ARG_DECL)
++Connection_Manager::connect_to_receivers (AVStreams::MMDevice_ptr sender
++					  ACE_ENV_ARG_DECL)
+ {
+   // Connect to all receivers that we know about.
+   for (Receivers::iterator iterator = this->receivers_.begin ();
+@@ -197,13 +289,37 @@
+       ACE_CString flowname =
+         (*iterator).ext_id_;
+ 
++
++      Endpoint_Addresses* addr = 0;
++      ep_addr_.find (flowname,
++		     addr);
++
++      ACE_CString sender_addr_str;
++      ACE_CString receiver_addr_str;
++
++      if (addr != 0)
++	{
++	  sender_addr_str = addr->sender_addr;
++	  receiver_addr_str = addr->receiver_addr;
++	}
++      else ACE_DEBUG ((LM_DEBUG,
++		       "No endpoint address for flowname %s\n",
++		       flowname.c_str ()));
++
++      ACE_INET_Addr receiver_addr (receiver_addr_str.c_str ());      
++      ACE_INET_Addr sender_addr (sender_addr_str.c_str ());
++
++
+       // Create the forward flow specification to describe the flow.
+       TAO_Forward_FlowSpec_Entry sender_entry (flowname.c_str (),
+                                                "IN",
+                                                "USER_DEFINED",
+                                                "",
+                                                "UDP",
+-                                               0);
++                                               &sender_addr);
++      
++      sender_entry.set_peer_addr (&receiver_addr);
++
+ 
+       // Set the flow specification for the stream between receiver
+       // and distributer
+@@ -232,7 +348,7 @@
+                                streamctrl_object);
+ 
+       // Bind the sender and receiver MMDevices.
+-      (void) streamctrl->bind_devs (this->sender_.in (),
++      (void) streamctrl->bind_devs (sender,
+                                     (*iterator).int_id_.in (),
+                                     the_qos.inout (),
+                                     flow_spec
+@@ -370,13 +486,38 @@
+     "_" +
+     this->receiver_name_;
+ 
++
++  Endpoint_Addresses* addr;
++  ep_addr_.find (flowname,
++		 addr);
++  
++  ACE_CString sender_addr_str;
++  ACE_CString receiver_addr_str;
++  
++  if (addr != 0)
++    {
++      sender_addr_str = addr->sender_addr;
++      receiver_addr_str = addr->receiver_addr;
++
++      ACE_DEBUG ((LM_DEBUG,
++		  "Address Strings %s %s\n",
++		  sender_addr_str.c_str (),
++		  receiver_addr_str.c_str ()));
++    }
++  
++  ACE_INET_Addr sender_addr (sender_addr_str.c_str ());
++  ACE_INET_Addr receiver_addr (receiver_addr_str.c_str ());
++
+   // Create the forward flow specification to describe the flow.
+   TAO_Forward_FlowSpec_Entry sender_entry (flowname.c_str (),
+                                            "IN",
+                                            "USER_DEFINED",
+                                            "",
+                                            "UDP",
+-                                           0);
++                                           &sender_addr);
++  
++  sender_entry.set_peer_addr (&receiver_addr);
++
+ 
+   // Set the flow specification for the stream between sender and
+   // receiver.
+Index: Connection_Manager.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/tests/AVStreams/Asynch_Three_Stage/Connection_Manager.h,v
+retrieving revision 1.3
+retrieving revision 1.3.58.3
+diff -u -r1.3 -r1.3.58.3
+--- Connection_Manager.h	29 Jan 2002 20:20:52 -0000	1.3
++++ Connection_Manager.h	24 Apr 2003 18:37:20 -0000	1.3.58.3
+@@ -1,4 +1,4 @@
+-//$Id: Connection_Manager.h,v 1.3 2002/01/29 20:20:52 okellogg Exp $
++//$Id: Connection_Manager.h,v 1.3.58.3 2003/04/24 18:37:20 yamuna Exp $
+ 
+ // ============================================================================
+ //
+@@ -23,6 +23,13 @@
+ #include "orbsvcs/AV/Protocol_Factory.h"
+ #include "tao/PortableServer/PortableServer.h"
+ 
++class Endpoint_Addresses
++{
++ public:
++  ACE_CString sender_addr;
++  ACE_CString receiver_addr;
++};
++
+ class Connection_Manager
+ {
+   // = TITLE
+@@ -49,7 +56,8 @@
+   // Method that binds the sender to the Naming Service and retreives
+   // the references of any registered receivers.
+ 
+-  void connect_to_receivers (ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS);
++  void connect_to_receivers (AVStreams::MMDevice_ptr sender
++			     ACE_ENV_ARG_DECL_WITH_DEFAULTS);
+   // Connect to the receivers that we found.
+ 
+   void bind_to_sender (const ACE_CString &sender_name,
+@@ -75,9 +83,9 @@
+ 
+   // Map of receivers.
+   typedef ACE_Hash_Map_Manager<ACE_CString,
+-                               AVStreams::MMDevice_var,
+-                               ACE_Null_Mutex>
+-          Receivers;
++    AVStreams::MMDevice_var,
++    ACE_Null_Mutex>
++    Receivers;
+ 
+   // Map of protocol objects.
+   typedef ACE_Hash_Map_Manager<ACE_CString,
+@@ -85,19 +93,31 @@
+                                ACE_Null_Mutex>
+           Protocol_Objects;
+ 
++  
++
+   // Map of streamctrl.
+   typedef ACE_Hash_Map_Manager<ACE_CString,
+                                AVStreams::StreamCtrl_var,
+                                ACE_Null_Mutex>
+           StreamCtrls;
+ 
++  // Map of flownames and corresponding endpoint addresses
++  typedef ACE_Hash_Map_Manager<ACE_CString,
++                               Endpoint_Addresses*,
++                               ACE_Null_Mutex>
++          EP_Addr;
++
+   // Map accessors.
+   Receivers &receivers (void);
+   Protocol_Objects &protocol_objects (void);
+   StreamCtrls &streamctrls (void);
+ 
++  void load_ep_addr (const char* file_name);
++  
+ protected:
+ 
++
++
+   void find_receivers (ACE_ENV_SINGLE_ARG_DECL);
+ 
+   void add_to_receivers (CosNaming::BindingList &binding_list
+@@ -110,6 +130,7 @@
+   Receivers receivers_;
+   Protocol_Objects protocol_objects_;
+   StreamCtrls streamctrls_;
++  EP_Addr ep_addr_;
+ 
+   // Sender name.
+   ACE_CString sender_name_;
+Index: README
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/tests/AVStreams/Asynch_Three_Stage/README,v
+retrieving revision 1.2
+retrieving revision 1.2.86.1
+diff -u -r1.2 -r1.2.86.1
+--- README	27 Mar 2001 11:40:59 -0000	1.2
++++ README	24 Apr 2003 18:46:43 -0000	1.2.86.1
+@@ -1,4 +1,4 @@
+-// $Id: README,v 1.2 2001/03/27 11:40:59 irfan Exp $
++// $Id: README,v 1.2.86.1 2003/04/24 18:46:43 yamuna Exp $
+ 
+ Description
+ -----------
+@@ -25,7 +25,7 @@
+ sender
+ ------
+ 
+-sender [-f <filename>] [-r <data_rate>] [-s <sender device name>]
++sender [-f <filename>] [-r <data_rate>] [-s <sender device name>] [-a <address_file>]
+ 
+ -f filename --> The name of the file from which data needs to be sent
+ 
+@@ -33,12 +33,19 @@
+ 
+ -s sender device name --> This is the name of the sender as it will be
+                           registered with the naming service and which
+-                          receivers connect to.
++                          receivers connect to.  
++
++-a address_file -->	  This file contains the sender and receiver
++			  endpoint addressses to be used to set up a
++			  flow for each flow. The format for each flow
++			  is Flowname/sender_endpoint_host:sender_endpoint_port/receiver_endpoint_host:receiver_endpoint_port
++			  If no endpoint addresses are specified default addresses would be used.
++
+ 
+ receiver
+ --------
+ 
+-receiver [-f <filename>] [-s <sender device name>] [-r <receiver device name>]
++receiver [-f <filename>] [-s <sender device name>] [-r <receiver device name>] [-a <address_file>]
+ 
+ -f filename --> File into which the data received from the distributer is stored.
+ 
+@@ -49,17 +56,30 @@
+                             will be registered with the naming
+                             service.
+ 
++-a address_file -->	  This file contains the sender and receiver
++			  endpoint addressses to be used to set up a
++			  flow for each flow. The format for each flow
++			  is Flowname/sender_endpoint_host:sender_endpoint_port/receiver_endpoint_host:receiver_endpoint_port
++			  If no endpoint addresses are specified default addresses would be used.
++
++
+ distributer:
+ -----------
+ 
+-distributer [-s <sender device name>] [-r <distributer device name>]
++distributer [-s <sender device name>] [-r <distributer device name>] [-a <address_file>]
+ 
+ -s sender device name --> This is the name of the sender that the
+-                          receiver wants to connect to.
++                          distributer wants to connect to.
+ 
+ -r distributer device name --> This is the name with which this
+                                distributer will be registered with the
+                                naming service. The receivers will bind
+                                with this name to receieve data from
+                                this distributer.
++
++-a address_file -->	  This file contains the sender and receiver
++			  endpoint addressses to be used to set up a
++			  flow for each flow. The format for each flow
++			  is Flowname/sender_endpoint_host:sender_endpoint_port/receiver_endpoint_host:receiver_endpoint_port
++			  If no endpoint addresses are specified default addresses would be used.
+ 
+Index: distributer.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/tests/AVStreams/Asynch_Three_Stage/distributer.cpp,v
+retrieving revision 1.8
+retrieving revision 1.8.52.2
+diff -u -r1.8 -r1.8.52.2
+--- distributer.cpp	13 May 2002 13:03:21 -0000	1.8
++++ distributer.cpp	24 Apr 2003 18:38:32 -0000	1.8.52.2
+@@ -1,4 +1,4 @@
+-// $Id: distributer.cpp,v 1.8 2002/05/13 13:03:21 elliott_c Exp $
++// $Id: distributer.cpp,v 1.8.52.2 2003/04/24 18:38:32 yamuna Exp $
+ 
+ #include "distributer.h"
+ #include "ace/Get_Opt.h"
+@@ -97,6 +97,7 @@
+   : sender_name_ ("sender")
+   , distributer_name_ ("distributer")
+   , done_ (0)
++    , addr_file_ ("addr_file")
+ {
+ }
+ 
+@@ -115,13 +116,16 @@
+                          char **argv)
+ {
+   // Parse command line arguments
+-  ACE_Get_Opt opts (argc, argv, "s:r:");
++  ACE_Get_Opt opts (argc, argv, "s:r:a:");
+ 
+   int c;
+   while ((c= opts ()) != -1)
+     {
+       switch (c)
+         {
++	case 'a':
++	  this->addr_file_ = opts.opt_arg ();
++	  break;
+         case 's':
+           this->sender_name_ = opts.opt_arg ();
+           break;
+@@ -168,6 +172,8 @@
+   if (result != 0)
+     return result;
+ 
++  this->connection_manager_.load_ep_addr (this->addr_file_.c_str ());
++
+   ACE_NEW_RETURN (this->distributer_sender_mmdevice_,
+                   TAO_MMDevice (&this->sender_endpoint_strategy_),
+                   -1);
+@@ -196,7 +202,8 @@
+   ACE_CHECK_RETURN (-1);
+ 
+   // Connect to receivers
+-  this->connection_manager_.connect_to_receivers (ACE_ENV_SINGLE_ARG_PARAMETER);
++  this->connection_manager_.connect_to_receivers (distributer_sender_mmdevice.in ()
++												ACE_ENV_ARG_PARAMETER);
+   ACE_CHECK_RETURN (-1);
+ 
+   // Bind to sender.
+Index: distributer.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/tests/AVStreams/Asynch_Three_Stage/distributer.h,v
+retrieving revision 1.4
+diff -u -r1.4 distributer.h
+--- distributer.h	29 Jan 2002 20:20:53 -0000	1.4
++++ distributer.h	24 Apr 2003 18:47:32 -0000
+@@ -154,4 +154,6 @@
+ 
+   int done_;
+   // Flag to know when we are done.
++
++  ACE_CString addr_file_;
+ };
+Index: receiver.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/tests/AVStreams/Asynch_Three_Stage/receiver.cpp,v
+retrieving revision 1.9
+retrieving revision 1.9.52.1
+diff -u -r1.9 -r1.9.52.1
+--- receiver.cpp	10 May 2002 01:25:05 -0000	1.9
++++ receiver.cpp	24 Apr 2003 18:38:10 -0000	1.9.52.1
+@@ -1,4 +1,4 @@
+-// $Id: receiver.cpp,v 1.9 2002/05/10 01:25:05 crodrigu Exp $
++// $Id: receiver.cpp,v 1.9.52.1 2003/04/24 18:38:10 yamuna Exp $
+ 
+ #include "receiver.h"
+ #include "ace/Get_Opt.h"
+@@ -84,6 +84,7 @@
+ Receiver::Receiver (void)
+   : mmdevice_ (0),
+     output_file_name_ ("output"),
++    addr_file_ ("addr_file"),
+     sender_name_ ("distributer"),
+     receiver_name_ ("receiver")
+ {
+@@ -111,6 +112,8 @@
+   if (result != 0)
+     return result;
+ 
++  this->connection_manager_.load_ep_addr (this->addr_file_.c_str ());
++
+   // Register the receiver mmdevice object with the ORB
+   ACE_NEW_RETURN (this->mmdevice_,
+                   TAO_MMDevice (&this->reactive_strategy_),
+@@ -145,13 +148,16 @@
+   // Parse the command line arguments
+   ACE_Get_Opt opts (argc,
+                     argv,
+-                    "f:s:r:");
++                    "f:s:r:a:");
+ 
+   int c;
+   while ((c = opts ()) != -1)
+     {
+       switch (c)
+         {
++	case 'a':
++	  this->addr_file_ = opts.opt_arg ();
++	  break;
+         case 'f':
+           this->output_file_name_ = opts.opt_arg ();
+           break;
+Index: receiver.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/tests/AVStreams/Asynch_Three_Stage/receiver.h,v
+retrieving revision 1.4
+diff -u -r1.4 receiver.h
+--- receiver.h	29 Jan 2002 20:20:53 -0000	1.4
++++ receiver.h	24 Apr 2003 18:47:32 -0000
+@@ -114,6 +114,8 @@
+   ACE_CString output_file_name_;
+   // File name of the file into which received data is written.
+ 
++  ACE_CString addr_file_;
++
+   ACE_CString sender_name_;
+   // Sender name.
+ 
+Index: sender.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/tests/AVStreams/Asynch_Three_Stage/sender.cpp,v
+retrieving revision 1.8
+retrieving revision 1.8.52.2
+diff -u -r1.8 -r1.8.52.2
+--- sender.cpp	10 May 2002 01:25:05 -0000	1.8
++++ sender.cpp	24 Apr 2003 18:37:49 -0000	1.8.52.2
+@@ -1,4 +1,4 @@
+-// $Id: sender.cpp,v 1.8 2002/05/10 01:25:05 crodrigu Exp $
++// $Id: sender.cpp,v 1.8.52.2 2003/04/24 18:37:49 yamuna Exp $
+ 
+ #include "sender.h"
+ #include "tao/debug.h"
+@@ -41,6 +41,7 @@
+     frame_count_ (0),
+     filename_ ("input"),
+     input_file_ (0),
++    addr_file_ ("addr_file"),
+     frame_rate_ (10.0),
+     mb_ (BUFSIZ),
+     sender_name_ ("sender")
+@@ -52,13 +53,16 @@
+                     char **argv)
+ {
+   // Parse command line arguments
+-  ACE_Get_Opt opts (argc, argv, "s:f:r:d");
++  ACE_Get_Opt opts (argc, argv, "s:f:r:da:");
+ 
+   int c;
+   while ((c= opts ()) != -1)
+     {
+       switch (c)
+         {
++	case 'a':
++	  this->addr_file_ = opts.opt_arg ();
++	  break;
+         case 'f':
+           this->filename_ = opts.opt_arg ();
+           break;
+@@ -97,6 +101,8 @@
+   if (result != 0)
+     return result;
+ 
++
++
+   // Parse the command line arguments
+   result =
+     this->parse_args (argc,
+@@ -104,6 +110,8 @@
+   if (result != 0)
+     return result;
+ 
++  this->connection_manager_.load_ep_addr (this->addr_file_.c_str ());
++
+   // Open file to read.
+   this->input_file_ =
+     ACE_OS::fopen (this->filename_.c_str (),
+@@ -139,7 +147,8 @@
+   ACE_CHECK_RETURN (-1);
+ 
+   // Connect to the receivers
+-  this->connection_manager_.connect_to_receivers (ACE_ENV_SINGLE_ARG_PARAMETER);
++  this->connection_manager_.connect_to_receivers (mmdevice.in ()
++								ACE_ENV_ARG_PARAMETER);
+   ACE_CHECK_RETURN (-1);
+ 
+   return 0;
+Index: sender.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/tests/AVStreams/Asynch_Three_Stage/sender.h,v
+retrieving revision 1.5
+diff -u -r1.5 sender.h
+--- sender.h	30 Apr 2002 21:55:47 -0000	1.5
++++ sender.h	24 Apr 2003 18:47:32 -0000
+@@ -91,6 +91,9 @@
+   FILE *input_file_;
+   // File handle of the file read from.
+ 
++  ACE_CString addr_file_;
++  // File from which data is read.
++
+   double frame_rate_;
+   // Rate at which the data will be sent.
+ 
