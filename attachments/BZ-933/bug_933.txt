@@ -1,0 +1,41 @@
+I accidently sent the bug in an incomplete form, here's the complete description:
+
+With the specified configuration, code similar to the following
+
+  IOP::ServiceContext_var context = ... // get a service context
+  IOP::Codec_var codec = ... // get a codec
+
+  Any_var ctxVal = codec->decode(context->context_data);
+
+
+produces a compile-time error on MSVC similar to:
+
+error C2664: 'decode' cannot convert parameter 1 from 'class IOP::ServiceContext::_tao_seq_Octet' to 'const class CORBA_OctetSeq &'
+
+due to the fact that the PIDL argument type for the decode operation is mapped differently from IOP::ServiceContext context_data member:
+
+local interface Codec {
+  ...
+  any decode(in CORBA::OctetSeq) ...
+  ...
+};
+
+and
+
+struct ServiceContext {
+  ...
+  sequence<octet> context_data;
+};
+
+The workaround is to construct a temporary CORBA::OctetSeq type from the ServiceContext member. e.g.
+
+  CORBA::OctetSeq tmp(
+                    context->context_data.length();
+                    context->context_data.length();
+                    context->context_data.get_buffer();
+                    0);
+
+and pass it as the argument.
+
+I'm not totally sure this is a bug as such, but it would be handy to able to have the CORBA::OctetSeq be used interchangeably with the anonymous Octet sequence type (especially since the OctetSeq is just a typedef of the anonymous type).
+  
