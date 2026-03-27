@@ -1,0 +1,62 @@
+Index: orbsvcs/orbsvcs/Naming/Naming_Context_Interface.cpp
+===================================================================
+RCS file: /home/src/cvs/ACE_wrappers/TAO/orbsvcs/orbsvcs/Naming/Naming_Context_Interface.cpp,v
+retrieving revision 1.1.1.1
+retrieving revision 1.2
+diff -u -u -r1.1.1.1 -r1.2
+--- orbsvcs/orbsvcs/Naming/Naming_Context_Interface.cpp	2001/09/14 18:03:06	1.1.1.1
++++ orbsvcs/orbsvcs/Naming/Naming_Context_Interface.cpp	2002/06/15 02:39:02	1.2
+@@ -256,12 +256,12 @@
+ 
+ void
+ TAO_Naming_Context::
+-to_name_helper (char *dest, const char*& src)
++to_name_helper (char *dest, const char*& src, Hint hint)
+ {
+   for (; *src != '\0'; ++src, ++dest)
+     {
+ 
+-      if (*src == '.' || *src == '/')
++      if ((hint == HINT_ID && *src == '.') || *src == '/')
+         {
+           *dest = '\0';
+           return;
+@@ -347,13 +347,13 @@
+       char *kind = CORBA::string_alloc (len);
+ 
+       // Assign to the id.
+-      this->to_name_helper (id, k);
++      this->to_name_helper (id, k, HINT_ID);
+ 
+       if (*k == '.')
+         {
+           k++;
+           // Assign to kind
+-          this->to_name_helper (kind, k);
++          this->to_name_helper (kind, k, HINT_KIND);
+         }
+       else
+         {
+Index: orbsvcs/orbsvcs/Naming/Naming_Context_Interface.h
+===================================================================
+RCS file: /home/src/cvs/ACE_wrappers/TAO/orbsvcs/orbsvcs/Naming/Naming_Context_Interface.h,v
+retrieving revision 1.1.1.1
+retrieving revision 1.2
+diff -u -u -r1.1.1.1 -r1.2
+--- orbsvcs/orbsvcs/Naming/Naming_Context_Interface.h	2001/09/14 18:03:06	1.1.1.1
++++ orbsvcs/orbsvcs/Naming/Naming_Context_Interface.h	2002/06/15 02:39:02	1.2
+@@ -240,7 +240,13 @@
+ 
+ private:
+ 
+-  void to_name_helper (char *dest, const char*& src);
++  enum Hint
++  {
++    HINT_ID,
++    HINT_KIND
++  };
++
++  void to_name_helper (char *dest, const char*& src, Hint hint);
+   // This private function is used as a helper to <to_name>. It reads
+   // character by character from 'src' and depending on the character,
+   // either assigns it to 'dest' or returns back to the calling
