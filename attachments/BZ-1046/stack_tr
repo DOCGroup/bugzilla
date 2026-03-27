@@ -1,0 +1,42 @@
+
+This is the stack trace of the crashed client program.  Note how on stack positions
+0 and 1 that the entry parameter is 0, but on the call to purge_entry() of stack
+positions 2 and 3 it is non-null
+
+
+#0  0x7a9352c0 in ACE_Hash_Map_Manager_Ex<TAO_Cache_ExtId,TAO_Cache_IntId,ACE_Hash<TAO_Cache_ExtId>,ACE_Equal_To<TAO_Cache_ExtId>,ACE_Null_Mutex>::unbind_i (this=0x4003b5cc, entry=0x0) at /home/acton/u7/tao_hp/ACE_wrappers/ace/Hash_Map_Manager_T.cpp:283
+#1  0x7a936128 in ACE_Hash_Map_Manager_Ex<TAO_Cache_ExtId,TAO_Cache_IntId,ACE_Hash<TAO_Cache_ExtId>,ACE_Equal_To<TAO_Cache_ExtId>,ACE_Null_Mutex>::unbind (this=0x4003b5cc, entry=0x0) at /home/acton/u7/tao_hp/ACE_wrappers/ace/Hash_Map_Manager_T.i:171
+#2  0x7a9360b0 in TAO_Transport_Cache_Manager::purge_entry_i (this=0x4003b5c0, entry=@0x400af7a4) at /export/user7/acton/tao_hp/ACE_wrappers/TAO/tao/Transport_Cache_Manager.cpp:290
+#3  0x7a932ae4 in TAO_Transport_Cache_Manager::purge_entry (this=0x4003b5c0, entry=@0x400af7a4) at /home/acton/u7/tao_hp/ACE_wrappers/TAO/tao/Transport_Cache_Manager.inl:123
+#4  0x7a7d9948 in TAO_Transport::close_connection (this=0x400af790) at /export/user7/acton/tao_hp/ACE_wrappers/TAO/tao/Transport.cpp:641
+#5  0x7a89cde4 in TAO_GIOP_Invocation::close_connection (this=0x7a39c440) at /export/user7/acton/tao_hp/ACE_wrappers/TAO/tao/Invocation.cpp:470
+#6  0x7a8d256c in TAO_ORB_Core::service_raise_comm_failure (this=0x400219f8, invoke=0x7a39c440, profile=0x40060150, _ACE_CORBA_Environment_variable=@0x7a39c298) at /export/user7/acton/tao_hp/ACE_wrappers/TAO/tao/ORB_Core.cpp:1491
+#7  0x7a89dd70 in TAO_GIOP_Synch_Invocation::invoke_i (this=0x7a39c440, is_locate_request=0 '\000', _ACE_CORBA_Environment_variable=@0x7a39c298) at /export/user7/acton/tao_hp/ACE_wrappers/TAO/tao/Invocation.cpp:696
+#8  0x7a89e684 in TAO_GIOP_Twoway_Invocation::invoke (this=0x7a39c440, excepts=0x0, except_count=0, _ACE_CORBA_Environment_variable=@0x7a39c298) at /export/user7/acton/tao_hp/ACE_wrappers/TAO/tao/Invocation.cpp:840
+#9  0x15e38 in Test::_TAO_Roundtrip_Remote_Proxy_Impl::test_method (this=0x40004434, _collocated_tao_target_=0x4005dd10, send_time=1002136072185135000, _ACE_CORBA_Environment_variable=@0x7a39c298) at /export/user7/acton/tao_hp/ACE_wrappers/TAO/performance-tests/new/TestC.cpp:595
+#10 0x17e38 in Test::Roundtrip::test_method (this=0x4005dd08, send_time=1002136072185135000, _ACE_CORBA_Environment_variable=@0x7a39c298) at /export/user7/acton/tao_hp/ACE_wrappers/TAO/performance-tests/new/TestC.cpp:1047
+#11 0x13a6c in Client_Task::svc (this=0x7b040ed8) at /export/user7/acton/tao_hp/ACE_wrappers/TAO/performance-tests/new/Client_Task.cpp:44
+#12 0x7aca1cbc in ACE_Task_Base::svc_run (args=0x7b040ed8) at /export/user7/acton/tao_hp/ACE_wrappers/ace/Task.cpp:203
+#13 0x7ac09088 in ACE_Thread_Adapter::invoke_i (this=0x4005f5d8) at /export/user7/acton/tao_hp/ACE_wrappers/ace/Thread_Adapter.cpp:148
+#14 0x7ac08f60 in ACE_Thread_Adapter::invoke (this=0x4005f5d8) at /export/user7/acton/tao_hp/ACE_wrappers/ace/Thread_Adapter.cpp:91
+#15 0x7aba2480 in ace_thread_adapter (args=0x4005f5d8) at /export/user7/acton/tao_hp/ACE_wrappers/ace/Base_Thread_Adapter.cpp:127
+#16 0x7ad25db0 in __pthread_create_system () from /usr/lib/libpthread.1
+
+
+The crash occurs on the first reference to entry. The debugger
+shows that entry is NULL.
+
+
+template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> int
+ACE_Hash_Map_Manager_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::unbind_i (ACE_Hash_Map_Entry<EXT_ID, INT_ID> *entry)
+{
+  entry->next_->prev_ = entry->prev_;
+  entry->prev_->next_ = entry->next_;
+
+  // Explicitly call the destructor.
+  ACE_DES_FREE_TEMPLATE2 (entry, this->allocator_->free,
+                          ACE_Hash_Map_Entry, EXT_ID, INT_ID);
+  this->cur_size_--;
+  return 0;
+}
+
