@@ -1,0 +1,4 @@
+I think there may be two problems here.
+  1. The FactoryServer crash seems to happen only when it has thrown an exception.
+  2. The FactoryServer destroy operation does not call deactivate_object.
+  -- Kevin
