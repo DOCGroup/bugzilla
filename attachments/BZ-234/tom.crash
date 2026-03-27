@@ -1,0 +1,172 @@
+From nobody Tue Aug 17 17:58:03 1999
+Path: newsreader.wustl.edu!taumsauk.cs.wustl.edu!not-for-mail
+From: Tom Ziomek <tomz@cc701.comm.mot.com>
+Newsgroups: comp.soft-sys.ace
+Subject: Re: [tao-users] POAManager::deactivate() crashing
+Date: 17 Aug 1999 17:05:19 -0500
+Organization: Washington University in St. Louis
+Lines: 156
+Message-ID: <199908172158.QAA24284@cc792.comm.mot.com>
+References: <990805180146.ZM15046@cc770.comm.mot.com>
+Reply-To: tao-users@cs.wustl.edu
+NNTP-Posting-Host: cs.wustl.edu
+Summary: Gatewayed from tao-users@cs.wustl.edu (sequence #19109)
+Xref: newsreader.wustl.edu comp.soft-sys.ace:21445
+
+In article <199908121757.MAA02193@cc792.comm.mot.com>,
+Tom Ziomek  <tao-users@cs.wustl.edu> wrote:
+>In article <199908061637.LAA21622@cc792.comm.mot.com> you write:
+>>In article <lyuwvv9g43g.fsf@macarena.cs.wustl.edu>,
+>>Carlos O'Ryan <tao-users@cs.wustl.edu> wrote:
+>>>
+>>>	The rest seems fine; btw, i recently added a Timeout and
+>>>Wildcard test to the $TAO_ROOT/orbsvcs/tests/Event/Basic directory
+>>>that do all the right cleanup, they may help you debug this stuff.
+>>
+>>Okay, I'll look at it and see what's different.
+>
+>Just an update...I haven't yet looked at the cleanup example you mention, 
+>but I did try my example code on TAO 1.0 and it does crash in the same
+>way.
+
+Okay, I looked at the Shutdown test and saw two differences:  You set your
+_var's to _nil() after deactivating the objects, and you don't delete the
+EC impl object until after you deactivate the scheduler.
+   I made both changes in my code but the behavior did not change...I
+still crash in POAManager's deactivate().
+   Now your Shutdown test doesn't actually call POAManager deactivate()
+(where my crash actually occurs), POA destroy(), or ORB shutdown().  But
+I added these calls to the end of EC_Driver::run_cleanup(), will all argu-
+ments set to TRUE, and your code still runs to completion without crashing.
+   Oh yeah -- I'm using the ACE_EventChannel.  I tried building your Shut-
+down test with that (not defining EC_DISABLE_OLD_EC) but the compile fails
+because TAO 1.0 does not include EC_Scheduler_Info.h.
+
+So, there is still something about my way of doing things that leads to
+a crash.  I accept that, but it doesn't indicate whether the problem is
+in my code; I may just be doing things in a different legal manner and
+bringing out a (shh) bug in TAO.  Nah.
+
+   It appeared you didn't see anything wrong about my code (remember, I
+wasn't even getting any proxy objects or attaching any suppliers/consum-
+ers).  Is this currently in your problem tracking system as something to
+investigate, or is the onus all on my side?  If the latter, any hints as
+to where in TAO I might start looking to figure out what's going on?
+
+To refresh, the crash happens at
+    active_object_map_entry->servant_->_remove_ref()
+within
+    TAO_POA:cleanup_servant()
+
+Here's my current code.  It might be helpful to know if you can reproduce
+the problem.  I am using the MFC builds, but that shouldn't matter (right?).
+
+Thanks, Tom
+
+
+============================================================================
+
+#include "orbsvcs/RtecEventChannelAdminC.h"
+#include "orbsvcs/Event/Event_Channel.h"
+#include "orbsvcs/Sched/Config_Scheduler.h"     // for event channel
+#include <winbase.h>     // for Sleep()
+
+
+/*============================================================================*/
+
+int main (int argc, char *argv[])
+{
+   // Standard CORBA stuff
+   CORBA::ORB_var vOrb;
+   CORBA::Object_var vPoa;
+   PortableServer::POA_var vRootPoa;
+   PortableServer::POAManager_var vPoaMgr;
+   // Stuff for the realtime event channel
+   ACE_EventChannel *pEcImpl;
+   RtecEventChannelAdmin::EventChannel_var vEC;
+   // Scheduler stuff
+   ACE_Config_Scheduler *pSchedulerImpl;
+   RtecScheduler::Scheduler_var vScheduler;
+   RtecScheduler::handle_t rtInfo;
+   ACE_Time_Value timeValue(0, 2000);
+   TimeBase::TimeT time;
+   ORBSVCS_Time::Time_Value_to_TimeT(time, timeValue);
+   // Consumer
+   RtecEventChannelAdmin::ConsumerAdmin_var vConsumerAdmin;
+//   RtecEventChannelAdmin::SupplierAdmin_var vProducerAdmin;
+   // Misc
+   PortableServer::ObjectId_var vDeactivatingObject;   // Useful @ shutdown
+
+
+// General CORBA init stuff
+   vOrb = CORBA::ORB_init(argc, argv);
+   vPoa = vOrb->resolve_initial_references("RootPOA");
+   vRootPoa = PortableServer::POA::_narrow(vPoa.in());
+   vPoaMgr = vRootPoa->the_POAManager();
+   vPoaMgr->activate();
+
+// Init event channel stuff
+   // The EC needs a Scheduler...
+   pSchedulerImpl = new ACE_Config_Scheduler;
+   vScheduler = pSchedulerImpl->_this();
+   // ...RTEC's realtime info stuff (don't ask me)...
+   rtInfo = vScheduler->create("");
+   vScheduler->set(rtInfo, RtecScheduler::VERY_HIGH_CRITICALITY,
+                   time, time, time, 0, RtecScheduler::VERY_LOW_IMPORTANCE,
+                   time, 0, RtecScheduler::OPERATION);
+   // Create and activate the EC servant (default EC type; default to no module
+   // factory)
+   pEcImpl = new ACE_EventChannel(vScheduler.in(), 1,
+                                  ACE_DEFAULT_EVENT_CHANNEL_TYPE, 0);
+   vEC = pEcImpl->_this();
+   // Activate the EC entity (application-level activation)
+   pEcImpl->activate();
+
+
+   vConsumerAdmin = vEC->for_consumers();   // *** THIS IS ONE TROUBLE LINE ***
+
+   vConsumerAdmin = RtecEventChannelAdmin::ConsumerAdmin::_nil();
+   CORBA::release(vConsumerAdmin);
+
+   // General shutdown
+   vEC->destroy();
+   vDeactivatingObject = vRootPoa->reference_to_id(vEC);
+   vRootPoa->deactivate_object(vDeactivatingObject);
+   vEC = RtecEventChannelAdmin::EventChannel::_nil();
+   CORBA::release(vEC);
+   vDeactivatingObject = vRootPoa->reference_to_id(vScheduler);
+   vRootPoa->deactivate_object(vDeactivatingObject);
+   vScheduler = RtecScheduler::Scheduler::_nil();
+   CORBA::release(vScheduler);
+   delete pEcImpl;   // ** THIS IS THE OTHER **
+   delete pSchedulerImpl;
+   Sleep(50);
+
+/* If both lines marked above exist, this next line crashes with
+ "Unhandled exception in ConsumerAdmin.exe (TAOD.DLL): 0xC0000005: Access Violation."
+   in POA.cpp line 1022 (within TAO_POA::cleanup_servant() ):
+          active_object_map_entry->servant_->_remove_ref (ACE_TRY_ENV);
+   If either line is deleted the program exits cleanly.
+   The same thing happens
+   - whether or not I do a pEcImpl->destroy() before deactivating the EC object.
+   - regardless of the arguments passed to POAManager::deactivate().
+   - whether or not orb->run() was ever called.
+   - whether or not I deactivate the EC and Scheduler.
+   - whether or not I CORBA::release() the EC and Scheduler object _var's.
+   - whether I delete the pEcImpl before or after deactivating the Scheduler.
+ */
+   vPoaMgr->deactivate(TRUE, TRUE);
+   vRootPoa->destroy(TRUE, TRUE);
+   Sleep(50);
+
+   vOrb->shutdown(TRUE);
+   Sleep(50);
+
+// All done, go bye-bye
+   return(1);
+}   /* main() */
+
+/*============================================================================*/
+-- 
+Send email to user 'tomz' at domain 'comm.mot.com'.
+
