@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. ./uavenv.sh
+
+cd $QUO_ROOT/UAV/uav/avstreams
+./sender -ORBInitRef NameService=corbaloc::192.168.1.2:2809/NameService -ORBDebugLevel 1  -f ../f14_short.mpg -s Sender -r 30  -a sender_addr_file -l $@
+
