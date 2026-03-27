@@ -1,0 +1,429 @@
+Only in .: .obj
+Common subdirectories: /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/AV_Collab and ./AV_Collab
+diff -u /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/Connection_Manager.cpp ./Connection_Manager.cpp
+--- /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/Connection_Manager.cpp	Fri Jun 28 14:02:32 2002
++++ ./Connection_Manager.cpp	Mon May 12 00:15:20 2003
+@@ -20,6 +20,86 @@
+ {
+ }
+ 
++void
++Connection_Manager::load_ep_addr (const char* file_name)
++{
++  FILE* addr_file = ACE_OS::fopen (file_name, "r");
++  
++  if (addr_file == 0)
++    {
++      ACE_ERROR ((LM_DEBUG,
++		  "Cannot open addr file %s\n",
++		  file_name));
++      return;
++    }
++  else
++    ACE_DEBUG ((LM_DEBUG,
++                "Addr file opened successfully\n"));
++
++  while (1)
++    {
++      char buf [BUFSIZ];
++      
++      // Read from the file into a buffer
++      if ((ACE_OS::fgets (buf,BUFSIZ,addr_file)) == NULL)
++	{
++	  // At end of file break the loop and end the sender.
++	  if (TAO_debug_level > 0)
++	    ACE_DEBUG ((LM_DEBUG,"End of Addr file\n"));
++	  break;
++	}
++	
++
++      if (TAO_debug_level > 0)
++	ACE_DEBUG ((LM_DEBUG,
++		    "%s\n",
++		    buf));
++
++      Endpoint_Addresses* addr;
++      ACE_NEW (addr,
++	       Endpoint_Addresses);
++
++      TAO_Tokenizer addr_tokenizer (buf,'/');
++
++      ACE_CString flowname;
++
++      if (addr_tokenizer [0] == 0)
++	{
++	  ACE_ERROR ((LM_ERROR,
++		      "Corresponding flow name not specified for endpoint addresses\n"));
++	  return;
++	}
++      else
++	flowname += addr_tokenizer [0];
++      
++      if (addr_tokenizer [1] != 0)
++	addr->sender_addr += CORBA::string_dup (addr_tokenizer [1]);
++
++      if (addr_tokenizer [2] != 0)
++	addr->receiver_addr += CORBA::string_dup (addr_tokenizer [2]);
++
++      int result = ep_addr_.bind (flowname,
++				  addr);
++      if (result == 0)
++	{
++	if (TAO_debug_level > 0)
++	  ACE_DEBUG ((LM_DEBUG,
++		      "Flowname %s Bound Successfully\n",
++		      flowname.c_str ()));
++	}
++      else if (result == 1)
++	ACE_DEBUG ((LM_DEBUG,
++		    "Flowname %s already exists\n",
++		    flowname.c_str ()));
++      else ACE_DEBUG ((LM_DEBUG,
++		       "Flowname %s Bound Failed\n",
++		       flowname.c_str ()));
++
++      
++    }
++
++}
++
+ int
+ Connection_Manager::init (CORBA::ORB_ptr orb)
+ {
+@@ -242,13 +322,37 @@
+         "_" +
+         (*iterator).ext_id_;
+ 
++      Endpoint_Addresses* addr = 0;
++      ep_addr_.find (flowname,
++		     addr);
++
++      ACE_CString sender_addr_str;
++      ACE_CString receiver_addr_str;
++
++      if (addr != 0)
++	{
++	  sender_addr_str = addr->sender_addr;
++	  receiver_addr_str = addr->receiver_addr;
++	}
++      else ACE_DEBUG ((LM_DEBUG,
++		       "No endpoint address for flowname %s\n",
++		       flowname.c_str ()));
++
++      ACE_INET_Addr receiver_addr (receiver_addr_str.c_str ());      
++      ACE_INET_Addr sender_addr (sender_addr_str.c_str ());
++
++
+       // Create the forward flow specification to describe the flow.
+       TAO_Forward_FlowSpec_Entry sender_entry (flowname.c_str (),
+                                                "IN",
+                                                "USER_DEFINED",
+                                                "",
+-                                               protocol.c_str(),
+-                                               0);
++					       protocol.c_str(),
++                                               &sender_addr);
++      
++      //Set the remote host addresses
++      sender_entry.set_peer_addr (&receiver_addr);
++
+ 
+       // Set the flow specification for the stream between receiver
+       // and distributer
+@@ -514,7 +618,7 @@
+ 
+ void
+ Connection_Manager::connect_to_sender (AVStreams::streamQoS& the_qos, int use_qos
+-	       	ACE_ENV_ARG_DECL )
++				       ACE_ENV_ARG_DECL )
+ {
+   if (CORBA::is_nil (this->sender_.in ()))
+     return;
+@@ -535,13 +639,37 @@
+     "_" +
+     this->receiver_name_;
+ 
++  Endpoint_Addresses* addr;
++  ep_addr_.find (flowname,
++		 addr);
++  
++  ACE_CString sender_addr_str;
++  ACE_CString receiver_addr_str;
++  
++  if (addr != 0)
++    {
++      sender_addr_str = addr->sender_addr;
++      receiver_addr_str = addr->receiver_addr;
++
++      ACE_DEBUG ((LM_DEBUG,
++		  "Address Strings %s %s\n",
++		  sender_addr_str.c_str (),
++		  receiver_addr_str.c_str ()));
++    }
++  
++  ACE_INET_Addr sender_addr (sender_addr_str.c_str ());
++  ACE_INET_Addr receiver_addr (receiver_addr_str.c_str ());
++
+   // Create the forward flow specification to describe the flow.
+   TAO_Forward_FlowSpec_Entry sender_entry (flowname.c_str (),
+                                            "IN",
+                                            "USER_DEFINED",
+                                            "",
+-                                           protocol.c_str(),
+-                                           0);
++					   protocol.c_str(),
++                                           &sender_addr);
++  
++  //Set the remote host addresses
++  sender_entry.set_peer_addr (&receiver_addr);
+ 
+   // Set the flow specification for the stream between sender and
+   // receiver.
+Only in .: Connection_Manager.cpp~
+diff -u /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/Connection_Manager.h ./Connection_Manager.h
+--- /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/Connection_Manager.h	Wed Apr 17 12:14:12 2002
++++ ./Connection_Manager.h	Mon May 12 00:13:27 2003
+@@ -25,6 +25,20 @@
+ #include "tao/PortableServer/PortableServer.h"
+ 
+ /**
++ *@class Endpoint_Addresses
++ *
++ *@brief Stores the endpoint addresses
++ *
++ * This class is a container for the endpoint addresses
++ */
++class Endpoint_Addresses
++{
++ public:
++  ACE_CString sender_addr;
++  ACE_CString receiver_addr;
++};
++
++/**
+  * @class Connection_Manager
+  *
+  * @brief Defines the Connection Manager.
+@@ -110,11 +124,22 @@
+                                ACE_Null_Mutex>
+           StreamCtrls;
+ 
++  // Map of flownames and corresponding endpoint addresses
++  typedef ACE_Hash_Map_Manager<ACE_CString,
++                               Endpoint_Addresses*,
++                               ACE_Null_Mutex>
++          EP_Addr;
++
+   // Map accessors.
+   Receivers &receivers (void);
+   Protocol_Objects &protocol_objects (void);
+   StreamCtrls &streamctrls (void);
+ 
++  // Read the endpoint addresses for the corresponding 
++  // flownames and store them in a hash map with the 
++  // flowname as key
++  void load_ep_addr (const char* file_name);
++
+ protected:
+ 
+   void find_receivers ( ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS );
+@@ -129,6 +154,7 @@
+   Receivers receivers_;
+   Protocol_Objects protocol_objects_;
+   StreamCtrls streamctrls_;
++  EP_Addr ep_addr_;
+ 
+   // Sender name.
+   ACE_CString sender_name_;
+Only in .: Connection_Manager.h~
+Common subdirectories: /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/UDP_Collab and ./UDP_Collab
+Only in .: avstreams_patch
+Only in .: core.30138
+Only in .: core.30148
+Only in .: core.30228
+Only in .: core.30960
+Only in .: distributer_addr_file
+Only in .: distributer_addr_file~
+Only in .: distributor
+diff -u /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/distributor.cpp ./distributor.cpp
+--- /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/distributor.cpp	Tue Mar  4 16:20:53 2003
++++ ./distributor.cpp	Mon May 12 00:42:29 2003
+@@ -537,7 +537,8 @@
+     normal_codepoint_(16),
+     critical_codepoint_(32),
+     full_res_bits_(1206000),
+-    partial_res_bits_(670000)
++    partial_res_bits_(670000),
++    addr_file_ (0)
+ {
+ }
+ 
+@@ -622,13 +623,16 @@
+   }
+ 
+   // Parse command line arguments
+-  ACE_Get_Opt opts (argc, argv, "s:r:d:P:S:M:N:C:F:p:x:y:z:b:");
++  ACE_Get_Opt opts (argc, argv, "a:s:r:d:P:S:M:N:C:F:p:x:y:z:b:");
+ 
+   int c;
+   while ((c= opts ()) != -1)
+     {
+       switch (c)
+         {
++	case 'a':
++          this->addr_file_ = opts.opt_arg ();
++          break;
+         case 's':
+           this->sender_name_ = opts.optarg;
+           break;
+@@ -732,6 +736,10 @@
+   if (result != 0)
+     return result;
+ 
++  if (addr_file_ != 0)
++    //Load the endpoint addresses
++    this->connection_manager_.load_ep_addr (this->addr_file_);
++
+   u_long priority_mask = 0;
+ 
+   if(DEBUG_LEVEL > 0) {
+Only in .: distributor.cpp~
+diff -u /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/distributor.h ./distributor.h
+--- /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/distributor.h	Tue Mar  4 16:20:53 2003
++++ ./distributor.h	Mon May 12 00:35:29 2003
+@@ -316,6 +316,9 @@
+   /// The number of bits/sec for full/partial RSVP reservations
+   long full_res_bits_;
+   long partial_res_bits_;
++
++  char* addr_file_;
++
+ };
+ 
+ typedef ACE_Singleton<Distributor, ACE_Null_Mutex> DISTRIBUTOR;
+Only in .: distributor.h~
+Only in .: frame_proc
+Only in .: name.ior
+Only in .: negotiator
+Only in .: receiver
+diff -u /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/receiver.cpp ./receiver.cpp
+--- /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/receiver.cpp	Mon Apr 21 16:04:31 2003
++++ ./receiver.cpp	Mon May 12 00:42:07 2003
+@@ -189,6 +189,7 @@
+   : debug_level_ (0),
+     mmdevice_ (0),
+     output_file_name_ (),
++    addr_file_ (0),
+     is_output_file_ (0),
+     sender_name_ ("distributor"),
+     receiver_name_ ("receiver"),
+@@ -226,6 +227,10 @@
+   if (result != 0)
+     return result;
+ 
++  if (addr_file_ != 0)
++    //Load the endpoint addresses
++    this->connection_manager_.load_ep_addr (this->addr_file_);
++
+   // Register the receiver mmdevice object with the ORB
+   ACE_NEW_RETURN (this->mmdevice_,
+                   TAO_MMDevice (&this->reactive_strategy_),
+@@ -320,15 +325,18 @@
+   // Parse the command line arguments
+   ACE_Get_Opt opts (argc,
+                     argv,
+-                    "f:s:r:d:p:M:V:F:");
++                    "a:f:s:r:d:p:M:V:F:");
+ 
+   int c;
+   while ((c = opts ()) != -1)
+     {
+       switch (c)
+         {
++	case 'a':
++          this->addr_file_ = opts.opt_arg ();
++          break;
+         case 'f':
+-          this->output_file_name_ = opts.optarg;
++          output_file_name_ = opts.optarg;
+ 	  this->is_output_file_ = 1;
+           break;
+         case 's':
+Only in .: receiver.cpp~
+diff -u /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/receiver.h ./receiver.h
+--- /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/receiver.h	Mon Apr 21 16:04:31 2003
++++ ./receiver.h	Mon May 12 00:34:17 2003
+@@ -154,6 +154,9 @@
+   /// File name of the file into which received data is written.
+   ACE_CString output_file_name_;
+ 
++  char* addr_file_;
++
++
+   /// Did the user specify an output file: 0 = no, non-zero = yes
+   int is_output_file_;
+ 
+Only in .: receiver.h~
+Only in .: receiver_addr_file
+Only in .: sender
+diff -u /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/sender.cpp ./sender.cpp
+--- /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/sender.cpp	Tue Sep 10 14:45:37 2002
++++ ./sender.cpp	Mon May 12 00:33:29 2003
+@@ -150,6 +150,7 @@
+     sender_mmdevice_ (0),
+     filename_ ("input"),
+     input_file_ (0),
++    addr_file_ (0),
+     frame_rate_ (5),
+     endless_loop_ (0),
+     sender_name_ ("sender"),
+@@ -193,13 +194,16 @@
+   }
+ 
+   // Parse command line arguments
+-  ACE_Get_Opt opts (argc, argv, "s:f:r:d:lN:C:M:");
++  ACE_Get_Opt opts (argc, argv, "a:s:f:r:d:lN:C:M:");
+ 
+   int c;
+   while ((c= opts ()) != -1)
+     {
+       switch (c)
+         {
++	case 'a':
++          this->addr_file_ = opts.opt_arg ();
++          break;
+         case 'f':
+           this->filename_ = opts.optarg;
+           break;
+@@ -272,6 +276,11 @@
+                       result);
+   }
+ 
++  if (addr_file_ != 0)
++    //Load the endpoint addresses
++    this->connection_manager_.load_ep_addr (this->addr_file_);
++
++
+   u_long priority_mask = 0;
+ 
+   if(DEBUG_LEVEL > 0) {
+Only in .: sender.cpp~
+diff -u /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/sender.h ./sender.h
+--- /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/sender.h	Thu Jun 20 09:40:52 2002
++++ ./sender.h	Mon May 12 00:32:40 2003
+@@ -126,6 +126,10 @@
+   /// File handle of the file read from.
+   FILE *input_file_;
+ 
++  //File from which end point addresses are read
++  char* addr_file_;
++  
++
+   /// Rate at which the data will be sent.
+   int frame_rate_;
+ 
+Only in .: sender.h~
+Only in .: sender_addr_file
+Only in .: sender_addr_file~
+Only in .: sender_stub
+Common subdirectories: /groups/pces/uav_oep/oomworks-uav/AVStreams_Ext/temp/quo/UAV/uav/avstreams/srd_open and ./srd_open
