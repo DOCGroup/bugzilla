@@ -1,0 +1,1766 @@
+Index: ChangeLog
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/ChangeLog,v
+retrieving revision 1.5943
+diff -u -r1.5943 ChangeLog
+--- ChangeLog	23 Apr 2005 19:38:20 -0000	1.5943
++++ ChangeLog	25 Apr 2005 18:44:42 -0000
+@@ -1,3 +1,83 @@
++Mon Apr 25 12:14:55 2005  Iliyan Jeliazkov  <jeliazkov_i@ociweb.com>
++
++          This change allows bi-directional policy to work with SSLIOP
++          endpoints.  When a server accepts a client-initiated
++          connection or a listen point list, there is no data available
++          about the IIOP endpoints, underlying the SSLIOP endpoints.
++          There is also no data for most of the attributes of the secure
++          connection.  Therefore the "server" must synthesize those,
++          however this can not be done correctly. The problem becomes
++          evident when bi-directional policy is in effect for both
++          peers: a "server" during callback, needs to use the same
++          connection the "client" has initiated, but the secure endpoint
++          obtained from an IOR can not yield the same hash value as the
++          synthesized endpoint (from an LPL), used to cache the
++          connection.  Also, such endpoints can not be equivalent, in
++          terms of the is_equivalent () method. The IOR from the client
++          contains the real (non-synthetic) port number for the IIOP
++          endpoint underlying the SSL endpoint.  This causes the server
++          to decide that it deals with a different endpoint and try to
++          open a new connection. When the ORBs are using bi-directional
++          policies and are behind a firewall, this will fail
++
++        * orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp:
++
++          Creates an instance of the new SSLIOP_Synthetic_Endpoint,
++          which it then uses to re-cache the transport.
++          TAO_SSLIOP_Connection_Handler::add_transport_to_cache()
++          ultimately uses the is_equivalent () method to compare
++          endpoints. That method must not compare the underlying IIOP
++          port numbers, because in some cases SSLIOP endpoints are
++          instantiated with limited amount of information available. For
++          example, when accepting a connections in server role, the
++          underlying IIOP endpoint's port is unknown an is merely
++          assigned to be the same as the secure port, effectively
++          precludes the ability of the server to find a connection
++          cached with these parameters later.
++        
++        * orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.h:
++        * orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.cpp:
++
++          Introduced a new SSLIOP_Synthetic_Endpoint, which relaxes the
++          equivalence comparison with another SSLIOP_Endpoint to limit
++          it to only hostname, SSL port and QoP.
++          Changed the hash() implementation in SSLIOP_Endpoint to
++          eliminate any influence the embedded IIOP endpoint has on the
++          hash value. This allows the SSLIOP_Synthetic_Endpoint to hash
++          just like an SSLIOP_Endpoint and makes possible that synthetic
++          endpoints to be used to find previously cached transports.
++
++        * orbsvcs/tests/Security/BiDirectional/BiDirectional.mpc:
++        * orbsvcs/tests/Security/BiDirectional/README:
++        * orbsvcs/tests/Security/BiDirectional/client.conf:
++        * orbsvcs/tests/Security/BiDirectional/client.cpp:
++        * orbsvcs/tests/Security/BiDirectional/run_test.pl:
++        * orbsvcs/tests/Security/BiDirectional/server.conf:
++        * orbsvcs/tests/Security/BiDirectional/server.cpp:
++        * orbsvcs/tests/Security/BiDirectional/test.idl:
++        * orbsvcs/tests/Security/BiDirectional/test_i.h:
++        * orbsvcs/tests/Security/BiDirectional/test_i.i:
++        * orbsvcs/tests/Security/BiDirectional/test_i.cpp:
++
++          A test that demonstrates the problem. Uses TAO-specific
++          interfaces to the ORB core to obtain the number of currently
++          open connections before and after an invocation. This is done
++          both in the servant and in the client.
++
++        * orbsvcs/tests/Security/BiDirectional/ssl/ca.pem:
++        * orbsvcs/tests/Security/BiDirectional/ssl/client-cert.pem:
++        * orbsvcs/tests/Security/BiDirectional/ssl/client-key.pem:
++        * orbsvcs/tests/Security/BiDirectional/ssl/make-client-keys:
++        * orbsvcs/tests/Security/BiDirectional/ssl/server-cert.pem:
++        * orbsvcs/tests/Security/BiDirectional/ssl/server-key.pem:
++
++          Client and server certificates and keys. Also, a script to
++          regenerate them all.
++          
++
++        * tao/Transport_Cache_Manager.cpp:
++
++          Added more informative logging.
+ Sat Apr 23 19:38:12 UTC 2005  Johnny Willemsen  <jwillemsen@remedy.nl>
+ 
+         * tao/PortableInterceptorA.cpp:
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp,v
+retrieving revision 1.78
+diff -u -r1.78 SSLIOP_Connection_Handler.cpp
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	14 Mar 2005 02:21:03 -0000	1.78
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	25 Apr 2005 18:44:43 -0000
+@@ -20,7 +20,7 @@
+ 
+ ACE_RCSID (SSLIOP,
+            SSLIOP_Connection_Handler,
+-           "$Id: SSLIOP_Connection_Handler.cpp,v 1.78 2005/03/14 02:21:03 bala Exp $")
++           "$Id: SSLIOP_Connection_Handler.cpp,v 1.1.1.3.2.2 2005/04/18 20:40:03 jeliazkov_i Exp $")
+ 
+ // ****************************************************************
+ 
+@@ -166,6 +166,9 @@
+   if (this->peer ().get_local_addr (local_addr) == -1)
+     return -1;
+ 
++  int use_dotted_decimal_addresses = 
++    this->orb_core ()->orb_params ()->use_dotted_decimal_addresses ();
++  
+   if (local_addr.get_ip_address () == remote_addr.get_ip_address ()
+       && local_addr.get_port_number () == remote_addr.get_port_number ())
+     {
+@@ -175,9 +178,11 @@
+           char local_as_string[MAXHOSTNAMELEN + 16];
+ 
+           (void) remote_addr.addr_to_string (remote_as_string,
+-                                             sizeof (remote_as_string));
++                                             sizeof (remote_as_string),
++                                             use_dotted_decimal_addresses);
+           (void) local_addr.addr_to_string (local_as_string,
+-                                            sizeof (local_as_string));
++                                            sizeof (local_as_string),
++                                             use_dotted_decimal_addresses);
+           ACE_ERROR ((LM_ERROR,
+                       "TAO(%P|%t) - TAO::SSLIOP::Connection_Handler::open, "
+                       "Holy Cow! The remote addr and "
+@@ -193,14 +198,32 @@
+       char client[MAXHOSTNAMELEN + 16];
+ 
+       // Verify that we can resolve the peer hostname.
+-      if (remote_addr.addr_to_string (client, sizeof (client)) == -1)
+-        return -1;
++      if (remote_addr.addr_to_string (client, 
++                                      sizeof (client),
++                                      use_dotted_decimal_addresses) == -1)
++      {
++        ACE_OS::strcpy (client, "*unable to obtain*");
++      }
+ 
+       ACE_DEBUG ((LM_DEBUG,
+                   ACE_TEXT ("TAO (%P|%t) SSLIOP connection from ")
+-                  ACE_TEXT ("client <%s> on %d\n"),
++                  ACE_TEXT ("client <%s> on [%d]\n"),
+                   client,
+                   this->peer ().get_handle ()));
++      
++      // Verify that we can resolve our hostname.
++      if (local_addr.addr_to_string (client, 
++                                      sizeof (client),
++                                      use_dotted_decimal_addresses) == -1)
++      {
++        ACE_OS::strcpy (client, "*unable to obtain*");
++      }
++      
++      ACE_DEBUG ((LM_DEBUG,
++                  ACE_TEXT ("TAO (%P|%t) SSLIOP connection accepted from ")
++                  ACE_TEXT ("server <%s> on [%d]\n"),
++                  client,
++                  this->get_handle ()));
+     }
+ 
+   // Set that the transport is now connected, if fails we return -1
+@@ -356,23 +379,16 @@
+       TAO_IIOP_Endpoint tmpoint (addr,
+         this->orb_core()->orb_params()->use_dotted_decimal_addresses ());
+ 
+-      // @@ This is broken.  We need to include the
+-      //    SecurityAssociation options so that the invocation to the
+-      //    originator is attempted with the appropriate security
+-      //    settings.  Unfortunately, there is currently no portable
+-      //    way to send the SecurityAssociation options with the
++      // @@ This is broken.  Instead of just using the default CORBA
++      // SecurityAssociation options, by not supplying SSLIOP::SSL
++      // instance in the endpoint constructor, we need to include the
++      // actual SecurityAssociation options so that the invocation to
++      // the originator is attempted with the appropriate security
++      // settings. Unfortunately, there is currently no portable way to
++      // send the SecurityAssociation options with the
+       //    IIOP::ListenPointList.  Presumably the new Firewall
+       //    specification will address this deficiency.
+-      const ::SSLIOP::SSL ssl =
+-        {
+-          0,                        // target_supports
+-          0,                        // target_requires
+-          listen_point.port         // port
+-        };
+-
+-      // Construct an SSLIOP_Endpoint
+-      TAO_SSLIOP_Endpoint endpoint (&ssl,
+-                                    &tmpoint);
++      TAO_SSLIOP_Synthetic_Endpoint endpoint (&tmpoint);
+ 
+       // Construct a property object
+       TAO_Base_Transport_Property prop (&endpoint);
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.cpp,v
+retrieving revision 1.24
+diff -u -r1.24 SSLIOP_Endpoint.cpp
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.cpp	4 Feb 2005 21:14:48 -0000	1.24
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.cpp	25 Apr 2005 18:44:43 -0000
+@@ -4,11 +4,13 @@
+ 
+ #include "ace/OS_NS_stdio.h"
+ #include "ace/OS_NS_string.h"
++#include "ace/os_include/os_netdb.h"
+ 
++#include "tao/debug.h"
+ 
+ ACE_RCSID (SSLIOP,
+            SSLIOP_Endpoint,
+-           "$Id: SSLIOP_Endpoint.cpp,v 1.24 2005/02/04 21:14:48 mesnier_p Exp $")
++           "$Id: SSLIOP_Endpoint.cpp,v 1.1.1.3.2.3 2005/04/20 11:29:14 chad Exp $")
+ 
+ 
+ #if !defined (__ACE_INLINE__)
+@@ -88,6 +90,41 @@
+     delete this->iiop_endpoint_;
+ }
+ 
++#if 0
++static void
++dump_endpoint (const char* msg, const TAO_Endpoint *other_endpoint)
++{
++  
++  TAO_Endpoint *endpt = const_cast<TAO_Endpoint *> (other_endpoint);
++
++  TAO_SSLIOP_Endpoint *endpoint =
++    dynamic_cast<TAO_SSLIOP_Endpoint *> (endpt);
++
++  if (endpoint == 0)
++  {
++    ACE_DEBUG ((LM_DEBUG, "TAO (%P|%t) endpoint - %s: Unable to cast an endpoint to SSLIOP_Endpoint\n", msg));
++    return;
++  }
++  
++  char hostaddr[MAXHOSTNAMELEN + 16];
++  int gothost = endpoint->addr_to_string (hostaddr, sizeof hostaddr);
++
++  ACE_DEBUG ((LM_INFO, "TAO (%P|%t) SSLIOPEndpoint %s - %@ {%s, ssl=%d, iiop=%d,"
++                " qop=%d, trst=(%d,%d), c=%@, crdh=0x%x}, h=0x%x\n", 
++                msg,
++                endpoint,
++                (gothost == 0 ? hostaddr : "*UNKNOWN*"),
++                endpoint->ssl_component ().port , 
++                endpoint->iiop_endpoint ()->port (),
++                endpoint->qop() , 
++                endpoint->trust().trust_in_target , 
++                endpoint->trust().trust_in_client ,
++                endpoint->credentials() , 
++                (endpoint->credentials_set () ? endpoint->credentials()->hash () : 0) , 
++                endpoint->hash ()));
++}
++#endif /* 0 */
++
+ int
+ TAO_SSLIOP_Endpoint::addr_to_string (char *buffer, size_t length)
+ {
+@@ -136,10 +173,22 @@
+       || this->trust_.trust_in_client != t.trust_in_client
+       || (!CORBA::is_nil (this->credentials_.in ())
+           && !(*this->credentials_.in () == *endpoint->credentials ())))
++  {
++    return 0;
++  }
++
++  // Comparing the underlying iiop endpoints is wrong, as their port
++  // numbers often may not make sense. Or may not being used anyway.
++  // Therefore, we only need to directly compare the hosts. See also the
++  // comments in the hash() method.
++  if (this->iiop_endpoint() == 0 || endpoint->iiop_endpoint() == 0)
++    return 0;
++
++  if ((ACE_OS::strcmp (this->iiop_endpoint()->host (), 
++                       endpoint->iiop_endpoint()->host ()) != 0))
+     return 0;
+ 
+-  return
+-    this->iiop_endpoint_->is_equivalent (endpoint->iiop_endpoint_);
++  return 1;
+ }
+ 
+ TAO_Endpoint *
+@@ -172,7 +221,10 @@
+   if (this->hash_val_ != 0)
+     return this->hash_val_;
+ 
+-  {
++  // Do this with no locks held, as it may try to acquire it, too.
++  const ACE_INET_Addr &oaddr = this->object_addr();
++
++  { // nested scope for the lock
+     ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+                       guard,
+                       this->addr_lookup_lock_,
+@@ -181,15 +233,18 @@
+     if (this->hash_val_ != 0)
+       return this->hash_val_;
+ 
++
++    // Note that we are not using the underlying IIOP endpoint's hash
++    // value in order to avoid the influence of the IIOP port number,
++    // since it is ignored anyway. When it features a
++    // purely fictional port number, as when accepting an SSL
++    // connection, the unsecured port is undefined and
++    // had we used it in computing the hash it would have broken the
++    // bi-directional support - as the 'guessed' IIOP port value will
++    // hardly match the one specified in the bi-dir service context.
+     this->hash_val_ =
+-      this->iiop_endpoint_->hash ()
+-      + this->ssl_component_.port
+-      + this->qop_
+-      + this->trust_.trust_in_target
+-      + this->trust_.trust_in_client
+-      + (CORBA::is_nil (this->credentials_.in ())
+-         ? 0
+-         : this->credentials_->hash ());
++      oaddr.get_ip_address ()
++      + this->ssl_component_.port;
+   }
+ 
+   return this->hash_val_;
+@@ -249,3 +304,76 @@
+   // reset the hash value to force a recomputation.
+   this->hash_val_ = 0;
+ }
++
++
++
++
++TAO_SSLIOP_Synthetic_Endpoint::~TAO_SSLIOP_Synthetic_Endpoint ()
++{
++}
++
++TAO_SSLIOP_Synthetic_Endpoint::TAO_SSLIOP_Synthetic_Endpoint (const ::SSLIOP::SSL *ssl)
++  : TAO_SSLIOP_Endpoint (ssl, 0)
++{
++}
++
++
++TAO_SSLIOP_Synthetic_Endpoint::TAO_SSLIOP_Synthetic_Endpoint (TAO_IIOP_Endpoint *iiop_endp)
++  : TAO_SSLIOP_Endpoint ((const ::SSLIOP::SSL *)0, iiop_endp)
++{
++   this->ssl_component_.port = iiop_endp->port ();
++}
++
++
++CORBA::Boolean
++TAO_SSLIOP_Synthetic_Endpoint::is_equivalent (const TAO_Endpoint *other_endpoint)
++{
++  TAO_Endpoint *endpt = const_cast<TAO_Endpoint *> (other_endpoint);
++
++  TAO_SSLIOP_Endpoint *endpoint =
++    dynamic_cast<TAO_SSLIOP_Endpoint *> (endpt);
++
++  if (endpoint == 0)
++    return 0;
++  
++  if ((this->ssl_component ().port != 0
++       && endpoint->ssl_component ().port != 0
++       && this->ssl_component ().port != endpoint->ssl_component ().port)
++       || this->qop () < endpoint->qop ())
++  {
++    return 0;
++  }
++
++  // Comparing the underlying iiop endpoints is wrong, as their port
++  // numbers often may not make sense, or are not being used anyway.
++  // Therefore, directly comparing the hosts at this point. See also the
++  // comments in the hash() method
++  if (this->iiop_endpoint() == 0 || endpoint->iiop_endpoint() == 0)
++    return 0;
++
++  if ((ACE_OS::strcmp (this->iiop_endpoint()->host (), 
++                       endpoint->iiop_endpoint()->host ()) != 0))
++    return 0;
++
++  return 1;
++}
++
++TAO_Endpoint *
++TAO_SSLIOP_Synthetic_Endpoint::duplicate (void)
++{
++  TAO_SSLIOP_Synthetic_Endpoint *endpoint = 0;
++
++  // @@ We need to set the priority of the newly formed endpoint. It
++  // shouldnt be a problem as long as SSL is not used with RTCORBA.
++  ACE_NEW_RETURN (endpoint,
++                  TAO_SSLIOP_Synthetic_Endpoint (&(this->ssl_component ())),
++                  0);
++
++  if (this->credentials_set())
++    endpoint->set_sec_attrs (this->qop (),this->trust (), this->credentials ());
++
++  endpoint->iiop_endpoint (this->iiop_endpoint (), true);
++  endpoint->hash_val_ = this->hash ();
++  return endpoint;
++}
++
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.h,v
+retrieving revision 1.24
+diff -u -r1.24 SSLIOP_Endpoint.h
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.h	4 Feb 2005 21:14:48 -0000	1.24
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Endpoint.h	25 Apr 2005 18:44:43 -0000
+@@ -4,7 +4,7 @@
+ /**
+  *  @file     SSLIOP_Endpoint.h
+  *
+- *  $Id: SSLIOP_Endpoint.h,v 1.24 2005/02/04 21:14:48 mesnier_p Exp $
++ *  $Id: SSLIOP_Endpoint.h,v 1.1.1.3.2.2 2005/04/18 20:40:03 jeliazkov_i Exp $
+  *
+  *  SSLIOP implementation of PP Framework Endpoint interface.
+  *
+@@ -61,7 +61,7 @@
+                 TAO_IIOP_Endpoint *iiop_endp);
+ 
+       /// Destructor.
+-      ~TAO_SSLIOP_Endpoint (void);
++      virtual ~TAO_SSLIOP_Endpoint (void);
+ 
+       /**
+        * @name TAO_Endpoint Methods
+@@ -73,19 +73,27 @@
+       virtual int addr_to_string (char *buffer, size_t length);
+ 
+       /// Return true if this endpoint is equivalent to @param
+-      /// other_endpoint.
+-      /**
+-       * Two endpoints are equivalent iff their iiop counterparts are
+-       * equivalent, and, if both have non-zero ssl ports, their ssl
+-       * ports are the same.
+-       */
++      /// other_endpoint. The relationship is defined as equivalency of
++      /// their qop, hostname and ssl ports (if non-zero).
++      /// Two endpoints may be equivalent even if their iiop counterparts are
++      /// not. In fact, there are cases (as with the LPL processing)
++      /// when those counterparts are not known at all.
+       CORBA::Boolean is_equivalent (const TAO_Endpoint *other_endpoint);
+ 
+       /// Return a copy of the corresponding endpoints by allocating
+       /// memory.
+       virtual TAO_Endpoint *duplicate (void);
+ 
+-      /// Return a hash value for this object.
++      /// Return a hash value for this object.  Note that only the IP
++      /// address and port are used to generate the hash value. This may
++      /// cause a few more hash table collisions in the transport cache,
++      /// because a synthesized SSLIOP endpoints for an address will
++      /// have the same hash value as a fully qualified one. The
++      /// redeeming feature is that it makes / bi-directional SSLIOP work
++      /// by allowing descendent class (Synthetic_Endpoint) instances to
++      /// be used as keys in the cache manager and match other fully
++      /// qualified endpoint. (which were  used earlier to cache a
++      /// particular transport)
+       virtual CORBA::ULong hash (void);
+       //@}
+ 
+@@ -143,12 +151,14 @@
+       /// that was set to nil explicitly.
+       int credentials_set (void) const;
+ 
+-    private:
++    protected:
+ 
+       /// Cache the SSL tagged component in a decoded format. Notice
+       /// that we do not need to marshal this object!
+       ::SSLIOP::SSL ssl_component_;
+ 
++    private:
++
+       /// Cached instance of ACE_INET_Addr for use in making invocations,
+       /// etc.
+       mutable ACE_INET_Addr object_addr_;
+@@ -182,6 +192,54 @@
+       int credentials_set_;
+     };
+ 
++    /**
++     * @class SSLIOP_Synthetic_Endpoint
++     *
++     * @brief SSLIOP-specific implementation of PP Framework Endpoint
++     *        interface, representing synthetic endpoints. An endpoints
++     *        is synthetic whenever there is insuficient data to fully
++     *        initialize an SSLIOP endpoint: qop, trust, credentials,
++     *        etc. Such as when creating an SSLIOP endpoint in response
++     *        of a Listen Point List or accepting a connection.
++     *
++     *        LPL and IOR-originated endpoints can now compare as
++     *        equivalent, if they denote the same host, port and
++     *        protection.  That would have given some false
++     *        positives in some very obscure cases (same SSL port, but
++     *        different protection or undelying IIOP port, or vice versa)
++     *        The "synthetic eVndpoint" has its very own is_equivalent()
++     *        to help eliminate any false positives and make the process
++     *        more clear.
++     *
++     */
++    class TAO_SSLIOP_Export TAO_SSLIOP_Synthetic_Endpoint : public TAO_SSLIOP_Endpoint
++    {
++    public:
++
++      /// Constructor
++      TAO_SSLIOP_Synthetic_Endpoint (TAO_IIOP_Endpoint *iiop_endp);
++
++      /// Destructor.
++      virtual ~TAO_SSLIOP_Synthetic_Endpoint (void);
++
++      /**
++       * Return true if this endpoint is equivalent to @param
++       * other_endpoint.
++       * Two synthetic endpoints are equivalent iff their iiop counterparts are
++       * equivalent, and, if both have non-zero ssl ports, their ssl
++       * ports are the same.
++       */
++      CORBA::Boolean is_equivalent (const TAO_Endpoint *other_endpoint);
++      
++      /// Return a copy of the corresponding endpoints by allocating
++      /// memory.
++      virtual TAO_Endpoint *duplicate (void);
++    
++    private:
++      TAO_SSLIOP_Synthetic_Endpoint (const ::SSLIOP::SSL *ssl);
++
++    };
++
+ //   }  // End SSLIOP namespace.
+ // }  // End TAO namespace.
+ 
+Index: orbsvcs/tests/Security/BiDirectional/BiDirectional.mpc
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/BiDirectional.mpc
+diff -N orbsvcs/tests/Security/BiDirectional/BiDirectional.mpc
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/BiDirectional.mpc	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,14 @@
++project(*Server): taoexe, portableserver, minimum_corba, bidir_giop {
++  Source_Files {
++    test_i.cpp
++    server.cpp
++  }
++}
++
++project(*Client): taoexe, portableserver, minimum_corba, bidir_giop {
++  Source_Files {
++    test_i.cpp
++    client.cpp
++  }
++}
++
+Index: orbsvcs/tests/Security/BiDirectional/README
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/README
+diff -N orbsvcs/tests/Security/BiDirectional/README
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/README	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,29 @@
++# $Id: README,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $
++
++This is a test that exercises the birectional GIOP connection
++implementation in TAO over SSLIOP connection. 
++
++Basicaly, the test is a copy of the $TAO_ROOT/tests/BiDirectional with
++added support for SSLIOP
++
++Start the server like this
++
++$ server -ORBSvcConf server.conf -o <file.ior> -i <no_iterations>
++$ client -ORBSvcConf client.conf -k file://<file.ior> -x 
++
++Or, simply
++
++$ ./run_test.pl -ssl
++
++The server starts up writing the IOR to the file. The client then starts
++up, creates its own object and passes the reference to the server. Then
++it invokes a method on the server to indicate that it is ready for
++callback. The server then callsback the client on the same connection
++<no_iterations> times. If the server creates a new connection the server
++would crash itself.
++
++To determine that no new connections have been opened or used the test
++relies on the fact that TAO uses a transport cache. It can provide us
++iwith the number of currently cashed transports before and after making an
++invocation. Both the client and at the server make this check. 
++
+Index: orbsvcs/tests/Security/BiDirectional/client.conf
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/client.conf
+diff -N orbsvcs/tests/Security/BiDirectional/client.conf
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/client.conf	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,10 @@
++dynamic SSLIOP_Factory Service_Object * 
++  TAO_SSLIOP:_make_TAO_SSLIOP_Protocol_Factory() 
++  "-SSLAuthenticate SERVER_AND_CLIENT -SSLPrivateKey 'PEM:ssl/client-key.pem' -SSLCertificate 'PEM:ssl/client-cert.pem' -SSLCAFile 'PEM:ssl/ca.pem'" 
++
++dynamic Advanced_Resource_Factory Service_Object* 
++  TAO_Strategies:_make_TAO_Advanced_Resource_Factory () 
++  "-ORBProtocolFactory SSLIOP_Factory"
++  
++static Client_Strategy_Factory  "-ORBConnectStrategy blocked"
++
+Index: orbsvcs/tests/Security/BiDirectional/client.cpp
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/client.cpp
+diff -N orbsvcs/tests/Security/BiDirectional/client.cpp
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/client.cpp	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,206 @@
++// $Id: client.cpp,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $
++
++#include "ace/Get_Opt.h"
++#include "test_i.h"
++#include "tao/BiDir_GIOP/BiDirGIOP.h"
++
++#include "tao/ORB_Core.h"
++#include "tao/Transport_Cache_Manager.h"
++#include "tao/Thread_Lane_Resources.h"
++
++ACE_RCSID(BiDirectional, client, "$Id: client.cpp,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $")
++
++const char *ior = "file://test.ior";
++
++void do_nothing (void)
++{
++}
++
++int
++parse_args (int argc, char *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, "k:");
++  int c;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'k':
++        ior = get_opts.opt_arg ();
++        break;
++
++      case '?':
++      default:
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "usage:  %s "
++                           "-k <ior> "
++                           "\n",
++                           argv [0]),
++                          -1);
++      }
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++int
++main (int argc, char *argv[])
++{
++  ACE_TRY_NEW_ENV
++    {
++      CORBA::ORB_var orb =
++        CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      CORBA::Object_var poa_object =
++        orb->resolve_initial_references ("RootPOA" ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (CORBA::is_nil (poa_object.in ()))
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           " (%P|%t) Unable to initialize the POA.\n"),
++                          1);
++
++      PortableServer::POA_var root_poa =
++        PortableServer::POA::_narrow (poa_object.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      PortableServer::POAManager_var poa_manager =
++        root_poa->the_POAManager (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      // Policies for the childPOA to be created.
++      CORBA::PolicyList policies (1);
++      policies.length (1);
++
++      CORBA::Any pol;
++      pol <<= BiDirPolicy::BOTH;
++      policies[0] =
++        orb->create_policy (BiDirPolicy::BIDIRECTIONAL_POLICY_TYPE,
++                            pol
++                            ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      // Create POA as child of RootPOA with the above policies.  This POA
++      // will receive request in the same connection in which it sent
++      // the request
++      PortableServer::POA_var child_poa =
++        root_poa->create_POA ("childPOA",
++                              poa_manager.in (),
++                              policies
++                              ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      // Creation of childPOA is over. Destroy the Policy objects.
++      for (CORBA::ULong i = 0;
++           i < policies.length ();
++           ++i)
++        {
++          policies[i]->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
++          ACE_TRY_CHECK;
++        }
++
++      poa_manager->activate (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      CORBA::Object_var object =
++        orb->string_to_object (ior ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      Simple_Server_var server =
++        Simple_Server::_narrow (object.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (CORBA::is_nil (server.in ()))
++        {
++          ACE_ERROR_RETURN ((LM_ERROR,
++                             "Object reference <%s> is nil\n",
++                             ior),
++                            1);
++        }
++
++
++      Callback_i callback_impl (orb.in ());
++
++      PortableServer::ObjectId_var id =
++        PortableServer::string_to_ObjectId ("client_callback");
++
++      child_poa->activate_object_with_id (id.in (),
++                                          &callback_impl
++                                          ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++      
++      CORBA::Object_var callback_object =
++        child_poa->id_to_reference (id.in ()
++                                    ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++      
++      Callback_var callback =
++        Callback::_narrow (callback_object.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++      
++      
++      CORBA::String_var ior =
++        orb->object_to_string (callback.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      ACE_DEBUG ((LM_DEBUG, "(%P|%t) Client callback activated as <%s>\n", ior.in ()));
++
++      // Send the calback object to the server
++      server->callback_object (callback.in ()
++                               ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      // This is a non-portable, but the only currently available way of
++      // determining the number of currently open connections.
++      int pre_call_connections = 
++        orb->orb_core ()->lane_resources ().transport_cache ().current_size ();
++      
++      // A  method to kickstart callbacks from the server
++      CORBA::Long r =
++        server->test_method (1 ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (r != 0)
++        {
++          ACE_DEBUG ((LM_DEBUG,
++                      "(%P|%t) unexpected result = %d ",
++                      r));
++        }
++
++      orb->run (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      // This is a non-portable, but the only currently available way of
++      // determining the number of currently open connections.
++      int cur_connections = 
++        orb->orb_core()->lane_resources().transport_cache().current_size ();
++      
++      if (cur_connections > pre_call_connections)
++        {
++          ACE_ERROR ((LM_ERROR,
++                      "(%P|%t) Expected %d "
++                      "connections in the transport cache, but found "
++                      "%d instead.  Aborting.\n",
++                      pre_call_connections,
++                      cur_connections));
++
++          ACE_OS::abort ();
++        }
++
++      root_poa->destroy (1, 1 ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++    }
++  ACE_CATCHANY
++    {
++      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
++                           "Caught exception:");
++      return 1;
++    }
++  ACE_ENDTRY;
++
++  return 0;
++}
+Index: orbsvcs/tests/Security/BiDirectional/run_test.pl
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/run_test.pl
+diff -N orbsvcs/tests/Security/BiDirectional/run_test.pl
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/run_test.pl	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,187 @@
++eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
++    & eval 'exec perl -S $0 $argv:q'
++    if 0;
++
++# $Id: run_test.pl,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $
++# -*- perl -*-
++
++use lib "$ENV{'ACE_ROOT'}/bin";
++use PerlACE::Run_Test;
++use Getopt::Long;
++
++$status = 0;
++$opt = "";
++$conf_client = "";
++$conf_server = "";
++$iorfile = PerlACE::LocalFile ("test.ior");
++$iter = 10;        
++
++sub options () { 
++  my $help = 0;       # handled locally 
++  my $man = 0;        # handled locally
++  my $ssl = 1;        # handled locally
++  my $dotdec = 0;     # handled locally
++  my $debug;        # handled locally
++  my $shost;        # handled locally
++  my $chost;        # handled locally
++
++  # Process options.
++  if ( @ARGV > 0 ) { 
++    GetOptions ('help|?' => \$help, 
++                'manual' => \$man, 
++                'iter=i' => \$iter, 
++                'ssl' => \$ssl, 
++                'dd=s' => \$dotdec, 
++                'shost=s' => \$shost, 
++                'chost=s' => \$chost, 
++                'debug=i' => \$debug) or pod2usage(2); 
++  }
++
++  if ($ssl) {
++    $conf_client = " -ORBSvcConf client.conf";
++    $conf_server = " -ORBSvcConf server.conf";
++  }
++
++  if ($debug) {
++    $opt = "$opt -ORBDebugLevel $debug";
++  }
++  
++  if ($dotdec) {
++    if ($dotdec =~ /client/) {
++      $conf_client = "$conf_client -ORBDottedDecimalAddresses 1";
++    }
++    if ($dotdec =~ /server/) {
++      $conf_server = "$conf_server -ORBDottedDecimalAddresses 1";
++    }
++  }
++  
++  if ($shost) {
++    $conf_server = "$conf_server -ORBListenEndpoints iiop:///hostname_in_ior=$shost";
++  }
++  
++  if ($chost) {
++    $conf_client = "$conf_client -ORBListenEndpoints iiop:///hostname_in_ior=$chost";
++  }
++  
++  if ( $man or $help ) {
++    # Load Pod::Usage only if needed.
++    require "Pod/Usage.pm"; 
++    import Pod::Usage; 
++    pod2usage(1) if $help;
++    pod2usage(VERBOSE => 2) if $man; 
++    return 0;
++  } 
++
++  return 1;
++}
++
++options () or die "Nothing executed";
++
++unlink $iorfile;
++
++print STDERR "Executing, server options=$conf_server $opt -o $iorfile -i $iter\n";
++$SV = new PerlACE::Process ("server", 
++                            "$conf_server $opt -o $iorfile -i $iter");
++
++print STDERR "Executing, client options=$conf_client $opt -k file://$iorfile\n";
++$CL = new PerlACE::Process ("client", 
++                            "$conf_client $opt -k file://$iorfile");
++#                            "$conf_client -k file://$iorfile");
++
++$SV->Spawn ();
++
++if (PerlACE::waitforfile_timed ($iorfile, 15) == -1) {
++    print STDERR "ERROR: cannot find file <$iorfile>\n";
++    $SV->Kill (); 
++    exit 1;
++}
++
++$client = $CL->SpawnWaitKill (20);
++
++if ($client != 0) {
++    print STDERR "ERROR: client returned $client\n";
++    $status = 1;
++}
++
++$server = $SV->WaitKill (10);
++
++if ($server != 0) {
++    print STDERR "ERROR: server returned $server\n";
++    $status = 1;
++}
++
++unlink $iorfile;
++
++if ($status != 0) {
++  print STDERR "Test failed\n";
++}
++else {
++  print STDERR "Test succeded\n";
++}
++
++exit $status;
++
++__END__
++
++=head1 NAME
++
++run_test.pl - A driver to run the test
++
++=head1 SYNOPSIS
++
++B<run_test.pl> [B<-help|?>] [B<-iter iterations>] [B<-chost host>]
++               [B<-dd who>] [B<-shost host>] [B<-man>] [B<-ssl>] 
++               [B<-debug level>]
++
++
++=head1 DESCRIPTION
++
++This is a test that exercises the birectional GIOP connection
++implementation in TAO over SSLIOP connection. Start the server like this
++
++$ server -ORBSvcConf server.conf -o <file.ior> -i <no_iterations>
++$ client -ORBSvcConf client.conf -k file://<file.ior> -x 
++
++Or, simply
++
++$ ./run_test.pl -ssl
++
++The server starts up writing the IOR to the file. The client then starts
++up, creates its own object and passes the reference to the server. Then
++it invokes a method on the server to indicate that it is ready for
++callback. The server then callsback the client on the same connection
++<no_iterations> times. If the server creates a new connection the server
++would crash itself.
++
++Basicaly, the test is a copy of the $TAO_ROOT/tests/BiDirectional with
++added support for SSLIOP
++
++=head1 OPTIONS
++
++[B<-help|?>]
++  Print a short help message
++
++[B<-iter iterations>] 
++  The number of iterations to make. Default is 10.
++  
++[B<-chost hostname>] 
++  The hostname_in_ior for the client. Used only if specified.
++  
++[B<-shost hostname>] 
++  The hostname_in_ior for the server. Used only if specified.
++  
++[B<-man>]
++  Prints this nice manual page
++
++[B<-dd who>]
++  Request the usage of -ORBDottedDecimalAddresses 1" for the client, the
++  server or both. Values of who can be "client", "server" or
++  "client,server".
++
++[B<-ssl>] 
++  Enables the use of SSLIOP instead of IIOP
++  
++[B<-debug level>]
++  Enables debugging. Values for level are 1-10
++
++=cut
+Index: orbsvcs/tests/Security/BiDirectional/server.conf
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/server.conf
+diff -N orbsvcs/tests/Security/BiDirectional/server.conf
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/server.conf	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,10 @@
++dynamic SSLIOP_Factory Service_Object * 
++  TAO_SSLIOP:_make_TAO_SSLIOP_Protocol_Factory() 
++  "-SSLAuthenticate SERVER_AND_CLIENT -SSLPrivateKey 'PEM:ssl/server-key.pem' -SSLCertificate 'PEM:ssl/server-cert.pem' -SSLCAFile 'PEM:ssl/ca.pem' -SSLRand /home/local/jeliazkov_i/.bashrc:/home/local/jeliazkov_i/.ssh/id_dsa.pub" 
++
++dynamic Advanced_Resource_Factory Service_Object* 
++  TAO_Strategies:_make_TAO_Advanced_Resource_Factory () 
++  "-ORBProtocolFactory SSLIOP_Factory"
++  
++static Client_Strategy_Factory  "-ORBConnectStrategy blocked"
++
+Index: orbsvcs/tests/Security/BiDirectional/server.cpp
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/server.cpp
+diff -N orbsvcs/tests/Security/BiDirectional/server.cpp
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/server.cpp	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,173 @@
++// $Id: server.cpp,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $
++
++#include "ace/Get_Opt.h"
++#include "test_i.h"
++#include "tao/BiDir_GIOP/BiDirGIOP.h"
++
++ACE_RCSID(BiDirectional, server, "$Id: server.cpp,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $")
++
++const char *ior_output_file = 0;
++int no_iterations = 10;
++
++int
++parse_args (int argc, char *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, "o:i:");
++  int c;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'o':
++        ior_output_file = get_opts.opt_arg ();
++        break;
++      case 'i':
++        no_iterations = ACE_OS::atoi (get_opts.opt_arg ());
++        break;
++      case '?':
++      default:
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "usage:  %s "
++                           "-o <iorfile>"
++                           "-i <no_iterations>"
++                           "\n",
++                           argv [0]),
++                          -1);
++      }
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++int
++main (int argc, char *argv[])
++{
++  ACE_TRY_NEW_ENV
++    {
++      CORBA::ORB_var orb =
++        CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      CORBA::Object_var poa_object =
++        orb->resolve_initial_references ("RootPOA" ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (CORBA::is_nil (poa_object.in ()))
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           " (%P|%t) Unable to initialize the POA.\n"),
++                          1);
++
++      PortableServer::POA_var root_poa =
++        PortableServer::POA::_narrow (poa_object.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      PortableServer::POAManager_var poa_manager =
++        root_poa->the_POAManager (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      // Policies for the childPOA to be created.
++      CORBA::PolicyList policies (1);
++      policies.length (1);
++
++      CORBA::Any pol;
++      pol <<= BiDirPolicy::BOTH;
++      policies[0] =
++        orb->create_policy (BiDirPolicy::BIDIRECTIONAL_POLICY_TYPE,
++                            pol
++                            ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      // Create POA as child of RootPOA with the above policies.  This POA
++      // will receive request in the same connection in which it sent
++      // the request
++      PortableServer::POA_var child_poa =
++        root_poa->create_POA ("childPOA",
++                              poa_manager.in (),
++                              policies
++                              ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      // Creation of childPOA is over. Destroy the Policy objects.
++      for (CORBA::ULong i = 0;
++           i < policies.length ();
++           ++i)
++        {
++          policies[i]->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
++          ACE_TRY_CHECK;
++        }
++
++      poa_manager->activate (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      Simple_Server_i server_impl (orb.in (),
++                                   no_iterations);
++
++      PortableServer::ObjectId_var id =
++        PortableServer::string_to_ObjectId ("simple_server");
++
++      child_poa->activate_object_with_id (id.in (),
++                                          &server_impl
++                                          ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      CORBA::Object_var obj =
++        child_poa->id_to_reference (id.in ()
++                                    ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      CORBA::String_var ior =
++        orb->object_to_string (obj.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      ACE_DEBUG ((LM_DEBUG, "(%P|%t) Server activated as <%s>\n", ior.in ()));
++
++      // If the ior_output_file exists, output the ior to it
++      if (ior_output_file != 0)
++        {
++          FILE *output_file= ACE_OS::fopen (ior_output_file, "w");
++          if (output_file == 0)
++            ACE_ERROR_RETURN ((LM_ERROR,
++                               "Cannot open output file for writing IOR: %s",
++                               ior_output_file),
++                              1);
++          ACE_OS::fprintf (output_file, "%s", ior.in ());
++          ACE_OS::fclose (output_file);
++        }
++
++      int retval = 0;
++      while (retval == 0)
++        {
++          // Just process one upcall. We know that we would get the
++          // clients IOR in that call.
++          CORBA::Boolean pending =
++            orb->work_pending(ACE_ENV_SINGLE_ARG_PARAMETER);
++          ACE_TRY_CHECK;
++
++          if (pending)
++            {
++              orb->perform_work(ACE_ENV_SINGLE_ARG_PARAMETER);
++              ACE_TRY_CHECK;
++            }
++
++          // Now that hopefully we have the clients IOR, just start
++          // making remote calls to the client.
++          retval = server_impl.call_client (ACE_ENV_SINGLE_ARG_PARAMETER);
++          ACE_TRY_CHECK;
++        }
++      ACE_DEBUG ((LM_DEBUG, "event loop finished\n"));
++
++      root_poa->destroy (1, 1 ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++    }
++  ACE_CATCHANY
++    {
++      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
++                           "Caught exception:");
++      return 1;
++    }
++  ACE_ENDTRY;
++
++  return 0;
++}
+Index: orbsvcs/tests/Security/BiDirectional/test.idl
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/test.idl
+diff -N orbsvcs/tests/Security/BiDirectional/test.idl
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/test.idl	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,27 @@
++//
++// $Id: test.idl,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $
++//
++
++interface Callback
++{
++  oneway void shutdown ();
++  // A safe way to shutdown the client, using either clean shutdowns
++  // or "catastrophic failures".
++
++  void callback_method ();
++  // A simple remote call
++
++};
++
++interface Simple_Server
++{
++  long test_method (in boolean do_callback);
++  // Just call a method on the server,
++
++  void callback_object (in Callback cb);
++  // send the callback object to the server
++
++  oneway void shutdown ();
++  // A safe way to shutdown the server, it is a oneway function so we
++  // will never get a COMM_FAILURE error
++};
+Index: orbsvcs/tests/Security/BiDirectional/test_i.cpp
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/test_i.cpp
+diff -N orbsvcs/tests/Security/BiDirectional/test_i.cpp
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/test_i.cpp	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,102 @@
++// $Id: test_i.cpp,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $
++
++#include "test_i.h"
++
++#include "tao/ORB_Core.h"
++#include "tao/debug.h"
++#include "tao/Transport_Cache_Manager.h"
++#include "tao/Thread_Lane_Resources.h"
++
++#if !defined(__ACE_INLINE__)
++#include "test_i.i"
++#endif /* __ACE_INLINE__ */
++
++ACE_RCSID(BiDirectional, test_i, "$Id: test_i.cpp,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $")
++
++void
++Callback_i::shutdown (ACE_ENV_SINGLE_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  ACE_DEBUG ((LM_DEBUG, "Performing clean shutdown\n"));
++  this->orb_->shutdown (0 ACE_ENV_ARG_PARAMETER);
++}
++
++void
++Callback_i::callback_method (ACE_ENV_SINGLE_ARG_DECL_NOT_USED /*ACE_ENV_SINGLE_ARG_PARAMETER*/)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  if (TAO_debug_level > 0)
++    ACE_DEBUG ((LM_DEBUG, "Callback method called \n"));
++}
++
++
++// ****************************************************************
++
++CORBA::Long
++Simple_Server_i::test_method (CORBA::Boolean do_callback
++                              ACE_ENV_ARG_DECL_NOT_USED )
++    ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  if (do_callback)
++    {
++      this->flag_ = 1;
++    }
++
++  return 0;
++}
++
++void
++Simple_Server_i::callback_object (Callback_ptr callback
++                                  ACE_ENV_ARG_DECL_NOT_USED )
++    ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  // Store the callback object
++  this->callback_ = Callback::_duplicate (callback);
++}
++
++int
++Simple_Server_i::call_client (ACE_ENV_SINGLE_ARG_DECL)
++{
++  int pre_call_connections = 
++    this->orb_->orb_core ()->lane_resources ().transport_cache ().current_size ();
++  
++  if (this->flag_)
++    {
++      for (int times = 0; times < this->no_iterations_; ++times)
++        {
++          this->callback_->callback_method (ACE_ENV_SINGLE_ARG_PARAMETER);
++          ACE_CHECK_RETURN (0);
++
++          int cur_connections = 
++            this->orb_->orb_core()->lane_resources().transport_cache().current_size ();
++          
++          if (cur_connections > pre_call_connections)
++            {
++              ACE_ERROR ((LM_ERROR,
++                          "(%P|%t) TEST OUTPUT: expected to find %d "
++                          "connections in the transport cache, but found "
++                          "%d instead.  Aborting.\n",
++                          pre_call_connections,
++                          cur_connections));
++
++              ACE_OS::abort ();
++            }
++        }
++
++      this->callback_->shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_CHECK_RETURN (0);
++      this->flag_ = 0;
++
++      return 1;
++    }
++
++  return 0;
++}
++
++
++void
++Simple_Server_i::shutdown (ACE_ENV_SINGLE_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  this->orb_->shutdown (0 ACE_ENV_ARG_PARAMETER);
++}
+Index: orbsvcs/tests/Security/BiDirectional/test_i.h
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/test_i.h
+diff -N orbsvcs/tests/Security/BiDirectional/test_i.h
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/test_i.h	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,92 @@
++// $Id: test_i.h,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $
++
++// ============================================================================
++//
++// = LIBRARY
++//   TAO/tests/BiDirectional
++//
++// = FILENAME
++//   test_i.h
++//
++// = AUTHOR
++//   Balachandran Natarajan <bala@cs.wustl.edu>
++//
++// ============================================================================
++
++#ifndef TAO_BIDIRECTIONAL_TEST_I_H
++#define TAO_BIDIRECTIONAL_TEST_I_H
++
++#include "testS.h"
++
++class Callback_i : public POA_Callback
++{
++  // = TITLE
++  //   A callback object to the "client"
++  //
++  // = DESCRIPTION
++  //   To test that the server can call the client on the same
++  //   connection that was established by the client
++  //
++public:
++  Callback_i (CORBA::ORB_ptr orb);
++  // ctor
++
++  void shutdown (ACE_ENV_SINGLE_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++  // Safe way to shutdown
++
++  void callback_method (ACE_ENV_SINGLE_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++  // The callback method
++
++private:
++  CORBA::ORB_var orb_;
++  // The orb
++
++};
++
++class Simple_Server_i : public POA_Simple_Server
++{
++  // = TITLE
++  //   Simpler Server implementation
++  //
++  // = DESCRIPTION
++  //   Implements the Simple_Server interface in test.idl
++  //
++public:
++  Simple_Server_i (CORBA::ORB_ptr orb, int no_iterations);
++  // ctor
++
++  // = The Simple_Server methods.
++  CORBA::Long test_method (CORBA::Boolean do_callback
++                           ACE_ENV_ARG_DECL_NOT_USED)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  void callback_object (Callback_ptr callback
++                        ACE_ENV_ARG_DECL_NOT_USED)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  void shutdown (ACE_ENV_SINGLE_ARG_DECL_NOT_USED)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
++  int call_client (ACE_ENV_SINGLE_ARG_DECL_NOT_USED);
++
++private:
++  CORBA::ORB_var orb_;
++  // The ORB
++
++  int flag_;
++  // Flag to indicate, whether we are ready for a remote call.
++
++  Callback_var callback_;
++  // Callback Object
++
++  int no_iterations_;
++  // Number of times the callback needs to be called
++};
++
++#if defined(__ACE_INLINE__)
++#include "test_i.i"
++#endif /* __ACE_INLINE__ */
++
++#endif /* TAO_BIDIRECTIONAL_TEST_I_H */
+Index: orbsvcs/tests/Security/BiDirectional/test_i.i
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/test_i.i
+diff -N orbsvcs/tests/Security/BiDirectional/test_i.i
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/test_i.i	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,17 @@
++// $Id: test_i.i,v 1.1.6.1 2005/04/18 20:44:44 jeliazkov_i Exp $
++
++ACE_INLINE
++Callback_i::Callback_i (CORBA::ORB_ptr orb)
++  :  orb_ (CORBA::ORB::_duplicate (orb))
++{
++}
++
++ACE_INLINE
++Simple_Server_i::Simple_Server_i (CORBA::ORB_ptr orb,
++                                  int no_iterations)
++  :  orb_ (CORBA::ORB::_duplicate (orb)),
++     flag_ (0),
++     callback_ (0),
++     no_iterations_ (no_iterations)
++{
++}
+Index: orbsvcs/tests/Security/BiDirectional/ssl/ca.pem
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/ssl/ca.pem
+diff -N orbsvcs/tests/Security/BiDirectional/ssl/ca.pem
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/ssl/ca.pem	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,34 @@
++-----BEGIN CERTIFICATE-----
++MIICuDCCAiGgAwIBAgIBADANBgkqhkiG9w0BAQQFADBNMQswCQYDVQQGEwJVUzEL
++MAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8w
++DQYDVQQDEwZzZXJ2ZXIwHhcNMDUwNDE4MjAzNDQxWhcNMDYwNDE4MjAzNDQxWjBN
++MQswCQYDVQQGEwJVUzELMAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEM
++MAoGA1UEChMDT0NJMQ8wDQYDVQQDEwZzZXJ2ZXIwgZ8wDQYJKoZIhvcNAQEBBQAD
++gY0AMIGJAoGBANCcDTCxc5DlaXJtflPMTkCUook5uOF1N56inw0eyaLx8zucv3TL
++LU1cORInZDzie7+ImiQ8tmiB+3rCy/UER5F0zv8Pc0aklyysK+cjMlA0mu7D26Ut
++M/YlDp18kyBmSWEtx3AobTUo5Ry5dqXjN96oJGUc+WypIJX6yvs3CsKNAgMBAAGj
++gacwgaQwHQYDVR0OBBYEFElH1lMSF2uqjpL29w0U3+NNVLsvMHUGA1UdIwRuMGyA
++FElH1lMSF2uqjpL29w0U3+NNVLsvoVGkTzBNMQswCQYDVQQGEwJVUzELMAkGA1UE
++CBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8wDQYDVQQD
++EwZzZXJ2ZXKCAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQQFAAOBgQB8Tttf
++Yf+9cjjdw01L1ERXjJIcwH5ZhhKoCguDV0BmbkDmTD8DhIMLZG3mKkJnS7g0JRT3
++7Gs4okPK+sPW7elRLxTvlYZeO4O9ra6TF9+esSw03h3p10/MdCFyt5YK7i6DHWMJ
++hYUnQ6tBMvDuTamwWoxJGWDxkkBSRrGgVRb3IQ==
++-----END CERTIFICATE-----
++-----BEGIN CERTIFICATE-----
++MIICuDCCAiGgAwIBAgIBADANBgkqhkiG9w0BAQQFADBNMQswCQYDVQQGEwJVUzEL
++MAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8w
++DQYDVQQDEwZjbGllbnQwHhcNMDUwNDE4MjAzNDQxWhcNMDYwNDE4MjAzNDQxWjBN
++MQswCQYDVQQGEwJVUzELMAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEM
++MAoGA1UEChMDT0NJMQ8wDQYDVQQDEwZjbGllbnQwgZ8wDQYJKoZIhvcNAQEBBQAD
++gY0AMIGJAoGBAKlt5waXlc4y4i8T4kJ+z0DGHAdjJCl5f+CAAhiAGnM6ojV7YNbH
++KHZW2qGBvq5jsy2DXGJC7/hxV3IKerv1Us9znbFypAgJNwqERBlwC0enBcfrQkIa
++umzheCyr6xSDSAB9Kmgtsrm1JGuq7eOIfqiUUBCovpg+Y3Q1eLvD34eJAgMBAAGj
++gacwgaQwHQYDVR0OBBYEFKYlVQvY/ngeBTk9SsDbu/1S8e6PMHUGA1UdIwRuMGyA
++FKYlVQvY/ngeBTk9SsDbu/1S8e6PoVGkTzBNMQswCQYDVQQGEwJVUzELMAkGA1UE
++CBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8wDQYDVQQD
++EwZjbGllbnSCAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQQFAAOBgQAU9c+R
++NCKu/jkIkUUACc+yTiNb2DvLJtRpWsrUSTLj8KK9wXlwyk3Zm/0h7PjGMUyE7nPi
++4vWXDrXBgQ3gXbcmbMygFJikAO6jVlyE+49AsJET/HzTorTgu7n+/Y3D9+J5GTDA
++jFzmjtaMPErQwhjRvG15ekJOZeqR8NjIRPm/OQ==
++-----END CERTIFICATE-----
+Index: orbsvcs/tests/Security/BiDirectional/ssl/client-cert.pem
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/ssl/client-cert.pem
+diff -N orbsvcs/tests/Security/BiDirectional/ssl/client-cert.pem
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/ssl/client-cert.pem	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,17 @@
++-----BEGIN CERTIFICATE-----
++MIICuDCCAiGgAwIBAgIBADANBgkqhkiG9w0BAQQFADBNMQswCQYDVQQGEwJVUzEL
++MAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8w
++DQYDVQQDEwZjbGllbnQwHhcNMDUwNDE4MjAzNDQxWhcNMDYwNDE4MjAzNDQxWjBN
++MQswCQYDVQQGEwJVUzELMAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEM
++MAoGA1UEChMDT0NJMQ8wDQYDVQQDEwZjbGllbnQwgZ8wDQYJKoZIhvcNAQEBBQAD
++gY0AMIGJAoGBAKlt5waXlc4y4i8T4kJ+z0DGHAdjJCl5f+CAAhiAGnM6ojV7YNbH
++KHZW2qGBvq5jsy2DXGJC7/hxV3IKerv1Us9znbFypAgJNwqERBlwC0enBcfrQkIa
++umzheCyr6xSDSAB9Kmgtsrm1JGuq7eOIfqiUUBCovpg+Y3Q1eLvD34eJAgMBAAGj
++gacwgaQwHQYDVR0OBBYEFKYlVQvY/ngeBTk9SsDbu/1S8e6PMHUGA1UdIwRuMGyA
++FKYlVQvY/ngeBTk9SsDbu/1S8e6PoVGkTzBNMQswCQYDVQQGEwJVUzELMAkGA1UE
++CBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8wDQYDVQQD
++EwZjbGllbnSCAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQQFAAOBgQAU9c+R
++NCKu/jkIkUUACc+yTiNb2DvLJtRpWsrUSTLj8KK9wXlwyk3Zm/0h7PjGMUyE7nPi
++4vWXDrXBgQ3gXbcmbMygFJikAO6jVlyE+49AsJET/HzTorTgu7n+/Y3D9+J5GTDA
++jFzmjtaMPErQwhjRvG15ekJOZeqR8NjIRPm/OQ==
++-----END CERTIFICATE-----
+Index: orbsvcs/tests/Security/BiDirectional/ssl/client-key.pem
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/ssl/client-key.pem
+diff -N orbsvcs/tests/Security/BiDirectional/ssl/client-key.pem
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/ssl/client-key.pem	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,32 @@
++-----BEGIN RSA PRIVATE KEY-----
++MIICWwIBAAKBgQCpbecGl5XOMuIvE+JCfs9AxhwHYyQpeX/ggAIYgBpzOqI1e2DW
++xyh2Vtqhgb6uY7Mtg1xiQu/4cVdyCnq79VLPc52xcqQICTcKhEQZcAtHpwXH60JC
++Grps4Xgsq+sUg0gAfSpoLbK5tSRrqu3jiH6olFAQqL6YPmN0NXi7w9+HiQIDAQAB
++AoGAMUz3kqV9Q9julABXMD4yFIkREt04YpEmMq9M7NAp4inHlYRnM1gUYAr551EX
++qSr9slqtATK1HTft2BNQj2zdQWLLs4rJ7FvVYLYdBBCAFdYugjnjkxHafaOYX/Sb
++HGHiGZxM/6N5BUijGfNBc4qF+jeONDyGDZoxW//uqaslpmECQQDeqG+QF3Kqe272
++HPol81WpLL8M6Vtk8woLB9/T7oKHEbw4C/ZzHqJQPGcEUxStm3z9Bo+rb1wjAMp/
++r/TL0i3VAkEAwsz0C3JPbt9PC0UwqrgXfsvYuVNwJ60HGGe29mQ+5xpFQgzOPgUI
++XRaXpCtnMYinedsGeGEBvDHZkESibkZo5QJAYCeBNkrJ/BGeE67j4Cu7nHl0cBD+
++pRPIDId0A8QGnmnsTI/t+D0Mf3X2TwnJ7kctrN9+f9xxf7RBvu6v2q2DmQJAd5+O
++efz/ZHGDQ8OAaEXWP8oEU4I2jFbH1afTBil3K0nJoA7nE9TZVvjJtEnm+9cUKVNj
++/MZtX1kpZluPd7KLNQJATm3ZjpwPsK/wz2W0cIfZjswh7ARW3ie3UzWI7ryBumQB
++q0wXd5VXuG2hmWI2S0SfuRRDWxCW/KmPVYCaSY+HQg==
++-----END RSA PRIVATE KEY-----
++-----BEGIN CERTIFICATE-----
++MIICuDCCAiGgAwIBAgIBADANBgkqhkiG9w0BAQQFADBNMQswCQYDVQQGEwJVUzEL
++MAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8w
++DQYDVQQDEwZjbGllbnQwHhcNMDUwNDE4MjAzNDQxWhcNMDYwNDE4MjAzNDQxWjBN
++MQswCQYDVQQGEwJVUzELMAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEM
++MAoGA1UEChMDT0NJMQ8wDQYDVQQDEwZjbGllbnQwgZ8wDQYJKoZIhvcNAQEBBQAD
++gY0AMIGJAoGBAKlt5waXlc4y4i8T4kJ+z0DGHAdjJCl5f+CAAhiAGnM6ojV7YNbH
++KHZW2qGBvq5jsy2DXGJC7/hxV3IKerv1Us9znbFypAgJNwqERBlwC0enBcfrQkIa
++umzheCyr6xSDSAB9Kmgtsrm1JGuq7eOIfqiUUBCovpg+Y3Q1eLvD34eJAgMBAAGj
++gacwgaQwHQYDVR0OBBYEFKYlVQvY/ngeBTk9SsDbu/1S8e6PMHUGA1UdIwRuMGyA
++FKYlVQvY/ngeBTk9SsDbu/1S8e6PoVGkTzBNMQswCQYDVQQGEwJVUzELMAkGA1UE
++CBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8wDQYDVQQD
++EwZjbGllbnSCAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQQFAAOBgQAU9c+R
++NCKu/jkIkUUACc+yTiNb2DvLJtRpWsrUSTLj8KK9wXlwyk3Zm/0h7PjGMUyE7nPi
++4vWXDrXBgQ3gXbcmbMygFJikAO6jVlyE+49AsJET/HzTorTgu7n+/Y3D9+J5GTDA
++jFzmjtaMPErQwhjRvG15ekJOZeqR8NjIRPm/OQ==
++-----END CERTIFICATE-----
+Index: orbsvcs/tests/Security/BiDirectional/ssl/make-client-keys
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/ssl/make-client-keys
+diff -N orbsvcs/tests/Security/BiDirectional/ssl/make-client-keys
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/ssl/make-client-keys	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,16 @@
++#!/bin/bash -x
++
++openssl req -new -x509 -days 365 -nodes -newkey rsa:1024 \
++    -out server-cert.pem -keyout server-key.pem \
++    -subj "/C=US/ST=MO/L=St. Louis/O=OCI/CN=server"
++
++cat server-cert.pem >>server-key.pem
++cat server-cert.pem >ca.pem
++        
++openssl req -new -x509 -days 365 -nodes -newkey rsa:1024 \
++    -out client-cert.pem -keyout client-key.pem \
++    -subj "/C=US/ST=MO/L=St. Louis/O=OCI/CN=client"
++
++cat client-cert.pem >>client-key.pem
++cat client-cert.pem >>ca.pem
++        
+Index: orbsvcs/tests/Security/BiDirectional/ssl/server-cert.pem
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/ssl/server-cert.pem
+diff -N orbsvcs/tests/Security/BiDirectional/ssl/server-cert.pem
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/ssl/server-cert.pem	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,17 @@
++-----BEGIN CERTIFICATE-----
++MIICuDCCAiGgAwIBAgIBADANBgkqhkiG9w0BAQQFADBNMQswCQYDVQQGEwJVUzEL
++MAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8w
++DQYDVQQDEwZzZXJ2ZXIwHhcNMDUwNDE4MjAzNDQxWhcNMDYwNDE4MjAzNDQxWjBN
++MQswCQYDVQQGEwJVUzELMAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEM
++MAoGA1UEChMDT0NJMQ8wDQYDVQQDEwZzZXJ2ZXIwgZ8wDQYJKoZIhvcNAQEBBQAD
++gY0AMIGJAoGBANCcDTCxc5DlaXJtflPMTkCUook5uOF1N56inw0eyaLx8zucv3TL
++LU1cORInZDzie7+ImiQ8tmiB+3rCy/UER5F0zv8Pc0aklyysK+cjMlA0mu7D26Ut
++M/YlDp18kyBmSWEtx3AobTUo5Ry5dqXjN96oJGUc+WypIJX6yvs3CsKNAgMBAAGj
++gacwgaQwHQYDVR0OBBYEFElH1lMSF2uqjpL29w0U3+NNVLsvMHUGA1UdIwRuMGyA
++FElH1lMSF2uqjpL29w0U3+NNVLsvoVGkTzBNMQswCQYDVQQGEwJVUzELMAkGA1UE
++CBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8wDQYDVQQD
++EwZzZXJ2ZXKCAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQQFAAOBgQB8Tttf
++Yf+9cjjdw01L1ERXjJIcwH5ZhhKoCguDV0BmbkDmTD8DhIMLZG3mKkJnS7g0JRT3
++7Gs4okPK+sPW7elRLxTvlYZeO4O9ra6TF9+esSw03h3p10/MdCFyt5YK7i6DHWMJ
++hYUnQ6tBMvDuTamwWoxJGWDxkkBSRrGgVRb3IQ==
++-----END CERTIFICATE-----
+Index: orbsvcs/tests/Security/BiDirectional/ssl/server-key.pem
+===================================================================
+RCS file: orbsvcs/tests/Security/BiDirectional/ssl/server-key.pem
+diff -N orbsvcs/tests/Security/BiDirectional/ssl/server-key.pem
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ orbsvcs/tests/Security/BiDirectional/ssl/server-key.pem	25 Apr 2005 18:44:44 -0000
+@@ -0,0 +1,32 @@
++-----BEGIN RSA PRIVATE KEY-----
++MIICXQIBAAKBgQDQnA0wsXOQ5WlybX5TzE5AlKKJObjhdTeeop8NHsmi8fM7nL90
++yy1NXDkSJ2Q84nu/iJokPLZogft6wsv1BEeRdM7/D3NGpJcsrCvnIzJQNJruw9ul
++LTP2JQ6dfJMgZklhLcdwKG01KOUcuXal4zfeqCRlHPlsqSCV+sr7NwrCjQIDAQAB
++AoGAf5gDRVY0XlrDbVblXrHm5v9CjvZ8S4Jbm67R47+CCyU75alRPUmMkvWmfqET
++YV4R3Kvbw/BSjYd7XrHI+Ds+3e/0grBK4MM0DpWT1Dqa/EklACt5DlJ3UPmAUnAp
++IvuLgcC/8e88VWylQ1vRJ2qoTvrY3yZI5NQXfuaxf7eQLyECQQD+jh5pX4qL7MDQ
++FskGqB4CUDy/UO/Ye2hTY/ILIj7H5X/Rpn82fEItx9NfAuW4loaKBrpGElwqJJJw
++9EeN2sMpAkEA0csr6f/hBaxyenaZ72fTNDFvX1EsnqVpOdcYFgJYFsizcjpHNjkj
++GlBo7WTrfKPgJCVHrSd7zqpz6a8Dj6R0xQJAOpKpHMYHMzs/AqK7jvSQMygTUlJl
++XgLHdqjAwR8YIxcD2lHdY8Qj1jTsxif8hATe4FO7+POwkWHo8GTFMjbsQQJBALaW
++Svv3NRLJCUFII6VXCVwtgi7E6T6R28j5SP8uvxflSTgrPHsWs1Rdk1S5NrJdtd//
++iihLatdtRkClj0Xe7bkCQQCM/JaBwb7UyHFmGhSk/6teiTc+GiRQkbTV7ssbIB6N
++1KPKXPguFf4bemVjadw6d9mljTat/QcgJRdaW8iAjqa1
++-----END RSA PRIVATE KEY-----
++-----BEGIN CERTIFICATE-----
++MIICuDCCAiGgAwIBAgIBADANBgkqhkiG9w0BAQQFADBNMQswCQYDVQQGEwJVUzEL
++MAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8w
++DQYDVQQDEwZzZXJ2ZXIwHhcNMDUwNDE4MjAzNDQxWhcNMDYwNDE4MjAzNDQxWjBN
++MQswCQYDVQQGEwJVUzELMAkGA1UECBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEM
++MAoGA1UEChMDT0NJMQ8wDQYDVQQDEwZzZXJ2ZXIwgZ8wDQYJKoZIhvcNAQEBBQAD
++gY0AMIGJAoGBANCcDTCxc5DlaXJtflPMTkCUook5uOF1N56inw0eyaLx8zucv3TL
++LU1cORInZDzie7+ImiQ8tmiB+3rCy/UER5F0zv8Pc0aklyysK+cjMlA0mu7D26Ut
++M/YlDp18kyBmSWEtx3AobTUo5Ry5dqXjN96oJGUc+WypIJX6yvs3CsKNAgMBAAGj
++gacwgaQwHQYDVR0OBBYEFElH1lMSF2uqjpL29w0U3+NNVLsvMHUGA1UdIwRuMGyA
++FElH1lMSF2uqjpL29w0U3+NNVLsvoVGkTzBNMQswCQYDVQQGEwJVUzELMAkGA1UE
++CBMCTU8xEjAQBgNVBAcTCVN0LiBMb3VpczEMMAoGA1UEChMDT0NJMQ8wDQYDVQQD
++EwZzZXJ2ZXKCAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQQFAAOBgQB8Tttf
++Yf+9cjjdw01L1ERXjJIcwH5ZhhKoCguDV0BmbkDmTD8DhIMLZG3mKkJnS7g0JRT3
++7Gs4okPK+sPW7elRLxTvlYZeO4O9ra6TF9+esSw03h3p10/MdCFyt5YK7i6DHWMJ
++hYUnQ6tBMvDuTamwWoxJGWDxkkBSRrGgVRb3IQ==
++-----END CERTIFICATE-----
+Index: tao/Transport_Cache_Manager.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Transport_Cache_Manager.cpp,v
+retrieving revision 1.39
+diff -u -r1.39 Transport_Cache_Manager.cpp
+--- tao/Transport_Cache_Manager.cpp	18 Mar 2005 16:36:14 -0000	1.39
++++ tao/Transport_Cache_Manager.cpp	25 Apr 2005 18:44:44 -0000
+@@ -1,6 +1,7 @@
+ //$Id: Transport_Cache_Manager.cpp,v 1.39 2005/03/18 16:36:14 bala Exp $
+ #include "tao/Transport_Cache_Manager.h"
+ #include "tao/Transport.h"
++#include "tao/Endpoint.h"
+ #include "tao/debug.h"
+ #include "tao/ORB_Core.h"
+ #include "tao/Connection_Purging_Strategy.h"
+@@ -83,11 +84,19 @@
+   Transport_Cache_Manager::bind_i (Cache_ExtId &ext_id,
+                                    Cache_IntId &int_id)
+   {
+-    if (TAO_debug_level > 0)
++    if (TAO_debug_level > 4)
+       {
+-        ACE_DEBUG ((LM_DEBUG,
+-                    "TAO (%P|%t) - Transport_Cache_Manager::bind_i, "
+-                    "0x%x -> 0x%x Transport[%d]\n",
++        ACE_TCHAR address [MAXHOSTNAMELEN + 16];
++        ext_id.property ()->endpoint ()->addr_to_string (address, 
++                                                         sizeof address);
++        ACE_ERROR ((LM_ERROR,
++                    ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::bind_i ")
++                    ACE_TEXT ("<%s>, hash=0x%x\n"), 
++                    address,
++                    ext_id.hash ()));
++        ACE_ERROR ((LM_ERROR,
++                    ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::bind_i, ")
++                    ACE_TEXT ("%@ -> %@ Transport[%d]\n"), 
+                     ext_id.property (),
+                     int_id.transport (),
+                     int_id.transport ()->id ()));
+@@ -206,6 +215,16 @@
+     // Make a temporary object. It does not do a copy.
+     Cache_ExtId tmp_key (key.property ());
+ 
++    if (TAO_debug_level > 4)
++      {
++        char address [MAXHOSTNAMELEN + 16];
++        key.property ()->endpoint ()->addr_to_string (address, sizeof address);
++        ACE_DEBUG ((LM_DEBUG,
++                    ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::find_i, ")
++                    ACE_TEXT ("looking for <%s>, hash=0x%x\n"), 
++                    address, tmp_key.hash()));
++      }
++
+     while (retval == 0)
+       {
+         // Wait for a connection..
+@@ -215,6 +234,13 @@
+         retval = this->cache_map_.find (tmp_key,
+                                         entry);
+ 
++        if (TAO_debug_level > 4 && retval != 0)
++          {
++            ACE_ERROR ((LM_ERROR,
++                        ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::find_i, ")
++                        ACE_TEXT ("cache miss\n")));
++          }
++
+         // We have an entry in the map, check whether it is idle.
+         if (entry)
+           {
+@@ -235,15 +261,22 @@
+                 if (TAO_debug_level > 4)
+                   {
+                     ACE_DEBUG ((LM_DEBUG,
+-                                "TAO (%P|%t) - Transport_Cache_Manager::find_i, "
+-                                "index in find <%d> (Transport[%d])\n",
++                                ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::find_i, ")
++                                ACE_TEXT ("index in find <%d> (Transport[%d])\n"),
+                                 entry->ext_id_.index (),
+-                                value.transport ()->id ()
+-                                ));
++                                entry->int_id_.transport ()->id ()));
+                   }
+ 
+                 return 0;
+               }
++            else if (TAO_debug_level > 4)
++                  {
++                    ACE_DEBUG ((LM_DEBUG,
++                                ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::find_i, ")
++                                ACE_TEXT ("index in find <%d> (Transport[%d]) is not idle\n"),
++                                entry->ext_id_.index (),
++                                entry->int_id_.transport ()->id ()));
++                  }
+           }
+ 
+         // Bump the index up
