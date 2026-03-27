@@ -1,0 +1,41 @@
+Index: ace/TP_Reactor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/TP_Reactor.cpp,v
+retrieving revision 4.56
+diff -u -r4.56 TP_Reactor.cpp
+--- ace/TP_Reactor.cpp	27 Jul 2002 02:04:03 -0000	4.56
++++ ace/TP_Reactor.cpp	9 Sep 2002 21:13:13 -0000
+@@ -323,6 +323,7 @@
+ {
+   int event_count =
+     this->get_event_for_dispatching (max_wait_time);
++  int initial_event_count = event_count;
+ 
+   int result = 0;
+ 
+@@ -379,12 +380,22 @@
+   if (event_count > 0)
+     {
+       // Handle socket events
+-      return this->handle_socket_events (event_count,
+-                                         guard);
++      result = this->handle_socket_events (event_count,
++                                           guard);
+     }
+ 
+-  return 0;
++  if (event_count != 0
++      && event_count == initial_event_count)
++    {
++      // If this happens then we have some fake event in the ready_set
++      // and we need to force a recomputation.
++      this->state_changed_ = 1;
++      // ACE_DEBUG ((LM_DEBUG,
++      // "ACE (%P|%t) - TP_Reactor::dispatch_i, "
++      // "unexpected, events ready but none was handled!\n"));
++    }
+ 
++  return result;
+ }
+ 
+ 
