@@ -1,0 +1,41 @@
+Index: Acceptor_Registry.cpp
+===================================================================
+RCS file: /project/ace/cvs-repository/ACE_wrappers-repository/TAO/tao/Acceptor_Registry.cpp,v
+retrieving revision 1.21
+diff -u -r1.21 Acceptor_Registry.cpp
+--- Acceptor_Registry.cpp	1999/12/13 00:03:12	1.21
++++ Acceptor_Registry.cpp	2000/03/13 00:22:18
+@@ -296,22 +296,31 @@
+ 
+   TAO_ProtocolFactorySetItor end = pfs->end ();
+ 
++  // Flag that indicates at least one endpoint was opened.  If one
++  // wasn't opened then there is a problem.
++  int opened_endpoint = 0;
++
+   // loop through all the loaded protocols...
+   for (TAO_ProtocolFactorySetItor i = pfs->begin ();
+        i != end;
+        ++i)
+     {
+-      // if the protocol requires an explicit -ORBEndpoint option then
++      // If the protocol requires an explicit -ORBEndpoint option then
+       // don't use it, otherwise open a default endpoint for that
+       // protocol, this solves the problem with persistent endpoints
+-      // (such as UNIX domain rendesvouz points), that are not cleaned
++      // (such as UNIX domain rendesvouz points) that are not cleaned
+       // up if the server crashes.
+       if (!(*i)->factory ()->requires_explicit_endpoint ())
+         {
+           if (this->open_default (orb_core, i, options) != 0)
+             return -1;
++
++          opened_endpoint = 1;
+         }
+     }
++
++  if (!opened_endpoint)
++    return -1;
+ 
+   return 0;
+ }
