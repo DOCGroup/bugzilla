@@ -1,0 +1,102 @@
+Index: TAO/tao/ORB_Core.cpp
+===================================================================
+RCS file: /home/src/cvs/ACE_wrappers/TAO/tao/ORB_Core.cpp,v
+retrieving revision 1.1.1.5
+diff -u -r1.1.1.5 ORB_Core.cpp
+--- TAO/tao/ORB_Core.cpp	2002/07/18 19:31:23	1.1.1.5
++++ TAO/tao/ORB_Core.cpp	2002/08/05 13:26:30
+@@ -1764,47 +1764,57 @@
+ TAO_ORB_Core::shutdown (CORBA::Boolean wait_for_completion
+                         ACE_ENV_ARG_DECL)
+ {
+-  ACE_GUARD (TAO_SYNCH_MUTEX, monitor, this->lock_);
++  {
++    ACE_GUARD (TAO_SYNCH_MUTEX, monitor, this->lock_);
+ 
+-  if (this->has_shutdown () == 0)
+-    {
+-      this->adapter_registry_.check_close (wait_for_completion
+-                                           ACE_ENV_ARG_PARAMETER);
+-      ACE_CHECK;
+-
+-      this->adapter_registry_.close (wait_for_completion
+-                                     ACE_ENV_ARG_PARAMETER);
+-      ACE_CHECK;
+-
+-      // Set the shutdown flag
+-      this->has_shutdown_ = 1;
+-
+-      // Shutdown reactor.
+-      this->thread_lane_resources_manager ().shutdown_reactor ();
+-
+-      // Grab the thread manager
+-      ACE_Thread_Manager *tm = this->thr_mgr ();
+-
+-      // Try to cancel all the threads in the ORB.
+-      tm->cancel_all ();
+-
+-      // If <wait_for_completion> is set, wait for all threads to exit.
+-      if (wait_for_completion != 0)
+-        tm->wait ();
+-
+-      // Invoke Interceptor::destroy() on all registered interceptors.
+-      this->destroy_interceptors (ACE_ENV_SINGLE_ARG_PARAMETER);
+-      ACE_CHECK;
+-
+-      // Explicitly destroy the object reference table since it
+-      // contains references to objects, which themselves may contain
+-      // reference to this ORB.
+-      this->object_ref_table_.destroy ();
++    if (this->has_shutdown () != 0)
++      return;
+ 
++    // Check if we are on the right state, i.e. do not accept
++    // shutdowns with the 'wait_for_completion' flag set in the middle
++    // of an upcall (because those deadlock).
++    this->adapter_registry_.check_close (wait_for_completion
++                                         ACE_ENV_ARG_PARAMETER);
++    ACE_CHECK;
++
++    // Set the 'has_shutdown' flag, so any further attempt to shutdown
++    // becomes a noop.
++    this->has_shutdown_ = 1;
++
++    // need to release the mutex, because some of the shutdown
++    // operations invoke application code, that could (and in practice
++    // does!) callback into ORB Core code.
++  }
++
++  this->adapter_registry_.close (wait_for_completion
++                                 ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++
++  // Shutdown reactor.
++  this->thread_lane_resources_manager ().shutdown_reactor ();
++
++  // Grab the thread manager
++  ACE_Thread_Manager *tm = this->thr_mgr ();
++
++  // Try to cancel all the threads in the ORB.
++  tm->cancel_all ();
++
++  // If <wait_for_completion> is set, wait for all threads to exit.
++  if (wait_for_completion != 0)
++    tm->wait ();
++
++  // Invoke Interceptor::destroy() on all registered interceptors.
++  this->destroy_interceptors (ACE_ENV_SINGLE_ARG_PARAMETER);
++  ACE_CHECK;
++
++  // Explicitly destroy the object reference table since it
++  // contains references to objects, which themselves may contain
++  // reference to this ORB.
++  this->object_ref_table_.destroy ();
++
+ #if (TAO_HAS_INTERCEPTORS == 1)
+-      this->pi_current_ = 0;  // For the sake of consistency.
++  this->pi_current_ = 0;  // For the sake of consistency.
+ #endif  /* TAO_HAS_INTERCEPTORS == 1 */
+-    }
+ }
+ 
+ void
