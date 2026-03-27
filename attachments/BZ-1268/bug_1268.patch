@@ -1,0 +1,108 @@
+? tests/test.reg
+? tests/testConfig.ini
+Index: ace/Select_Reactor_Base.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/ace/Select_Reactor_Base.cpp,v
+retrieving revision 1.6
+diff -u -u -r1.6 Select_Reactor_Base.cpp
+--- ace/Select_Reactor_Base.cpp	17 Dec 2002 19:14:39 -0000	1.6
++++ ace/Select_Reactor_Base.cpp	14 May 2003 19:53:48 -0000
+@@ -710,15 +710,15 @@
+ #if defined (ACE_HAS_REACTOR_NOTIFICATION_QUEUE)
+   // Artificial scope to limit the duration of the mutex.
+   {
+-    // int notification_required = 0;
++    int notification_required = 0;
+ 
+     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, mon, this->notify_queue_lock_, -1);
+ 
+     // No pending notifications.
+ 
+     // We will send notify for every message..
+-    // if (this->notify_queue_.is_empty ())
+-    //   notification_required = 1;
++    if (this->notify_queue_.is_empty ())
++      notification_required = 1;
+ 
+     ACE_Notification_Buffer *temp = 0;
+ 
+@@ -753,6 +753,11 @@
+ 
+     if (notify_queue_.enqueue_tail (temp) == -1)
+       return -1;
++
++    if(!notification_required)
++    {
++      return 0;
++    }
+   }
+ #endif /* ACE_HAS_REACTOR_NOTIFICATION_QUEUE */
+ 
+@@ -844,6 +849,7 @@
+                          ACE_LIB_TEXT ("%p\n"),
+                          ACE_LIB_TEXT ("enqueue_head")),
+                         -1);
++
+   }
+ #else
+   // If eh == 0 then another thread is unblocking the
+@@ -886,6 +892,17 @@
+                          ACE_LIB_TEXT ("%p\n"),
+                          ACE_LIB_TEXT ("enqueue_head")),
+                         -1);
++
++    if(!this->notify_queue_.is_empty())
++    {
++      // The queue is not empty, signal the Reactor through the pipe,
++      // to dispatch the rest of the pending messages ASAP.
++      ACE_Notification_Buffer ** next;
++      this->notify_queue_.get(next, 0);
++      (void) ACE::send(
++          this->notification_pipe_.write_handle(),
++          (char *)*next, sizeof(ACE_Notification_Buffer));
++    }
+   }
+ 
+   // If eh == 0 then another thread is unblocking the
+Index: tests/.cvsignore
+===================================================================
+RCS file: /home/src/ACE_wrappers/tests/.cvsignore,v
+retrieving revision 1.2
+diff -u -u -r1.2 .cvsignore
+--- tests/.cvsignore	17 Dec 2002 19:14:42 -0000	1.2
++++ tests/.cvsignore	14 May 2003 19:53:48 -0000
+@@ -121,3 +121,4 @@
+ Upgradable_RW_Test
+ Vector_Test
+ XtReactor_Test
++Bug_1268_Regression_Test
+Index: tests/Makefile
+===================================================================
+RCS file: /home/src/ACE_wrappers/tests/Makefile,v
+retrieving revision 1.1.1.6
+diff -u -u -r1.1.1.6 Makefile
+--- tests/Makefile	13 Dec 2002 14:34:25 -0000	1.1.1.6
++++ tests/Makefile	14 May 2003 19:53:48 -0000
+@@ -18,6 +18,7 @@
+         Barrier_Test \
+         Basic_Types_Test \
+ 	Bound_Ptr_Test \
++	Bug_1268_Regression_Test \
+         Buffer_Stream_Test \
+         Cache_Map_Manager_Test \
+         Cached_Accept_Conn_Test \
+Index: tests/run_test.lst
+===================================================================
+RCS file: /home/src/ACE_wrappers/tests/run_test.lst,v
+retrieving revision 1.1.1.5
+diff -u -u -r1.1.1.5 run_test.lst
+--- tests/run_test.lst	13 Dec 2002 14:34:26 -0000	1.1.1.5
++++ tests/run_test.lst	14 May 2003 19:53:48 -0000
+@@ -23,6 +23,7 @@
+ Basic_Types_Test
+ Bound_Ptr_Test
+ Buffer_Stream_Test
++Bug_1268_Regression_Test
+ Cache_Map_Manager_Test
+ Cached_Conn_Test: !LynxOS !VxWorks
+ Cached_Accept_Conn_Test: !VxWorks
