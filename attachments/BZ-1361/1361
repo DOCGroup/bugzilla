@@ -1,0 +1,85 @@
+Index: Event_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Event_Handler.h,v
+retrieving revision 4.47
+diff -u -r4.47 Event_Handler.h
+--- Event_Handler.h	2 Jul 2002 19:56:48 -0000	4.47
++++ Event_Handler.h	12 Nov 2002 12:46:34 -0000
+@@ -132,7 +132,12 @@
+ 
+   enum
+     {
++      /// The handler is not resumed at all. Could lead to deadlock..
++      ACE_EVENT_HANDLER_NOT_RESUMED = -1,
++      /// The reactor takes responsibility of resuming the handler and
++      /// is the default
+       ACE_REACTOR_RESUMES_HANDLER = 0,
++      /// The application takes responsibility of resuming the handler
+       ACE_APPLICATION_RESUMES_HANDLER
+     };
+   /* Called to figure out whether the handler needs to resumed by the
+Index: TP_Reactor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/TP_Reactor.cpp,v
+retrieving revision 4.57
+diff -u -r4.57 TP_Reactor.cpp
+--- TP_Reactor.cpp	26 Sep 2002 18:56:42 -0000	4.57
++++ TP_Reactor.cpp	12 Nov 2002 12:46:43 -0000
+@@ -562,7 +562,7 @@
+   if (this->dispatch_socket_event (dispatch_info) == 0)
+     ++result;                // Dispatched an event
+ 
+-  int flag = 0;
++  int flag = ACE_Event_Handler::ACE_EVENT_HANDLER_NOT_RESUMED;
+ 
+   // Acquire the token since we want to access the handler
+   // repository. The call to find () does not hold a lock and hence
+Index: TAO/tao/Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Connection_Handler.cpp,v
+retrieving revision 1.25
+diff -u -r1.25 Connection_Handler.cpp
+--- TAO/tao/Connection_Handler.cpp	10 Nov 2002 14:26:34 -0000	1.25
++++ TAO/tao/Connection_Handler.cpp	12 Nov 2002 12:47:43 -0000
+@@ -188,6 +188,20 @@
+   }
+ 
+   ACE_ASSERT(this->reference_count_ == 0);
++
++  // Close the socket, this is the last thread and no more threads
++  // will use references to this.
++  int r = this->release_os_resources ();
++  if (r == -1 && TAO_debug_level)
++      {
++        ACE_ERROR ((LM_ERROR,
++                    "TAO (%P|%t) - Connection_Handler[%d]::"
++                    "close_connection, release_os_resources() failed %p\n"));
++      }
++
++  // @@ NOTE: Need to assert that the handle is invalid. Not sure how,
++  // though
++  // ACE_ASSERT(eh->get_handle() == ACE_INVALID_HANDLE);
+   delete this;
+ 
+   return 0;
+@@ -447,20 +461,7 @@
+     //    find out if a handle is registered...
+     this->transport ()->wait_strategy ()->is_registered (0);
+ 
+-    // Close the socket, implicitly this makes:
+-    //   get_handle() == ACE_INVALID_HANDLE
+-    // At this point any further calls to handle_close() or
+-    // close_connection() become no-ops
+-    r = this->release_os_resources ();
+-    if (r == -1 && TAO_debug_level)
+-      {
+-        ACE_ERROR ((LM_ERROR,
+-                    "TAO (%P|%t) - Connection_Handler[%d]::"
+-                    "close_connection, release_os_resources() failed %p\n",
+-                    id, ""));
+-      }
+ 
+-    ACE_ASSERT(eh->get_handle() == ACE_INVALID_HANDLE);
+   }
+ 
+   ACE_ASSERT(this->transport () != 0);
