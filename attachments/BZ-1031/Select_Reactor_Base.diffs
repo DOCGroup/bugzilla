@@ -1,0 +1,63 @@
+*** old\Select_Reactor_Base.cpp Thu Nov  8 13:26:58 2001
+--- new\Select_Reactor_Base.cpp Thu Nov  8 13:29:52 2001
+***************
+*** 890,912 ****
+--- 890,917 ----
+            result = buffer.eh_->handle_output (ACE_INVALID_HANDLE);
+            break;
+          case ACE_Event_Handler::EXCEPT_MASK:
+            result = buffer.eh_->handle_exception (ACE_INVALID_HANDLE);
+            break;
+          default:
+            // Should we bail out if we get an invalid mask?
+            ACE_ERROR ((LM_ERROR, ACE_LIB_TEXT ("invalid mask = %d\n"), buffer.mask_));
+          }
+        if (result == -1)
++         {
+            buffer.eh_->handle_close (ACE_INVALID_HANDLE,
+                                      ACE_Event_Handler::EXCEPT_MASK);
++           // handle_close will have released the reference on the event handler,
++           // so we don't do so explicitly in this case.
++           return 1;
+          }
++     }
+  #else
+    // If eh == 0 then another thread is unblocking the
+    // <ACE_Select_Reactor> to update the <ACE_Select_Reactor>'s
+    // internal structures.  Otherwise, we need to dispatch the
+    // appropriate handle_* method on the <ACE_Event_Handler>
+    // pointer we've been passed.
+    if (buffer.eh_ != 0)
+      {
+        switch (buffer.mask_)
+          {
+***************
+*** 926,947 ****
+--- 931,957 ----
+          case ACE_Event_Handler::GROUP_QOS_MASK:
+            result = buffer.eh_->handle_group_qos (ACE_INVALID_HANDLE);
+            break;
+          default:
+            // Should we bail out if we get an invalid mask?
+            ACE_ERROR ((LM_ERROR,
+                        ACE_LIB_TEXT ("invalid mask = %d\n"),
+                        buffer.mask_));
+          }
+        if (result == -1)
++         {
+            buffer.eh_->handle_close (ACE_INVALID_HANDLE,
+                                      ACE_Event_Handler::EXCEPT_MASK);
++           // handle_close will have released the reference on the event handler,
++           // so we don't do so explicitly in this case.
++           return 1;
++         }
+      }
+  
+  #endif /* ACE_HAS_REACTOR_NOTIFICATION_QUEUE */
+  
+    // Now that the callback to the event handler is done, we can release the reference
+    // that we obtained when we posted the notification event.
+    ACE_Event_Handler::remove_ref (buffer.eh_);
+  
+    return 1;
+  }
