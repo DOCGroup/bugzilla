@@ -1,0 +1,37 @@
+*** l:ORB.cpp	Fri Sep 10 13:49:33 1999
+--- ORB.cpp	Wed Oct 06 14:18:05 1999
+***************
+*** 822,835 ****
+      this->orb_core_->orb_params ()->ior_lookup_table ();
+  
+    ACE_CString ior;
+    ACE_CString object_id ((const char *) name);
+  
+    // Is the service name in the IOR Table.
+    if (table->find_ior (object_id, ior) == 0)
+-     return this->string_to_object (ior.c_str (), ACE_TRY_ENV);
+-   if (this->lookup_table_.find_ior (object_id, ior) == 0)
+      return this->string_to_object (ior.c_str (), ACE_TRY_ENV);
+    else
+      {
+        // Get the list of initial reference prefixes specified through
+        // -ORBDefaultInitRef.
+--- 822,839 ----
+      this->orb_core_->orb_params ()->ior_lookup_table ();
+  
+    ACE_CString ior;
+    ACE_CString object_id ((const char *) name);
+  
++   // First attempt to resolve the IOR within the ORB's lookup
++   // table. If not found, proceed to check IORs set with 
++   // -ORBInitRef
++   if (this->lookup_table_.find_ior (object_id, ior) == 0)
++     return this->string_to_object (ior.c_str (), ACE_TRY_ENV);
++ 
+    // Is the service name in the IOR Table.
+    if (table->find_ior (object_id, ior) == 0)
+      return this->string_to_object (ior.c_str (), ACE_TRY_ENV);
+    else
+      {
+        // Get the list of initial reference prefixes specified through
+        // -ORBDefaultInitRef.
