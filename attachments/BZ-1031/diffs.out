@@ -1,0 +1,504 @@
+
+C:\refcount>diff -b -C 10 orig\Event_Handler.h patched/Event_Handler.h 
+*** orig\Event_Handler.h Sat Sep 22 15:20:14 2001
+--- patched/Event_Handler.h Thu Oct 25 17:13:04 2001
+***************
+*** 8,27 ****
+--- 8,28 ----
+   *
+   *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+   */
+  //=============================================================================
+  
+  #ifndef ACE_EVENT_HANDLER_H
+  #define ACE_EVENT_HANDLER_H
+  #include "ace/pre.h"
+  
+  #include "ace/ACE.h"
++ #include "ace/Synch_T.h"
+  
+  #if !defined (ACE_LACKS_PRAGMA_ONCE)
+  # pragma once
+  #endif /* ACE_LACKS_PRAGMA_ONCE */
+  
+  // Forward declaration.
+  class ACE_Message_Block;
+  class ACE_Reactor;
+  class ACE_Thread_Manager;
+  class ACE_Process;
+***************
+*** 134,153 ****
+--- 135,158 ----
+    /// themseleves.
+    virtual int resume_handler (void);
+  
+    virtual int handle_qos (ACE_HANDLE = ACE_INVALID_HANDLE);
+    virtual int handle_group_qos (ACE_HANDLE = ACE_INVALID_HANDLE);
+  
+    // = Accessors to set/get the various event demultiplexors.
+    virtual void reactor (ACE_Reactor *reactor);
+    virtual ACE_Reactor *reactor (void) const;
+  
++   // Reference counting methods.
++   static void add_ref (ACE_Event_Handler* h);
++   static void remove_ref (ACE_Event_Handler* h);
++ 
+  #if !defined (ACE_HAS_WINCE)
+    /**
+     * Used to read from non-socket ACE_HANDLEs in our own thread to
+     * work around Win32 limitations that don't allow us to <select> on
+     * non-sockets (such as ACE_STDIN).  This is commonly used in
+     * situations where the Reactor is used to demultiplex read events
+     * on ACE_STDIN on UNIX.  Note that <event_handler> must be a
+     * subclass of <ACE_Event_Handler>.  If the <get_handle> method of
+     * this event handler returns <ACE_INVALID_HANDLE> we default to
+     * reading from ACE_STDIN.
+***************
+*** 174,193 ****
+--- 179,202 ----
+    ACE_Event_Handler (ACE_Reactor * = 0,
+                       int priority = ACE_Event_Handler::LO_PRIORITY);
+  
+  private:
+  
+    /// Priority of this Event_Handler.
+    int priority_;
+  
+    // = Pointers to the various event demultiplexors.
+    ACE_Reactor *reactor_;
++ 
++   int ref_count_;
++   ACE_SYNCH_MUTEX ref_count_mutex_;
++ 
+  };
+  
+  /**
+   * @class ACE_Notification_Buffer
+   *
+   * @brief Simple wrapper for passing <ACE_Event_Handler *>s and
+   * <ACE_Reactor_Mask>s between threads.
+   */
+  class ACE_Export ACE_Notification_Buffer
+  {
+
+C:\refcount>diff -b -C 10 orig\Event_Handler.cpp patched/Event_Handler.cpp 
+*** orig\Event_Handler.cpp Thu May 24 08:35:04 2001
+--- patched/Event_Handler.cpp Thu Oct 25 17:13:04 2001
+***************
+*** 12,32 ****
+  #endif /* __ACE_INLINE__ */
+  
+  ACE_RCSID(ace, Event_Handler, "Event_Handler.cpp,v 4.19 2001/05/24 15:35:04 bala Exp")
+  
+  // Implement conceptually abstract virtual functions in the base class
+  // so derived classes don't have to implement unused ones.
+  
+  ACE_Event_Handler::ACE_Event_Handler (ACE_Reactor *r,
+                                        int p)
+    : priority_ (p),
+!     reactor_ (r)
+  {
+    // ACE_TRACE ("ACE_Event_Handler::ACE_Event_Handler");
+  }
+  
+  ACE_Event_Handler::~ACE_Event_Handler (void)
+  {
+    // ACE_TRACE ("ACE_Event_Handler::~ACE_Event_Handler");
+    if (this->reactor_ != 0)
+      {
+        ACE_Errno_Guard guard (errno);     // purge may get ENOTSUP
+--- 12,33 ----
+  #endif /* __ACE_INLINE__ */
+  
+  ACE_RCSID(ace, Event_Handler, "Event_Handler.cpp,v 4.19 2001/05/24 15:35:04 bala Exp")
+  
+  // Implement conceptually abstract virtual functions in the base class
+  // so derived classes don't have to implement unused ones.
+  
+  ACE_Event_Handler::ACE_Event_Handler (ACE_Reactor *r,
+                                        int p)
+    : priority_ (p),
+!     reactor_ (r),
+!     ref_count_ (1)
+  {
+    // ACE_TRACE ("ACE_Event_Handler::ACE_Event_Handler");
+  }
+  
+  ACE_Event_Handler::~ACE_Event_Handler (void)
+  {
+    // ACE_TRACE ("ACE_Event_Handler::~ACE_Event_Handler");
+    if (this->reactor_ != 0)
+      {
+        ACE_Errno_Guard guard (errno);     // purge may get ENOTSUP
+***************
+*** 149,168 ****
+--- 150,200 ----
+  {
+    ACE_TRACE ("ACE_Event_Handler::handle_qos");
+    return -1;
+  }
+  
+  int
+  ACE_Event_Handler::handle_group_qos (ACE_HANDLE)
+  {
+    ACE_TRACE ("ACE_Event_Handler::handle_group_qos");
+    return -1;
++ }
++ 
++ void
++ ACE_Event_Handler::add_ref (ACE_Event_Handler* h)
++ {
++   if (h != 0)
++     {
++       int r;
++       {
++         ACE_GUARD (ACE_SYNCH_MUTEX, guard, h->ref_count_mutex_);
++         r = ++h->ref_count_;
++       }
++     }
++ 
++ }
++ 
++ void 
++ ACE_Event_Handler::remove_ref (ACE_Event_Handler* h)
++ {
++   if (h != 0)
++     {
++       int r;
++       {
++         ACE_GUARD (ACE_SYNCH_MUTEX, guard, h->ref_count_mutex_);
++         r = --h->ref_count_;
++       }
++       if (r == 0)
++       {
++         delete h;
++       }
++     }
+  }
+  
+  void
+  ACE_Event_Handler::reactor (ACE_Reactor *reactor)
+  {
+    ACE_TRACE ("ACE_Event_Handler::reactor");
+    this->reactor_ = reactor;
+  }
+  
+  ACE_Reactor *
+
+C:\refcount>diff -b -C 10 orig\TP_Reactor.cpp patched/TP_Reactor.cpp 
+*** orig\TP_Reactor.cpp Mon Oct 29 15:33:24 2001
+--- patched/TP_Reactor.cpp Mon Oct 29 15:40:58 2001
+***************
+*** 4,24 ****
+--- 4,45 ----
+  #include "ace/TP_Reactor.h"
+  #include "ace/Reactor.h"
+  #include "ace/Thread.h"
+  
+  #if !defined (__ACE_INLINE__)
+  #include "ace/TP_Reactor.i"
+  #endif /* __ACE_INLINE__ */
+  
+  ACE_RCSID(ace, TP_Reactor, "$Id: TP_Reactor.cpp,v 4.47 2001/10/29 23:30:42 bala Exp $")
+  
++ // Event_Handler_Pin - a wrapper for automatic releasing of ACE_Event_Handler references.
++ class Event_Handler_Pin
++   {
++   public:
++     Event_Handler_Pin (ACE_Event_Handler* eh = 0) 
++       : eh_( eh ) 
++       {
++         ACE_Event_Handler::add_ref( eh_ );
++       }
++     ~Event_Handler_Pin() 
++       {
++         ACE_Event_Handler::remove_ref( eh_ );
++       }
++     void pin( ACE_Event_Handler* eh )
++       {
++         eh_ = eh;
++       }
++   private:
++     ACE_Event_Handler* eh_;
++   };
+  
++ 
+  ACE_ALLOC_HOOK_DEFINE (ACE_TP_Reactor)
+  
+  int
+  ACE_TP_Token_Guard::grab_token (ACE_Time_Value *max_wait_time)
+  {
+    ACE_TRACE ("ACE_TP_Token_Guard::grab_token");
+  
+    // The order of these events is very subtle, modify with care.
+  
+    // Try to grab the lock.  If someone if already there, don't wake
+***************
+*** 515,534 ****
+--- 536,558 ----
+  ACE_TP_Reactor::handle_socket_events (int &event_count,
+                                        ACE_TP_Token_Guard &guard)
+  {
+  
+    // We got the lock, lets handle some events.  Note: this method will
+    // *not* dispatch any I/O handlers.  It will dispatch signals,
+    // timeouts, and notifications.
+    ACE_EH_Dispatch_Info dispatch_info;
+  
+    this->get_socket_event_info (dispatch_info);
++ 
++   // Make sure the event handler remains valid until the callback is complete.
++   Event_Handler_Pin eh_pin (dispatch_info.event_handler_);
+  
+    // If there is any event handler that is ready to be dispatched, the
+    // dispatch information is recorded in dispatch_info.
+    if (dispatch_info.dispatch ())
+      {
+        // Suspend the handler so that other threads don't start
+        // dispatching it.
+        // NOTE: This check was performed in older versions of the
+        // TP_Reactor. Looks like it is a waste..
+        if (dispatch_info.event_handler_ != this->notify_handler_)
+
+C:\refcount>diff -b -C 10 orig\IIOP_Connection_Handler.cpp patched/IIOP_Connection_Handler.cpp 
+*** orig\IIOP_Connection_Handler.cpp Mon Oct  1 05:28:56 2001
+--- patched/IIOP_Connection_Handler.cpp Mon Oct 29 17:18:42 2001
+***************
+*** 48,67 ****
+--- 48,75 ----
+            TAO_IIOP_Transport (this, orb_core, flag));
+  
+    // store this pointer (indirectly increment ref count)
+    this->transport(specific_transport);
+    TAO_Transport::release (specific_transport);
+  }
+  
+  
+  TAO_IIOP_Connection_Handler::~TAO_IIOP_Connection_Handler (void)
+  {
++   // not sure if this handle check is required
++   if (this->get_handle () != ACE_INVALID_HANDLE)
++     {
++       // Signal the transport that we will no longer have
++       // a reference to it.  This will eventually call
++       // TAO_Transport::release ().
++       this->transport (0);
++     }
+  }
+  
+  int
+  TAO_IIOP_Connection_Handler::open (void*)
+  {
+    if (this->set_socket_option (this->peer (),
+                                 this->tcp_properties_->send_buffer_size,
+                                 this->tcp_properties_->recv_buffer_size) == -1)
+      return -1;
+  
+***************
+*** 196,221 ****
+    //    in turn take appropiate action (such as sending exceptions to
+    //    all waiting reply handlers).
+    if (TAO_debug_level)
+    ACE_DEBUG  ((LM_DEBUG,
+                 ACE_TEXT ("TAO (%P|%t) ")
+                 ACE_TEXT ("IIOP_Connection_Handler::handle_close ")
+                 ACE_TEXT ("(%d, %d)\n"),
+                 handle,
+                 rm));
+  
+!   long upcalls = this->decr_pending_upcalls ();
+  
+-   ACE_ASSERT (upcalls >= 0);
+- 
+-   // If the upcall count is zero start the cleanup.
+-   if (upcalls == 0)
+      this->handle_close_i ();
+  
+    return 0;
+  }
+  
+  
+  void
+  TAO_IIOP_Connection_Handler::handle_close_i (void)
+  {
+    if (TAO_debug_level)
+--- 204,230 ----
+    //    in turn take appropiate action (such as sending exceptions to
+    //    all waiting reply handlers).
+    if (TAO_debug_level)
+    ACE_DEBUG  ((LM_DEBUG,
+                 ACE_TEXT ("TAO (%P|%t) ")
+                 ACE_TEXT ("IIOP_Connection_Handler::handle_close ")
+                 ACE_TEXT ("(%d, %d)\n"),
+                 handle,
+                 rm));
+  
+!   // pending_upcalls has been replaced by ACE_Event_Handler ref counting.
+!   // long upcalls = this->decr_pending_upcalls ();
+!   // ACE_ASSERT (upcalls >= 0);
+!   // // If the upcall count is zero start the cleanup.
+!   // if (upcalls == 0)
+!   //   this->handle_close_i ();
+  
+    this->handle_close_i ();
+  
+    return 0;
+  }
+  
+  
+  void
+  TAO_IIOP_Connection_Handler::handle_close_i (void)
+  {
+    if (TAO_debug_level)
+***************
+*** 229,263 ****
+      {
+        // Make sure there are no timers.
+        this->reactor ()->cancel_timer (this);
+  
+        // Set the flag to indicate that it is no longer registered with
+        // the reactor, so that it isn't included in the set that is
+        // passed to the reactor on ORB destruction.
+        this->transport ()->wait_strategy ()->is_registered (0);
+      }
+  
+    // Close the handle..
+    if (this->get_handle () != ACE_INVALID_HANDLE)
+      {
+        // Remove the entry as it is invalid
+        this->transport ()->purge_entry ();
+- 
+-       // Signal the transport that we will no longer have
+-       // a reference to it.  This will eventually call
+-       // TAO_Transport::release ().
+-       this->transport (0);
+      }
+! 
+!   // Follow usual Reactor-style lifecycle semantics and commit
+!   // suicide.
+!   this->destroy ();
+  }
+  
+  
+  
+  int
+  TAO_IIOP_Connection_Handler::resume_handler (void)
+  {
+    return TAO_RESUMES_CONNECTION_HANDLER;
+  }
+  
+--- 238,265 ----
+      {
+        // Make sure there are no timers.
+        this->reactor ()->cancel_timer (this);
+  
+        // Set the flag to indicate that it is no longer registered with
+        // the reactor, so that it isn't included in the set that is
+        // passed to the reactor on ORB destruction.
+        this->transport ()->wait_strategy ()->is_registered (0);
+      }
+  
++ 
+    // Close the handle..
+    if (this->get_handle () != ACE_INVALID_HANDLE)
+      {
+        // Remove the entry as it is invalid
+        this->transport ()->purge_entry ();
+      }
+!   TAO_IIOP_Connection_Handler::remove_ref (this);
+  }
+  
+  
+  
+  int
+  TAO_IIOP_Connection_Handler::resume_handler (void)
+  {
+    return TAO_RESUMES_CONNECTION_HANDLER;
+  }
+  
+***************
+*** 334,375 ****
+      }
+  
+    return 0;
+  }
+  
+  
+  int
+  TAO_IIOP_Connection_Handler::handle_input (ACE_HANDLE)
+  {
+    // Increase the reference count on the upcall that have passed us.
+!   long upcalls = this->incr_pending_upcalls ();
+  
+    TAO_Resume_Handle  resume_handle (this->orb_core (),
+                                      this->get_handle ());
+  
+    int retval = this->transport ()->handle_input_i (resume_handle);
+  
+    // The upcall is done. Bump down the reference count
+!   upcalls = this->decr_pending_upcalls ();
+  
+!   ACE_ASSERT (upcalls >= 0);
+! 
+!   if (upcalls == 0)
+!     {
+!       this->handle_close_i ();
+! 
+!       // As we have already performed the handle closing we dont want
+!       // to return a  -1. Doing so would make the reactor call
+!       // handle_close () which could be harmful.
+!       retval = 0;
+!     }
+! 
+  
+    if (retval == -1)
+      {
+        // This is really a odd case. We could have a race condition if
+        // we dont do this. Looks like this what happens
+        // - imagine we have more than 1 server threads
+        // - The server has got more than one connection from the
+        //   clients
+        // - The clients make requests and they start dissappearing.
+        // - The connections start getting closed
+--- 336,376 ----
+      }
+  
+    return 0;
+  }
+  
+  
+  int
+  TAO_IIOP_Connection_Handler::handle_input (ACE_HANDLE)
+  {
+    // Increase the reference count on the upcall that have passed us.
+!   // long upcalls = this->incr_pending_upcalls ();
+  
+    TAO_Resume_Handle  resume_handle (this->orb_core (),
+                                      this->get_handle ());
+  
+    int retval = this->transport ()->handle_input_i (resume_handle);
+  
+    // The upcall is done. Bump down the reference count
+!   // upcalls = this->decr_pending_upcalls ();
+  
+!   // pending_upcalls has been replaced by ACE_Event_Handler ref counting.
+!   // ACE_ASSERT (upcalls >= 0);
+!   // if (upcalls == 0)
+!   //   {
+!   //     this->handle_close_i ();
+!   //
+!   //     // As we have already performed the handle closing we dont want
+!   //     // to return a  -1. Doing so would make the reactor call
+!   //     // handle_close () which could be harmful.
+!   //     retval = 0;
+!   //   }
+  
+    if (retval == -1)
+      {
+        // This is really a odd case. We could have a race condition if
+        // we dont do this. Looks like this what happens
+        // - imagine we have more than 1 server threads
+        // - The server has got more than one connection from the
+        //   clients
+        // - The clients make requests and they start dissappearing.
+        // - The connections start getting closed
