@@ -1,0 +1,89 @@
+4008,4095d4007
+< /*ACE_INLINE*/ char *
+< ACE_OS::strenvdup (const char *str)
+< {
+< #if defined (ACE_HAS_WINCE)
+<      // WinCE doesn't have environment variables so we just skip it.
+<   return ACE_OS::strdup (str);
+< #else
+<   char *temp_beg = 0;
+< 
+<   const char* pc = ACE_OS::strchr (str, '$');
+<   if (pc) {
+<     const char *prev_pc = str;
+<     size_t len = strlen (str)+128;
+<     char *temp  = reinterpret_cast<char*> (ACE_OS::malloc (len));
+<     temp_beg = temp;
+<     char *temp_end = temp_beg+len-1;
+<     for (;;) {
+<       char *ev = 0;
+<       size_t ev_len = 0;
+<       const char* next_pc = pc;
+<       if (*pc == '$') {
+< 	const char* ev_beg = pc+1;
+< 	if (pc[1] == '(') {
+< 	  const char* ev_end = ACE_OS::strchr (pc+1, ')');
+< 	  size_t ev_len2 = ACE_OS::strcspn (pc+1, "$ :/\\@#");
+< 	  if (ev_end && (ev_len2 == 0 || (pc+ev_len2 >= ev_end))) {
+< 	    ev_len = (ev_end - pc)-2;
+< 	    next_pc = ev_end+1;
+< 	    ev_beg = pc+2;
+< 	  }
+< 	  else {
+< 	    pc += 2;
+< 	    next_pc = pc;
+< 	  }
+< 	}
+< 	else {
+< 	  ev_len = ACE_OS::strcspn (pc+1, "$ :/\\@#");
+< 	  if (ev_len > 0)
+< 	    next_pc = pc+1+ev_len;
+< 	  else {
+< 	    pc++;
+< 	    next_pc = pc;
+< 	  }
+< 	}
+< 	if (ev_len > 0) {
+< 	  char* evn = reinterpret_cast<char*> (ACE_OS::malloc (ev_len+1));
+< 	  ACE_OS::strncpy (evn, ev_beg, ev_len);
+< 	  evn[ev_len] = 0;
+< 	  if ((ev = ACE_OS::getenv (evn)) == 0)
+< 	    ev_len = 0;
+< 	  else
+< 	    ev_len = strlen (ev);
+< 	  ACE_OS::free (evn);
+< 	}
+<       }
+<       if (temp+(pc-prev_pc)+ev_len >= temp_end) {
+< 	size_t len = (temp_end-temp_beg)+ev_len+128;
+< 	char* temp_s = reinterpret_cast<char*> (ACE_OS::malloc (len));
+< 	if (temp > temp_beg)
+< 	  ACE_OS::memcpy (temp_s, temp_beg, temp-temp_beg);
+< 	temp = temp_s + (temp-temp_beg);
+< 	ACE_OS::free (temp_beg);
+< 	temp_end = temp_s + len-1;
+< 	temp_beg = temp_s;
+<       }
+<       if (pc > prev_pc) {
+< 	ACE_OS::strncat (temp, prev_pc, pc-prev_pc);
+< 	temp += pc-prev_pc;
+<       }
+<       if (ev_len > 0) {
+< 	ACE_OS::strncat (temp, ev, ev_len);
+< 	temp += ev_len;
+<       }
+<       if (*pc == 0)
+< 	break;
+<       prev_pc = next_pc;
+<       if ((pc = ACE_OS::strchr (prev_pc, '$')) == 0)
+< 	pc = prev_pc + strlen (prev_pc);
+<     }
+<     *temp = 0;
+<   }
+<   if (temp_beg)
+<     return temp_beg;
+<   else
+<     return ACE_OS::strdup (str);
+< #endif /* ACE_HAS_WINCE */
+< }
+< 
