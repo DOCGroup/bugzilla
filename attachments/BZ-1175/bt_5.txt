@@ -1,0 +1,15 @@
+#0  0x40325584 in __libc_write () from /lib/i686/libc.so.6
+#1  0x401cd5f8 in __DTOR_END__ () from /lib/i686/libpthread.so.0
+#2  0x400b35dd in ACE::send (handle=9, buf=0x409808e4, n=8, timeout=0x0) at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/ACE.i:212
+#3  0x400ebd69 in ACE_Select_Reactor_Notify::notify (this=0x8071a68, eh=0xbfffe7b0, mask=4, timeout=0x0) at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/Pipe.i:22
+#4  0x0805d054 in ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::notify (this=0x80712e0, eh=0xbfffe7b0, mask=4, timeout=0x0)
+    at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/Select_Reactor_T.cpp:261
+#5  0x4013ef2a in ACE_Reactor::notify (this=0x8078b20, event_handler=0xbfffe7b0, mask=4, tv=0x0) at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/Reactor.i:526
+#6  0x08054326 in Supplier_Task::perform_notifications (this=0xbfffe7b0, notifications=-1) at Reactor_Notify_Test.cpp:187
+#7  0x080545a3 in Supplier_Task::svc (this=0xbfffe7b0) at Reactor_Notify_Test.cpp:219
+#8  0x401189ee in ACE_Task_Base::svc_run (args=0xbfffe7b0) at Task.cpp:203
+#9  0x400e11a2 in ACE_Thread_Adapter::invoke_i (this=0x807c640) at Thread_Adapter.cpp:150
+#10 0x400e0fb3 in ACE_Thread_Adapter::invoke (this=0x807c640) at Thread_Adapter.cpp:93
+#11 0x400b05a4 in ace_thread_adapter (args=0x807c640) at Base_Thread_Adapter.cpp:121
+#12 0x401bfb9c in pthread_start_thread (arg=0x40980be0) at manager.c:274
+#13 0x401bfc7f in pthread_start_thread_event (arg=0x40980be0) at manager.c:298
