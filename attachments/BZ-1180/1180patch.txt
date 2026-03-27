@@ -1,0 +1,161 @@
+Hi,
+
+Finally I got some time to look on my old bug report 1180.
+To resolve the bug, there is need of ACE_SSL_SOCK_Stream::close
+function with timeout parameter to be able finish EWOULDBLOCK
+error within function. 
+
+My version of this function is appended (inspired by ssl_accept 
+and ssl_connect functions of ACE_SSL_Acceptor/Connector)
+
+there are still 3 qustion open
+
+1. Should really function always return -1 as close(void) does ??
+2. Do we still need calling this->set_handle (ACE_INVALID_HANDLE); ??
+3. if timeout occurs, we should probably call SSL_clear 
+
+and then calling of ACE_SSL_SOCK_Stream::close() should be replaced 
+with ACE_SSL_SOCK_Stream::close(timeout) in connector/reactor
+
+
+ASYS_INLINE int
+ACE_SSL_SOCK_Stream::close (const ACE_Time_Value *timeout)
+{
+  ACE_TRACE ("ACE_SSL_SOCK_Stream::close");
+
+  if (this->ssl_ == 0 || this->get_handle () == ACE_INVALID_HANDLE)
+    return 0;  // SSL_SOCK_Stream was never opened.
+
+  ACE_HANDLE handle = this->get_handle ();
+  ACE_Time_Value time_copy;
+  
+  // Take into account the time between each select() call below.
+  ACE_Countdown_Time countdown (&time_copy);
+
+  int reset_blocking_mode = 0;
+  if (timeout != 0)
+    {
+      reset_blocking_mode = ACE_BIT_DISABLED (ACE::get_flags (handle),
+                                              ACE_NONBLOCK);
+          // Set the handle into non-blocking mode if it's not already
+          // in it.
+          if (reset_blocking_mode
+              && ACE::set_flags (handle,
+                                 ACE_NONBLOCK) == -1)
+            return -1;
+      time_copy += (*timeout); 
+    }
+
+  countdown.start ();
+
+  int status;
+  do
+    {
+
+      // These handle sets are used to set up for whatever SSL_accept
+      // says it wants next. They're reset on each pass around the loop.
+      ACE_Handle_Set rd_handle;
+      ACE_Handle_Set wr_handle;
+
+      // SSL_shutdown() returns 1 on successful shutdown of the SSL
+      // connection, not 0.
+      status = ::SSL_shutdown (this->ssl_);
+  
+      switch (::SSL_get_error (this->ssl_, status))
+        {
+        case SSL_ERROR_NONE:
+          status = 0;               // To tell caller about success
+          break;                    // Done
+
+        case SSL_ERROR_WANT_WRITE:
+          wr_handle.set_bit (handle);
+          status = 1;               // Wait for more activity
+          break;
+
+        case SSL_ERROR_WANT_READ:
+          rd_handle.set_bit (handle);
+          status = 1;               // Wait for more activity
+          break;
+
+        case SSL_ERROR_SYSCALL:
+          // On some platforms (e.g. MS Windows) OpenSSL does not
+          // store the last error in errno so explicitly do so.
+
+          // Explicitly check for EWOULDBLOCK since it doesn't get
+          // converted to an SSL_ERROR_WANT_{READ,WRITE} on some
+          // platforms. If SSL_accept failed outright, though, don't
+          // bother checking more. This can happen if the socket gets
+          // closed during the handshake.
+          if (ACE_OS::set_errno_to_last_error () == EWOULDBLOCK &&
+              status == -1)
+            {
+              // Although the SSL_ERROR_WANT_READ/WRITE isn't getting
+              // set correctly, the read/write state should be valid.
+              // Use that to decide what to do.
+              status = 1;               // Wait for more activity
+              if (SSL_want_write (this->ssl_))
+                wr_handle.set_bit (handle);
+              else if (SSL_want_read (this->ssl_))
+                rd_handle.set_bit (handle);
+              else
+                status = -1;            // Doesn't want anything - bail out
+            }
+          else 
+            status = -1;
+          
+          if (status == -1) {
+
+            // Reset the SSL object to allow another connection to be made
+            // using this ACE_SSL_SOCK_Stream instance.  This prevents the
+            // previous SSL session state from being associated with the new
+            // SSL session/connection.
+            (void) ::SSL_clear (this->ssl_);
+            //do we still need this?
+            this->set_handle (ACE_INVALID_HANDLE);
+          }
+          break;
+
+        default:
+          ACE_SSL_Context::report_error ();
+          ACE_Errno_Guard error (errno);   // Save/restore errno
+ 
+          status = -1;
+        }
+
+      if (status == 1)
+        {
+          // Must have at least one handle to wait for at this point.
+          //ACE_ASSERT (rd_handle.num_set() == 1 || wr_handle.num_set () == 1);
+          status = ACE::select (int (handle) + 1,
+                                &rd_handle,
+                                &wr_handle,
+                                0,
+                                &time_copy);
+
+          (void) countdown.update ();
+
+          // 0 is timeout, so we're done.
+          // -1 is error, so we're done.
+          // Could be both handles set (same handle in both masks) so
+          // set to 1.
+          if (status >= 1)
+            status = 1;
+          else                   // Timeout or failure
+            status = -1;
+        }
+    } while (status == 1);
+
+  if (reset_blocking_mode)
+    {
+      ACE_Errno_Guard eguard (errno);
+      ACE::clr_flags (handle, ACE_NONBLOCK);
+    }
+
+  if (status == -1)
+    this->stream_.close ();
+
+  //return -1; ???
+  return (status == -1 ? -1 : 0);
+}
+
+
