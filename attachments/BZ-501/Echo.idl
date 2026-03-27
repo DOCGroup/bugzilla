@@ -1,0 +1,7 @@
+// Echo.idl
+
+
+interface Echo
+{
+  string echo_it(in string echo_me);
+};
