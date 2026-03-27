@@ -1,0 +1,774 @@
+*** ACE_wrappers/ace/Log_Record.cpp	Fri Mar  8 17:44:34 2002
+--- ACE_wrappers/ace/Log_Record.cpp	Sat Aug 17 17:54:52 2002
+***************
+*** 257,263 ****
+  int
+  ACE_Log_Record::print (const ACE_TCHAR *host_name,
+                         u_long verbose_flag,
+!                        ostream &s)
+  {
+    ACE_TCHAR verbose_msg [MAXVERBOSELOGMSGLEN];
+    int result = this->format_msg (host_name, verbose_flag, verbose_msg);
+--- 257,263 ----
+  int
+  ACE_Log_Record::print (const ACE_TCHAR *host_name,
+                         u_long verbose_flag,
+!                        ACE_OSTREAM_TYPE &s)
+  {
+    ACE_TCHAR verbose_msg [MAXVERBOSELOGMSGLEN];
+    int result = this->format_msg (host_name, verbose_flag, verbose_msg);
+*** ACE_wrappers/ace/Log_Record.h	Fri Mar  8 17:44:34 2002
+--- ACE_wrappers/ace/Log_Record.h	Sat Aug 17 17:54:45 2002
+***************
+*** 79,85 ****
+    /// <ostream>.
+    int print (const ACE_TCHAR host_name[],
+               u_long verbose_flag,
+!              ostream &stream);
+  #endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  
+    int format_msg (const ACE_TCHAR host_name[],
+--- 79,85 ----
+    /// <ostream>.
+    int print (const ACE_TCHAR host_name[],
+               u_long verbose_flag,
+!              ACE_OSTREAM_TYPE &stream);
+  #endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  
+    int format_msg (const ACE_TCHAR host_name[],
+*** ACE_wrappers/ace/Logging_Strategy.cpp	Wed Jan  9 23:19:56 2002
+--- ACE_wrappers/ace/Logging_Strategy.cpp	Sat Aug 17 18:07:57 2002
+***************
+*** 288,307 ****
+            if (output_file == 0)
+              return -1;
+  #else
+!           ofstream *output_file = 0;
+            // Create a new ofstream to direct output to the file.
+            if (wipeout_logfile_)
+              ACE_NEW_RETURN 
+                (output_file,
+!                ofstream (ACE_TEXT_ALWAYS_CHAR (this->filename_)),
+                 -1);
+            else
+              ACE_NEW_RETURN 
+                (output_file,
+!                ofstream (ACE_TEXT_ALWAYS_CHAR (this->filename_),
+!                          ios::app | ios::out),
+                 -1);
+!           if (output_file->rdstate () != ios::goodbit)
+              {
+                delete output_file;
+                return -1;
+--- 288,307 ----
+            if (output_file == 0)
+              return -1;
+  #else
+!           ACE_OFSTREAM_TYPE *output_file = 0;
+            // Create a new ofstream to direct output to the file.
+            if (wipeout_logfile_)
+              ACE_NEW_RETURN 
+                (output_file,
+!                ACE_OFSTREAM_TYPE (ACE_TEXT_ALWAYS_CHAR (this->filename_)),
+                 -1);
+            else
+              ACE_NEW_RETURN 
+                (output_file,
+!                ACE_OFSTREAM_TYPE (ACE_TEXT_ALWAYS_CHAR (this->filename_),
+!                          ACE_IOS::app | ACE_IOS::out),
+                 -1);
+!           if (output_file->rdstate () != ACE_IOS::goodbit)
+              {
+                delete output_file;
+                return -1;
+***************
+*** 359,366 ****
+        ACE_OS::fclose (output_file);
+        // We'll call msg_ostream() modifier later.
+  #else
+!       ofstream *output_file = 
+!         (ofstream *) this->log_msg_->msg_ostream ();
+        output_file->close ();
+  #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
+        // Save current logfile to logfile.old analyze if it was set any
+--- 359,366 ----
+        ACE_OS::fclose (output_file);
+        // We'll call msg_ostream() modifier later.
+  #else
+!       ACE_OFSTREAM_TYPE *output_file = 
+!         (ACE_OFSTREAM_TYPE *) this->log_msg_->msg_ostream ();
+        output_file->close ();
+  #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
+        // Save current logfile to logfile.old analyze if it was set any
+***************
+*** 382,388 ****
+                this->log_msg_->msg_ostream (output_file);
+  #else
+                output_file->open (ACE_TEXT_ALWAYS_CHAR (this->filename_),
+!                                  ios::out);
+  #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
+  
+                // Release the lock previously acquired.
+--- 382,388 ----
+                this->log_msg_->msg_ostream (output_file);
+  #else
+                output_file->open (ACE_TEXT_ALWAYS_CHAR (this->filename_),
+!                                  ACE_IOS::out);
+  #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
+  
+                // Release the lock previously acquired.
+***************
+*** 475,481 ****
+        this->log_msg_->msg_ostream (output_file);
+  #else
+        output_file->open (ACE_TEXT_ALWAYS_CHAR (this->filename_),
+!                          ios::out);
+  #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
+  
+        // Release the lock previously acquired.
+--- 475,481 ----
+        this->log_msg_->msg_ostream (output_file);
+  #else
+        output_file->open (ACE_TEXT_ALWAYS_CHAR (this->filename_),
+!                          ACE_IOS::out);
+  #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
+  
+        // Release the lock previously acquired.
+*** ACE_wrappers/ace/OS.h	Sun May 12 12:59:18 2002
+--- ACE_wrappers/ace/OS.h	Sat Aug 17 23:54:56 2002
+***************
+*** 2437,2452 ****
+  #if !defined (ACE_OSTREAM_TYPE)
+  # if defined (ACE_LACKS_IOSTREAM_TOTALLY)
+  #   define ACE_OSTREAM_TYPE FILE
+! # else  /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  #   define ACE_OSTREAM_TYPE ostream
+  # endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  #endif /* ! ACE_OSTREAM_TYPE */
+  
+  #if !defined (ACE_DEFAULT_LOG_STREAM)
+  # if defined (ACE_LACKS_IOSTREAM_TOTALLY)
+  #   define ACE_DEFAULT_LOG_STREAM 0
+! # else  /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+! #   define ACE_DEFAULT_LOG_STREAM (&cerr)
+  # endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  #endif /* ! ACE_DEFAULT_LOG_STREAM */
+  
+--- 2437,2474 ----
+  #if !defined (ACE_OSTREAM_TYPE)
+  # if defined (ACE_LACKS_IOSTREAM_TOTALLY)
+  #   define ACE_OSTREAM_TYPE FILE
+! # elif defined (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
+! #   define ACE_OSTREAM_TYPE std::ostream
+! # else
+  #   define ACE_OSTREAM_TYPE ostream
+  # endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  #endif /* ! ACE_OSTREAM_TYPE */
+  
++ #if !defined (ACE_OFSTREAM_TYPE)
++ # if defined (ACE_LACKS_IOSTREAM_TOTALLY)
++ #   define ACE_OFSTREAM_TYPE FILE
++ # elif defined (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ #   define ACE_OFSTREAM_TYPE std::ofstream
++ # else
++ #   define ACE_OFSTREAM_TYPE ofstream
++ # endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
++ #endif /* ! ACE_OFSTREAM_TYPE */
++ 
++ #if !defined (ACE_IOS)
++ #  if defined (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ #    define ACE_IOS std::ios
++ #  else
++ #    define ACE_IOS ios
++ #  endif /* ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB */
++ #endif /* ! ACE_IOS */
++ 
+  #if !defined (ACE_DEFAULT_LOG_STREAM)
+  # if defined (ACE_LACKS_IOSTREAM_TOTALLY)
+  #   define ACE_DEFAULT_LOG_STREAM 0
+! # elif defined (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
+! #  define ACE_DEFAULT_LOG_STREAM (&std::cerr)
+! # else
+! #  define ACE_DEFAULT_LOG_STREAM (&cerr)
+  # endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  #endif /* ! ACE_DEFAULT_LOG_STREAM */
+  
+*** ACE_wrappers/ace/OS_Log_Msg_Attributes.h	Sat Nov 18 13:03:54 2000
+--- ACE_wrappers/ace/OS_Log_Msg_Attributes.h	Sun Aug 18 00:33:45 2002
+***************
+*** 27,38 ****
+  #if !defined (ACE_OSTREAM_TYPE)
+  # if defined (ACE_LACKS_IOSTREAM_TOTALLY)
+  #   define ACE_OSTREAM_TYPE FILE
+! # else  /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  #   define ACE_OSTREAM_TYPE ostream
+  # endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  #endif /* ! ACE_OSTREAM_TYPE */
+  
+- 
+  #include "ace/OS_Export.h"
+  
+  /// The attributes required by ACE_Log_Msg.
+--- 27,39 ----
+  #if !defined (ACE_OSTREAM_TYPE)
+  # if defined (ACE_LACKS_IOSTREAM_TOTALLY)
+  #   define ACE_OSTREAM_TYPE FILE
+! # elif defined (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
+! #   define ACE_OSTREAM_TYPE std::ostream
+! # else
+  #   define ACE_OSTREAM_TYPE ostream
+  # endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  #endif /* ! ACE_OSTREAM_TYPE */
+  
+  #include "ace/OS_Export.h"
+  
+  /// The attributes required by ACE_Log_Msg.
+*** ACE_wrappers/ace/iosfwd.h	Wed Nov  1 17:17:39 2000
+--- ACE_wrappers/ace/iosfwd.h	Sat Aug 17 22:11:17 2002
+***************
+*** 39,63 ****
+      defined (ACE_HAS_MINIMUM_IOSTREAMH_INCLUSION)
+  #   include /**/ <iosfwd>
+  # endif /* ! ACE_USES_OLD_IOSTREAMS  ||  ACE_HAS_MINIMUM_IOSTREAMH_INCLUSION */
+- 
+- # if defined (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB) && \
+-              (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB != 0)
+- 
+- #   if !defined (ACE_USES_OLD_IOSTREAMS)
+-       // Make these available in the global name space
+-       using std::ios;
+-       using std::streambuf;
+-       using std::istream;
+-       using std::ostream;
+-       using std::iostream;
+-       using std::filebuf;
+-       using std::ifstream;
+-       using std::ofstream;
+-       using std::fstream;
+- #   endif /* ! ACE_USES_OLD_IOSTREAMS */
+- 
+- # endif /* ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB */
+- 
+  #else /* ! ACE_HAS_STANDARD_CPP_LIBRARY */
+  
+    class ios;
+--- 39,44 ----
+*** ACE_wrappers/ace/streams.h	Thu Feb 21 13:16:32 2002
+--- ACE_wrappers/ace/streams.h	Sat Aug 17 22:10:28 2002
+***************
+*** 67,111 ****
+  #     include /**/ <ios>
+  #   endif /* ACE_USES_OLD_IOSTREAMS */
+  
+- #   if defined (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB) && \
+-        (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB != 0)
+- 
+- #     if !defined (ACE_USES_OLD_IOSTREAMS)
+-         // Make these available in the global name space
+-         using std::ios;
+-         using std::streambuf;
+-         using std::istream;
+-         using std::ostream;
+-         using std::iostream;
+-         using std::filebuf;
+-         using std::ifstream;
+-         using std::ofstream;
+-         using std::fstream;
+- 
+-         using std::cin;
+-         using std::cout;
+-         using std::cerr;
+-         using std::clog;
+- 
+-         using std::endl;
+-         using std::ends;
+-         using std::flush;
+- 
+-         using std::ws;
+- 
+-         using std::resetiosflags;
+-         using std::setfill;
+-         using std::setiosflags;
+-         using std::setprecision;
+-         using std::setw;
+- 
+-         using std::dec;
+-         using std::hex;
+-         using std::oct;
+- #     endif /* ! ACE_USES_OLD_IOSTREAMS */
+- 
+- #   endif /* ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB */
+- 
+  #   if defined (_MSC_VER)
+  #     pragma warning(4: 4018 4114 4146 4245)
+  #     pragma warning(4: 4663 4664 4665 4512 4511)
+--- 67,72 ----
+*** ACE_wrappers/examples/ASX/UPIPE_Event_Server/event_server.cpp	Fri Jul 31 18:55:09 1998
+--- ACE_wrappers/examples/ASX/UPIPE_Event_Server/event_server.cpp	Sat Aug 17 22:04:16 2002
+***************
+*** 12,17 ****
+--- 12,21 ----
+  #include "Event_Analyzer.h"
+  #include "Supplier_Router.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(UPIPE_Event_Server, event_server, "event_server.cpp,v 4.15 1998/07/31 22:55:09 gonzo Exp")
+  
+  #if defined (ACE_HAS_THREADS)
+*** ACE_wrappers/examples/Log_Msg/test_log_msg.cpp	Wed Mar  6 16:48:02 2002
+--- ACE_wrappers/examples/Log_Msg/test_log_msg.cpp	Sat Aug 17 22:04:44 2002
+***************
+*** 21,26 ****
+--- 21,30 ----
+  #include "ace/streams.h"
+  #include "ace/Log_Msg.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(Log_Msg, test_log_msg, "test_log_msg.cpp,v 4.18 2002/03/06 21:48:02 nanbor Exp")
+  
+  static void
+*** ACE_wrappers/examples/Log_Msg/test_ostream.cpp	Wed Mar  6 16:48:02 2002
+--- ACE_wrappers/examples/Log_Msg/test_ostream.cpp	Sat Aug 17 22:05:01 2002
+***************
+*** 21,26 ****
+--- 21,30 ----
+  #include "ace/streams.h"
+  #include "ace/Log_Msg.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(Log_Msg, test_ostream, "test_ostream.cpp,v 4.9 2002/03/06 21:48:02 nanbor Exp")
+  
+  int
+*** ACE_wrappers/examples/Logger/Acceptor-server/server_loggerd.cpp	Thu Apr 11 10:49:12 2002
+--- ACE_wrappers/examples/Logger/Acceptor-server/server_loggerd.cpp	Sat Aug 17 22:04:30 2002
+***************
+*** 16,21 ****
+--- 16,25 ----
+  
+  #include "server_loggerd.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(Acceptor_server, server_loggerd, "server_loggerd.cpp,v 4.23 2002/04/11 14:49:12 dhinton Exp")
+  
+  // ----------------------------------------
+*** ACE_wrappers/examples/Reactor/Misc/test_time_value.cpp	Thu Jul  6 11:52:08 2000
+--- ACE_wrappers/examples/Reactor/Misc/test_time_value.cpp	Sat Aug 17 22:05:12 2002
+***************
+*** 4,9 ****
+--- 4,13 ----
+  #include "ace/streams.h"
+  #include "ace/Log_Msg.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(Misc, test_time_value, "test_time_value.cpp,v 4.9 2000/07/06 15:52:08 levine Exp")
+  
+  inline int my_abs (int d) { return d > 0 ? d : -d; }
+*** ACE_wrappers/examples/Shared_Malloc/test_persistence.cpp	Thu Feb  7 16:23:03 2002
+--- ACE_wrappers/examples/Shared_Malloc/test_persistence.cpp	Sat Aug 17 22:05:23 2002
+***************
+*** 9,14 ****
+--- 9,18 ----
+  #include "ace/Malloc.h"
+  #include "ace/streams.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(Shared_Malloc, test_persistence, "test_persistence.cpp,v 4.26 2002/02/07 21:23:03 shuston Exp")
+  
+  typedef ACE_Malloc <ACE_MMAP_MEMORY_POOL, ACE_Null_Mutex> TEST_MALLOC;
+*** ACE_wrappers/examples/System_V_IPC/SV_Message_Queues/MQ_Client.cpp	Thu Dec  7 16:24:24 2000
+--- ACE_wrappers/examples/System_V_IPC/SV_Message_Queues/MQ_Client.cpp	Sat Aug 17 22:05:42 2002
+***************
+*** 4,9 ****
+--- 4,13 ----
+  #include "test.h"
+  #include "ace/streams.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(SV_Message_Queues, MQ_Client, "MQ_Client.cpp,v 4.6 2000/12/07 21:24:24 brunsch Exp")
+  
+  int 
+*** ACE_wrappers/examples/System_V_IPC/SV_Message_Queues/MQ_Server.cpp	Thu Dec  7 16:24:24 2000
+--- ACE_wrappers/examples/System_V_IPC/SV_Message_Queues/MQ_Server.cpp	Sat Aug 17 22:05:31 2002
+***************
+*** 5,10 ****
+--- 5,14 ----
+  #include "ace/streams.h"
+  #include "test.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(SV_Message_Queues, MQ_Server, "MQ_Server.cpp,v 4.10 2000/12/07 21:24:24 brunsch Exp")
+  
+  // Must be global for signal Message...
+*** ACE_wrappers/examples/System_V_IPC/SV_Message_Queues/TMQ_Client.cpp	Thu Dec  7 16:24:24 2000
+--- ACE_wrappers/examples/System_V_IPC/SV_Message_Queues/TMQ_Client.cpp	Sat Aug 17 22:06:02 2002
+***************
+*** 5,10 ****
+--- 5,14 ----
+  #include "ace/Log_Msg.h"
+  #include "test.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(SV_Message_Queues, TMQ_Client, "TMQ_Client.cpp,v 4.8 2000/12/07 21:24:24 brunsch Exp")
+  
+  int
+*** ACE_wrappers/examples/System_V_IPC/SV_Message_Queues/TMQ_Server.cpp	Thu Dec  7 16:24:24 2000
+--- ACE_wrappers/examples/System_V_IPC/SV_Message_Queues/TMQ_Server.cpp	Sat Aug 17 22:05:58 2002
+***************
+*** 7,12 ****
+--- 7,16 ----
+  #include "ace/streams.h"
+  #include "ace/Log_Msg.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(SV_Message_Queues, TMQ_Server, "TMQ_Server.cpp,v 4.12 2000/12/07 21:24:24 brunsch Exp")
+  
+  // Must be global for signal Message...
+*** ACE_wrappers/examples/Threads/task_three.cpp	Wed Mar  6 16:48:03 2002
+--- ACE_wrappers/examples/Threads/task_three.cpp	Sat Aug 17 22:06:12 2002
+***************
+*** 16,21 ****
+--- 16,25 ----
+  #include "ace/Task.h"
+  #include "ace/streams.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(Threads, task_three, "task_three.cpp,v 4.18 2002/03/06 21:48:03 nanbor Exp")
+  
+  #if defined (ACE_HAS_THREADS)
+*** ACE_wrappers/netsvcs/clients/Naming/Dump_Restore/Dump_Restore.cpp	Mon Jun  7 00:13:34 1999
+--- ACE_wrappers/netsvcs/clients/Naming/Dump_Restore/Dump_Restore.cpp	Sat Aug 17 18:57:56 2002
+***************
+*** 447,455 ****
+  void
+  Dump_Restore::dump (void)
+  {
+!   ofstream output_file (dump_filename_);
+  
+!   ostream *orig_stream = ACE_Log_Msg::instance ()->msg_ostream ();
+    ACE_Log_Msg::instance ()->msg_ostream (&output_file);
+    ACE_Log_Msg::instance ()->clr_flags (ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER );
+    ACE_Log_Msg::instance ()->set_flags (ACE_Log_Msg::OSTREAM);
+--- 447,455 ----
+  void
+  Dump_Restore::dump (void)
+  {
+!   ACE_OFSTREAM_TYPE output_file (dump_filename_);
+  
+!   ACE_OSTREAM_TYPE *orig_stream = ACE_Log_Msg::instance ()->msg_ostream ();
+    ACE_Log_Msg::instance ()->msg_ostream (&output_file);
+    ACE_Log_Msg::instance ()->clr_flags (ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER );
+    ACE_Log_Msg::instance ()->set_flags (ACE_Log_Msg::OSTREAM);
+*** ACE_wrappers/netsvcs/lib/Client_Logging_Handler.cpp	Thu Apr 11 18:30:06 2002
+--- ACE_wrappers/netsvcs/lib/Client_Logging_Handler.cpp	Sat Aug 17 18:56:24 2002
+***************
+*** 290,296 ****
+  int
+  ACE_Client_Logging_Handler::send (ACE_Log_Record &log_record)
+  {
+!   ostream *orig_ostream = ACE_Log_Msg::instance ()->msg_ostream ();
+  
+    // This logic must occur before we do the encode() on <log_record>
+    // since otherwise the values of the <log_record> fields will be in
+--- 290,296 ----
+  int
+  ACE_Client_Logging_Handler::send (ACE_Log_Record &log_record)
+  {
+!   ACE_OSTREAM_TYPE *orig_ostream = ACE_Log_Msg::instance ()->msg_ostream ();
+  
+    // This logic must occur before we do the encode() on <log_record>
+    // since otherwise the values of the <log_record> fields will be in
+*** ACE_wrappers/netsvcs/lib/Log_Message_Receiver.cpp	Fri Oct 13 18:54:48 2000
+--- ACE_wrappers/netsvcs/lib/Log_Message_Receiver.cpp	Sat Aug 17 18:57:21 2002
+***************
+*** 28,34 ****
+  template<ACE_SYNCH_DECL> void
+  Static_Log_Message_Receiver<ACE_SYNCH_USE>::log_output (char const *hostname,
+                                                          ACE_Log_Record &record,
+!                                                         ostream *outputfile)
+  {
+    if (outputfile != 0)
+      {
+--- 28,34 ----
+  template<ACE_SYNCH_DECL> void
+  Static_Log_Message_Receiver<ACE_SYNCH_USE>::log_output (char const *hostname,
+                                                          ACE_Log_Record &record,
+!                                                         ACE_OSTREAM_TYPE *outputfile)
+  {
+    if (outputfile != 0)
+      {
+***************
+*** 120,126 ****
+  template<ACE_SYNCH_DECL> void
+  Log_Message_Receiver_Impl<ACE_SYNCH_USE>::log_output (char const *hostname,
+                                                        ACE_Log_Record &record,
+!                                                       ostream *outputfile)
+  {
+    if (outputfile != 0)
+      {
+--- 120,126 ----
+  template<ACE_SYNCH_DECL> void
+  Log_Message_Receiver_Impl<ACE_SYNCH_USE>::log_output (char const *hostname,
+                                                        ACE_Log_Record &record,
+!                                                       ACE_OSTREAM_TYPE *outputfile)
+  {
+    if (outputfile != 0)
+      {
+***************
+*** 164,170 ****
+  template<ACE_SYNCH_DECL> void
+  Log_Message_Receiver<ACE_SYNCH_USE>::log_output(char const *hostname,
+                                                  ACE_Log_Record &record,
+!                                                 ostream *outputfile)
+  {
+    ACE_ASSERT (receiver_impl_ != 0);
+    receiver_impl_->log_output (hostname, record, outputfile);
+--- 164,170 ----
+  template<ACE_SYNCH_DECL> void
+  Log_Message_Receiver<ACE_SYNCH_USE>::log_output(char const *hostname,
+                                                  ACE_Log_Record &record,
+!                                                 ACE_OSTREAM_TYPE *outputfile)
+  {
+    ACE_ASSERT (receiver_impl_ != 0);
+    receiver_impl_->log_output (hostname, record, outputfile);
+*** ACE_wrappers/netsvcs/lib/Log_Message_Receiver.h	Mon Jun  7 01:28:38 1999
+--- ACE_wrappers/netsvcs/lib/Log_Message_Receiver.h	Sat Aug 17 18:58:59 2002
+***************
+*** 105,111 ****
+  
+    static void log_output(const char *hostname,
+                           ACE_Log_Record &record,
+!                          ostream *output);
+    // Prints the log_record to a user specified ostream.
+  };
+  
+--- 105,111 ----
+  
+    static void log_output(const char *hostname,
+                           ACE_Log_Record &record,
+!                          ACE_OSTREAM_TYPE *output);
+    // Prints the log_record to a user specified ostream.
+  };
+  
+***************
+*** 158,164 ****
+  
+    void log_output(const char *hostname,
+                    ACE_Log_Record &record,
+!                   ostream *output);
+  private:
+    ACE_UNIMPLEMENTED_FUNC (void operator= (const Log_Message_Receiver<ACE_SYNCH_USE> &rhs))
+  
+--- 158,164 ----
+  
+    void log_output(const char *hostname,
+                    ACE_Log_Record &record,
+!                   ACE_OSTREAM_TYPE *output);
+  private:
+    ACE_UNIMPLEMENTED_FUNC (void operator= (const Log_Message_Receiver<ACE_SYNCH_USE> &rhs))
+  
+***************
+*** 184,190 ****
+  
+    void log_output(const char *hostname,
+                    ACE_Log_Record &record,
+!                   ostream *output);
+  
+  private:
+    Log_Message_Receiver_Impl (void);
+--- 184,190 ----
+  
+    void log_output(const char *hostname,
+                    ACE_Log_Record &record,
+!                   ACE_OSTREAM_TYPE *output);
+  
+  private:
+    Log_Message_Receiver_Impl (void);
+*** ACE_wrappers/netsvcs/lib/Server_Logging_Handler_T.cpp	Fri Apr 26 16:38:06 2002
+--- ACE_wrappers/netsvcs/lib/Server_Logging_Handler_T.cpp	Sat Aug 17 18:59:24 2002
+***************
+*** 127,133 ****
+                                   ACE_Log_Msg::STDERR))
+                  receiver ().log_record (this->host_name (),
+                                          lp);
+!             ostream *orig_ostream = ACE_Log_Msg::instance ()->msg_ostream ();
+              receiver ().log_output (this->host_name (),
+                                      lp,
+                                      orig_ostream);
+--- 127,133 ----
+                                   ACE_Log_Msg::STDERR))
+                  receiver ().log_record (this->host_name (),
+                                          lp);
+!             ACE_OSTREAM_TYPE *orig_ostream = ACE_Log_Msg::instance ()->msg_ostream ();
+              receiver ().log_output (this->host_name (),
+                                      lp,
+                                      orig_ostream);
+*** ACE_wrappers/tests/CDR_File_Test.cpp	Fri Mar 29 12:36:41 2002
+--- ACE_wrappers/tests/CDR_File_Test.cpp	Sat Aug 17 21:58:03 2002
+***************
+*** 24,29 ****
+--- 24,33 ----
+  #include "ace/Get_Opt.h"
+  #include "test_config.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(tests, CDR_File_Test, "CDR_File_Test.cpp,v 4.23 2002/03/29 17:36:41 spark Exp")
+  
+  #if !defined (ACE_LACKS_IOSTREAM_TOTALLY) | defined (ACE_HAS_WINCE)
+*** ACE_wrappers/tests/Log_Msg_Test.cpp	Thu Apr 11 10:49:12 2002
+--- ACE_wrappers/tests/Log_Msg_Test.cpp	Sat Aug 17 21:57:20 2002
+***************
+*** 27,32 ****
+--- 27,36 ----
+  #include "ace/Log_Record.h"
+  #include "test_config.h"
+  
++ #if defined(ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB)
++ using namespace std;
++ #endif
++ 
+  ACE_RCSID(tests, Log_Msg_Test, "Log_Msg_Test.cpp,v 4.31 2002/04/11 14:49:12 dhinton Exp")
+  
+  static void
+*** ACE_wrappers/tests/test_config.h	Thu May  2 00:08:14 2002
+--- ACE_wrappers/tests/test_config.h	Sat Aug 17 21:53:08 2002
+***************
+*** 150,186 ****
+    ACE_OS::unlink (temp);
+  #endif /* ! VXWORKS */
+  
+- #if defined (ACE_LACKS_IOSTREAM_TOTALLY)
+- #define OFSTREAM FILE
+- #else
+- #define OFSTREAM ofstream
+- #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
+- 
+  class ACE_Test_Output
+  {
+  public:
+    ACE_Test_Output (void);
+    ~ACE_Test_Output (void);
+    int set_output (const ACE_TCHAR *filename, int append = 0);
+!   OFSTREAM *output_file (void);
+    void close (void);
+  
+  private:
+!   OFSTREAM *output_file_;
+  };
+  
+  inline ACE_Test_Output::ACE_Test_Output (void)
+    : output_file_ (0)
+  {
+  #if !defined (ACE_LACKS_IOSTREAM_TOTALLY)
+!   this->output_file_ = new OFSTREAM;
+  #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
+  }
+  
+  inline ACE_Test_Output::~ACE_Test_Output (void)
+  {
+  #if !defined (ACE_LACKS_IOSTREAM_TOTALLY) && !defined (ACE_PSOS)
+!   ACE_LOG_MSG->msg_ostream (&cerr);
+  #endif /* ! ACE_LACKS_IOSTREAM_TOTALLY && ! ACE_PSOS */
+  
+    ACE_LOG_MSG->clr_flags (ACE_Log_Msg::OSTREAM);
+--- 150,180 ----
+    ACE_OS::unlink (temp);
+  #endif /* ! VXWORKS */
+  
+  class ACE_Test_Output
+  {
+  public:
+    ACE_Test_Output (void);
+    ~ACE_Test_Output (void);
+    int set_output (const ACE_TCHAR *filename, int append = 0);
+!   ACE_OFSTREAM_TYPE *output_file (void);
+    void close (void);
+  
+  private:
+!   ACE_OFSTREAM_TYPE *output_file_;
+  };
+  
+  inline ACE_Test_Output::ACE_Test_Output (void)
+    : output_file_ (0)
+  {
+  #if !defined (ACE_LACKS_IOSTREAM_TOTALLY)
+!   this->output_file_ = new ACE_OFSTREAM_TYPE;
+  #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
+  }
+  
+  inline ACE_Test_Output::~ACE_Test_Output (void)
+  {
+  #if !defined (ACE_LACKS_IOSTREAM_TOTALLY) && !defined (ACE_PSOS)
+!   ACE_LOG_MSG->msg_ostream (ACE_DEFAULT_LOG_STREAM);
+  #endif /* ! ACE_LACKS_IOSTREAM_TOTALLY && ! ACE_PSOS */
+  
+    ACE_LOG_MSG->clr_flags (ACE_Log_Msg::OSTREAM);
+***************
+*** 191,197 ****
+  #endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  }
+  
+! inline OFSTREAM *
+  ACE_Test_Output::output_file (void)
+  {
+    return this->output_file_;
+--- 185,191 ----
+  #endif /* ! ACE_LACKS_IOSTREAM_TOTALLY */
+  }
+  
+! inline ACE_OFSTREAM_TYPE *
+  ACE_Test_Output::output_file (void)
+  {
+    return this->output_file_;
+***************
+*** 252,258 ****
+  
+  # if !defined (ACE_LACKS_IOSTREAM_TOTALLY)
+    this->output_file_->open (ACE_TEXT_ALWAYS_CHAR (temp),
+!                             ios::out | (append ? ios::app : ios::trunc));
+    if (this->output_file_->bad ())
+      return -1;
+  #else /* when ACE_LACKS_IOSTREAM_TOTALLY */
+--- 246,252 ----
+  
+  # if !defined (ACE_LACKS_IOSTREAM_TOTALLY)
+    this->output_file_->open (ACE_TEXT_ALWAYS_CHAR (temp),
+!                             ACE_IOS::out | (append ? ACE_IOS::app : ACE_IOS::trunc));
+    if (this->output_file_->bad ())
+      return -1;
+  #else /* when ACE_LACKS_IOSTREAM_TOTALLY */
