@@ -1,0 +1,32 @@
+To better document BUG 599
+
+I capture mem. alloc & free with      
+   _CrtSetAllocHook(theHook);
+in NT
+
+theHook gets the size of the freed block bay backing up 10h bytes
+
+then accumulates the size into iTotRelSize;
+then counts the number of 0xCD in every released buffer
+and accumulates the counted number into iUnusedRel 
+
+
+        iTotRelSize = 0;
+        iUnusedRel = 0;
+        ACE::fini();
+        int iPerc = 0;
+        if (iTotRelSize > 10000){
+            iPerc = iUnusedRel / (iTotRelSize / 100);
+        }
+        TRACE3 ("ACE::fini: Tot Released:%d TotUnused:%d %d%%\n", 
+                iTotRelSize, iUnusedRel, iPerc);
+
+the code above displays: 
+ACE::fini: Tot Released:44317797 TotUnused:41754471 94%
+
+The application has been allocating 135 times blocks of 322188 bytes.
+Some have been released but the big share has been kept unused.
+
+With some worse data in the server we reached up to 140-150 MBytes
+of useless allocation. This stops us from using TAO in a client.
+
