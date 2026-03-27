@@ -1,0 +1,2479 @@
+? tao/Modified
+? tao/bug_1202_fixes.patch
+Index: tao/GIOP_Message_Base.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/GIOP_Message_Base.cpp,v
+retrieving revision 1.82
+diff -u -u -r1.82 GIOP_Message_Base.cpp
+--- tao/GIOP_Message_Base.cpp	27 Apr 2002 21:49:57 -0000	1.82
++++ tao/GIOP_Message_Base.cpp	14 Jun 2002 17:32:50 -0000
+@@ -1447,15 +1447,16 @@
+ 
+       // Print.
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("(%P | %t): %s GIOP v%c.%c msg, ")
+-                  ACE_TEXT ("%d data bytes, %s endian, %s = %u\n"),
+-          ACE_TEXT_CHAR_TO_TCHAR(label),
++                  "TAO (%P|%t) - GIOP_Message_Base::dump_msg, "
++                  "%s GIOP v%c.%c msg, %d data bytes, %s endian, "
++                  "Type %s[%u]\n",
++                  label,
+                   digits[ptr[TAO_GIOP_VERSION_MAJOR_OFFSET]],
+                   digits[ptr[TAO_GIOP_VERSION_MINOR_OFFSET]],
+                   len - TAO_GIOP_MESSAGE_HEADER_LEN ,
+-          (byte_order == TAO_ENCAP_BYTE_ORDER) ? ACE_LIB_TEXT("my") : ACE_LIB_TEXT("other"),
+-          ACE_TEXT_CHAR_TO_TCHAR(message_name),
+-          *id));
++                  (byte_order == TAO_ENCAP_BYTE_ORDER) ? ACE_LIB_TEXT("my") : ACE_LIB_TEXT("other"),
++                  ACE_TEXT_CHAR_TO_TCHAR(message_name),
++                  *id));
+ 
+       if (TAO_debug_level >= 10)
+         ACE_HEX_DUMP ((LM_DEBUG,
+Index: tao/IIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Connection_Handler.cpp,v
+retrieving revision 1.52
+diff -u -u -r1.52 IIOP_Connection_Handler.cpp
+--- tao/IIOP_Connection_Handler.cpp	27 Apr 2002 21:49:57 -0000	1.52
++++ tao/IIOP_Connection_Handler.cpp	14 Jun 2002 17:32:50 -0000
+@@ -194,37 +194,43 @@
+ TAO_IIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+                                            ACE_Reactor_Mask rm)
+ {
+-  // @@ Alex: we need to figure out if the transport decides to close
+-  //    us or something else.  If it is something else (for example
+-  //    the cached connector trying to make room for other
+-  //    connections) then we should let the transport know, so it can
+-  //    in turn take appropiate action (such as sending exceptions to
+-  //    all waiting reply handlers).
++  ACE_HANDLE my_handle = this->get_handle ();
++
+   if (TAO_debug_level)
+-  ACE_DEBUG  ((LM_DEBUG,
+-               ACE_LIB_TEXT ("TAO (%P|%t) ")
+-               ACE_LIB_TEXT ("IIOP_Connection_Handler::handle_close ")
+-               ACE_LIB_TEXT ("(%d, %d)\n"),
+-               handle,
+-               rm));
++    {
++      ACE_DEBUG  ((LM_DEBUG,
++                   "TAO (%P|%t) - IIOP_Connection_Handler[%d]::handle_close, "
++                   "(%d, %d)\n",
++                   my_handle, handle, rm));
++    }
++
++  if(my_handle == ACE_INVALID_HANDLE)
++    {
++      return 0;
++    }
++
++  // Just close the socket irrespective of what the upcall count is,
++  // we need to cleanup OS resources ASAP.
++  this->peer().close ();
++
++  // Set the handle to be INVALID_HANDLE
++  this->set_handle (ACE_INVALID_HANDLE);
+ 
++  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
++
++  // @@ TODO All this code dealing with upcalls is fishy, upcalls are
++  //    incremented/decremented in handle_input_i(), and only
++  //    decremented here!  Also: the reference count is decremented
++  //    here, while it is incremented in a selected few other places,
++  //    in a very confusing ways.
+   long upcalls = this->decr_pending_upcalls ();
+ 
++  // @@ TODO This is just bogus, a reference count below zero
++  //    indicates a bug, should be ACE_ASSERT'ed and crash the ORB
++  //    during testing!
+   // Just return incase the upcall count goes below 0.
+   if (upcalls < 0)
+     return 0;
+-
+-  if (this->get_handle () != ACE_INVALID_HANDLE)
+-    {
+-      // Just close the socket irrespective of what the upcall count
+-      // is.
+-      this->peer().close ();
+-
+-      // Set the handle to be INVALID_HANDLE
+-      this->set_handle (ACE_INVALID_HANDLE);
+-    }
+-
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+ 
+   // If the upcall count is zero start the cleanup.
+   if (upcalls == 0)
+Index: tao/IIOP_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Transport.cpp,v
+retrieving revision 1.96
+diff -u -u -r1.96 IIOP_Transport.cpp
+--- tao/IIOP_Transport.cpp	4 Apr 2002 04:26:09 -0000	1.96
++++ tao/IIOP_Transport.cpp	14 Jun 2002 17:32:50 -0000
+@@ -179,10 +179,10 @@
+     return -1;
+ 
+   // This guarantees to send all data (bytes) or return an error.
+-  ssize_t n = this->send_message_i (stub,
+-                                    twoway,
+-                                    stream.begin (),
+-                                    max_wait_time);
++  ssize_t n = this->send_message_shared (stub,
++                                         twoway,
++                                         stream.begin (),
++                                         max_wait_time);
+ 
+   if (n == -1)
+     {
+@@ -368,8 +368,10 @@
+   return 1;
+ }
+ 
+-void
+-TAO_IIOP_Transport::transition_handler_state_i (void)
++ACE_Event_Handler *
++TAO_IIOP_Transport::invalidate_event_handler_i (void)
+ {
++  ACE_Event_Handler * eh = this->connection_handler_;
+   this->connection_handler_ = 0;
++  return eh;
+ }
+Index: tao/IIOP_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Transport.h,v
+retrieving revision 1.50
+diff -u -u -r1.50 IIOP_Transport.h
+--- tao/IIOP_Transport.h	18 Feb 2002 18:45:11 -0000	1.50
++++ tao/IIOP_Transport.h	14 Jun 2002 17:32:50 -0000
+@@ -73,7 +73,8 @@
+    */
+   //@{
+ 
+-  virtual ACE_Event_Handler *event_handler_i (void);
++  virtual ACE_Event_Handler * event_handler_i (void);
++  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
+ 
+   /// Access the underlying messaging object
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+@@ -88,9 +89,6 @@
+ 
+   virtual int register_handler_i (void);
+ 
+-  /// Method to do whatever it needs to do when the connection
+-  /// handler is being closed and destroyed.
+-  virtual void transition_handler_state_i (void);
+ 
+ public:
+   /// @@TODO: These methods IMHO should have more meaningful
+Index: tao/ORB_Core.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.cpp,v
+retrieving revision 1.445
+diff -u -u -r1.445 ORB_Core.cpp
+--- tao/ORB_Core.cpp	6 Jun 2002 20:30:06 -0000	1.445
++++ tao/ORB_Core.cpp	14 Jun 2002 17:32:50 -0000
+@@ -1675,7 +1675,9 @@
+ {
+   if (TAO_debug_level >= 3)
+     ACE_DEBUG ((LM_DEBUG,
+-                ACE_LIB_TEXT ("TAO (%P|%t) - start of run/perform_work\n")));
++                "TAO (%P|%t) - ORB_Core::run, "
++                "start [%s]\n",
++                perform_work?"perform_work":"run"));
+ 
+   // Fetch the Reactor
+   ACE_Reactor *r = this->reactor ();
+@@ -1726,13 +1728,15 @@
+ 
+       if (TAO_debug_level >= 3)
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_LIB_TEXT ("TAO (%P|%t) - calling handle_events\n")));
++                    ACE_LIB_TEXT ("TAO (%P|%t) - ORB_Core::run, "
++                                  "calling handle_events()\n")));
+ 
+       result = r->handle_events (tv);
+ 
+       if (TAO_debug_level >= 3)
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_LIB_TEXT ("TAO (%P|%t) - handle_events returns %d\n"),
++                    ACE_LIB_TEXT ("TAO (%P|%t) - ORB_Core::run, "
++                                  "handle_events() returns %d\n"),
+                     result));
+ 
+       if (result == -1)
+@@ -1758,8 +1762,8 @@
+ 
+   if (TAO_debug_level >= 3)
+     ACE_DEBUG ((LM_DEBUG,
+-                ACE_LIB_TEXT ("TAO (%P|%t) - ")
+-                ACE_LIB_TEXT ("end of run/perform_work %d\n"),
++                ACE_LIB_TEXT ("TAO (%P|%t) - ORB_Core::run, ")
++                ACE_LIB_TEXT ("ends with result = %d\n"),
+                 result));
+ 
+   return result;
+Index: tao/Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Transport.cpp,v
+retrieving revision 1.55
+diff -u -u -r1.55 Transport.cpp
+--- tao/Transport.cpp	2 May 2002 03:24:35 -0000	1.55
++++ tao/Transport.cpp	14 Jun 2002 17:32:51 -0000
+@@ -104,27 +104,21 @@
+ 
+   delete this->handler_lock_;
+ 
+-  TAO_Queued_Message *i = this->head_;
+-  while (i != 0)
++  while (this->head_ != 0)
+     {
+-      // @@ This is a good point to insert a flag to indicate that a
+-      // CloseConnection message was successfully received.
+-      i->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+-
+-      TAO_Queued_Message *tmp = i;
+-      i = i->next ();
+-
+-      tmp->destroy ();
++      TAO_Queued_Message *i = this->head_;
++      this->head_ = i->next ();
++      i->destroy ();
+     }
+ 
+-    // Avoid making the call if we can.  This may be redundant, unless
+-    // someone called handle_close() on the connection handler from
+-    // outside the TAO_Transport.
+-    if (this->cache_map_entry_ != 0)
+-      {
+-        this->orb_core_->lane_resources ().transport_cache ().purge_entry (
++  // Avoid making the call if we can.  This may be redundant, unless
++  // someone called handle_close() on the connection handler from
++  // outside the TAO_Transport.
++  if (this->cache_map_entry_ != 0)
++    {
++      this->orb_core_->lane_resources ().transport_cache ().purge_entry (
+           this->cache_map_entry_);
+-      }
++    }
+ }
+ 
+ int
+@@ -186,8 +180,8 @@
+   ACE_Log_Msg::instance ()->acquire ();
+ 
+   ACE_DEBUG ((LM_DEBUG,
+-              "TAO (%P|%t) - Transport[%d]::%s"
+-              " sending %d buffers\n",
++              "TAO (%P|%t) - Transport[%d]::%s, "
++              "sending %d buffers\n",
+               id, location, iovcnt));
+   for (int i = 0; i != iovcnt && 0 < current_transfer; ++i)
+     {
+@@ -198,8 +192,8 @@
+         iov_len = current_transfer;
+ 
+       ACE_DEBUG ((LM_DEBUG,
+-                  "TAO (%P|%t) - Transport[%d]::%s"
+-                  " buffer %d/%d has %d bytes\n",
++                  "TAO (%P|%t) - Transport[%d]::%s, "
++                  "buffer %d/%d has %d bytes\n",
+                   id, location,
+                   i, iovcnt,
+                   iov_len));
+@@ -209,10 +203,10 @@
+         {
+           ACE_TCHAR header[1024];
+           ACE_OS::sprintf (header,
+-                           ACE_LIB_TEXT("TAO - Transport[%d]::%s (")
+-                           ACE_SIZE_T_FORMAT_SPECIFIER ACE_LIB_TEXT("/")
+-                           ACE_SIZE_T_FORMAT_SPECIFIER ACE_LIB_TEXT(")\n"),
+-                           id, ACE_TEXT_CHAR_TO_TCHAR(location), offset, iov_len);
++                           "TAO - Transport[%d]::%s ("
++                           ACE_SIZE_T_FORMAT_SPECIFIER "/"
++                           ACE_SIZE_T_FORMAT_SPECIFIER ")\n",
++                           id, location, offset, iov_len);
+ 
+           len = iov_len - offset;
+           if (len > 512)
+@@ -225,9 +219,9 @@
+       current_transfer -= iov_len;
+     }
+   ACE_DEBUG ((LM_DEBUG,
+-              ACE_LIB_TEXT("TAO (%P|%t) - Transport[%d]::%s")
+-              ACE_LIB_TEXT(" end of data\n"),
+-              id, ACE_TEXT_CHAR_TO_TCHAR(location)));
++              "TAO (%P|%t) - Transport[%d]::%s, "
++              "end of data\n",
++              id, location));
+ 
+   ACE_Log_Msg::instance ()->release ();
+ }
+@@ -239,7 +233,7 @@
+ {
+   ACE_GUARD_RETURN (ACE_Lock, ace_mon, *this->handler_lock_, -1);
+ 
+-  if (this->check_event_handler_i ("TAO_Transport::send_message_block_chain") == -1)
++  if (this->check_event_handler_i ("Transport::send_message_block_chain") == -1)
+     return -1;
+ 
+   return this->send_message_block_chain_i (mb,
+@@ -289,144 +283,27 @@
+ }
+ 
+ int
+-TAO_Transport::send_message_i (TAO_Stub *stub,
+-                               int is_synchronous,
+-                               const ACE_Message_Block *message_block,
+-                               ACE_Time_Value *max_wait_time)
++TAO_Transport::send_message_shared (TAO_Stub *stub,
++                                    int is_synchronous,
++                                    const ACE_Message_Block *message_block,
++                                    ACE_Time_Value *max_wait_time)
+ {
+-  ACE_GUARD_RETURN (ACE_Lock, ace_mon, *this->handler_lock_, -1);
+-
+-  if (this->check_event_handler_i ("TAO_Transport::send_message_i") == -1)
+-    return -1;
+-
+-  if (is_synchronous)
+-    {
+-      return this->send_synchronous_message_i (message_block,
+-                                               max_wait_time);
+-    }
+-
+-  // Let's figure out if the message should be queued without trying
+-  // to send first:
+-  int try_sending_first = 1;
+-
+-  int queue_empty = (this->head_ == 0);
+-
+-  if (!queue_empty)
+-    try_sending_first = 0;
+-  else if (stub->sync_strategy ().must_queue (queue_empty))
+-    try_sending_first = 0;
+-
+-  ssize_t n;
+-
+-  TAO_Flushing_Strategy *flushing_strategy =
+-    this->orb_core ()->flushing_strategy ();
+-
+-  if (try_sending_first)
+-    {
+-      size_t byte_count = 0;
+-      // ... in this case we must try to send the message first ...
+-
+-      size_t total_length = message_block->total_length ();
+-      if (TAO_debug_level > 6)
+-        {
+-          ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO (%P|%t) - Transport[%d]::send_message_i, ")
+-                      ACE_LIB_TEXT("trying to send the message (ml = %d)\n"),
+-                      this->id (), total_length));
+-        }
+-
+-      // @@ I don't think we want to hold the mutex here, however if
+-      // we release it we need to recheck the status of the transport
+-      // after we return... once I understand the final form for this
+-      // code I will re-visit this decision
+-      n = this->send_message_block_chain_i (message_block,
+-                                            byte_count,
+-                                            max_wait_time);
+-      if (n == -1)
+-        {
+-          // ... if this is just an EWOULDBLOCK we must schedule the
+-          // message for later, if it is ETIME we still have to send
+-          // the complete message, because cutting off the message at
+-          // this point will destroy the synchronization with the
+-          // server ...
+-          if (errno != EWOULDBLOCK && errno != ETIME)
+-            {
+-              return -1;
+-            }
+-        }
+-
+-      // ... let's figure out if the complete message was sent ...
+-      if (total_length == byte_count)
+-        {
+-          // Done, just return.  Notice that there are no allocations
+-          // or copies up to this point (though some fancy calling
+-          // back and forth).
+-          // This is the common case for the critical path, it should
+-          // be fast.
+-          return 0;
+-        }
+-
+-      if (TAO_debug_level > 6)
+-        {
+-          ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO (%P|%t) - Transport[%d]::send_message_i, ")
+-                      ACE_LIB_TEXT("partial send %d / %d bytes\n"),
+-                      this->id (), byte_count, total_length));
+-        }
+-
+-      // ... part of the data was sent, need to figure out what piece
+-      // of the message block chain must be queued ...
+-      while (message_block != 0 && message_block->length () == 0)
+-        message_block = message_block->cont ();
+-
+-      // ... at least some portion of the message block chain should
+-      // remain ...
+-      ACE_ASSERT (message_block != 0);
+-    }
+-
+-  // ... either the message must be queued or we need to queue it
+-  // because it was not completely sent out ...
+-
+-  if (TAO_debug_level > 6)
+-    {
+-      ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - Transport[%d]::send_message_i, ")
+-                  ACE_LIB_TEXT("message is queued\n"),
+-                  this->id ()));
+-    }
+-
+-  TAO_Queued_Message *queued_message = 0;
+-  ACE_NEW_RETURN (queued_message,
+-                  TAO_Asynch_Queued_Message (message_block),
+-                  -1);
+-  queued_message->push_back (this->head_, this->tail_);
+-
+-  // ... if the queue is full we need to activate the output on the
+-  // queue ...
+-  int must_flush = 0;
+-  int constraints_reached =
+-    this->check_buffering_constraints_i (stub,
+-                                         must_flush);
+-
+-  // ... but we also want to activate it if the message was partially
+-  // sent.... Plus, when we use the blocking flushing strategy the
+-  // queue is flushed as a side-effect of 'schedule_output()'
+-
+-  if (constraints_reached || try_sending_first)
+-    {
+-      (void) flushing_strategy->schedule_output (this);
+-    }
++  int r;
++  {
++    ACE_GUARD_RETURN (ACE_Lock, ace_mon, *this->handler_lock_, -1);
+ 
+-  if (must_flush)
+-    {
+-      typedef ACE_Reverse_Lock<ACE_Lock> TAO_REVERSE_LOCK;
+-      TAO_REVERSE_LOCK reverse (*this->handler_lock_);
+-      ACE_GUARD_RETURN (TAO_REVERSE_LOCK, ace_mon, reverse, -1);
++    if (this->check_event_handler_i ("Transport::send_message_shared") == -1)
++      return -1;
+ 
+-      (void) flushing_strategy->flush_transport (this);
+-    }
++    r = this->send_message_shared_i (stub, is_synchronous,
++                                     message_block, max_wait_time);
++  }
++  if (r == -1)
++  {
++    this->close_connection ();
++  }
+ 
+-  return 0;
++  return r;
+ }
+ 
+ int
+@@ -517,8 +394,9 @@
+       if (TAO_debug_level > 0)
+         {
+           ACE_ERROR ((LM_ERROR,
+-                      ACE_LIB_TEXT("TAO (%P|%t) TAO_Transport::send_synchronous_message_i, ")
+-                      ACE_LIB_TEXT("error while flushing message %p\n"), ""));
++                      "TAO (%P|%t) - Transport[%d]::send_synchronous_message_i, "
++                      "error while flushing message %p\n",
++                      this->id (), ""));
+         }
+ 
+       return -1;
+@@ -552,22 +430,20 @@
+   ACE_NOTSUP_RETURN (-1);
+ }
+ 
+-
+ void
+ TAO_Transport::connection_handler_closing (void)
+ {
+-  {
+-    ACE_MT (ACE_GUARD (ACE_Lock,
+-                     guard,
+-                     *this->handler_lock_));
++  // The connection has closed, we must invalidate the handler to
++  // ensure that any attempt to use this transport results in an
++  // error.  Basically all the other methods in the Transport
++  // cooperate via check_event_handler_i()
+ 
+-    this->transition_handler_state_i ();
+-  }
+-  // Can't hold the lock while we release, b/c the release could
+-  // invoke the destructor!
++  (void) this->invalidate_event_handler ();
++  this->send_connection_closed_notifications ();
+ 
+-  // This should be the last thing we do here
+-  TAO_Transport::release(this);
++  // Can't hold the lock while we release, b/c the release could
++  // invoke the destructor!  This should be the last thing we do here
++  TAO_Transport::release (this);
+ }
+ 
+ TAO_Transport*
+@@ -594,14 +470,21 @@
+       else if (count < 0)
+         {
+           ACE_ERROR ((LM_ERROR,
+-                      ACE_LIB_TEXT ("(%P|%t) TAO_Transport::release, ")
+-                      ACE_LIB_TEXT ("reference countis less than zero: %d\n"),
+-                      count));
++                      "TAO (%P|%t) - Transport[%d]::release, "
++                      "reference count is less than zero: %d\n",
++                      transport->id (), count));
+           ACE_OS::abort ();
+         }
+     }
+ }
+ 
++// @@ TODO Somebody needs to go throught this code and change those
++// stupidly long calls sequences:
++//
++// this->orb_core_->lane_resources ().transport_cache ().
++//
++// to a single inline function!!
++
+ int
+ TAO_Transport::recache_transport (TAO_Transport_Descriptor_Interface *desc)
+ {
+@@ -637,36 +520,40 @@
+ void
+ TAO_Transport::close_connection (void)
+ {
+-  this->close_connection_i ();
+-
+-  // Purge the entry
+-  if (this->cache_map_entry_ != 0)
+-    {
+-      this->orb_core_->lane_resources ().transport_cache ().purge_entry (
+-        this->cache_map_entry_);
+-    }
++  ACE_Event_Handler * eh = this->invalidate_event_handler ();
++  this->close_connection_shared (1, eh);
+ }
+ 
+-
+ void
+ TAO_Transport::close_connection_i (void)
+ {
+-  ACE_Event_Handler *eh = 0;
+-  {
+-    ACE_MT (ACE_GUARD (ACE_Lock, guard, *this->handler_lock_));
++  ACE_Event_Handler * eh = this->invalidate_event_handler_i ();
++  this->close_connection_shared (1, eh);
++}
+ 
+-    eh = this->event_handler_i ();
++void
++TAO_Transport::close_connection_no_purge (void)
++{
++  ACE_Event_Handler * eh = this->invalidate_event_handler ();
++  this->close_connection_shared (0, eh);
++}
+ 
+-    this->transition_handler_state_i ();
++void
++TAO_Transport::close_connection_shared (int disable_purge,
++                                        ACE_Event_Handler * eh)
++{
++  // Purge the entry
++  if (!disable_purge && this->cache_map_entry_ != 0)
++    {
++      this->orb_core_->lane_resources ().transport_cache ().purge_entry (
++        this->cache_map_entry_);
++    }
+ 
+-    if (eh == 0)
++  if (eh == 0)
++    {
++      // The connection was already closed
+       return;
+-  }
+-
+-  // Close the underlying connection, it is enough to get an
+-  // Event_Handler pointer to do this, so we can factor out the code
+-  // in the base TAO_Transport class.
+-
++    }
+ 
+   // We first try to remove the handler from the reactor. After that
+   // we destroy the handler using handle_close (). The remove handler
+@@ -683,10 +570,7 @@
+   (void) eh->handle_close (ACE_INVALID_HANDLE,
+                            ACE_Event_Handler::ALL_EVENTS_MASK);
+ 
+-  for (TAO_Queued_Message *i = this->head_; i != 0; i = i->next ())
+-    {
+-      i->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+-    }
++  this->send_connection_closed_notifications ();
+ }
+ 
+ ssize_t
+@@ -699,7 +583,7 @@
+                             *this->handler_lock_,
+                             -1));
+ 
+-  if (this->check_event_handler_i ("TAO_Transport::send") == -1)
++  if (this->check_event_handler_i ("Transport::send") == -1)
+     return -1;
+ 
+   // now call the template method
+@@ -716,7 +600,7 @@
+                             *this->handler_lock_,
+                             -1));
+ 
+-  if (this->check_event_handler_i ("TAO_Transport::recv") == -1)
++  if (this->check_event_handler_i ("Transport::recv") == -1)
+     return -1;
+ 
+   // now call the template method
+@@ -736,8 +620,9 @@
+     {
+       if (TAO_debug_level > 0)
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_LIB_TEXT ("(%P|%t) Error in marshalling the \n")
+-                    ACE_LIB_TEXT ("LocateRequest Header \n")));
++                    "TAO (%P|%t) - Transport[%d]::generate_locate_request, "
++                    "error while marshalling the LocateRequest header\n",
++                    this->id ()));
+ 
+       return -1;
+     }
+@@ -758,8 +643,9 @@
+     {
+       if (TAO_debug_level > 0)
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_LIB_TEXT ("(%P|%t) Error in marshalling the \n")
+-                    ACE_LIB_TEXT ("LocateRequest Header \n")));
++                    "(%P|%t) - Transport[%d]::generate_request_header, "
++                    "error while marshalling the Request header\n",
++                    this->id()));
+ 
+       return -1;
+     }
+@@ -775,7 +661,7 @@
+   if (TAO_debug_level > 3)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - Transport[%d]::handle_input\n"),
++                  "TAO (%P|%t) - Transport[%d]::handle_input\n",
+                   this->id ()));
+     }
+ 
+@@ -788,10 +674,11 @@
+         {
+           if (TAO_debug_level > 2)
+             ACE_DEBUG ((LM_DEBUG,
+-                        ACE_LIB_TEXT("TAO (%P|%t) Transport::handle_input_i,")
+-                        ACE_LIB_TEXT("error while parsing the head of the queue \n")));
++                        "TAO (%P|%t) - Transport[%d]::handle_input_i, "
++                        "error while parsing the head of the queue\n",
++                        this->id()));
+ 
+-          this->tms_->connection_closed ();
++          this->send_connection_closed_notifications ();
+         }
+       return retval;
+     }
+@@ -838,7 +725,9 @@
+   if (n <= 0)
+     {
+       if (n == -1)
+-        this->tms_->connection_closed ();
++        {
++          this->send_connection_closed_notifications ();
++        }
+ 
+       return n;
+     }
+@@ -846,8 +735,9 @@
+   if (TAO_debug_level > 2)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) Read [%d] bytes from transport [%d]\n"),
+-                  n, this->id ()));
++                  "TAO (%P|%t) - Transport[%d]::handle_input_i, "
++                  "read %d bytes\n",
++                  this->id (), n));
+     }
+ 
+   // Set the write pointer in the stack buffer
+@@ -864,8 +754,9 @@
+       if (retval == -1 && TAO_debug_level > 0)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO (%P|%t) - Transport::handle_input_i ")
+-                      ACE_LIB_TEXT("error while parsing and consolidating \n")));
++                      "TAO (%P|%t) - Transport[%d]::handle_input_i, "
++                      "error while parsing and consolidating\n",
++                      this->id ()));
+         }
+       return retval;
+     }
+@@ -943,9 +834,11 @@
+         {
+           if (TAO_debug_level > 2)
+             ACE_DEBUG ((LM_DEBUG,
+-                        ACE_LIB_TEXT ("TAO (%P|%t) - error in incoming message \n")));
++                        "TAO (%P|%t) - Transport[%d]::parse_incoming_messages, "
++                        "error in incoming message\n",
++                        this->id ()));
+ 
+-          this->tms_->connection_closed ();
++          this->send_connection_closed_notifications ();
+           return -1;
+         }
+     }
+@@ -984,7 +877,7 @@
+   if (TAO_debug_level > 4)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport[%d]::consolidate_message \n"),
++                  "TAO (%P|%t) - Transport[%d]::consolidate_message\n",
+                   this->id ()));
+     }
+ 
+@@ -1013,12 +906,12 @@
+       if (TAO_debug_level > 6)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      "(%P|%t) Read [%d] bytes on attempt \n",
+-                      n));
++                      "TAO (%P|%t) - Transport[%d]::consolidate_message, "
++                      "read %d bytes on attempt\n",
++                      this->id(), n));
+         }
+ 
+-      if (n == 0 ||
+-          n == -1)
++      if (n == 0 || n == -1)
+         {
+           break;
+         }
+@@ -1033,10 +926,11 @@
+       if (TAO_debug_level > 4)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO (%P|%t) - TAO_Trasport::consolidate_message,")
+-                      ACE_LIB_TEXT("error while trying to consolidate \n")));
++                      "TAO (%P|%t) - Trasport[%d]::consolidate_message, "
++                      "error while trying to consolidate\n",
++                      this->id ()));
+         }
+-      this->tms_->connection_closed ();
++      this->send_connection_closed_notifications ();
+       return -1;
+     }
+ 
+@@ -1056,8 +950,8 @@
+       if (TAO_debug_level > 4)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport[%d]::consolidate_message \n")
+-                      ACE_LIB_TEXT("queueing up the message \n"),
++                      "TAO (%P|%t) - Transport[%d]::consolidate_message, "
++                      "queueing up the message\n",
+                       this->id ()));
+         }
+ 
+@@ -1154,7 +1048,7 @@
+   if (TAO_debug_level > 4)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport[%d]::consolidate_message_queue \n"),
++                  "TAO (%P|%t) - Transport[%d]::consolidate_message_queue\n",
+                   this->id ()));
+     }
+ 
+@@ -1187,8 +1081,9 @@
+           if (TAO_debug_level)
+             {
+               ACE_DEBUG ((LM_DEBUG,
+-                          ACE_LIB_TEXT("TAO (%P|%t) - Error while consolidating... \n"),
+-                          ACE_LIB_TEXT("TAO (%P|%t) - .. part of the read message \n")));
++                          "TAO (%P|%t) - Transport[%d]::consolidate_message_queue, "
++                          "error while consolidating, part of the read message\n",
++                          this->id ()));
+             }
+           return retval;
+         }
+@@ -1277,7 +1172,7 @@
+   if (TAO_debug_level > 4)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport[%d]::consolidate_extra_messages \n"),
++                  "TAO (%P|%t) - Transport[%d]::consolidate_extra_messages\n",
+                   this->id ()));
+     }
+ 
+@@ -1302,8 +1197,8 @@
+   if (TAO_debug_level > 6)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport[%d]::consolidate_extra_messages \n")
+-                  ACE_LIB_TEXT(".............. extracting extra messages \n"),
++                  "TAO (%P|%t) - Transport[%d]::consolidate_extra_messages, "
++                  "extracting extra messages\n",
+                   this->id ()));
+     }
+ 
+@@ -1351,11 +1246,11 @@
+     {
+       if (TAO_debug_level > 0)
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_LIB_TEXT ("TAO (%P|%t) - %p\n"),
+-                    ACE_LIB_TEXT ("Close Connection Message recd \n")));
++                    "TAO (%P|%t) - Transport[%d]::process_parsed_messages, "
++                    "received CloseConnection message %p\n",
++                    this->id(), ""));
+ 
+-      // Close the TMS
+-      this->tms_->connection_closed ();
++      this->send_connection_closed_notifications ();
+ 
+       // Return a "-1" so that the next stage can take care of
+       // closing connection and the necessary memory management.
+@@ -1372,8 +1267,7 @@
+             this,
+             qd) == -1)
+         {
+-          // Close the TMS
+-          this->tms_->connection_closed ();
++          this->send_connection_closed_notifications ();
+ 
+           // Return a "-1" so that the next stage can take care of
+           // closing connection and the necessary memory management.
+@@ -1395,12 +1289,11 @@
+         {
+           if (TAO_debug_level > 0)
+             ACE_DEBUG ((LM_DEBUG,
+-                        ACE_LIB_TEXT ("TAO (%P|%t) - %p\n"),
+-                        ACE_LIB_TEXT ("IIOP_Transport::process_message, ")
+-                        ACE_LIB_TEXT ("process_reply_message ()")));
++                        "TAO (%P|%t) - Transport[%d]::process_parsed_messages, "
++                        "error in process_reply_message %p\n",
++                        this->id (), ""));
+ 
+-          this->messaging_object ()->reset ();
+-          this->tms_->connection_closed ();
++          this->send_connection_closed_notifications ();
+           return -1;
+         }
+ 
+@@ -1412,23 +1305,25 @@
+           // every reply on this connection.
+           if (TAO_debug_level > 0)
+             ACE_ERROR ((LM_ERROR,
+-                        ACE_LIB_TEXT ("TAO (%P|%t) : IIOP_Transport::")
+-                        ACE_LIB_TEXT ("process_message - ")
+-                        ACE_LIB_TEXT ("dispatch reply failed\n")));
++                        "TAO (%P|%t) - Transport[%d]::process_parsed_messages, "
++                        "dispatch reply failed\n",
++                        this->id ()));
+ 
+-          this->messaging_object ()->reset ();
+-          this->tms_->connection_closed ();
++          this->send_connection_closed_notifications ();
+           return -1;
+         }
+ 
+     }
+   else if (t == TAO_PLUGGABLE_MESSAGE_MESSAGERROR)
+     {
+-      // Ys, we print out all levels that we are closing the
+-      // connection.
+-      ACE_ERROR_RETURN ((LM_ERROR,
+-                         ACE_LIB_TEXT("(%P|%t) Closing down the connection \n")),
+-                         -1);
++      if (TAO_debug_level)
++        {
++          ACE_ERROR_RETURN ((LM_ERROR,
++                             "TAO (%P|%t) - Transport[%d]::process_parsed_messages, "
++                             "received MessageError, closing connection\n",
++                             this->id ()),
++                            -1);
++        }
+     }
+ 
+   // If not, just return back..
+@@ -1489,7 +1384,7 @@
+   if (TAO_debug_level > 3)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - Transport[%d]::process_queue_head \n"),
++                  "TAO (%P|%t) - Transport[%d]::process_queue_head\n",
+                   this->id ()));
+     }
+ 
+@@ -1503,8 +1398,8 @@
+       if (TAO_debug_level > 3)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO(%P|%t) - Transport[%d]::process_queue_head")
+-                      ACE_LIB_TEXT(" the size of the queue is [%d] \n"),
++                      "TAO(%P|%t) - Transport[%d]::process_queue_head, "
++                      "the size of the queue is [%d]\n",
+                       this->id (),
+                       this->incoming_message_queue_.queue_length()));
+         }
+@@ -1527,7 +1422,8 @@
+               if (TAO_debug_level > 0)
+                 {
+                   ACE_DEBUG ((LM_DEBUG,
+-                              ACE_LIB_TEXT("TAO (%P|%t) - Transport[%d]::notify to Reactor\n"),
++                              "TAO (%P|%t) - Transport[%d]::process_queue_header, "
++                              "notify to Reactor\n",
+                               this->id ()));
+                 }
+ 
+@@ -1544,8 +1440,9 @@
+                   // @@todo: need to think about what is the action that
+                   // we can take when we get here.
+                   ACE_DEBUG ((LM_DEBUG,
+-                              ACE_LIB_TEXT ("TAO (%P|%t) - Transport::process_queue_head ")
+-                              ACE_LIB_TEXT ("notify to the reactor failed.. \n")));
++                              "TAO (%P|%t) - Transport[%d]::process_queue_head, "
++                              "notify to the reactor failed..\n",
++                              this->id ()));
+                 }
+             }
+         }
+@@ -1623,7 +1520,7 @@
+   if (TAO_debug_level > 3)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - Transport[%d]::schedule_output\n"),
++                  "TAO (%P|%t) - Transport[%d]::schedule_output\n",
+                   this->id ()));
+     }
+ 
+@@ -1644,7 +1541,7 @@
+   if (TAO_debug_level > 3)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - Transport[%d]::cancel_output\n"),
++                  "TAO (%P|%t) - Transport[%d]::cancel_output\n",
+                   this->id ()));
+     }
+ 
+@@ -1658,8 +1555,9 @@
+   if (TAO_debug_level > 6)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport::handle_timeout, ")
+-                  ACE_LIB_TEXT("timer expired\n")));
++                  "TAO (%P|%t) - TAO_Transport[%d]::handle_timeout, "
++                  "timer expired\n",
++                  this->id ()));
+     }
+ 
+   /// This is the only legal ACT in the current configuration....
+@@ -1704,7 +1602,7 @@
+ int
+ TAO_Transport::drain_queue_helper (int &iovcnt, iovec iov[])
+ {
+-  if (this->check_event_handler_i ("TAO_Transport::drain_queue_helper") == -1)
++  if (this->check_event_handler_i ("Transport::drain_queue_helper") == -1)
+     return -1;
+ 
+   size_t byte_count = 0;
+@@ -1730,8 +1628,9 @@
+       if (TAO_debug_level > 4)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport::drain_queue_helper, ")
+-                      ACE_LIB_TEXT("send() returns 0")));
++                      "TAO (%P|%t) - Transport[%d]::drain_queue_helper, "
++                      "send() returns 0",
++                      this->id ()));
+         }
+       return -1;
+     }
+@@ -1740,9 +1639,9 @@
+       if (TAO_debug_level > 4)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport::drain_queue_helper, ")
+-                      ACE_LIB_TEXT("%p"),
+-                      ACE_LIB_TEXT("send()")));
++                      "TAO (%P|%t) - Transport[%d]::drain_queue_helper, "
++                      "error during %p\n",
++                      this->id (), "send_i()"));
+         }
+       if (errno == EWOULDBLOCK)
+         return 0;
+@@ -1756,9 +1655,9 @@
+   if (TAO_debug_level > 4)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport::drain_queue_helper, ")
+-                  ACE_LIB_TEXT("byte_count = %d, head_is_empty = %d\n"),
+-                  byte_count, (this->head_ == 0)));
++                  "TAO (%P|%t) - Transport[%d]::drain_queue_helper, "
++                  "byte_count = %d, head_is_empty = %d\n",
++                  this->id(), byte_count, (this->head_ == 0)));
+     }
+   return 1;
+ }
+@@ -1790,9 +1689,9 @@
+           if (TAO_debug_level > 4)
+             {
+               ACE_DEBUG ((LM_DEBUG,
+-                          ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport::drain_queue_i, ")
+-                          ACE_LIB_TEXT("helper retval = %d\n"),
+-                          retval));
++                          "TAO (%P|%t) - Transport[%d]::drain_queue_i, "
++                          "helper retval = %d\n",
++                          this->id (), retval));
+             }
+           if (retval != 1)
+             return retval;
+@@ -1814,9 +1713,9 @@
+           if (TAO_debug_level > 4)
+             {
+               ACE_DEBUG ((LM_DEBUG,
+-                          ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport::drain_queue_i, ")
+-                          ACE_LIB_TEXT("helper retval = %d\n"),
+-                          retval));
++                          "TAO (%P|%t) - Transport[%d]::drain_queue_i, "
++                          "helper retval = %d\n",
++                          this->id (), retval));
+             }
+       if (retval != 1)
+         return retval;
+@@ -1853,9 +1752,9 @@
+       if (TAO_debug_level > 4)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport::cleanup_queue, ")
+-                      ACE_LIB_TEXT("byte_count = %d\n"),
+-                      byte_count));
++                      "TAO (%P|%t) - Transport[%d]::cleanup_queue, "
++                      "byte_count = %d\n",
++                      this->id (), byte_count));
+         }
+ 
+       // Update the state of the first message
+@@ -1864,9 +1763,9 @@
+       if (TAO_debug_level > 4)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_LIB_TEXT("TAO (%P|%t) - TAO_Transport::cleanup_queue, ")
+-                      ACE_LIB_TEXT("after transfer, bc = %d, all_sent = %d, ml = %d\n"),
+-                      byte_count, i->all_data_sent (),
++                      "TAO (%P|%t) - Transport[%d]::cleanup_queue, "
++                      "after transfer, bc = %d, all_sent = %d, ml = %d\n",
++                      this->id (), byte_count, i->all_data_sent (),
+                       i->message_length ()));
+         }
+ 
+@@ -1939,13 +1838,174 @@
+   if (TAO_debug_level > 0)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_LIB_TEXT("(%P|%t) transport %d (tag=%d) %s ")
+-                  ACE_LIB_TEXT("no longer associated with handler, ")
+-                  ACE_LIB_TEXT("returning -1 with errno = ENOENT\n"),
+-                  this->id (),
+-                  this->tag_,
+-                  ACE_TEXT_CHAR_TO_TCHAR(caller)));
++                  "(%P|%t) - Transport[%d]::report_invalid_event_handler"
++                  "(%s) no longer associated with handler [tag=%d]\n",
++                  this->id (), caller, this->tag_));
++    }
++}
++
++ACE_Event_Handler *
++TAO_Transport::invalidate_event_handler (void)
++{
++  ACE_MT (ACE_GUARD_RETURN (ACE_Lock, guard, *this->handler_lock_, 0));
++
++  return this->invalidate_event_handler_i ();
++}
++
++void
++TAO_Transport::send_connection_closed_notifications (void)
++{
++  while (this->head_ != 0)
++    {
++      TAO_Queued_Message *i = this->head_;
++
++      // @@ This is a good point to insert a flag to indicate that a
++      //    CloseConnection message was successfully received.
++      i->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
++
++      this->head_ = i->next ();
++
++      i->destroy ();
++    }
++
++  this->tms ()->connection_closed ();
++  this->messaging_object ()->reset ();
++}
++
++int
++TAO_Transport::send_message_shared_i (TAO_Stub *stub,
++                                      int is_synchronous,
++                                      const ACE_Message_Block *message_block,
++                                      ACE_Time_Value *max_wait_time)
++{
++  if (is_synchronous)
++    {
++      return this->send_synchronous_message_i (message_block,
++                                               max_wait_time);
++    }
++
++  // Let's figure out if the message should be queued without trying
++  // to send first:
++  int try_sending_first = 1;
++
++  int queue_empty = (this->head_ == 0);
++
++  if (!queue_empty)
++    try_sending_first = 0;
++  else if (stub->sync_strategy ().must_queue (queue_empty))
++    try_sending_first = 0;
++
++  ssize_t n;
++
++  TAO_Flushing_Strategy *flushing_strategy =
++    this->orb_core ()->flushing_strategy ();
++
++  if (try_sending_first)
++    {
++      size_t byte_count = 0;
++      // ... in this case we must try to send the message first ...
++
++      size_t total_length = message_block->total_length ();
++      if (TAO_debug_level > 6)
++        {
++          ACE_DEBUG ((LM_DEBUG,
++                      "TAO (%P|%t) - Transport[%d]::send_message_i, "
++                      "trying to send the message (ml = %d)\n",
++                      this->id (), total_length));
++        }
++
++      // @@ I don't think we want to hold the mutex here, however if
++      // we release it we need to recheck the status of the transport
++      // after we return... once I understand the final form for this
++      // code I will re-visit this decision
++      n = this->send_message_block_chain_i (message_block,
++                                            byte_count,
++                                            max_wait_time);
++      if (n == -1)
++        {
++          // ... if this is just an EWOULDBLOCK we must schedule the
++          // message for later, if it is ETIME we still have to send
++          // the complete message, because cutting off the message at
++          // this point will destroy the synchronization with the
++          // server ...
++          if (errno != EWOULDBLOCK && errno != ETIME)
++            {
++              return -1;
++            }
++        }
++
++      // ... let's figure out if the complete message was sent ...
++      if (total_length == byte_count)
++        {
++          // Done, just return.  Notice that there are no allocations
++          // or copies up to this point (though some fancy calling
++          // back and forth).
++          // This is the common case for the critical path, it should
++          // be fast.
++          return 0;
++        }
++
++      if (TAO_debug_level > 6)
++        {
++          ACE_DEBUG ((LM_DEBUG,
++                      "TAO (%P|%t) - Transport[%d]::send_message_i, "
++                      "partial send %d / %d bytes\n",
++                      this->id (), byte_count, total_length));
++        }
++
++      // ... part of the data was sent, need to figure out what piece
++      // of the message block chain must be queued ...
++      while (message_block != 0 && message_block->length () == 0)
++        message_block = message_block->cont ();
++
++      // ... at least some portion of the message block chain should
++      // remain ...
++      ACE_ASSERT (message_block != 0);
+     }
++
++  // ... either the message must be queued or we need to queue it
++  // because it was not completely sent out ...
++
++  if (TAO_debug_level > 6)
++    {
++      ACE_DEBUG ((LM_DEBUG,
++                  "TAO (%P|%t) - Transport[%d]::send_message_i, "
++                  "message is queued\n",
++                  this->id ()));
++    }
++
++  TAO_Queued_Message *queued_message = 0;
++  ACE_NEW_RETURN (queued_message,
++                  TAO_Asynch_Queued_Message (message_block),
++                  -1);
++  queued_message->push_back (this->head_, this->tail_);
++
++  // ... if the queue is full we need to activate the output on the
++  // queue ...
++  int must_flush = 0;
++  int constraints_reached =
++    this->check_buffering_constraints_i (stub,
++                                         must_flush);
++
++  // ... but we also want to activate it if the message was partially
++  // sent.... Plus, when we use the blocking flushing strategy the
++  // queue is flushed as a side-effect of 'schedule_output()'
++
++  if (constraints_reached || try_sending_first)
++    {
++      (void) flushing_strategy->schedule_output (this);
++    }
++
++  if (must_flush)
++    {
++      typedef ACE_Reverse_Lock<ACE_Lock> TAO_REVERSE_LOCK;
++      TAO_REVERSE_LOCK reverse (*this->handler_lock_);
++      ACE_GUARD_RETURN (TAO_REVERSE_LOCK, ace_mon, reverse, -1);
++
++      (void) flushing_strategy->flush_transport (this);
++    }
++
++  return 0;
+ }
+ 
+ #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+Index: tao/Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Transport.h,v
+retrieving revision 1.28
+diff -u -u -r1.28 Transport.h
+--- tao/Transport.h	4 Apr 2002 04:26:10 -0000	1.28
++++ tao/Transport.h	14 Jun 2002 17:32:51 -0000
+@@ -429,7 +429,19 @@
+    */
+   // @@ this is broken once we add the lock b/c it returns the thing
+   // we're trying to lock down! (CJC)
+-  virtual ACE_Event_Handler *event_handler_i (void) = 0;
++  virtual ACE_Event_Handler * event_handler_i (void) = 0;
++
++  /// Called by <code>connection_handler_closing()</code> to signal
++  /// that the protocol-specific transport should dissociate itself
++  /// with the protocol-specific connection handler.
++  /**
++   * Typically, this just sets the pointer to the associated connection
++   * handler to zero, although it could also clear out any additional
++   * resources associated with the handler association.
++   *
++   * @return The old event handler
++   */
++  virtual ACE_Event_Handler * invalidate_event_handler_i (void) = 0;
+ 
+   /// Return the messaging object that is used to format the data that
+   /// needs to be sent.
+@@ -482,14 +494,6 @@
+                           size_t len,
+                           const ACE_Time_Value *timeout = 0) = 0;
+ 
+-  /// This class needs priviledged access to
+-  /// - close_connection_i()
+-  friend class TAO_Transport_Cache_Manager;
+-
+-  /// Call the corresponding connection handler's <close>
+-  /// method.
+-  virtual void close_connection_i (void);
+-
+ public:
+ 
+   /// This is a request for the transport object to write a
+@@ -592,17 +596,6 @@
+   // @@ lockme
+   virtual int register_handler_i (void) = 0;
+ 
+-  /// Called by <code>connection_handler_closing()</code> to signal
+-  /// that the protocol-specific transport should dissociate itself
+-  /// with the protocol-specific connection handler.
+-  /**
+-   * Typically, this just sets the pointer to the associated connection
+-   * handler to zero, although it could also clear out any additional
+-   * resources associated with the handler association.
+-   */
+-  virtual void transition_handler_state_i (void) = 0;
+-
+-
+   /// Called by the handle_input_i  (). This method is used to parse
+   /// message read by the handle_input_i () call. It also decides
+   /// whether the message  needs consolidation before processing.
+@@ -682,9 +675,6 @@
+ 
+   /// Sent the contents of <message_block>
+   /**
+-   * @todo This method name sucks, but send_message() was already
+-   *       taken by other silly methods!
+-   *
+    * @param stub The object reference used for this operation, useful
+    *             to obtain the current policies.
+    * @param is_synchronous If set this method will block until the
+@@ -695,13 +685,11 @@
+    *             field.
+    * @param max_wait_time The maximum time that the operation can
+    *             block, used in the implementation of timeouts.
+-   *
+    */
+-  /// the twoway flag or by the current policies in the stub.
+-  int send_message_i (TAO_Stub *stub,
+-                      int is_synchronous,
+-                      const ACE_Message_Block *message_block,
+-                      ACE_Time_Value *max_wait_time);
++  int send_message_shared (TAO_Stub *stub,
++                           int is_synchronous,
++                           const ACE_Message_Block *message_block,
++                           ACE_Time_Value *max_wait_time);
+ 
+   /// Send a message block chain, assuming the lock is held
+   int send_message_block_chain_i (const ACE_Message_Block *message_block,
+@@ -816,6 +804,36 @@
+   /// If there are more messages in the queue, this method sends a
+   /// notify () to the reactor to send a next thread along.
+   int process_queue_head (TAO_Resume_Handle &rh);
++
++  /// Grab the mutex and then call invalidate_event_handler_i()
++  ACE_Event_Handler * invalidate_event_handler (void);
++
++  /// Notify all the components inside a Transport when the underlying
++  /// connection is closed.
++  void send_connection_closed_notifications (void);
++
++  /// Implement send_message_shared() assuming the handler_lock_ is
++  /// held.
++  int send_message_shared_i (TAO_Stub *stub,
++                             int is_synchronous,
++                             const ACE_Message_Block *message_block,
++                             ACE_Time_Value *max_wait_time);
++
++  /// Implement close_connection() assuming the handler_lock_ is held.
++  void close_connection_i (void);
++
++  /// This class needs priviledged access to:
++  /// close_connection_no_purge ()
++  friend class TAO_Transport_Cache_Manager;
++
++  /// Close the underlying connection, do not purge the entry from the
++  /// map (supposedly it was purged already, trust the caller, yuck!)
++  void close_connection_no_purge (void);
++
++  /// Close the underlying connection, implements the code shared by
++  /// all the close_connection_* variants.
++  void close_connection_shared (int disable_purge,
++                                ACE_Event_Handler * eh);
+ 
+   /// Prohibited
+   ACE_UNIMPLEMENTED_FUNC (TAO_Transport (const TAO_Transport&))
+Index: tao/Transport_Cache_Manager.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Transport_Cache_Manager.cpp,v
+retrieving revision 1.15
+diff -u -u -r1.15 Transport_Cache_Manager.cpp
+--- tao/Transport_Cache_Manager.cpp	5 Apr 2002 14:11:11 -0000	1.15
++++ tao/Transport_Cache_Manager.cpp	14 Jun 2002 17:32:51 -0000
+@@ -523,7 +523,7 @@
+           // This is a bit ugly, but we must do this to
+           // avoid taking and giving locks inside this loop.
+           transport->cache_map_entry (0);
+-          transport->close_connection_i ();
++          transport->close_connection_no_purge ();
+           this->purge_entry_i (entry);
+ 
+           // Count this as a successful purged entry
+Index: tao/Strategies/DIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Connection_Handler.cpp,v
+retrieving revision 1.20
+diff -u -u -r1.20 DIOP_Connection_Handler.cpp
+--- tao/Strategies/DIOP_Connection_Handler.cpp	27 Apr 2002 21:50:00 -0000	1.20
++++ tao/Strategies/DIOP_Connection_Handler.cpp	14 Jun 2002 17:32:51 -0000
+@@ -206,37 +206,33 @@
+ TAO_DIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+                                            ACE_Reactor_Mask rm)
+ {
+-  // @@ Alex: we need to figure out if the transport decides to close
+-  //    us or something else.  If it is something else (for example
+-  //    the cached connector trying to make room for other
+-  //    connections) then we should let the transport know, so it can
+-  //    in turn take appropiate action (such as sending exceptions to
+-  //    all waiting reply handlers).
++  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
++  //    in fact, even the comments were identical.  IMHO needs
++  //    re-factoring.
++  ACE_HANDLE my_handle = this->get_handle ();
++
+   if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 ACE_TEXT ("TAO (%P|%t) ")
+-                 ACE_TEXT ("DIOP_Connection_Handler::handle_close ")
+-                 ACE_TEXT ("(%d, %d)\n"),
+-                 handle,
+-                 rm));
++    {
++      ACE_DEBUG  ((LM_DEBUG,
++                   "TAO (%P|%t) - DIOP_Connection_Handler[%d]::handle_close, "
++                   "(%d, %d)\n",
++                   my_handle, handle, rm));
++    }
+ 
+-  long upcalls =
+-    this->decr_pending_upcalls ();
++  if(my_handle == ACE_INVALID_HANDLE)
++    {
++      return 0;
++    }
++  this->peer().close ();
+ 
+-  if (upcalls < 0)
+-    return 0;
++  this->set_handle (ACE_INVALID_HANDLE);
++  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+ 
+-  if (this->get_handle () != ACE_INVALID_HANDLE)
+-    {
+-      // Just close the socket irrespective of what the upcall count
+-      // is.
+-      this->peer().close ();
++  long upcalls = this->decr_pending_upcalls ();
+ 
+-      // Set the handle to be INVALID_HANDLE
+-      this->set_handle (ACE_INVALID_HANDLE);
+-    }
++  if (upcalls < 0)
++    return 0;
+ 
+-  // Try to clean up things if the upcall count has reached 0
+   if (upcalls == 0)
+     this->decr_refcount ();
+ 
+Index: tao/Strategies/DIOP_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Transport.cpp,v
+retrieving revision 1.8
+diff -u -u -r1.8 DIOP_Transport.cpp
+--- tao/Strategies/DIOP_Transport.cpp	6 Dec 2001 22:35:29 -0000	1.8
++++ tao/Strategies/DIOP_Transport.cpp	14 Jun 2002 17:32:51 -0000
+@@ -273,10 +273,10 @@
+   // versions seem to need it though.  Leaving it costs little.
+ 
+   // This guarantees to send all data (bytes) or return an error.
+-  ssize_t n = this->send_message_i (stub,
+-                                    twoway,
+-                                    stream.begin (),
+-                                    max_wait_time);
++  ssize_t n = this->send_message_shared (stub,
++                                         twoway,
++                                         stream.begin (),
++                                         max_wait_time);
+ 
+   if (n == -1)
+     {
+@@ -464,10 +464,12 @@
+ }
+ */
+ 
+-void
+-TAO_DIOP_Transport::transition_handler_state_i (void)
++ACE_Event_Handler *
++TAO_DIOP_Transport::invalidate_event_handler_i (void)
+ {
++  ACE_Event_Handler * eh = this->connection_handler_;
+   this->connection_handler_ = 0;
++  return eh;
+ }
+ 
+ #endif /* TAO_HAS_DIOP && TAO_HAS_DIOP != 0 */
+Index: tao/Strategies/DIOP_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Transport.h,v
+retrieving revision 1.4
+diff -u -u -r1.4 DIOP_Transport.h
+--- tao/Strategies/DIOP_Transport.h	27 May 2002 06:34:14 -0000	1.4
++++ tao/Strategies/DIOP_Transport.h	14 Jun 2002 17:32:51 -0000
+@@ -73,8 +73,8 @@
+    */
+   //@{
+ 
+-  virtual ACE_Event_Handler *event_handler_i (void);
+-
++  virtual ACE_Event_Handler * event_handler_i (void);
++  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
+   /// Write the complete Message_Block chain to the connection.
+@@ -90,9 +90,6 @@
+ 
+   virtual int register_handler_i (void);
+ 
+-  /// Method to do whatever it needs to do when the connection
+-  /// handler is being closed and destroyed.
+-  virtual void transition_handler_state_i (void);
+   ///@}
+ public:
+   /// @todo These methods IMHO should have more meaningful names.
+Index: tao/Strategies/SHMIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/SHMIOP_Connection_Handler.cpp,v
+retrieving revision 1.46
+diff -u -u -r1.46 SHMIOP_Connection_Handler.cpp
+--- tao/Strategies/SHMIOP_Connection_Handler.cpp	27 Apr 2002 21:50:00 -0000	1.46
++++ tao/Strategies/SHMIOP_Connection_Handler.cpp	14 Jun 2002 17:32:51 -0000
+@@ -167,37 +167,33 @@
+ TAO_SHMIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+                                              ACE_Reactor_Mask rm)
+ {
+-  // @@ Alex: we need to figure out if the transport decides to close
+-  //    us or something else.  If it is something else (for example
+-  //    the cached connector trying to make room for other
+-  //    connections) then we should let the transport know, so it can
+-  //    in turn take appropiate action (such as sending exceptions to
+-  //    all waiting reply handlers).
++  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
++  //    in fact, even the comments were identical.  IMHO needs
++  //    re-factoring.
++  ACE_HANDLE my_handle = this->get_handle ();
++
+   if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 ACE_LIB_TEXT ("TAO (%P|%t) ")
+-                 ACE_LIB_TEXT ("SHMIOP_Connection_Handler::handle_close ")
+-                 ACE_LIB_TEXT ("(%d, %d)\n"),
+-                 handle,
+-                 rm));
++    {
++      ACE_DEBUG  ((LM_DEBUG,
++                   "TAO (%P|%t) - SMHIOP_Connection_Handler[%d]::handle_close, "
++                   "(%d, %d)\n",
++                   my_handle, handle, rm));
++    }
+ 
+-  long upcalls =  this->decr_pending_upcalls ();
++  if(my_handle == ACE_INVALID_HANDLE)
++    {
++      return 0;
++    }
++  this->peer().close ();
+ 
+-  // Just return incase the upcall count goes below 0.
+-  if (upcalls < 0)
+-    return 0;
++  this->set_handle (ACE_INVALID_HANDLE);
++  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+ 
+-  if (this->get_handle () != ACE_INVALID_HANDLE)
+-    {
+-      // Just close the socket irrespective of what the upcall count
+-      // is.
+-      this->peer().close ();
++  long upcalls = this->decr_pending_upcalls ();
+ 
+-      // Set the handle to be INVALID_HANDLE
+-      this->set_handle (ACE_INVALID_HANDLE);
+-    }
++  if (upcalls < 0)
++    return 0;
+ 
+-  // Try to clean up things if the upcall count has reached 0
+   if (upcalls == 0)
+     this->decr_refcount ();
+ 
+Index: tao/Strategies/SHMIOP_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/SHMIOP_Transport.cpp,v
+retrieving revision 1.23
+diff -u -u -r1.23 SHMIOP_Transport.cpp
+--- tao/Strategies/SHMIOP_Transport.cpp	5 Sep 2001 17:59:44 -0000	1.23
++++ tao/Strategies/SHMIOP_Transport.cpp	14 Jun 2002 17:32:51 -0000
+@@ -247,10 +247,10 @@
+   // versions seem to need it though.  Leaving it costs little.
+ 
+   // This guarantees to send all data (bytes) or return an error.
+-  ssize_t n = this->send_message_i (stub,
+-                                    twoway,
+-                                    stream.begin (),
+-                                    max_wait_time);
++  ssize_t n = this->send_message_shared (stub,
++                                         twoway,
++                                         stream.begin (),
++                                         max_wait_time);
+ 
+   if (n == -1)
+     {
+@@ -276,10 +276,12 @@
+   return 1;
+ }
+ 
+-void
+-TAO_SHMIOP_Transport::transition_handler_state_i (void)
++ACE_Event_Handler *
++TAO_SHMIOP_Transport::invalidate_event_handler_i (void)
+ {
+-  connection_handler_ = 0;
++  ACE_Event_Handler * eh = this->connection_handler_;
++  this->connection_handler_ = 0;
++  return eh;
+ }
+ 
+ #endif /* TAO_HAS_SHMIOP && TAO_HAS_SHMIOP != 0 */
+Index: tao/Strategies/SHMIOP_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/SHMIOP_Transport.h,v
+retrieving revision 1.15
+diff -u -u -r1.15 SHMIOP_Transport.h
+--- tao/Strategies/SHMIOP_Transport.h	27 May 2002 06:34:14 -0000	1.15
++++ tao/Strategies/SHMIOP_Transport.h	14 Jun 2002 17:32:51 -0000
+@@ -67,7 +67,8 @@
+    * These are implementations of template methods declared by TAO_Transport.
+    */
+   //@{
+-  virtual ACE_Event_Handler *event_handler_i (void);
++  virtual ACE_Event_Handler * event_handler_i (void);
++  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
+ 
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
+@@ -88,9 +89,6 @@
+ 
+   virtual int register_handler_i (void);
+ 
+-  /// Method to do whatever it needs to do when the connection
+-  /// handler is being closed and destroyed.
+-  virtual void transition_handler_state_i (void);
+   //@}
+ 
+ public:
+Index: tao/Strategies/UIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/UIOP_Connection_Handler.cpp,v
+retrieving revision 1.44
+diff -u -u -r1.44 UIOP_Connection_Handler.cpp
+--- tao/Strategies/UIOP_Connection_Handler.cpp	27 Apr 2002 21:50:00 -0000	1.44
++++ tao/Strategies/UIOP_Connection_Handler.cpp	14 Jun 2002 17:32:51 -0000
+@@ -150,40 +150,35 @@
+ TAO_UIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+                                            ACE_Reactor_Mask rm)
+ {
+-  // @@ Alex: we need to figure out if the transport decides to close
+-  //    us or something else.  If it is something else (for example
+-  //    the cached connector trying to make room for other
+-  //    connections) then we should let the transport know, so it can
+-  //    in turn take appropiate action (such as sending exceptions to
+-  //    all waiting reply handlers).
++  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
++  //    in fact, even the comments were identical.  IMHO needs
++  //    re-factoring.
++  ACE_HANDLE my_handle = this->get_handle ();
++
+   if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 ACE_TEXT ("TAO (%P|%t) ")
+-                 ACE_TEXT ("UIOP_Connection_Handler::handle_close ")
+-                 ACE_TEXT ("(%d, %d)\n"),
+-                 handle,
+-                 rm));
++    {
++      ACE_DEBUG  ((LM_DEBUG,
++                   "TAO (%P|%t) - UIOP_Connection_Handler[%d]::handle_close, "
++                   "(%d, %d)\n",
++                   my_handle, handle, rm));
++    }
++
++  if(my_handle == ACE_INVALID_HANDLE)
++    {
++      return 0;
++    }
++  this->peer().close ();
++
++  this->set_handle (ACE_INVALID_HANDLE);
+ 
+   long upcalls = this->decr_pending_upcalls ();
++  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+ 
+-  // Just return incase the upcall count goes below 0.
+   if (upcalls < 0)
+     return 0;
+ 
+-  if (this->get_handle () != ACE_INVALID_HANDLE)
+-    {
+-      // Just close the socket irrespective of what the upcall count
+-      // is.
+-      this->peer().close ();
+-
+-      // Set the handle to be INVALID_HANDLE
+-      this->set_handle (ACE_INVALID_HANDLE);
+-    }
+-
+-  // Try to clean up things if the upcall count has reached 0
+   if (upcalls == 0)
+     this->decr_refcount ();
+-
+ 
+   return 0;
+ }
+Index: tao/Strategies/UIOP_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/UIOP_Transport.cpp,v
+retrieving revision 1.22
+diff -u -u -r1.22 UIOP_Transport.cpp
+--- tao/Strategies/UIOP_Transport.cpp	5 Sep 2001 17:59:44 -0000	1.22
++++ tao/Strategies/UIOP_Transport.cpp	14 Jun 2002 17:32:51 -0000
+@@ -176,10 +176,10 @@
+   // versions seem to need it though.  Leaving it costs little.
+ 
+   // This guarantees to send all data (bytes) or return an error.
+-  ssize_t n = this->send_message_i (stub,
+-                                    twoway,
+-                                    stream.begin (),
+-                                    max_wait_time);
++  ssize_t n = this->send_message_shared (stub,
++                                         twoway,
++                                         stream.begin (),
++                                         max_wait_time);
+ 
+   if (n == -1)
+     {
+@@ -205,10 +205,12 @@
+   return 1;
+ }
+ 
+-void
+-TAO_UIOP_Transport::transition_handler_state_i (void)
++ACE_Event_Handler *
++TAO_UIOP_Transport::invalidate_event_handler_i (void)
+ {
+-  connection_handler_ = 0;
++  ACE_Event_Handler * eh = this->connection_handler_;
++  this->connection_handler_ = 0;
++  return eh;
+ }
+ 
+ #endif  /* TAO_HAS_UIOP */
+Index: tao/Strategies/UIOP_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/UIOP_Transport.h,v
+retrieving revision 1.12
+diff -u -u -r1.12 UIOP_Transport.h
+--- tao/Strategies/UIOP_Transport.h	27 May 2002 06:34:14 -0000	1.12
++++ tao/Strategies/UIOP_Transport.h	14 Jun 2002 17:32:51 -0000
+@@ -66,7 +66,8 @@
+    */
+   //@{
+ 
+-  virtual ACE_Event_Handler *event_handler_i (void);
++  virtual ACE_Event_Handler * event_handler_i (void);
++  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
+ 
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
+@@ -81,10 +82,6 @@
+                           const ACE_Time_Value *s = 0);
+ 
+   virtual int register_handler_i (void);
+-
+-  /// Method to do whatever it needs to do when the connection
+-  /// handler is being closed and destroyed.
+-  virtual void transition_handler_state_i (void);
+ 
+ public:
+   /// @todo These methods IMHO should have more meaningful names.
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp,v
+retrieving revision 1.7
+diff -u -u -r1.7 UIPMC_Connection_Handler.cpp
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	10 Jun 2002 00:27:03 -0000	1.7
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	14 Jun 2002 17:32:51 -0000
+@@ -217,39 +217,35 @@
+ 
+ int
+ TAO_UIPMC_Connection_Handler::handle_close (ACE_HANDLE handle,
+-                                           ACE_Reactor_Mask rm)
++                                            ACE_Reactor_Mask rm)
+ {
+-  // @@ Alex: we need to figure out if the transport decides to close
+-  //    us or something else.  If it is something else (for example
+-  //    the cached connector trying to make room for other
+-  //    connections) then we should let the transport know, so it can
+-  //    in turn take appropiate action (such as sending exceptions to
+-  //    all waiting reply handlers).
++  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
++  //    in fact, even the comments were identical.  IMHO needs
++  //    re-factoring.
++  ACE_HANDLE my_handle = this->get_handle ();
++
+   if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 ACE_TEXT ("TAO (%P|%t) ")
+-                 ACE_TEXT ("UIPMC_Connection_Handler::handle_close ")
+-                 ACE_TEXT ("(%d, %d)\n"),
+-                 handle,
+-                 rm));
++    {
++      ACE_DEBUG  ((LM_DEBUG,
++                   "TAO (%P|%t) - UIPMC_Connection_Handler[%d]::handle_close, "
++                   "(%d, %d)\n",
++                   my_handle, handle, rm));
++    }
+ 
+-  long upcalls =
+-    this->decr_pending_upcalls ();
++  if(my_handle == ACE_INVALID_HANDLE)
++    {
++      return 0;
++    }
++  this->peer().close ();
+ 
+-  if (upcalls < 0)
+-    return 0;
++  this->set_handle (ACE_INVALID_HANDLE);
++  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+ 
+-  if (this->get_handle () != ACE_INVALID_HANDLE)
+-    {
+-      // Just close the socket irrespective of what the upcall count
+-      // is.
+-      this->peer().close ();
++  long upcalls = this->decr_pending_upcalls ();
+ 
+-      // Set the handle to be INVALID_HANDLE
+-      this->set_handle (ACE_INVALID_HANDLE);
+-    }
++  if (upcalls < 0)
++    return 0;
+ 
+-  // Try to clean up things if the upcall count has reached 0
+   if (upcalls == 0)
+     this->decr_refcount ();
+ 
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp,v
+retrieving revision 1.4
+diff -u -u -r1.4 UIPMC_Transport.cpp
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp	17 Jan 2002 03:34:27 -0000	1.4
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp	14 Jun 2002 17:32:51 -0000
+@@ -40,7 +40,7 @@
+            TAO_GIOP_Message_Base (orb_core,
+                                   ACE_MAX_DGRAM_SIZE));
+ 
+-  // Replace the default wait strategy with our own 
++  // Replace the default wait strategy with our own
+   // since we don't support waiting on anything.
+   delete this->ws_;
+   ACE_NEW (this->ws_,
+@@ -508,10 +508,10 @@
+   // versions seem to need it though.  Leaving it costs little.
+ 
+   // This guarantees to send all data (bytes) or return an error.
+-  ssize_t n = this->send_message_i (stub,
+-                                    is_synchronous,
+-                                    stream.begin (),
+-                                    max_wait_time);
++  ssize_t n = this->send_message_shared (stub,
++                                         is_synchronous,
++                                         stream.begin (),
++                                         max_wait_time);
+ 
+   if (n == -1)
+     {
+@@ -538,8 +538,10 @@
+   return 1;
+ }
+ 
+-void
+-TAO_UIPMC_Transport::transition_handler_state_i (void)
++ACE_Event_Handler *
++TAO_UIPMC_Transport::invalidate_event_handler_i (void)
+ {
++  ACE_Event_Handler * eh = this->connection_handler_;
+   this->connection_handler_ = 0;
++  return eh;
+ }
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h,v
+retrieving revision 1.3
+diff -u -u -r1.3 UIPMC_Transport.h
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h	18 Feb 2002 18:44:38 -0000	1.3
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h	14 Jun 2002 17:32:51 -0000
+@@ -70,7 +70,8 @@
+    */
+   //@{
+ 
+-  virtual ACE_Event_Handler *event_handler_i (void);
++  virtual ACE_Event_Handler * event_handler_i (void);
++  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
+ 
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
+@@ -86,10 +87,6 @@
+                           const ACE_Time_Value *s = 0);
+ 
+   virtual int register_handler_i (void);
+-
+-  /// Method to do whatever it needs to do when the connection
+-  /// handler is being closed and destroyed.
+-  virtual void transition_handler_state_i (void);
+ 
+ public:
+   /// @@TODO: These methods IMHO should have more meaningful
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp,v
+retrieving revision 1.58
+diff -u -u -r1.58 SSLIOP_Connection_Handler.cpp
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	2 May 2002 04:02:51 -0000	1.58
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	14 Jun 2002 17:32:51 -0000
+@@ -211,29 +211,33 @@
+ TAO_SSLIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+                                              ACE_Reactor_Mask rm)
+ {
++  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
++  //    in fact, even the comments were identical.  IMHO needs
++  //    re-factoring.
++  ACE_HANDLE my_handle = this->get_handle ();
++
+   if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 "TAO (%P|%t) SSLIOP_Connection_Handler::handle_close "
+-                 "(%d, %d)\n",
+-                 handle,
+-                 rm));
++    {
++      ACE_DEBUG  ((LM_DEBUG,
++                   "TAO (%P|%t) - SSLIOP_Connection_Handler[%d]::handle_close, "
++                   "(%d, %d)\n",
++                   my_handle, handle, rm));
++    }
++
++  if(my_handle == ACE_INVALID_HANDLE)
++    {
++      return 0;
++    }
++  this->peer().close ();
++
++  this->set_handle (ACE_INVALID_HANDLE);
++  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+ 
+   long upcalls = this->decr_pending_upcalls ();
+ 
+   if (upcalls < 0)
+     return 0;
+ 
+-  if (this->get_handle () != ACE_INVALID_HANDLE)
+-    {
+-      // Just close the socket irrespective of what the upcall count
+-      // is.
+-      this->peer().close ();
+-
+-      // Set the handle to be INVALID_HANDLE
+-      this->set_handle (ACE_INVALID_HANDLE);
+-    }
+-
+-  // Try to clean up things if the upcall count has reached 0
+   if (upcalls == 0)
+     this->decr_refcount ();
+ 
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.cpp,v
+retrieving revision 1.57
+diff -u -u -r1.57 SSLIOP_Transport.cpp
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.cpp	10 Mar 2002 14:13:47 -0000	1.57
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.cpp	14 Jun 2002 17:32:51 -0000
+@@ -5,10 +5,6 @@
+ #include "SSLIOP_Transport.h"
+ #include "tao/debug.h"
+ 
+-ACE_RCSID (SSLIOP,
+-           SSLIOP_Transport,
+-           "$Id: SSLIOP_Transport.cpp,v 1.57 2002/03/10 14:13:47 bala Exp $")
+-
+ #include "SSLIOP_Connection_Handler.h"
+ #include "SSLIOP_Profile.h"
+ #include "SSLIOP_Acceptor.h"
+@@ -23,6 +19,7 @@
+ #include "tao/GIOP_Message_Base.h"
+ #include "tao/Acceptor_Registry.h"
+ 
++ACE_RCSID (SSLIOP, SSLIOP_Transport, "$Id: SSLIOP_Transport.cpp,v 1.57 2002/03/10 14:13:47 bala Exp $")
+ 
+ TAO_SSLIOP_Transport::TAO_SSLIOP_Transport (
+   TAO_SSLIOP_Connection_Handler *handler,
+@@ -197,10 +194,10 @@
+   // versions seem to need it though.  Leaving it costs little.
+ 
+   // This guarantees to send all data (bytes) or return an error.
+-  ssize_t n = this->send_message_i (stub,
+-                                    twoway,
+-                                    stream.begin (),
+-                                    max_wait_time);
++  ssize_t n = this->send_message_shared (stub,
++                                         twoway,
++                                         stream.begin (),
++                                         max_wait_time);
+ 
+   if (n == -1)
+     {
+@@ -399,8 +396,10 @@
+   return 1;
+ }
+ 
+-void
+-TAO_SSLIOP_Transport::transition_handler_state_i (void)
++ACE_Event_Handler *
++TAO_IIOP_Transport::invalidate_event_handler_i (void)
+ {
++  ACE_Event_Handler * eh = this->connection_handler_;
+   this->connection_handler_ = 0;
++  return eh;
+ }
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.h,v
+retrieving revision 1.25
+diff -u -u -r1.25 SSLIOP_Transport.h
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.h	6 Jul 2001 04:48:46 -0000	1.25
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Transport.h	14 Jun 2002 17:32:51 -0000
+@@ -86,7 +86,8 @@
+    */
+   //@{
+ 
+-  virtual ACE_Event_Handler *event_handler_i (void);
++  virtual ACE_Event_Handler * event_handler_i (void);
++  virtual ACE_Event_Handler * invalidate_event_handler_i (void);
+ 
+   virtual TAO_Pluggable_Messaging *messaging_object (void);
+ 
+@@ -102,10 +103,6 @@
+                           const ACE_Time_Value *s = 0);
+ 
+   virtual int register_handler_i (void);
+-
+-  /// Method to do whatever it needs to do when the connection
+-  /// handler is being closed and destroyed.
+-  virtual void transition_handler_state_i (void);
+ 
+ public:
+   /// @@TODO: These methods IMHO should have more meaningful
+Index: tests/Nested_Upcall_Crash/Client_Peer.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tests/Nested_Upcall_Crash/Client_Peer.cpp,v
+retrieving revision 1.1
+diff -u -u -r1.1 Client_Peer.cpp
+--- tests/Nested_Upcall_Crash/Client_Peer.cpp	23 May 2002 17:37:33 -0000	1.1
++++ tests/Nested_Upcall_Crash/Client_Peer.cpp	14 Jun 2002 17:32:51 -0000
+@@ -32,7 +32,7 @@
+                     ACE_ENV_ARG_DECL)
+   ACE_THROW_SPEC((CORBA::SystemException))
+ {
+-  ACE_DEBUG ((LM_DEBUG, "Received call, depth = %d\n", max_depth));
++  // ACE_DEBUG ((LM_DEBUG, "Received call, depth = %d\n", max_depth));
+   if (max_depth > 0)
+   {
+     Test::Peer_var me =
+@@ -72,6 +72,8 @@
+ Crasher::handle_timeout (ACE_Time_Value const & ,
+                        void const *)
+ {
+-  ACE_DEBUG ((LM_DEBUG, "Performing intentional crash %a\n"));
++  // ACE_DEBUG ((LM_DEBUG, "(%P|%t) Performing intentional crash
++  // %a\n"));
++  ACE_OS::abort();
+   return 0;
+ }
+Index: tests/Nested_Upcall_Crash/Makefile
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tests/Nested_Upcall_Crash/Makefile,v
+retrieving revision 1.1
+diff -u -u -r1.1 Makefile
+--- tests/Nested_Upcall_Crash/Makefile	23 May 2002 17:37:34 -0000	1.1
++++ tests/Nested_Upcall_Crash/Makefile	14 Jun 2002 17:32:51 -0000
+@@ -288,6 +288,8 @@
+   $(ACE_ROOT)/ace/Service_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.i \
++  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++  $(ACE_ROOT)/ace/DLL.h \
+   $(ACE_ROOT)/ace/Service_Object.i \
+   $(TAO_ROOT)/tao/params.h \
+   $(TAO_ROOT)/tao/params.i \
+@@ -298,6 +300,9 @@
+   $(ACE_ROOT)/ace/Map_Manager.i \
+   $(ACE_ROOT)/ace/Map_Manager.cpp \
+   $(ACE_ROOT)/ace/Service_Config.h \
++  $(ACE_ROOT)/ace/Service_Types.h \
++  $(ACE_ROOT)/ace/Service_Types.i \
++  $(ACE_ROOT)/ace/XML_Svc_Conf.h \
+   $(ACE_ROOT)/ace/Service_Config.i \
+   $(ACE_ROOT)/ace/Reactor.h \
+   $(ACE_ROOT)/ace/Handle_Set.h \
+@@ -311,7 +316,6 @@
+   $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
+   $(ACE_ROOT)/ace/Reactor.i \
+   $(ACE_ROOT)/ace/Reactor_Impl.h \
+-  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
+   $(TAO_ROOT)/tao/Parser_Registry.h \
+   $(TAO_ROOT)/tao/Parser_Registry.i \
+   $(TAO_ROOT)/tao/Service_Callbacks.h \
+@@ -336,8 +340,6 @@
+   $(TAO_ROOT)/tao/Interceptor_List.inl \
+   $(TAO_ROOT)/tao/PICurrent.h \
+   $(TAO_ROOT)/tao/PICurrent.inl \
+-  $(TAO_ROOT)/tao/Protocols_Hooks.h \
+-  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+   $(ACE_ROOT)/ace/Thread_Manager.h \
+   $(ACE_ROOT)/ace/Containers.h \
+   $(ACE_ROOT)/ace/Containers.i \
+@@ -347,6 +349,11 @@
+   $(ACE_ROOT)/ace/Singleton.h \
+   $(ACE_ROOT)/ace/Singleton.i \
+   $(ACE_ROOT)/ace/Singleton.cpp \
++  $(ACE_ROOT)/ace/Framework_Component.h \
++  $(ACE_ROOT)/ace/Framework_Component.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.cpp \
+   $(ACE_ROOT)/ace/Thread_Manager.i \
+   $(TAO_ROOT)/tao/ORB_Core.i \
+   $(ACE_ROOT)/ace/Get_Opt.h \
+@@ -583,6 +590,8 @@
+   $(ACE_ROOT)/ace/Service_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.i \
++  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++  $(ACE_ROOT)/ace/DLL.h \
+   $(ACE_ROOT)/ace/Service_Object.i \
+   $(TAO_ROOT)/tao/params.h \
+   $(TAO_ROOT)/tao/params.i \
+@@ -593,6 +602,9 @@
+   $(ACE_ROOT)/ace/Map_Manager.i \
+   $(ACE_ROOT)/ace/Map_Manager.cpp \
+   $(ACE_ROOT)/ace/Service_Config.h \
++  $(ACE_ROOT)/ace/Service_Types.h \
++  $(ACE_ROOT)/ace/Service_Types.i \
++  $(ACE_ROOT)/ace/XML_Svc_Conf.h \
+   $(ACE_ROOT)/ace/Service_Config.i \
+   $(ACE_ROOT)/ace/Reactor.h \
+   $(ACE_ROOT)/ace/Handle_Set.h \
+@@ -606,7 +618,6 @@
+   $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
+   $(ACE_ROOT)/ace/Reactor.i \
+   $(ACE_ROOT)/ace/Reactor_Impl.h \
+-  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
+   $(TAO_ROOT)/tao/Parser_Registry.h \
+   $(TAO_ROOT)/tao/Parser_Registry.i \
+   $(TAO_ROOT)/tao/Service_Callbacks.h \
+@@ -631,8 +642,6 @@
+   $(TAO_ROOT)/tao/Interceptor_List.inl \
+   $(TAO_ROOT)/tao/PICurrent.h \
+   $(TAO_ROOT)/tao/PICurrent.inl \
+-  $(TAO_ROOT)/tao/Protocols_Hooks.h \
+-  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+   $(ACE_ROOT)/ace/Thread_Manager.h \
+   $(ACE_ROOT)/ace/Containers.h \
+   $(ACE_ROOT)/ace/Containers.i \
+@@ -642,6 +651,11 @@
+   $(ACE_ROOT)/ace/Singleton.h \
+   $(ACE_ROOT)/ace/Singleton.i \
+   $(ACE_ROOT)/ace/Singleton.cpp \
++  $(ACE_ROOT)/ace/Framework_Component.h \
++  $(ACE_ROOT)/ace/Framework_Component.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.cpp \
+   $(ACE_ROOT)/ace/Thread_Manager.i \
+   $(TAO_ROOT)/tao/ORB_Core.i \
+   $(ACE_ROOT)/ace/Get_Opt.h \
+@@ -863,6 +877,8 @@
+   $(ACE_ROOT)/ace/Service_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.i \
++  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++  $(ACE_ROOT)/ace/DLL.h \
+   $(ACE_ROOT)/ace/Service_Object.i \
+   $(TAO_ROOT)/tao/params.h \
+   $(TAO_ROOT)/tao/params.i \
+@@ -873,6 +889,9 @@
+   $(ACE_ROOT)/ace/Map_Manager.i \
+   $(ACE_ROOT)/ace/Map_Manager.cpp \
+   $(ACE_ROOT)/ace/Service_Config.h \
++  $(ACE_ROOT)/ace/Service_Types.h \
++  $(ACE_ROOT)/ace/Service_Types.i \
++  $(ACE_ROOT)/ace/XML_Svc_Conf.h \
+   $(ACE_ROOT)/ace/Service_Config.i \
+   $(ACE_ROOT)/ace/Reactor.h \
+   $(ACE_ROOT)/ace/Handle_Set.h \
+@@ -886,7 +905,6 @@
+   $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
+   $(ACE_ROOT)/ace/Reactor.i \
+   $(ACE_ROOT)/ace/Reactor_Impl.h \
+-  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
+   $(TAO_ROOT)/tao/Parser_Registry.h \
+   $(TAO_ROOT)/tao/Parser_Registry.i \
+   $(TAO_ROOT)/tao/Service_Callbacks.h \
+@@ -911,8 +929,6 @@
+   $(TAO_ROOT)/tao/Interceptor_List.inl \
+   $(TAO_ROOT)/tao/PICurrent.h \
+   $(TAO_ROOT)/tao/PICurrent.inl \
+-  $(TAO_ROOT)/tao/Protocols_Hooks.h \
+-  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+   $(ACE_ROOT)/ace/Thread_Manager.h \
+   $(ACE_ROOT)/ace/Containers.h \
+   $(ACE_ROOT)/ace/Containers.i \
+@@ -922,6 +938,11 @@
+   $(ACE_ROOT)/ace/Singleton.h \
+   $(ACE_ROOT)/ace/Singleton.i \
+   $(ACE_ROOT)/ace/Singleton.cpp \
++  $(ACE_ROOT)/ace/Framework_Component.h \
++  $(ACE_ROOT)/ace/Framework_Component.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.cpp \
+   $(ACE_ROOT)/ace/Thread_Manager.i \
+   $(TAO_ROOT)/tao/ORB_Core.i \
+   $(ACE_ROOT)/ace/Get_Opt.h \
+@@ -1133,6 +1154,8 @@
+   $(ACE_ROOT)/ace/Service_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.i \
++  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++  $(ACE_ROOT)/ace/DLL.h \
+   $(ACE_ROOT)/ace/Service_Object.i \
+   $(TAO_ROOT)/tao/params.h \
+   $(TAO_ROOT)/tao/params.i \
+@@ -1153,6 +1176,9 @@
+   $(ACE_ROOT)/ace/Map_Manager.i \
+   $(ACE_ROOT)/ace/Map_Manager.cpp \
+   $(ACE_ROOT)/ace/Service_Config.h \
++  $(ACE_ROOT)/ace/Service_Types.h \
++  $(ACE_ROOT)/ace/Service_Types.i \
++  $(ACE_ROOT)/ace/XML_Svc_Conf.h \
+   $(ACE_ROOT)/ace/Service_Config.i \
+   $(ACE_ROOT)/ace/Reactor.h \
+   $(ACE_ROOT)/ace/Handle_Set.h \
+@@ -1166,7 +1192,6 @@
+   $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
+   $(ACE_ROOT)/ace/Reactor.i \
+   $(ACE_ROOT)/ace/Reactor_Impl.h \
+-  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
+   $(TAO_ROOT)/tao/Parser_Registry.h \
+   $(TAO_ROOT)/tao/Parser_Registry.i \
+   $(TAO_ROOT)/tao/Service_Callbacks.h \
+@@ -1191,8 +1216,6 @@
+   $(TAO_ROOT)/tao/Interceptor_List.inl \
+   $(TAO_ROOT)/tao/PICurrent.h \
+   $(TAO_ROOT)/tao/PICurrent.inl \
+-  $(TAO_ROOT)/tao/Protocols_Hooks.h \
+-  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+   $(ACE_ROOT)/ace/Thread_Manager.h \
+   $(ACE_ROOT)/ace/Containers.h \
+   $(ACE_ROOT)/ace/Containers.i \
+@@ -1202,6 +1225,11 @@
+   $(ACE_ROOT)/ace/Singleton.h \
+   $(ACE_ROOT)/ace/Singleton.i \
+   $(ACE_ROOT)/ace/Singleton.cpp \
++  $(ACE_ROOT)/ace/Framework_Component.h \
++  $(ACE_ROOT)/ace/Framework_Component.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.cpp \
+   $(ACE_ROOT)/ace/Thread_Manager.i \
+   $(TAO_ROOT)/tao/ORB_Core.i
+ 
+@@ -1595,6 +1623,8 @@
+   $(ACE_ROOT)/ace/Service_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.i \
++  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++  $(ACE_ROOT)/ace/DLL.h \
+   $(ACE_ROOT)/ace/Service_Object.i \
+   $(TAO_ROOT)/tao/params.h \
+   $(TAO_ROOT)/tao/params.i \
+@@ -1615,6 +1645,9 @@
+   $(ACE_ROOT)/ace/Map_Manager.i \
+   $(ACE_ROOT)/ace/Map_Manager.cpp \
+   $(ACE_ROOT)/ace/Service_Config.h \
++  $(ACE_ROOT)/ace/Service_Types.h \
++  $(ACE_ROOT)/ace/Service_Types.i \
++  $(ACE_ROOT)/ace/XML_Svc_Conf.h \
+   $(ACE_ROOT)/ace/Service_Config.i \
+   $(ACE_ROOT)/ace/Reactor.h \
+   $(ACE_ROOT)/ace/Handle_Set.h \
+@@ -1628,7 +1661,6 @@
+   $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
+   $(ACE_ROOT)/ace/Reactor.i \
+   $(ACE_ROOT)/ace/Reactor_Impl.h \
+-  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
+   $(TAO_ROOT)/tao/Parser_Registry.h \
+   $(TAO_ROOT)/tao/Parser_Registry.i \
+   $(TAO_ROOT)/tao/Service_Callbacks.h \
+@@ -1653,8 +1685,6 @@
+   $(TAO_ROOT)/tao/Interceptor_List.inl \
+   $(TAO_ROOT)/tao/PICurrent.h \
+   $(TAO_ROOT)/tao/PICurrent.inl \
+-  $(TAO_ROOT)/tao/Protocols_Hooks.h \
+-  $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+   $(ACE_ROOT)/ace/Thread_Manager.h \
+   $(ACE_ROOT)/ace/Containers.h \
+   $(ACE_ROOT)/ace/Containers.i \
+@@ -1664,6 +1694,11 @@
+   $(ACE_ROOT)/ace/Singleton.h \
+   $(ACE_ROOT)/ace/Singleton.i \
+   $(ACE_ROOT)/ace/Singleton.cpp \
++  $(ACE_ROOT)/ace/Framework_Component.h \
++  $(ACE_ROOT)/ace/Framework_Component.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.cpp \
+   $(ACE_ROOT)/ace/Thread_Manager.i \
+   $(TAO_ROOT)/tao/ORB_Core.i \
+   $(TAO_ROOT)/tao/Stub.i \
+@@ -1897,10 +1932,15 @@
+   $(ACE_ROOT)/ace/Map_Manager.i \
+   $(ACE_ROOT)/ace/Map_Manager.cpp \
+   $(ACE_ROOT)/ace/Service_Config.h \
++  $(ACE_ROOT)/ace/Service_Types.h \
+   $(ACE_ROOT)/ace/Service_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.h \
+   $(ACE_ROOT)/ace/Shared_Object.i \
++  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
++  $(ACE_ROOT)/ace/DLL.h \
+   $(ACE_ROOT)/ace/Service_Object.i \
++  $(ACE_ROOT)/ace/Service_Types.i \
++  $(ACE_ROOT)/ace/XML_Svc_Conf.h \
+   $(ACE_ROOT)/ace/Service_Config.i \
+   $(ACE_ROOT)/ace/Reactor.h \
+   $(ACE_ROOT)/ace/Handle_Set.h \
+@@ -1914,7 +1954,6 @@
+   $(ACE_ROOT)/ace/Timer_Queue_T.cpp \
+   $(ACE_ROOT)/ace/Reactor.i \
+   $(ACE_ROOT)/ace/Reactor_Impl.h \
+-  $(ACE_ROOT)/ace/Svc_Conf_Tokens.h \
+   $(ACE_ROOT)/ace/Hash_Map_Manager.h \
+   $(ACE_ROOT)/ace/Hash_Map_Manager_T.h \
+   $(ACE_ROOT)/ace/Functor.h \
+@@ -1990,7 +2029,6 @@
+   $(TAO_ROOT)/tao/Object_Ref_Table.h \
+   $(TAO_ROOT)/tao/Interceptor_List.h \
+   $(TAO_ROOT)/tao/Interceptor_List.inl \
+-  $(TAO_ROOT)/tao/Protocols_Hooks.h \
+   $(ACE_ROOT)/ace/Thread_Manager.h \
+   $(ACE_ROOT)/ace/Containers.h \
+   $(ACE_ROOT)/ace/Containers.i \
+@@ -2000,6 +2038,11 @@
+   $(ACE_ROOT)/ace/Singleton.h \
+   $(ACE_ROOT)/ace/Singleton.i \
+   $(ACE_ROOT)/ace/Singleton.cpp \
++  $(ACE_ROOT)/ace/Framework_Component.h \
++  $(ACE_ROOT)/ace/Framework_Component.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.h \
++  $(ACE_ROOT)/ace/Framework_Component_T.inl \
++  $(ACE_ROOT)/ace/Framework_Component_T.cpp \
+   $(ACE_ROOT)/ace/Thread_Manager.i \
+   $(TAO_ROOT)/tao/ORB_Core.i \
+   $(TAO_ROOT)/tao/Stub.h \
+Index: tests/Nested_Upcall_Crash/Server_Peer.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tests/Nested_Upcall_Crash/Server_Peer.cpp,v
+retrieving revision 1.1
+diff -u -u -r1.1 Server_Peer.cpp
+--- tests/Nested_Upcall_Crash/Server_Peer.cpp	23 May 2002 17:37:34 -0000	1.1
++++ tests/Nested_Upcall_Crash/Server_Peer.cpp	14 Jun 2002 17:32:51 -0000
+@@ -7,6 +7,7 @@
+  *
+  */
+ #include "Server_Peer.h"
++#include "tao/debug.h"
+ 
+ ACE_RCSID(Nested_Upcall_Crash, Server_Peer, "$Id: Server_Peer.cpp,v 1.1 2002/05/23 17:37:34 coryan Exp $")
+ 
+@@ -27,6 +28,13 @@
+   ACE_THROW_SPEC((CORBA::SystemException))
+ {
+   int r = ACE_OS::rand_r(this->seed_) % 50;
++
++  if(TAO_debug_level)
++    {
++      ACE_DEBUG ((LM_DEBUG,
++                  "(%P|%t) Server_Peer::callme[%d], r = %d\n",
++                  max_depth, r));
++    }
+ 
+   if(r == 0)
+   {
+Index: tests/Nested_Upcall_Crash/client.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tests/Nested_Upcall_Crash/client.cpp,v
+retrieving revision 1.1
+diff -u -u -r1.1 client.cpp
+--- tests/Nested_Upcall_Crash/client.cpp	23 May 2002 17:37:34 -0000	1.1
++++ tests/Nested_Upcall_Crash/client.cpp	14 Jun 2002 17:32:51 -0000
+@@ -121,7 +121,7 @@
+ 
+       Timer timer(local_peer.in (), peer.in ());
+ 
+-      ACE_Time_Value interval(0, 100000);
++      ACE_Time_Value interval(0, 50 * 1000000 / HZ);
+       ACE_Reactor * reactor = orb->orb_core()->reactor();
+       reactor->schedule_timer(&timer, 0, interval, interval);
+ 
+Index: tests/Nested_Upcall_Crash/scavenger.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tests/Nested_Upcall_Crash/scavenger.cpp,v
+retrieving revision 1.1
+diff -u -u -r1.1 scavenger.cpp
+--- tests/Nested_Upcall_Crash/scavenger.cpp	23 May 2002 17:37:34 -0000	1.1
++++ tests/Nested_Upcall_Crash/scavenger.cpp	14 Jun 2002 17:32:51 -0000
+@@ -81,7 +81,7 @@
+         ACE_TRY_CHECK;
+       }
+ 
+-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) client - event loop finished\n"));
++      ACE_DEBUG ((LM_DEBUG, "(%P|%t) scavenger - event loop finished\n"));
+ 
+       orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+Index: tests/Nested_Upcall_Crash/server.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tests/Nested_Upcall_Crash/server.cpp,v
+retrieving revision 1.1
+diff -u -u -r1.1 server.cpp
+--- tests/Nested_Upcall_Crash/server.cpp	23 May 2002 17:37:34 -0000	1.1
++++ tests/Nested_Upcall_Crash/server.cpp	14 Jun 2002 17:32:51 -0000
+@@ -196,8 +196,9 @@
+ Sleeper::handle_timeout (ACE_Time_Value const & ,
+                          void const *)
+ {
++  // ACE_DEBUG((LM_DEBUG, "(%P|%t) - Sleeper::handle_timeout()\n"));
+   ACE_Time_Value clk_tck (0, 1000000 / HZ);
+-  this->orb_->run(clk_tck);
++  this->orb_->perform_work(clk_tck);
+ 
+   return 0;
+ }
