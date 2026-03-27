@@ -1,0 +1,272 @@
+? tests/ACE_Init_Test__rh-7.3-i686_g++-3.2_inl
+? tests/ACE_Test__rh-7.3-i686_g++-3.2_inl
+? tests/ARGV_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Aio_Platform_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Arg_Shifter_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Atomic_Op_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Auto_IncDec_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Barrier_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Basic_Types_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Bound_Ptr_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Buffer_Stream_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Bug_1576_Regression_Test__rh-7.3-i686_g++-3.2_inl
+? tests/CDR_Array_Test__rh-7.3-i686_g++-3.2_inl
+? tests/CDR_File_Test__rh-7.3-i686_g++-3.2_inl
+? tests/CDR_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Cache_Map_Manager_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Cached_Accept_Conn_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Cached_Allocator_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Cached_Conn_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Capabilities_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Codecs_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Collection_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Config_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Conn_Test__rh-7.3-i686_g++-3.2_inl
+? tests/DLL_Test__rh-7.3-i686_g++-3.2_inl
+? tests/DLList_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Date_Time_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Dev_Poll_Reactor_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Dirent_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Dynamic_Priority_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Enum_Interfaces_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Env_Value_Test__rh-7.3-i686_g++-3.2_inl
+? tests/FIFO_Test__rh-7.3-i686_g++-3.2_inl
+? tests/FlReactor_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Framework_Component_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Future_Set_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Future_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Get_Opt_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Handle_Set_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Hash_Map_Bucket_Iterator_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Hash_Map_Manager_Test__rh-7.3-i686_g++-3.2_inl
+? tests/High_Res_Timer_Test__rh-7.3-i686_g++-3.2_inl
+? tests/INET_Addr_Test_IPV6__rh-7.3-i686_g++-3.2_inl
+? tests/INET_Addr_Test__rh-7.3-i686_g++-3.2_inl
+? tests/IOStream_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Lazy_Map_Manager_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Log_Msg_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Logging_Strategy_Test__rh-7.3-i686_g++-3.2_inl
+? tests/MEM_Stream_Test__rh-7.3-i686_g++-3.2_inl
+? tests/MM_Shared_Memory_Test__rh-7.3-i686_g++-3.2_inl
+? tests/MT_Reactor_Timer_Test__rh-7.3-i686_g++-3.2_inl
+? tests/MT_Reactor_Upcall_Test__rh-7.3-i686_g++-3.2_inl
+? tests/MT_Reference_Counted_Event_Handler_Test__rh-7.3-i686_g++-3.2_inl
+? tests/MT_Reference_Counted_Notify_Test__rh-7.3-i686_g++-3.2_inl
+? tests/MT_SOCK_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Malloc_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Map_Manager_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Map_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Max_Default_Port_Test_IPV6__rh-7.3-i686_g++-3.2_inl
+? tests/Max_Default_Port_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Mem_Map_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Message_Block_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Message_Queue_Notifications_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Message_Queue_Test_Ex__rh-7.3-i686_g++-3.2_inl
+? tests/Message_Queue_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Multicast_Test_IPV6__rh-7.3-i686_g++-3.2_inl
+? tests/Multicast_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Multihomed_INET_Addr_Test_IPV6__rh-7.3-i686_g++-3.2_inl
+? tests/Multihomed_INET_Addr_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Naming_Test__rh-7.3-i686_g++-3.2_inl
+? tests/New_Fail_Test__rh-7.3-i686_g++-3.2_inl
+? tests/NonBlocking_Conn_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Notify_Performance_Test__rh-7.3-i686_g++-3.2_inl
+? tests/OS_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Object_Manager_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Obstack_Test__rh-7.3-i686_g++-3.2_inl
+? tests/OrdMultiSet_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Pipe_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Priority_Buffer_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Priority_Reactor_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Priority_Task_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Proactor_Scatter_Gather_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Proactor_Test_IPV6__rh-7.3-i686_g++-3.2_inl
+? tests/Proactor_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Proactor_Timer_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Process_Manager_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Process_Mutex_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Process_Strategy_Test__rh-7.3-i686_g++-3.2_inl
+? tests/RB_Tree_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reactor_Dispatch_Order_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reactor_Exceptions_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reactor_Notification_Queue_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reactor_Notify_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reactor_Performance_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reactor_Registration_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reactor_Timer_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reactors_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reader_Writer_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Recursive_Condition_Bug_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Recursive_Condition_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Recursive_Mutex_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Refcounted_Auto_Ptr_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reference_Counted_Event_Handler_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Reverse_Lock_Test__rh-7.3-i686_g++-3.2_inl
+? tests/SOCK_Connector_Test__rh-7.3-i686_g++-3.2_inl
+? tests/SOCK_Dgram_Bcast_Test__rh-7.3-i686_g++-3.2_inl
+? tests/SOCK_Dgram_Test__rh-7.3-i686_g++-3.2_inl
+? tests/SOCK_Send_Recv_Test_IPV6__rh-7.3-i686_g++-3.2_inl
+? tests/SOCK_Send_Recv_Test__rh-7.3-i686_g++-3.2_inl
+? tests/SOCK_Test_IPv6__rh-7.3-i686_g++-3.2_inl
+? tests/SOCK_Test__rh-7.3-i686_g++-3.2_inl
+? tests/SPIPE_Test__rh-7.3-i686_g++-3.2_inl
+? tests/SString_Test__rh-7.3-i686_g++-3.2_inl
+? tests/SV_Shared_Memory_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Semaphore_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Service_Config_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Signal_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Sigset_Ops_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Simple_Message_Block_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Svc_Handler_Test__rh-7.3-i686_g++-3.2_inl
+? tests/TP_Reactor_Test__rh-7.3-i686_g++-3.2_inl
+? tests/TSS_Static_Test__rh-7.3-i686_g++-3.2_inl
+? tests/TSS_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Task_Ex_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Task_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Thread_Manager_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Thread_Mutex_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Thread_Pool_Reactor_Resume_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Thread_Pool_Reactor_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Thread_Pool_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Time_Service_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Time_Value_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Timeprobe_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Timer_Cancellation_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Timer_Queue_Reference_Counting_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Timer_Queue_Test__rh-7.3-i686_g++-3.2_inl
+? tests/TkReactor_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Token_Strategy_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Tokens_Test__rh-7.3-i686_g++-3.2_inl
+? tests/UPIPE_SAP_Test__rh-7.3-i686_g++-3.2_inl
+? tests/UUIDTest__rh-7.3-i686_g++-3.2_inl
+? tests/Unbounded_Set_Test_Ex__rh-7.3-i686_g++-3.2_inl
+? tests/Upgradable_RW_Test__rh-7.3-i686_g++-3.2_inl
+? tests/Vector_Test__rh-7.3-i686_g++-3.2_inl
+? tests/WFMO_Reactor_Test__rh-7.3-i686_g++-3.2_inl
+? tests/XtReactor_Test__rh-7.3-i686_g++-3.2_inl
+? tests/RMCast/RMCast_Fragment_Test__rh-7.3-i686_g++-3.2_inl
+? tests/RMCast/RMCast_Membership_Test__rh-7.3-i686_g++-3.2_inl
+? tests/RMCast/RMCast_Reassembly_Test__rh-7.3-i686_g++-3.2_inl
+? tests/RMCast/RMCast_Reordering_Test__rh-7.3-i686_g++-3.2_inl
+? tests/RMCast/RMCast_Retransmission_Test__rh-7.3-i686_g++-3.2_inl
+? tests/RMCast/RMCast_UDP_Best_Effort_Test__rh-7.3-i686_g++-3.2_inl
+Index: ace/IOStream.h
+===================================================================
+RCS file: /home/src/ACE_wrappers-pt/ace/IOStream.h,v
+retrieving revision 1.1.1.1
+diff -u -u -r1.1.1.1 IOStream.h
+--- ace/IOStream.h	31 Mar 2005 16:05:50 -0000	1.1.1.1
++++ ace/IOStream.h	14 Apr 2005 20:41:28 -0000
+@@ -25,19 +25,12 @@
+ // FUZZ: disable check_for_streams_include
+ #include "ace/streams.h"
+ 
+-// This is a temporary restriction - ACE_IOStream is only enabled if the
+-// compiler does not supply the standard C++ library (and standard iostreams)
+-// or, if it does, the platform is explicitly set to use old iostreams
+-// by its config.h file.
+-// This restriction is recorded in Bugzilla entry 857.
+-#if defined (ACE_HAS_STANDARD_CPP_LIBRARY) && (ACE_HAS_STANDARD_CPP_LIBRARY == 1)
+-#  if !defined (ACE_USES_OLD_IOSTREAMS) && !defined (ACE_LACKS_ACE_IOSTREAM)
+-#    define ACE_LACKS_ACE_IOSTREAM
+-#  endif /* !ACE_USES_OLD_IOSTREAMS && !ACE_LACKS_ACE_IOSTREAM */
+-#endif /* ACE_HAS_STANDARD_CPP_LIBRARY */
+-
+ #if !defined (ACE_LACKS_ACE_IOSTREAM)
+ 
++#  if defined (ACE_HAS_STANDARD_CPP_LIBRARY)
++#    define ACE_LACKS_IOSTREAM_FX
++#  endif /* ACE_HAS_STANDARD_CPP_LIBRARY */
++
+ #  if defined (ACE_HAS_STRING_CLASS)
+ #    if defined (ACE_WIN32) && defined (_MSC_VER)
+ typedef CString ACE_IOStream_String;
+@@ -362,7 +355,6 @@
+ // operators.  Notice how the <ipfx> and <isfx> functions are used.
+ 
+ #define GET_SIG(MT,DT)          inline virtual MT& operator>> (DT v)
+-#  if defined (__KCC) || (defined (__SUNPRO_CC) && __SUNPRO_CC > 0x510)
+ #define GET_CODE {                      \
+         if (ipfx (0))                                   \
+         {                                               \
+@@ -371,16 +363,6 @@
+         isfx ();                                        \
+         return *this;                                   \
+         }
+-#  else
+-#define GET_CODE {                      \
+-        if (ipfx (0))                                   \
+-        {                                               \
+-                iostream::operator>> (v);               \
+-        }                                               \
+-        isfx ();                                        \
+-        return *this;                                   \
+-        }
+-#  endif /* __KCC */
+ #define GET_PROT(MT,DT,CODE)    GET_SIG(MT,DT)  CODE
+ #define GET_FUNC(MT,DT)         GET_PROT(MT,DT,GET_CODE)
+ 
+@@ -389,7 +371,6 @@
+ // operators.  Notice how the <opfx> and <osfx> functions are used.
+ 
+ #define PUT_SIG(MT,DT)          inline virtual MT& operator<< (DT v)
+-#  if defined (__KCC) || (defined (__SUNPRO_CC) && __SUNPRO_CC > 0x510)
+ #define PUT_CODE {                      \
+         if (opfx ())                                    \
+         {                                               \
+@@ -398,16 +379,6 @@
+         osfx ();                                        \
+         return *this;                                   \
+         }
+-#  else
+-#define PUT_CODE {                      \
+-        if (opfx ())                                    \
+-        {                                               \
+-                iostream::operator<< (v);               \
+-        }                                               \
+-        osfx ();                                        \
+-        return *this;                                   \
+-        }
+-#  endif /* __KCC */
+ #define PUT_PROT(MT,DT,CODE)    PUT_SIG(MT,DT)  CODE
+ #define PUT_FUNC(MT,DT)         PUT_PROT(MT,DT,PUT_CODE)
+ 
+Index: ace/IOStream_T.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers-pt/ace/IOStream_T.cpp,v
+retrieving revision 1.1.1.1
+diff -u -u -r1.1.1.1 IOStream_T.cpp
+--- ace/IOStream_T.cpp	31 Mar 2005 16:05:50 -0000	1.1.1.1
++++ ace/IOStream_T.cpp	14 Apr 2005 20:41:28 -0000
+@@ -43,6 +43,7 @@
+   : ACE_Streambuf (streambuf_size, io_mode),
+     peer_ (peer)
+ {
++#if defined (ACE_USES_OLD_IOSTREAMS)
+   // A streambuf allows for unbuffered IO where every character is
+   // read as requested and written as provided.  To me, this seems
+   // terribly inefficient for socket-type operations, so I've disabled
+@@ -60,6 +61,7 @@
+ #if !defined (ACE_LACKS_LINEBUFFERED_STREAMBUF)
+   this->linebuffered (0);
+ #endif /* ! ACE_LACKS_LINEBUFFERED_STREAMBUF */
++#endif /* ACE_USES_OLD_IOSTREAMS */
+ }
+ 
+ // The typical constructor.  This will initiailze your STREAM and then
+Index: tests/IOStream_Test.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers-pt/tests/IOStream_Test.cpp,v
+retrieving revision 1.1.1.1
+diff -u -u -r1.1.1.1 IOStream_Test.cpp
+--- tests/IOStream_Test.cpp	31 Mar 2005 16:06:12 -0000	1.1.1.1
++++ tests/IOStream_Test.cpp	14 Apr 2005 20:41:28 -0000
+@@ -238,7 +238,7 @@
+         {
+           ACE_DEBUG ((LM_DEBUG,
+                       ACE_TEXT (" (%P|%t) Recoverable stream error/timed out)\n")));
+-          server.clear (0);
++          server.clear (ios::eofbit);
+         }
+     }
+ 
