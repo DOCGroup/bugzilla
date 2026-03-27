@@ -1,0 +1,2010 @@
+? bug_1270_fix01.patch
+? bug_263_tao.patch
+? orbsvcs/performance-tests/RTEvent/Roundtrip/run_baseline.sh
+? orbsvcs/performance-tests/RTEvent/TCP_Baseline/README
+? tao/Acceptor_Impl.cpp.fixed
+? tao/Connection_Handler.cpp.fixed
+? tao/Connection_Handler.h.fixed
+? tao/Connection_Handler.inl.fixed
+? tao/GIOP_Message_Base.cpp.fixed
+? tao/GIOP_Message_Lite.cpp.fixed
+? tao/IIOP_Connection_Handler.cpp.fixed
+? tao/IIOP_Connection_Handler.h.fixed
+? tao/IIOP_Connector.cpp.fixed
+? tao/IIOP_Transport.cpp.fixed
+? tao/IIOP_Transport.h.fixed
+? tao/Invocation.cpp.fixed
+? tao/LF_Connect_Strategy.cpp.fixed
+? tao/Muxed_TMS.cpp.fixed
+? tao/Notify_Handler.cpp.fixed
+? tao/ORB.cpp.fixed
+? tao/Synch_Refcountable.cpp.fixed
+? tao/TAO_Server_Request.cpp.fixed
+? tao/Transport.cpp.fixed
+? tao/Transport.h.fixed
+? tao/Transport_Cache_Manager.cpp.fixed
+? tao/Strategies/DIOP_Connection_Handler.cpp.fixed
+? tao/Strategies/DIOP_Connection_Handler.h.fixed
+? tao/Strategies/DIOP_Connector.cpp.fixed
+? tao/Strategies/DIOP_Transport.cpp.fixed
+? tao/Strategies/DIOP_Transport.h.fixed
+? tao/Strategies/SHMIOP_Connection_Handler.cpp.fixed
+? tao/Strategies/SHMIOP_Connection_Handler.h.fixed
+? tao/Strategies/SHMIOP_Transport.cpp.fixed
+? tao/Strategies/SHMIOP_Transport.h.fixed
+? tao/Strategies/UIOP_Connection_Handler.cpp.fixed
+? tao/Strategies/UIOP_Connection_Handler.h.fixed
+? tao/Strategies/UIOP_Transport.cpp.fixed
+? tao/Strategies/UIOP_Transport.h.fixed
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp,v
+retrieving revision 1.10
+diff -u -u -r1.10 UIPMC_Connection_Handler.cpp
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	26 Jun 2002 14:20:34 -0000	1.10
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	12 Sep 2002 15:56:35 -0000
+@@ -214,89 +214,41 @@
+   return this->svc_i ();
+ }
+ 
+-
+ int
+-TAO_UIPMC_Connection_Handler::handle_close (ACE_HANDLE handle,
+-                                            ACE_Reactor_Mask rm)
++TAO_UIPMC_Connection_Handler::resume_handler (void)
+ {
+-  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
+-  //    in fact, even the comments were identical.  IMHO needs
+-  //    re-factoring.
+-  ACE_HANDLE my_handle = this->get_handle ();
+-
+-  if (TAO_debug_level)
+-    {
+-      ACE_DEBUG  ((LM_DEBUG,
+-                   "TAO (%P|%t) - UIPMC_Connection_Handler[%d]::handle_close, "
+-                   "(%d, %d)\n",
+-                   my_handle, handle, rm));
+-    }
+-
+-  if(my_handle == ACE_INVALID_HANDLE)
+-    {
+-      return 0;
+-    }
+-  this->peer().close ();
+-
+-  this->set_handle (ACE_INVALID_HANDLE);
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+-
+-  long upcalls = this->decr_pending_upcalls ();
++  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
++}
+ 
+-  if (upcalls < 0)
+-    return 0;
++int
++TAO_UIPMC_Connection_Handler::handle_input (ACE_HANDLE h)
++{
++  return this->handle_input_eh (h, this);
++}
+ 
+-  if (upcalls == 0)
+-    this->decr_refcount ();
++int
++TAO_UIPMC_Connection_Handler::handle_output (ACE_HANDLE handle)
++{
++  return this->handle_output_eh (handle, this);
++}
+ 
+-  return 0;
++int
++TAO_UIPMC_Connection_Handler::handle_close (ACE_HANDLE handle,
++                                           ACE_Reactor_Mask rm)
++{
++  return this->handle_close_eh (handle, rm, this);
+ }
+ 
+ void
+ TAO_UIPMC_Connection_Handler::handle_close_i (void)
+ {
+-  if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 ACE_TEXT ("TAO (%P|%t) ")
+-                 ACE_TEXT ("UIPMC_Connection_Handler::handle_close_i ")
+-                 ACE_TEXT ("(%d)\n"),
+-                 this->transport ()->id ()));
+-
+-  // @@ Why are we doing checks for is_registered flags here if the
+-  // handlers are not registered with the reactor? - Bala
+-  if (this->transport ()->wait_strategy ()->is_registered ())
+-    {
+-      // @@ Frank: Added reactor check.  not sure if this is right?
+-      if (this->reactor ())
+-        {
+-          // Make sure there are no timers.
+-          this->reactor ()->cancel_timer (this);
+-        }
+-
+-      // Set the flag to indicate that it is no longer registered with
+-      // the reactor, so that it isn't included in the set that is
+-      // passed to the reactor on ORB destruction.
+-      this->transport ()->wait_strategy()->is_registered (0);
+-    }
+-
+-  // Close the handle..
+-  // Remove the entry as it is invalid
+-  this->transport ()->purge_entry ();
+-
+-  // Signal the transport that we will no longer have
+-  // a reference to it.  This will eventually call
+-  // TAO_Transport::release ().
+-  this->transport (0);
+-
+-  // Follow usual Reactor-style lifecycle semantics and commit
+-  // suicide.
+-  this->destroy ();
++  this->handle_close_i_eh (this);
+ }
+ 
+ int
+-TAO_UIPMC_Connection_Handler::resume_handler (void)
++TAO_UIPMC_Connection_Handler::release_os_resources (void)
+ {
+-  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
++  return this->peer().close ();
+ }
+ 
+ int
+@@ -321,108 +273,16 @@
+                                                this->transport ());
+ }
+ 
+-
+-int
+-TAO_UIPMC_Connection_Handler::handle_input (ACE_HANDLE)
+-{
+-  // Increase the reference count on the upcall that have passed us.
+-  this->incr_pending_upcalls ();
+-
+-  TAO_Resume_Handle  resume_handle (this->orb_core (),
+-                                    this->get_handle ());
+-
+-  int retval = this->transport ()->handle_input_i (resume_handle);
+-
+-  // Now the message has been read
+-  if (retval == -1 && TAO_debug_level > 0)
+-    {
+-      ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("TAO (%P|%t) - %p\n"),
+-                  ACE_TEXT ("UIPMC_Connection_Handler::handle_input \n")));
+-
+-    }
+-
+-  // The upcall is done. Bump down the reference count
+-  long upcalls = this->decr_pending_upcalls ();
+-
+-  ACE_ASSERT (upcalls >= 0);
+-
+-  // Try to clean up things if the upcall count has reached 0
+-  if (upcalls == 0)
+-    {
+-      this->decr_refcount ();
+-
+-      // As we have already performed the handle closing we dont want
+-      // to return a  -1. Doing so would make the reactor call
+-      // handle_close () which could be harmful.
+-      retval = 0;
+-    }
+-
+-  if (retval == -1)
+-    {
+-      // @@ Bala: I am not sure why I am doing this here. But let it
+-      // be there for uniformity sake..
+-      // This is really a odd case. We could have a race condition if
+-      // we dont do this. Looks like this what happens
+-      // - imagine we have more than 1 server threads
+-      // - The server has got more than one connection from the
+-      //   clients
+-      // - The clients make requests and they start dissappearing.
+-      // - The connections start getting closed
+-      // - at that point one of the server threads is woken up to
+-      //   and handle_input () is called.
+-      // - the handle_input sees no data and so is about return a -1.
+-      // - if the handle is resumed, it looks like the oen more thread
+-      //   gets access to the handle and the handle_input is called by
+-      //   another thread.
+-      // - at that point of time if the thread returning -1 to the
+-      //   reactor starts closing down the handler, bad things start
+-      //   happening.
+-      // Looks subtle though. After adding this I dont see anything
+-      // bad happenin and so let us stick with it...
+-      resume_handle.set_flag (TAO_Resume_Handle::TAO_HANDLE_LEAVE_SUSPENDED);
+-    }
+-  // @@ Michael:
+-  // We always return 0, as we do not have any send errors.
+-  return 0;
+-}
+-
+-
+-int
+-TAO_UIPMC_Connection_Handler::handle_cleanup (void)
+-{
+-  // Deregister this handler with the ACE_Reactor.
+-  if (this->reactor ())
+-    {
+-      ACE_Reactor_Mask mask =
+-        ACE_Event_Handler::ALL_EVENTS_MASK | ACE_Event_Handler::DONT_CALL;
+-
+-      // Make sure there are no timers.
+-      this->reactor ()->cancel_timer (this);
+-
+-      // Remove self from reactor.
+-      this->reactor ()->remove_handler (this, mask);
+-    }
+-
+-  return 0;
+-}
+-
+-
+ // ****************************************************************
+ 
+ #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+ 
+-// Instantiated in IIOP_Connection_Handler.cpp
+-//template class ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>;
+-
+ template class ACE_Concurrency_Strategy<TAO_UIPMC_Connection_Handler>;
+ template class ACE_Creation_Strategy<TAO_UIPMC_Connection_Handler>;
+ 
+ #elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+ 
+-// Instantiated in IIOP_Connection_Handler.cpp
+-//#pragma instantiate ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
+-
+ #pragma instantiate ACE_Concurrency_Strategy<TAO_UIPMC_Connection_Handler>
+ #pragma instantiate ACE_Creation_Strategy<TAO_UIPMC_Connection_Handler>
++
+ #endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h,v
+retrieving revision 1.2
+diff -u -u -r1.2 UIPMC_Connection_Handler.h
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h	13 Jan 2002 20:00:12 -0000	1.2
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h	12 Sep 2002 15:56:35 -0000
+@@ -107,12 +107,14 @@
+   /// calling <activate>.  This serves as the event loop in such cases.
+   virtual int svc (void);
+ 
+-  /// Perform appropriate closing.
+-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+-                            ACE_Reactor_Mask = ACE_Event_Handler::NULL_MASK);
+-
+-  /// Event handler overload..
++  //@{
++  /** @name Event Handler overloads
++   */
+   virtual int resume_handler (void);
++  virtual int handle_input (ACE_HANDLE);
++  virtual int handle_output (ACE_HANDLE);
++  virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
++  //@}
+ 
+   /// Add ourselves to Cache.
+   int add_transport_to_cache (void);
+@@ -139,17 +141,6 @@
+ 
+ protected:
+ 
+-  /// = Event Handler overloads
+-
+-  /// Reads a message from the <peer()>, dispatching and servicing it
+-  /// appropriately.
+-  /// handle_input() just delegates on handle_input_i() which timeouts
+-  /// after <max_wait_time>, this is used in thread-per-connection to
+-  /// ensure that server threads eventually exit.
+-
+-  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+-  virtual int handle_cleanup ();
+-
+   // UIPMC Additions - Begin
+ 
+   /// Client side UDP socket (send only).
+@@ -169,10 +160,13 @@
+ 
+   // UIPMC Additions - End
+ 
+-private:
+-
+-  /// Perform appropriate closing
++  //@{
++  /**
++   * @name TAO_Connection Handler overloads
++   */
+   void handle_close_i (void);
++  virtual int release_os_resources (void);
++  //@}
+ 
+ private:
+ 
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp,v
+retrieving revision 1.60
+diff -u -u -r1.60 SSLIOP_Connection_Handler.cpp
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	19 Jun 2002 19:22:56 -0000	1.60
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	12 Sep 2002 15:56:35 -0000
+@@ -206,103 +206,48 @@
+   return this->svc_i ();
+ }
+ 
+-
+ int
+-TAO_SSLIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+-                                             ACE_Reactor_Mask rm)
++TAO_SSLIOP_Connection_Handler::resume_handler (void)
+ {
+-  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
+-  //    in fact, even the comments were identical.  IMHO needs
+-  //    re-factoring.
+-  ACE_HANDLE my_handle = this->get_handle ();
+-
+-  if (TAO_debug_level)
+-    {
+-      ACE_DEBUG  ((LM_DEBUG,
+-                   "TAO (%P|%t) - SSLIOP_Connection_Handler[%d]::handle_close, "
+-                   "(%d, %d)\n",
+-                   my_handle, handle, rm));
+-    }
+-
+-  if(my_handle == ACE_INVALID_HANDLE)
+-    {
+-      return 0;
+-    }
+-  this->peer().close ();
+-
+-  this->set_handle (ACE_INVALID_HANDLE);
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+-
+-  long upcalls = this->decr_pending_upcalls ();
++  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
++}
+ 
+-  if (upcalls < 0)
+-    return 0;
++int
++TAO_SSLIOP_Connection_Handler::handle_input (ACE_HANDLE h)
++{
++  return this->handle_input_eh (h, this);
++}
+ 
+-  if (upcalls == 0)
+-    this->decr_refcount ();
++int
++TAO_SSLIOP_Connection_Handler::handle_output (ACE_HANDLE handle)
++{
++  return this->handle_output_eh (handle, this);
++}
+ 
+-  return 0;
++int
++TAO_SSLIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
++                                           ACE_Reactor_Mask rm)
++{
++  return this->handle_close_eh (handle, rm, this);
+ }
+ 
+ void
+ TAO_SSLIOP_Connection_Handler::handle_close_i (void)
+ {
+-  if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 ACE_TEXT ("TAO (%P|%t) ")
+-                 ACE_TEXT ("SSLIOP_Connection_Handler::handle_close_i ")
+-                 ACE_TEXT ("(%d)\n"),
+-                 this->transport ()->id ()));
+-
+-  if (this->transport ()->wait_strategy ()->is_registered ())
+-    {
+-      // Make sure there are no timers.
+-      this->reactor ()->cancel_timer (this);
+-
+-      // Set the flag to indicate that it is no longer registered with
+-      // the reactor, so that it isn't included in the set that is
+-      // passed to the reactor on ORB destruction.
+-      this->transport ()->wait_strategy ()->is_registered (0);
+-    }
+-
+-  // Close the handle..
+-  // Remove the entry as it is invalid
+-  this->transport ()->purge_entry ();
+-
+-  // Signal the transport that we will no longer have
+-  // a reference to it.  This will eventually call
+-  // TAO_Transport::release ().
+-  this->transport (0);
+-
+-  // Follow usual Reactor-style lifecycle semantics and commit
+-  // suicide.
+-  this->destroy ();
++  this->handle_close_i_eh (this);
+ }
+ 
+ int
+-TAO_SSLIOP_Connection_Handler::resume_handler (void)
++TAO_SSLIOP_Connection_Handler::release_os_resources (void)
+ {
+-  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
++  return this->peer().close ();
+ }
+ 
+-int
+-TAO_SSLIOP_Connection_Handler::handle_output (ACE_HANDLE)
++void
++TAO_SSLIOP_Connection_Handler::pos_io_hook (int & return_value)
+ {
+-  TAO_Resume_Handle resume_handle (this->orb_core (),
+-                                   this->get_handle ());
+-
+-  int result = this->transport ()->handle_output ();
+-
+-  // Force this event handler to be called before waiting for
+-  // additional events if there is still data in OpenSSL's internal
+-  // buffers.  That buffer must be flushed before additional events on
+-  // the SSLIOP handle can be polled.
+-  if (result == 0
+-      && this->transport () != 0
+-      && ::SSL_pending (this->peer ().ssl ()))
+-    return 1;
+-
+-  return result;
++  if (return_value == 0 && ::SSL_pending (this->peer ().ssl ()))
++    return_value = 1;
+ }
+ 
+ int
+@@ -345,7 +290,6 @@
+       this->transport ());
+ }
+ 
+-
+ int
+ TAO_SSLIOP_Connection_Handler::process_listen_point_list (
+   IIOP::ListenPointList &listen_list)
+@@ -411,70 +355,6 @@
+ 
+   return 0;
+ }
+-
+-
+-int
+-TAO_SSLIOP_Connection_Handler::handle_input (ACE_HANDLE)
+-{
+-    // Increase the reference count on the upcall that have passed us.
+-  this->incr_pending_upcalls ();
+-
+-  TAO_Resume_Handle resume_handle (this->orb_core (),
+-                                   this->get_handle ());
+-
+-  int retval = this->transport ()->handle_input_i (resume_handle);
+-
+-  // The upcall is done. Bump down the reference count
+-  long upcalls = this->decr_pending_upcalls ();
+-
+-  // Try to clean up things if the upcall count has reached 0
+-  if (upcalls == 0)
+-    {
+-      this->decr_refcount ();
+-
+-      // As we have already performed the handle closing we don't want
+-      // to return a -1. Doing so would make the reactor call
+-      // handle_close() which could be harmful.
+-      return 0;
+-    }
+-  else if (upcalls < 0)
+-    {
+-      retval = 0;
+-    }
+-
+-  // Force this event handler to be called before waiting for
+-  // additional events if there is still data in OpenSSL's internal
+-  // buffers.  That buffer must be flushed before additional events on
+-  // the SSLIOP handle can be polled.
+-  if (retval == 0 && ::SSL_pending (this->peer ().ssl ()))
+-    return 1;
+-
+-  if (retval == -1)
+-    {
+-      // This is really a odd case. We could have a race condition if
+-      // we dont do this. Looks like this what happens
+-      // - imagine we have more than 1 server threads
+-      // - The server has got more than one connection from the
+-      //   clients
+-      // - The clients make requests and they start dissappearing.
+-      // - The connections start getting closed
+-      // - at that point one of the server threads is woken up to
+-      //   and handle_input () is called.
+-      // - the handle_input sees no data and so is about return a -1.
+-      // - if the handle is resumed, it looks like the oen more thread
+-      //   gets access to the handle and the handle_input is called by
+-      //   another thread.
+-      // - at that point of time if the thread returning -1 to the
+-      //   reactor starts closing down the handler, bad things start
+-      //   happening.
+-      // Looks subtle though. After adding this I dont see anything
+-      // bad happenin and so let us stick with it...
+-      resume_handle.set_flag (TAO_Resume_Handle::TAO_HANDLE_LEAVE_SUSPENDED);
+-    }
+-
+-  return retval;
+-}
+-
+ 
+ int
+ TAO_SSLIOP_Connection_Handler::setup_ssl_state (
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h,v
+retrieving revision 1.16
+diff -u -u -r1.16 SSLIOP_Connection_Handler.h
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h	2 May 2002 04:02:51 -0000	1.16
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h	12 Sep 2002 15:56:35 -0000
+@@ -81,15 +81,14 @@
+   /// calling <activate>.  This serves as the event loop in such cases.
+   virtual int svc (void);
+ 
+-  /// Perform appropriate closing.
+-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+-                            ACE_Reactor_Mask = ACE_Event_Handler::NULL_MASK);
+-
+-  /// Documented in ACE_Event_Handler
+-  virtual int handle_output (ACE_HANDLE);
+-
+-  /// Doumented in ACE_Event_Handler
++  //@{
++  /** @name Event Handler overloads
++   */
+   virtual int resume_handler (void);
++  virtual int handle_input (ACE_HANDLE);
++  virtual int handle_output (ACE_HANDLE);
++  virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
++  //@}
+ 
+   /// Add ourselves to Cache.
+   int add_transport_to_cache (void);
+@@ -109,18 +108,13 @@
+ 
+ protected:
+ 
++  //@{
+   /**
+-   * @name Event Handler overloads
+-   *
+-   * SSLIOP-specific event handling methods.
++   * @name TAO_Connection Handler overloads
+    */
+-  //@{
+-
+-  /// Reads a message from the <peer()>, dispatching and servicing it
+-  /// appropriately.
+-  /// handle_input() just delegates on handle_input_i().
+-  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+-
++  void handle_close_i (void);
++  virtual int release_os_resources (void);
++  virtual void pos_io_hook (int & return_value);
+   //@}
+ 
+ protected:
+@@ -128,11 +122,6 @@
+   /// Reference to the SSLIOP::Current object (downcast to gain access
+   /// to the low-level management methods).
+   TAO_SSLIOP_Current_var current_;
+-
+-private:
+-
+-  /// Perform appropriate closing..
+-  void handle_close_i (void);
+ 
+ private:
+ 
+Index: tao/Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Connection_Handler.cpp,v
+retrieving revision 1.20
+diff -u -u -r1.20 Connection_Handler.cpp
+--- tao/Connection_Handler.cpp	2 Jul 2002 21:10:02 -0000	1.20
++++ tao/Connection_Handler.cpp	12 Sep 2002 15:56:35 -0000
+@@ -7,7 +7,11 @@
+ #include "Object.h"
+ #include "Resume_Handle.h"
+ #include "Transport.h"
++#include "Wait_Strategy.h"
++#include "Resume_Handle.h"
++
+ #include "ace/SOCK.h"
++#include "ace/Reactor.h"
+ 
+ #if !defined (__ACE_INLINE__)
+ #include "tao/Connection_Handler.inl"
+@@ -18,7 +22,7 @@
+            "$Id: Connection_Handler.cpp,v 1.20 2002/07/02 21:10:02 bala Exp $")
+ 
+ TAO_Connection_Handler::TAO_Connection_Handler (TAO_ORB_Core *orb_core)
+-  :orb_core_ (orb_core),
++  : orb_core_ (orb_core),
+    transport_ (0),
+    tss_resources_ (orb_core->get_tss_resources ()),
+    pending_upcalls_ (1),
+@@ -200,4 +204,206 @@
+                     *this->pending_upcall_lock_, -1);
+ 
+   return --this->pending_upcalls_;
++}
++
++int
++TAO_Connection_Handler::handle_close_eh (
++    ACE_HANDLE handle, unsigned long reactor_mask, ACE_Event_Handler * eh)
++{
++  ACE_HANDLE my_handle = eh->get_handle ();
++
++  if (TAO_debug_level)
++    {
++      ACE_DEBUG  ((LM_DEBUG,
++                   "TAO (%P|%t) - Connection_Handler[%d]::handle_close_eh, "
++                   "(%d, %d)\n",
++                   my_handle, handle, reactor_mask));
++    }
++
++  if(my_handle == ACE_INVALID_HANDLE)
++    {
++      return 0;
++    }
++
++  // Just close the socket irrespective of what the upcall count is,
++  // we need to cleanup OS resources ASAP.
++  this->release_os_resources ();
++
++  // Set the handle to be INVALID_HANDLE
++  eh->set_handle (ACE_INVALID_HANDLE);
++
++  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
++
++  // @@ TODO All this code dealing with upcalls is fishy, upcalls are
++  //    incremented/decremented in handle_input_i(), and only
++  //    decremented here!  Also: the reference count is decremented
++  //    here, while it is incremented in a selected few other places,
++  //    in a very confusing ways.
++  long upcalls = this->decr_pending_upcalls ();
++
++  ACE_ASSERT(upcalls >= 0);
++
++  // If the upcall count is zero start the cleanup.
++  if (upcalls == 0)
++    this->decr_refcount ();
++
++  return 0;
++}
++
++void
++TAO_Connection_Handler::handle_close_i_eh (
++    ACE_Event_Handler * eh)
++{
++  if (TAO_debug_level)
++    ACE_DEBUG  ((LM_DEBUG,
++                 "TAO (%P|%t) - Connection_Handler[%d]::handle_close_i, "
++                 "\n",
++                 this->transport ()->id ()));
++
++  if (this->transport ()->wait_strategy ()->is_registered ())
++    {
++      // Make sure there are no timers.
++      ACE_ASSERT(eh->reactor() != 0);
++      eh->reactor ()->cancel_timer (eh);
++
++      // Set the flag to indicate that it is no longer registered with
++      // the reactor, so that it isn't included in the set that is
++      // passed to the reactor on ORB destruction.
++      this->transport ()->wait_strategy ()->is_registered (0);
++    }
++
++  // Close the handle..
++  // Remove the entry as it is invalid
++  this->transport ()->purge_entry ();
++
++  // Signal the transport that we will no longer have
++  // a reference to it.  This will eventually call
++  // TAO_Transport::release ().
++  this->transport (0);
++
++  delete this;
++}
++
++int
++TAO_Connection_Handler::handle_output_eh (
++    ACE_HANDLE, ACE_Event_Handler * eh)
++{
++  // Instantiate the resume handle here.. This will automatically
++  // resume the handle once data is written..
++  TAO_Resume_Handle resume_handle (this->orb_core (),
++                                   eh->get_handle ());
++
++  int return_value = 0;
++  this->pre_io_hook (return_value);
++  if (return_value != 0)
++    {
++      return return_value;
++    }
++
++  return_value = this->transport ()->handle_output ();
++
++  this->pos_io_hook(return_value);
++  if (return_value != 0)
++    {
++      resume_handle.set_flag (TAO_Resume_Handle::TAO_HANDLE_LEAVE_SUSPENDED);
++    }
++
++  return return_value;
++}
++
++int
++TAO_Connection_Handler::handle_input_eh (
++    ACE_HANDLE h, ACE_Event_Handler * eh)
++{
++  // Increase the reference count on the upcall that have passed us.
++  long upcalls = this->incr_pending_upcalls ();
++
++  if (TAO_debug_level > 6)
++    {
++      ACE_HANDLE handle = eh->get_handle();
++      ACE_DEBUG ((LM_DEBUG,
++                  "TAO (%P|%t) - IIOP_Connection_Handler[%d]::handle_input, "
++                  "handle = %d/%d, upcalls = %d\n",
++                  this->transport()->id(), handle, h, upcalls));
++    }
++  ACE_ASSERT (upcalls > 0);
++
++  TAO_Resume_Handle resume_handle (this->orb_core (),
++                                   eh->get_handle ());
++
++  int return_value = 0;
++
++  this->pre_io_hook (return_value);
++  if (return_value != 0)
++    {
++      return return_value;
++    }
++
++  return_value = this->transport ()->handle_input_i (resume_handle);
++
++  this->pos_io_hook(return_value);
++
++  // The upcall is done. Bump down the reference count
++  upcalls = this->decr_pending_upcalls ();
++
++  if (TAO_debug_level > 6)
++    {
++      ACE_HANDLE handle = eh->get_handle();
++      ACE_DEBUG ((LM_DEBUG,
++                  "TAO (%P|%t) - IIOP_Connection_Handler[%d]::handle_input, "
++                  "handle = %d/%d, upcalls = %d, retval = %d\n",
++                  this->transport()->id(), handle, h, upcalls, return_value));
++    }
++  ACE_ASSERT (upcalls >= 0);
++
++  if (upcalls == 0)
++    {
++      this->decr_refcount ();
++
++      // As we have already performed the handle closing (indirectly)
++      // we dont want to return a  -1. Doing so would make the reactor
++      // call handle_close () which could be harmful.
++      return_value = 0;
++    }
++
++  if (return_value != 0 || upcalls == 0)
++    {
++      // This is really a odd case. We could have a race condition if
++      // we dont do this. Looks like this what happens
++      // - imagine we have more than 1 server threads
++      // - The server has got more than one connection from the
++      //   clients
++      // - The clients make requests and they start dissappearing.
++      // - The connections start getting closed
++      // - at that point one of the server threads is woken up to
++      //   and handle_input () is called.
++      // - the handle_input sees no data and so is about return a -1.
++      // - if the handle is resumed, it looks like the oen more thread
++      //   gets access to the handle and the handle_input is called by
++      //   another thread.
++      // - at that point of time if the thread returning -1 to the
++      //   reactor starts closing down the handler, bad things start
++      //   happening.
++      // Looks subtle though. After adding this I dont see anything
++      // bad happenin and so let us stick with it...
++      resume_handle.set_flag (TAO_Resume_Handle::TAO_HANDLE_LEAVE_SUSPENDED);
++    }
++
++  return return_value;
++}
++
++int
++TAO_Connection_Handler::release_os_resources (void)
++{
++  return 0;
++}
++
++void
++TAO_Connection_Handler::pre_io_hook (int & )
++{
++}
++
++void
++TAO_Connection_Handler::pos_io_hook (int & )
++{
+ }
+Index: tao/Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Connection_Handler.h,v
+retrieving revision 1.23
+diff -u -u -r1.23 Connection_Handler.h
+--- tao/Connection_Handler.h	7 Aug 2002 04:38:10 -0000	1.23
++++ tao/Connection_Handler.h	12 Sep 2002 15:56:35 -0000
+@@ -28,6 +28,7 @@
+ class TAO_Transport;
+ class ACE_SOCK;
+ class ACE_Lock;
++class ACE_Event_Handler;
+ 
+ /**
+  * @class TAO_Connection_Handler
+@@ -108,6 +109,49 @@
+ 
+   /// Shutdown the object
+   virtual void handle_close_i (void) = 0;
++
++  //@{
++  /**
++   * @name Helper methods for Event_Handler-based derived classes.
++   *
++   * Many (actually all so far) implementations of
++   * TAO_Connection_Handler are a mixin of TAO_Connection_Handler and
++   * some form of ACE_Event_Handler.  The following methods simplify
++   * such implementations by capturing the common code in a single
++   * place.
++   */
++
++  /// Implement the handle_close() callback
++  virtual int handle_close_eh (ACE_HANDLE h,
++                               unsigned long reactor_mask,
++                               ACE_Event_Handler * eh);
++
++  /// Implement the handle_close_i() template method.
++  void handle_close_i_eh (ACE_Event_Handler * eh);
++
++  /// Implement the handle_output() callback
++  int handle_output_eh (ACE_HANDLE h, ACE_Event_Handler * eh);
++
++  /// Implement the handle_input() callback
++  int handle_input_eh (ACE_HANDLE h, ACE_Event_Handler * eh);
++
++  /// Release the OS resources related to this handler, used in handle_close_eh()
++  virtual int release_os_resources (void);
++
++  /// Pre-invocation hook for I/O operations (handle_input() &
++  /// handle_output())
++  /**
++   * See the SSLIOP protocol for an interesting use-case
++   */
++  virtual void pre_io_hook (int & return_value);
++
++  /// Post-invocation hook for I/O operations (handle_input() &
++  /// handle_output())
++  /**
++   * See the SSLIOP protocol for an interesting use-case
++   */
++  virtual void pos_io_hook (int & return_value);
++  //@}
+ 
+ private:
+   /// Pointer to the TAO_ORB_Core
+Index: tao/IIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Connection_Handler.cpp,v
+retrieving revision 1.57
+diff -u -u -r1.57 IIOP_Connection_Handler.cpp
+--- tao/IIOP_Connection_Handler.cpp	7 Aug 2002 17:50:46 -0000	1.57
++++ tao/IIOP_Connection_Handler.cpp	12 Sep 2002 15:56:35 -0000
+@@ -188,105 +188,41 @@
+   return this->svc_i ();
+ }
+ 
+-
+ int
+-TAO_IIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+-                                           ACE_Reactor_Mask rm)
++TAO_IIOP_Connection_Handler::resume_handler (void)
+ {
+-  ACE_HANDLE my_handle = this->get_handle ();
+-
+-  if (TAO_debug_level)
+-    {
+-      ACE_DEBUG  ((LM_DEBUG,
+-                   "TAO (%P|%t) - IIOP_Connection_Handler[%d]::handle_close, "
+-                   "(%d, %d)\n",
+-                   my_handle, handle, rm));
+-    }
+-
+-  if(my_handle == ACE_INVALID_HANDLE)
+-    {
+-      return 0;
+-    }
+-
+-  // Just close the socket irrespective of what the upcall count is,
+-  // we need to cleanup OS resources ASAP.
+-  this->peer().close ();
+-
+-  // Set the handle to be INVALID_HANDLE
+-  this->set_handle (ACE_INVALID_HANDLE);
+-
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+-
+-  // @@ TODO All this code dealing with upcalls is fishy, upcalls are
+-  //    incremented/decremented in handle_input_i(), and only
+-  //    decremented here!  Also: the reference count is decremented
+-  //    here, while it is incremented in a selected few other places,
+-  //    in a very confusing ways.
+-  long upcalls = this->decr_pending_upcalls ();
+-
+-  // @@ TODO This is just bogus, a reference count below zero
+-  //    indicates a bug, should be ACE_ASSERT'ed and crash the ORB
+-  //    during testing!
+-  // Just return incase the upcall count goes below 0.
+-  if (upcalls < 0)
+-    return 0;
+-
+-  // If the upcall count is zero start the cleanup.
+-  if (upcalls == 0)
+-    this->decr_refcount ();
+-
+-  return 0;
++  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
+ }
+ 
+-
+-void
+-TAO_IIOP_Connection_Handler::handle_close_i (void)
++int
++TAO_IIOP_Connection_Handler::handle_input (ACE_HANDLE h)
+ {
+-  if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 "TAO (%P|%t) - IIOP_Connection_Handler[%d]::handle_close_i, "
+-                 "\n",
+-                 this->transport ()->id ()));
+-
+-  if (this->transport ()->wait_strategy ()->is_registered ())
+-    {
+-      // Make sure there are no timers.
+-      this->reactor ()->cancel_timer (this);
+-
+-      // Set the flag to indicate that it is no longer registered with
+-      // the reactor, so that it isn't included in the set that is
+-      // passed to the reactor on ORB destruction.
+-      this->transport ()->wait_strategy ()->is_registered (0);
+-    }
++  return this->handle_input_eh (h, this);
++}
+ 
+-  // Close the handle..
+-  // Remove the entry as it is invalid
+-  this->transport ()->purge_entry ();
+-
+-  // Signal the transport that we will no longer have
+-  // a reference to it.  This will eventually call
+-  // TAO_Transport::release ().
+-  this->transport (0);
+-
+-  // Follow usual Reactor-style lifecycle semantics and commit
+-  // suicide.
+-  this->destroy ();
++int
++TAO_IIOP_Connection_Handler::handle_output (ACE_HANDLE handle)
++{
++  return this->handle_output_eh (handle, this);
+ }
+ 
+ int
+-TAO_IIOP_Connection_Handler::resume_handler (void)
++TAO_IIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
++                                           ACE_Reactor_Mask rm)
+ {
+-  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
++  return this->handle_close_eh (handle, rm, this);
++}
++
++void
++TAO_IIOP_Connection_Handler::handle_close_i (void)
++{
++  this->handle_close_i_eh (this);
+ }
+ 
+ int
+-TAO_IIOP_Connection_Handler::handle_output (ACE_HANDLE)
++TAO_IIOP_Connection_Handler::release_os_resources (void)
+ {
+-  // Instantiate the resume handle here.. This will automatically
+-  // resume the handle once data is written..
+-  TAO_Resume_Handle resume_handle (this->orb_core (),
+-                                   this->get_handle ());
+-  return this->transport ()->handle_output ();
++  return this->peer().close ();
+ }
+ 
+ int
+@@ -355,77 +291,6 @@
+   return 0;
+ }
+ 
+-
+-int
+-TAO_IIOP_Connection_Handler::handle_input (ACE_HANDLE h)
+-{
+-  // Increase the reference count on the upcall that have passed us.
+-  long upcalls = this->incr_pending_upcalls ();
+-
+-  if (TAO_debug_level > 6)
+-    {
+-      ACE_HANDLE handle = this->get_handle();
+-      ACE_DEBUG ((LM_DEBUG,
+-                  "TAO (%P|%t) - IIOP_Connection_Handler[%d]::handle_input, "
+-                  "handle = %d/%d, upcalls = %d\n",
+-                  this->transport()->id(), handle, h, upcalls));
+-    }
+-  ACE_ASSERT (upcalls > 0);
+-
+-  TAO_Resume_Handle resume_handle (this->orb_core (),
+-                                   this->get_handle ());
+-
+-  int retval = this->transport ()->handle_input_i (resume_handle);
+-
+-  // The upcall is done. Bump down the reference count
+-  upcalls = this->decr_pending_upcalls ();
+-
+-  if (TAO_debug_level > 6)
+-    {
+-      ACE_HANDLE handle = this->get_handle();
+-      ACE_DEBUG ((LM_DEBUG,
+-                  "TAO (%P|%t) - IIOP_Connection_Handler[%d]::handle_input, "
+-                  "handle = %d/%d, upcalls = %d, retval = %d\n",
+-                  this->transport()->id(), handle, h, upcalls, retval));
+-    }
+-  ACE_ASSERT (upcalls >= 0);
+-
+-  if (upcalls == 0)
+-    {
+-      this->decr_refcount ();
+-
+-      // As we have already performed the handle closing (indirectly)
+-      // we dont want to return a  -1. Doing so would make the reactor
+-      // call handle_close () which could be harmful.
+-      retval = 0;
+-    }
+-
+-  if (retval == -1 || upcalls == 0)
+-    {
+-      // This is really a odd case. We could have a race condition if
+-      // we dont do this. Looks like this what happens
+-      // - imagine we have more than 1 server threads
+-      // - The server has got more than one connection from the
+-      //   clients
+-      // - The clients make requests and they start dissappearing.
+-      // - The connections start getting closed
+-      // - at that point one of the server threads is woken up to
+-      //   and handle_input () is called.
+-      // - the handle_input sees no data and so is about return a -1.
+-      // - if the handle is resumed, it looks like the oen more thread
+-      //   gets access to the handle and the handle_input is called by
+-      //   another thread.
+-      // - at that point of time if the thread returning -1 to the
+-      //   reactor starts closing down the handler, bad things start
+-      //   happening.
+-      // Looks subtle though. After adding this I dont see anything
+-      // bad happenin and so let us stick with it...
+-      resume_handle.set_flag (TAO_Resume_Handle::TAO_HANDLE_LEAVE_SUSPENDED);
+-    }
+-
+-  return retval;
+-}
+-
+ void
+ TAO_IIOP_Connection_Handler::update_protocol_properties (
+   int send_buffer_size,
+@@ -520,10 +385,6 @@
+ 
+   return 0;
+ }
+-
+-
+-
+-
+ 
+ // ****************************************************************
+ 
+Index: tao/IIOP_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Connection_Handler.h,v
+retrieving revision 1.16
+diff -u -u -r1.16 IIOP_Connection_Handler.h
+--- tao/IIOP_Connection_Handler.h	7 Aug 2002 04:47:04 -0000	1.16
++++ tao/IIOP_Connection_Handler.h	12 Sep 2002 15:56:35 -0000
+@@ -103,21 +103,19 @@
+                         size_t stack_size[] = 0,
+                         ACE_thread_t  thread_names[] = 0);
+ 
++
+   /// Only used when the handler is turned into an active object by
+   /// calling <activate>.  This serves as the event loop in such cases.
+   virtual int svc (void);
+ 
+-  /// Perform appropriate closing.
+-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+-                            ACE_Reactor_Mask = ACE_Event_Handler::NULL_MASK);
+-
+-
+-  /// Send a TRUE value to the reactor, so that the reactor does not
+-  /// resume the handler
++  //@{
++  /** @name Event Handler overloads
++   */
+   virtual int resume_handler (void);
+-
+-  /// Use peer() to drain the outgoing message queue
++  virtual int handle_input (ACE_HANDLE);
+   virtual int handle_output (ACE_HANDLE);
++  virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
++  //@}
+ 
+   /// Add ourselves to Cache.
+   int add_transport_to_cache (void);
+@@ -142,18 +140,13 @@
+ 
+ protected:
+ 
+-  /// = Event Handler overloads
+-
+-  /// Reads a message from the <peer()>, dispatching and servicing it
+-  /// appropriately.
+-  /// handle_input() just delegates on handle_input_i() which timeouts
+-  /// after <max_wait_time>, this is used in thread-per-connection to
+-  /// ensure that server threads eventually exit.
+-  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+-
+-  /// Connection Handler overloads
+-  /// Perform appropriate closing.
++  //@{
++  /**
++   * @name TAO_Connection Handler overloads
++   */
+   void handle_close_i (void);
++  virtual int release_os_resources (void);
++  //@}
+ 
+ private:
+   /// TCP configuration for this connection.
+Index: tao/Strategies/DIOP_Acceptor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Acceptor.cpp,v
+retrieving revision 1.7
+diff -u -u -r1.7 DIOP_Acceptor.cpp
+--- tao/Strategies/DIOP_Acceptor.cpp	12 Jun 2002 17:29:36 -0000	1.7
++++ tao/Strategies/DIOP_Acceptor.cpp	12 Sep 2002 15:56:35 -0000
+@@ -239,7 +239,8 @@
+         }
+       else
+         {
+-          this->connection_handler_->handle_close ();
++          this->connection_handler_->handle_close (ACE_INVALID_HANDLE,
++                                                   ACE_Event_Handler::ALL_EVENTS_MASK);
+         }
+       this->connection_handler_ = 0;
+     }
+Index: tao/Strategies/DIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Connection_Handler.cpp,v
+retrieving revision 1.22
+diff -u -u -r1.22 DIOP_Connection_Handler.cpp
+--- tao/Strategies/DIOP_Connection_Handler.cpp	19 Jun 2002 19:22:55 -0000	1.22
++++ tao/Strategies/DIOP_Connection_Handler.cpp	12 Sep 2002 15:56:35 -0000
+@@ -201,112 +201,41 @@
+   return this->svc_i ();
+ }
+ 
+-
+ int
+-TAO_DIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+-                                           ACE_Reactor_Mask rm)
++TAO_DIOP_Connection_Handler::resume_handler (void)
+ {
+-  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
+-  //    in fact, even the comments were identical.  IMHO needs
+-  //    re-factoring.
+-  ACE_HANDLE my_handle = this->get_handle ();
+-
+-  if (TAO_debug_level)
+-    {
+-      ACE_DEBUG  ((LM_DEBUG,
+-                   "TAO (%P|%t) - DIOP_Connection_Handler[%d]::handle_close, "
+-                   "(%d, %d)\n",
+-                   my_handle, handle, rm));
+-    }
+-
+-  if(my_handle == ACE_INVALID_HANDLE)
+-    {
+-      return 0;
+-    }
+-  this->peer().close ();
+-
+-  this->set_handle (ACE_INVALID_HANDLE);
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+-
+-  long upcalls = this->decr_pending_upcalls ();
+-
+-  if (upcalls < 0)
+-    return 0;
+-
+-  if (upcalls == 0)
+-    this->decr_refcount ();
+-
+-  return 0;
++  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
+ }
+ 
+-void
+-TAO_DIOP_Connection_Handler::handle_close_i (void)
++int
++TAO_DIOP_Connection_Handler::handle_input (ACE_HANDLE h)
+ {
+-  if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 ACE_TEXT ("TAO (%P|%t) ")
+-                 ACE_TEXT ("DIOP_Connection_Handler::handle_close_i ")
+-                 ACE_TEXT ("(%d)\n"),
+-                 this->transport ()->id ()));
+-
+-  // @@ Why are we doing checks for is_registered flags here if the
+-  // handlers are not registered with the reactor? - Bala
+-  if (this->transport ()->wait_strategy ()->is_registered ())
+-    {
+-      // @@ Frank: Added reactor check.  not sure if this is right?
+-      if (this->reactor ())
+-        {
+-          // Make sure there are no timers.
+-          this->reactor ()->cancel_timer (this);
+-        }
+-
+-      // Set the flag to indicate that it is no longer registered with
+-      // the reactor, so that it isn't included in the set that is
+-      // passed to the reactor on ORB destruction.
+-      this->transport ()->wait_strategy()->is_registered (0);
+-    }
+-
+-  // Close the handle..
+-  // Remove the entry as it is invalid
+-  this->transport ()->purge_entry ();
+-
+-  // Signal the transport that we will no longer have
+-  // a reference to it.  This will eventually call
+-  // TAO_Transport::release ().
+-  this->transport (0);
+-
+-  // Follow usual Reactor-style lifecycle semantics and commit
+-  // suicide.
+-  this->destroy ();
++  return this->handle_input_eh (h, this);
+ }
+ 
+-
+ int
+-TAO_DIOP_Connection_Handler::resume_handler (void)
++TAO_DIOP_Connection_Handler::handle_output (ACE_HANDLE handle)
+ {
+-  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
++  return this->handle_output_eh (handle, this);
+ }
+ 
+-
+ int
+-TAO_DIOP_Connection_Handler::add_transport_to_cache (void)
++TAO_DIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
++                                           ACE_Reactor_Mask rm)
+ {
+-  ACE_INET_Addr addr;
+-
+-  // Get the peername.
+-  if (this->peer ().get_remote_addr (addr) == -1)
+-    return -1;
+-
+-  // Construct an  DIOP_Endpoint object
+-  TAO_DIOP_Endpoint endpoint (addr,
+-                              0);
++  return this->handle_close_eh (handle, rm, this);
++}
+ 
+-  // Construct a property object
+-  TAO_Base_Transport_Property prop (&endpoint);
++void
++TAO_DIOP_Connection_Handler::handle_close_i (void)
++{
++  this->handle_close_i_eh (this);
++}
+ 
+-  // Add the handler to Cache
+-  return this->orb_core ()->lane_resources ().transport_cache ().cache_transport (&prop,
+-                                                                                  this->transport ());
++int
++TAO_DIOP_Connection_Handler::release_os_resources (void)
++{
++  return this->peer().close ();
+ }
+ 
+ // @@ Frank: Hopefully this isn't needed
+@@ -349,112 +278,14 @@
+ }
+ */
+ 
+-int
+-TAO_DIOP_Connection_Handler::handle_input (ACE_HANDLE)
+-{
+-  // Increase the reference count on the upcall that have passed us.
+-  this->incr_pending_upcalls ();
+-
+-  TAO_Resume_Handle  resume_handle (this->orb_core (),
+-                                    this->get_handle ());
+-
+-  int retval = this->transport ()->handle_input_i (resume_handle);
+-
+-  // Now the message has been read
+-  if (retval == -1 && TAO_debug_level > 0)
+-    {
+-      ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("TAO (%P|%t) - %p\n"),
+-                  ACE_TEXT ("DIOP_Connection_Handler::handle_input \n")));
+-
+-    }
+-
+-  // The upcall is done. Bump down the reference count
+-  long upcalls = this->decr_pending_upcalls ();
+-
+-  // Try to clean up things if the upcall count has reached 0
+-  if (upcalls == 0)
+-    {
+-      this->decr_refcount ();
+-
+-      // As we have already performed the handle closing we dont want
+-      // to return a  -1. Doing so would make the reactor call
+-      // handle_close () which could be harmful.
+-      retval = 0;
+-    }
+-  else if (upcalls < 0)
+-    {
+-      retval = 0;
+-    }
+-
+-  if (retval == -1)
+-    {
+-      // @@ Bala: I am not sure why I am doing this here. But let it
+-      // be there for uniformity sake..
+-      // This is really a odd case. We could have a race condition if
+-      // we dont do this. Looks like this what happens
+-      // - imagine we have more than 1 server threads
+-      // - The server has got more than one connection from the
+-      //   clients
+-      // - The clients make requests and they start dissappearing.
+-      // - The connections start getting closed
+-      // - at that point one of the server threads is woken up to
+-      //   and handle_input () is called.
+-      // - the handle_input sees no data and so is about return a -1.
+-      // - if the handle is resumed, it looks like the oen more thread
+-      //   gets access to the handle and the handle_input is called by
+-      //   another thread.
+-      // - at that point of time if the thread returning -1 to the
+-      //   reactor starts closing down the handler, bad things start
+-      //   happening.
+-      // Looks subtle though. After adding this I dont see anything
+-      // bad happenin and so let us stick with it...
+-      resume_handle.set_flag (TAO_Resume_Handle::TAO_HANDLE_LEAVE_SUSPENDED);
+-    }
+-  // @@ Michael:
+-  // We always return 0, as we do not have any send errors.
+-  return 0;
+-}
+-
+-
+-
+-// @@ Frank: From DIOP_Connect.cpp
+-int
+-TAO_DIOP_Connection_Handler::handle_cleanup (void)
+-{
+-  // Deregister this handler with the ACE_Reactor.
+-  if (this->reactor ())
+-    {
+-      ACE_Reactor_Mask mask =
+-        ACE_Event_Handler::ALL_EVENTS_MASK | ACE_Event_Handler::DONT_CALL;
+-
+-      // Make sure there are no timers.
+-      this->reactor ()->cancel_timer (this);
+-
+-      // Remove self from reactor.
+-      this->reactor ()->remove_handler (this, mask);
+-    }
+-
+-  return 0;
+-}
+-
+-
+-
+-
+ // ****************************************************************
+ 
+ #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+ 
+-// Instantiated in IIOP_Connection_Handler.cpp
+-//template class ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>;
+-
+ template class ACE_Concurrency_Strategy<TAO_DIOP_Connection_Handler>;
+ template class ACE_Creation_Strategy<TAO_DIOP_Connection_Handler>;
+ 
+ #elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+-
+-// Instantiated in IIOP_Connection_Handler.cpp
+-//#pragma instantiate ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
+ 
+ #pragma instantiate ACE_Concurrency_Strategy<TAO_DIOP_Connection_Handler>
+ #pragma instantiate ACE_Creation_Strategy<TAO_DIOP_Connection_Handler>
+Index: tao/Strategies/DIOP_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Connection_Handler.h,v
+retrieving revision 1.10
+diff -u -u -r1.10 DIOP_Connection_Handler.h
+--- tao/Strategies/DIOP_Connection_Handler.h	27 May 2002 06:34:13 -0000	1.10
++++ tao/Strategies/DIOP_Connection_Handler.h	12 Sep 2002 15:56:35 -0000
+@@ -1,4 +1,5 @@
+ // This may look like C, but it's really -*- C++ -*-
++
+ // ===================================================================
+ /**
+  *  @file   DIOP_Connection_Handler.h
+@@ -110,12 +111,14 @@
+   /// calling <activate>.  This serves as the event loop in such cases.
+   virtual int svc (void);
+ 
+-  /// Perform appropriate closing.
+-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+-                            ACE_Reactor_Mask = ACE_Event_Handler::NULL_MASK);
+-
+-  /// Event handler overload..
++  //@{
++  /** @name Event Handler overloads
++   */
+   virtual int resume_handler (void);
++  virtual int handle_input (ACE_HANDLE);
++  virtual int handle_output (ACE_HANDLE);
++  virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
++  //@}
+ 
+   /// Add ourselves to Cache.
+   int add_transport_to_cache (void);
+@@ -152,18 +155,13 @@
+ 
+ protected:
+ 
+-  /// = Event Handler overloads
+-
++  //@{
+   /**
+-   * Reads a message from the <peer()>, dispatching and servicing it
+-   * appropriately.
+-   * handle_input() just delegates on handle_input_i() which timeouts
+-   * after <max_wait_time>, this is used in thread-per-connection to
+-   * ensure that server threads eventually exit.
++   * @name TAO_Connection Handler overloads
+    */
+-  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+-
+-  virtual int handle_cleanup ();
++  void handle_close_i (void);
++  virtual int release_os_resources (void);
++  //@}
+ 
+   // DIOP Additions - Begin
+   /**
+@@ -182,16 +180,9 @@
+   // DIOP Additions - End
+ 
+ private:
+-
+-  /// Perform appropriate closing
+-  void handle_close_i (void);
+-
+-private:
+   /// TCP configuration for this connection.
+   TAO_DIOP_Properties *tcp_properties_;
+-
+ };
+-
+ 
+ #if defined (__ACE_INLINE__)
+ #include "DIOP_Connection_Handler.i"
+Index: tao/Strategies/SHMIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/SHMIOP_Connection_Handler.cpp,v
+retrieving revision 1.48
+diff -u -u -r1.48 SHMIOP_Connection_Handler.cpp
+--- tao/Strategies/SHMIOP_Connection_Handler.cpp	19 Jun 2002 19:22:55 -0000	1.48
++++ tao/Strategies/SHMIOP_Connection_Handler.cpp	12 Sep 2002 15:56:35 -0000
+@@ -162,92 +162,41 @@
+   return this->svc_i ();
+ }
+ 
+-
+ int
+-TAO_SHMIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+-                                             ACE_Reactor_Mask rm)
++TAO_SHMIOP_Connection_Handler::resume_handler (void)
+ {
+-  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
+-  //    in fact, even the comments were identical.  IMHO needs
+-  //    re-factoring.
+-  ACE_HANDLE my_handle = this->get_handle ();
+-
+-  if (TAO_debug_level)
+-    {
+-      ACE_DEBUG  ((LM_DEBUG,
+-                   "TAO (%P|%t) - SMHIOP_Connection_Handler[%d]::handle_close, "
+-                   "(%d, %d)\n",
+-                   my_handle, handle, rm));
+-    }
+-
+-  if(my_handle == ACE_INVALID_HANDLE)
+-    {
+-      return 0;
+-    }
+-  this->peer().close ();
+-
+-  this->set_handle (ACE_INVALID_HANDLE);
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+-
+-  long upcalls = this->decr_pending_upcalls ();
+-
+-  if (upcalls < 0)
+-    return 0;
+-
+-  if (upcalls == 0)
+-    this->decr_refcount ();
+-
+-  return 0;
++  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
+ }
+ 
+-void
+-TAO_SHMIOP_Connection_Handler::handle_close_i (void)
++int
++TAO_SHMIOP_Connection_Handler::handle_input (ACE_HANDLE h)
+ {
+-  if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 ACE_LIB_TEXT ("TAO (%P|%t) ")
+-                 ACE_LIB_TEXT ("SHMIOP_Connection_Handler::handle_close_i ")
+-                 ACE_LIB_TEXT ("(%d)\n"),
+-                 this->transport ()->id ()));
+-
+-  if (this->transport ()->wait_strategy ()->is_registered ())
+-    {
+-      // Make sure there are no timers.
+-      this->reactor ()->cancel_timer (this);
+-
+-      // Set the flag to indicate that it is no longer registered with
+-      // the reactor, so that it isn't included in the set that is
+-      // passed to the reactor on ORB destruction.
+-      this->transport ()->wait_strategy ()->is_registered (0);
+-    }
+-
+-  // Close the handle..
+-  // Remove the entry as it is invalid
+-  this->transport ()->purge_entry ();
+-
+-  // Signal the transport that we will no longer have
+-  // a reference to it.  This will eventually call
+-  // TAO_Transport::release ().
+-  this->transport (0);
+-
+-  this->destroy ();
++  return this->handle_input_eh (h, this);
+ }
+ 
+ int
+-TAO_SHMIOP_Connection_Handler::resume_handler (void)
++TAO_SHMIOP_Connection_Handler::handle_output (ACE_HANDLE handle)
+ {
+-  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
++  return this->handle_output_eh (handle, this);
+ }
+ 
+ int
+-TAO_SHMIOP_Connection_Handler::handle_output (ACE_HANDLE)
++TAO_SHMIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
++                                           ACE_Reactor_Mask rm)
+ {
+-  // Instantiate the resume handle here.. This will automatically
+-  // resume the handle once data is written..
+-  TAO_Resume_Handle  resume_handle (this->orb_core (),
+-                                    this->get_handle ());
++  return this->handle_close_eh (handle, rm, this);
++}
+ 
+-  return this->transport ()->handle_output ();
++void
++TAO_SHMIOP_Connection_Handler::handle_close_i (void)
++{
++  this->handle_close_i_eh (this);
++}
++
++int
++TAO_SHMIOP_Connection_Handler::release_os_resources (void)
++{
++  return this->peer().close ();
+ }
+ 
+ int
+@@ -271,67 +220,6 @@
+   return this->orb_core ()->lane_resources ().transport_cache ().cache_transport (&prop,
+                                                                                   this->transport ());
+ }
+-
+-
+-int
+-TAO_SHMIOP_Connection_Handler::handle_input (ACE_HANDLE)
+-{
+-  // Increase the reference count on the upcall that have passed us.
+-  this->incr_pending_upcalls ();
+-
+-  TAO_Resume_Handle resume_handle (this->orb_core (),
+-                                   this->get_handle ());
+-
+-  int retval = this->transport ()->handle_input_i (resume_handle);
+-
+-  // The upcall is done. Bump down the reference count
+-  long upcalls = this->decr_pending_upcalls ();
+-
+-  // Try to clean up things if the upcall count has reached 0
+-  if (upcalls == 0)
+-    {
+-      this->decr_refcount ();
+-
+-      // As we have already performed the handle closing we dont want
+-      // to return a  -1. Doing so would make the reactor call
+-      // handle_close () which could be harmful.
+-      retval = 0;
+-    }
+-  else if (upcalls < 0)
+-    {
+-      retval = 0;
+-    }
+-
+-  if (retval == -1)
+-    {
+-      // This is really a odd case. We could have a race condition if
+-      // we dont do this. Looks like this what happens
+-      // - imagine we have more than 1 server threads
+-      // - The server has got more than one connection from the
+-      //   clients
+-      // - The clients make requests and they start dissappearing.
+-      // - The connections start getting closed
+-      // - at that point one of the server threads is woken up to
+-      //   and handle_input () is called.
+-      // - the handle_input sees no data and so is about return a -1.
+-      // - if the handle is resumed, it looks like the oen more thread
+-      //   gets access to the handle and the handle_input is called by
+-      //   another thread.
+-      // - at that point of time if the thread returning -1 to the
+-      //   reactor starts closing down the handler, bad things start
+-      //   happening.
+-      // Looks subtle though. After adding this I dont see anything
+-      // bad happenin and so let us stick with it...
+-      resume_handle.set_flag (TAO_Resume_Handle::TAO_HANDLE_LEAVE_SUSPENDED);
+-    }
+-
+-  return retval;
+-}
+-
+-
+-
+-
+-
+ 
+ // ****************************************************************
+ #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+Index: tao/Strategies/SHMIOP_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/SHMIOP_Connection_Handler.h,v
+retrieving revision 1.12
+diff -u -u -r1.12 SHMIOP_Connection_Handler.h
+--- tao/Strategies/SHMIOP_Connection_Handler.h	27 May 2002 06:34:14 -0000	1.12
++++ tao/Strategies/SHMIOP_Connection_Handler.h	12 Sep 2002 15:56:35 -0000
+@@ -81,36 +81,27 @@
+   /// calling <activate>.  This serves as the event loop in such cases.
+   virtual int svc (void);
+ 
+-  /// Perform appropriate closing.
+-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+-                            ACE_Reactor_Mask = ACE_Event_Handler::NULL_MASK);
+-
+-  /// Documented in ACE_Event_Handler
+-  virtual int handle_output (ACE_HANDLE);
+-
+-  /// Overload for resuming handlers..
++  //@{
++  /** @name Event Handler overloads
++   */
+   virtual int resume_handler (void);
++  virtual int handle_input (ACE_HANDLE);
++  virtual int handle_output (ACE_HANDLE);
++  virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
++  //@}
+ 
+   /// Add ourselves to Cache.
+   int add_transport_to_cache (void);
+ 
+ protected:
+ 
+-  /// = Event Handler overloads
+-
++  //@{
+   /**
+-   * Reads a message from the <peer()>, dispatching and servicing it
+-   * appropriately.
+-   * handle_input() just delegates on handle_input_i() which timeouts
+-   * after <max_wait_time>, this is used in thread-per-connection to
+-   * ensure that server threads eventually exit.
++   * @name TAO_Connection Handler overloads
+    */
+-  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+-
+-private:
+-
+-  /// Perform handle close
+   void handle_close_i (void);
++  virtual int release_os_resources (void);
++  //@}
+ 
+ private:
+   /// Flag that we will be passing to the event handler to indicate
+Index: tao/Strategies/UIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/UIOP_Connection_Handler.cpp,v
+retrieving revision 1.46
+diff -u -u -r1.46 UIOP_Connection_Handler.cpp
+--- tao/Strategies/UIOP_Connection_Handler.cpp	19 Jun 2002 19:22:55 -0000	1.46
++++ tao/Strategies/UIOP_Connection_Handler.cpp	12 Sep 2002 15:56:35 -0000
+@@ -145,88 +145,41 @@
+   return this->svc_i ();
+ }
+ 
+-
+ int
+-TAO_UIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
+-                                           ACE_Reactor_Mask rm)
++TAO_UIOP_Connection_Handler::resume_handler (void)
+ {
+-  // @@ TODO this too similar to IIOP_Connection_Handler::handle_close,
+-  //    in fact, even the comments were identical.  IMHO needs
+-  //    re-factoring.
+-  ACE_HANDLE my_handle = this->get_handle ();
+-
+-  if (TAO_debug_level)
+-    {
+-      ACE_DEBUG  ((LM_DEBUG,
+-                   "TAO (%P|%t) - UIOP_Connection_Handler[%d]::handle_close, "
+-                   "(%d, %d)\n",
+-                   my_handle, handle, rm));
+-    }
+-
+-  if(my_handle == ACE_INVALID_HANDLE)
+-    {
+-      return 0;
+-    }
+-  this->peer().close ();
+-
+-  this->set_handle (ACE_INVALID_HANDLE);
+-
+-  long upcalls = this->decr_pending_upcalls ();
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED);
+-
+-  if (upcalls < 0)
+-    return 0;
+-
+-  if (upcalls == 0)
+-    this->decr_refcount ();
+-
+-  return 0;
++  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
+ }
+ 
+-void
+-TAO_UIOP_Connection_Handler::handle_close_i (void)
++int
++TAO_UIOP_Connection_Handler::handle_input (ACE_HANDLE h)
+ {
+-  if (TAO_debug_level)
+-    ACE_DEBUG  ((LM_DEBUG,
+-                 ACE_TEXT ("TAO (%P|%t) ")
+-                 ACE_TEXT ("UIOP_Connection_Handler::handle_close_i ")
+-                 ACE_TEXT ("(%d)\n"),
+-                 this->transport ()->id ()));
+-  if (this->transport ()->wait_strategy ()->is_registered ())
+-    {
+-      // Make sure there are no timers.
+-      this->reactor ()->cancel_timer (this);
+-
+-      // Set the flag to indicate that it is no longer registered with
+-      // the reactor, so that it isn't included in the set that is
+-      // passed to the reactor on ORB destruction.
+-      this->transport ()->wait_strategy ()->is_registered (0);
+-    }
+-
+-  // Remove the entry as it is invalid
+-  this->transport ()->purge_entry ();
+-
+-  // Signal the transport that we will no longer have
+-  // a reference to it.  This will eventually call
+-  // TAO_Transport::release ().
+-  this->transport (0);
++  return this->handle_input_eh (h, this);
++}
+ 
+-  this->destroy ();
++int
++TAO_UIOP_Connection_Handler::handle_output (ACE_HANDLE handle)
++{
++  return this->handle_output_eh (handle, this);
+ }
+ 
+ int
+-TAO_UIOP_Connection_Handler::resume_handler (void)
++TAO_UIOP_Connection_Handler::handle_close (ACE_HANDLE handle,
++                                           ACE_Reactor_Mask rm)
+ {
+-  return ACE_Event_Handler::ACE_APPLICATION_RESUMES_HANDLER;
++  return this->handle_close_eh (handle, rm, this);
+ }
+ 
++void
++TAO_UIOP_Connection_Handler::handle_close_i (void)
++{
++  this->handle_close_i_eh (this);
++}
+ 
+ int
+-TAO_UIOP_Connection_Handler::handle_output (ACE_HANDLE)
++TAO_UIOP_Connection_Handler::release_os_resources (void)
+ {
+-  TAO_Resume_Handle  resume_handle (this->orb_core (),
+-                                    this->get_handle ());
+-  return this->transport ()->handle_output ();
++  return this->peer().close ();
+ }
+ 
+ int
+@@ -247,61 +200,6 @@
+   // Add the handler to Cache
+   return this->orb_core ()->lane_resources ().transport_cache ().cache_transport (&prop,
+                                                                                   this->transport ());
+-}
+-
+-int
+-TAO_UIOP_Connection_Handler::handle_input (ACE_HANDLE)
+-{
+-  this->incr_pending_upcalls ();
+-
+-  TAO_Resume_Handle resume_handle (this->orb_core (),
+-                                   this->get_handle ());
+-
+-  int retval =
+-    this->transport ()->handle_input_i (resume_handle);
+-
+-  // The upcall is done. Bump down the reference count
+-  long upcalls = this->decr_pending_upcalls ();
+-
+-  // Try to clean up things if the upcall count has reached 0
+-  if (upcalls == 0)
+-    {
+-      this->decr_refcount ();
+-
+-      // As we have already performed the handle closing we dont want
+-      // to return a  -1. Doing so would make the reactor call
+-      // handle_close () which could be harmful.
+-      retval = 0;
+-    }
+-  else if (upcalls < 0)
+-    {
+-      retval = 0;
+-    }
+-
+-  if (retval == -1)
+-    {
+-      // This is really a odd case. We could have a race condition if
+-      // we dont do this. Looks like this what happens
+-      // - imagine we have more than 1 server threads
+-      // - The server has got more than one connection from the
+-      //   clients
+-      // - The clients make requests and they start dissappearing.
+-      // - The connections start getting closed
+-      // - at that point one of the server threads is woken up to
+-      //   and handle_input () is called.
+-      // - the handle_input sees no data and so is about return a -1.
+-      // - if the handle is resumed, it looks like the oen more thread
+-      //   gets access to the handle and the handle_input is called by
+-      //   another thread.
+-      // - at that point of time if the thread returning -1 to the
+-      //   reactor starts closing down the handler, bad things start
+-      //   happening.
+-      // Looks subtle though. After adding this I dont see anything
+-      // bad happenin and so let us stick with it...
+-      resume_handle.set_flag (TAO_Resume_Handle::TAO_HANDLE_LEAVE_SUSPENDED);
+-    }
+-
+-  return retval;
+ }
+ 
+ #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+Index: tao/Strategies/UIOP_Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/UIOP_Connection_Handler.h,v
+retrieving revision 1.12
+diff -u -u -r1.12 UIOP_Connection_Handler.h
+--- tao/Strategies/UIOP_Connection_Handler.h	27 May 2002 06:34:14 -0000	1.12
++++ tao/Strategies/UIOP_Connection_Handler.h	12 Sep 2002 15:56:35 -0000
+@@ -100,33 +100,27 @@
+   /// calling <activate>.  This serves as the event loop in such cases.
+   virtual int svc (void);
+ 
+-  /// Perform appropriate closing.
+-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+-                            ACE_Reactor_Mask = ACE_Event_Handler::NULL_MASK);
+-
+-  /// Overload for resuming handlers..
++  //@{
++  /** @name Event Handler overloads
++   */
+   virtual int resume_handler (void);
+-
+-  /// Use peer() to drain the outgoing message queue
++  virtual int handle_input (ACE_HANDLE);
+   virtual int handle_output (ACE_HANDLE);
++  virtual int handle_close (ACE_HANDLE, ACE_Reactor_Mask);
++  //@}
+ 
+   /// Add ourselves to Cache.
+   int add_transport_to_cache (void);
+ 
+ protected:
+ 
+-  /// = Event Handler overloads
+-
++  //@{
+   /**
+-   * Reads a message from the <peer()>, dispatching and servicing it
+-   * appropriately. handle_input() just delegates on handle_input_i() which
+-   * timeouts after <max_wait_time>.
++   * @name TAO_Connection Handler overloads
+    */
+-  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+-
+-private:
+-  /// Perform appropriate closing
+   void handle_close_i (void);
++  virtual int release_os_resources (void);
++  //@}
+ 
+ private:
+ 
