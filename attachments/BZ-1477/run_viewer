@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# This runs all the components that support a single viewer.
+# The viewer consists of a dvdview (to actually render the MPEG),
+# a receiver (to acquire the MPEG stream via A/V Streams) and a
+# quokernel (to control the QoS of that stream).
+
+. ./uavenv.sh
+
+VIEWER=Receiver
+
+cd $QUO_ROOT/UAV/uav/qosket/distributor/kernel
+./startquokernel  -s Distributer  -r $VIEWER &
+
+cd $QUO_ROOT/UAV/uav/dvdview/src
+./dvdview -z 8004 a &
+
+sleep 2
+cd $QUO_ROOT/UAV/uav/avstreams
+./receiver -ORBInitRef NameService=corbaloc::192.168.1.2:2809/NameService -s Distributer  -p 8004 -r $VIEWER -d 3  -a receiver_addr_file
+
