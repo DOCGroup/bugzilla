@@ -1,0 +1,75 @@
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Acceptor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Acceptor.cpp,v
+retrieving revision 1.36
+diff -u -u -r1.36 SSLIOP_Acceptor.cpp
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Acceptor.cpp	18 Jan 2002 01:40:13 -0000	1.36
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Acceptor.cpp	12 Jun 2002 17:23:02 -0000
+@@ -345,7 +345,12 @@
+ 
+   for (size_t i = 0; i < this->endpoint_count_; ++i)
+     {
+-      // compare the port and sin_addr (numeric host address)
++      // @@ TODO The following code looks funky, why only the address
++      //    is compared?  What about the IIOP address?  Why force a
++      //    DNS lookup every time an SSLIOP object is decoded:
++      //
++      // http://deuce.doc.wustl.edu/bugzilla/show_bug.cgi?id=1220
++      //
+       if (endp->iiop_endpoint ()->object_addr () == this->addrs_[i])
+         return 1;  // Collocated
+     }
+Index: tao/IIOP_Acceptor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Acceptor.cpp,v
+retrieving revision 1.69
+diff -u -u -r1.69 IIOP_Acceptor.cpp
+--- tao/IIOP_Acceptor.cpp	18 Apr 2002 17:21:24 -0000	1.69
++++ tao/IIOP_Acceptor.cpp	12 Jun 2002 17:23:02 -0000
+@@ -247,12 +247,18 @@
+ 
+   for (size_t i = 0; i < this->endpoint_count_; ++i)
+     {
+-      // compare the port and sin_addr (numeric host address)
+-      if (endp->object_addr () == this->addrs_[i])
+-        return 1;  // Collocated
++      // compare the port and host name.  Please do *NOT* optimize
++      // this code by comparing the IP address instead.  That would
++      // trigger the following bug:
++      //
++      // http://deuce.doc.wustl.edu/bugzilla/show_bug.cgi?id=1220
++      //
++      if (endp->port() == this->addrs_[i].get_port_number()
++          && ACE_OS::strcmp(endp->host(), this->hosts_[i]) == 0)
++        return 1;
+     }
+ 
+-  return 0;  // Not collocated
++  return 0;
+ }
+ 
+ int
+Index: tao/Strategies/DIOP_Acceptor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Strategies/DIOP_Acceptor.cpp,v
+retrieving revision 1.6
+diff -u -u -r1.6 DIOP_Acceptor.cpp
+--- tao/Strategies/DIOP_Acceptor.cpp	13 Jan 2002 20:00:15 -0000	1.6
++++ tao/Strategies/DIOP_Acceptor.cpp	12 Jun 2002 17:23:02 -0000
+@@ -210,8 +210,14 @@
+ 
+   for (size_t i = 0; i < this->endpoint_count_; ++i)
+     {
+-      // compare the port and sin_addr (numeric host address)
+-      if (endp->object_addr () == this->addrs_[i])
++      // compare the port and host name.  Please do *NOT* optimize
++      // this code by comparing the IP address instead.  That would
++      // trigger the following bug:
++      //
++      // http://deuce.doc.wustl.edu/bugzilla/show_bug.cgi?id=1220
++      //
++      if (endp->port() == this->addrs_[i].get_port_number()
++          && ACE_OS::strcmp(endp->host(), this->hosts_[i]) == 0)
+         return 1;  // Collocated
+     }
+ 
