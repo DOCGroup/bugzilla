@@ -1,0 +1,23 @@
+Index: TAO_Internal.cpp
+===================================================================
+RCS file: /home/src/cvs/ACE_wrappers/TAO/tao/TAO_Internal.cpp,v
+retrieving revision 1.1.1.4
+diff -u -r1.1.1.4 TAO_Internal.cpp
+--- TAO_Internal.cpp	2002/04/10 23:17:47	1.1.1.4
++++ TAO_Internal.cpp	2002/06/04 20:16:20
+@@ -184,9 +184,12 @@
+                                         const char *server_strategy_factory_args,
+                                         const char *client_strategy_factory_args)
+ {
+-  TAO_Internal::resource_factory_args_ = resource_factory_args;
+-  TAO_Internal::server_strategy_factory_args_ = server_strategy_factory_args;
+-  TAO_Internal::client_strategy_factory_args_ = client_strategy_factory_args;
++  if(resource_factory_args != 0)
++    TAO_Internal::resource_factory_args_ = resource_factory_args;
++  if(server_strategy_factory_args != 0)
++    TAO_Internal::server_strategy_factory_args_ = server_strategy_factory_args;
++  if(client_strategy_factory_args != 0)
++    TAO_Internal::client_strategy_factory_args_ = client_strategy_factory_args;
+ }
+ 
+ int
