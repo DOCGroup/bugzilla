@@ -1,0 +1,22 @@
+#0  0x40273aa5 in __sigsuspend (set=0xbfffe250) at ../sysdeps/unix/sysv/linux/sigsuspend.c:45
+#1  0x401c2079 in __pthread_wait_for_restart_signal (self=0x401cad60) at pthread.c:967
+#2  0x401c3d39 in __pthread_alt_lock (lock=0x8071ab8, self=0x0) at restart.h:34
+#3  0x401c0c16 in __pthread_mutex_lock (mutex=0x8071aa8) at mutex.c:120
+#4  0x400ec2b4 in ACE_Select_Reactor_Notify::dispatch_notify (this=0x8071a68, buffer=@0xbfffe410) at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/OS.i:1811
+#5  0x400ec640 in ACE_Select_Reactor_Notify::handle_input (this=0x8071a68, handle=8) at Select_Reactor_Base.cpp:993
+#6  0x400ed0ba in ACE_Select_Reactor_Notify::dispatch_notifications (this=0x8071a68, number_of_active_handles=@0xbfffe4b4, rd_mask=@0xbfffe4c0) at Select_Reactor_Base.cpp:766
+#7  0x0805d2fc in ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::dispatch_notification_handlers (this=0x80712e0, dispatch_set=@0xbfffe4c0, 
+    number_of_active_handles=@0xbfffe4b4, number_of_handlers_dispatched=@0xbfffe498) at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/Select_Reactor_T.cpp:1069
+#8  0x0805b79f in ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::dispatch (this=0x80712e0, active_handle_count=0, dispatch_set=@0xbfffe4c0)
+    at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/Select_Reactor_T.cpp:1234
+#9  0x0805d556 in ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::handle_events_i (this=0x80712e0, max_wait_time=0xbfffe7a0)
+    at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/Select_Reactor_T.cpp:1309
+#10 0x08058b20 in ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::handle_events (this=0x80712e0, max_wait_time=0xbfffe7a0)
+    at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/OS.i:11614
+#11 0x0805cd52 in ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::handle_events (this=0x80712e0, max_wait_time=@0xbfffe7a0)
+    at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/Select_Reactor_T.cpp:766
+#12 0x4013e87c in ACE_Reactor::handle_events (this=0x8078b20, max_wait_time=@0xbfffe7a0) at /project/amrod/bugzilla/ImplicitTemplates/ACE_wrappers/ace/Reactor.i:184
+#13 0x08054b41 in run_test (disable_notify_pipe=0, tv=@0xbfffe8d0) at Reactor_Notify_Test.cpp:323
+#14 0x08055592 in main () at Reactor_Notify_Test.cpp:476
+#15 0x40261507 in __libc_start_main (main=0x8055278 <main>, argc=1, ubp_av=0xbffff974, init=0x8053190 <_init>, fini=0x805f358 <_fini>, rtld_fini=0x4000dc14 <_dl_fini>, 
+    stack_end=0xbffff96c) at ../sysdeps/generic/libc-start.c:129
