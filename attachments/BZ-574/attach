@@ -1,0 +1,204 @@
+// Client_main.cpp
+
+#include "testC.h"
+
+const int  NUM_MRS = 3;
+const int  USEC_DELAY = 1000;
+
+/*-------------------------------------------------------------*/
+
+int main (int argc, char *argv[])
+{
+   Test::Server_var vServer;
+   CORBA::ORB_var vOrb;
+   CORBA::Object_var vObject;
+   CORBA::String_var vString;
+   ifstream fileIn;
+
+// STARTUP
+   vOrb = CORBA::ORB_init(argc, argv);
+   // Get NT service IOR from file 'ServerIOR'
+   fileIn.open("ServerIOR");
+   char buffer[1000];
+   fileIn >> buffer;
+   vString = CORBA::string_dup(buffer);
+   fileIn.close();
+   vObject= vOrb->string_to_object(vString.in());
+   vServer = Test::Server::_narrow(vObject.in());
+
+// RUN
+   CORBA::Short i;
+   Test::Tstruct testStruct;
+   Test::TstructSeq testSeq;
+   Test::Tunion testUnion;
+   CORBA::Any any;
+   int numIter;
+
+   cout << "Size of Test::Tstruct is " << sizeof(testStruct) << endl;
+   cout << "Size of Test::TstructSeq is " << sizeof(testSeq) << endl;
+   cout << "Size of Test::Tunion is " << sizeof(testUnion) <<endl;
+   cout << endl;
+
+   cout << "How many calls should be made? ";
+   cin >> numIter;
+   cout << "Sending " << numIter << " sequences in Anys..." << endl;
+
+   for ( i = 0; i < numIter; i++ )
+   {
+      // No server-side leak if the union's 'short' or 'struct' elements
+      // were used instead.
+      testSeq.length(1);
+      testSeq[0].ShortSElem = i;
+      testSeq[0].LongSElem = i + 1024 * 64;
+      testUnion.SeqUElem(testSeq);
+      // Insertion is by reference, which should make a deep copy into
+      // newly-allocated memory.  Memory already owned by the Any should
+      // first be freed.  If we were inserting by pointer than the Any
+      // would take ownership of the pointed-to memory.
+      any <<= testUnion;
+      vServer->PushAny(any);
+      ACE_OS::sleep(ACE_Time_Value(0, USEC_DELAY));
+   };
+
+   // All done, go bye-bye
+   ACE_OS::sleep(2);
+   vServer->Shutdown();
+   return 0;
+}   /* main() */
+
+/*-- End Client_main.cpp --------------------------------------*/
+
+======== cut here ===================================================
+// Server_impl.h
+/* CORBA object that receives the data from the client.  */
+
+#include "testS.h"
+
+class Server_impl : public POA_Test::Server,
+                    public virtual PortableServer::RefCountServantBase
+{
+public:
+   Server_impl(int argc, char ** argv) :
+         m_argc(argc),
+         m_argv(argv),
+         m_count(0)
+         {};
+   ~Server_impl() {};
+
+   // IDL interfaces
+   void PushAny(const CORBA::Any & data);
+   void Shutdown(void);
+
+private:
+   int m_argc;
+   char ** m_argv;
+   int m_count;
+};
+
+/*-- End Server_impl.h ----------------------------------------*/
+
+======== cut here ===================================================
+// Server_impl.cpp
+
+#include "Server_impl.h"
+
+/*-------------------------------------------------------------*/
+
+void Server_impl::PushAny(const CORBA::Any& data)
+{
+   Test::Tunion * pUnion;
+
+   m_count++;
+
+   // Leaks even if the extraction below were not done.
+   if ( data >>= pUnion )   // The Any still owns the memory ref'ed by pUnion
+   {
+      cout << "PushAny(): received #" << m_count << " as a Tunion" << endl;
+   }
+   else
+   {
+      cout << "#" << m_count << ": PushAny() couldn't extract anything" << endl;
+   }
+
+}   /* PushAny() */
+
+/*-------------------------------------------------------------*/
+
+void Server_impl::Shutdown(void)
+{
+   CORBA::ORB_init(m_argc, m_argv)->shutdown(FALSE);
+}   /* Shutdown() */
+
+/*-------------------------------------------------------------*/
+/*-- End Server_impl.cpp --------------------------------------*/
+
+======== cut here ===================================================
+// Server_main.cpp
+
+#include "Server_impl.h"
+
+/*-------------------------------------------------------------*/
+
+int main (int argc, char *argv[])
+{
+   Server_impl servant(argc, argv);
+   Test::Server_var vServer;
+   CORBA::ORB_var vOrb;
+   CORBA::Object_var vPoa;
+   PortableServer::POA_var vRootPoa;
+   PortableServer::POAManager_var vPoaMgr;
+   PortableServer::ObjectId_var vDeactivatingObject;
+   ofstream fileOut;
+
+// STARTUP
+   // General CORBA init
+   vOrb = CORBA::ORB_init(argc, argv);
+   vPoa = vOrb->resolve_initial_references("RootPOA");
+   vRootPoa = PortableServer::POA::_narrow(vPoa.in());
+   vPoaMgr = vRootPoa->the_POAManager();
+   vPoaMgr->activate();
+   // Init the CORBA object
+   vServer = servant._this();
+   // Write my IOR to a file so the client can read it
+   fileOut.open("ServerIOR");
+   fileOut << vOrb->object_to_string(vServer);
+   fileOut.close();
+
+// RUN
+   cout << "Ready..." << endl;
+   vOrb->run();
+
+   // All done, go bye-bye
+   return 0;
+}   /* main() */
+
+/*-- End Server_main.cpp --------------------------------------*/
+
+======== cut here ===================================================
+// test.idl
+// IDL
+module Test
+{
+   struct Tstruct
+   {
+      short ShortSElem;
+      long LongSElem;
+   };
+
+   typedef sequence<Tstruct> TstructSeq;
+
+   union Tunion switch (short)
+   {
+      case 1: short ShortUElem;
+      case 2: Tstruct StructUElem;
+      case 3: TstructSeq SeqUElem;
+   };
+
+   interface Server
+   {
+      void PushAny(in Any data);
+      void Shutdown();
+   };
+};
+
+
