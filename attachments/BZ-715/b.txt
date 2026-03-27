@@ -1,0 +1,10 @@
+The bug isn't related to id_to_reference or reference_to_id methods.
+
+After a fews second that the factoryclient stops to
+call Corba methods (I insert also a sleep before the exit/return
+but nothing change),  many timeout start in the server side
+(I seem me in number equal to the number of connection)
+and the last timeout causes the crash.
+
+Regards,
+  Sandro
