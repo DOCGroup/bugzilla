@@ -1,0 +1,12 @@
+enum Result_t
+{
+	OK,
+	ERROR
+};
+
+typedef sequence<string> List_t;
+
+interface XXX
+{
+   Result_t GetList(out List_t names);
+};
