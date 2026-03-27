@@ -1,0 +1,41 @@
+Index: ace/Connector.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Connector.cpp,v
+retrieving revision 4.81
+diff -u -r4.81 Connector.cpp
+--- ace/Connector.cpp	26 Aug 2002 06:28:16 -0000	4.81
++++ ace/Connector.cpp	9 Sep 2002 21:04:27 -0000
+@@ -302,6 +302,7 @@
+ 
+   if (this->cleanup_AST (h, ast) != -1)
+     {
++      ACE_ASSERT (ast != 0);
+       ast->svc_handler ()->close (0);
+       delete ast;
+     }
+@@ -548,7 +549,7 @@
+     if (me->int_id_->svc_handler () == sh)
+       {
+         AST *ast = 0;
+-        this->cleanup_AST (me->ext_id_, ast);
++        (void) this->cleanup_AST (me->ext_id_, ast);
+         delete ast;
+         return 0;
+       }
+@@ -665,10 +666,14 @@
+ 
+           // Clean it up.
+           AST *ast = 0;
+-          this->cleanup_AST (handle, ast);
++          int r = this->cleanup_AST (handle, ast);
+ 
+           // Close the svc_handler.
+-          ast->svc_handler ()->close (0);
++          if (r != -1)
++            {
++              ACE_ASSERT (ast != 0);
++              ast->svc_handler ()->close (0);
++            }
+ 
+           // Zap the ast.
+           delete ast;
