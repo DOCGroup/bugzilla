@@ -1,0 +1,74 @@
+? tao/Acceptor_Impl.cpp.fixed
+? tao/Connection_Handler.cpp.fixed
+? tao/Connection_Handler.h.fixed
+? tao/Connection_Handler.inl.fixed
+? tao/GIOP_Message_Base.cpp.fixed
+? tao/GIOP_Message_Lite.cpp.fixed
+? tao/IIOP_Connection_Handler.cpp.fixed
+? tao/IIOP_Connection_Handler.h.fixed
+? tao/IIOP_Connector.cpp.fixed
+? tao/IIOP_Transport.cpp.fixed
+? tao/IIOP_Transport.h.fixed
+? tao/Invocation.cpp.fixed
+? tao/LF_Connect_Strategy.cpp.fixed
+? tao/Muxed_TMS.cpp.fixed
+? tao/Notify_Handler.cpp.fixed
+? tao/ORB.cpp.fixed
+? tao/Synch_Refcountable.cpp.fixed
+? tao/TAO_Server_Request.cpp.fixed
+? tao/Transport.cpp.fixed
+? tao/Transport.h.fixed
+? tao/Transport_Cache_Manager.cpp.fixed
+? tao/delta
+? tao/delta.patch
+? tao/Strategies/DIOP_Connection_Handler.cpp.fixed
+? tao/Strategies/DIOP_Connection_Handler.h.fixed
+? tao/Strategies/DIOP_Connector.cpp.fixed
+? tao/Strategies/DIOP_Transport.cpp.fixed
+? tao/Strategies/DIOP_Transport.h.fixed
+? tao/Strategies/SHMIOP_Connection_Handler.cpp.fixed
+? tao/Strategies/SHMIOP_Connection_Handler.h.fixed
+? tao/Strategies/SHMIOP_Transport.cpp.fixed
+? tao/Strategies/SHMIOP_Transport.h.fixed
+? tao/Strategies/UIOP_Connection_Handler.cpp.fixed
+? tao/Strategies/UIOP_Connection_Handler.h.fixed
+? tao/Strategies/UIOP_Transport.cpp.fixed
+? tao/Strategies/UIOP_Transport.h.fixed
+Index: tao/Connection_Handler.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Connection_Handler.h,v
+retrieving revision 1.24
+diff -u -u -r1.24 Connection_Handler.h
+--- tao/Connection_Handler.h	13 Sep 2002 13:41:37 -0000	1.24
++++ tao/Connection_Handler.h	25 Sep 2002 23:13:32 -0000
+@@ -76,10 +76,6 @@
+   /// reference to this object can call the event handler methods.
+   virtual int handle_input (ACE_HANDLE fd) = 0;
+ 
+-  void update_protocol_properties (int send_buffer_size,
+-                                   int recv_buffer_size,
+-                                   int no_delay,
+-                                   int enable_network_priority);
+ protected:
+ 
+   /// Return our TAO_ORB_Core pointer
+Index: tao/Connection_Handler.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Connection_Handler.inl,v
+retrieving revision 1.17
+diff -u -u -r1.17 Connection_Handler.inl
+--- tao/Connection_Handler.inl	7 Aug 2002 04:39:36 -0000	1.17
++++ tao/Connection_Handler.inl	25 Sep 2002 23:13:32 -0000
+@@ -48,12 +48,3 @@
+ {
+   return this->pending_upcalls_;
+ }
+-
+-ACE_INLINE void
+-TAO_Connection_Handler::update_protocol_properties (int /*send_buffer_size*/,
+-                                                    int /*recv_buffer_size*/,
+-                                                    int /*no_delay*/,
+-                                                    int /*enable_network_priority*/)
+-{
+-}
+-
