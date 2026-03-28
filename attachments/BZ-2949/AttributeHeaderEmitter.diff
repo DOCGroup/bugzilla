@@ -1,0 +1,17 @@
+AttributeHeaderEmitter.diff
+Produced: 6/1/2007 6:07:45 PM
+
+--- C:\ACE_wrappers_Pharlap\TAO\CIAO\CIDLC\AttributeHeaderEmitters.cpp	2007-02-20 08:32:24.000000000 -0400
++++ C:\ACE_wrappers\TAO\CIAO\CIDLC\AttributeHeaderEmitters.cpp	2007-06-01 17:17:53.000000000 -0400
+@@ -24 +24 @@
+-  os << "void" << endl;
++  os << "virtual void" << endl;
+@@ -30 +30 @@
+-  os << a.name () << " (" << endl;
++  os << a.name () << " (";
+@@ -34 +34 @@
+-  os << " " << a.name () << ")" << endl;
++  os << " " << a.name () << ")";
+@@ -87 +87 @@
+-  os << a.name () << " ()" << endl;
++  os << a.name () << " ()";
