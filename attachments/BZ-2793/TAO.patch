@@ -1,0 +1,29 @@
+diff -u -r TAO.orig/tao/Unbounded_Basic_String_Sequence_T.h TAO/tao/Unbounded_Basic_String_Sequence_T.h
+--- TAO.orig/tao/Unbounded_Basic_String_Sequence_T.h	2007-02-01 08:32:39.317559900 -0500
++++ TAO/tao/Unbounded_Basic_String_Sequence_T.h	2007-02-01 08:33:27.691940700 -0500
+@@ -114,6 +114,11 @@
+ private:
+   implementation_type impl_;
+ };
++
++#if defined ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT
++  template class TAO_Export unbounded_basic_string_sequence<char>;
++#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT */
++
+ } // namespace TAO
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+diff -u -r TAO.orig/tao/Unbounded_Value_Sequence_T.h TAO/tao/Unbounded_Value_Sequence_T.h
+--- TAO.orig/tao/Unbounded_Value_Sequence_T.h	2007-02-01 08:32:39.426933500 -0500
++++ TAO/tao/Unbounded_Value_Sequence_T.h	2007-02-01 09:19:13.641167100 -0500
+@@ -93,6 +93,10 @@
+   implementation_type impl_;
+ };
+ 
++#if defined ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT
++  template class TAO_Export unbounded_value_sequence<unsigned short>;
++#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT */
++
+ } // namespace TAO
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
