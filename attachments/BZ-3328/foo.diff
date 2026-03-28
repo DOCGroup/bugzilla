@@ -1,0 +1,26 @@
+diff -ru ACE_wrappers/ace/Dev_Poll_Reactor.cpp
+ACE_wrappers_foo/ace/Dev_Poll_Reactor.cpp
+--- ACE_wrappers/ace/Dev_Poll_Reactor.cpp    2008-04-10
+17:14:15.000000000 +1000
++++ ACE_wrappers_foo/ace/Dev_Poll_Reactor.cpp    2008-05-16
+21:59:14.000000000 +1000
+@@ -46,6 +46,8 @@
+ #include "ace/OS_NS_string.h"
+ #include "ace/OS_NS_sys_time.h"
+
++bool foo = false;
++
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ ACE_Dev_Poll_Reactor_Notify::ACE_Dev_Poll_Reactor_Notify (void)
+@@ -231,6 +233,8 @@
+
+more_messages_queued,
+                                                           next);
+
++  if (foo) usleep(100 * 1000);
++
+   if (result == 0)
+     {
+       // remove the notification byte from the pipe, avoiding
+notification loop
