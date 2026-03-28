@@ -1,0 +1,176 @@
+Index: SSL_Initializer.cpp
+===================================================================
+--- SSL_Initializer.cpp	(revision 0)
++++ SSL_Initializer.cpp	(revision 0)
+@@ -0,0 +1,44 @@
++// $Id$
++
++#include "SSL_Initializer.h"
++#include "SSL_Context.h"
++
++ACE_BEGIN_VERSIONED_NAMESPACE_DECL
++
++int
++ACE_SSL_Initializer::static_init (void)
++{
++  ACE_Service_Config::process_directive (ace_svc_desc_ACE_SSL_Initializer);
++  return 0;
++}
++
++int
++ACE_SSL_Initializer::init (int, ACE_TCHAR *[])
++{
++  // Initialize ACE_SSL_Context singleton.
++  ACE_SSL_Context * ssl_ctx = ACE_SSL_Context::instance ();
++  ACE_ASSERT (ssl_ctx != 0);
++  ACE_UNUSED_ARG (ssl_ctx);
++
++  return 0;
++}
++
++int
++ACE_SSL_Initializer::fini (void)
++{
++  // Explicitly close the ACE_SSL_Context singleton.
++  ACE_Unmanaged_Singleton<ACE_SSL_Context, ACE_SYNCH_MUTEX>::close();
++
++  return 0;
++}
++
++ACE_END_VERSIONED_NAMESPACE_DECL
++
++ACE_STATIC_SVC_DEFINE (ACE_SSL_Initializer,
++                       ACE_TEXT ("ACE_SSL_Initializer"),
++                       ACE_SVC_OBJ_T,
++                       &ACE_SVC_NAME (ACE_SSL_Initializer),
++                       ACE_Service_Type::DELETE_THIS |
++                         ACE_Service_Type::DELETE_OBJ,
++                       0)
++ACE_FACTORY_DEFINE (ACE_SSL, ACE_SSL_Initializer)
+
+Property changes on: SSL_Initializer.cpp
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: SSL_Context.cpp
+===================================================================
+--- SSL_Context.cpp	(revision 93465)
++++ SSL_Context.cpp	(working copy)
+@@ -202,9 +202,6 @@
+   --ssl_library_init_count;
+   if (ssl_library_init_count == 0)
+     {
+-      // Explicitly close the singleton
+-      ACE_Unmanaged_Singleton<ACE_SSL_Context, ACE_SYNCH_MUTEX>::close();
+-
+       ::ERR_free_strings ();
+       ::EVP_cleanup ();
+ 
+@@ -216,7 +213,6 @@
+ 
+       delete [] this->locks_;
+       this->locks_ = 0;
+-
+ #endif  /* ACE_HAS_THREADS */
+     }
+ }
+@@ -645,8 +641,8 @@
+ 
+ #if defined (ACE_HAS_EXPLICIT_STATIC_TEMPLATE_MEMBER_INSTANTIATION)
+ 
+-template ACE_Singleton<ACE_SSL_Context, ACE_SYNCH_MUTEX> *
+-  ACE_Singleton<ACE_SSL_Context, ACE_SYNCH_MUTEX>::singleton_;
++template ACE_Unmanaged_Singleton<ACE_SSL_Context, ACE_SYNCH_MUTEX> *
++  ACE_Unmanaged_Singleton<ACE_SSL_Context, ACE_SYNCH_MUTEX>::singleton_;
+ 
+ #endif /* ACE_HAS_EXPLICIT_STATIC_TEMPLATE_MEMBER_INSTANTIATION */
+ 
+Index: SSL_Initializer.h
+===================================================================
+--- SSL_Initializer.h	(revision 0)
++++ SSL_Initializer.h	(revision 0)
+@@ -0,0 +1,52 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ *  @file    SSL_Initializer.h
++ *
++ *  $Id$
++ *
++ *  @author Vladimir Zykov <vz@prismtech.com>
++ */
++//=============================================================================
++
++#ifndef ACE_SSL_INITIALIZER_H
++#define ACE_SSL_INITIALIZER_H
++
++#include /**/ "ace/pre.h"
++
++#include "SSL_Export.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++#include "ace/Service_Config.h"
++#include "ace/Service_Object.h"
++
++ACE_BEGIN_VERSIONED_NAMESPACE_DECL
++
++class ACE_SSL_Export ACE_SSL_Initializer
++  : public ACE_Service_Object
++{
++public:
++  /// Used to force the initialization of ACE_SSL.
++  static int static_init (void);
++
++  /// Create ACE_SSL_Context singleton.
++  virtual int init (int argc, ACE_TCHAR *argv[]);
++
++  /// Do cleanup of SSL library.
++  virtual int fini (void);
++};
++
++static int ACE_Force_ACE_SSL_Initializer = ACE_SSL_Initializer::static_init ();
++
++ACE_END_VERSIONED_NAMESPACE_DECL
++
++ACE_STATIC_SVC_DECLARE (ACE_SSL_Initializer)
++ACE_FACTORY_DECLARE (ACE_SSL, ACE_SSL_Initializer)
++
++#include /**/ "ace/post.h"
++
++#endif  /* ACE_SSL_INITIALIZER_H */
+
+Property changes on: SSL_Initializer.h
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: SSL_Context.h
+===================================================================
+--- SSL_Context.h	(revision 93465)
++++ SSL_Context.h	(working copy)
+@@ -62,6 +62,7 @@
+ 
+ // ****************************************************************
+ 
++class ACE_SSL_Initializer;
+ 
+ /**
+  * @class ACE_SSL_Context
+@@ -74,6 +75,8 @@
+  */
+ class ACE_SSL_Export ACE_SSL_Context
+ {
++  friend class ACE_SSL_Initializer;
++
+ public:
+ 
+ #ifdef ACE_HAS_THREADS
