@@ -1,0 +1,304 @@
+Index: wrapper_macros.GNU
+===================================================================
+--- wrapper_macros.GNU	(revision 83733)
++++ wrapper_macros.GNU	(working copy)
+@@ -192,6 +192,44 @@
+ #      (link to the appropriate platform-specific config file).
+ #----------------------------------------------------------------------------
+ 
++# default to not using an architecture specific output directory
++ARCH        ?=
++ARCH_BIN     = $(BIN)
++ARCH_BIN2    = $(BIN2)
++ARCH_LIB     = $(LIB)
++ARCH_LIB2    = $(LIB2)
++ARCH_SHLIB   = $(SHLIB)
++ARCH_SHLIB2  = $(SHLIB2)
++ARCH_SHLIBA  = $(SHLIBA)
++ARCH_SHLIBA2 = $(SHLIBA2)
++
++ifdef ARCH
++ifdef BIN
++  ARCH_BIN = $(ARCH)/$(BIN)
++endif
++ifdef BIN2
++  ARCH_BIN2 = $(ARCH)/$(BIN2)
++endif
++ifdef LIB
++  ARCH_LIB = $(ARCH)/$(LIB)
++endif
++ifdef LIB2
++  ARCH_LIB2 = $(ARCH)/$(LIB2)
++endif
++ifdef SHLIB
++  ARCH_SHLIB = $(ARCH)/$(SHLIB)
++endif
++ifdef SHLIB2
++  ARCH_SHLIB2 = $(ARCH)/$(SHLIB2)
++endif
++ifdef SHLIBA
++  ARCH_SHLIBA = $(ARCH)/$(SHLIBA)
++endif
++ifdef SHLIBA2
++  ARCH_HLIBA2 = $(ARCH)/$(SHLIBA2)
++endif
++endif
++
+ # Set the cleanup targets.  These targets are used by realclean even if
+ # the component isn't being built, i.e., the decision to build it was based
+ # on components built in another makefile and written a file (that might no
+@@ -205,10 +243,10 @@
+ BIN_UNCHECKED ?=
+ CLEANUP_BIN ?=
+ ifdef BIN
+-  CLEANUP_BIN = $(BIN)
++  CLEANUP_BIN = $(ARCH_BIN)
+ endif # !BIN
+ ifdef BIN2
+-  CLEANUP_BIN += $(BIN2)
++  CLEANUP_BIN += $(ARCH_BIN2)
+ endif # !BIN2
+ ifneq ($(BIN_UNCHECKED),)
+   CLEANUP_BIN += $(BIN_UNCHECKED)
+@@ -217,10 +255,10 @@
+ LIB_UNCHECKED ?=
+ CLEANUP_LIB ?=
+ ifdef LIB
+-  CLEANUP_LIB = $(LIB)
++  CLEANUP_LIB = $(ARCH_LIB)
+ endif # !LIB
+ ifdef LIB2
+-  CLEANUP_LIB += $(LIB2)
++  CLEANUP_LIB += $(ARCH_LIB2)
+ endif # !LIB2
+ ifneq ($(LIB_UNCHECKED),)
+   CLEANUP_LIB = $(LIB_UNCHECKED)
+@@ -229,10 +267,10 @@
+ SHLIB_UNCHECKED ?=
+ CLEANUP_SHLIB ?=
+ ifdef SHLIB
+-  CLEANUP_SHLIB = $(SHLIB)
++  CLEANUP_SHLIB = $(ARCH_SHLIB)
+ endif # !SHLIB
+ ifdef SHLIB2
+-  CLEANUP_SHLIB += $(SHLIB2)
++  CLEANUP_SHLIB += $(ARCH_SHLIB2)
+ endif # SHLIB2
+ ifneq ($(SHLIB_UNCHECKED),)
+   CLEANUP_SHLIB += $(SHLIB_UNCHECKED)
+@@ -241,10 +279,10 @@
+ SHLIBA_UNCHECKED ?=
+ CLEANUP_SHLIBA ?=
+ ifdef SHLIBA
+-  CLEANUP_SHLIBA = $(SHLIBA)
++  CLEANUP_SHLIBA = $(ARCH_SHLIBA)
+ endif # SHLIBA
+ ifdef SHLIBA2
+-  CLEANUP_SHLIBA = $(SHLIBA2)
++  CLEANUP_SHLIBA = $(ARCH_SHLIBA2)
+ endif # SHLIB2A
+ ifneq ($(SHLIBA_UNCHECKED),)
+   CLEANUP_SHLIBA = $(SHLIBA_UNCHECKED)
+@@ -379,8 +417,13 @@
+ VAR             =
+ 
+ # Let users override the default VDIR directories
++ifdef ARCH
++VDIR          ?= $(ARCH)/.obj/
++VSHDIR        ?= $(ARCH)/.shobj/
++else
+ VDIR          ?= .obj/
+ VSHDIR        ?= .shobj/
++endif
+ 
+ # NOTE: VLDLIBS is defined below, in case it is overridden for static-
+ #       or shared-only builds.
+Index: rules.local.GNU
+===================================================================
+--- rules.local.GNU	(revision 83733)
++++ rules.local.GNU	(working copy)
+@@ -64,7 +64,7 @@
+ VLIBS ?=
+ BUILD ?=
+ BIN ?=
+-VBIN ?= $(BIN:%=%$(VAR))
++VBIN ?= $(ARCH_BIN:%=%$(VAR))
+ ifneq ($(VBIN),)
+   $(VBIN): $(VLIBS)
+ endif
+@@ -255,6 +255,14 @@
+   endif # ! WIN32
+ endif # ! LN_S
+ 
++# Don't call shell/call directly below since we may need to 
++# add the architecture specific suffix to the directory
++ifneq ($(mingw32),1)
++ARCH_SOURCE_DIR := $(patsubst /,,$(shell pwd)/$(ARCH))
++else
++ARCH_SOURCE_DIR := $(patsubst /,,$(call PWD)/$(ARCH))
++endif
++
+ $(INSBIN)/%$(VAR)$(EXEEXT) \
+ $(INSINC)/ace% \
+ $(INSLIB)/% \
+@@ -272,57 +280,57 @@
+ 	@if exist $@ echo "$(@F) already installed"
+ 	@if not exist $@ echo "Installing $(@F:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)) to $(@D)" && \
+ 		$(RM) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)) && \
+-		$(LN_S) $(shell pwd)/$(@F) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)) && \
++		$(LN_S) $(ARCH_SOURCE_DIR)/$(@F) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)) && \
+ 		echo "Installing $(@F) to $(@D)" && \
+ 		$(RM) $@ && \
+-		$(LN_S) $(shell pwd)/$(@F) $@
++		$(LN_S) $(ARCH_SOURCE_DIR)/$(@F) $@
+ else #not vxworks_ntbuild
+   ifeq ($(mingw32),1)
+     #If we're actually copying instead of linking, pay attention to timestamps to know when to install
+     ifeq ($(firstword $(LN_S)),cp)
+       ifneq ($(SOVERSION),)
+-	@if test $(call PWD) != $(@D) ; then \
++	@if test $(ARCH_SOURCE_DIR) != $(@D) ; then \
+ 		if test $(@F) -ot $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)) ; then \
+ 			echo "Installing $(@F:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)) -> $(@D)" ; \
+ 			$(RM) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)); \
+-			$(LN_S) $(call PWD)/$(@F) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)); \
++			$(LN_S) $(ARCH_SOURCE_DIR)/$(@F) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)); \
+ 		fi ; \
+ 	fi
+       endif #SOVERSION
+-	@if test $(call PWD) != $(@D) ; then \
++	@if test $(ARCH_SOURCE_DIR) != $(@D) ; then \
+ 		if test $@ -nt $(@F) ; then \
+ 			echo "$(@F) already installed" ; \
+ 		else \
+ 			echo "Installing $(@F) -> $(@D)" ; \
+ 			$(RM) $@; \
+-			$(LN_S) $(call PWD)/$(@F) $@; \
++			$(LN_S) $(ARCH_SOURCE_DIR)/$(@F) $@; \
+ 		fi ; \
+ 	fi
+     else #firstword of LN_S is not cp, so we're using real symlinks
+-	@if test $(call PWD) != $(@D) -o -n "$(SOVERSION)" ; then \
++	@if test $(ARCH_SOURCE_DIR) != $(@D) -o -n "$(SOVERSION)" ; then \
+ 		if test -s $@ ; then \
+ 			echo "$(@F) already installed" ; \
+ 		else \
+ 			echo "Installing $(@F:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)) -> $(@D)" ; \
+ 			$(RM) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)); \
+-			$(LN_S) $(call PWD)/$(@F) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)); \
++			$(LN_S) $(ARCH_SOURCE_DIR)/$(@F) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)); \
+ 			echo "Installing $(@F) -> $(@D)" ; \
+ 			$(RM) $@; \
+-			$(LN_S) $(call PWD)/$(@F) $@; \
++			$(LN_S) $(ARCH_SOURCE_DIR)/$(@F) $@; \
+ 		fi ; \
+ 	fi
+     endif #firstword
+   else #not mingw32
+-	@if test $(shell pwd) != $(@D) -o -n "$(SOVERSION)" ; then \
++	@if test $(ARCH_SOURCE_DIR) != $(@D) -o -n "$(SOVERSION)" ; then \
+ 		if test -s $@ ; then \
+ 			echo "$(@F) already installed" ; \
+ 		else \
+ 			echo "Installing $(@F:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)) -> $(@D)" ; \
+ 			$(RM) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)); \
+-			$(LN_S) $(shell pwd)/$(@F) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)); \
++			$(LN_S) $(ARCH_SOURCE_DIR)/$(@F) $(@:%.$(SOEXT)$(SOVERSION)=%.$(SOEXT)); \
+ 			echo "Installing $(@F) -> $(@D)" ; \
+ 			$(RM) $@; \
+-			$(LN_S) $(shell pwd)/$(@F) $@; \
++			$(LN_S) $(ARCH_SOURCE_DIR)/$(@F) $@; \
+ 		fi ; \
+ 	fi
+   endif #mingw32
+@@ -335,7 +343,7 @@
+ 			echo "$(@F:.$(SOEXT)=.x) already installed" ; \
+ 		else \
+ 			echo "Installing $(@F:.$(SOEXT)=.x) -> $(@D)" ; \
+-			$(RM) $(@); $(LN_S) $(shell pwd)/$(@F:.$(SOEXT)=.x) $(@:.$(SOEXT)=.x) ; \
++			$(RM) $(@); $(LN_S) $(ARCH_SOURCE_DIR)/$(@F:.$(SOEXT)=.x) $(@:.$(SOEXT)=.x) ; \
+ 		fi \
+ 	fi
+ endif
+@@ -386,7 +394,7 @@
+   CLEANUP_OBJS += $(addprefix $(VDIR), $(OBJS))
+ endif # OBJS
+ ifneq ($(CLEANUP_BIN),)
+-  CLEANUP_OBJS += $(addsuffix .$(OBJEXT),$(addprefix $(VDIR),$(basename $(CLEANUP_BIN)))) $(VOBJS)
++  CLEANUP_OBJS += $(addsuffix .$(OBJEXT),$(addprefix $(VDIR),$(basename $(CLEANUP_BIN:$(ARCH)/%=%)))) $(VOBJS)
+ endif # CLEANUP_BIN
+ ifdef VSHOBJS
+   CLEANUP_OBJS += $(VSHOBJS)
+@@ -521,8 +529,8 @@
+ 	@echo "done."
+ 
+ svnignore.local:
+-	if [ "n$(BIN)" != "n" ]; then \
+-	  (svn propget svn:ignore .; echo $(BIN)) | sort | uniq | sed '/^$$/d' >SvNiGnOrE; \
++	if [ "n$(ARCH_BIN)" != "n" ]; then \
++	  (svn propget svn:ignore .; echo $(ARCH_BIN)) | sort | uniq | sed '/^$$/d' >SvNiGnOrE; \
+ 	  svn propset svn:ignore -F SvNiGnOrE .; \
+ 	  rm SvNiGnOrE; \
+ 	fi
+Index: rules.lib.GNU
+===================================================================
+--- rules.lib.GNU	(revision 83733)
++++ rules.lib.GNU	(working copy)
+@@ -36,7 +36,7 @@
+ #----------------------------------------------------------------------------
+ 
+ LIB ?=
+-VLIB = $(LIB:%.$(LIBEXT)=%$(VAR).$(LIBEXT))
++VLIB = $(ARCH_LIB:%.$(LIBEXT)=%$(VAR).$(LIBEXT))
+ CLEANUP_VLIB = $(CLEANUP_LIB:%.$(LIBEXT)=%$(VAR).$(LIBEXT))
+ 
+ # Add VLIB to VLIBS if building static_libs.
+@@ -46,13 +46,13 @@
+ 
+ SHLIB ?=
+ # Setup shared library variables, including versions.
+-VSHLIB_NO_VER = $(SHLIB:%.$(SOEXT)=%$(VAR).$(SOEXT))
++VSHLIB_NO_VER = $(ARCH_SHLIB:%.$(SOEXT)=%$(VAR).$(SOEXT))
+ CLEANUP_VSHLIB_NO_VER = $(CLEANUP_SHLIB:%.$(SOEXT)=%$(VAR).$(SOEXT))
+ VSHLIB = $(VSHLIB_NO_VER:%=%$(SOVERSION))
+ CLEANUP_VSHLIB = $(CLEANUP_VSHLIB_NO_VER:%=%$(SOVERSION))
+ 
+ SHLIBA ?=
+-VSHLIBA = $(SHLIBA:%.$(LIBEXT)=%$(VAR).$(LIBEXT))
++VSHLIBA = $(ARCH_SHLIBA:%.$(LIBEXT)=%$(VAR).$(LIBEXT))
+ 
+ # Add VSHLIB if we're building shared_libs.
+ ifdef shared_libs
+Index: rules.bin.GNU
+===================================================================
+--- rules.bin.GNU	(revision 83733)
++++ rules.bin.GNU	(working copy)
+@@ -9,7 +9,7 @@
+ #----------------------------------------------------------------------------
+ 
+ ifdef BIN
+-  VBIN = $(BIN:%=%$(VAR))
++  VBIN = $(ARCH_BIN:%=%$(VAR))
+   # VBIN always depends on idl_stubs and libraries, if they exist.
+   ifdef IDL_SRC
+     $(VBIN): $(IDL_SRC)
+@@ -39,14 +39,15 @@
+ using_aix_vacpp ?=
+ 
+ ifeq ($(VXWORKSLINK),1)
+-$(BIN): $(DEFAULTRULE)
++$(ARCH_BIN): $(DEFAULTRULE)
+ 	mv $(DEFAULTRULE) $@
+ else # !VXWORKSLINK
+   ifeq (1,$(using_aix_vacpp))
+-$(BIN): %: %.icc $(SRC)
++$(ARCH_BIN): %: %.icc $(SRC)
+ 	vacbld_r $< -severitylevel=warning
+   else # !using_aix_vacpp
+-$(BIN): %: $(VDIR)%.$(OBJEXT) $(VOBJS)
+-	$(LINK.cc) $(LDFLAGS) $(CC_OUTPUT_FLAG) $@ $(sort $(VDIR)$@.$(OBJEXT) $(VOBJS)) $(VLDLIBS) $(POSTLINK)
++# Since we add in the vdir, don't use arch_bin.  use bin instead!
++$(ARCH_BIN): %: $(VDIR)$(BIN).$(OBJEXT) $(VOBJS)
++	$(LINK.cc) $(LDFLAGS) $(CC_OUTPUT_FLAG) $@ $(sort $(VDIR)$(BIN).$(OBJEXT) $(VOBJS)) $(VLDLIBS) $(POSTLINK)
+   endif # using_aix_vacpp
+ endif
