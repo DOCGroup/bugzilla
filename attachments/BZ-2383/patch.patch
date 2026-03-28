@@ -1,0 +1,23 @@
+Index: ace/Parse_Node.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Parse_Node.cpp,v
+retrieving revision 4.81
+diff -u -r4.81 Parse_Node.cpp
+--- ace/Parse_Node.cpp	10 Feb 2006 10:12:01 -0000	4.81
++++ ace/Parse_Node.cpp	6 Mar 2006 16:46:10 -0000
+@@ -411,15 +411,6 @@
+   if (-1 == this->dll_.open (this->pathname ()))
+     {
+       ++yyerrno;
+-
+-#ifndef ACE_NLOGGING
+-      ACE_TCHAR *errmsg = this->dll_.error ();
+-      ACE_ERROR ((LM_ERROR,
+-                  ACE_LIB_TEXT ("ACE_DLL::open failed for %s: %s\n"),
+-                  this->pathname (),
+-                  errmsg ? errmsg : ACE_LIB_TEXT ("no error reported")));
+-#endif /* ACE_NLOGGING */
+-
+       return -1;
+     }
+ 
