@@ -1,0 +1,161 @@
+Index: tao/TAO_Server_Request.cpp
+===================================================================
+--- tao/TAO_Server_Request.cpp	(revision 78943)
++++ tao/TAO_Server_Request.cpp	(working copy)
+@@ -81,7 +81,7 @@
+     , caught_exception_ (0)
+     , reply_status_ (-1)
+ #endif  /* TAO_HAS_INTERCEPTORS == 1 */
+-    , transport_selection_guard_ (transport)
++//    , transport_selection_guard_ (transport)
+ {
+   ACE_FUNCTION_TIMEPROBE (TAO_SERVER_REQUEST_START);
+   // No-op.
+@@ -125,7 +125,7 @@
+   , caught_exception_ (0)
+   , reply_status_ (-1)
+ #endif  /* TAO_HAS_INTERCEPTORS == 1 */
+-  , transport_selection_guard_ (transport)
++//  , transport_selection_guard_ (transport)
+ {
+   this->profile_.object_key (object_key);
+   parse_error = 0;
+@@ -162,7 +162,7 @@
+   , caught_exception_ (0)
+   , reply_status_ (-1)
+ #endif  /* TAO_HAS_INTERCEPTORS == 1 */
+-  , transport_selection_guard_ (0)
++//  , transport_selection_guard_ (0)
+ {
+   // Have to use a const_cast<>.  *sigh*
+   this->profile_.object_key (
+Index: tao/TAO_Server_Request.h
+===================================================================
+--- tao/TAO_Server_Request.h	(revision 78943)
++++ tao/TAO_Server_Request.h	(working copy)
+@@ -294,8 +294,8 @@
+   /// Outgoing stream.
+   TAO_OutputCDR *outgoing_;
+ 
+-  /// Transport class.
+-  TAO_Transport *transport_;
++  ///// Transport class.
++  //TAO_Transport *transport_;
+ 
+   /// false: oneway (SYNC_NONE or SYNC_WITH_TRANSPORT)
+   /// true: twoway, or oneway (SYNC_WITH_SERVER or SYNC_WITH_TARGET)
+@@ -367,7 +367,7 @@
+ 
+   /// An RAII (resource acquisition is initialization) class instance
+   /// for interfacing with TSS storage for the "current" transport.
+-  TAO::Transport_Selection_Guard transport_selection_guard_;
++  TAO::Transport_Selection_Guard transport_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/Transport_Selection_Guard.h
+===================================================================
+--- tao/Transport_Selection_Guard.h	(revision 78943)
++++ tao/Transport_Selection_Guard.h	(working copy)
+@@ -110,6 +110,70 @@
+ 
+     /// The "real" Transport, i.e. the one selected at present
+     TAO_Transport* curr_;
++
++    // Comparison. See Modern C++ Design by A. Alexandrescu for the gory detail.
++    bool 
++    operator! () const
++    {
++      return curr_ == 0;
++    }
++
++    inline friend bool 
++    operator== (const Transport_Selection_Guard& lhs,
++                const TAO_Transport* rhs)
++    {
++      return lhs.curr_ == rhs;
++    }
++
++    inline friend bool 
++    operator== (const TAO_Transport* lhs,
++                const Transport_Selection_Guard& rhs)
++    {
++      return lhs == rhs.curr_;
++    }
++
++    inline friend bool 
++    operator!= (const Transport_Selection_Guard& lhs,
++                const TAO_Transport* rhs)
++    {
++      return lhs.curr_ != rhs;
++    }
++
++    inline friend bool 
++    operator!= (const TAO_Transport* lhs,
++                const Transport_Selection_Guard& rhs)
++    {
++      return lhs != rhs.curr_;
++    }
++
++    template <class U> inline friend bool
++    operator== (const Transport_Selection_Guard& lhs,
++                const U* rhs)
++    {
++      return lhs.curr_ == rhs;
++    }
++
++    template <class U> inline friend bool
++    operator== (const U* lhs,
++                const Transport_Selection_Guard& rhs)
++    {
++      return lhs == rhs.curr_;
++    }
++
++    template <class U> inline friend bool
++    operator!= (const Transport_Selection_Guard& lhs,
++                const U* rhs)
++    {
++      return lhs.curr_ != rhs;
++    }
++
++    template <class U> inline friend bool
++    operator!= (const U* lhs,
++                const Transport_Selection_Guard& rhs)
++    {
++      return lhs != rhs.curr_;
++    }
++
+   };
+ 
+ } /* namespace TAO */
+Index: tao/TAO_Server_Request.inl
+===================================================================
+--- tao/TAO_Server_Request.inl	(revision 78943)
++++ tao/TAO_Server_Request.inl	(working copy)
+@@ -34,7 +34,7 @@
+   , caught_exception_ (0)
+   , reply_status_ (-1)
+ #endif  /* TAO_HAS_INTERCEPTORS == 1 */
+-  , transport_selection_guard_ (0)
++//  , transport_selection_guard_ (0)
+ {
+ }
+ 
+@@ -138,7 +138,7 @@
+ ACE_INLINE TAO_Transport *
+ TAO_ServerRequest::transport (void)
+ {
+-  return this->transport_;
++  return this->transport_.get ();
+ }
+ 
+ ACE_INLINE CORBA::ULong
+@@ -223,7 +223,7 @@
+ ACE_INLINE bool
+ TAO_ServerRequest::collocated (void) const
+ {
+-  return this->transport_ == 0;
++  return this->transport_.get () == 0;
+ }
+ 
+ 
