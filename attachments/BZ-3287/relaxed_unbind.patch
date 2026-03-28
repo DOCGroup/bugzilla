@@ -1,0 +1,13 @@
+diff -up ./Select_Reactor_Base.cpp.orig ./Select_Reactor_Base.cpp
+diff -up ./Select_Reactor_Base.inl.orig ./Select_Reactor_Base.inl
+--- ./Select_Reactor_Base.inl.orig	2007-12-16 01:49:58.000000000 -0500
++++ ./Select_Reactor_Base.inl	2008-04-03 19:06:58.000000000 -0400
+@@ -34,7 +34,7 @@ ACE_Select_Reactor_Handler_Repository::u
+   // To resolve bug 2653, unbind must be called even when find_eh returns
+   // event_handlers_.end().
+ 
+-  return !this->handle_in_range (handle) ? -1
++  return this->invalid_handle (handle) ? -1
+           : this->unbind (handle,
+                           this->find_eh (handle),
+                           mask);
