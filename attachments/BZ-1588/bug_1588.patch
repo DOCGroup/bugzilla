@@ -1,0 +1,28 @@
+Index: bin/auto_run_tests.pl
+===================================================================
+RCS file: /home/src/ACE_wrappers/bin/auto_run_tests.pl,v
+retrieving revision 1.3
+diff -u -r1.3 auto_run_tests.pl
+--- bin/auto_run_tests.pl	17 Dec 2002 19:14:39 -0000	1.3
++++ bin/auto_run_tests.pl	29 Aug 2003 15:45:16 -0000
+@@ -22,17 +22,17 @@
+ 
+ $config_list->load ($ACE_ROOT."/bin/auto_run_tests.lst");
+ 
+-if (!getopts ('ac:ds:t') || $opt_h) {
+-    print "auto_run_tests.pl [-a] [-c config] [-h] [-s sandbox] [-t]\n";
++if (!getopts ('ads:t') || $opt_h) {
++    print "auto_run_tests.pl [-a] [-h] [-s sandbox] [-t]\n";
+     print "\n";
+     print "Runs the tests listed in auto_run_tests.lst\n";
+     print "\n";
+     print "Options:\n";
+     print "    -a          ACE tests only\n";
+-    print "    -c config   Run the tests for the <config> configuration\n";
+     print "    -h          display this help\n";
+     print "    -s sandbox  Runs each program using a sandbox program\n";
+     print "    -t          TAO tests only\n";
++    print "    -Config cfg Run the tests for the <cfg> configuration\n";
+     print "\n";
+     print "Configs: " . $config_list->list_configs () . "\n";
+     exit (1);
