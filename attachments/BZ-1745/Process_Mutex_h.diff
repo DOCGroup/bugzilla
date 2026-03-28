@@ -1,0 +1,33 @@
+--- Process_Mutex.h	2003-08-03 23:53:52.000000000 -0400
++++ /cygdrive/c/welchj/c/apps/ACE_wrappers/ace/Process_Mutex.h	2004-02-17 12:42:55.395326400 -0500
+@@ -74,10 +74,14 @@
+    * this argument is ignored.
+    * @param mode optional, the protection mode for either the backing store
+    * file (for ACE_Mutex use) or the ACE_SV_Semaphore_Complex that's created.
++   * @param LPSECURITY_ATTRIBUTES sa optional. Used to gain access to the Mutex
++   * if created by a process that is running under a different user. 
+    */
+   ACE_Process_Mutex (const char *name = 0,
+                      void *arg = 0,
+-                     mode_t mode = ACE_DEFAULT_FILE_PERMS);
++                     mode_t mode = ACE_DEFAULT_FILE_PERMS,
++                     LPSECURITY_ATTRIBUTES sa = 0);
++
+ 
+ #if defined (ACE_HAS_WCHAR)
+   /**
+@@ -93,10 +97,13 @@
+    * this argument is ignored.
+    * @param mode optional, the protection mode for either the backing store
+    * file (for ACE_Mutex use) or the ACE_SV_Semaphore_Complex that's created.
++   * @param LPSECURITY_ATTRIBUTES sa optional. Used to gain access to the Mutex
++   * if created by a process that is running under a different user. 
+    */
+   ACE_Process_Mutex (const wchar_t *name,
+                      void *arg = 0,
+-                     mode_t mode = ACE_DEFAULT_FILE_PERMS);
++                     mode_t mode = ACE_DEFAULT_FILE_PERMS,
++                     LPSECURITY_ATTRIBUTES sa = 0);
+ #endif /* ACE_HAS_WCHAR */
+ 
+   ~ACE_Process_Mutex (void);
