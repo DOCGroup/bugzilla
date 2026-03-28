@@ -1,0 +1,25 @@
+--- ACE_wrappers.orig/ace/FoxReactor/FoxReactor.cpp
++++ ACE_wrappers/ace/FoxReactor/FoxReactor.cpp
+@@ -248,9 +248,9 @@
+ 
+   if (max_wait_time != 0)
+     {
+-      float t = max_wait_time->sec ()
++      float t = max_wait_time->sec () +
+         max_wait_time->usec () / 1000000.0F;
+-      fxapp->addTimeout (t*1000, this, 0);
++      fxapp->addTimeout (this, 0, t*1000);
+     }
+ }
+ 
+--- ACE_wrappers.orig/TAO/tao/FoxResource/FoxResource_Loader.h
++++ ACE_wrappers/TAO/tao/FoxResource/FoxResource_Loader.h
+@@ -22,6 +22,8 @@
+ # pragma once
+ #endif /* ACE_LACKS_PRAGMA_ONCE */
+ 
++#include <fox/fx.h>
++
+ #include "tao/Versioned_Namespace.h"
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
