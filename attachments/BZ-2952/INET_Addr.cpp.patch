@@ -1,0 +1,21 @@
+Index: INET_Addr.cpp
+===================================================================
+--- INET_Addr.cpp	(revision 78559)
++++ INET_Addr.cpp	(working copy)
+@@ -340,13 +340,14 @@
+   int ret = -1;
+   for (res = res0; res != 0; res = res->ai_next)
+     {
+-      if (res->ai_family == AF_INET || res->ai_family == AF_INET6)
++      if (address_family == AF_UNSPEC || res->ai_family == address_family)
+         {
+           this->set_type (res->ai_family);
+           this->set_addr (res->ai_addr, res->ai_addrlen);
+           this->set_port_number (port_number, encode);
+           ret = 0;
+-          break;
++          if (address_family == AF_UNSPEC && res->ai_family == AF_INET6)
++            break;
+         }
+     }
+   freeaddrinfo (res0);
