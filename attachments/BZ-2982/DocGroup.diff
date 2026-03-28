@@ -1,0 +1,344 @@
+Index: TypeCode_CDR_Extraction.cpp
+===================================================================
+--- TypeCode_CDR_Extraction.cpp	(revision 78812)
++++ TypeCode_CDR_Extraction.cpp	(working copy)
+@@ -64,6 +64,35 @@
+ 
+ namespace
+ {
++  void add_to_already_seen (CORBA::TypeCode_ptr & tc,
++                            TAO::TypeCodeFactory::TC_Info_List & infos)
++  {
++    // Since we created a new tc, add it to the list.
++    size_t const old_size = infos.size ();
++    if (infos.size (old_size + 1) == -1)  // Incremental growth -- *sigh*
++      {
++        // Can't increase the list size, since we can't append the new TC to
++        // the end of the list, we will generate another TC if it is seen again
++        // (anoying but not realy a problem).
++        return;
++      }
++
++    TAO::TypeCodeFactory::TC_Info & info = infos [old_size];
++
++    try
++      {
++        // Append the new TC to the list.
++        info.id = tc->id (); // Should never throw, but could!
++        info.type = tc;
++      }
++    catch (...)
++      {
++        // Remove the partially added new TC from the list, we will have to generate
++        // another TC if this is seen again (anoying but not realy a problem).
++        infos.size (old_size);
++      }
++  }
++
+   bool start_cdr_encap_extraction (TAO_InputCDR & cdr)
+   {
+     CORBA::Boolean byte_order;
+@@ -439,7 +468,7 @@
+           rtc->struct_parameters (name.in (), fields, nfields);
+         }
+ 
+-      tc = recursive_tc[0].type;
++      tc = CORBA::TypeCode::_duplicate (recursive_tc[0].type);
+     }
+   else
+     {
+@@ -450,6 +479,9 @@
+                                      fields,     // Will be copied.
+                                      nfields),
+                       false);
++
++      // Since we created a new tc, add it to the "Repeat" list.
++      add_to_already_seen (tc, infos);
+     }
+ 
+   return true;
+@@ -702,7 +734,7 @@
+                                  default_index);
+         }
+ 
+-      tc = recursive_tc[0].type;
++      tc = CORBA::TypeCode::_duplicate (recursive_tc[0].type);
+     }
+   else
+     {
+@@ -714,6 +746,9 @@
+                                      ncases,
+                                      default_index),
+                       false);
++
++      // Since we created a new tc, add it to the "Repeat" list.
++      add_to_already_seen (tc, infos);
+     }
+ 
+   return true;
+@@ -860,18 +895,29 @@
+         && tc_demarshal (cdr, content_type.out (), infos)))
+     return false;
+ 
+-  typedef TAO::TypeCode::Alias<
+-    CORBA::String_var,
+-    CORBA::TypeCode_var,
+-    TAO::True_RefCount_Policy> typecode_type;
++  TAO::TypeCodeFactory::TC_Info_List recursive_tc;
++  if (find_recursive_tc (id.in (), recursive_tc, infos))
++    {
++      tc = CORBA::TypeCode::_duplicate (recursive_tc[0].type);
++    }
++  else
++    {
++      typedef TAO::TypeCode::Alias<
++        CORBA::String_var,
++        CORBA::TypeCode_var,
++        TAO::True_RefCount_Policy> typecode_type;
+ 
+-  ACE_NEW_RETURN (tc,
+-                  typecode_type (kind,
+-                                 id.in (),
+-                                 name.in (),
+-                                 content_type),
+-                  false);
++      ACE_NEW_RETURN (tc,
++                      typecode_type (kind,
++                                    id.in (),
++                                    name.in (),
++                                    content_type),
++                      false);
+ 
++      // Since we created a new tc, add it to the "Repeat" list.
++      add_to_already_seen (tc, infos);
++    }
++
+   return true;
+ }
+ 
+@@ -976,24 +1022,6 @@
+   if (!(cdr >> TAO_InputCDR::to_string (id.out (), 0)))
+     return false;
+ 
+-//   if (ACE_OS::strcmp (id.in (), "IDL:omg.org/CORBA/ValueBase:1.0") == 0)
+-//     {
+-//       // No need to create a TypeCode.  Just use the TypeCode
+-//       // constant.
+-//       tc = CORBA::TypeCode::_duplicate (CORBA::_tc_ValueBase);
+-
+-//       return true;
+-//     }
+-//   else if (ACE_OS::strcmp (id.in (),
+-//                            "IDL:omg.org/CORBA/EventBase:1.0") == 0)
+-//     {
+-//       // No need to create a TypeCode.  Just use the TypeCode
+-//       // constant.
+-//       tc = CORBA::TypeCode::_duplicate (CORBA::_tc_EventBase);
+-
+-//       return true;
+-//     }
+-
+   CORBA::String_var name;
+   CORBA::ValueModifier type_modifier;
+   CORBA::TypeCode_var concrete_base;
+@@ -1057,7 +1085,7 @@
+                                      fields,     // Will be copied.
+                                      nfields);
+         }
+-      tc = recursive_tc[0].type;
++      tc = CORBA::TypeCode::_duplicate (recursive_tc[0].type);
+     }
+   else
+     {
+@@ -1070,6 +1098,9 @@
+                                      fields,     // Will be copied.
+                                      nfields),
+                       false);
++
++      // Since we created a new tc, add it to the "Repeat" list.
++      add_to_already_seen (tc, infos);
+     }
+ 
+   return true;
+@@ -1224,10 +1255,6 @@
+         return false;
+       }
+ 
+-//     ACE_Message_Block * const mb =
+-//       const_cast<ACE_Message_Block *> (cdr.start ());
+-
+-//     TAO_InputCDR indir_stream (mb->rd_ptr () + offset - 4,
+     TAO_InputCDR indir_stream (cdr.rd_ptr () + offset - sizeof (CORBA::Long),
+                                (-offset) + sizeof (CORBA::Long),
+                                cdr.byte_order ());
+@@ -1271,54 +1298,42 @@
+ 
+     // Don't bother demarshaling the rest of the parameters.  They will
+     // be handled by the top-level TypeCode demarshaling call.
+-    bool new_tc = false;
+ 
+-    switch (kind)
++    // Check if we already have a tc for this type, if yes, use that
++    TAO::TypeCodeFactory::TC_Info_List recursive_tc;
++    if (find_recursive_tc (id.in (), recursive_tc, infos))
+       {
+-      case CORBA::tk_alias:
+-        {
+-          // Check if we already have a tc for this type, if yes, use that
+-          TAO::TypeCodeFactory::TC_Info_List recursive_tc;
+-          if (find_recursive_tc (id.in (), recursive_tc, infos))
++        tc = CORBA::TypeCode::_duplicate (recursive_tc[0].type);
++      }
++    else
++      {
++        switch (kind)
++          {
++          case CORBA::tk_alias:
+             {
+-              tc = recursive_tc[0].type;
+-            }
+-          else
+-            {
+-              new_tc = true;
+-
+               CORBA::String_var name;
+               CORBA::TypeCode_var content_type;
+               if (!(indir_stream >> TAO_InputCDR::to_string (name.out (), 0)
+                   && tc_demarshal (indir_stream, content_type.out (), infos)))
+-                 return false;
++                {
++                  return false;
++                }
+ 
+               typedef TAO::TypeCode::Alias<
+-                               CORBA::String_var,
+-                               CORBA::TypeCode_var,
+-                               TAO::True_RefCount_Policy> typecode_type;
++                              CORBA::String_var,
++                              CORBA::TypeCode_var,
++                              TAO::True_RefCount_Policy> typecode_type;
+ 
+               ACE_NEW_RETURN (tc,
+                   typecode_type (kind,
+-                                 id.in (),
+-                                 name.in (),
+-                                 content_type),
++                                id.in (),
++                                name.in (),
++                                content_type),
+                   false);
+             }
+-        }
+-        break;
+-      case CORBA::tk_struct:
+-        {
+-          // Check if we already have a tc for this type, if yes, use that
+-          TAO::TypeCodeFactory::TC_Info_List recursive_tc;
+-          if (find_recursive_tc (id.in (), recursive_tc, infos))
++            break;
++          case CORBA::tk_struct:
+             {
+-              tc = recursive_tc[0].type;
+-            }
+-          else
+-            {
+-              new_tc = true;
+-
+               typedef ACE_Array_Base<
+                 TAO::TypeCode::Struct_Field<
+                   CORBA::String_var,
+@@ -1337,23 +1352,12 @@
+ 
+               ACE_NEW_RETURN (tc,
+                               recursive_typecode_type (kind,
+-                                                       id.in ()),
++                                                      id.in ()),
+                               false);
+             }
+-        }
+-        break;
+-      case CORBA::tk_union:
+-        {
+-          // Check if we already have a tc for this type, if yes, use that
+-          TAO::TypeCodeFactory::TC_Info_List recursive_tc;
+-          if (find_recursive_tc (id.in (), recursive_tc, infos))
++            break;
++          case CORBA::tk_union:
+             {
+-              tc = recursive_tc[0].type;
+-            }
+-          else
+-            {
+-              new_tc = true;
+-
+               typedef union_case_array_type member_array_type;
+ 
+               typedef TAO::TypeCode::Union<
+@@ -1369,24 +1373,13 @@
+ 
+               ACE_NEW_RETURN (tc,
+                               recursive_typecode_type (kind,
+-                                                       id.in ()),
++                                                      id.in ()),
+                               false);
+             }
+-        }
+-        break;
+-      case CORBA::tk_value:
+-      case CORBA::tk_event:
+-        {
+-          // Check if we already have a tc for this type, if yes, use that
+-          TAO::TypeCodeFactory::TC_Info_List recursive_tc;
+-          if (find_recursive_tc (id.in (), recursive_tc, infos))
++            break;
++          case CORBA::tk_value:
++          case CORBA::tk_event:
+             {
+-              tc = recursive_tc[0].type;
+-            }
+-          else
+-            {
+-              new_tc = true;
+-
+               typedef ACE_Array_Base<
+                 TAO::TypeCode::Value_Field<
+                   CORBA::String_var,
+@@ -1405,30 +1398,18 @@
+ 
+               ACE_NEW_RETURN (tc,
+                               recursive_typecode_type (kind,
+-                                                       id.in ()),
++                                                      id.in ()),
+                               false);
+             }
+-        }
+-        break;
+-      default:
+-        return false;  // We should never get here.
+-      };
++            break;
++          default:
++            return false;  // We should never get here.
++          }
+ 
+-     // Only when we created a new tc add it to the list.
+-     if (new_tc)
+-       {
+-         size_t const old_size = infos.size ();
+-         if (infos.size (old_size + 1) == -1)  // Incremental growth -- *sigh*
+-           return false;
++        // Since we created a new tc, add it to the "Repeat" list.
++        add_to_already_seen (tc, infos);
++      }
+ 
+-         TAO::TypeCodeFactory::TC_Info & info = infos[old_size];
+-
+-         info.id = tc->id ();
+- // Should never throw!
+-
+-         info.type = tc;
+-       }
+-
+     return true;
+   }
+ }
