@@ -1,0 +1,83 @@
+Index: ChangeLog.atd
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/ChangeLog.atd,v
+retrieving revision 1.78
+diff -u -r1.78 ChangeLog.atd
+--- ChangeLog.atd	12 Jun 2003 17:34:11 -0000	1.78
++++ ChangeLog.atd	7 Jul 2003 22:53:11 -0000
+@@ -1,3 +1,11 @@
++Mon Jul  7 18:40:50 2003  Carlos O'Ryan  <coryan@atdesk.com>
++
++	* orbsvcs/orbsvcs/Event/EC_Event_Channel_Base.cpp:
++	  Crashes during shutdown because the event channel was not
++	  cleaning up its resources in the (reverse) order of
++	  construction.  This fixes:
++	    http://deuce.doc.wustl.edu/bugzilla/show_bug.cgi?id=1549
++
+ Thu Jun 12 13:22:30 2003  Carlos O'Ryan  <coryan@atdesk.com>
+ 
+ 	* tao/PortableServer/Object_Adapter.cpp:
+Index: orbsvcs/orbsvcs/Event/EC_Event_Channel_Base.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/orbsvcs/orbsvcs/Event/EC_Event_Channel_Base.cpp,v
+retrieving revision 1.4
+diff -u -r1.4 EC_Event_Channel_Base.cpp
+--- orbsvcs/orbsvcs/Event/EC_Event_Channel_Base.cpp	24 Jul 2002 22:22:46 -0000	1.4
++++ orbsvcs/orbsvcs/Event/EC_Event_Channel_Base.cpp	7 Jul 2003 22:53:11 -0000
+@@ -92,28 +92,38 @@
+ 
+ TAO_EC_Event_Channel_Base::~TAO_EC_Event_Channel_Base (void)
+ {
+-  this->factory_->destroy_dispatching (this->dispatching_);
+-  this->dispatching_ = 0;
+-  this->factory_->destroy_filter_builder (this->filter_builder_);
+-  this->filter_builder_ = 0;
+-  this->factory_->destroy_supplier_filter_builder (this->supplier_filter_builder_);
+-  this->supplier_filter_builder_ = 0;
+-  this->factory_->destroy_consumer_admin (this->consumer_admin_);
+-  this->consumer_admin_ = 0;
+-  this->factory_->destroy_supplier_admin (this->supplier_admin_);
+-  this->supplier_admin_ = 0;
+-  this->factory_->destroy_timeout_generator (this->timeout_generator_);
+-  this->timeout_generator_ = 0;
+-  this->factory_->destroy_observer_strategy (this->observer_strategy_);
+-  this->observer_strategy_ = 0;
++  // Destroy Strategies in the reverse order of creation (sp?), they
++  // refere to each other during destruction and thus need to be
++  // cleaned up properly.
++  this->factory_->destroy_supplier_control (this->supplier_control_);
++  this->supplier_control_ = 0;
++
++  this->factory_->destroy_consumer_control (this->consumer_control_);
++  this->consumer_control_ = 0;
+ 
+   this->factory_->destroy_scheduling_strategy (this->scheduling_strategy_);
+   this->scheduling_strategy_ = 0;
+ 
+-  this->factory_->destroy_consumer_control (this->consumer_control_);
+-  this->consumer_control_ = 0;
+-  this->factory_->destroy_supplier_control (this->supplier_control_);
+-  this->supplier_control_ = 0;
++  this->factory_->destroy_observer_strategy (this->observer_strategy_);
++  this->observer_strategy_ = 0;
++
++  this->factory_->destroy_timeout_generator (this->timeout_generator_);
++  this->timeout_generator_ = 0;
++
++  this->factory_->destroy_supplier_admin (this->supplier_admin_);
++  this->supplier_admin_ = 0;
++
++  this->factory_->destroy_consumer_admin (this->consumer_admin_);
++  this->consumer_admin_ = 0;
++
++  this->factory_->destroy_supplier_filter_builder (this->supplier_filter_builder_);
++  this->supplier_filter_builder_ = 0;
++
++  this->factory_->destroy_filter_builder (this->filter_builder_);
++  this->filter_builder_ = 0;
++
++  this->factory_->destroy_dispatching (this->dispatching_);
++  this->dispatching_ = 0;
+ 
+   this->factory (0, 0);
+ }
