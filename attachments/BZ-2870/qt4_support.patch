@@ -1,0 +1,87 @@
+Index: ACE_wrappers/ace/QtReactor/QtReactor.cpp
+===================================================================
+--- ACE_wrappers/ace/QtReactor/QtReactor.cpp	(revision 77750)
++++ ACE_wrappers/ace/QtReactor/QtReactor.cpp	(working copy)
+@@ -494,8 +494,12 @@
+                       SIGNAL (timeout ()),
+                       this,
+                       SLOT (timeout_event ()));
+-
++#if QT4
++    qtime_->setSingleShot (1);
++    qtime_->start(max_wait_time->msec());
++#else	
+     qtime_->start(max_wait_time->msec(), 1);
++#endif
+   }
+ 
+ }
+@@ -582,7 +586,11 @@
+     return -1; // Bad file arguments...
+ 
+   // Qt processing.
++#if QT4
++  this->qapp_->processEvents();
++#else 
+   this->qapp_->processOneEvent ();
++#endif
+ 
+   // Reset the width, in case it changed during the upcalls.
+   width = handler_rep_.max_handlep1 ();
+Index: ACE_wrappers/ace/QtReactor/QtReactor.h
+===================================================================
+--- ACE_wrappers/ace/QtReactor/QtReactor.h	(revision 77750)
++++ ACE_wrappers/ace/QtReactor/QtReactor.h	(working copy)
+@@ -24,13 +24,23 @@
+ 
+ #include "ace/Select_Reactor.h"
+ #include "ace/Map_Manager.h"
++ //undefine  QT4  
++// QT toolkit specific includes.
++#define QT4 0
++#if QT4
++#include /**/ <QtGui/QApplication>
++#include /**/ <QtCore/QObject>
++#include /**/ <QtCore/QSocketNotifier.h>
++#include /**/ <QtCore/QTimer.h>
+ 
+-// QT toolkit specific includes.
++#else
++
+ #include /**/ <qapplication.h>
+ #include /**/ <qobject.h>
+ #include /**/ <qsocketnotifier.h>
+ #include /**/ <qtimer.h>
+ 
++#endif
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ /**
+Index: ACE_wrappers/TAO/tao/QtResource/QtResource_Factory.h
+===================================================================
+--- ACE_wrappers/TAO/tao/QtResource/QtResource_Factory.h	(revision 77750)
++++ ACE_wrappers/TAO/tao/QtResource/QtResource_Factory.h	(working copy)
+@@ -20,9 +20,9 @@
+ # pragma once
+ #endif /* ACE_LACKS_PRAGMA_ONCE */
+ 
+-#include <qapplication.h>
+ #include "ace/QtReactor/QtReactor.h"
+ #include "tao/GUIResource_Factory.h"
++class QApplication;
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+Index: ACE_wrappers/TAO/tao/QtResource/QtResource_Loader.h
+===================================================================
+--- ACE_wrappers/TAO/tao/QtResource/QtResource_Loader.h	(revision 77750)
++++ ACE_wrappers/TAO/tao/QtResource/QtResource_Loader.h	(working copy)
+@@ -23,7 +23,7 @@
+ 
+ #include "tao/Versioned_Namespace.h"
+ 
+-#include <qapplication.h>
++class QApplication;
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
