@@ -1,0 +1,1059 @@
+? ace/orig
+Index: ace/CDR_Stream.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/CDR_Stream.cpp,v
+retrieving revision 1.96
+diff -u -r1.96 CDR_Stream.cpp
+--- ace/CDR_Stream.cpp	12 Mar 2006 16:32:53 -0000	1.96
++++ ace/CDR_Stream.cpp	4 Apr 2006 12:09:18 -0000
+@@ -123,6 +123,14 @@
+   return ACE_OutputCDR::wchar_maxbytes_;
+ }
+ 
++bool
++ACE_OutputCDR::prepare_for_adjust (size_t, 
++                                   size_t,
++                                   char*&)
++{
++  return true;
++}
++
+ int
+ ACE_OutputCDR::grow_and_adjust (size_t size,
+                                 size_t align,
+@@ -152,18 +160,43 @@
+ 
+       this->good_bit_ = false;
+       ACE_Message_Block* tmp;
+-      ACE_NEW_RETURN (tmp,
+-                      ACE_Message_Block (newsize,
+-                                         ACE_Message_Block::MB_DATA,
+-                                         0,
+-                                         0,
+-                                         this->current_->data_block ()->allocator_strategy (),
+-                                         0,
+-                                         0,
+-                                         ACE_Time_Value::zero,
+-                                         ACE_Time_Value::max_time,
+-                                         this->current_->data_block ()->data_block_allocator ()),
+-                      -1);
++      ACE_Allocator* message_block_allocator =
++                        this->current_->message_block_allocator ();
++      if (message_block_allocator == 0)
++        {
++          ACE_NEW_RETURN (tmp,
++                          ACE_Message_Block (newsize,
++                                             ACE_Message_Block::MB_DATA,
++                                             0,
++                                             0,
++                                             this->current_->data_block ()->allocator_strategy (),
++                                             0,
++                                             0,
++                                             ACE_Time_Value::zero,
++                                             ACE_Time_Value::max_time,
++                                             this->current_->data_block ()->data_block_allocator (),
++                                             message_block_allocator),
++                          -1);
++        }
++      else
++        {
++          ACE_NEW_MALLOC_RETURN (
++                          tmp,
++                          static_cast<ACE_Message_Block*> (
++                             message_block_allocator->malloc (sizeof (ACE_Message_Block))), 
++                          ACE_Message_Block (newsize,
++                                             ACE_Message_Block::MB_DATA,
++                                             0,
++                                             0,
++                                             this->current_->data_block ()->allocator_strategy (),
++                                             0,
++                                             0,
++                                             ACE_Time_Value::zero,
++                                             ACE_Time_Value::max_time,
++                                             this->current_->data_block ()->data_block_allocator (),
++                                             message_block_allocator),
++                          -1);
++        }
+       this->good_bit_ = true;
+ 
+ #if !defined (ACE_LACKS_CDR_ALIGNMENT)
+@@ -363,9 +396,27 @@
+ 
+       ACE_Message_Block* cont = 0;
+       this->good_bit_ = false;
+-      ACE_NEW_RETURN (cont,
+-                      ACE_Message_Block (i->data_block ()->duplicate ()),
+-                      0);
++      ACE_Allocator* message_block_allocator =
++                        this->current_->message_block_allocator ();
++      if (message_block_allocator == 0)
++        {
++          ACE_NEW_RETURN (cont,
++                          ACE_Message_Block (i->data_block ()->duplicate (),
++                                             0,
++                                             message_block_allocator),
++                          0);
++        }
++      else
++        {
++          ACE_NEW_MALLOC_RETURN (
++                          cont,
++                          static_cast<ACE_Message_Block *> (
++                            message_block_allocator->malloc (sizeof (ACE_Message_Block))),
++                          ACE_Message_Block (i->data_block ()->duplicate (),
++                                             0,
++                                             message_block_allocator),
++                          0);
++        }
+       this->good_bit_ = true;
+ 
+       if (cont != 0)
+Index: ace/CDR_Stream.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/CDR_Stream.h,v
+retrieving revision 1.92
+diff -u -r1.92 CDR_Stream.h
+--- ace/CDR_Stream.h	25 Jan 2006 13:05:49 -0000	1.92
++++ ace/CDR_Stream.h	4 Apr 2006 12:09:18 -0000
+@@ -144,7 +144,7 @@
+                  ACE_CDR_GIOP_MINOR_VERSION);
+ 
+   /// destructor
+-  ~ACE_OutputCDR (void);
++  virtual ~ACE_OutputCDR (void);
+ 
+   /**
+    * Disambiguate overload when inserting booleans, octets, chars, and
+@@ -393,16 +393,13 @@
+   /// Set the underlying GIOP version..
+   int get_version (ACE_CDR::Octet &major,
+                    ACE_CDR::Octet &minor);
+-private:
+-  /// disallow copying...
+-  ACE_OutputCDR (const ACE_OutputCDR& rhs);
+-  ACE_OutputCDR& operator= (const ACE_OutputCDR& rhs);
+ 
+-  ACE_CDR::Boolean write_1 (const ACE_CDR::Octet *x);
+-  ACE_CDR::Boolean write_2 (const ACE_CDR::UShort *x);
+-  ACE_CDR::Boolean write_4 (const ACE_CDR::ULong *x);
+-  ACE_CDR::Boolean write_8 (const ACE_CDR::ULongLong *x);
+-  ACE_CDR::Boolean write_16 (const ACE_CDR::LongDouble *x);
++protected:
++  /**
++   */
++  virtual bool prepare_for_adjust (size_t size,
++                                   size_t align,
++                                   char *&buf);
+ 
+   /**
+    * write an array of <length> elements, each of <size> bytes and the
+@@ -416,15 +413,25 @@
+    * could be interesting to find the break even point and optimize
+    * for that case, but that would be too platform dependent.
+    */
+-  ACE_CDR::Boolean write_array (const void *x,
+-                                size_t size,
+-                                size_t align,
+-                                ACE_CDR::ULong length);
++  virtual ACE_CDR::Boolean write_array (const void *x,
++                                        size_t size,
++                                        size_t align,
++                                        ACE_CDR::ULong length);
+ 
+ 
+-  ACE_CDR::Boolean write_wchar_array_i (const ACE_CDR::WChar* x,
+-                                        ACE_CDR::ULong length);
++  virtual ACE_CDR::Boolean write_wchar_array_i (const ACE_CDR::WChar* x,
++                                                ACE_CDR::ULong length);
+ 
++private:
++  /// disallow copying...
++  ACE_OutputCDR (const ACE_OutputCDR& rhs);
++  ACE_OutputCDR& operator= (const ACE_OutputCDR& rhs);
++
++  ACE_CDR::Boolean write_1 (const ACE_CDR::Octet *x);
++  ACE_CDR::Boolean write_2 (const ACE_CDR::UShort *x);
++  ACE_CDR::Boolean write_4 (const ACE_CDR::ULong *x);
++  ACE_CDR::Boolean write_8 (const ACE_CDR::ULongLong *x);
++  ACE_CDR::Boolean write_16 (const ACE_CDR::LongDouble *x);
+ 
+   /**
+    * Grow the CDR stream. When it returns <buf> contains a pointer to
+Index: ace/CDR_Stream.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/CDR_Stream.inl,v
+retrieving revision 4.9
+diff -u -r4.9 CDR_Stream.inl
+--- ace/CDR_Stream.inl	12 Mar 2006 16:32:53 -0000	4.9
++++ ace/CDR_Stream.inl	4 Apr 2006 12:09:18 -0000
+@@ -430,6 +430,9 @@
+                        size_t align,
+                        char*& buf)
+ {
++  if (size != 0 && !this->prepare_for_adjust (size, align, buf))
++    return -1;
++
+   if (!this->current_is_writable_)
+     return this->grow_and_adjust (size, align, buf);
+ 
+Index: ace/Message_Block.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Message_Block.h,v
+retrieving revision 4.111
+diff -u -r4.111 Message_Block.h
+--- ace/Message_Block.h	24 Feb 2006 15:02:52 -0000	4.111
++++ ace/Message_Block.h	4 Apr 2006 12:09:18 -0000
+@@ -424,6 +424,8 @@
+                           ACE_Allocator *&data_block_allocator,
+                           ACE_Allocator *&message_block_allocator);
+ 
++  ACE_Allocator* message_block_allocator (void) const;
++
+   /// Reset all the allocators in the message block.
+   /// @@todo: Not sure whether we would need finer control while
+   /// trying to reset allocators ie. a method for every allocator.
+Index: ace/Message_Block.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Message_Block.inl,v
+retrieving revision 4.4
+diff -u -r4.4 Message_Block.inl
+--- ace/Message_Block.inl	28 Oct 2005 16:14:53 -0000	4.4
++++ ace/Message_Block.inl	4 Apr 2006 12:09:18 -0000
+@@ -281,6 +281,12 @@
+     this->message_block_allocator_;
+ }
+ 
++ACE_INLINE ACE_Allocator*
++ACE_Message_Block::message_block_allocator (void) const
++{
++  return this->message_block_allocator_;
++}
++
+ ACE_INLINE char *
+ ACE_Message_Block::base (void) const
+ {
+Index: TAO/tao/CDR.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/CDR.cpp,v
+retrieving revision 1.60.6.4
+diff -u -r1.60.6.4 CDR.cpp
+--- TAO/tao/CDR.cpp	30 Mar 2006 12:41:46 -0000	1.60.6.4
++++ TAO/tao/CDR.cpp	4 Apr 2006 12:09:18 -0000
+@@ -209,19 +209,70 @@
+ }
+ 
+ bool
+-TAO_OutputCDR::fragment_stream (ACE_CDR::ULong pending_alignment,
+-                                ACE_CDR::ULong pending_length)
++TAO_OutputCDR::prepare_for_adjust (size_t pending_length,
++                                   size_t pending_alignment,
++                                   char*&)
+ {
+   if (this->fragmentation_strategy_)
+     {
+-      return (this->fragmentation_strategy_->fragment (*this,
+-                                                       pending_alignment,
+-                                                       pending_length) == 0);
++      return (this->fragmentation_strategy_->fragment (
++                                                   *this,
++                                                   pending_alignment,
++                                                   pending_length) == 0);
+     }
+ 
+-  return true;  // Success.
++  return true;
+ }
+ 
++ACE_CDR::Boolean
++TAO_OutputCDR::write_array (const void *x,
++                            size_t size, 
++                            size_t align, 
++                            ACE_CDR::ULong length)
++{
++  if (this->fragmentation_strategy_ == 0 ||
++      this->fragmentation_strategy_->would_fit (*this, align,
++                                                size * length))
++    {
++      return this->ACE_OutputCDR::write_array (x, size, align, length);
++    }
++
++  if (length == 0)
++    return true;
++
++  const char* ptr = static_cast<const char*> (x);
++  const ACE_CDR::ULong max_message_size =
++    this->fragmentation_strategy_->max_message_size ();
++
++  while (length > 0)
++    {
++      ACE_CDR::ULong available = max_message_size;
++      ACE_CDR::ULong taken =
++        ACE_align_binary (this->total_length (), align);
++      if (taken >= available)
++        {
++          if (length < available)
++            available = length;
++        }
++      else
++        available = (available - taken) / size;
++
++      length -= available;
++
++      if (!this->ACE_OutputCDR::write_array (ptr, size, align, available))
++        return false;
++      ptr += (size * available);
++    }
++
++  return true;
++}
++
++ACE_CDR::Boolean
++TAO_OutputCDR::write_wchar_array_i (const ACE_CDR::WChar* x,
++                                    ACE_CDR::ULong length)
++{
++  return this->ACE_OutputCDR::write_wchar_array_i (x, length);
++}
+ 
+ // ****************************************************************
+ 
+Index: TAO/tao/CDR.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/CDR.h,v
+retrieving revision 1.74.6.5
+diff -u -r1.74.6.5 CDR.h
+--- TAO/tao/CDR.h	3 Apr 2006 07:18:35 -0000	1.74.6.5
++++ TAO/tao/CDR.h	4 Apr 2006 12:09:18 -0000
+@@ -168,14 +168,6 @@
+    * requests and replies.
+    */
+   //@{
+-  /// Fragment this output CDR stream if necessary.
+-  /**
+-   * Fragmentation will done through GIOP fragments when the length of
+-   * the CDR stream length will exceed the configured threshold.
+-   */
+-  bool fragment_stream (ACE_CDR::ULong pending_alignment,
+-                        ACE_CDR::ULong pending_length);
+-
+   /// Are there more data fragments to come?
+   bool more_fragments (void) const;
+ 
+@@ -201,6 +193,25 @@
+   ACE_Time_Value * timeout (void) const;
+   //@}
+ 
++protected:
++  /// Fragment this output CDR stream if necessary.
++  /**
++   * Fragmentation will done through GIOP fragments when the length of
++   * the CDR stream length will exceed the configured threshold.
++   */
++  virtual bool prepare_for_adjust (size_t pending_length,
++                                   size_t pending_alignment,
++                                   char *&buf);
++
++  virtual ACE_CDR::Boolean write_array (const void *x,
++                                        size_t size, 
++                                        size_t align, 
++                                        ACE_CDR::ULong length); 
++
++
++  virtual ACE_CDR::Boolean write_wchar_array_i (const ACE_CDR::WChar* x,
++                                                ACE_CDR::ULong length);
++
+ private:
+ 
+   // disallow copying...
+Index: TAO/tao/CDR.i
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/CDR.i,v
+retrieving revision 1.47.14.4
+diff -u -r1.47.14.4 CDR.i
+--- TAO/tao/CDR.i	22 Mar 2006 09:38:01 -0000	1.47.14.4
++++ TAO/tao/CDR.i	4 Apr 2006 12:09:18 -0000
+@@ -208,102 +208,67 @@
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::Short x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::SHORT_ALIGN,
+-                        sizeof (CORBA::Short))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::UShort x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::SHORT_ALIGN,
+-                        sizeof (CORBA::UShort))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::Long x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::LONG_ALIGN,
+-                        sizeof (CORBA::Long))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::ULong x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::LONG_ALIGN,
+-                        sizeof (CORBA::ULong))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::LongLong x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::LONGLONG_ALIGN,
+-                        sizeof (CORBA::LongLong))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::ULongLong x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::LONGLONG_ALIGN,
+-                        sizeof (CORBA::ULongLong))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR& os,
+                                       CORBA::LongDouble x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::LONGDOUBLE_ALIGN,
+-                        sizeof (CORBA::LongDouble))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::Float x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::LONG_ALIGN,
+-                        sizeof (CORBA::Float))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::Double x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::LONGLONG_ALIGN,
+-                        sizeof (CORBA::Double))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       const char * x)
+ {
+-  return
+-    os.fragment_stream (ACE_CDR::OCTET_ALIGN,
+-                        sizeof (char))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       const CORBA::WChar * x)
+ {
+-  return
+-    os.fragment_stream ((sizeof (CORBA::WChar) == 2
+-                         ? ACE_CDR::SHORT_ALIGN
+-                         : ACE_CDR::LONG_ALIGN),
+-                        sizeof (CORBA::WChar))
+-    && static_cast<ACE_OutputCDR &> (os) << x;
++  return static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
+ // ****************************************************************
+Index: TAO/tao/GIOP_Fragmentation_Strategy.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Attic/GIOP_Fragmentation_Strategy.h,v
+retrieving revision 1.1.2.3
+diff -u -r1.1.2.3 GIOP_Fragmentation_Strategy.h
+--- TAO/tao/GIOP_Fragmentation_Strategy.h	22 Mar 2006 00:53:02 -0000	1.1.2.3
++++ TAO/tao/GIOP_Fragmentation_Strategy.h	4 Apr 2006 12:09:18 -0000
+@@ -46,6 +46,14 @@
+   /// Destructor.
+   virtual ~TAO_GIOP_Fragmentation_Strategy (void);
+ 
++  virtual ACE_CDR::ULong max_message_size (void) const = 0;
++
++  /// Could the pending amount be added to the current CDR
++  /// without exceeding the maximum message size?
++  virtual bool would_fit (TAO_OutputCDR & cdr,
++                          ACE_CDR::ULong pending_alignment,
++                          ACE_CDR::ULong pending_length) const = 0;
++
+   /// Fragment the (potentially partially) encoded GIOP message.
+   /**
+    * Fragmentation the contents of the CDR output stream @a cdr into
+Index: TAO/tao/GIOP_Message_Generator_Parser_12.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/GIOP_Message_Generator_Parser_12.cpp,v
+retrieving revision 1.31.14.1
+diff -u -r1.31.14.1 GIOP_Message_Generator_Parser_12.cpp
+--- TAO/tao/GIOP_Message_Generator_Parser_12.cpp	22 Mar 2006 09:38:01 -0000	1.31.14.1
++++ TAO/tao/GIOP_Message_Generator_Parser_12.cpp	4 Apr 2006 12:09:19 -0000
+@@ -31,7 +31,8 @@
+   )
+ {
+   // First the request id
+-  msg << opdetails.request_id ();
++  if (!(msg << opdetails.request_id ()))
++    return 0;
+ 
+   const CORBA::Octet response_flags = opdetails.response_flags ();
+ 
+@@ -46,7 +47,10 @@
+   //
+   // We have not implemented the policy INV_NO_RESPONSE for DII.
+   if (response_flags == TAO_TWOWAY_RESPONSE_FLAG)
+-    msg << ACE_OutputCDR::from_octet (3);
++    {
++      if (!(msg << ACE_OutputCDR::from_octet (3)))
++        return 0;
++    }
+   // Second the response flags
+   // Sync scope - ignored by server if request is not oneway.
+   else if (response_flags == CORBA::Octet (Messaging::SYNC_NONE)
+@@ -63,6 +67,7 @@
+   else if (response_flags == CORBA::Octet (Messaging::SYNC_WITH_TARGET))
+     // Return after dispatching servant.
+     msg << ACE_OutputCDR::from_octet (3);
++
+   else
+     // Until more flags are defined by the OMG.
+     return 0;
+@@ -70,18 +75,21 @@
+   // The reserved field
+   CORBA::Octet reserved[3] = {0, 0, 0};
+ 
+-  msg.write_octet_array (reserved, 3);
++  if (!msg.write_octet_array (reserved, 3))
++    return 0;
+ 
+   if (this->marshall_target_spec (spec,
+                                   msg) == 0)
+     return 0;
+ 
+   // Write the operation name
+-  msg.write_string (opdetails.opname_len (),
+-                    opdetails.opname ());
++  if (!msg.write_string (opdetails.opname_len (),
++                         opdetails.opname ()))
++    return 0;
+ 
+   // Write the service context list
+-  msg << opdetails.request_service_info ();
++  if (!(msg << opdetails.request_service_info ()))
++    return 0;
+ 
+   // We align the pointer only if the operation has arguments.
+   if (opdetails.argument_flag ()
+@@ -102,7 +110,8 @@
+   )
+ {
+   // Write the request id
+-  msg << request_id;
++  if (!(msg << request_id))
++    return 0;
+ 
+   // Write the target address
+   if (this->marshall_target_spec (spec,
+@@ -150,11 +159,13 @@
+     }
+ 
+ #if (TAO_HAS_MINIMUM_CORBA == 1)
+-  output << reply.service_context_notowned ();
++  if (!(output << reply.service_context_notowned ()))
++    return 0;
+ #else
+   if (reply.is_dsi_ == 0)
+     {
+-      output << reply.service_context_notowned ();
++      if (!(output << reply.service_context_notowned ()))
++        return 0;
+     }
+   else
+     {
+@@ -163,11 +174,13 @@
+       CORBA::ULong l = svc_ctx.length ();
+ 
+       // Now marshal the rest of the service context objects
+-      output << l;
++      if (!(output << l))
++        return 0;
+ 
+       for (CORBA::ULong i = 0; i != l; ++i)
+         {
+-          output << svc_ctx[i];
++          if (!(output << svc_ctx[i]))
++            return 0;
+         }
+ 
+     }
+@@ -453,7 +466,8 @@
+     case TAO_Target_Specification::Key_Addr:
+       {
+         // As this is a union send in the discriminant first
+-        msg << GIOP::KeyAddr;
++        if (!(msg << GIOP::KeyAddr))
++          return 0;
+ 
+         // Get the object key
+         const TAO::ObjectKey *key = spec.object_key ();
+@@ -461,7 +475,8 @@
+         if (key)
+           {
+             // Marshall in the object key
+-            msg << *key;
++            if (!(msg << *key))
++              return 0;
+           }
+         else
+           {
+@@ -475,7 +490,8 @@
+     case TAO_Target_Specification::Profile_Addr:
+       {
+         // As this is a union send in the discriminant first
+-        msg << GIOP::ProfileAddr;
++        if (!(msg << GIOP::ProfileAddr))
++          return 0;
+ 
+         // Get the profile
+         const IOP::TaggedProfile *pfile = spec.profile ();
+@@ -483,7 +499,8 @@
+         if (pfile)
+           {
+             // Marshall in the object key
+-            msg << *pfile;
++            if (!(msg << *pfile))
++              return 0;
+           }
+         else
+           {
+@@ -497,7 +514,8 @@
+     case TAO_Target_Specification::Reference_Addr:
+       {
+         // As this is a union send in the discriminant first
+-        msg << GIOP::ReferenceAddr;
++        if (!(msg << GIOP::ReferenceAddr))
++          return 0;
+ 
+         // Get the IOR
+         IOP::IOR *ior;
+@@ -508,8 +526,10 @@
+             // This is a struct IORAddressingInfo. So, marshall each
+             // member of the struct one after another in the order
+             // defined.
+-            msg << index;
+-            msg << *ior;
++            if (!(msg << index))
++              return 0;
++            if (!(msg << *ior))
++              return 0;
+           }
+         else
+           {
+Index: TAO/tao/GIOP_Message_Lite.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/GIOP_Message_Lite.cpp,v
+retrieving revision 1.92.2.1
+diff -u -r1.92.2.1 GIOP_Message_Lite.cpp
+--- TAO/tao/GIOP_Message_Lite.cpp	22 Mar 2006 09:38:01 -0000	1.92.2.1
++++ TAO/tao/GIOP_Message_Lite.cpp	4 Apr 2006 12:09:19 -0000
+@@ -1239,7 +1239,8 @@
+      TAO_OutputCDR &out_stream
+    )
+ {
+-  out_stream << opdetails.request_id ();
++  if (!(out_stream << opdetails.request_id ()))
++    return 0;
+ 
+   const CORBA::Octet response_flags = opdetails.response_flags ();
+ 
+@@ -1311,7 +1312,8 @@
+     TAO_OutputCDR &msg
+   )
+ {
+-  msg << request_id;
++  if (!(msg << request_id))
++    return 0;
+ 
+   // In this case we cannot recognise anything other than the Object
+   // key as the address disposition variable. But we do a sanity check
+Index: TAO/tao/Null_Fragmentation_Strategy.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Attic/Null_Fragmentation_Strategy.cpp,v
+retrieving revision 1.1.2.2
+diff -u -r1.1.2.2 Null_Fragmentation_Strategy.cpp
+--- TAO/tao/Null_Fragmentation_Strategy.cpp	22 Mar 2006 00:53:02 -0000	1.1.2.2
++++ TAO/tao/Null_Fragmentation_Strategy.cpp	4 Apr 2006 12:09:19 -0000
+@@ -8,6 +8,21 @@
+ {
+ }
+ 
++ACE_CDR::ULong
++TAO_Null_Fragmentation_Strategy::max_message_size (void) const
++{
++  return ACE_UINT32_MAX;
++}
++
++bool
++TAO_Null_Fragmentation_Strategy::would_fit (
++                          TAO_OutputCDR &,
++                          ACE_CDR::ULong,
++                          ACE_CDR::ULong) const
++{
++  return true;
++}
++
+ int
+ TAO_Null_Fragmentation_Strategy::fragment (TAO_OutputCDR &,
+                                            ACE_CDR::ULong,
+Index: TAO/tao/Null_Fragmentation_Strategy.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Attic/Null_Fragmentation_Strategy.h,v
+retrieving revision 1.1.2.2
+diff -u -r1.1.2.2 Null_Fragmentation_Strategy.h
+--- TAO/tao/Null_Fragmentation_Strategy.h	22 Mar 2006 00:53:02 -0000	1.1.2.2
++++ TAO/tao/Null_Fragmentation_Strategy.h	4 Apr 2006 12:09:19 -0000
+@@ -45,6 +45,10 @@
+ 
+   TAO_Null_Fragmentation_Strategy (void) {}
+   virtual ~TAO_Null_Fragmentation_Strategy (void);
++  virtual ACE_CDR::ULong max_message_size (void) const;
++  virtual bool would_fit (TAO_OutputCDR & cdr,
++                          ACE_CDR::ULong pending_alignment,
++                          ACE_CDR::ULong pending_length) const;
+   virtual int fragment (TAO_OutputCDR &,
+                         ACE_CDR::ULong,
+                         ACE_CDR::ULong);
+Index: TAO/tao/On_Demand_Fragmentation_Strategy.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Attic/On_Demand_Fragmentation_Strategy.cpp,v
+retrieving revision 1.1.2.5
+diff -u -r1.1.2.5 On_Demand_Fragmentation_Strategy.cpp
+--- TAO/tao/On_Demand_Fragmentation_Strategy.cpp	3 Apr 2006 11:20:10 -0000	1.1.2.5
++++ TAO/tao/On_Demand_Fragmentation_Strategy.cpp	4 Apr 2006 12:09:19 -0000
+@@ -21,26 +21,20 @@
+ {
+ }
+ 
+-int
+-TAO_On_Demand_Fragmentation_Strategy::fragment (
+-  TAO_OutputCDR & cdr,
+-  ACE_CDR::ULong pending_alignment,
+-  ACE_CDR::ULong pending_length)
++ACE_CDR::ULong
++TAO_On_Demand_Fragmentation_Strategy::max_message_size (void) const
+ {
+-  if (this->transport_ == 0)
+-    return 0;  // No transport.  Can't fragment.
+-
+-  CORBA::Octet major = 0;
+-  CORBA::Octet minor = 0;
+-
+-  (void) cdr.get_version (major, minor);
+-
+-  // GIOP fragments are supported in GIOP 1.1 and better, but TAO only
+-  // supports them in 1.2 or better since GIOP 1.1 fragments do not
+-  // have a fragment message header.
+-  if (major == 1 && minor < 2)
+-    return -1;
++  // Subtracting 24 is a hack.  We need to make sure there's room for
++  // the header and alignment.
++  return this->max_message_size_ - 24;
++}
+ 
++bool
++TAO_On_Demand_Fragmentation_Strategy::would_fit (
++                          TAO_OutputCDR & cdr,
++                          ACE_CDR::ULong pending_alignment,
++                          ACE_CDR::ULong pending_length) const
++{
+   // Determine increase in CDR stream length if pending data is
+   // marshaled, taking into account the alignment for the given data
+   // type.
+@@ -59,7 +53,30 @@
+   //  + 4 for GIOP fragment header
+   //  + 8 for payload (including padding)
+   // since fragments must be aligned on an 8 byte boundary.
+-  if (aligned_length > this->max_message_size_)
++  return (aligned_length <= this->max_message_size_);
++}
++
++int
++TAO_On_Demand_Fragmentation_Strategy::fragment (
++  TAO_OutputCDR & cdr,
++  ACE_CDR::ULong pending_alignment,
++  ACE_CDR::ULong pending_length)
++{
++  if (this->transport_ == 0)
++    return 0;  // No transport.  Can't fragment.
++
++  CORBA::Octet major = 0;
++  CORBA::Octet minor = 0;
++
++  (void) cdr.get_version (major, minor);
++
++  // GIOP fragments are supported in GIOP 1.1 and better, but TAO only
++  // supports them in 1.2 or better since GIOP 1.1 fragments do not
++  // have a fragment message header.
++  if (major == 1 && minor < 2)
++    return -1;
++
++  if (!this->would_fit (cdr, pending_alignment, pending_length))
+     {
+       // Pad the outgoing fragment if necessary.
+       if (cdr.align_write_ptr (ACE_CDR::MAX_ALIGNMENT) != 0)
+Index: TAO/tao/On_Demand_Fragmentation_Strategy.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Attic/On_Demand_Fragmentation_Strategy.h,v
+retrieving revision 1.1.2.3
+diff -u -r1.1.2.3 On_Demand_Fragmentation_Strategy.h
+--- TAO/tao/On_Demand_Fragmentation_Strategy.h	22 Mar 2006 00:53:03 -0000	1.1.2.3
++++ TAO/tao/On_Demand_Fragmentation_Strategy.h	4 Apr 2006 12:09:19 -0000
+@@ -2,7 +2,7 @@
+ 
+ //=============================================================================
+ /**
+- *  @file    True_Fragmentation_Strategy.h
++ *  @file    On_Demand_Fragmentation_Strategy.h
+  *
+  *  $Id: On_Demand_Fragmentation_Strategy.h,v 1.1.2.3 2006/03/22 00:53:03 ossama Exp $
+  *
+@@ -50,6 +50,13 @@
+                                         ACE_CDR::ULong max_message_size);
+ 
+   virtual ~TAO_On_Demand_Fragmentation_Strategy (void);
++
++  virtual ACE_CDR::ULong max_message_size (void) const;
++
++  virtual bool would_fit (TAO_OutputCDR & cdr,
++                          ACE_CDR::ULong pending_alignment,
++                          ACE_CDR::ULong pending_length) const;
++
+   virtual int fragment (TAO_OutputCDR & cdr,
+                         ACE_CDR::ULong pending_alignment,
+                         ACE_CDR::ULong pending_length);
+Index: TAO/tao/Queued_Fragmentation_Strategy.cpp
+===================================================================
+RCS file: TAO/tao/Queued_Fragmentation_Strategy.cpp
+diff -N TAO/tao/Queued_Fragmentation_Strategy.cpp
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ TAO/tao/Queued_Fragmentation_Strategy.cpp	4 Apr 2006 12:09:19 -0000
+@@ -0,0 +1,102 @@
++// $Id: Queued_Fragmentation_Strategy.cpp,v 1.1.2.4 2006/03/30 12:41:46 elliott_c Exp $
++
++
++#include "tao/Queued_Fragmentation_Strategy.h"
++
++#include "tao/Transport.h"
++#include "tao/CDR.h"
++#include "tao/Pluggable_Messaging.h"
++#include "tao/debug.h"
++
++TAO_Queued_Fragmentation_Strategy::TAO_Queued_Fragmentation_Strategy (
++  TAO_Transport * transport,
++  CORBA::ULong max_message_size)
++  : transport_ (transport)
++  , max_message_size_ (max_message_size)
++{
++}
++
++TAO_Queued_Fragmentation_Strategy::~TAO_Queued_Fragmentation_Strategy (
++  void)
++{
++}
++
++ACE_CDR::ULong
++TAO_Queued_Fragmentation_Strategy::max_message_size (void) const
++{
++  return this->max_message_size_ - 24;
++}
++
++bool
++TAO_Queued_Fragmentation_Strategy::would_fit (
++                          TAO_OutputCDR & cdr,
++                          ACE_CDR::ULong pending_alignment,
++                          ACE_CDR::ULong pending_length) const
++{
++  // Determine increase in CDR stream length if pending data is
++  // marshaled, taking into account the alignment for the given data
++  // type.
++  ACE_CDR::ULong const total_pending_length =
++    ACE_align_binary (cdr.total_length (), pending_alignment)
++    + pending_length;
++
++  // Except for the last fragment, fragmented GIOP messages must
++  // always be aligned on an 8-byte boundary.  Padding will be added
++  // if necessary.
++  ACE_CDR::ULong const aligned_length =
++    ACE_align_binary (total_pending_length, ACE_CDR::MAX_ALIGNMENT);
++
++  // this->max_message_size_ must be >= 24 bytes, i.e.:
++  //   12 for GIOP protocol header
++  //  + 4 for GIOP fragment header
++  //  + 8 for payload (including padding)
++  // since fragments must be aligned on an 8 byte boundary.
++  return (aligned_length <= this->max_message_size_);
++}
++
++int
++TAO_Queued_Fragmentation_Strategy::fragment (
++  TAO_OutputCDR & cdr,
++  ACE_CDR::ULong pending_alignment,
++  ACE_CDR::ULong pending_length)
++{
++  if (this->transport_ == 0)
++    return 0;  // No transport.  Can't fragment.
++
++  CORBA::Octet major = 0;
++  CORBA::Octet minor = 0;
++
++  (void) cdr.get_version (major, minor);
++
++  // GIOP fragments are supported in GIOP 1.1 and better, but TAO only
++  // supports them in 1.2 or better since GIOP 1.1 fragments do not
++  // have a fragment message header.
++  if (major == 1 && minor < 2)
++    return -1;
++
++  if (!this->would_fit (cdr, pending_alignment, pending_length))
++    {
++      if (TAO_debug_level > 0)
++        ACE_DEBUG ((LM_DEBUG, "TAO (%P|%t) - Sending fragment of size %d\n",
++                    cdr.total_length ()));
++
++      // Pad the outgoing fragment if necessary.
++      if (cdr.align_write_ptr (ACE_CDR::MAX_ALIGNMENT) != 0)
++        return -1;
++
++      // More fragments to come.
++      cdr.more_fragments (true);
++
++      // Send the current CDR stream contents through the transport,
++      // making sure to switch on the the GIOP flags "more fragments"
++      // bit.
++      if (this->transport_->format_queue_message (cdr) == -1
++          // Now generate a fragment header.
++          || this->transport_->messaging_object ()->generate_fragment_header (
++               cdr,
++               cdr.request_id ()) != 0)
++        return -1;
++    }
++
++  return 0;
++}
+Index: TAO/tao/Queued_Fragmentation_Strategy.h
+===================================================================
+RCS file: TAO/tao/Queued_Fragmentation_Strategy.h
+diff -N TAO/tao/Queued_Fragmentation_Strategy.h
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ TAO/tao/Queued_Fragmentation_Strategy.h	4 Apr 2006 12:09:19 -0000
+@@ -0,0 +1,84 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ *  @file    Queued_Fragmentation_Strategy.h
++ *
++ *  $Id: Queued_Fragmentation_Strategy.h,v 1.1.2.3 2006/03/22 00:53:03 ossama Exp $
++ *
++ *  @author  Ossama Othman <ossama@dre.vanderbilt.edu>
++ */
++//=============================================================================
++
++#ifndef TAO_TRUE_FRAGMENTATION_STRATEGY_H
++#define TAO_TRUE_FRAGMENTATION_STRATEGY_H
++
++#include /**/ "ace/pre.h"
++
++#include "tao/GIOP_Fragmentation_Strategy.h"
++#include "ace/CDR_Base.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++class TAO_OutputCDR;
++class TAO_Transport;
++
++
++/**
++ * @class TAO_Queued_Fragmenation_Strategy
++ *
++ * @brief On Demand GIOP message fragmentation strategy.
++ *
++ * GIOP message fragmentation strategy that performs fragmentation
++ * when the size of the CDR stream will exceed the user configured
++ * threshold when marshaling the next/pending set of data.
++ *
++ * @see TAO_GIOP_Fragmentation_Strategy
++ */
++class TAO_Queued_Fragmentation_Strategy
++  : public TAO_GIOP_Fragmentation_Strategy
++{
++public:
++
++  /// Constructor.
++  TAO_Queued_Fragmentation_Strategy (TAO_Transport * transport,
++                                        ACE_CDR::ULong max_message_size);
++
++  virtual ~TAO_Queued_Fragmentation_Strategy (void);
++
++  virtual ACE_CDR::ULong max_message_size (void) const;
++
++  virtual bool would_fit (TAO_OutputCDR & cdr,
++                          ACE_CDR::ULong pending_alignment,
++                          ACE_CDR::ULong pending_length) const;
++
++  virtual int fragment (TAO_OutputCDR & cdr,
++                        ACE_CDR::ULong pending_alignment,
++                        ACE_CDR::ULong pending_length);
++
++private:
++
++  // Disallow copying and assignment.
++  TAO_Queued_Fragmentation_Strategy (TAO_Queued_Fragmentation_Strategy const &);
++  void operator= (TAO_Queued_Fragmentation_Strategy const &);
++
++private:
++
++  /// Pointer to the underlying transport object.
++  TAO_Transport * const transport_;
++
++  /// Size of GIOP message at which fragmentation will occur.
++  ACE_CDR::ULong const max_message_size_;
++
++};
++
++TAO_END_VERSIONED_NAMESPACE_DECL
++
++#include /**/ "ace/post.h"
++
++#endif  /* TAO_TRUE_FRAGMENTATION_STRATEGY_H */
