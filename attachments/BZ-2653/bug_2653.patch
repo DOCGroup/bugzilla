@@ -1,0 +1,85 @@
+Index: TP_Reactor.inl
+===================================================================
+--- TP_Reactor.inl	(revision 74469)
++++ TP_Reactor.inl	(working copy)
+@@ -1,6 +1,6 @@
+ // -*- C++ -*-
+ //
+-// $Id$
++// TP_Reactor.inl,v 4.4 2006/03/17 08:48:27 jwillemsen Exp
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -26,6 +26,12 @@
+                            ACE_Reactor_Mask mask,
+                            ACE_EH_PTMF callback)
+ {
++  if (event_handler == 0)
++    {
++      this->dispatch_ = false;
++      return;
++    }
++
+   this->dispatch_ = true;
+ 
+   this->handle_ = handle;
+Index: Select_Reactor_Base.cpp
+===================================================================
+--- Select_Reactor_Base.cpp	(revision 74469)
++++ Select_Reactor_Base.cpp	(working copy)
+@@ -1,4 +1,4 @@
+-// $Id$
++// Select_Reactor_Base.cpp,v 4.75 2006/04/19 19:13:09 jwillemsen Exp
+ 
+ #include "ace/Select_Reactor_Base.h"
+ #include "ace/Reactor.h"
+@@ -16,7 +16,7 @@
+ 
+ ACE_RCSID (ace,
+            Select_Reactor_Base,
+-           "$Id$")
++           "Select_Reactor_Base.cpp,v 4.75 2006/04/19 19:13:09 jwillemsen Exp")
+ 
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+@@ -331,8 +331,16 @@
+   size_t slot = 0;
+   ACE_Event_Handler *event_handler = this->find (handle, &slot);
+ 
++#if 0
++  // there is an unresolved bug that allows a handler scheduled
++  // for writing to be invoked while another thread is in select
++  // this causes select to return an EBADF which triggers unbind
++  // to eliminate the offending handle. However we don't want
++  // to exit before actually removing the handle from the 
++  // reactor's handle set.
+   if (event_handler == 0)
+     return -1;
++#endif
+ 
+   // Clear out the <mask> bits in the Select_Reactor's wait_set.
+   this->select_reactor_.bit_ops (handle,
+@@ -435,7 +443,13 @@
+ 
+     }
+ 
+-  bool const requires_reference_counting =
++  // The event handler pointer returned by find might be null due
++  // to an undefined race condition that clears the handler but
++  // doesn't remove the entry from the reactor's handle set.
++  if (event_handler == 0)
++    return -1;
++
++  int requires_reference_counting =
+     event_handler->reference_counting_policy ().value () ==
+     ACE_Event_Handler::Reference_Counting_Policy::ENABLED;
+ 
+@@ -969,7 +983,7 @@
+       ACE_Event_Handler *event_handler =
+         buffer.eh_;
+ 
+-      bool const requires_reference_counting =
++      int const requires_reference_counting =
+         event_handler->reference_counting_policy ().value () ==
+         ACE_Event_Handler::Reference_Counting_Policy::ENABLED;
+ 
