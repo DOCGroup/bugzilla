@@ -1,0 +1,258 @@
+Index: branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynany.cpp
+===================================================================
+--- branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynany.cpp	(revision 1353)
++++ branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynany.cpp	(revision 1354)
+@@ -326,5 +326,5 @@
+               "\n%d errors\n",
+               this->error_count_));
+ 
+-  return 0;
++  return !!error_count_;
+ }
+Index: branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynunion.cpp
+===================================================================
+--- branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynunion.cpp	(revision 1353)
++++ branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynunion.cpp	(revision 1354)
+@@ -340,5 +340,5 @@
+               "\n%d errors\n",
+               this->error_count_));
+ 
+-  return 0;
++  return !!error_count_;
+ }
+Index: branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynsequence.cpp
+===================================================================
+--- branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynsequence.cpp	(revision 1353)
++++ branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynsequence.cpp	(revision 1354)
+@@ -15,10 +15,40 @@
+ #include "test_dynsequence.h"
+ #include "da_testsC.h"
+ #include "data.h"
++#include "analyzer.h"
+ #include "tao/DynamicAny/DynamicAny.h"
+-#include "analyzer.h"
+ #include "ace/OS_NS_string.h"
+ 
++namespace
++{
++
++bool
++compare_string_sequence_elements(
++    CORBA::ULong i,
++    DynamicAny::DynAnySeq const & lhs,
++    DynamicAny::DynAnySeq const & rhs)
++{
++    CORBA::String_var lhs_string = lhs[i]->get_string ();
++
++    ACE_DEBUG ((LM_DEBUG, "elem[%d] = %s\n", i, lhs_string.in()));
++
++    CORBA::Boolean match =
++        lhs[i]->equal (rhs[i]);
++
++    if (!match)
++    {
++        CORBA::String_var rhs_string =
++            rhs[i]->get_string();
++
++        ACE_DEBUG ((LM_DEBUG,
++                    "  mismatch with elements[%d] = %s\n", i,
++                    rhs_string.in() ));
++    }
++
++    return match;
++}
++}
++
+ Test_DynSequence::Test_DynSequence (CORBA::ORB_var orb, int debug)
+   : orb_ (orb),
+     test_name_ (CORBA::string_dup ("test_dynsequence")),
+@@ -140,13 +170,12 @@
+                       -1);
+       elem_ptr->length (length);
+       DynamicAny::DynAnySeq_var elements (elem_ptr);
+-      CORBA::Any elem_any;
+       CORBA::ULong i;
+ 
+       for (i = 0; i < length; ++i)
+         {
+-          elem_any <<= CORBA::Any::from_string (values[i],
+-                                                8);
++	    CORBA::Any elem_any;
++          elem_any <<= CORBA::Any::from_string (values[i], 8);
+           elements[i] = dynany_factory->create_dyn_any (elem_any);
+         }
+ 
+@@ -161,34 +190,48 @@
+           return -1;
+         }
+ 
+-      elem_any <<= CORBA::Any::from_string ("replacement",20);
+-      CORBA::ULong io_index = 0;
+-      DynamicAny::DynAny *&io = out_elems[io_index].inout();
+-
+-      io = dynany_factory->create_dyn_any (elem_any);
+-
+       analyzer.analyze (fa1.in());
+ 
+-      CORBA::String_var out_str;
+-
+       for (i = 0; i < length; ++i)
+         {
+-          out_str = out_elems[i]->get_string ();
+-          ACE_DEBUG ((LM_DEBUG,"elem[%d] = %s\n", i, out_str.in()));
++          if (!compare_string_sequence_elements(i,
++                                                elements.in(), out_elems.in()))
++          {
++              error_count_++;
++          }
+ 
+-          CORBA::Boolean equal =
+-            out_elems[i]->equal (elements[i]);
+-
+-          if (!equal)
+-            {
+-              ++this->error_count_;
+-            }
+-
+           // To show that calling destroy() on a component does
+           // nothing, as required by the spec.
+           out_elems[i]->destroy ();
+         }
+ 
++      // Now verify that we can replace an element using the in/out return
++      // type.  This illustrates the problems described in bug # 2877:
++      //   http://bugzilla.dre.vanderbilt.edu/show_bug.cgi?id=2877
++      // notice that this code has side-effects on the out_elems sequence, so
++      // do not move this code up or you will make the comparisons above fail.
++      {
++	  char replacement[] = "replacement";
++	  CORBA::Any tmp;
++	  tmp <<= CORBA::Any::from_string (replacement,20);
++	  CORBA::ULong io_index = 0;
++	  DynamicAny::DynAny *&io = out_elems[io_index].inout();
++	  io = dynany_factory->create_dyn_any (tmp);
++
++	  // Compare the value of the replaced string.
++	  CORBA::String_var new_str = out_elems[io_index]->get_string();
++	  if (0 != ACE_OS::strcmp(new_str.in(), replacement))
++	  {
++	      ACE_DEBUG((LM_DEBUG,
++			 "  Mismatch after replacing through in/out.\n"
++			 "  expected = %s, got = %s\n",
++			 replacement, new_str.in()));
++	      this->error_count_++;
++	  }
++      }
++
++
++
+       if (this->error_count_ == 0)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+@@ -291,5 +334,5 @@
+               this->error_count_));
+ 
+ 
+-  return 0;
++  return !!error_count_;
+ }
+Index: branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynstruct.cpp
+===================================================================
+--- branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynstruct.cpp	(revision 1353)
++++ branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynstruct.cpp	(revision 1354)
+@@ -385,5 +385,5 @@
+               "\n%d errors\n",
+               this->error_count_));
+ 
+-  return 0;
++  return !!error_count_;
+ }
+Index: branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynenum.cpp
+===================================================================
+--- branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynenum.cpp	(revision 1353)
++++ branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynenum.cpp	(revision 1354)
+@@ -246,5 +246,5 @@
+               "\n%d errors\n",
+               this->error_count_));
+ 
+-  return 0;
++  return !!error_count_;
+ }
+Index: branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_wrapper.cpp
+===================================================================
+--- branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_wrapper.cpp	(revision 1353)
++++ branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_wrapper.cpp	(revision 1354)
+@@ -43,7 +43,8 @@
+               "********************* %s *******************\n\n",
+               test_name));
+ 
+-  if (this->test_object_->run_test () == -1)
++  int retval = this->test_object_->run_test ();
++  if (retval == -1)
+     {
+       ACE_ERROR ((LM_ERROR,
+                   "(%N:%l) test_wrapper.cpp - run_test:"
+@@ -53,7 +54,7 @@
+       return -1;
+     }
+ 
+-  return 0;
++  return retval;
+ }
+ 
+ #endif /* TEST_WRAPPER_CPP */
+Index: branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynarray.cpp
+===================================================================
+--- branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynarray.cpp	(revision 1353)
++++ branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/test_dynarray.cpp	(revision 1354)
+@@ -182,5 +182,5 @@
+               "\n%d errors\n",
+               this->error_count_));
+ 
+-  return 0;
++  return !!error_count_;
+ }
+Index: branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/driver.cpp
+===================================================================
+--- branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/driver.cpp	(revision 1353)
++++ branches/merge_ACE_TAO_X_6_1/TAO/tests/DynAny_Test/driver.cpp	(revision 1354)
+@@ -37,7 +37,7 @@
+                       -1);
+ 
+   // run the tests
+-  if (driver.run () == -1)
++  if (driver.run () != 0)
+     ACE_ERROR_RETURN ((LM_ERROR,
+                        "(%N:%l) driver.cpp - "
+                        "tests failed\n"),
+Index: branches/merge_ACE_TAO_X_6_1/ChangeLog.atd
+===================================================================
+--- branches/merge_ACE_TAO_X_6_1/ChangeLog.atd	(revision 1353)
++++ branches/merge_ACE_TAO_X_6_1/ChangeLog.atd	(revision 1354)
+@@ -1,3 +1,26 @@
++Fri Jun  6 12:40:31 UTC 2008  Carlos O'Ryan  <coryan@atdesk.com>
++
++        * TAO/tests/DynAny_Test/test_dynsequence.cpp:
++          As part of the changes for this bug:
++            http://bugzilla.dre.vanderbilt.edu/show_bug.cgi?id=2877
++          the test was modified to use .inout() parameters.  However, that
++          modification introduced a side-effect that made the next portion
++          of the test fail.  I moved the code for bug 2877 down to avoid
++          the side-effect, documented what the section of the code did,
++          and refactored some of the code for good measure.
++
++        * TAO/tests/DynAny_Test/test_dynany.cpp:
++        * TAO/tests/DynAny_Test/test_dynunion.cpp:
++        * TAO/tests/DynAny_Test/test_dynstruct.cpp:
++        * TAO/tests/DynAny_Test/test_dynenum.cpp:
++        * TAO/tests/DynAny_Test/test_wrapper.cpp:
++        * TAO/tests/DynAny_Test/test_dynarray.cpp:
++        * TAO/tests/DynAny_Test/driver.cpp:
++          Make sure any errors detected in the tests are passed upstream
++          until main().  In the previous version only exceptions were
++          reported, but regular errors (mismatched values for example,)
++          required visual inspection of the test output.
++        
+ Wed Jun  4 23:24:27 UTC 2008  Carlos O'Ryan  <coryan@atdesk.com>
+ 
+         * TAO/orbsvcs/orbsvcs/Event/EC_Default_ProxySupplier.cpp:
