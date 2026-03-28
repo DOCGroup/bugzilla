@@ -1,0 +1,88 @@
+Index: tao151/TAO/orbsvcs/IFR_Service/IFR_Server.cpp
+===================================================================
+RCS file: /home/cvs/tao151/TAO/orbsvcs/IFR_Service/IFR_Server.cpp,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 IFR_Server.cpp
+--- tao151/TAO/orbsvcs/IFR_Service/IFR_Server.cpp	11 May 2006 14:15:05 -0000	1.1.1.1
++++ tao151/TAO/orbsvcs/IFR_Service/IFR_Server.cpp	20 Nov 2006 10:29:04 -0000
+@@ -4,7 +4,7 @@
+ #include "IFR_Service.h"
+ #include "tao/Environment.h"
+ 
+-ACE_RCSID (IFR_Service, 
++ACE_RCSID (IFR_Service,
+            IFR_Server,
+            "$Id: IFR_Server.cpp,v 1.1.1.1 2006/05/11 14:15:05 sm Exp $")
+ 
+@@ -19,7 +19,7 @@
+       int status = server.init (argc, argv ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
+-      if (status == -1)
++      if (status != 0)
+         {
+           return 1;
+         }
+Index: tao151/TAO/orbsvcs/IFR_Service/IFR_Service.cpp
+===================================================================
+RCS file: /home/cvs/tao151/TAO/orbsvcs/IFR_Service/IFR_Service.cpp,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 IFR_Service.cpp
+--- tao151/TAO/orbsvcs/IFR_Service/IFR_Service.cpp	11 May 2006 14:15:05 -0000	1.1.1.1
++++ tao151/TAO/orbsvcs/IFR_Service/IFR_Service.cpp	20 Nov 2006 10:29:04 -0000
+@@ -40,7 +40,7 @@
+       result = this->my_ifr_server_.init_with_orb (argc,
+                                                    argv,
+                                                    this->orb_.in ());
+-      if (result == -1)
++      if (result != 0)
+         {
+           return result;
+         }
+Index: tao151/TAO/orbsvcs/orbsvcs/IFRService/IFR_Service_Loader.cpp
+===================================================================
+RCS file: /home/cvs/tao151/TAO/orbsvcs/orbsvcs/IFRService/IFR_Service_Loader.cpp,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 IFR_Service_Loader.cpp
+--- tao151/TAO/orbsvcs/orbsvcs/IFRService/IFR_Service_Loader.cpp	11 May 2006 14:15:04 -0000	1.1.1.1
++++ tao151/TAO/orbsvcs/orbsvcs/IFRService/IFR_Service_Loader.cpp	20 Nov 2006 10:29:04 -0000
+@@ -87,12 +87,12 @@
+   result = this->ifr_server_.init_with_orb (argc,
+                                             argv,
+                                             orb);
+-  if (result == -1)
++  if (result != 0)
+     {
+-      return CORBA::Object::_nil ();
++      throw new CORBA::BAD_PARAM;
+     }
+ 
+-  return 0;
++  return CORBA::Object::_nil ();
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao151/TAO/orbsvcs/orbsvcs/IFRService/Options.cpp
+===================================================================
+RCS file: /home/cvs/tao151/TAO/orbsvcs/orbsvcs/IFRService/Options.cpp,v
+retrieving revision 1.2
+diff -u -r1.2 Options.cpp
+--- tao151/TAO/orbsvcs/orbsvcs/IFRService/Options.cpp	12 May 2006 08:44:42 -0000	1.2
++++ tao151/TAO/orbsvcs/orbsvcs/IFRService/Options.cpp	20 Nov 2006 10:29:04 -0000
+@@ -79,7 +79,15 @@
+                            " [-l]"
+                            " [-m] <0|1>"
+                            " [-p]"
+-                           " [-b] <persistence_file>"
++                           " [-f]"
++                           " [-b] <persistence_file>\n\n"
++                           "  -o  <filename> Output service IOR to <filename>\n"
++                           "  -r  Persist contents in the win32 registry\n"
++                           "  -l  Enable locking (off by default)\n"
++                           "  -m  <0|1> Enable multicast discovery of this service\n"
++                           "  -p  Persist contents using a memory mapped file (NOT RECOMMENDED)\n"
++                           "  -f  Persist contents using a flat file storage mechanism\n"
++                           "  -b  <filename> Used with one of the file persistence options. Specifies the storage file name.\n"
+                             "\n",
+                            argv [0]),
+                           1);
