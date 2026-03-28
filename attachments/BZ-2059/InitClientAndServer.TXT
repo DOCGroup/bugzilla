@@ -1,0 +1,66 @@
+Here is my code to initialize the server :
+==========================================
+TAO_ORB_Manager m_taoOrbManager;
+TAO_Naming_Server m_taoNamingServer;
+
+args.add("-ORBDottedDecimalAddresses");
+args.add("1");
+args.add("-ORBEndpoint");
+args.add("iiop://:12345");
+int argc = args.argc();
+
+m_taoOrbManager.init_child_poa(	argc, args.argv(), "child_poa" ACE_ENV_ARG_PARAMETER);
+m_taoOrbManager.activate_poa_manager(ACE_ENV_SINGLE_ARG_PARAMETER)
+
+CORBA::String_var str = m_taoOrbManager.activate_under_child_poa ("InterfaceServices", &CInterfaceServices_i::getInstance() ACE_ENV_ARG_PARAMETER);
+
+CORBA::ORB_var orb = m_taoOrbManager.orb ();
+PortableServer::POA_var child_poa = m_taoOrbManager.child_poa ();
+
+m_taoNamingServer.init(	orb.in (), child_poa.in (), ACE_DEFAULT_MAP_SIZE, NULL, 0, NULL, TAO_NAMING_BASE_ADDR, 0);
+
+CORBA_Manager::CorbaInterfaceServices_var InterfaceServices_obj = CInterfaceServices_i::getInstance()._this (ACE_ENV_SINGLE_ARG_PARAMETER);
+
+CosNaming::Name InterfaceServices_obj_name (1);
+InterfaceServices_obj_name.length (1);
+InterfaceServices_obj_name[0].id = CORBA::string_dup ("InterfaceServices");
+
+m_taoNamingServer->bind(InterfaceServices_obj_name, InterfaceServices_obj.in ());
+
+
+Here is my code to initialize the Client :
+==========================================
+TAO_ORB_Manager m_taoOrbManager;
+TAO_Naming_Client m_taoNamingServicesClient;
+
+args.add("-ORBDottedDecimalAddresses");
+args.add("1");
+sprintf(rgTxtAdresseServeurCorba, "NameService=corbaloc::%s:%s/NameService", rgTxtIpServeurCorba, rgTxtPortEcouteServeurCorba);
+args.add("-ORBInitRef");
+args.add(rgTxtAdresseServeurCorba);
+int argc=args.argc();
+
+m_taoOrbManager.init_child_poa (argc, args.argv(), "child_poa" ACE_ENV_ARG_PARAMETER);
+CORBA::ORB_var orb =  m_taoOrbManager.orb();
+m_taoNamingServicesClient.init(orb.in());
+CosNaming::Name Manager_ref_name (1);
+Manager_ref_name.length (1);
+Manager_ref_name[0].id = CORBA::string_dup ("InterfaceServices");	
+
+CORBA::Object_var Manager_obj = m_taoNamingServicesClient->resolve (Manager_ref_name ACE_ENV_ARG_PARAMETER);
+m_corbaInterfaceServicesVar = CORBA_Manager::CorbaInterfaceServices::_narrow(	Manager_obj.in () ACE_ENV_ARG_PARAMETER);
+CORBA::Object_var poa_object = orb->resolve_initial_references("RootPOA" ACE_ENV_ARG_PARAMETER);
+PortableServer::POA_var poa = PortableServer::POA::_narrow(	poa_object.in() ACE_ENV_ARG_PARAMETER);
+
+PortableServer::POAManager_var poa_manager = poa->the_POAManager (ACE_ENV_SINGLE_ARG_PARAMETER);
+
+poa_manager->activate (ACE_ENV_SINGLE_ARG_PARAMETER);
+
+CORBA::String_var str = m_taoOrbManager.activate_under_child_poa ("InterfaceServices", &CInterfaceNotifications_i::getInstance() ACE_ENV_ARG_PARAMETER);
+
+m_corbaInterfaceNotificationsVar = CInterfaceNotifications_i::getInstance()._this (ACE_ENV_SINGLE_ARG_PARAMETER);
+
+m_chaineIORCorbaInterfaceNotifications = m_taoOrbManager.orb()->object_to_string (m_corbaInterfaceNotificationsVar ACE_ENV_ARG_PARAMETER);
+
+m_InterfaceServicesCorba->connecterClient(m_chaineIORCorbaInterfaceNotifications.in() ACE_ENV_ARG_DECL_WITH_DEFAULTS);
+
