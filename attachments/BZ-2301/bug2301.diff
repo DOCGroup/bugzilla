@@ -1,0 +1,91 @@
+Index: orbsvcs/tests/FaultTolerance/GroupRef_Manipulation/server.cpp
+===================================================================
+--- orbsvcs/tests/FaultTolerance/GroupRef_Manipulation/server.cpp	(revision 74303)
++++ orbsvcs/tests/FaultTolerance/GroupRef_Manipulation/server.cpp	(working copy)
+@@ -120,6 +120,45 @@
+   return;
+ }
+ 
++void test_colocal (ForwardRequestTest::test_ptr server
++                   ACE_ENV_ARG_DECL)
++{
++  CORBA::ULong number = 0;
++  for (int i = 1; i <= 25; ++i)
++    {
++      ACE_DEBUG ((LM_INFO,
++                  "CLIENT: Issuing colocal request %d.\n",
++                  i));
++      CORBA::ULong retval =
++         server->number (ACE_ENV_SINGLE_ARG_PARAMETER);
++      if (retval != 1 && retval != 317)
++        {
++          // Not a valid return value, forwarding went wrong and
++          // retval is in udefined state
++          ACE_ERROR ((LM_ERROR,
++                      "(%P|%t) ERROR: colocal invocation returned invalid"
++                      " value, location-forwarding must have failed.\n"));
++          ACE_OS::abort ();
++        }
++
++      number += retval;
++      ACE_TRY_CHECK;
++
++
++      ACE_DEBUG ((LM_INFO,
++                  "CLIENT: Number %d .\n",
++                  number));
++    }
++
++  if (number < 250)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  "(%P|%t) ERROR: Did not forward to new location \n"));
++      ACE_OS::abort ();
++    }
++}
++
++
+ int
+ main (int argc, char *argv[])
+ {
+@@ -233,6 +272,16 @@
+                                        ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
++      // Run co-local test
++        {
++          ForwardRequestTest::test_var server =
++            ForwardRequestTest::test::_narrow (obj1.in () ACE_ENV_ARG_PARAMETER);
++          test_colocal (server.in() ACE_ENV_ARG_PARAMETER);
++
++          // Reset interceptor for remote tests
++          interceptor->reset (ACE_ENV_SINGLE_ARG_PARAMETER);
++        }
++
+       // Write each IOR to a file.
+ 
+       // IOR 1
+Index: tao/PortableServer/Object_Adapter.cpp
+===================================================================
+--- tao/PortableServer/Object_Adapter.cpp	(revision 74303)
++++ tao/PortableServer/Object_Adapter.cpp	(working copy)
+@@ -382,6 +382,19 @@
+     ACE_CHECK_RETURN (result);
+   }
+ 
++#if TAO_HAS_INTERCEPTORS == 1
++  // ServerInterceptor might have raised ForwardRequest. In case of
++  // remote calls invocations the LocationForwardReply would have been
++  // sent in earlier stage, but in colocal scenario no message is sent
++  // and the LocationForward object must be passed over here to
++  // calling operation's mem-space.
++  if (req.collocated() && req.reply_status () == PortableInterceptor::LOCATION_FORWARD)
++    {
++      forward_to = CORBA::Object::_duplicate (req.forward_location ());
++      result = TAO_Adapter::DS_FORWARD;
++    }
++#endif
++
+   return result;
+ }
+ 
