@@ -1,0 +1,112 @@
+ diff -u ~/tao1.4.5.original/ACE_wrappers/TAO/tao/PortableServer/Root_POA.cpp  Root_POA.cpp 
+--- /home/klyk/tao1.4.5.original/ACE_wrappers/TAO/tao/PortableServer/Root_POA.cpp	2005-04-17 02:28:00.000000000 +0300
++++ Root_POA.cpp	2005-05-25 17:49:05.551225552 +0300
+@@ -47,6 +47,7 @@
+ #include "tao/TSS_Resources.h"
+ #include "tao/IORInterceptor_Adapter.h"
+ #include "tao/debug.h"
++#include "tao/Connector_Registry.h"
+ 
+ // auto_ptr class
+ #include "ace/Auto_Ptr.h"
+@@ -2056,7 +2057,7 @@
+   //
+ #if (TAO_HAS_MINIMUM_CORBA == 0)
+ 
+-  CORBA::Object_ptr obj = CORBA::Object::_nil ();
++  //CORBA::Object_ptr obj = CORBA::Object::_nil ();
+ 
+   if (indirect && this->active_policy_strategies_.lifespan_strategy()->use_imr ())
+     {
+@@ -2078,7 +2079,7 @@
+ 
+       CORBA::String_var imr_str =
+         imr->_stubobj ()->profile_in_use ()->to_string (ACE_ENV_SINGLE_ARG_PARAMETER);
+-      ACE_CHECK_RETURN (obj);
++      //ACE_CHECK_RETURN (obj);
+ 
+       if (TAO_debug_level > 0)
+         ACE_DEBUG ((LM_DEBUG,
+@@ -2104,7 +2105,17 @@
+           goto orbkey;
+         }
+ 
+-      ACE_CString ior (imr_str.in ());
++      ACE_CString ior;
++      pos = ACE_OS::strchr (imr_str.inout() + sizeof (corbaloc) -1, ':');
++      if(!ACE_OS::strcmp(pos, "://"))
++         ior.set(imr_str.in() + sizeof (corbaloc) -1);
++      else
++      {
++         ssize_t protocol_length = pos - imr_str.in() - sizeof (corbaloc) + 1;
++         ior.set(imr_str.in() + sizeof (corbaloc) - 1,  protocol_length, 1);
++         ior += "://";
++         ior += (imr_str.in() + sizeof (corbaloc) + protocol_length);
++      }
+ 
+       // Add the key.
+ 
+@@ -2118,12 +2129,58 @@
+                     "ImR-ified IOR = \n%s\n",
+                     ACE_TEXT_CHAR_TO_TCHAR (ior.c_str ())));
+ 
+-      obj =
+-        this->orb_core_.orb ()->string_to_object (ior.c_str ()
+-                                                  ACE_ENV_ARG_PARAMETER);
+-      ACE_CHECK_RETURN (obj);
++      TAO_MProfile mprofile;
++      TAO_Connector_Registry *conn_reg =
++        orb_core_.connector_registry (ACE_ENV_SINGLE_ARG_PARAMETER);
++
++      ACE_CHECK_RETURN(0);
++
++      int retv =
++        conn_reg->make_mprofile (ior.c_str(),
++                             mprofile
++                             ACE_ENV_ARG_PARAMETER);
++
++      if (retv != 0)
++        {
++          ACE_THROW (CORBA::INV_OBJREF (
++                   CORBA::SystemException::_tao_minor_code (
++                      TAO_DEFAULT_MINOR_CODE,
++                      EINVAL),
++                   CORBA::COMPLETED_NO));
++        }
++
++      TAO_Stub *data = orb_core_.create_stub ((const char *) 0,
++                                               mprofile
++                                               ACE_ENV_ARG_PARAMETER);
++      
++      TAO_Stub_Auto_Ptr safe_data (data);
++      
++       CORBA::Object_ptr tmp;
++      
++      if (this->orb_core_.optimize_collocation_objects ())
++         {
++            ACE_NEW_THROW_EX (tmp, CORBA::Object (data,
++						  collocated,
++						  servant),
++			      CORBA::INTERNAL ());
+ 
+-      return obj;
++		ACE_CHECK_RETURN (CORBA::Object::_nil ());
++	 }
++      else
++         {
++            ACE_NEW_THROW_EX (tmp,
++                        CORBA::Object (data,
++                                       collocated),
++                        CORBA::INTERNAL ());
++            ACE_CHECK_RETURN (CORBA::Object::_nil ());
++         }
++
++      data->servant_orb (this->orb_core_.orb ());
++
++      // Transfer ownership to the Object.
++      (void) safe_data.release ();
++
++      return tmp;
+     }
+ 
+ orbkey:
