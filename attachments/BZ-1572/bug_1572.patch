@@ -1,0 +1,115 @@
+Index: ACE_wrappers/TAO/tao/Transport.h
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/Transport.h,v
+retrieving revision 1.1.1.5
+diff -u -u -r1.1.1.5 Transport.h
+--- ACE_wrappers/TAO/tao/Transport.h	10 Aug 2003 20:23:40 -0000	1.1.1.5
++++ ACE_wrappers/TAO/tao/Transport.h	14 Aug 2003 22:22:52 -0000
+@@ -30,6 +30,8 @@
+ #include "Incoming_Message_Queue.h"
+ #include "Synch_Refcountable.h"
+ 
++#include "ace/Copy_Disabled.h"
++
+ class TAO_ORB_Core;
+ class TAO_Target_Specification;
+ class TAO_Operation_Details;
+@@ -985,6 +987,7 @@
+  *  and decrements the refcount on destruction.
+  */
+ class TAO_Export TAO_Transport_Refcount_Guard
++  : private ACE_Copy_Disabled
+ {
+ public:
+   TAO_Transport_Refcount_Guard (TAO_Transport *);
+Index: ACE_wrappers/TAO/tao/PortableServer/AMH_Response_Handler.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/PortableServer/AMH_Response_Handler.cpp,v
+retrieving revision 1.1.1.3
+diff -u -u -r1.1.1.3 AMH_Response_Handler.cpp
+--- ACE_wrappers/TAO/tao/PortableServer/AMH_Response_Handler.cpp	10 Aug 2003 20:23:44 -0000	1.1.1.3
++++ ACE_wrappers/TAO/tao/PortableServer/AMH_Response_Handler.cpp	14 Aug 2003 22:22:52 -0000
+@@ -16,7 +16,7 @@
+   : mesg_base_ (server_request.mesg_base_)
+   , request_id_ (server_request.request_id_)
+   , response_expected_ (server_request.response_expected_)
+-  , transport_ (TAO_Transport::_duplicate (server_request.transport ()))
++  , transport_ (TAO_Transport::_duplicate(server_request.transport ()))
+   , orb_core_ (server_request.orb_core ())
+   , argument_flag_ (1)
+   , exception_type_ (TAO_GIOP_NO_EXCEPTION)
+@@ -26,6 +26,10 @@
+ 
+ TAO_AMH_Response_Handler::~TAO_AMH_Response_Handler (void)
+ {
++  TAO_Transport_Refcount_Guard transport_guard(transport_);
++  // The reference count was incremented, need to adjust the count:
++  TAO_Transport::release(transport_);
++
+   // Since we are destroying the object we put a huge lock around the
+   // whole destruction process (just paranoid).
+   {
+@@ -34,40 +38,38 @@
+     if (this->response_expected_ == 0) //oneway ?
+       {
+         // if client is not expecting anything, don't send anything
+-        TAO_Transport::release (this->transport_);
+         return;
+       }
+     
+     // If the ResponseHandler is being destroyed before a reply has
+     // been sent to the client, we send a system exception
+     // CORBA::NO_RESPONSE, with minor code to indicate the problem.
+-    if (this->reply_status_ != TAO_RS_SENT)
+-      {
+-        // Is sending the exception to the client fails, then we just
+-        // give up, release the transport and return.
+-        ACE_DECLARE_NEW_CORBA_ENV;
+-        ACE_TRY
+-          {
+-            CORBA::NO_RESPONSE ex (CORBA::SystemException::_tao_minor_code
+-                                                 (TAO_AMH_REPLY_LOCATION_CODE,
+-                                                  EFAULT),
+-                                            CORBA::COMPLETED_NO);
+-            this->_tao_rh_send_exception (ex ACE_ENV_ARG_PARAMETER);
+-            ACE_TRY_CHECK;
+-
+-            TAO_Transport::release (this->transport_);
+-          }
+-        ACE_CATCHALL
+-          {
+-            TAO_Transport::release (this->transport_);
+-          }
+-        ACE_ENDTRY;
+-      }
+-    else
++    if (this->reply_status_ == TAO_RS_SENT)
+       {
+-        TAO_Transport::release (this->transport_);
++        return;
+       }
++
++    // It would be slightly more efficient to *NOT* release the lock
++    // before calling _tao_rh_send_exception(), but this code is way
++    // out of the critical path.
+   }
++
++  // Is sending the exception to the client fails, then we just
++  // give up, release the transport and return.
++
++  ACE_TRY_NEW_ENV
++    {
++      CORBA::NO_RESPONSE ex (CORBA::SystemException::_tao_minor_code
++          (TAO_AMH_REPLY_LOCATION_CODE,
++              EFAULT),
++          CORBA::COMPLETED_NO);
++      this->_tao_rh_send_exception (ex ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++    }
++  ACE_CATCHALL
++    {
++    }
++  ACE_ENDTRY;
+ }
+ 
+ void
