@@ -1,0 +1,257 @@
+Index: Client_Strategy_Factory.cpp
+===================================================================
+--- Client_Strategy_Factory.cpp	(revision 74162)
++++ Client_Strategy_Factory.cpp	(working copy)
+@@ -65,12 +65,6 @@
+   return 0;
+ }
+ 
+-ACE_Lock *
+-TAO_Client_Strategy_Factory::create_ft_service_retention_id_lock (void)
+-{
+-  return 0;
+-}
+-
+ bool
+ TAO_Client_Strategy_Factory::use_cleanup_options (void) const
+ {
+Index: Fault_Tolerance_Service.h
+===================================================================
+--- Fault_Tolerance_Service.h	(revision 74162)
++++ Fault_Tolerance_Service.h	(working copy)
+@@ -26,12 +26,7 @@
+ #endif /* ACE_LACKS_PRAGMA_ONCE */
+ 
+ #include "tao/Basic_Types.h"
+-#include "ace/SString.h"
+ 
+-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+-class ACE_Lock;
+-ACE_END_VERSIONED_NAMESPACE_DECL
+-
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ class TAO_Service_Callbacks;
+@@ -42,12 +37,7 @@
+  *
+  * @brief TAO_Fault_Tolerant_Service
+  *
+- * A collection of ORB & ORB_Core related stuff that is needed at
+- * the ORB level. The ORB Core would carry an instance of this
+- * class and invoke methods on this.
+- * Note: This collection would be really useful when we have
+- * logging in  place. The contents of this class can be logged at
+- * regular check point intervals.
++ * A class that holds an FT service call back instance.
+  */
+ class TAO_Export TAO_Fault_Tolerance_Service
+ {
+@@ -65,38 +55,10 @@
+   /// Return the underlying callback object
+   TAO_Service_Callbacks *service_callback (void);
+ 
+-  /// Return the underlying <ft_object_id>
+-  const ACE_CString &client_id (void);
+-
+-  /// Set the client id
+-  void client_id (const char *id);
+-
+-  /// Generate and return a new retention id
+-  CORBA::Long retention_id (void);
+-
+ private:
+ 
+   /// hook to callback on to the service
+   TAO_Service_Callbacks *ft_service_callback_;
+-
+-  /// The object id that would be used if the ft service is loaded.
+-  ACE_CString ft_object_id_;
+-
+-  /**
+-   * This and the <ft_object_id_> act as unique identifiers for the
+-   * request sent from the source Object. Modification of this value
+-   * is done by the loaded FT
+-   */
+-  CORBA::Long ft_object_retention_id_;
+-
+-  /// Lock for the retention id
+-  ACE_Lock *ft_object_retention_id_lock_;
+-
+-  // NOTE: At a glance this retention id can be easily mistaken for a
+-  // request id in a GIOP request. But the purpose served are a lot
+-  // more than what a RequestId does for GIOP. So, we have a unique
+-  // generator with a lock to protect from different threads accessing
+-  // this.
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: Fault_Tolerance_Service.cpp
+===================================================================
+--- Fault_Tolerance_Service.cpp	(revision 74162)
++++ Fault_Tolerance_Service.cpp	(working copy)
+@@ -18,7 +18,6 @@
+ TAO_Fault_Tolerance_Service::~TAO_Fault_Tolerance_Service (void)
+ {
+   delete this->ft_service_callback_;
+-  delete this->ft_object_retention_id_lock_;
+ }
+ 
+ void
+@@ -36,31 +35,7 @@
+         this->ft_service_callback_ = service->activate_services (orb_core);
+     }
+ 
+-  // If we have a valid service then we instantiate our lock and the
+-  // client id
+-  if (this->ft_service_callback_)
+-    {
+-      // Initialize the lock
+-      this->ft_object_retention_id_lock_ =
+-        orb_core->client_factory ()
+-          ->create_ft_service_retention_id_lock ();
+-
+-      // Initialize the client id
+-      this->ft_object_id_ = "TAO_Client";
+-    }
+-
+   return;
+ }
+ 
+-CORBA::Long
+-TAO_Fault_Tolerance_Service::retention_id (void)
+-{
+-  ACE_MT (ACE_GUARD_RETURN (ACE_Lock,
+-                            guard,
+-                            *this->ft_object_retention_id_lock_,
+-                            0));
+-
+-  return ++this->ft_object_retention_id_;
+-}
+-
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: ORB.cpp
+===================================================================
+--- ORB.cpp	(revision 74162)
++++ ORB.cpp	(working copy)
+@@ -1302,18 +1302,6 @@
+     ::TAO_unexpected_exception_handler);
+ }
+ 
+-const ACE_CString &
+-CORBA::ORB::_tao_ft_client_id (void)
+-{
+-  return this->orb_core ()->fault_tolerance_service ().client_id ();
+-}
+-
+-void
+-CORBA::ORB::_tao_ft_client_id (const char *id)
+-{
+-  this->orb_core ()->fault_tolerance_service ().client_id (id);
+-}
+-
+ CORBA::ORB_ptr
+ CORBA::ORB::_tao_make_ORB (TAO_ORB_Core * orb_core)
+ {
+Index: ORB.h
+===================================================================
+--- ORB.h	(revision 74162)
++++ ORB.h	(working copy)
+@@ -568,15 +568,6 @@
+     /// Get the ORB core.
+     TAO_ORB_Core *orb_core (void) const;
+ 
+-    /**
+-     * TAO specific extension to get and set the client ID. The client
+-     * id can be set by the application which would be used by the FT
+-     * service. As there are no specific interfaces defined in the
+-     * spec, we have this proprietary extension.
+-     */
+-    const ACE_CString &_tao_ft_client_id (void);
+-    void _tao_ft_client_id (const char *id);
+-
+     /// Factory method that creates an ORB.
+     static CORBA::ORB_ptr _tao_make_ORB (TAO_ORB_Core * orb_core);
+ 
+Index: Fault_Tolerance_Service.inl
+===================================================================
+--- Fault_Tolerance_Service.inl	(revision 74162)
++++ Fault_Tolerance_Service.inl	(working copy)
+@@ -6,10 +6,7 @@
+ 
+ ACE_INLINE
+ TAO_Fault_Tolerance_Service::TAO_Fault_Tolerance_Service (void)
+-  : ft_service_callback_ (0),
+-    ft_object_id_ (),
+-    ft_object_retention_id_ (-1),
+-    ft_object_retention_id_lock_ (0)
++  : ft_service_callback_ (0)
+ {
+ }
+ 
+@@ -19,16 +16,4 @@
+   return this->ft_service_callback_;
+ }
+ 
+-ACE_INLINE const ACE_CString &
+-TAO_Fault_Tolerance_Service::client_id (void)
+-{
+-  return this->ft_object_id_;
+-}
+-
+-ACE_INLINE void
+-TAO_Fault_Tolerance_Service::client_id (const char *id)
+-{
+-  this->ft_object_id_ = id;
+-}
+-
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: default_client.cpp
+===================================================================
+--- default_client.cpp	(revision 74162)
++++ default_client.cpp	(working copy)
+@@ -384,18 +384,6 @@
+   return (this->wait_strategy_ != TAO_WAIT_ON_READ);
+ }
+ 
+-ACE_Lock *
+-TAO_Default_Client_Strategy_Factory::create_ft_service_retention_id_lock (void)
+-{
+-  ACE_Lock *the_lock = 0;
+-
+-  ACE_NEW_RETURN (the_lock,
+-                  ACE_Lock_Adapter<TAO_SYNCH_MUTEX>,
+-                  0);
+-
+-  return the_lock;
+-}
+-
+ void
+ TAO_Default_Client_Strategy_Factory::report_option_value_error (
+                                  const ACE_TCHAR* option_name,
+Index: default_client.h
+===================================================================
+--- default_client.h	(revision 74162)
++++ default_client.h	(working copy)
+@@ -61,7 +61,6 @@
+   virtual int allow_callback (void);
+   virtual TAO_Wait_Strategy *create_wait_strategy (TAO_Transport *transport);
+   virtual TAO_Connect_Strategy *create_connect_strategy (TAO_ORB_Core *);
+-  virtual ACE_Lock *create_ft_service_retention_id_lock (void);
+   virtual bool use_cleanup_options (void) const;
+   virtual Connect_Strategy connect_strategy (void) const;
+ 
+Index: Client_Strategy_Factory.h
+===================================================================
+--- Client_Strategy_Factory.h	(revision 74162)
++++ Client_Strategy_Factory.h	(working copy)
+@@ -87,10 +87,6 @@
+   /// Does the client allow any form of callback?
+   virtual int allow_callback (void);
+ 
+-  /// Create a lock to be used by the TAO_Fault_Tolerant_Service class
+-  /// to generate unique retention ids
+-  virtual ACE_Lock *create_ft_service_retention_id_lock (void);
+-
+   /// Cleanup options for wait strategy.
+   /**
+     * Only applicable to RW wait strategy
