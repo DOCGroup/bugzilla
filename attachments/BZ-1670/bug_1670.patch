@@ -1,0 +1,136 @@
+Index: ChangeLog.atd
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/ChangeLog.atd,v
+retrieving revision 1.95
+diff -u -r1.95 ChangeLog.atd
+--- ChangeLog.atd	26 Nov 2003 16:38:52 -0000	1.95
++++ ChangeLog.atd	10 Dec 2003 20:27:28 -0000
+@@ -1,3 +1,15 @@
++Wed Dec 10 15:44:15 2003  Carlos O'Ryan  <coryan@atdesk.com>
++
++	* TAO_IDL/be/be_visitor_interface/amh_ss.cpp:
++	* TAO_IDL/be/be_visitor_interface/interface_ss.cpp:
++	* TAO_IDL/be_include/be_visitor_interface/amh_ss.h:
++	* TAO_IDL/be_include/be_visitor_interface/interface_ss.h:
++	  Generate calls to tao_send_reply() for the AMH version of
++	  _is_a_skel, _non_existent_skel, _interface_skel and
++	  _component_skel.  Otherwise the response is never sent to the
++	  client.  This fixes:
++	    http://deuce.doc.wustl.edu/bugzilla/show_bug.cgi?id=1670
++
+ Tue Nov 25 18:45:52 2003  Carlos O'Ryan  <coryan@atdesk.com>
+ 
+ 	* orbsvcs/orbsvcs/ReliableEvent/REC_Basic_Sequence_Verifier.h:
+Index: TAO_IDL/be/be_visitor_interface/amh_ss.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/TAO_IDL/be/be_visitor_interface/amh_ss.cpp,v
+retrieving revision 1.1.1.3
+diff -u -r1.1.1.3 amh_ss.cpp
+--- TAO_IDL/be/be_visitor_interface/amh_ss.cpp	13 Dec 2002 14:34:37 -0000	1.1.1.3
++++ TAO_IDL/be/be_visitor_interface/amh_ss.cpp	10 Dec 2003 20:27:28 -0000
+@@ -123,6 +123,13 @@
+       << "}";
+ }
+ 
++void
++be_visitor_amh_interface_ss::generate_send_reply (TAO_OutStream * os)
++{
++  *os << be_idt_nl << "_tao_server_request.tao_send_reply ();"
++      << be_uidt_nl;
++}
++
+ int
+ be_visitor_amh_interface_ss::generate_amh_classes (be_interface *)
+ {
+Index: TAO_IDL/be/be_visitor_interface/interface_ss.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/TAO_IDL/be/be_visitor_interface/interface_ss.cpp,v
+retrieving revision 1.1.1.3
+diff -u -r1.1.1.3 interface_ss.cpp
+--- TAO_IDL/be/be_visitor_interface/interface_ss.cpp	13 Dec 2002 14:34:37 -0000	1.1.1.3
++++ TAO_IDL/be/be_visitor_interface/interface_ss.cpp	10 Dec 2003 20:27:28 -0000
+@@ -205,6 +205,8 @@
+       *os << "ACE_THROW (CORBA::MARSHAL ());" << be_uidt << be_uidt_nl;
+     }
+ 
++  this->generate_send_reply (os);
++
+   *os << "}" << be_nl << be_nl;
+ 
+ 
+@@ -238,6 +240,8 @@
+       *os << "ACE_THROW (CORBA::MARSHAL ());" << be_uidt << be_uidt_nl;
+     }
+ 
++  this->generate_send_reply (os);
++
+   *os << "}" << be_nl << be_nl;
+ 
+   // Generate code for the _interface skeleton.
+@@ -286,6 +290,9 @@
+       << "{" << be_idt_nl
+       << "ACE_THROW (CORBA::MARSHAL ());" << be_uidt_nl
+       << "}" << be_uidt << be_uidt_nl;
++
++  this->generate_send_reply (os);
++
+   *os << "}" << be_nl << be_nl;
+ 
+   // Generate code for the _component skeleton.
+@@ -318,6 +325,8 @@
+       *os << "ACE_THROW (CORBA::MARSHAL ());" << be_uidt << be_uidt_nl;
+     }
+ 
++  this->generate_send_reply (os);
++
+   *os << "}" << be_nl << be_nl;
+ 
+   // Generate code for the _is_a override.
+@@ -544,6 +553,12 @@
+       << "                                   ACE_ENV_ARG_PARAMETER);"
+       << be_uidt_nl;
+   *os << "}";
++}
++
++void
++be_visitor_interface_ss::generate_send_reply (TAO_OutStream *)
++{
++  // no-op for regular interfaces
+ }
+ 
+ int
+Index: TAO_IDL/be_include/be_visitor_interface/amh_ss.h
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/TAO_IDL/be_include/be_visitor_interface/amh_ss.h,v
+retrieving revision 1.1.1.2
+diff -u -r1.1.1.2 amh_ss.h
+--- TAO_IDL/be_include/be_visitor_interface/amh_ss.h	18 Jul 2002 19:30:53 -0000	1.1.1.2
++++ TAO_IDL/be_include/be_visitor_interface/amh_ss.h	10 Dec 2003 20:27:28 -0000
+@@ -29,6 +29,8 @@
+   virtual void this_method (be_interface *node);
+   virtual void dispatch_method (be_interface *node);
+ 
++  virtual void generate_send_reply (TAO_OutStream * os);
++
+   virtual int generate_amh_classes (be_interface *node);
+   virtual int generate_proxy_classes (be_interface *node);
+   virtual int generate_downcast_implementation (be_interface *node,
+Index: TAO_IDL/be_include/be_visitor_interface/interface_ss.h
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/TAO_IDL/be_include/be_visitor_interface/interface_ss.h,v
+retrieving revision 1.1.1.2
+diff -u -r1.1.1.2 interface_ss.h
+--- TAO_IDL/be_include/be_visitor_interface/interface_ss.h	18 Jul 2002 19:30:53 -0000	1.1.1.2
++++ TAO_IDL/be_include/be_visitor_interface/interface_ss.h	10 Dec 2003 20:27:28 -0000
+@@ -52,6 +52,11 @@
+   virtual void this_method (be_interface *node);
+   virtual void dispatch_method (be_interface *node);
+ 
++  // Some AMH skeletons must explicitly send the reply, for regular
++  // classes the following function is empty, for AMH code it
++  // generates the explicit call.
++  virtual void generate_send_reply (TAO_OutStream * os);
++
+   virtual int generate_amh_classes (be_interface *node);
+   virtual int generate_proxy_classes (be_interface *node);
+   virtual int generate_downcast_implementation (be_interface *node,
