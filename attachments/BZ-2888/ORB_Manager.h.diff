@@ -1,0 +1,48 @@
+FILE COMPARISON
+Produced: 4/18/2007 10:11:26 AM
+
+C:\Documents and Settings\tv2745\Desktop\ORB_Manager.h is what's in SVN head.
+C:\ACE_wrappers\TAO\tao\Utils\ORB_Manager.h are my changes.
+
+--- C:\Documents and Settings\tv2745\Desktop\ORB_Manager.h	2007-04-18 10:09:55.000000000 -0400
++++ C:\ACE_wrappers\TAO\tao\Utils\ORB_Manager.h	2007-04-17 19:41:23.000000000 -0400
+@@ -58,3 +58,3 @@
+-  TAO_ORB_Manager (CORBA::ORB_ptr orb = 0,
+-                   PortableServer::POA_ptr poa = 0,
+-                   PortableServer::POAManager_ptr poa_manager = 0);
++  TAO_ORB_Manager (CORBA::ORB_ptr orb = CORBA::ORB::_nil(),
++                   PortableServer::POA_ptr poa = PortableServer::POA::_nil(),
++                   PortableServer::POAManager_ptr poa_manager = PortableServer::POAManager::_nil());
+@@ -70,2 +69,0 @@
+-            char *argv[]
+-            );
+@@ -80 +69,0 @@
+-  int init (int &argc,
+@@ -82,2 +71 @@
+-            const char *orb_name
+-            );
++            const char *orb_name = 0);
+@@ -97,2 +85 @@
+-                      const char *orb_name = 0
+-                      );
++                      const char *orb_name = 0);
+@@ -134,2 +121 @@
+-  char *activate (PortableServer::Servant servant
+-                  );
++  char *activate (PortableServer::Servant servant);
+@@ -142,2 +128 @@
+-  void deactivate (const char *id
+-                   );
++  void deactivate (const char *id);
+@@ -161,2 +146 @@
+-                                  PortableServer::Servant servant
+-                                  );
++                                  PortableServer::Servant servant);
+@@ -170,2 +154 @@
+-  void deactivate_under_child_poa (const char *id
+-                                   );
++  void deactivate_under_child_poa (const char *id);
+@@ -181,2 +164 @@
+-  int run (ACE_Time_Value &tv
+-           );
++  int run (ACE_Time_Value &tv);
