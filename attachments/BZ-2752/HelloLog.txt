@@ -1,0 +1,205 @@
+(704|3368) server - starting a run
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Codeset_Manager_i::init_ccs, Loaded Codeset translator <UTF8_Latin1_Factory>, ncs = 00010001 tcs = 05010001
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - UTF16_BOM_Translator: forceBE 0
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) Loaded default protocol <IIOP_Factory>
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) created new ORB <>
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Acceptor::open, address==localhost:50000, options=(null)
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Acceptor::open, specified host=localhost:50000
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Acceptor::open_i, trying to listen on port 50000
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Acceptor::open_i, listening on: <127.0.0.1:50000>
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, start [run]
+Dec 18 17:08:22.656 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, calling handle_events()
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Codeset_Manager_i::init_ccs, Loaded Codeset translator <UTF8_Latin1_Factory>, ncs = 00010001 tcs = 05010001
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - UTF16_BOM_Translator: forceBE 0
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) Loaded default protocol <IIOP_Factory>
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) created new ORB <>
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|(2912|3776) client - starting a run
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|(2912|3776) client - getting string
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_ERROR@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Cache_Manager::find_i, no idle transport is available
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_maximum = 512
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - IIOP_Connector::make_connection, to <127.0.0.1:50000> which should block
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_maximum = 512
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Connection_Handler::open, The local addr is <127.0.0.1> 
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Connection_Handler::open, IIOP connection to peer <127.0.0.1:1834> on 1668
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport_Cache_Manager::bind_i, 0x12e978 -> 0xe9f798 Transport[1668]
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport_Cache_Manager::bind_i, cache size is [1]
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::register_handler
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, handle_events() returns 1
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, calling handle_events()
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[13159320]
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Leader_Follower[13159320]::wait_for_event, (leader) enter reactor event loop
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - IIOP_Connection_Handler::open, The local addr is <127.0.0.1> 
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - IIOP_Connection_Handler::open, IIOP connection to peer <127.0.0.1:50000> on 1772
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Leader_Follower[13159320]::wait_for_event, (leader) exit reactor event loop
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Connector::wait_for_connection_completion, transport [1772], wait done result = 1
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - IIOP_Connector::make_connection, new connected connection to <127.0.0.1:50000> on Transport[1772]
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Cache_Manager::bind_i, 0x12fb10 -> 0xc8cb98 Transport[1772]
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Cache_Manager::bind_i, cache size is [1]
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::register_handler
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Connector::connect, opening Transport[1772] in TAO_CLIENT_ROLE
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Codeset_Manager_i::set_tcs, setting char translator (00010001)
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Codeset_Manager_i::set_tcs, setting wchar translator (00010109)
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Muxed_TMS[1772]::request_id, <1>
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Codeset_Manager_i::generate_service_context, using tcs_c = 00010001, tcs_w = 00010109
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 84 data bytes, my endian, Type Request[1]
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|GIOP message - HEXDUMP 96 bytes
+47 49 4f 50 01 02 01 00  54 00 00 00 01 00 00 00   GIOP....T.......
+03 00 00 00 00 00 cd cd  1b 00 00 00 14 01 0f 00   ................
+52 53 54 56 11 87 45 7a  03 0a 00 00 00 00 00 01   RSTV..Ez........
+00 00 00 01 00 00 00 cd  0b 00 00 00 67 65 74 5f   ............get_
+73 74 72 69 6e 67 00 cd  01 00 00 00 01 00 00 00   string..........
+0c 00 00 00 01 cd cd cd  01 00 01 00 09 01 01 00   ................
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Connection_Handler[1668]::handle_input, handle = 1668/1668
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::handle_input
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::process_queue_head, 0 enqueued
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::handle_input_parse_data, enter
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::handle_input_parse_data, read 96 bytes
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - GIOP_Message_State::parse_message_header_i
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - GIOP_Message_State::get_version_info
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - GIOP_Message_State::get_byte_order_info
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::process_parsed_messages, entering (missing data == 0)
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 84 data bytes, my endian, Type Request[1]
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|GIOP message - HEXDUMP 96 bytes
+47 49 4f 50 01 02 01 00  54 00 00 00 01 00 00 00   GIOP....T.......
+03 00 00 00 00 00 cd cd  1b 00 00 00 14 01 0f 00   ................
+52 53 54 56 11 87 45 7a  03 0a 00 00 00 00 00 01   RSTV..Ez........
+00 00 00 01 00 00 00 cd  0b 00 00 00 67 65 74 5f   ............get_
+73 74 72 69 6e 67 00 cd  01 00 00 00 01 00 00 00   string..........
+0c 00 00 00 01 cd cd cd  01 00 01 00 09 01 01 00   ................
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Codeset_Manager_i::process_service_context, using tcsc = 00010001, tcsw = 00010109
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 29 data bytes, my endian, Type Reply[1]
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|GIOP message - HEXDUMP 41 bytes
+47 49 4f 50 01 02 01 01  1d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  0d 00 00 00 48 65 6c 6c   ............Hell
+6f 20 74 68 65 72 65 21  00                        o there!.       
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::cleanup_queue, byte_count = 41
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::drain_queue_helper, byte_count = 41, head_is_empty = 1
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::drain_queue_i, helper retval = 1
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Connection_Handler[1668]::handle_input, handle = 1668/1668, retval = 0
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, handle_events() returns 1
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, calling handle_events()
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::cleanup_queue, byte_count = 96
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::drain_queue_helper, byte_count = 96, head_is_empty = 1
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::drain_queue_i, helper retval = 1
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::make_idle
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Leader_Follower[1772]::wait_for_event, (leader) enter reactor event loop
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::handle_input, handle = 1772/1772
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::handle_input
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::process_queue_head, 0 enqueued
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::handle_input_parse_data, enter
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::handle_input_parse_data, read 41 bytes
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - GIOP_Message_State::parse_message_header_i
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - GIOP_Message_State::get_version_info
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - GIOP_Message_State::get_byte_order_info
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::process_parsed_messages, entering (missing data == 0)
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 29 data bytes, my endian, Type Reply[1]
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|GIOP message - HEXDUMP 41 bytes
+47 49 4f 50 01 02 01 01  1d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  0d 00 00 00 48 65 6c 6c   ............Hell
+6f 20 74 68 65 72 65 21  00                        o there!.       
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - TAO_Muxed_TMS::dispatch_reply, id = 1
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::handle_input, handle = 1772/1772, retval = 0
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Leader_Follower[1772]::wait_for_event, (leader) exit reactor event loop
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|(2912|3776) - string returned <Hello there!>
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Cache_Manager::is_entry_idle, state is [0]
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Cache_Manager::find_i, at index 0 (Transport[1772]) - idle
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Connector::connect, got an existing connected Transport[1772] in role TAO_CLIENT_ROLE
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Muxed_TMS[1772]::request_id, <2>
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 68 data bytes, my endian, Type Request[2]
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|GIOP message - HEXDUMP 80 bytes
+47 49 4f 50 01 02 01 00  44 00 00 00 02 00 00 00   GIOP....D.......
+00 00 00 00 00 00 cd cd  1b 00 00 00 14 01 0f 00   ................
+52 53 54 56 11 87 45 7a  03 0a 00 00 00 00 00 01   RSTV..Ez........
+00 00 00 01 00 00 00 cd  09 00 00 00 73 68 75 74   ............shut
+64 6f 77 6e 00 67 00 cd  00 00 00 00 01 00 00 00   down.g..........
+Dec 18 17:08:23.781 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::send_asynchronous_message_i, trying to send the message (ml = 80)
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Connection_Handler[1668]::handle_input, handle = 1668/1668
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::handle_input
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::process_queue_head, 0 enqueued
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::handle_input_parse_data, enter
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::handle_input_parse_data, read 80 bytes
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - GIOP_Message_State::parse_message_header_i
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - GIOP_Message_State::get_version_info
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - GIOP_Message_State::get_byte_order_info
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::process_parsed_messages, entering (missing data == 0)
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 68 data bytes, my endian, Type Request[2]
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|GIOP message - HEXDUMP 80 bytes
+47 49 4f 50 01 02 01 00  44 00 00 00 02 00 00 00   GIOP....D.......
+00 00 00 00 00 00 cd cd  1b 00 00 00 14 01 0f 00   ................
+52 53 54 56 11 87 45 7a  03 0a 00 00 00 00 00 01   RSTV..Ez........
+00 00 00 01 00 00 00 cd  09 00 00 00 73 68 75 74   ............shut
+64 6f 77 6e 00 67 00 cd  00 00 00 00 01 00 00 00   down.g..........
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Connection_Handler[1668]::handle_input, handle = 1668/1668, retval = 0
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, handle_events() returns 1
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, ends with result = 1
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|(704|3368) server - event loop restarting
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|CORBA::ORB::destroy() has been called on ORB <>.
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|Destroying ORB <>
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Connection_Handler[1668]::close_connection_eh, purging entry from cache
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Connection_Handler[1668]::close_connection_eh, removing from the reactor
+Dec 18 17:08:23.781 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Connection_Handler[1668]::close_connection_eh, cancel all timers
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Transport[1668]::cleanup_queue_i, cleaning up complete queue
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Connection_Handler[1668]::close_connection_eh
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|(704|3368) server - starting a run
+Dec 18 17:08:23.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::cleanup_queue, byte_count = 80
+Dec 18 17:08:23.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+Dec 18 17:08:23.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::drain_queue_helper, byte_count = 80, head_is_empty = 1
+Dec 18 17:08:23.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::drain_queue_i, helper retval = 1
+Dec 18 17:08:23.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::make_idle
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - Codeset_Manager_i::init_ccs, Loaded Codeset translator <UTF8_Latin1_Factory>, ncs = 00010001 tcs = 05010001
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) Loaded protocol <IIOP_Factory>
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) created new ORB <>
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Acceptor::open, address==localhost:50000, options=(null)
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Acceptor::open, specified host=localhost:50000
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Acceptor::open_i, trying to listen on port 50000
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - IIOP_Acceptor::open_i, listening on: <127.0.0.1:50000>
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, start [run]
+Dec 18 17:08:23.796 2006@<local_host>@704@LM_DEBUG@-ORBlistenEndpoints|TAO (704|3368) - ORB_Core::run, calling handle_events()
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|(2912|3776) client - starting a run
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|(2912|3776) client - getting string
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Cache_Manager::is_entry_idle, state is [0]
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Cache_Manager::find_i, at index 0 (Transport[1772]) - idle
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport_Connector::connect, got an existing connected Transport[1772] in role TAO_CLIENT_ROLE
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Muxed_TMS[1772]::request_id, <3>
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 68 data bytes, my endian, Type Request[3]
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|GIOP message - HEXDUMP 80 bytes
+47 49 4f 50 01 02 01 00  44 00 00 00 03 00 00 00   GIOP....D.......
+03 00 00 00 00 00 cd cd  1b 00 00 00 14 01 0f 00   ................
+52 53 54 57 11 87 45 cb  28 0c 00 00 00 00 00 01   RSTW..E.(.......
+00 00 00 01 00 00 00 cd  0b 00 00 00 67 65 74 5f   ............get_
+73 74 72 69 6e 67 00 cd  00 00 00 00 01 00 00 00   string..........
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::cleanup_queue, byte_count = 80
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::drain_queue_helper, byte_count = 80, head_is_empty = 1
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::drain_queue_i, helper retval = 1
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::make_idle
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Leader_Follower[1772]::wait_for_event, (leader) enter reactor event loop
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::handle_input, handle = 1772/1772
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::handle_input
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::process_queue_head, 0 enqueued
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::handle_input_parse_data, enter
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - IIOP_Transport[1772]::recv, read failure - connection aborted
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_ERROR@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::handle_input, error parsing incoming message
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::handle_input, handle = 1772/1772, retval = -1
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::close_connection_eh, purging entry from cache
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::close_connection_eh, removing from the reactor
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::close_connection_eh, cancel all timers
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::cleanup_queue_i, cleaning up complete queue
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::close_connection_eh
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Leader_Follower[1772]::wait_for_event, (leader) exit reactor event loop
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Synch_Twoway_Invocation::wait_for_reply, recovering after an error 
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::close_connection_eh, purging entry from cache
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Transport[1772]::cleanup_queue_i, cleaning up complete queue
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|TAO (2912|3776) - Connection_Handler[1772]::close_connection_eh
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_ERROR@-ORBlistenEndpoints|(2912|3776) EXCEPTION, Exception caught:
+system exception, ID 'IDL:omg.org/CORBA/COMM_FAILURE:1.0'
+TAO exception, minor code = 6 (failed to recv request response; ENOENT), completed = MAYBE
+
+Dec 18 17:08:24.796 2006@<local_host>@2912@LM_DEBUG@-ORBlistenEndpoints|Destroying ORB <>
+ERROR: client returned 1
+ERROR: server timedout
+ERROR: server returned -1
