@@ -1,0 +1,19 @@
+--- IIOP_Transport.cpp.old	2005-04-13 16:58:19.000000000 -0400
++++ IIOP_Transport.cpp.new	2005-04-14 10:54:01.000000000 -0400
+@@ -254,9 +254,13 @@
+       this->bidirectional_flag () < 0)
+     {
+       this->set_bidir_context_info (opdetails);
+-
+-      // Set the flag to 0  (i.e., originating side)
+-      this->bidirectional_flag (0);
++      //  ==  1 --> originating side
++      //  ==  0 --> other side
++      //  == -1 --> no bi-directional connection was negotiated
++      // The originating side must have an even request ID, and the other
++      // side must have an odd request ID.  Make sure that is the case.
++      // We change following line to 1
++      this->bidirectional_flag (1);
+     }
+ 
+   // Modify the request id if we have BiDirectional client/server
