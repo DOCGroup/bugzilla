@@ -1,0 +1,218 @@
+Index: Invocation_Base.h
+===================================================================
+--- Invocation_Base.h	(revision 81141)
++++ Invocation_Base.h	(working copy)
+@@ -192,7 +192,7 @@
+     /// Invoke status
+     TAO::Invocation_Status invoke_status (void) const;
+ 
+-    PortableInterceptor::ReplyStatus reply_status (void) const;
++    PortableInterceptor::ReplyStatus pi_reply_status (void) const;
+ 
+     /// Accessor used to determine if the current invocation is part
+     /// of a remote request, and if not, it will be considered to be
+Index: LocateRequest_Invocation_Adapter.cpp
+===================================================================
+--- LocateRequest_Invocation_Adapter.cpp	(revision 81141)
++++ LocateRequest_Invocation_Adapter.cpp	(working copy)
+@@ -86,7 +86,7 @@
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+                 CORBA::Boolean const is_permanent_forward =
+-                  (synch.reply_status() == GIOP::LOCATION_FORWARD_PERM);
++                  (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+ #else
+                 CORBA::Boolean const is_permanent_forward = false;
+ #endif
+Index: Invocation_Base.cpp
+===================================================================
+--- Invocation_Base.cpp	(revision 81141)
++++ Invocation_Base.cpp	(working copy)
+@@ -134,7 +134,7 @@
+           }
+ 
+         PortableInterceptor::ReplyStatus const status =
+-          this->adapter_->reply_status (*this);
++          this->adapter_->pi_reply_status (*this);
+ 
+         if (status == PortableInterceptor::LOCATION_FORWARD ||
+             status == PortableInterceptor::TRANSPORT_RETRY)
+@@ -189,7 +189,7 @@
+           }
+         else
+           {
+-            status = this->adapter_->reply_status (*this);
++            status = this->adapter_->pi_reply_status (*this);
+           }
+       }
+ 
+@@ -208,7 +208,7 @@
+       {
+         this->adapter_->receive_exception (*this);
+ 
+-        status = this->adapter_->reply_status (*this);
++        status = this->adapter_->pi_reply_status (*this);
+       }
+ 
+     return status;
+@@ -228,11 +228,11 @@
+   }
+ 
+   PortableInterceptor::ReplyStatus
+-  Invocation_Base::reply_status (void) const
++  Invocation_Base::pi_reply_status (void) const
+   {
+     if (adapter_ != 0)
+       {
+-        return this->adapter_->reply_status (*this);
++        return this->adapter_->pi_reply_status (*this);
+       }
+     else
+       {
+Index: DynamicInterface/DII_Invocation_Adapter.cpp
+===================================================================
+--- DynamicInterface/DII_Invocation_Adapter.cpp	(revision 81141)
++++ DynamicInterface/DII_Invocation_Adapter.cpp	(working copy)
+@@ -142,7 +142,7 @@
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const permanent_forward =
+-            (synch.reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const permanent_forward = false;
+ #endif
+Index: ClientRequestInterceptor_Adapter.h
+===================================================================
+--- ClientRequestInterceptor_Adapter.h	(revision 81141)
++++ ClientRequestInterceptor_Adapter.h	(working copy)
+@@ -102,7 +102,7 @@
+     virtual void destroy_interceptors (void) = 0;
+ 
+     /// Convert TAO Invocation status to a PI status
+-    virtual PortableInterceptor::ReplyStatus reply_status (
++    virtual PortableInterceptor::ReplyStatus pi_reply_status (
+       TAO::Invocation_Base const &invocation_base) = 0;
+   };
+ 
+Index: Messaging/Asynch_Invocation_Adapter.cpp
+===================================================================
+--- Messaging/Asynch_Invocation_Adapter.cpp	(revision 81141)
++++ Messaging/Asynch_Invocation_Adapter.cpp	(working copy)
+@@ -198,7 +198,7 @@
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const permanent_forward =
+-            (asynch.reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (asynch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const permanent_forward = false;
+ #endif
+Index: PI/ClientRequestInterceptor_Adapter_Impl.h
+===================================================================
+--- PI/ClientRequestInterceptor_Adapter_Impl.h	(revision 81141)
++++ PI/ClientRequestInterceptor_Adapter_Impl.h	(working copy)
+@@ -104,7 +104,7 @@
+ 
+     virtual void destroy_interceptors (void);
+ 
+-    virtual PortableInterceptor::ReplyStatus reply_status (
++    virtual PortableInterceptor::ReplyStatus pi_reply_status (
+       TAO::Invocation_Base const &invocation_base);
+ 
+   protected:
+Index: PI/ClientRequestInfo.cpp
+===================================================================
+--- PI/ClientRequestInfo.cpp	(revision 81141)
++++ PI/ClientRequestInfo.cpp	(working copy)
+@@ -138,8 +138,8 @@
+ {
+   this->check_validity ();
+ 
+-  if (this->invocation_->reply_status () != PortableInterceptor::SYSTEM_EXCEPTION
+-      && this->invocation_->reply_status () != PortableInterceptor::USER_EXCEPTION)
++  if (this->invocation_->pi_reply_status () != PortableInterceptor::SYSTEM_EXCEPTION
++      && this->invocation_->pi_reply_status () != PortableInterceptor::USER_EXCEPTION)
+     {
+       throw ::CORBA::BAD_INV_ORDER (CORBA::OMGVMCID | 14, CORBA::COMPLETED_NO);
+     }
+@@ -554,7 +554,7 @@
+   this->check_validity ();
+ 
+   PortableInterceptor::ReplyStatus const status =
+-    this->invocation_->reply_status();
++    this->invocation_->pi_reply_status();
+   if (status == -1 || status == PortableInterceptor::UNKNOWN)
+     {
+       // A reply hasn't been received yet.
+@@ -569,7 +569,7 @@
+ {
+   this->check_validity ();
+ 
+-  if (this->invocation_->reply_status() != PortableInterceptor::LOCATION_FORWARD)
++  if (this->invocation_->pi_reply_status() != PortableInterceptor::LOCATION_FORWARD)
+     {
+       throw ::CORBA::BAD_INV_ORDER (CORBA::OMGVMCID | 14, CORBA::COMPLETED_NO);
+     }
+Index: PI/ClientRequestInterceptor_Adapter_Impl.cpp
+===================================================================
+--- PI/ClientRequestInterceptor_Adapter_Impl.cpp	(revision 81141)
++++ PI/ClientRequestInterceptor_Adapter_Impl.cpp	(working copy)
+@@ -152,7 +152,7 @@
+         this->receive_exception (invocation);
+ 
+         PortableInterceptor::ReplyStatus status =
+-          this->reply_status (invocation);
++          this->pi_reply_status (invocation);
+ 
+         // Only re-throw the exception if it hasn't been transformed by
+         // the receive_exception() interception point (e.g. to a
+@@ -221,7 +221,7 @@
+         this->receive_exception (invocation);
+ 
+         PortableInterceptor::ReplyStatus status =
+-          this->reply_status (invocation);
++          this->pi_reply_status (invocation);
+ 
+         // Only re-throw the exception if it hasn't been transformed by
+         // the receive_exception() interception point (e.g. to a
+@@ -265,7 +265,7 @@
+   }
+ 
+   PortableInterceptor::ReplyStatus
+-  ClientRequestInterceptor_Adapter_Impl::reply_status (
++  ClientRequestInterceptor_Adapter_Impl::pi_reply_status (
+     TAO::Invocation_Base const &invocation_base)
+   {
+     PortableInterceptor::ReplyStatus reply_status;
+Index: Invocation_Adapter.cpp
+===================================================================
+--- Invocation_Adapter.cpp	(revision 81141)
++++ Invocation_Adapter.cpp	(working copy)
+@@ -172,7 +172,7 @@
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const is_permanent_forward =
+-            (coll_inv.reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (coll_inv.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const is_permanent_forward = false;
+ #endif
+@@ -308,7 +308,7 @@
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const is_permanent_forward =
+-            (synch.reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const is_permanent_forward = false;
+ #endif
+@@ -337,7 +337,7 @@
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const is_permanent_forward =
+-            (synch.reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const is_permanent_forward = false;
+ #endif
