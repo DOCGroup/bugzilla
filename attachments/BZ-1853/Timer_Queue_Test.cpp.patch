@@ -1,0 +1,13 @@
+123a124,128
+>   // Test a long time & earliest time recalculation
+>   long timer_id3;
+>   ACE_NEW (timer_act, int (1));
+>   timer_id3 = tq->schedule (&eh, timer_act, tq->gettimeofday () + ACE_Time_Value (1000));
+> 
+125a131,132
+>   result = tq->earliest_time () != ACE_Time_Value::zero;
+>   ACE_ASSERT (result != 0 );
+127a135,137
+>   result = tq->earliest_time () != ACE_Time_Value::zero;
+>   ACE_ASSERT (result != 0);
+>   tq->cancel (timer_id3, &timer_act);
