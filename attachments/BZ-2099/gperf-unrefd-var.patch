@@ -1,0 +1,10 @@
+--- Key_List.cpp.orig	2005-04-29 09:13:57.604958800 -0400
++++ Key_List.cpp	2005-04-29 09:14:03.636131600 -0400
+@@ -943,7 +943,6 @@
+   // Logic to handle the Binary Search.
+ 
+   ACE_OS::printf ("int first = 0, last = 0, middle;\n");
+-  ACE_OS::printf ("%s*base;\n",struct_tag);
+   ACE_OS::printf ("\nlast = %d;\n",total_keys - 1);
+   ACE_OS::printf ("while (last >= first)\n");
+   ACE_OS::printf ("\t{\n");
