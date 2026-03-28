@@ -1,0 +1,265 @@
+diff -Naru ACE_wrappers.orig/TAO/tao/PortableServer/Root_POA.cpp ACE_wrappers/TAO/tao/PortableServer/Root_POA.cpp
+--- ACE_wrappers.orig/TAO/tao/PortableServer/Root_POA.cpp	2005-12-07 08:52:56.000000000 -0800
++++ ACE_wrappers/TAO/tao/PortableServer/Root_POA.cpp	2005-12-07 09:30:01.000000000 -0800
+@@ -2853,6 +2853,25 @@
+   return CORBA::ORB::_duplicate (this->orb_core_.orb ());
+ }
+ 
++#if (TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG == 1)
++// This method is not MT safe
++// Use the lock() method to guard it and any operations on the 
++// ServantRetentionStrategyDebug* 
++TAO::Portable_Server::ServantRetentionStrategyDebug* 
++TAO_Root_POA::get_servant_retention_strategy_debug(void) const
++{
++  if (TAO_debug_level > 2)
++    {
++      ACE_DEBUG ((LM_DEBUG, "TAO_Root_POA::get_servant_retention_strategy_debug()\n"));
++    }
++  TAO::Portable_Server::ServantRetentionStrategy *servant_strategy = 
++    this->active_policy_strategies_.servant_retention_strategy();
++ 
++  return dynamic_cast<TAO::Portable_Server::ServantRetentionStrategyDebug *>(servant_strategy);
++}
++  
++#endif /* TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG */
++
+ // Initialize instance_ to 0, since this is what we test for in the call
+ // to instance ().  Note that this does not require a constructor call, so
+ // it is always initialized by the time that instance () can be called.
+diff -Naru ACE_wrappers.orig/TAO/tao/PortableServer/Root_POA.h ACE_wrappers/TAO/tao/PortableServer/Root_POA.h
+--- ACE_wrappers.orig/TAO/tao/PortableServer/Root_POA.h	2005-12-07 08:52:56.000000000 -0800
++++ ACE_wrappers/TAO/tao/PortableServer/Root_POA.h	2005-12-07 09:28:58.000000000 -0800
+@@ -57,6 +57,10 @@
+ // OctetSeq
+ #include "tao/OctetSeqC.h"
+ 
++#if (TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG == 1)
++#include "ServantRetentionStrategyDebug.h"
++#endif /* TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG */ 
++
+ // This is to remove "inherits via dominance" warnings from MSVC.
+ // MSVC is being a little too paranoid.
+ #if defined(_MSC_VER)
+@@ -932,6 +936,16 @@
+   };
+ 
+   Key_To_Object_Params key_to_object_params_;
++
++#if (TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG == 1)
++public:
++  // This method is not MT safe
++  // Use the lock() method to guard it and any operations on the 
++  // ServantRetentionStrategyDebug*
++  TAO::Portable_Server::ServantRetentionStrategyDebug* 
++  get_servant_retention_strategy_debug(void) const;
++#endif /* TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG */
++
+ };
+ 
+ /**
+diff -Naru ACE_wrappers.orig/TAO/tao/PortableServer/ServantRetentionStrategyDebug.h ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyDebug.h
+--- ACE_wrappers.orig/TAO/tao/PortableServer/ServantRetentionStrategyDebug.h	1969-12-31 16:00:00.000000000 -0800
++++ ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyDebug.h	2005-12-07 09:28:58.000000000 -0800
+@@ -0,0 +1,43 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ *  @file ServantRetentionStrategyDebug.h
++ *
++ *  @author  Abhijit Sachdev  <abhi@qualcomm.com>
++ */
++//=============================================================================
++#if (TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG == 1)
++
++#ifndef TAO_SERVANTRETENTIONSTRATEGYDEBUG_H
++#define TAO_SERVANTRETENTIONSTRATEGYDEBUG_H
++#include /**/ "ace/pre.h"
++
++#include "portableserver_export.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++namespace TAO
++{
++  namespace Portable_Server
++  {
++    class TAO_PortableServer_Export ServantRetentionStrategyDebug
++    {
++    public:
++      // Use this to dump the object_entries
++      virtual void dump_object_entries(void) const = 0;
++
++      virtual ~ServantRetentionStrategyDebug(void)
++      {
++      }
++    };
++  }
++}
++
++#include /**/ "ace/post.h" 
++#endif /* TAO_SERVANTRETENTIONSTRATEGYDEBUG_H */
++
++#endif /* TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG */
++
+diff -Naru ACE_wrappers.orig/TAO/tao/PortableServer/ServantRetentionStrategyRetain.cpp ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetain.cpp
+--- ACE_wrappers.orig/TAO/tao/PortableServer/ServantRetentionStrategyRetain.cpp	2005-12-07 08:52:56.000000000 -0800
++++ ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetain.cpp	2005-12-07 09:28:58.000000000 -0800
+@@ -1001,6 +1001,60 @@
+       return this->active_object_map_->remaining_activations (servant);
+     }
+ 
++#if (TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG == 1)
++    void ServantRetentionStrategyRetain::dump_object_entries(void) const
++    {
++      if (TAO_debug_level > 2)
++        {
++          ACE_DEBUG ((LM_DEBUG, "ServantRetentionStrategyRetain::dump_object_entries()\n"));
++        }
++      
++      TAO_Active_Object_Map::user_id_map::iterator end
++        = this->active_object_map_->user_id_map_->end ();
++      
++      for (TAO_Active_Object_Map::user_id_map::iterator iter
++             = this->active_object_map_->user_id_map_->begin ();
++           iter != end;
++           ++iter)
++        {
++          TAO_Active_Object_Map::user_id_map::value_type map_pair = *iter;
++          PortableServer::ObjectId obj_id = map_pair.first();
++          TAO_Active_Object_Map_Entry *active_object_map_entry = map_pair.second();
++          
++          ACE_DEBUG ((LM_DEBUG, "ObjectId is:\n"));
++          ACE_HEX_DUMP((LM_DEBUG, PortableServer::ObjectId_to_string(obj_id),
++                        sizeof(PortableServer::ObjectId_to_string(obj_id))));
++          
++          ACE_DEBUG ((LM_DEBUG, "user_id_ is:\n"));
++          ACE_HEX_DUMP((LM_DEBUG, PortableServer::ObjectId_to_string(active_object_map_entry->user_id_), 
++			sizeof(PortableServer::ObjectId_to_string(active_object_map_entry->user_id_))));
++          
++	  ACE_DEBUG ((LM_DEBUG, "system_id_ is:\n"));
++          ACE_HEX_DUMP((LM_DEBUG, PortableServer::ObjectId_to_string(active_object_map_entry->system_id_), 
++			sizeof(PortableServer::ObjectId_to_string(active_object_map_entry->system_id_))));
++          
++	  ACE_DEBUG ((LM_DEBUG, 
++                      ACE_LIB_TEXT ("servant_ = %x\n")
++                      ACE_LIB_TEXT ("reference_count_ = %d\n")
++                      ACE_LIB_TEXT ("deactivated_ = %d\n")
++                      ACE_LIB_TEXT ("priority_ = %d\n\n"),
++                      active_object_map_entry->servant_,
++                      active_object_map_entry->reference_count_,
++                      active_object_map_entry->deactivated_,
++                      active_object_map_entry->priority_));
++        }
++    } 
++
++
++    int ServantRetentionStrategyRetain::find_object_entry(const PortableServer::ObjectId &id,
++                                                          TAO_Active_Object_Map_Entry *&active_object_map_entry)
++    {
++      return this->active_object_map_->
++        find_servant_and_system_id_using_user_id (id, active_object_map_entry);
++    }
++
++#endif /* TAO_SERVANT_RETENTION_STRATEGY_RETAIN_H */
++
+     ::PortableServer::ServantRetentionPolicyValue
+     ServantRetentionStrategyRetain::type() const
+     {
+diff -Naru ACE_wrappers.orig/TAO/tao/PortableServer/ServantRetentionStrategyRetainDebug.h ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetainDebug.h
+--- ACE_wrappers.orig/TAO/tao/PortableServer/ServantRetentionStrategyRetainDebug.h	1969-12-31 16:00:00.000000000 -0800
++++ ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetainDebug.h	2005-12-07 09:28:58.000000000 -0800
+@@ -0,0 +1,51 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ *  @file ServantRetentionStrategyDebug.h
++ *
++ *  @author  Abhijit Sachdev  <abhi@qualcomm.com>
++ */
++//=============================================================================
++#if (TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG == 1)
++
++#ifndef TAO_SERVANTRETENTIONSTRATEGYRETAINDEBUG_H
++#define TAO_SERVANTRETENTIONSTRATEGYRETAINDEBUG_H
++#include /**/ "ace/pre.h"
++
++#include "portableserver_export.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++#include "ServantRetentionStrategyDebug.h"
++#include "Active_Object_Map_Entry.h"
++
++namespace TAO
++{
++  namespace Portable_Server
++  {
++    class TAO_PortableServer_Export ServantRetentionStrategyRetainDebug
++      : public ServantRetentionStrategyDebug
++    {
++    public:
++      // Use this to dump the object_entries (declared in the base class)
++      // virtual void dump_object_entries(void) const = 0;
++
++      // returns 0 on success, and populates the active_object_map_entry
++      virtual int find_object_entry(const PortableServer::ObjectId &id,
++                                    TAO_Active_Object_Map_Entry *&active_object_map_entry) = 0;
++
++      virtual ~ServantRetentionStrategyRetainDebug(void)
++      {
++      }
++    };  
++  }
++}
++
++#include /**/ "ace/post.h" 
++#endif /* TAO_SERVANTRETENTIONSTRATEGYRETAINDEBUG_H */
++
++#endif /* TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG */
++
+diff -Naru ACE_wrappers.orig/TAO/tao/PortableServer/ServantRetentionStrategyRetain.h ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetain.h
+--- ACE_wrappers.orig/TAO/tao/PortableServer/ServantRetentionStrategyRetain.h	2005-12-07 08:52:56.000000000 -0800
++++ ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetain.h	2005-12-07 09:28:58.000000000 -0800
+@@ -15,6 +15,9 @@
+ #include /**/ "ace/pre.h"
+ 
+ #include "ServantRetentionStrategyNonRetain.h"
++#if (TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG == 1)
++#include "ServantRetentionStrategyRetainDebug.h"
++#endif /* TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG */ 
+ 
+ #if !defined (ACE_LACKS_PRAGMA_ONCE)
+ # pragma once
+@@ -28,6 +31,9 @@
+   {
+     class ServantRetentionStrategyRetain
+        : public ServantRetentionStrategyNonRetain
++#if (TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG == 1)
++      , public ServantRetentionStrategyRetainDebug
++#endif /* TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG */ 
+     {
+     public:
+       ServantRetentionStrategyRetain (void);
+@@ -177,6 +183,15 @@
+     private:
+       TAO_Active_Object_Map *active_object_map_;
+       CORBA::ULong waiting_servant_deactivation_;
++
++#if (TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG == 1)
++    public:
++      virtual void dump_object_entries (void) const;
++
++      virtual int find_object_entry(const PortableServer::ObjectId &id,
++                                    TAO_Active_Object_Map_Entry *&active_object_map_entry);
++#endif /* TAO_HAS_SERVANT_RETENTION_STRATEGY_DEBUG */
++
+     };
+   }
+ }
