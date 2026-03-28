@@ -1,0 +1,41 @@
+Index: Root_POA.cpp
+===================================================================
+--- Root_POA.cpp	(revision 80257)
++++ Root_POA.cpp	(working copy)
+@@ -276,6 +276,12 @@
+   int result = this->poa_manager_.register_poa (this);
+   if (result != 0)
+     {
++      // Cleanup the policies that might have been created
++      // by update() method.
++      this->active_policy_strategies_.cleanup ();
++      // We don't need a ref to a poa manager any more.
++      this->poa_manager_._remove_ref();
++
+       throw ::CORBA::OBJ_ADAPTER ();
+     }
+ 
+@@ -289,6 +295,11 @@
+       // Remove from POA Manager in case of errors. No checks of
+       // further errors...
+       this->poa_manager_.remove_poa (this);
++      // Cleanup the policies that might have been created
++      // by update() method.
++      this->active_policy_strategies_.cleanup ();
++      // We don't need a ref to a poa manager any more.
++      this->poa_manager_._remove_ref();
+ 
+       throw ::CORBA::OBJ_ADAPTER ();
+     }
+@@ -307,6 +318,11 @@
+       this->object_adapter ().unbind_poa (this,
+                                           this->folded_name_,
+                                           this->system_name_.in ());
++      // Cleanup the policies that might have been created
++      // by update() method.
++      this->active_policy_strategies_.cleanup ();
++      // We don't need a ref to a poa manager any more.
++      this->poa_manager_._remove_ref();
+       throw;
+     }
+ }
