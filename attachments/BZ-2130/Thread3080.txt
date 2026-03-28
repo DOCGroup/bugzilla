@@ -1,0 +1,74 @@
+ 	NTDLL.DLL!77f82870() 	
+ 	NTDLL.DLL!77f8822a() 	
+ 	msvcr71d.dll!102094d4() 	
+ 	msvcr71d.dll!102094cb() 	
+ 	msvcr71d.dll!10209409() 	
+ 	NTDLL.DLL!77f8819b() 	
+ 	ACEd.dll!ACE_OS::thread_mutex_lock(_RTL_CRITICAL_SECTION * m=0x01c315b4)  Line 4441 + 0xc	C++
+ 	ACEd.dll!ACE_Thread_Mutex::acquire()  Line 50 + 0x9	C++
+ 	TAO_PortableServerd.dll!ACE_Lock_Adapter<ACE_Thread_Mutex>::acquire()  Line 29 + 0xe	C++
+ 	TAO_PortableServerd.dll!ACE_Guard<ACE_Lock>::acquire()  Line 9 + 0x13	C++
+ 	TAO_PortableServerd.dll!ACE_Guard<ACE_Lock>::ACE_Guard<ACE_Lock>(ACE_Lock & l={...})  Line 36	C++
+ 	TAO_PortableServerd.dll!TAO_Object_Adapter::find_servant(const TAO::ObjectKey & key={...}, TAO_ServantBase * & servant=0x00000000)  Line 67 + 0x11	C++
+		locks via:
+                TAO_OBJECT_ADAPTER_GUARD_RETURN (TAO_SERVANT_NOT_FOUND);
+		Already locked by ownerThread = 3320 (=0xcf8)
+
+		Heres the watch info for the windows RTL_CRITICAL_SECTION that this guard tries to acquire:
+		m	0x01c315b4 {DebugInfo=0x00149140 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01c315b4 {DebugInfo=0x00149140 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01c315b4 ...} LockCount=8 RecursionCount=1 ...} ...} LockCount=8 RecursionCount=1 ...}	_RTL_CRITICAL_SECTION *
+		-	DebugInfo	0x00149140 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01c315b4 {DebugInfo=0x00149140 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01c315b4 {DebugInfo=0x00149140 LockCount=8 RecursionCount=1 ...} ...} LockCount=8 RecursionCount=1 ...} ...}	_RTL_CRITICAL_SECTION_DEBUG *
+				Type	0	unsigned short
+				CreatorBackTraceIndex	0	unsigned short
+			+	CriticalSection	0x01c315b4 {DebugInfo=0x00149140 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01c315b4 {DebugInfo=0x00149140 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01c315b4 ...} LockCount=8 RecursionCount=1 ...} ...} LockCount=8 RecursionCount=1 ...}	_RTL_CRITICAL_SECTION *
+			+	ProcessLocksList	{Flink=0x00149330 {Flink=0x001492b8 {Flink=0x00149308 {Flink=0x00149290 Blink=0x001492b8 } Blink=0x00149330 {Flink=0x001492b8 Blink=0x00149148 } } Blink=0x00149148 {Flink=0x00149330 {Flink=0x001492b8 Blink=0x00149148 } Blink=0x00149030 {Flink=0x00149148 Blink=0x00149120 } } } Blink=0x00149030 {Flink=0x00149148 {Flink=0x00149330 {Flink=0x001492b8 Blink=0x00149148 } Blink=0x00149030 {Flink=0x00149148 Blink=0x00149120 } } Blink=0x00149120 {Flink=0x00149030 {Flink=0x00149148 Blink=0x00149120 } Blink=0x001490f8 {Flink=0x00149120 Blink=0x001490d0 } } } }	_LIST_ENTRY
+				EntryCount	186	unsigned long
+				ContentionCount	186	unsigned long
+			+	Spare	0x00149158	unsigned long [2]
+			LockCount	8	long
+			RecursionCount	1	long
+			OwningThread	0x00000cf8	void *  ---> =Thread3320
+			LockSemaphore	0x000018c4	void *
+			SpinCount	0	unsigned long
+
+ 	TAO_PortableServerd.dll!TAO_Object_Adapter::get_collocated_servant(const TAO_MProfile & mp={...})  Line 886 + 0x1b	C++
+ 	TAO_PortableServerd.dll!TAO_Object_Adapter::create_collocated_object(TAO_Stub * stub=0x1614daf8, const TAO_MProfile & mp={...})  Line 817 + 0xc	C++
+ 	TAOd.dll!TAO_Adapter_Registry::create_collocated_object(TAO_Stub * stub=0x1614daf8, const TAO_MProfile & mprofile={...})  Line 162 + 0x27	C++
+>	TAOd.dll!TAO_ORB_Core::create_object(TAO_Stub * stub=0x1614daf8)  Line 1733 + 0x10	C++
+		locks via:
+                ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+                      guard,
+                      this->lock_,
+                      CORBA::Object::_nil ());
+
+		this = 0x1bfcce8
+		ownerThread = 0x3080
+
+ 	TAOd.dll!operator>>(TAO_InputCDR & cdr={...}, CORBA::Object * & x=0x00000000)  Line 899 + 0x14	C++
+ 	TAOd.dll!TAO::Ret_Object_Argument_T<CORBA::Object *,TAO_Pseudo_Var_T<CORBA::Object> >::demarshal(TAO_InputCDR & cdr={...})  Line 961 + 0x15	C++
+ 	TAOd.dll!TAO_Operation_Details::demarshal_args(TAO_InputCDR & cdr={...})  Line 74 + 0x25	C++
+ 	TAOd.dll!TAO::Synch_Twoway_Invocation::check_reply_status(TAO_Synch_Reply_Dispatcher & rd={...})  Line 378 + 0xf	C++
+ 	TAOd.dll!TAO::Synch_Twoway_Invocation::remote_twoway(ACE_Time_Value * max_wait_time=0x00000000)  Line 189 + 0xf	C++
+ 	TAOd.dll!TAO::Invocation_Adapter::invoke_twoway(TAO_Operation_Details & details={...}, TAO_Pseudo_Var_T<CORBA::Object> & effective_target={...}, TAO::Profile_Transport_Resolver & r={...}, ACE_Time_Value * & max_wait_time=0x00000000)  Line 302 + 0x11	C++
+ 	TAOd.dll!TAO::Invocation_Adapter::invoke_remote_i(TAO_Stub * stub=0x1610bb80, TAO_Operation_Details & details={...}, TAO_Pseudo_Var_T<CORBA::Object> & effective_target={...}, ACE_Time_Value * & max_wait_time=0x00000000)  Line 271 + 0x1d	C++
+ 	TAOd.dll!TAO::Invocation_Adapter::invoke_i(TAO_Stub * stub=0x1610bb80, TAO_Operation_Details & details={...})  Line 88 + 0x1d	C++
+ 	TAOd.dll!TAO::Invocation_Adapter::invoke(TAO::Exception_Data * ex_data=0x012fc47c, unsigned long ex_count=3)  Line 46 + 0x15	C++
+ 	TAO_CosNamingd.dll!CosNaming::NamingContext::resolve(const CosNaming::Name & n={...})  Line 2381 + 0x12	C++
+ 	ActivationStateController.dll!CorbaNS::NameContextResolverBase<CORBA::Object>::resolveName(const CorbaNS::ReferenceVar<CosNaming::NamingContext> & a_nc={...}, const CorbaNS::StringList & a_name={...})  Line 97 + 0x31	C++
+ 	ActivationStateController.dll!CorbaNS::NameContextResolverBase<CORBA::Object>::resolveName(const CorbaNS::ReferenceVar<CORBA::ORB> & a_orb={...}, const CorbaNS::StringList & a_name={...})  Line 129 + 0x31	C++
+ 	ActivationStateController.dll!CorbaNS::NameContextResolverBase<CORBA::Object>::resolveNameFromNms7kRoot(const CorbaNS::ReferenceVar<CORBA::ORB> & a_orb={...}, const CorbaNS::StringList & a_name={...})  Line 143 + 0x11	C++
+ 	ActivationStateController.dll!ExeModuleFrameNS::CorbaServerOrbInitializer::isServantRegisteredInNamingService(const ExeModuleFrameNS::CorbaServerOrbInitializer::ServantInfo & a_servantInfo={...})  Line 241 + 0x28	C++
+ 	ActivationStateController.dll!ExeModuleFrameNS::CorbaServerOrbInitializer::isServantRegisteredInNamingService(unsigned int a_idx=1)  Line 231 + 0x14	C++
+ 	ActivationStateController.dll!ExeModuleFrameNS::CorbaServerModuleLifeCycleCallbacks::checkAndRecoverFromNamingServiceCrash()  Line 258 + 0x64	C++
+ 	ActivationStateController.dll!ExeModuleFrameNS::MaintenanceHandler::doMaintenance()  Line 64 + 0xa	C++
+ 	ActivationStateController.dll!RewindedWorkerTimerPrivateNS::RewindedWorkerTimer<ExeModuleFrameNS::MaintenanceHandler>::doWork()  Line 132 + 0x22	C++
+ 	ActivationStateController.dll!RewindedWorkerTimerPrivateNS::RewindedWorkerTimer<ExeModuleFrameNS::MaintenanceHandler>::DoWorkWrapper::doWork()  Line 109	C++
+ 	ActivationStateController.dll!nfcNS::SafePeerTraits<RewindedWorkerTimerPrivateNS::RewindedWorkerTimer<ExeModuleFrameNS::MaintenanceHandler>::DoWorkWrapper>::invoke(nfcNS::SmartPtr<RewindedWorkerTimerPrivateNS::RewindedWorkerTimer<ExeModuleFrameNS::MaintenanceHandler>::DoWorkWrapper,nfcNS::ImplRep> & a_ref={...}, void (void)* a_cb=0x0131349a)  Line 45 + 0x1b	C++
+ 	ActivationStateController.dll!nfcNS::SafeCallback<RewindedWorkerTimerPrivateNS::RewindedWorkerTimer<ExeModuleFrameNS::MaintenanceHandler>::DoWorkWrapper,nfcNS::SafePeerTraits<RewindedWorkerTimerPrivateNS::RewindedWorkerTimer<ExeModuleFrameNS::MaintenanceHandler>::DoWorkWrapper> >::doIt()  Line 82 + 0x13	C++
+ 	Threads.dll!nfcNS::CommandInvoker<nfcNS::CallbackTBase<void> >::execute(nfcNS::CallbackTBase<void> & a_lb={...})  Line 66 + 0xd	C++
+ 	Threads.dll!nfcNS::WorkerThreadHost::run()  Line 83 + 0xc	C++
+ 	Threads.dll!nfcNS::ThreadVoidFuncSptrTriat<nfcNS::WorkerThreadHost>::makeFunc(std::pair<nfcNS::SmartPtr<nfcNS::WorkerThreadHost,nfcNS::ImplRep>,void (__thiscall nfcNS::WorkerThreadHost::*)(void)> * a_p=0x03eeaec8)  Line 317 + 0x28	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke_i()  Line 149 + 0x9	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke()  Line 93 + 0xd	C++
+ 	ACEd.dll!ace_thread_adapter(void * args=0x03eeb038)  Line 131 + 0xd	C++
+ 	msvcr71d.dll!10203266() 	
+ 	KERNEL32.DLL!7c57b388() 	
