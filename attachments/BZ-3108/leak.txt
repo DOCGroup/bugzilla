@@ -1,0 +1,406 @@
+[build@shelob Bug_3108_Regression]$ perl run_test.pl
+==10103== Use of uninitialised value of size 8
+==10103==    at 0x52668CF: CORBA::ORB::object_to_string(CORBA::Object*) (ORB.cpp:1466)
+==10103==    by 0x4052D4: main (server.cpp:75)
+==10103==
+==10103== Use of uninitialised value of size 8
+==10103==    at 0x52668E1: CORBA::ORB::object_to_string(CORBA::Object*) (ORB.cpp:1467)
+==10103==    by 0x4052D4: main (server.cpp:75)
+==10104== Thread 20:
+==10104== Syscall param writev(vector[...]) points to uninitialised byte(s)
+==10104==    at 0x3C738C64C3: writev (in /lib64/libc-2.5.so)
+==10104==    by 0x50052A9: ACE::sendv(int, iovec const*, int, ACE_Time_Value const*) (OS_NS_sys_uio.inl:48)
+==10104==    by 0x4CADB62: TAO_IIOP_Transport::send(iovec*, int, unsigned long&, ACE_Time_Value const*) (SOCK_IO.inl:108)
+==10104==    by 0x4D041F4: TAO_Transport::drain_queue_helper(int&, iovec*) (Transport.cpp:901)
+==10104==    by 0x4D0488F: TAO_Transport::drain_queue_i() (Transport.cpp:1041)
+==10104==    by 0x4D0491D: TAO_Transport::send_synch_message_helper_i(TAO_Synch_Queued_Message&, ACE_Time_Value*) (Transport.cpp:738)
+==10104==    by 0x4D066C7: TAO_Transport::send_synchronous_message_i(ACE_Message_Block const*, ACE_Time_Value*) (Transport.cpp:578)
+==10104==    by 0x4D06A85: TAO_Transport::send_message_shared_i(TAO_Stub*, int, ACE_Message_Block const*, ACE_Time_Value*) (Transport.cpp:1258)
+==10104==    by 0x4CAE04E: TAO_IIOP_Transport::send_message_shared(TAO_Stub*, int, ACE_Message_Block const*, ACE_Time_Value*) (IIOP_Transport.cpp:279)
+==10104==    by 0x4CADC65: TAO_IIOP_Transport::send_message(TAO_OutputCDR&, TAO_Stub*, int, ACE_Time_Value*) (IIOP_Transport.cpp:247)
+==10104==    by 0x4CAD951: TAO_IIOP_Transport::send_request(TAO_Stub*, TAO_ORB_Core*, TAO_OutputCDR&, int, ACE_Time_Value*) (IIOP_Transport.cpp:222)
+==10104==    by 0x4CE55AB: TAO::Remote_Invocation::send_message(TAO_OutputCDR&, short, ACE_Time_Value*) (Remote_Invocation.cpp:180)
+==10104==    by 0x4CEE549: TAO::Synch_Twoway_Invocation::remote_twoway(ACE_Time_Value*) (Synch_Invocation.cpp:111)
+==10104==    by 0x4CB03D3: TAO::Invocation_Adapter::invoke_twoway(TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Profile_Transport_Resolver&, ACE_Time_Value*&) (Invocation_Adapter.cpp:298)
+==10104==    by 0x4CB003A: TAO::Invocation_Adapter::invoke_remote_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, ACE_Time_Value*&) (Invocation_Adapter.cpp:273)
+==10104==    by 0x4CB094F: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:92)
+==10104==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==10104==    by 0x40429E: test::test_method() (testC.cpp:130)
+==10104==    by 0x40367C: Client::svc() (client.cpp:65)
+==10104==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==10104==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+==10104==    by 0x3C744061B4: start_thread (in /lib64/libpthread-2.5.so)
+==10104==    by 0x3C738CD39C: clone (in /lib64/libc-2.5.so)
+==10104==  Address 0x53C787E is 3,574 bytes inside a block of size 4,096 alloc'd
+==10104==    at 0x4A055F6: operator new[](unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:211)
+==10104==    by 0x5035AC7: ACE_Local_Memory_Pool::acquire(unsigned long, unsigned long&) (Local_Memory_Pool.cpp:58)
+==10104==    by 0x4C8FBB5: ACE_Malloc_T<ACE_Local_Memory_Pool, ACE_Thread_Mutex, ACE_Control_Block>::open() (Malloc_T.cpp:409)
+==10104==    by 0x4C8FDAB: ACE_Malloc_T<ACE_Local_Memory_Pool, ACE_Thread_Mutex, ACE_Control_Block>::ACE_Malloc_T(char const*) (Malloc_T.cpp:488)
+==10104==    by 0x4C8EE4C: TAO_Default_Resource_Factory::output_cdr_buffer_allocator() (Malloc_T.inl:135)
+==10104==    by 0x4D0068E: TAO_Thread_Lane_Resources::output_cdr_buffer_allocator() (Thread_Lane_Resources.cpp:282)
+==10104==    by 0x4D05878: TAO_Transport::TAO_Transport(unsigned, TAO_ORB_Core*, unsigned long) (Transport.cpp:163)
+==10104==    by 0x4CADAAF: TAO_IIOP_Transport::TAO_IIOP_Transport(TAO_IIOP_Connection_Handler*, TAO_ORB_Core*) (IIOP_Transport.cpp:30)
+==10104==    by 0x4CA3BBF: TAO_IIOP_Connection_Handler::TAO_IIOP_Connection_Handler(TAO_ORB_Core*) (IIOP_Connection_Handler.cpp:45)
+==10104==    by 0x4CA7821: TAO_Connect_Creation_Strategy<TAO_IIOP_Connection_Handler>::make_svc_handler(TAO_IIOP_Connection_Handler*&) (Connector_Impl.cpp:28)
+==10104==    by 0x4CA6F62: ACE_Connector<TAO_IIOP_Connection_Handler, ACE_SOCK_Connector>::connect_i(TAO_IIOP_Connection_Handler*&, TAO_IIOP_Connection_Handler**, ACE_INET_Addr const&, ACE_Synch_Options const&, ACE_INET_Addr const&, int, int, int) (Connector.cpp:369)
+==10104==    by 0x4CA4F0C: TAO_IIOP_Connector::begin_connection(TAO_IIOP_Connection_Handler*&, TAO::Profile_Transport_Resolver*, TAO_IIOP_Endpoint*, ACE_Time_Value*) (Connector.cpp:328)
+==10104==    by 0x4CA5C69: TAO_IIOP_Connector::make_connection(TAO::Profile_Transport_Resolver*, TAO_Transport_Descriptor_Interface&, ACE_Time_Value*) (IIOP_Connector.cpp:195)
+==10104==    by 0x4D0A2A1: TAO_Connector::connect(TAO::Profile_Transport_Resolver*, TAO_Transport_Descriptor_Interface*, ACE_Time_Value*) (Transport_Connector.cpp:375)
+==10104==    by 0x4CE3E69: TAO::Profile_Transport_Resolver::try_connect_i(TAO_Transport_Descriptor_Interface*, ACE_Time_Value*, bool) (Profile_Transport_Resolver.cpp:171)
+==10104==    by 0x4CE3F7A: TAO::Profile_Transport_Resolver::try_connect(TAO_Transport_Descriptor_Interface*, ACE_Time_Value*) (Profile_Transport_Resolver.cpp:114)
+==10104==    by 0x4CB17FA: TAO_Default_Endpoint_Selector::select_endpoint(TAO::Profile_Transport_Resolver*, ACE_Time_Value*) (Invocation_Endpoint_Selectors.cpp:70)
+==10104==    by 0x4CE3BDD: TAO::Profile_Transport_Resolver::resolve(ACE_Time_Value*) (Profile_Transport_Resolver.cpp:88)
+==10104==    by 0x4CAFF46: TAO::Invocation_Adapter::invoke_remote_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, ACE_Time_Value*&) (Invocation_Adapter.cpp:247)
+==10104==    by 0x4CB094F: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:92)
+==10104==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==10104==    by 0x40429E: test::test_method() (testC.cpp:130)
+==10104==    by 0x40367C: Client::svc() (client.cpp:65)
+==10104==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==10104==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+(10103|92872144) server - event loop finished
+==10104==
+==10104== Thread 1:
+==10104==
+==10104== 16 bytes in 1 blocks are still reachable in loss record 1 of 10
+==10104==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10104==    by 0x503638B: ACE_Log_Msg_Manager::init_backend(unsigned long const*) (Log_Msg.cpp:192)
+==10104==    by 0x5036442: ACE_Log_Msg_Manager::get_lock() (Log_Msg.cpp:219)
+==10104==    by 0x50369EA: ACE_Log_Msg::~ACE_Log_Msg() (Log_Msg.cpp:709)
+==10104==    by 0x5037587: ACE_Log_Msg::close() (Log_Msg.cpp:265)
+==10104==    by 0x5045E43: ACE_Object_Manager::fini() (Object_Manager.cpp:642)
+==10104==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==10104==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==10104==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==10104==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10104==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10104==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==10104==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==10104==
+==10104==
+==10104== 32 bytes in 1 blocks are still reachable in loss record 2 of 10
+==10104==    at 0x4A04B32: calloc (vg_replace_malloc.c:279)
+==10104==    by 0x3C7400154A: _dlerror_run (in /lib64/libdl-2.5.so)
+==10104==    by 0x3C74000EF0: dlopen@@GLIBC_2.2.5 (in /lib64/libdl-2.5.so)
+==10104==    by 0x502B6E2: ACE_DLL_Handle::open(char const*, int, void*) (OS_NS_dlfcn.inl:135)
+==10104==    by 0x502BB3C: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==10104==    by 0x4FF190A: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==10104==    by 0x4FF2AD5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==10104==    by 0x4FF2BDD: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==10104==    by 0x4FF34BC: ACE_Service_Type_Factory::make_service_type(ACE_Service_Gestalt*) const (Parse_Node.cpp:796)
+==10104==    by 0x4FFA1AE: ACE_Service_Gestalt::initialize(ACE_Service_Type_Factory const*, char const*) (Service_Gestalt.cpp:583)
+==10104==    by 0x4FF32ED: ACE_Dynamic_Node::apply(ACE_Service_Gestalt*, int&) (Parse_Node.cpp:263)
+==10104==    by 0x4FFEFE4: ace_yyparse(void*) (Svc_Conf_y.cpp:1134)
+==10104==    by 0x4FF7890: ACE_Service_Gestalt::process_directives_i(ACE_Svc_Conf_Param*) (Service_Gestalt.cpp:825)
+==10104==    by 0x4FFA384: ACE_Service_Gestalt::process_directive(char const*) (Service_Gestalt.cpp:960)
+==10104==    by 0x4CFC7A9: TAO::ORB::open_services(ACE_Service_Gestalt*, int&, char**) (Service_Config.inl:142)
+==10104==    by 0x4CC942A: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1317)
+==10104==    by 0x403907: main (client.cpp:79)
+==10104==
+==10104==
+==10104== 48 bytes in 1 blocks are still reachable in loss record 3 of 10
+==10104==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10104==    by 0x5036420: ACE_Log_Msg_Manager::get_lock() (Log_Msg.cpp:214)
+==10104==    by 0x50369EA: ACE_Log_Msg::~ACE_Log_Msg() (Log_Msg.cpp:709)
+==10104==    by 0x5037587: ACE_Log_Msg::close() (Log_Msg.cpp:265)
+==10104==    by 0x5045E43: ACE_Object_Manager::fini() (Object_Manager.cpp:642)
+==10104==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==10104==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==10104==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==10104==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10104==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10104==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==10104==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==10104==
+==10104==
+==10104== 72 bytes in 1 blocks are still reachable in loss record 4 of 10
+==10104==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10104==    by 0x4D0B295: TAO_TSS_Singleton<TAO_TSS_Resources, ACE_Thread_Mutex>::instance() (TAO_Singleton.cpp:168)
+==10104==    by 0x4CCB608: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==10104==    by 0x4CB7387: TAO_Leader_Follower::~TAO_Leader_Follower() (Leader_Follower.cpp:37)
+==10104==    by 0x4D0099F: TAO_Thread_Lane_Resources::finalize() (Thread_Lane_Resources.cpp:416)
+==10104==    by 0x4CD071E: TAO_ORB_Core::fini() (ORB_Core.cpp:1391)
+==10104==    by 0x4CD803C: TAO_Singleton<TAO::ORB_Table, ACE_Thread_Mutex>::~TAO_Singleton() (ORB_Core.inl:29)
+==10104==    by 0x4CD7F9E: TAO_Singleton<TAO::ORB_Table, ACE_Thread_Mutex>::cleanup(void*) (TAO_Singleton.cpp:107)
+==10104==    by 0x501DB35: ACE_OS_Exit_Info::call_hooks() (Cleanup.cpp:183)
+==10104==    by 0x4CFF87B: TAO_Singleton_Manager::fini() (TAO_Singleton_Manager.cpp:232)
+==10104==    by 0x501DAF8: ACE_OS_Exit_Info::call_hooks() (Cleanup.cpp:188)
+==10104==    by 0x5045D33: ACE_Object_Manager::fini() (Object_Manager.cpp:609)
+==10104==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==10104==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==10104==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==10104==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10104==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10104==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==10104==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==10104==
+==10104==
+==10104== 288 bytes in 1 blocks are still reachable in loss record 5 of 10
+==10104==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10104==    by 0x4D0AF86: ACE_TSS<TAO_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==10104==    by 0x4D0B0C2: ACE_TSS<TAO_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==10104==    by 0x4CCB608: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==10104==    by 0x4CB7387: TAO_Leader_Follower::~TAO_Leader_Follower() (Leader_Follower.cpp:37)
+==10104==    by 0x4D0099F: TAO_Thread_Lane_Resources::finalize() (Thread_Lane_Resources.cpp:416)
+==10104==    by 0x4CD071E: TAO_ORB_Core::fini() (ORB_Core.cpp:1391)
+==10104==    by 0x4CD803C: TAO_Singleton<TAO::ORB_Table, ACE_Thread_Mutex>::~TAO_Singleton() (ORB_Core.inl:29)
+==10104==    by 0x4CD7F9E: TAO_Singleton<TAO::ORB_Table, ACE_Thread_Mutex>::cleanup(void*) (TAO_Singleton.cpp:107)
+==10104==    by 0x501DB35: ACE_OS_Exit_Info::call_hooks() (Cleanup.cpp:183)
+==10104==    by 0x4CFF87B: TAO_Singleton_Manager::fini() (TAO_Singleton_Manager.cpp:232)
+==10104==    by 0x501DAF8: ACE_OS_Exit_Info::call_hooks() (Cleanup.cpp:188)
+==10104==    by 0x5045D33: ACE_Object_Manager::fini() (Object_Manager.cpp:609)
+==10104==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==10104==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==10104==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==10104==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10104==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10104==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==10104==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==10104==
+==10104==
+==10104== 288 bytes in 1 blocks are definitely lost in loss record 6 of 10
+==10104==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10104==    by 0x4D0AF86: ACE_TSS<TAO_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==10104==    by 0x4D0B0C2: ACE_TSS<TAO_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==10104==    by 0x4CCB608: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==10104==    by 0x4CB6949: TAO_Leader_Follower::reactor() (Leader_Follower.cpp:135)
+==10104==    by 0x4CD569A: TAO_ORB_Core::init(int&, char**) (ORB_Core.cpp:1144)
+==10104==    by 0x4CC955F: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1350)
+==10104==    by 0x403907: main (client.cpp:79)
+==10104==
+==10104==
+==10104== 2,048 bytes in 1 blocks are still reachable in loss record 7 of 10
+==10104==    at 0x4A0590B: realloc (vg_replace_malloc.c:306)
+==10104==    by 0x3C74406D19: pthread_create@@GLIBC_2.2.5 (in /lib64/libpthread-2.5.so)
+==10104==    by 0x50497E3: ACE_OS::thr_create(void* (*)(void*), void*, long, unsigned long*, unsigned long*, long, void*, unsigned long, ACE_Base_Thread_Adapter*) (OS_NS_Thread.cpp:4274)
+==10104==    by 0x5078BC9: ACE_Thread_Manager::spawn_i(void* (*)(void*), void*, long, unsigned long*, unsigned long*, long, int, void*, unsigned long, ACE_Task_Base*) (Thread.inl:97)
+==10104==    by 0x507AE10: ACE_Thread_Manager::spawn_n(unsigned long, void* (*)(void*), void*, long, long, int, ACE_Task_Base*, unsigned long*, void**, unsigned long*) (Thread_Manager.cpp:739)
+==10104==    by 0x5076904: ACE_Task_Base::activate(long, int, int, long, int, ACE_Task_Base*, unsigned long*, void**, unsigned long*, unsigned long*) (Task.cpp:174)
+==10104==    by 0x403A48: main (client.cpp:95)
+==10104==
+==10104==
+==10104== 3,240 bytes in 45 blocks are indirectly lost in loss record 8 of 10
+==10104==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10104==    by 0x4FF7C2B: ACE_Service_Gestalt::init_i() (Service_Gestalt.cpp:269)
+==10104==    by 0x4FF7CFC: ACE_Service_Gestalt::ACE_Service_Gestalt(unsigned long, bool, bool) (Service_Gestalt.cpp:246)
+==10104==    by 0x4FF6D48: ACE_TSS<ACE_Service_Gestalt>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==10104==    by 0x4FF21A2: ACE_TSS<ACE_Service_Gestalt>::ts_get() const (TSS_T.cpp:219)
+==10104==    by 0x4FF698B: ACE_Service_Config_Guard::ACE_Service_Config_Guard(ACE_Service_Gestalt*) (TSS_T.cpp:53)
+==10104==    by 0x4CB08D2: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:61)
+==10104==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==10104==    by 0x40429E: test::test_method() (testC.cpp:130)
+==10104==    by 0x40367C: Client::svc() (client.cpp:65)
+==10104==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==10104==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+==10104==    by 0x3C744061B4: start_thread (in /lib64/libpthread-2.5.so)
+==10104==    by 0x3C738CD39C: clone (in /lib64/libc-2.5.so)
+==10104==
+==10104==
+==10104== 375,840 (3,960 direct, 371,880 indirect) bytes in 45 blocks are definitely lost in loss record 9 of 10
+==10104==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10104==    by 0x4FF6D26: ACE_TSS<ACE_Service_Gestalt>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==10104==    by 0x4FF21A2: ACE_TSS<ACE_Service_Gestalt>::ts_get() const (TSS_T.cpp:219)
+==10104==    by 0x4FF698B: ACE_Service_Config_Guard::ACE_Service_Config_Guard(ACE_Service_Gestalt*) (TSS_T.cpp:53)
+==10104==    by 0x4CB08D2: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:61)
+==10104==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==10104==    by 0x40429E: test::test_method() (testC.cpp:130)
+==10104==    by 0x40367C: Client::svc() (client.cpp:65)
+==10104==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==10104==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+==10104==    by 0x3C744061B4: start_thread (in /lib64/libpthread-2.5.so)
+==10104==    by 0x3C738CD39C: clone (in /lib64/libc-2.5.so)
+==10104==
+==10104==
+==10104== 368,640 bytes in 45 blocks are indirectly lost in loss record 10 of 10
+==10104==    at 0x4A055F6: operator new[](unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:211)
+==10104==    by 0x4FFC1C7: ACE_Service_Repository::open(unsigned long) (Service_Repository.cpp:114)
+==10104==    by 0x4FFC240: ACE_Service_Repository::ACE_Service_Repository(unsigned long) (Service_Repository.cpp:128)
+==10104==    by 0x4FF7C3F: ACE_Service_Gestalt::init_i() (Service_Gestalt.cpp:269)
+==10104==    by 0x4FF7CFC: ACE_Service_Gestalt::ACE_Service_Gestalt(unsigned long, bool, bool) (Service_Gestalt.cpp:246)
+==10104==    by 0x4FF6D48: ACE_TSS<ACE_Service_Gestalt>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==10104==    by 0x4FF21A2: ACE_TSS<ACE_Service_Gestalt>::ts_get() const (TSS_T.cpp:219)
+==10104==    by 0x4FF698B: ACE_Service_Config_Guard::ACE_Service_Config_Guard(ACE_Service_Gestalt*) (TSS_T.cpp:53)
+==10104==    by 0x4CB08D2: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:61)
+==10104==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==10104==    by 0x40429E: test::test_method() (testC.cpp:130)
+==10104==    by 0x40367C: Client::svc() (client.cpp:65)
+==10104==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==10104==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+==10104==    by 0x3C744061B4: start_thread (in /lib64/libpthread-2.5.so)
+==10104==    by 0x3C738CD39C: clone (in /lib64/libc-2.5.so)
+==10103==
+==10103==
+==10103== 1 bytes in 1 blocks are still reachable in loss record 1 of 9
+==10103==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10103==    by 0x55C9476: ACE_TSS<ACE_Dynamic>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==10103==    by 0x55C9772: ACE_TSS<ACE_Dynamic>::ts_get() const (TSS_T.cpp:219)
+==10103==    by 0x52412F1: TAO_Creation_Strategy<TAO_IIOP_Connection_Handler>::make_svc_handler(TAO_IIOP_Connection_Handler*&) (Svc_Handler.cpp:72)
+==10103==    by 0x52400E0: ACE_Acceptor<TAO_IIOP_Connection_Handler, ACE_SOCK_Acceptor>::handle_input(int) (Acceptor.cpp:383)
+==10103==    by 0x561B9A1: ACE_TP_Reactor::dispatch_socket_event(ACE_EH_Dispatch_Info&) (TP_Reactor.cpp:591)
+==10103==    by 0x561C291: ACE_TP_Reactor::handle_socket_events(int&, ACE_TP_Token_Guard&) (TP_Reactor.cpp:460)
+==10103==    by 0x561C39F: ACE_TP_Reactor::dispatch_i(ACE_Time_Value*, ACE_TP_Token_Guard&) (TP_Reactor.cpp:250)
+==10103==    by 0x561C475: ACE_TP_Reactor::handle_events(ACE_Time_Value*) (TP_Reactor.cpp:174)
+==10103==    by 0x526A426: TAO_ORB_Core::run(ACE_Time_Value*, int) (Reactor.inl:188)
+==10103==    by 0x405327: main (server.cpp:89)
+==10103==
+==10103==
+==10103== 16 bytes in 1 blocks are still reachable in loss record 2 of 9
+==10103==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10103==    by 0x55D338B: ACE_Log_Msg_Manager::init_backend(unsigned long const*) (Log_Msg.cpp:192)
+==10103==    by 0x55D3442: ACE_Log_Msg_Manager::get_lock() (Log_Msg.cpp:219)
+==10103==    by 0x55D39EA: ACE_Log_Msg::~ACE_Log_Msg() (Log_Msg.cpp:709)
+==10103==    by 0x55D4587: ACE_Log_Msg::close() (Log_Msg.cpp:265)
+==10103==    by 0x55E2E43: ACE_Object_Manager::fini() (Object_Manager.cpp:642)
+==10103==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==10103==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==10103==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==10103==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10103==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10103==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==10103==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==10103==
+==10103==
+==10103== 32 bytes in 1 blocks are still reachable in loss record 3 of 9
+==10103==    at 0x4A04B32: calloc (vg_replace_malloc.c:279)
+==10103==    by 0x3C7400154A: _dlerror_run (in /lib64/libdl-2.5.so)
+==10103==    by 0x3C74000EF0: dlopen@@GLIBC_2.2.5 (in /lib64/libdl-2.5.so)
+==10103==    by 0x55C86E2: ACE_DLL_Handle::open(char const*, int, void*) (OS_NS_dlfcn.inl:135)
+==10103==    by 0x55C8B3C: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==10103==    by 0x558E90A: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==10103==    by 0x558FAD5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==10103==    by 0x558FBDD: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==10103==    by 0x55904BC: ACE_Service_Type_Factory::make_service_type(ACE_Service_Gestalt*) const (Parse_Node.cpp:796)
+==10103==    by 0x55971AE: ACE_Service_Gestalt::initialize(ACE_Service_Type_Factory const*, char const*) (Service_Gestalt.cpp:583)
+==10103==    by 0x55902ED: ACE_Dynamic_Node::apply(ACE_Service_Gestalt*, int&) (Parse_Node.cpp:263)
+==10103==    by 0x559BFE4: ace_yyparse(void*) (Svc_Conf_y.cpp:1134)
+==10103==    by 0x5594890: ACE_Service_Gestalt::process_directives_i(ACE_Svc_Conf_Param*) (Service_Gestalt.cpp:825)
+==10103==    by 0x5597384: ACE_Service_Gestalt::process_directive(char const*) (Service_Gestalt.cpp:960)
+==10103==    by 0x529A7A9: TAO::ORB::open_services(ACE_Service_Gestalt*, int&, char**) (Service_Config.inl:142)
+==10103==    by 0x526742A: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1317)
+==10103==    by 0x405174: main (server.cpp:41)
+==10103==
+==10103==
+==10103== 39 bytes in 2 blocks are still reachable in loss record 4 of 9
+==10103==    at 0x4A055F6: operator new[](unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:211)
+==10103==    by 0x55D9631: ACE_New_Allocator::malloc(unsigned long) (Malloc_Allocator.cpp:118)
+==10103==    by 0x4C92D3F: ACE_String_Base<char>::set(char const*, unsigned long, bool) (String_Base.cpp:138)
+==10103==    by 0x4C8E3EA: TAO_POA_Static_Resources::TAO_POA_Static_Resources() (String_Base.cpp:347)
+==10103==    by 0x4C8E4B9: TAO_POA_Static_Resources::instance() (Root_POA.cpp:2657)
+==10103==    by 0x4C8E535: __static_initialization_and_destruction_0(int, int) (Root_POA.cpp:2644)
+==10103==    by 0x4CC3FB5: (within /home/build/ACE/gcc41/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.1)
+==10103==    by 0x4C73042: (within /home/build/ACE/gcc41/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.1)
+==10103==
+==10103==
+==10103== 48 bytes in 1 blocks are still reachable in loss record 5 of 9
+==10103==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10103==    by 0x55D3420: ACE_Log_Msg_Manager::get_lock() (Log_Msg.cpp:214)
+==10103==    by 0x55D39EA: ACE_Log_Msg::~ACE_Log_Msg() (Log_Msg.cpp:709)
+==10103==    by 0x55D4587: ACE_Log_Msg::close() (Log_Msg.cpp:265)
+==10103==    by 0x55E2E43: ACE_Object_Manager::fini() (Object_Manager.cpp:642)
+==10103==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==10103==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==10103==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==10103==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10103==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==10103==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==10103==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==10103==
+==10103==
+==10103== 64 bytes in 1 blocks are still reachable in loss record 6 of 9
+==10103==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10103==    by 0x52745E6: ACE_TSS<TAO_ORB_Core_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==10103==    by 0x52557B2: ACE_TSS<TAO_ORB_Core_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==10103==    by 0x5256604: TAO_LF_Strategy_Complete::set_event_loop_thread(ACE_Time_Value*, TAO_Leader_Follower&) (TSS_T.cpp:53)
+==10103==    by 0x526A3A2: TAO_ORB_Core::run(ACE_Time_Value*, int) (LF_Event_Loop_Thread_Helper.inl:16)
+==10103==    by 0x405327: main (server.cpp:89)
+==10103==
+==10103==
+==10103== 80 bytes in 1 blocks are still reachable in loss record 7 of 9
+==10103==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10103==    by 0x4C8E4A9: TAO_POA_Static_Resources::instance() (Root_POA.cpp:2657)
+==10103==    by 0x4C8E535: __static_initialization_and_destruction_0(int, int) (Root_POA.cpp:2644)
+==10103==    by 0x4CC3FB5: (within /home/build/ACE/gcc41/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.1)
+==10103==    by 0x4C73042: (within /home/build/ACE/gcc41/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.1)
+==10103==
+==10103==
+==10103== 192 bytes in 1 blocks are still reachable in loss record 8 of 9
+==10103==    at 0x4A05809: malloc (vg_replace_malloc.c:149)
+==10103==    by 0x3C73410731: add_to_global (in /lib64/ld-2.5.so)
+==10103==    by 0x3C73410B75: dl_open_worker (in /lib64/ld-2.5.so)
+==10103==    by 0x3C7340CC35: _dl_catch_error (in /lib64/ld-2.5.so)
+==10103==    by 0x3C7341036B: _dl_open (in /lib64/ld-2.5.so)
+==10103==    by 0x3C74000F79: dlopen_doit (in /lib64/libdl-2.5.so)
+==10103==    by 0x3C7340CC35: _dl_catch_error (in /lib64/ld-2.5.so)
+==10103==    by 0x3C740014EC: _dlerror_run (in /lib64/libdl-2.5.so)
+==10103==    by 0x3C74000EF0: dlopen@@GLIBC_2.2.5 (in /lib64/libdl-2.5.so)
+==10103==    by 0x55C86E2: ACE_DLL_Handle::open(char const*, int, void*) (OS_NS_dlfcn.inl:135)
+==10103==    by 0x55C8B3C: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==10103==    by 0x558E90A: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==10103==    by 0x558FAD5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==10103==    by 0x558FBDD: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==10103==    by 0x55904BC: ACE_Service_Type_Factory::make_service_type(ACE_Service_Gestalt*) const (Parse_Node.cpp:796)
+==10103==    by 0x55971AE: ACE_Service_Gestalt::initialize(ACE_Service_Type_Factory const*, char const*) (Service_Gestalt.cpp:583)
+==10103==    by 0x55902ED: ACE_Dynamic_Node::apply(ACE_Service_Gestalt*, int&) (Parse_Node.cpp:263)
+==10103==    by 0x559BFE4: ace_yyparse(void*) (Svc_Conf_y.cpp:1134)
+==10103==    by 0x5594890: ACE_Service_Gestalt::process_directives_i(ACE_Svc_Conf_Param*) (Service_Gestalt.cpp:825)
+==10103==    by 0x5597384: ACE_Service_Gestalt::process_directive(char const*) (Service_Gestalt.cpp:960)
+==10103==    by 0x529A7A9: TAO::ORB::open_services(ACE_Service_Gestalt*, int&, char**) (Service_Config.inl:142)
+==10103==    by 0x526742A: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1317)
+==10103==    by 0x405174: main (server.cpp:41)
+==10103==
+==10103==
+==10103== 288 bytes in 1 blocks are still reachable in loss record 9 of 9
+==10103==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==10103==    by 0x52A8F86: ACE_TSS<TAO_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==10103==    by 0x52A90C2: ACE_TSS<TAO_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==10103==    by 0x5269608: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==10103==    by 0x5254949: TAO_Leader_Follower::reactor() (Leader_Follower.cpp:135)
+==10103==    by 0x527369A: TAO_ORB_Core::init(int&, char**) (ORB_Core.cpp:1144)
+==10103==    by 0x526755F: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1350)
+==10103==    by 0x405174: main (server.cpp:41)
+[build@shelob Bug_3108_Regression]$
+
