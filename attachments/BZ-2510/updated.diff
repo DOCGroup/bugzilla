@@ -1,0 +1,145 @@
+Index: PICurrent.cpp
+===================================================================
+--- PICurrent.cpp	(revision 75991)
++++ PICurrent.cpp	(working copy)
+@@ -40,14 +40,7 @@
+   this->check_validity (identifier ACE_ENV_ARG_PARAMETER);
+   ACE_CHECK_RETURN (0);
+ 
+-  PICurrent_Impl *impl = this->tsc ();
+-
+-  if (impl == 0)
+-    ACE_THROW_RETURN (CORBA::BAD_INV_ORDER (CORBA::OMGVMCID | 14,
+-                                            CORBA::COMPLETED_NO),
+-                      0);
+-
+-  return impl->get_slot (identifier ACE_ENV_ARG_PARAMETER);
++  return this->tsc ()->get_slot (identifier ACE_ENV_ARG_PARAMETER);
+ }
+ 
+ void
+@@ -60,16 +53,15 @@
+   this->check_validity (identifier ACE_ENV_ARG_PARAMETER);
+   ACE_CHECK;
+ 
+-  PICurrent_Impl *impl = this->tsc ();
+-
+-  if (impl == 0)
+-    ACE_THROW (CORBA::BAD_INV_ORDER (CORBA::OMGVMCID | 14,
+-                                     CORBA::COMPLETED_NO));
+-
+-  impl->set_slot (identifier, data ACE_ENV_ARG_PARAMETER);
++  this->tsc ()->set_slot (identifier, data ACE_ENV_ARG_PARAMETER);
+   ACE_CHECK;
+ }
+ 
++void TAO::PICurrent::cleanup(void *object, void *)
++{
++  delete static_cast<TAO::PICurrent_Impl *> (object);
++}
++
+ TAO::PICurrent_Impl *
+ TAO::PICurrent::tsc (void)
+ {
+@@ -77,6 +69,19 @@
+     static_cast<TAO::PICurrent_Impl *> (
+       this->orb_core_.get_tss_resource (this->tss_slot_));
+ 
++  if (!impl)
++  {
++    ACE_NEW_THROW_EX (impl,
++                      TAO::PICurrent_Impl,
++                      CORBA::NO_MEMORY (
++                        CORBA::SystemException::_tao_minor_code (
++                          TAO::VMCID,
++                          ENOMEM),
++                        CORBA::COMPLETED_NO));
++
++    this->orb_core_.set_tss_resource (this->tss_slot_, impl);
++  }
++
+   return impl;
+ }
+ 
+@@ -88,6 +93,13 @@
+   // attributes are read only.
+   if (identifier >= this->slot_count_)
+     ACE_THROW (PortableInterceptor::InvalidSlot ());
++
++  // If the slot_count is zero, no initialization has been done (if there are
++  // no slots, then PICurrent_impl object is not created as there is no data
++  // to copy).
++  if (!this->slot_count_)
++    ACE_THROW (CORBA::BAD_INV_ORDER (CORBA::OMGVMCID | 14,
++                                     CORBA::COMPLETED_NO));
+ }
+ 
+ CORBA::ORB_ptr
+@@ -96,29 +108,15 @@
+   return CORBA::ORB::_duplicate (this->orb_core_.orb ());
+ }
+ 
+-int
++void
+ TAO::PICurrent::initialize (PortableInterceptor::SlotId sc
+                             ACE_ENV_ARG_DECL_NOT_USED)
+ {
+-  this->slot_count_ = sc;
+-
+-  if (this->tsc () == 0 && tss_slot_ == 0)
+-    {
+-      TAO::PICurrent_Impl *impl = 0;
+-      ACE_NEW_RETURN (impl,
+-                      TAO::PICurrent_Impl,
+-                      0);
+-
+-      const int result = this->orb_core_.add_tss_cleanup_func (0,
+-                                                               tss_slot_);
+-
+-      if (result != 0)
+-        return result;
+-
+-      this->orb_core_.set_tss_resource (tss_slot_, impl);
+-    }
+-
+-  return 0;
++  if (!this->slot_count_)
++  {
++    orb_core_.add_tss_cleanup_func (cleanup, this->tss_slot_);
++    this->slot_count_ = sc;
++  }
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: PICurrent.h
+===================================================================
+--- PICurrent.h	(revision 75991)
++++ PICurrent.h	(working copy)
+@@ -101,8 +101,11 @@
+                          ACE_ENV_ARG_DECL);
+ 
+     /// Initialize the PICurrent object.
+-    int initialize (PortableInterceptor::SlotId sc ACE_ENV_ARG_DECL);
++    void initialize (PortableInterceptor::SlotId sc ACE_ENV_ARG_DECL);
+ 
++	  /// Clean-up the memory allocated to any PICurrent_impl created
++    static void cleanup(void *object, void *unused_param);
++
+   protected:
+ 
+     /// Destructor
+@@ -127,11 +130,13 @@
+     TAO_ORB_Core &orb_core_;
+ 
+     /// TSS slot assigned to this object.
++    /// Chosen (constant) by constructor but the address of
++    /// this is needed for the registered clean up function.
+     size_t tss_slot_;
+ 
+     /// The number of allocated slots.
++    /// (0= uninitialized and PICurrent is not used).
+     PortableInterceptor::SlotId slot_count_;
+-
+   };
+ }
+ 
