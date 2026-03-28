@@ -1,0 +1,15 @@
+--- Key_List.cpp.orig2	2005-04-29 10:37:45.556225200 -0400
++++ Key_List.cpp	2005-04-29 10:38:36.758694800 -0400
+@@ -947,8 +947,10 @@
+   ACE_OS::printf ("while (last >= first)\n");
+   ACE_OS::printf ("\t{\n");
+   ACE_OS::printf ("\t   middle = (last + first) / 2;\n");
+-  ACE_OS::printf ("\t   if (strcmp (wordlist[middle].opname_, str) == 0)\n      break;\n");
+-  ACE_OS::printf ("\t   if (strcmp (wordlist[middle].opname_, str) < 0)\n      first = middle + 1;\n");
++  ACE_OS::printf ("\t   if (strcmp (wordlist[middle].%s, str) == 0)\n      break;\n",
++		  option.key_name());
++  ACE_OS::printf ("\t   if (strcmp (wordlist[middle].%s, str) < 0)\n      first = middle + 1;\n",
++		  option.key_name());
+   ACE_OS::printf ("\t   else last = middle - 1;\n");
+   ACE_OS::printf ("\t}\n");
+   ACE_OS::printf ("if (last < first)\n  return 0;\n");
