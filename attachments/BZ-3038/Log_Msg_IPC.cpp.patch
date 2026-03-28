@@ -1,0 +1,14 @@
+--- /ACE_wrappers/ace/Log_Msg_IPC.cpp	2007-05-23 17:45:14.000000000 -0700
++++ /ACE_wrappers/ace/Log_Msg_IPC.cpp	2007-08-12 15:57:48.171875000 -0700
+@@ -62,6 +62,11 @@
+   ACE_OutputCDR payload (max_payload_size);
+   payload << log_record;
+ 
++  // The message block chain (if it consists of more than one block) in payload
++  //  needs to be merged into one block before passing to the IPC.
++  int ret = payload.consolidate();
++  if (ret) return ret;
++
+   // Get the number of bytes used by the CDR stream. If it becomes desireable
+   // to support payloads more than 4GB, this field will need to be changed
+   // to a 64-bit value.
