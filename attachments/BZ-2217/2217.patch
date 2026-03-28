@@ -1,0 +1,150 @@
+Only in ACE_wrappers/ace: Debug
+diff -u ACE_wrappers.orig/ace/Pagefile_Memory_Pool.cpp ACE_wrappers/ace/Pagefile_Memory_Pool.cpp
+--- ACE_wrappers.orig/ace/Pagefile_Memory_Pool.cpp	2004-10-18 19:15:53.000000000 -0700
++++ ACE_wrappers/ace/Pagefile_Memory_Pool.cpp	2005-08-26 11:38:34.002740800 -0700
+@@ -134,18 +134,16 @@
+ {
+   // Map the shared memory and get information, if we created the
+   // shared memory.
+-  if (this->map (first_time) < 0)
++  if (this->map (first_time, 0, nbytes) < 0)
+     return 0;
+ 
+   if (first_time != 0)
+     // We created the shared memory. So we have to allocate the
+     // requested memory.
+-    return this->acquire (nbytes, rounded_bytes);
+-  else
+-    // We just mapped the memory and return the base address
+-    return (void *)((char *) this->local_cb_.mapped_base_
+-                    + ACE_Pagefile_Memory_Pool::round_to_page_size
+-                    ((int) sizeof (Control_Block)));
++    this->acquire (nbytes, rounded_bytes);
++
++  // We just mapped the memory and return the base address
++  return (void *)((char *) this->local_cb_.mapped_base_);
+ }
+ 
+ int
+@@ -218,7 +216,8 @@
+ 
+ int
+ ACE_Pagefile_Memory_Pool::map (int &first_time,
+-                               size_t append_bytes)
++                               size_t append_bytes,
++			       size_t init_bytes)
+ {
+   size_t map_size;
+   void *map_addr;
+@@ -276,39 +275,44 @@
+     {
+       // Map a view to the shared memory.  Note: <MapViewOfFile[Ex]>
+       // does *not* commit the pages!
+-      this->shared_cb_ = (ACE_Pagefile_Memory_Pool::Control_Block *)
+-        ACE_MAP_FILE (this->object_handle_,
++      this->local_cb_.mapped_base_ = ACE_MAP_FILE (this->object_handle_,
+                       FILE_MAP_WRITE,
+                       0,
+                       0,
+                       this->local_cb_.sh_.max_size_,
+                       this->local_cb_.req_base_);
+-      if (this->shared_cb_ == 0)
++      if (this->local_cb_.mapped_base_ == 0)
+         return -1;
+ 
+       // There was no previous mapping, so we map the first chunk and
+       // initialize the shared pool statistics.
+       if (first_time)
+         {
+-          // 1st block is used to keep shared memory statistics.
++          // 1st block is used to keep Malloc control block
++	  // 2nd block is used to keep shared memory statistics.
+           map_size =
+             ACE_Pagefile_Memory_Pool::round_to_chunk_size
+             (ACE_Pagefile_Memory_Pool::round_to_page_size
+-             ((int) sizeof(Control_Block))
++             ((int) sizeof(init_bytes))
++             + ACE_Pagefile_Memory_Pool::round_to_page_size
++                ((int) sizeof(Control_Block))
+              + append_bytes);
+ 
+-          if (::VirtualAlloc ((void *) this->shared_cb_,
++          if (::VirtualAlloc (this->local_cb_.mapped_base_,
+                               map_size,
+                               MEM_COMMIT,
+                               PAGE_READWRITE) == 0)
+             return -1;
+ 
++	  this->shared_cb_ = (Control_Block*)((char*)this->local_cb_.mapped_base_ 
++	                      + ACE_Pagefile_Memory_Pool::round_to_page_size
++                                  ((int) sizeof(init_bytes)));
+           this->shared_cb_->req_base_ = 0;
+           this->shared_cb_->mapped_base_ = 0;
+-          this->local_cb_.mapped_base_ = this->shared_cb_;
+           this->local_cb_.sh_.mapped_size_ = map_size;
+           this->local_cb_.sh_.free_offset_ =
+-            round_to_page_size ((int) sizeof (Control_Block));
++            round_to_page_size ((int) sizeof (init_bytes))
++            + round_to_page_size ((int) sizeof (Control_Block));
+           this->local_cb_.sh_.free_size_ =
+             this->local_cb_.sh_.mapped_size_ -
+             this->local_cb_.sh_.free_offset_;
+@@ -319,17 +323,23 @@
+       // base address of the pool to get the shared pool statistics.
+       else
+         {
+-          // 1st block is used to keep shared memory statistics.
++          // 1st block is used to keep Malloc control block
++	  // 2nd block is used to keep shared memory statistics.
+           map_size =
+             ACE_Pagefile_Memory_Pool::round_to_chunk_size
+-            ((int) sizeof (Control_Block));
++            (ACE_Pagefile_Memory_Pool::round_to_page_size
++             ((int) sizeof(init_bytes))
++            + (ACE_Pagefile_Memory_Pool::round_to_page_size
++             ((int) sizeof(Control_Block))));
+ 
+-          if (::VirtualAlloc ((void *) this->shared_cb_,
++          if (::VirtualAlloc (this->local_cb_.mapped_base_,
+                               map_size,
+                               MEM_COMMIT,
+                               PAGE_READWRITE) == 0)
+             return -1;
+-          this->local_cb_.mapped_base_ = this->shared_cb_;
++	  this->shared_cb_ = (Control_Block*)((char*)this->local_cb_.mapped_base_ 
++	                      + ACE_Pagefile_Memory_Pool::round_to_page_size
++                                  ((int) sizeof(init_bytes)));
+           this->local_cb_.sh_.mapped_size_ = map_size;
+         }
+     }
+@@ -346,7 +356,7 @@
+         + ACE_Pagefile_Memory_Pool::round_to_chunk_size
+         (append_bytes);
+ 
+-      map_addr = (void *)((char *) this->shared_cb_ +
++      map_addr = (void *)((char *) this->local_cb_.mapped_base_ +
+                           this->local_cb_.sh_.mapped_size_);
+ 
+       if (::VirtualAlloc (map_addr,
+Only in ACE_wrappers/ace: Pagefile_Memory_Pool.cpp.orig
+diff -u ACE_wrappers.orig/ace/Pagefile_Memory_Pool.h ACE_wrappers/ace/Pagefile_Memory_Pool.h
+--- ACE_wrappers.orig/ace/Pagefile_Memory_Pool.h	2004-10-11 23:43:26.000000000 -0700
++++ ACE_wrappers/ace/Pagefile_Memory_Pool.h	2005-08-25 17:07:04.458346800 -0700
+@@ -118,8 +118,11 @@
+    * Map portions or the entire pool into the local virtual address
+    * space.  To do this, we compute the new @c file_offset of the
+    * backing store and commit the memory.
++   *
++   * initBytes is space reserved at the beginning of the segment
++   * for any Malloc control block
+    */
+-  int map (int &firstTime, size_t appendBytes = 0);
++  int map (int &firstTime, size_t appendBytes = 0, size_t initBytes = 0);
+ 
+   /// Release the mapping.
+   int unmap (void);
+Common subdirectories: ACE_wrappers.orig/ace/QoS and ACE_wrappers/ace/QoS
+Only in ACE_wrappers/ace: Release
+Common subdirectories: ACE_wrappers.orig/ace/SSL and ACE_wrappers/ace/SSL
+Only in ACE_wrappers/ace: config.h
+Common subdirectories: ACE_wrappers.orig/ace/os_include and ACE_wrappers/ace/os_include
