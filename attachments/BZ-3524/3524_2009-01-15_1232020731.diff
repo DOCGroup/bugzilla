@@ -1,0 +1,1531 @@
+Index: tao/tao.mpc
+===================================================================
+--- tao/tao.mpc	(revision 83944)
++++ tao/tao.mpc	(working copy)
+@@ -276,6 +276,7 @@
+     BooleanSeqS.h
+     Bounded_Array_Allocation_Traits_T.h
+     Bounded_Array_Sequence_T.h
++    Bounded_BD_String_Sequence_T.h
+     Bounded_Basic_String_Sequence_T.h
+     Bounded_Object_Reference_Sequence_T.h
+     Bounded_Reference_Allocation_Traits_T.h
+@@ -546,6 +547,7 @@
+     ULongSeqS.h
+     Unbounded_Array_Allocation_Traits_T.h
+     Unbounded_Array_Sequence_T.h
++    Unbounded_BD_String_Sequence_T.h
+     Unbounded_Basic_String_Sequence_T.h
+     Unbounded_Object_Reference_Sequence_T.h
+     Unbounded_Octet_Sequence_T.h
+Index: tao/GIOP_Message_Base.cpp
+===================================================================
+--- tao/GIOP_Message_Base.cpp	(revision 83944)
++++ tao/GIOP_Message_Base.cpp	(working copy)
+@@ -775,6 +775,10 @@
+       this->generate_reply_header (cdr, params);
+       x._tao_encode (cdr);
+     }
++  catch (const ::CORBA::BAD_PARAM&)
++    {
++      throw;
++    }
+   catch (const ::CORBA::Exception&)
+     {
+       // Now we know that while handling the error an other error
+Index: tao/PortableServer/BD_String_SArgument_T.cpp
+===================================================================
+--- tao/PortableServer/BD_String_SArgument_T.cpp	(revision 83944)
++++ tao/PortableServer/BD_String_SArgument_T.cpp	(working copy)
+@@ -19,8 +19,12 @@
+     TAO_InputCDR & cdr
+   )
+ {
+-  typedef typename S_var::s_traits::to_type to_type;
+-  return cdr >> to_type (this->x_.out (), BOUND);
++  const CORBA::Boolean demarshalled = cdr >> this->x_.out ();
++  if (this->x_.in () != 0 && ACE_OS::strlen (this->x_.in ()) > BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -51,8 +55,11 @@
+     TAO_OutputCDR & cdr
+   )
+ {
+-  typedef typename S_var::s_traits::from_type from_type;
+-  return cdr << from_type (this->x_.in (), BOUND);
++  if (this->x_.in () != 0 && ACE_OS::strlen (this->x_.in ()) > BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return cdr << this->x_.in ();
+ }
+ 
+ template<typename S_var,
+@@ -63,8 +70,12 @@
+     TAO_InputCDR & cdr
+   )
+ {
+-  typedef typename S_var::s_traits::to_type to_type;
+-  return cdr >> to_type (this->x_.out (), BOUND);
++  const CORBA::Boolean demarshalled = cdr >> this->x_.out ();
++  if (this->x_.in () != 0 && ACE_OS::strlen (this->x_.in ()) > BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -95,8 +106,11 @@
+     TAO_OutputCDR &cdr
+   )
+ {
+-  typedef typename S_var::s_traits::from_type from_type;
+-  return cdr << from_type (this->x_.in (), BOUND);
++  if (this->x_.in () != 0 && ACE_OS::strlen (this->x_.in ()) > BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return cdr << this->x_.in ();
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -127,8 +141,11 @@
+     TAO_OutputCDR & cdr
+   )
+ {
+-  typedef typename S_var::s_traits::from_type from_type;
+-  return cdr << from_type (this->x_.in (), BOUND);
++  if (this->x_.in () != 0 && ACE_OS::strlen (this->x_.in ()) > BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return cdr << this->x_.in ();
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+Index: tao/Bounded_Sequence_CDR_T.h
+===================================================================
+--- tao/Bounded_Sequence_CDR_T.h	(revision 83944)
++++ tao/Bounded_Sequence_CDR_T.h	(working copy)
+@@ -12,6 +12,7 @@
+  */
+ 
+ #include "tao/orbconf.h"
++#include "tao/SystemException.h"
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -326,6 +327,36 @@
+     return true;
+   }
+ 
++  template <typename stream, typename charT, CORBA::ULong MAX, CORBA::ULong BD_STR_MAX>
++  bool demarshal_sequence(stream & strm, TAO::bounded_bd_string_sequence <charT, MAX, BD_STR_MAX> & target) {
++    typedef typename TAO::bounded_bd_string_sequence <charT, MAX, BD_STR_MAX> sequence;
++    typedef typename sequence::element_traits::string_var string_var;
++    ::CORBA::ULong new_length = 0;
++    if (!(strm >> new_length)) {
++      return false;
++    }
++    if ((new_length > strm.length()) || (new_length > target.maximum ())) {
++      return false;
++    }
++    sequence tmp;
++    tmp.length(new_length);
++    for(CORBA::ULong i = 0; i < new_length; ++i) {
++      string_var string;
++      if (!(strm >> string.inout ())) {
++        return false;
++      }
++      else {
++        if (string.in () != 0 &&
++            ACE_OS::strlen (string.in ()) > tmp.bd_string_maximum ()) {
++          throw ::CORBA::BAD_PARAM ();
++        }
++        tmp[i] = string._retn ();
++      }
++    }
++    tmp.swap(target);
++    return true;
++  }
++
+   template <typename stream, typename object_t, typename object_t_var, CORBA::ULong MAX>
+   bool demarshal_sequence(stream & strm, TAO::bounded_object_reference_sequence<object_t, object_t_var, MAX> & target) {
+     typedef typename TAO::bounded_object_reference_sequence<object_t, object_t_var, MAX> sequence;
+@@ -497,6 +528,24 @@
+     return true;
+   }
+ 
++  template <typename stream, typename charT, CORBA::ULong MAX, CORBA::ULong BD_STR_MAX>
++  bool marshal_sequence(stream & strm, const TAO::bounded_bd_string_sequence <charT, MAX, BD_STR_MAX> & source) {
++    ::CORBA::ULong const length = source.length ();
++    if (!(strm << length)) {
++      return false;
++    }
++    for(CORBA::ULong i = 0; i < length; ++i) {
++      if (source[i].in () != 0 &&
++          ACE_OS::strlen (source[i]) > source.bd_string_maximum ()) {
++        throw ::CORBA::BAD_PARAM ();
++      }
++      if (!(strm << source[i])) {
++        return false;
++      }
++    }
++    return true;
++  }
++
+   template <typename stream, typename object_t, typename object_t_var, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_object_reference_sequence<object_t, object_t_var, MAX> & source) {
+     typedef typename TAO::bounded_object_reference_sequence<object_t, object_t_var, MAX>::object_type object_type;
+Index: tao/Unbounded_Sequence_CDR_T.h
+===================================================================
+--- tao/Unbounded_Sequence_CDR_T.h	(revision 83944)
++++ tao/Unbounded_Sequence_CDR_T.h	(working copy)
+@@ -13,6 +13,7 @@
+ 
+ #include "tao/orbconf.h"
+ #include "tao/CORBA_String.h"
++#include "tao/SystemException.h"
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -362,6 +363,36 @@
+     return true;
+   }
+ 
++  template <typename stream, typename charT, CORBA::ULong BD_STR_MAX>
++  bool demarshal_sequence(stream & strm, TAO::unbounded_bd_string_sequence <charT, BD_STR_MAX> & target) {
++    typedef TAO::unbounded_bd_string_sequence <charT, BD_STR_MAX> sequence;
++    typedef typename sequence::element_traits::string_var string_var;
++    ::CORBA::ULong new_length = 0;
++    if (!(strm >> new_length)) {
++      return false;
++    }
++    if (new_length > strm.length()) {
++      return false;
++    }
++    sequence tmp(new_length);
++    tmp.length(new_length);
++    for(CORBA::ULong i = 0; i < new_length; ++i) {
++      string_var string;
++      if (!(strm >> string.inout ())) {
++        return false;
++      }
++      else {
++        if (string.in () != 0 &&
++            ACE_OS::strlen (string.in ()) > tmp.bd_string_maximum ()) {
++          throw ::CORBA::BAD_PARAM ();
++        }
++        tmp[i] = string._retn ();
++      }
++    }
++    tmp.swap(target);
++    return true;
++  }
++
+   template <typename stream, typename object_t, typename object_t_var>
+   bool demarshal_sequence(stream & strm, TAO::unbounded_object_reference_sequence<object_t, object_t_var> & target) {
+     typedef TAO::unbounded_object_reference_sequence<object_t, object_t_var> sequence;
+@@ -547,6 +578,24 @@
+     return true;
+   }
+ 
++  template <typename stream, typename charT, CORBA::ULong BD_STR_MAX>
++  bool marshal_sequence(stream & strm, const TAO::unbounded_bd_string_sequence <charT, BD_STR_MAX> & source) {
++    ::CORBA::ULong const length = source.length ();
++    if (!(strm << length)) {
++      return false;
++    }
++    for(CORBA::ULong i = 0; i < length; ++i) {
++      if (source[i].in () != 0 &&
++          ACE_OS::strlen (source[i]) > source.bd_string_maximum ()) {
++        throw ::CORBA::BAD_PARAM ();
++      }
++      if (!(strm << source[i])) {
++        return false;
++      }
++    }
++    return true;
++  }
++
+   template <typename stream, typename object_t, typename object_t_var>
+   bool marshal_sequence(stream & strm, const TAO::unbounded_object_reference_sequence<object_t, object_t_var> & source) {
+     typedef typename TAO::unbounded_object_reference_sequence<object_t, object_t_var>::object_type objec_t;
+Index: tao/CDR.inl
+===================================================================
+--- tao/CDR.inl	(revision 83944)
++++ tao/CDR.inl	(working copy)
+@@ -275,6 +275,56 @@
+ 
+ // ****************************************************************
+ 
++ACE_INLINE
++TAO_OutputCDR::from_bounded_string::from_bounded_string (const ACE_CDR::Char *s,
++                                                         ACE_CDR::ULong b)
++  : val_ (const_cast<ACE_CDR::Char *> (s)),
++    bound_ (b)
++{
++}
++
++ACE_INLINE
++TAO_InputCDR::to_bounded_string::to_bounded_string (ACE_CDR::Char *&s,
++                                                    ACE_CDR::ULong b)
++  : val_ (s),
++    bound_ (b)
++{
++}
++
++ACE_INLINE
++TAO_InputCDR::to_bounded_string::to_bounded_string (const ACE_CDR::Char *&s,
++                                                    ACE_CDR::ULong b)
++  : val_ (const_cast<ACE_CDR::Char *&> (s)),
++    bound_ (b)
++{
++}
++
++ACE_INLINE
++TAO_OutputCDR::from_bounded_wstring::from_bounded_wstring (const ACE_CDR::WChar *ws,
++                                                           ACE_CDR::ULong b)
++  : val_ (const_cast<ACE_CDR::WChar *> (ws)),
++    bound_ (b)
++{
++}
++
++ACE_INLINE
++TAO_InputCDR::to_bounded_wstring::to_bounded_wstring (ACE_CDR::WChar *&ws,
++                                                      ACE_CDR::ULong b)
++  : val_ (ws),
++    bound_ (b)
++{
++}
++
++ACE_INLINE
++TAO_InputCDR::to_bounded_wstring::to_bounded_wstring (const ACE_CDR::WChar *&ws,
++                                                      ACE_CDR::ULong b)
++  : val_ (const_cast<ACE_CDR::WChar *&> (ws)),
++    bound_ (b)
++{
++}
++
++// ****************************************************************
++
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::Short x)
+ {
+@@ -376,6 +426,28 @@
+     && static_cast<ACE_OutputCDR &> (os) << x;
+ }
+ 
++ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
++                                      TAO_OutputCDR::from_bounded_string x)
++{
++  if (x.val_ != 0 &&
++      ACE_OS::strlen (x.val_) > x.bound_)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return os << x.val_;
++}
++
++ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
++                                      TAO_OutputCDR::from_bounded_wstring x)
++{
++  if (x.val_ != 0 &&
++      ACE_OS::strlen (x.val_) > x.bound_)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return os << x.val_;
++}
++
+ // ****************************************************************
+ 
+ ACE_INLINE CORBA::Boolean operator>> (TAO_InputCDR &is,
+@@ -444,4 +516,28 @@
+   return static_cast<ACE_InputCDR &> (is) >> x;
+ }
+ 
++ACE_INLINE CORBA::Boolean operator>> (TAO_InputCDR &is,
++                                      TAO_InputCDR::to_bounded_string x)
++{
++  const CORBA::Boolean marshal_flag = is >> x.val_;
++  if (marshal_flag && x.val_ != 0 &&
++      ACE_OS::strlen (x.val_) > x.bound_)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return marshal_flag;
++}
++
++ACE_INLINE CORBA::Boolean operator>> (TAO_InputCDR &is,
++                                      TAO_InputCDR::to_bounded_wstring x)
++{
++  const CORBA::Boolean marshal_flag = is >> x.val_;
++  if (marshal_flag && x.val_ != 0 &&
++      ACE_OS::strlen (x.val_) > x.bound_)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return marshal_flag;
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/Unbounded_BD_String_Sequence_T.h
+===================================================================
+--- tao/Unbounded_BD_String_Sequence_T.h	(revision 0)
++++ tao/Unbounded_BD_String_Sequence_T.h	(revision 0)
+@@ -0,0 +1,47 @@
++#ifndef guard_unbounded_bd_string_sequence_hpp
++#define guard_unbounded_bd_string_sequence_hpp
++/**
++ * @file
++ *
++ * @brief Implement unbounded sequences for bounded strings and wide-strings.
++ *
++ * $Id$
++ *
++ * @author Vladimir Zykov
++ */
++#include "tao/Unbounded_Basic_String_Sequence_T.h"
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++namespace TAO
++{
++template<typename charT, CORBA::ULong BD_STR_MAX>
++class unbounded_bd_string_sequence
++  : public unbounded_basic_string_sequence<charT>
++{
++public:
++  inline unbounded_bd_string_sequence()
++    : unbounded_basic_string_sequence<charT>()
++  {}
++
++  inline explicit unbounded_bd_string_sequence(CORBA::ULong maximum)
++    : unbounded_basic_string_sequence<charT>(maximum)
++  {}
++  inline unbounded_bd_string_sequence(
++      CORBA::ULong maximum,
++      CORBA::ULong length,
++      typename unbounded_basic_string_sequence<charT>::value_type * data,
++      CORBA::Boolean release)
++    : unbounded_basic_string_sequence<charT>(maximum, length, data, release)
++  {}
++
++  inline CORBA::ULong bd_string_maximum() const
++  {
++    return BD_STR_MAX;
++  }
++};
++} // namespace TAO
++
++TAO_END_VERSIONED_NAMESPACE_DECL
++
++#endif // guard_unbounded_bd_string_sequence_hpp
+
+Property changes on: tao/Unbounded_BD_String_Sequence_T.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: tao/BD_String_Argument_T.cpp
+===================================================================
+--- tao/BD_String_Argument_T.cpp	(revision 83944)
++++ tao/BD_String_Argument_T.cpp	(working copy)
+@@ -19,8 +19,11 @@
+     TAO_OutputCDR & cdr
+   )
+ {
+-  typedef typename S_var::s_traits::from_type from_type;
+-  return cdr << from_type (this->x_, BOUND);
++  if (this->x_ != 0 && ACE_OS::strlen (this->x_) > BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return cdr << this->x_;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -79,8 +82,11 @@
+     TAO_OutputCDR & cdr
+   )
+ {
+-  typedef typename S_var::s_traits::from_type from_type;
+-  return cdr << from_type (this->x_, BOUND);
++  if (this->x_ != 0 && ACE_OS::strlen (this->x_) > BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return cdr << this->x_;
+ }
+ 
+ template<typename S_var,
+@@ -91,9 +97,15 @@
+     TAO_InputCDR & cdr
+   )
+ {
+-  typedef typename S_var::s_traits::to_type to_type;
+-  delete [] this->x_;
+-  return cdr >> to_type (this->x_, BOUND);
++  S_var tmp = this->x_;
++  const CORBA::Boolean demarshalled = cdr >> this->x_;
++  if (this->x_ != 0 && ACE_OS::strlen (this->x_) > BOUND)
++    {
++      S_var for_deletion = this->x_;
++      this->x_ = tmp._retn ();
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -124,8 +136,12 @@
+     TAO_InputCDR & cdr
+   )
+ {
+-  typedef typename S_var::s_traits::to_type to_type;
+-  return cdr >> to_type (this->x_, BOUND);
++  const CORBA::Boolean demarshalled = cdr >> this->x_;
++  if (this->x_ != 0 && ACE_OS::strlen (this->x_) > BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -156,8 +172,12 @@
+     TAO_InputCDR & cdr
+   )
+ {
+-  typedef typename S_var::s_traits::to_type to_type;
+-  return cdr >> to_type (this->x_.out (), BOUND);
++  const CORBA::Boolean demarshalled = cdr >> this->x_.out ();
++  if (this->x_.in () != 0 && ACE_OS::strlen (this->x_.in ()) > BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+Index: tao/TAO_Server_Request.cpp
+===================================================================
+--- tao/TAO_Server_Request.cpp	(revision 83944)
++++ tao/TAO_Server_Request.cpp	(working copy)
+@@ -425,27 +425,40 @@
+                             gv.minor);
+ 
+       this->transport_->assign_translators (0, &output);
+-      // Make the reply message
+-      if (this->mesg_base_->generate_exception_reply (*this->outgoing_,
+-                                                      reply_params,
+-                                                      ex) == -1)
++
++      try
+         {
+-          ACE_ERROR ((LM_ERROR,
+-                      ACE_TEXT ("TAO (%P|%t) - ServerRequest::tao_send_reply_exception, ")
+-                      ACE_TEXT ("could not make exception reply\n")));
++          // Make the reply message
++          if (this->mesg_base_->generate_exception_reply (*this->outgoing_,
++                                                          reply_params,
++                                                          ex) == -1)
++            {
++              ACE_ERROR ((LM_ERROR,
++                          ACE_TEXT ("TAO (%P|%t) - ServerRequest::")
++                          ACE_TEXT ("tao_send_reply_exception, ")
++                          ACE_TEXT ("could not make exception reply\n")));
++            }
+ 
++          this->outgoing_->more_fragments (false);
++
++          // Send the message
++          if (this->transport_->send_message (*this->outgoing_,
++                                              0,
++                                              TAO_Transport::TAO_REPLY) == -1)
++            {
++              ACE_ERROR ((LM_ERROR,
++                          ACE_TEXT ("TAO (%P|%t) - ServerRequest::")
++                          ACE_TEXT ("tao_send_reply_exception, ")
++                          ACE_TEXT ("could not send exception reply\n")));
++            }
+         }
+-
+-      this->outgoing_->more_fragments (false);
+-
+-      // Send the message
+-      if (this->transport_->send_message (*this->outgoing_,
+-                                          0,
+-                                          TAO_Transport::TAO_REPLY) == -1)
++      catch (const ::CORBA::BAD_PARAM &bp_ex)
+         {
+           ACE_ERROR ((LM_ERROR,
+-                      ACE_TEXT ("TAO (%P|%t) - ServerRequest::tao_send_reply_exception, ")
+-                      ACE_TEXT ("could not send exception reply\n")));
++                      ACE_TEXT ("TAO (%P|%t) - ServerRequest::")
++                      ACE_TEXT ("tao_send_reply_exception, ")
++                      ACE_TEXT ("could not marshal exception reply\n")));
++          this->tao_send_reply_exception (bp_ex);
+         }
+     }
+   else if (TAO_debug_level > 0)
+Index: tao/Sequence_T.h
+===================================================================
+--- tao/Sequence_T.h	(revision 83944)
++++ tao/Sequence_T.h	(working copy)
+@@ -3,11 +3,13 @@
+ #include "tao/Unbounded_Octet_Sequence_T.h"
+ #include "tao/Unbounded_Value_Sequence_T.h"
+ #include "tao/Unbounded_Basic_String_Sequence_T.h"
++#include "tao/Unbounded_BD_String_Sequence_T.h"
+ #include "tao/Unbounded_Object_Reference_Sequence_T.h"
+ #include "tao/Unbounded_Array_Sequence_T.h"
+ #include "tao/Unbounded_Sequence_CDR_T.h"
+ #include "tao/Bounded_Value_Sequence_T.h"
+ #include "tao/Bounded_Basic_String_Sequence_T.h"
++#include "tao/Bounded_BD_String_Sequence_T.h"
+ #include "tao/Bounded_Object_Reference_Sequence_T.h"
+ #include "tao/Bounded_Array_Sequence_T.h"
+ #include "tao/Bounded_Sequence_CDR_T.h"
+Index: tao/CDR.h
+===================================================================
+--- tao/CDR.h	(revision 83944)
++++ tao/CDR.h	(working copy)
+@@ -150,6 +150,22 @@
+   /// Destructor.
+   ~TAO_OutputCDR (void);
+ 
++  struct TAO_Export from_bounded_string
++  {
++    from_bounded_string (const ACE_CDR::Char* s,
++                         ACE_CDR::ULong b);
++    ACE_CDR::Char *val_;
++    ACE_CDR::ULong bound_;
++  };
++
++  struct TAO_Export from_bounded_wstring
++  {
++    from_bounded_wstring (const ACE_CDR::WChar* ws,
++                          ACE_CDR::ULong b);
++    ACE_CDR::WChar *val_;
++    ACE_CDR::ULong bound_;
++  };
++
+   // @todo do we want a special method to write an array of
+   // strings and wstrings?
+ 
+@@ -368,6 +384,26 @@
+   /// destructor
+   ~TAO_InputCDR (void);
+ 
++  struct TAO_Export to_bounded_string
++  {
++    to_bounded_string (ACE_CDR::Char *&s,
++                       ACE_CDR::ULong b);
++    to_bounded_string (const ACE_CDR::Char *&s,
++                       ACE_CDR::ULong b);
++    ACE_CDR::Char *&val_;
++    ACE_CDR::ULong bound_;
++  };
++
++  struct TAO_Export to_bounded_wstring
++  {
++    to_bounded_wstring (ACE_CDR::WChar *&ws,
++                        ACE_CDR::ULong b);
++    to_bounded_wstring (const ACE_CDR::WChar *&ws,
++                        ACE_CDR::ULong b);
++    ACE_CDR::WChar *&val_;
++    ACE_CDR::ULong bound_;
++  };
++
+   // = TAO specific methods.
+ 
+   /// Accessor
+@@ -429,6 +465,10 @@
+                                       const CORBA::Char* x);
+ TAO_Export CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       const CORBA::WChar* x);
++TAO_Export CORBA::Boolean operator<< (TAO_OutputCDR &os,
++                                      TAO_OutputCDR::from_bounded_string x);
++TAO_Export CORBA::Boolean operator<< (TAO_OutputCDR &os,
++                                      TAO_OutputCDR::from_bounded_wstring x);
+ 
+ // CDR input operators for CORBA types
+ 
+@@ -454,6 +494,10 @@
+                                       CORBA::Char* &x);
+ TAO_Export CORBA::Boolean operator>> (TAO_InputCDR &is,
+                                       CORBA::WChar* &x);
++TAO_Export CORBA::Boolean operator>> (TAO_InputCDR &os,
++                                      TAO_InputCDR::to_bounded_string x);
++TAO_Export CORBA::Boolean operator>> (TAO_InputCDR &os,
++                                      TAO_InputCDR::to_bounded_wstring x);
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+Index: tao/Bounded_BD_String_Sequence_T.h
+===================================================================
+--- tao/Bounded_BD_String_Sequence_T.h	(revision 0)
++++ tao/Bounded_BD_String_Sequence_T.h	(revision 0)
+@@ -0,0 +1,43 @@
++#ifndef guard_bounded_bd_string_sequence_hpp
++#define guard_bounded_bd_string_sequence_hpp
++/**
++ * @file
++ *
++ * @brief Implement bounded sequences for bounded strings and wide-strings.
++ *
++ * $Id$
++ *
++ * @author Vladimir Zykov
++ */
++#include "tao/Bounded_Basic_String_Sequence_T.h"
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++namespace TAO
++{
++template<typename charT, CORBA::ULong MAX, CORBA::ULong BD_STR_MAX>
++class bounded_bd_string_sequence
++  : public bounded_basic_string_sequence<charT, MAX>
++{
++public:
++  inline bounded_bd_string_sequence()
++    : bounded_basic_string_sequence<charT, MAX>()
++  {}
++
++  inline bounded_bd_string_sequence(
++      CORBA::ULong length,
++      typename bounded_basic_string_sequence<charT, MAX>::value_type * data,
++      CORBA::Boolean release)
++    : bounded_basic_string_sequence<charT, MAX>(length, data, release)
++  {}
++
++  inline CORBA::ULong bd_string_maximum() const
++  {
++    return BD_STR_MAX;
++  }
++};
++} // namespace TAO
++
++TAO_END_VERSIONED_NAMESPACE_DECL
++
++#endif // guard_bounded_bd_string_sequence_hpp
+
+Property changes on: tao/Bounded_BD_String_Sequence_T.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: tests/DynAny_Test/test_dynsequence.cpp
+===================================================================
+--- tests/DynAny_Test/test_dynsequence.cpp	(revision 83944)
++++ tests/DynAny_Test/test_dynsequence.cpp	(working copy)
+@@ -215,8 +215,10 @@
+           CORBA::Any tmp;
+           tmp <<= CORBA::Any::from_string (replacement,20);
+           CORBA::ULong io_index = 0;
+-          DynamicAny::DynAny *&io = out_elems[io_index].inout();
+-          io = dynany_factory->create_dyn_any (tmp);
++          // Since we directly change an element in a sequence we give
++          // ownership for the previous element to a local temporary object.
++          DynamicAny::DynAny_var io_owner = out_elems[io_index].inout();
++          out_elems[io_index].inout() = dynany_factory->create_dyn_any (tmp);
+ 
+           // Compare the value of the replaced string.
+           CORBA::String_var new_str = out_elems[io_index]->get_string();
+Index: TAO_IDL/be/be_visitor_union_branch/cdr_op_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_union_branch/cdr_op_cs.cpp	(revision 83944)
++++ TAO_IDL/be/be_visitor_union_branch/cdr_op_cs.cpp	(working copy)
+@@ -762,8 +762,29 @@
+           *os << "::CORBA::WString_var _tao_union_tmp;" << be_nl;
+         }
+ 
+-      *os << "result = strm >> _tao_union_tmp.out ();" << be_nl << be_nl
+-          << "if (result)" << be_idt_nl
++      if (node->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (node->width () == (long) sizeof (char))
++            {
++              *os << "result = strm >> TAO_InputCDR::to_bounded_string ("
++                  << "_tao_union_tmp.out (), "
++                  << node->max_size ()->ev ()->u.ulval << ");"
++                  << be_nl << be_nl;
++            }
++          else
++            {
++              *os << "result = strm >> TAO_InputCDR::to_bounded_wstring ("
++                  << "_tao_union_tmp.out (), "
++                  << node->max_size ()->ev ()->u.ulval << ");"
++                  << be_nl << be_nl;
++            }
++        }
++      else
++        {
++          *os << "result = strm >> _tao_union_tmp.out ();" << be_nl << be_nl;
++        }
++
++      *os << "if (result)" << be_idt_nl
+           << "{" << be_idt_nl
+           << "_tao_union."
+           << f->local_name () << " (_tao_union_tmp);" << be_nl
+@@ -773,8 +794,26 @@
+       break;
+ 
+     case TAO_CodeGen::TAO_CDR_OUTPUT:
+-      *os << "result = strm << _tao_union."
+-          << f->local_name () << " ();";
++      if (node->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (node->width () == (long) sizeof (char))
++            {
++              *os << "result = strm << TAO_OutputCDR::from_bounded_string ("
++                  << "_tao_union." << f->local_name () << " (), "
++                  << node->max_size ()->ev ()->u.ulval << ");";
++            }
++          else
++            {
++              *os << "result = strm << TAO_OutputCDR::from_bounded_wstring ("
++                  << "_tao_union." << f->local_name () << " (), "
++                  << node->max_size ()->ev ()->u.ulval << ");";
++            }
++        }
++      else
++        {
++          *os << "result = strm << _tao_union."
++              << f->local_name () << " ();";
++        }
+       break;
+ 
+     case TAO_CodeGen::TAO_CDR_SCOPE:
+Index: TAO_IDL/be/be_visitor_union_branch/serializer_op_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_union_branch/serializer_op_cs.cpp	(revision 83944)
++++ TAO_IDL/be/be_visitor_union_branch/serializer_op_cs.cpp	(working copy)
+@@ -1048,8 +1048,29 @@
+           *os << "::CORBA::WString_var _tao_union_tmp;" << be_nl;
+         }
+ 
+-      *os << "result = strm >> _tao_union_tmp.out ();" << be_nl << be_nl
+-          << "if (result)" << be_idt_nl
++      if (node->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (node->width () == (long) sizeof (char))
++            {
++              *os << "result = strm >> TAO_InputCDR::to_bounded_string ("
++                  << "_tao_union_tmp.out (), "
++                  << node->max_size ()->ev ()->u.ulval << ");"
++                  << be_nl << be_nl;
++            }
++          else
++            {
++              *os << "result = strm >> TAO_InputCDR::to_bounded_wstring ("
++                  << "_tao_union_tmp.out (), "
++                  << node->max_size ()->ev ()->u.ulval << ");"
++                  << be_nl << be_nl;
++            }
++        }
++      else
++        {
++          *os << "result = strm >> _tao_union_tmp.out ();" << be_nl << be_nl;
++        }
++
++      *os << "if (result)" << be_idt_nl
+           << "{" << be_idt_nl
+           << "_tao_union."
+           << f->local_name () << " (_tao_union_tmp);" << be_nl
+@@ -1059,8 +1080,26 @@
+       break;
+ 
+     case TAO_CodeGen::TAO_CDR_OUTPUT:
+-      *os << "result = strm << _tao_union."
+-          << f->local_name () << " ();";
++      if (node->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (node->width () == (long) sizeof (char))
++            {
++              *os << "result = strm << TAO_OutputCDR::from_bounded_string ("
++                  << "_tao_union." << f->local_name () << " (), "
++                  << node->max_size ()->ev ()->u.ulval << ");";
++            }
++          else
++            {
++              *os << "result = strm << TAO_OutputCDR::from_bounded_wstring ("
++                  << "_tao_union." << f->local_name () << " (), "
++                  << node->max_size ()->ev ()->u.ulval << ");";
++            }
++        }
++      else
++        {
++          *os << "result = strm << _tao_union."
++              << f->local_name () << " ();";
++        }
+       break;
+ 
+     case TAO_CodeGen::TAO_CDR_SCOPE:
+Index: TAO_IDL/be/be_visitor_array/cdr_op_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_array/cdr_op_cs.cpp	(revision 83944)
++++ TAO_IDL/be/be_visitor_array/cdr_op_cs.cpp	(working copy)
+@@ -645,8 +645,37 @@
+         }
+       else
+         {
++          be_string *str = 0;
++          if (bt->node_type () == AST_Decl::NT_string ||
++              bt->node_type () == AST_Decl::NT_wstring)
++            {
++              str = be_string::narrow_from_decl (bt);
++              if (!str)
++                {
++                  ACE_ERROR_RETURN ((LM_ERROR,
++                                     "(%N:%l) be_visitor_array_cdr_op_cs::"
++                                     "visit_node - "
++                                     "bad string node\n"),
++                                    -1);
++                }
++            }
++
+           *os << "_tao_marshal_flag = (strm >> ";
+-          *os << "_tao_array ";
++          if (str != 0 && str->max_size ()->ev ()->u.ulval != 0)
++            {
++              if (str->width () == (long) sizeof (char))
++                {
++                  *os << "TAO_InputCDR::to_bounded_string (_tao_array ";
++                }
++              else
++                {
++                  *os << "TAO_InputCDR::to_bounded_wstring (_tao_array ";
++                }
++            }
++          else
++            {
++              *os << "_tao_array ";
++            }
+ 
+           for (i = 0; i < ndims; ++i)
+             {
+@@ -659,6 +688,16 @@
+               // handled in a special way.
+               case AST_Decl::NT_string:
+               case AST_Decl::NT_wstring:
++                if (str->max_size ()->ev ()->u.ulval != 0)
++                  {
++                    *os << ".out (), "
++                        << str->max_size ()->ev ()->u.ulval << ")";
++                  }
++                else
++                  {
++                    *os << ".out ()";
++                  }
++                break;
+               case AST_Decl::NT_valuetype:
+               case AST_Decl::NT_valuetype_fwd:
+               case AST_Decl::NT_eventtype:
+@@ -733,8 +772,37 @@
+         }
+       else
+         {
++          be_string *str = 0;
++          if (bt->node_type () == AST_Decl::NT_string ||
++              bt->node_type () == AST_Decl::NT_wstring)
++            {
++              str = be_string::narrow_from_decl (bt);
++              if (!str)
++                {
++                  ACE_ERROR_RETURN ((LM_ERROR,
++                                     "(%N:%l) be_visitor_array_cdr_op_cs::"
++                                     "visit_node - "
++                                     "bad string node\n"),
++                                    -1);
++                }
++            }
++
+           *os << "_tao_marshal_flag = (strm << ";
+-          *os << "_tao_array ";
++          if (str != 0 && str->max_size ()->ev ()->u.ulval != 0)
++            {
++              if (str->width () == (long) sizeof (char))
++                {
++                  *os << "TAO_OutputCDR::from_bounded_string (_tao_array ";
++                }
++              else
++                {
++                  *os << "TAO_OutputCDR::from_bounded_wstring (_tao_array ";
++                }
++            }
++          else
++            {
++              *os << "_tao_array ";
++            }
+ 
+           for (i = 0; i < ndims; ++i)
+             {
+@@ -747,6 +815,16 @@
+               // handled in a special way.
+               case AST_Decl::NT_string:
+               case AST_Decl::NT_wstring:
++                if (str->max_size ()->ev ()->u.ulval != 0)
++                  {
++                    *os << ".in (), "
++                        << str->max_size ()->ev ()->u.ulval << ")";
++                  }
++                else
++                  {
++                    *os << ".in ()";
++                  }
++                break;
+               case AST_Decl::NT_valuetype:
+               case AST_Decl::NT_valuetype_fwd:
+               case AST_Decl::NT_eventtype:
+Index: TAO_IDL/be/be_visitor_array/serializer_op_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_array/serializer_op_cs.cpp	(revision 83944)
++++ TAO_IDL/be/be_visitor_array/serializer_op_cs.cpp	(working copy)
+@@ -1035,8 +1035,37 @@
+           }
+         else
+           {
++            be_string *str = 0;
++            if (bt->node_type () == AST_Decl::NT_string ||
++                bt->node_type () == AST_Decl::NT_wstring)
++              {
++                str = be_string::narrow_from_decl (bt);
++                if (!str)
++                  {
++                    ACE_ERROR_RETURN ((LM_ERROR,
++                                       "(%N:%l) be_visitor_array_cdr_op_cs::"
++                                       "visit_node - "
++                                       "bad string node\n"),
++                                      -1);
++                  }
++              }
++
+             *os << "_tao_marshal_flag = (strm >> ";
+-            *os << "_tao_array ";
++            if (str != 0 && str->max_size ()->ev ()->u.ulval != 0)
++              {
++                if (str->width () == (long) sizeof (char))
++                  {
++                    *os << "TAO_InputCDR::to_bounded_string (_tao_array ";
++                  }
++                else
++                  {
++                    *os << "TAO_InputCDR::to_bounded_wstring (_tao_array ";
++                  }
++              }
++            else
++              {
++                *os << "_tao_array ";
++              }
+ 
+             for (i = 0; i < ndims; ++i)
+               {
+@@ -1049,6 +1078,16 @@
+                 // handled in a special way.
+                 case AST_Decl::NT_string:
+                 case AST_Decl::NT_wstring:
++                  if (str->max_size ()->ev ()->u.ulval != 0)
++                    {
++                      *os << ".out (), "
++                          << str->max_size ()->ev ()->u.ulval << ")";
++                    }
++                  else
++                    {
++                      *os << ".out ()";
++                    }
++                  break;
+                 case AST_Decl::NT_valuetype:
+                 case AST_Decl::NT_eventtype:
+                 case AST_Decl::NT_eventtype_fwd:
+@@ -1147,8 +1186,37 @@
+           }
+         else
+           {
++            be_string *str = 0;
++            if (bt->node_type () == AST_Decl::NT_string ||
++                bt->node_type () == AST_Decl::NT_wstring)
++              {
++                str = be_string::narrow_from_decl (bt);
++                if (!str)
++                  {
++                    ACE_ERROR_RETURN ((LM_ERROR,
++                                       "(%N:%l) be_visitor_array_cdr_op_cs::"
++                                       "visit_node - "
++                                       "bad string node\n"),
++                                      -1);
++                  }
++              }
++
+             *os << "_tao_marshal_flag = (strm << ";
+-            *os << "_tao_array ";
++            if (str != 0 && str->max_size ()->ev ()->u.ulval != 0)
++              {
++                if (str->width () == (long) sizeof (char))
++                  {
++                    *os << "TAO_OutputCDR::from_bounded_string (_tao_array ";
++                  }
++                else
++                  {
++                    *os << "TAO_OutputCDR::from_bounded_wstring (_tao_array ";
++                  }
++              }
++            else
++              {
++                *os << "_tao_array ";
++              }
+ 
+             for (i = 0; i < ndims; ++i)
+               {
+@@ -1161,6 +1229,16 @@
+                 // handled in a special way.
+                 case AST_Decl::NT_string:
+                 case AST_Decl::NT_wstring:
++                  if (str->max_size ()->ev ()->u.ulval != 0)
++                    {
++                      *os << ".in (), "
++                          << str->max_size ()->ev ()->u.ulval << ")";
++                    }
++                  else
++                    {
++                      *os << ".in ()";
++                    }
++                  break;
+                 case AST_Decl::NT_valuetype:
+                 case AST_Decl::NT_eventtype:
+                 case AST_Decl::NT_eventtype_fwd:
+Index: TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp	(revision 83944)
++++ TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp	(working copy)
+@@ -262,7 +262,7 @@
+       << "ACE_NEW_RETURN (" << be_idt_nl
+       << "vb_object," << be_nl
+       << node->local_name () << "," << be_nl
+-      << "false);" << be_nl << be_uidt_nl;
++      << "false);" << be_uidt_nl << be_nl;
+ 
+   if (is_array)
+     {
+@@ -270,7 +270,31 @@
+           << "_forany temp (vb_object->_boxed_inout ());" << be_nl;
+     }
+     
+-  *os << "return (strm >> " << unmarshal_arg << ");" << be_uidt_nl
++  *os << "return (strm >> ";
++
++  be_string *str = be_string::narrow_from_decl (bt);
++  if (str != 0 &&
++      str->max_size ()->ev ()->u.ulval != 0)
++    {
++      if (str->width () == (long) sizeof (char))
++        {
++          *os << "::TAO_InputCDR::to_bounded_string "
++              << "(vb_object->_pd_value, "
++              << str->max_size ()->ev ()->u.ulval << ")";
++        }
++      else
++        {
++          *os << "::TAO_InputCDR::to_bounded_wstring "
++              << "(vb_object->_pd_value, "
++              << str->max_size ()->ev ()->u.ulval << ")";
++        }
++    }
++  else
++    {
++      *os << unmarshal_arg;
++    }
++
++  *os << ");" << be_uidt_nl
+       << "}" << be_nl << be_nl;
+ 
+   // _tao_unmarshal_v method.  Generated because ValueBase interface
+@@ -587,7 +611,7 @@
+ }
+ 
+ int
+-be_visitor_valuebox_cs::visit_string (be_string *)
++be_visitor_valuebox_cs::visit_string (be_string *str)
+ {
+   TAO_OutStream & os = *this->ctx_->stream ();
+ 
+@@ -604,7 +628,29 @@
+      << vb_node->name ()
+      << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
+      << "{" << be_idt_nl
+-     << "return (strm << this->_pd_value);" << be_uidt_nl
++     << "return (strm << ";
++
++  if (str->max_size ()->ev ()->u.ulval != 0)
++    {
++      if (str->width () == (long) sizeof (char))
++        {
++          os << "::TAO_OutputCDR::from_bounded_string "
++             << "(this->_pd_value, "
++             << str->max_size ()->ev ()->u.ulval << ")";
++        }
++      else
++        {
++          os << "::TAO_OutputCDR::from_bounded_wstring "
++             << "(this->_pd_value, "
++             << str->max_size ()->ev ()->u.ulval << ")";
++        }
++    }
++  else
++    {
++      os << "this->_pd_value";
++    }
++
++  os << ");" << be_uidt_nl
+      << "}" << be_nl << be_nl;
+ 
+   return 0;
+Index: TAO_IDL/be/be_sequence.cpp
+===================================================================
+--- TAO_IDL/be/be_sequence.cpp	(revision 83944)
++++ TAO_IDL/be/be_sequence.cpp	(working copy)
+@@ -27,6 +27,7 @@
+ #include "be_field.h"
+ #include "be_visitor.h"
+ #include "be_helper.h"
++#include "be_string.h"
+ 
+ #include "utl_identifier.h"
+ #include "idl_defines.h"
+@@ -624,28 +625,122 @@
+ 
+       break;
+     case be_sequence::MNG_STRING:
+-      if (this->unbounded ())
+-        {
+-          *os << "TAO::unbounded_basic_string_sequence<char>";
+-        }
+-      else
+-        {
+-          *os << "TAO::bounded_basic_string_sequence<char, "
+-              << this->max_size ()->ev ()->u.ulval << ">";
+-        }
++      {
++        be_type *prim_type = 0;
++        if (elem->node_type () == AST_Decl::NT_typedef)
++          {
++            // Get the primitive base type of this typedef node.
++            be_typedef *t = be_typedef::narrow_from_decl (elem);
++            prim_type = t->primitive_base_type ();
++          }
++        else
++          {
++            prim_type = elem;
++          }
+ 
++        if (prim_type->node_type () == AST_Decl::NT_string)
++          {
++            be_string *str =
++              be_string::narrow_from_decl (prim_type);
++            if (!str)
++              {
++                ACE_ERROR_RETURN ((LM_ERROR,
++                                   "(%N:%l) be_sequence::"
++                                   "gen_base_class_name - "
++                                   "bad string node\n"),
++                                  -1);
++              }
++
++            // We need to make a distinction between bounded and
++            // unbounded strings.
++            if (str->max_size ()->ev ()->u.ulval != 0)
++              {
++                if (this->unbounded ())
++                  {
++                    *os << "TAO::unbounded_bd_string_sequence<char, "
++                        << str->max_size ()->ev ()->u.ulval << ">";
++                  }
++                else
++                  {
++                    *os << "TAO::bounded_bd_string_sequence<char, "
++                        << this->max_size ()->ev ()->u.ulval << ", "
++                        << str->max_size ()->ev ()->u.ulval << ">";
++                  }
++              }
++            else
++              {
++                if (this->unbounded ())
++                  {
++                    *os << "TAO::unbounded_basic_string_sequence<char>";
++                  }
++                else
++                  {
++                    *os << "TAO::bounded_basic_string_sequence<char, "
++                        << this->max_size ()->ev ()->u.ulval << ">";
++                  }
++              }
++          }
++      }
++
+       break;
+     case be_sequence::MNG_WSTRING:
+-      if (this->unbounded ())
+-        {
+-          *os << "TAO::unbounded_basic_string_sequence<CORBA::WChar>";
+-        }
+-      else
+-        {
+-          *os << "TAO::bounded_basic_string_sequence<CORBA::WChar, "
+-              << this->max_size ()->ev ()->u.ulval << ">";
+-        }
++      {
++        be_type *prim_type = 0;
++        if (elem->node_type () == AST_Decl::NT_typedef)
++          {
++            // Get the primitive base type of this typedef node.
++            be_typedef *t = be_typedef::narrow_from_decl (elem);
++            prim_type = t->primitive_base_type ();
++          }
++        else
++          {
++            prim_type = elem;
++          }
+ 
++        if (prim_type->node_type () == AST_Decl::NT_wstring)
++          {
++            be_string *str =
++              be_string::narrow_from_decl (prim_type);
++            if (!str)
++              {
++                ACE_ERROR_RETURN ((LM_ERROR,
++                                   "(%N:%l) be_sequence::"
++                                   "gen_base_class_name - "
++                                   "bad string node\n"),
++                                  -1);
++              }
++
++            // We need to make a distinction between bounded and
++            // unbounded strings.
++            if (str->max_size ()->ev ()->u.ulval != 0)
++              {
++                if (this->unbounded ())
++                  {
++                    *os << "TAO::unbounded_bd_string_sequence<CORBA::WChar, "
++                        << str->max_size ()->ev ()->u.ulval << ">";
++                  }
++                else
++                  {
++                    *os << "TAO::bounded_bd_string_sequence<CORBA::WChar, "
++                        << this->max_size ()->ev ()->u.ulval << ", "
++                        << str->max_size ()->ev ()->u.ulval << ">";
++                  }
++              }
++            else
++              {
++                if (this->unbounded ())
++                  {
++                    *os << "TAO::unbounded_basic_string_sequence<CORBA::WChar>";
++                  }
++                else
++                  {
++                    *os << "TAO::bounded_basic_string_sequence<CORBA::WChar, "
++                        << this->max_size ()->ev ()->u.ulval << ">";
++                  }
++              }
++          }
++      }
++
+       break;
+     default: // Not a managed type.
+       switch (elem->base_node_type ())
+Index: TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp	(revision 83944)
++++ TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp	(working copy)
+@@ -626,7 +626,7 @@
+ }
+ 
+ int
+-be_visitor_valuetype_field_cdr_cs::visit_string (be_string *)
++be_visitor_valuetype_field_cdr_cs::visit_string (be_string *str)
+ {
+   TAO_OutStream *os = this->ctx_->stream ();
+ 
+@@ -647,12 +647,48 @@
+   switch (this->ctx_->sub_state ())
+     {
+     case TAO_CodeGen::TAO_CDR_INPUT:
+-      *os << "(strm >> " << this->pre_ << f->local_name ()
+-          << this->post_ << ".out ())";
++      if (str != 0 && str->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (str->width () == (long) sizeof (char))
++            {
++              *os << "(strm >> TAO_InputCDR::to_bounded_string ("
++                  << this->pre_ << f->local_name () << this->post_
++                  << ".out (), " << str->max_size ()->ev ()->u.ulval << "))";
++            }
++          else
++            {
++              *os << "(strm >> TAO_InputCDR::to_bounded_wstring ("
++                  << this->pre_ << f->local_name () << this->post_
++                  << ".out (), " << str->max_size ()->ev ()->u.ulval << "))";
++            }
++        }
++      else
++        {
++          *os << "(strm >> " << this->pre_ << f->local_name ()
++              << this->post_ << ".out ())";
++        }
+       break;
+     case TAO_CodeGen::TAO_CDR_OUTPUT:
+-      *os << "(strm << " << this->pre_ << f->local_name ()
+-          << this->post_ << ".in ())";
++      if (str != 0 && str->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (str->width () == (long) sizeof (char))
++            {
++              *os << "(strm << TAO_OutputCDR::from_bounded_string ("
++                  <<  this->pre_ << f->local_name () << this->post_
++                  << ".in (), " << str->max_size ()->ev ()->u.ulval << "))";
++            }
++          else
++            {
++              *os << "(strm << TAO_OutputCDR::from_bounded_wstring ("
++                  <<  this->pre_ << f->local_name () << this->post_
++                  << ".in (), " << str->max_size ()->ev ()->u.ulval << "))";
++            }
++        }
++      else
++        {
++          *os << "(strm << " << this->pre_ << f->local_name ()
++              << this->post_ << ".in ())";
++        }
+       break;
+     case TAO_CodeGen::TAO_CDR_SCOPE:
+       // Nothing to be done.
+Index: TAO_IDL/be/be_visitor_field/cdr_op_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_field/cdr_op_cs.cpp	(revision 83944)
++++ TAO_IDL/be/be_visitor_field/cdr_op_cs.cpp	(working copy)
+@@ -628,7 +628,7 @@
+ }
+ 
+ int
+-be_visitor_field_cdr_op_cs::visit_string (be_string *)
++be_visitor_field_cdr_op_cs::visit_string (be_string *str)
+ {
+   TAO_OutStream *os = this->ctx_->stream ();
+ 
+@@ -649,11 +649,47 @@
+   switch (this->ctx_->sub_state ())
+     {
+     case TAO_CodeGen::TAO_CDR_INPUT:
+-      *os << "(strm >> _tao_aggregate." << f->local_name () << ".out ())";
++      if (str != 0 && str->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (str->width () == (long) sizeof (char))
++            {
++              *os << "(strm >> TAO_InputCDR::to_bounded_string (_tao_aggregate."
++                  << f->local_name () << ".out (), "
++                  << str->max_size ()->ev ()->u.ulval << "))";
++            }
++          else
++            {
++              *os << "(strm >> TAO_InputCDR::to_bounded_wstring (_tao_aggregate."
++                  << f->local_name () << ".out (), "
++                  << str->max_size ()->ev ()->u.ulval << "))";
++            }
++        }
++      else
++        {
++          *os << "(strm >> _tao_aggregate." << f->local_name () << ".out ())";
++        }
+ 
+       break;
+     case TAO_CodeGen::TAO_CDR_OUTPUT:
+-      *os << "(strm << _tao_aggregate." << f->local_name () << ".in ())";
++      if (str != 0 && str->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (str->width () == (long) sizeof (char))
++            {
++              *os << "(strm << TAO_OutputCDR::from_bounded_string (_tao_aggregate."
++                  << f->local_name () << ".in (), "
++                  << str->max_size ()->ev ()->u.ulval << "))";
++            }
++          else
++            {
++              *os << "(strm << TAO_OutputCDR::from_bounded_wstring (_tao_aggregate."
++                  << f->local_name () << ".in (), "
++                  << str->max_size ()->ev ()->u.ulval << "))";
++            }
++        }
++      else
++        {
++          *os << "(strm << _tao_aggregate." << f->local_name () << ".in ())";
++        }
+ 
+       break;
+     case TAO_CodeGen::TAO_CDR_SCOPE:
+Index: TAO_IDL/be/be_visitor_field/serializer_op_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_field/serializer_op_cs.cpp	(revision 83944)
++++ TAO_IDL/be/be_visitor_field/serializer_op_cs.cpp	(working copy)
+@@ -785,11 +785,47 @@
+           << f->local_name () << ".in ())";
+       break;
+     case TAO_CodeGen::TAO_CDR_INPUT:
+-      *os << "(strm >> _tao_aggregate." << f->local_name () << ".out ())";
++      if (node != 0 && node->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (node->width () == (long) sizeof (char))
++            {
++              *os << "(strm >> TAO_InputCDR::to_bounded_string (_tao_aggregate."
++                  << f->local_name () << ".out (), "
++                  << node->max_size ()->ev ()->u.ulval << "))";
++            }
++          else
++            {
++              *os << "(strm >> TAO_InputCDR::to_bounded_wstring (_tao_aggregate."
++                  << f->local_name () << ".out (), "
++                  << node->max_size ()->ev ()->u.ulval << "))";
++            }
++        }
++      else
++        {
++          *os << "(strm >> _tao_aggregate." << f->local_name () << ".out ())";
++        }
+ 
+       break;
+     case TAO_CodeGen::TAO_CDR_OUTPUT:
+-      *os << "(strm << _tao_aggregate." << f->local_name () << ".in ())";
++      if (node != 0 && node->max_size ()->ev ()->u.ulval != 0)
++        {
++          if (node->width () == (long) sizeof (char))
++            {
++              *os << "(strm << TAO_OutputCDR::from_bounded_string (_tao_aggregate."
++                  << f->local_name () << ".in (), "
++                  << node->max_size ()->ev ()->u.ulval << "))";
++            }
++          else
++            {
++              *os << "(strm << TAO_OutputCDR::from_bounded_wstring (_tao_aggregate."
++                  << f->local_name () << ".in (), "
++                  << node->max_size ()->ev ()->u.ulval << "))";
++            }
++        }
++      else
++        {
++          *os << "(strm << _tao_aggregate." << f->local_name () << ".in ())";
++        }
+ 
+       break;
+     case TAO_CodeGen::TAO_CDR_SCOPE:
