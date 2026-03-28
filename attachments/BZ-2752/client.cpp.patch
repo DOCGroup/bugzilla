@@ -1,0 +1,94 @@
+1d0
+< // client.cpp,v 1.5 2002/01/29 20:21:07 okellogg Exp
+5,6c4,5
+< 
+< ACE_RCSID(Hello, client, "client.cpp,v 1.5 2002/01/29 20:21:07 okellogg Exp")
+---
+> #include "ace/OS_NS_unistd.h"
+> #include <iostream>
+40a40,45
+>       char *orbArgv[] = {
+>         "-ORBlistenEndpoints",
+>         "iiop://localhost:51000"
+>       };
+>       int orbArgc (sizeof(orbArgv) / sizeof (char *));
+> 
+42c47
+<         CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
+---
+>         CORBA::ORB_init (orbArgc, orbArgv, "" ACE_ENV_ARG_PARAMETER);
+48,50c53,55
+<       CORBA::Object_var tmp =
+<         orb->string_to_object(ior ACE_ENV_ARG_PARAMETER);
+<       ACE_TRY_CHECK;
+---
+>       const int numRuns = 3;
+>       int run = 1;
+>       bool runAgain = true;
+52,54c57,59
+<       Test::Hello_var hello =
+<         Test::Hello::_narrow(tmp.in () ACE_ENV_ARG_PARAMETER);
+<       ACE_TRY_CHECK;
+---
+>       do
+>       {
+>         ACE_DEBUG ((LM_DEBUG, "(%P|%t) client - starting a run\n"));
+56,62c61,63
+<       if (CORBA::is_nil (hello.in ()))
+<         {
+<           ACE_ERROR_RETURN ((LM_DEBUG,
+<                              "Nil Test::Hello reference <%s>\n",
+<                              ior),
+<                             1);
+<         }
+---
+>         CORBA::Object_var tmp =
+>           orb->string_to_object(ior ACE_ENV_ARG_PARAMETER);
+>         ACE_TRY_CHECK;
+64,66c65,67
+<       CORBA::String_var the_string =
+<         hello->get_string (ACE_ENV_SINGLE_ARG_PARAMETER);
+<       ACE_TRY_CHECK;
+---
+>         Test::Hello_var hello =
+>           Test::Hello::_narrow(tmp.in () ACE_ENV_ARG_PARAMETER);
+>         ACE_TRY_CHECK;
+68,69c69,75
+<       ACE_DEBUG ((LM_DEBUG, "(%P|%t) - string returned <%s>\n",
+<                   the_string.in ()));
+---
+>         if (CORBA::is_nil (hello.in ()))
+>           {
+>             ACE_ERROR_RETURN ((LM_DEBUG,
+>                                "Nil Test::Hello reference <%s>\n",
+>                                ior),
+>                               1);
+>           }
+71,72c77,100
+<       hello->shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
+<       ACE_TRY_CHECK;
+---
+>         ACE_DEBUG ((LM_DEBUG, "(%P|%t) client - getting string\n"));
+> 
+>         CORBA::String_var the_string =
+>           hello->get_string (ACE_ENV_SINGLE_ARG_PARAMETER);
+>         ACE_TRY_CHECK;
+> 
+>         ACE_DEBUG ((LM_DEBUG, "(%P|%t) - string returned <%s>\n",
+>                     the_string.in ()));
+> 
+>         hello->shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
+>         ACE_TRY_CHECK;
+> 
+>         if (run < numRuns)
+>         {
+>           ++run;
+>           ACE_Time_Value sleepDuration;
+>           sleepDuration.set( 1 );
+>           ACE_OS::sleep( sleepDuration );
+>         }
+>         else
+>         {
+>           runAgain = false;
+>         }
+>       } while (runAgain);
