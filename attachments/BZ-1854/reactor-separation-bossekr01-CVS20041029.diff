@@ -1,0 +1,544 @@
+diff -Nru ACE_wrappers.orig/ace/ace_flreactor.mpc ACE_wrappers/ace/ace_flreactor.mpc
+--- ACE_wrappers.orig/ace/ace_flreactor.mpc	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/ace/ace_flreactor.mpc	2004-11-01 17:38:48.088694176 +0100
+@@ -0,0 +1,14 @@
++//  -*- MPC -*- now wouldn't this be cool...
++// ace_flreactor.mpc,v
++
++project(ACE_FlReactor) : acedefaults, aceversion, core, acelib, ace_fltk {
++  libout       = $(ACE_ROOT)/lib
++  sharedname   = ACE_FlReactor
++  dynamicflags = ACE_BUILD_DLL ACE_OS_BUILD_DLL
++
++  Source_Files(ACE_COMPONENTS) {
++	Demux {
++      FlReactor.cpp
++    }
++  }
++}
+diff -Nru ACE_wrappers.orig/ace/ace.mpc ACE_wrappers/ace/ace.mpc
+--- ACE_wrappers.orig/ace/ace.mpc	2004-10-26 14:23:28.000000000 +0200
++++ ACE_wrappers/ace/ace.mpc	2004-11-01 17:38:48.094693264 +0100
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*- now wouldn't this be cool...
+ // $Id: ace.mpc,v 1.43 2004/10/26 12:23:28 mcorino Exp $
+ 
+-project(ACE) : acedefaults, aceversion, core, qt_reactor, other, codecs, token, svcconf, uuid, filecache {
++project(ACE) : acedefaults, aceversion, core, other, codecs, token, svcconf, uuid, filecache {
+   libout       = $(ACE_ROOT)/lib
+   sharedname   = ACE
+   dynamicflags = ACE_BUILD_DLL
+@@ -160,7 +160,6 @@
+ 
+     Demux {
+       Event_Handler.cpp
+-      FlReactor.cpp
+       Msg_WFMO_Reactor.cpp
+       POSIX_Proactor.cpp
+       POSIX_CB_Proactor.cpp
+@@ -173,10 +172,7 @@
+       SUN_Proactor.cpp
+       Dev_Poll_Reactor.cpp
+       TP_Reactor.cpp
+-      TkReactor.cpp
+       WFMO_Reactor.cpp
+-      XtReactor.cpp
+-      QtReactor.cpp
+     }
+ 
+     Connection {
+diff -Nru ACE_wrappers.orig/ace/ace.mwc ACE_wrappers/ace/ace.mwc
+--- ACE_wrappers.orig/ace/ace.mwc	2004-10-26 05:02:36.000000000 +0200
++++ ACE_wrappers/ace/ace.mwc	2004-11-01 17:38:48.096692960 +0100
+@@ -3,6 +3,10 @@
+ 
+ workspace {
+   ace.mpc
++  ace_flreactor.mpc
++  ace_qtreactor.mpc
++  ace_tkreactor.mpc
++  ace_xtreactor.mpc
+   QoS
+   RMCast
+   SSL
+diff -Nru ACE_wrappers.orig/ace/ace_qtreactor.mpc ACE_wrappers/ace/ace_qtreactor.mpc
+--- ACE_wrappers.orig/ace/ace_qtreactor.mpc	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/ace/ace_qtreactor.mpc	2004-11-01 17:38:48.098692656 +0100
+@@ -0,0 +1,18 @@
++//  -*- MPC -*- now wouldn't this be cool...
++// ace_qtreactor.mpc,v
++
++project(ACE_QtReactor) : acedefaults, aceversion, core, acelib, ace_qt, qt_moc {
++  libout       = $(ACE_ROOT)/lib
++  sharedname   = ACE_QtReactor
++  dynamicflags = ACE_BUILD_DLL ACE_OS_BUILD_DLL
++
++  MOC_Files {
++    QtReactor.h
++  }
++  Source_Files(ACE_COMPONENTS) {
++    Demux {
++      QtReactor_moc.cpp
++      QtReactor.cpp
++    }
++  }
++}
+diff -Nru ACE_wrappers.orig/ace/ace_tkreactor.mpc ACE_wrappers/ace/ace_tkreactor.mpc
+--- ACE_wrappers.orig/ace/ace_tkreactor.mpc	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/ace/ace_tkreactor.mpc	2004-11-01 17:38:48.100692352 +0100
+@@ -0,0 +1,14 @@
++//  -*- MPC -*- now wouldn't this be cool...
++// ace_tkreactor.mpc,v
++
++project(ACE_TkReactor) : acedefaults, aceversion, core, acelib, ace_tk {
++  libout       = $(ACE_ROOT)/lib
++  sharedname   = ACE_TkReactor
++  dynamicflags = ACE_BUILD_DLL ACE_OS_BUILD_DLL
++
++  Source_Files(ACE_COMPONENTS) {
++	Demux {
++      TkReactor.cpp
++    }
++  }
++}
+diff -Nru ACE_wrappers.orig/ace/ace_xtreactor.mpc ACE_wrappers/ace/ace_xtreactor.mpc
+--- ACE_wrappers.orig/ace/ace_xtreactor.mpc	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/ace/ace_xtreactor.mpc	2004-11-01 17:38:48.102692048 +0100
+@@ -0,0 +1,14 @@
++//  -*- MPC -*- now wouldn't this be cool...
++// ace_xtreactor.mpc,v
++
++project(ACE_XtReactor) : acedefaults, aceversion, core, acelib, ace_xt {
++  libout       = $(ACE_ROOT)/lib
++  sharedname   = ACE_XtReactor
++  dynamicflags = ACE_BUILD_DLL ACE_OS_BUILD_DLL
++
++  Source_Files(ACE_COMPONENTS) {
++	Demux {
++      XtReactor.cpp
++    }
++  }
++}
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/acedefaults.mpb ACE_wrappers/bin/MakeProjectCreator/config/acedefaults.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/acedefaults.mpb	2004-09-29 00:28:19.000000000 +0200
++++ ACE_wrappers/bin/MakeProjectCreator/config/acedefaults.mpb	2004-11-01 17:38:48.104691744 +0100
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id: acedefaults.mpb,v 1.16 2004/09/28 22:28:19 jtc Exp $
+ 
+-project: ace_qt, zzip {
++project: zzip {
+   staticflags += ACE_AS_STATIC_LIBS
+   includes    += $(ACE_ROOT)
+   libpaths    += $(ACE_ROOT)/lib
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_fltk.mpb ACE_wrappers/bin/MakeProjectCreator/config/ace_fltk.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_fltk.mpb	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/ace_fltk.mpb	2004-11-01 17:38:48.107691288 +0100
+@@ -0,0 +1,13 @@
++// -*- MPC -*-
++// ace_fltk.mpb,v
++
++project : ace_x11, ace_gl {
++  macros   += ACE_HAS_FL
++
++  // Depends on configration from include/makeinclude/platform_*.GNU
++  verbatim(gnuace,local) {
++    CPPFLAGS += $(PLATFORM_FL_CPPFLAGS)
++    LIBS += $(PLATFORM_FL_LIBS)
++    LDFLAGS += $(PLATFORM_FL_LDFLAGS)
++  }
++}
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_gl.mpb ACE_wrappers/bin/MakeProjectCreator/config/ace_gl.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_gl.mpb	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/ace_gl.mpb	2004-11-01 17:38:48.108691136 +0100
+@@ -0,0 +1,13 @@
++// -*- MPC -*-
++// ace_gl.mpb,v
++
++project : ace_x11 {
++  requires += ace_with_gl
++
++  // Depends on configration from include/makeinclude/platform_*.GNU
++  verbatim(gnuace,local) {
++    CPPFLAGS += $(PLATFORM_GL_CPPFLAGS)
++    LIBS += $(PLATFORM_GL_LIBS)
++    LDFLAGS += $(PLATFORM_GL_LDFLAGS)
++  }
++}
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_gtk.mpb ACE_wrappers/bin/MakeProjectCreator/config/ace_gtk.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_gtk.mpb	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/ace_gtk.mpb	2004-11-01 17:38:48.110690832 +0100
+@@ -0,0 +1,13 @@
++// -*- MPC -*-
++// ace_gtk.mpb,v
++
++project {
++  macros   += ACE_HAS_GTK
++
++  // Depends on configration from include/makeinclude/platform_*.GNU
++  verbatim(gnuace,local) {
++    CPPFLAGS += $(PLATFORM_GTK_CPPFLAGS)
++    LIBS += $(PLATFORM_GTK_LIBS)
++    LDFLAGS += $(PLATFORM_GTK_LDFLAGS)
++  }
++}
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_qt.mpb ACE_wrappers/bin/MakeProjectCreator/config/ace_qt.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_qt.mpb	2004-01-28 20:28:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/ace_qt.mpb	2004-11-01 17:38:48.111690680 +0100
+@@ -3,4 +3,11 @@
+ 
+ feature(qt): qt {
+   macros += ACE_HAS_QT
++
++  // Depends on configration from include/makeinclude/platform_*.GNU
++  verbatim(gnuace,local) {
++    CPPFLAGS += $(PLATFORM_QT_CPPFLAGS)
++    LIBS += $(PLATFORM_QT_LIBS)
++    LDFLAGS += $(PLATFORM_QT_LDFLAGS)
++  }
+ }
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_qtreactor.mpb ACE_wrappers/bin/MakeProjectCreator/config/ace_qtreactor.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_qtreactor.mpb	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/ace_qtreactor.mpb	2004-11-01 17:38:48.113690376 +0100
+@@ -0,0 +1,7 @@
++// -*- MPC -*-
++
++project : acelib, ace_qt, qt_moc {
++  requires += qt_reactor
++  after    += ACE_QtReactor
++  libs     += ACE_QtReactor
++}
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_tk.mpb ACE_wrappers/bin/MakeProjectCreator/config/ace_tk.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_tk.mpb	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/ace_tk.mpb	2004-11-01 17:38:48.114690224 +0100
+@@ -0,0 +1,14 @@
++// -*- MPC -*-
++// ace_tk.mpb,v
++
++project {
++  requires += ace_with_tk
++  macros   += ACE_HAS_TK
++
++  // Depends on configration from include/makeinclude/platform_*.GNU
++  verbatim(gnuace,local) {
++    CPPFLAGS += $(PLATFORM_TCL_CPPFLAGS) $(PLATFORM_TK_CPPFLAGS)
++    LIBS += $(PLATFORM_TCL_LIBS) $(PLATFORM_TK_LIBS)
++    LDFLAGS += $(PLATFORM_TCL_LIBS) $(PLATFORM_TK_LDFLAGS)
++  }
++}
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_x11.mpb ACE_wrappers/bin/MakeProjectCreator/config/ace_x11.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_x11.mpb	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/ace_x11.mpb	2004-11-01 17:38:48.116689920 +0100
+@@ -0,0 +1,13 @@
++// -*- MPC -*-
++// ace_x11.mpb,v
++
++feature(ace_with_x11) {
++  requires += ace_with_x11
++
++  // Depends on configration from include/makeinclude/platform_*.GNU
++  verbatim(gnuace,local) {
++	CPPFLAGS += $(PLATFORM_X11_CPPFLAGS)
++	LIBS += $(PLATFORM_X11_LIBS)
++	LDFLAGS += $(PLATFORM_X11_LDFLAGS)
++  }
++}
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_xt.mpb ACE_wrappers/bin/MakeProjectCreator/config/ace_xt.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_xt.mpb	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/ace_xt.mpb	2004-11-01 17:38:48.117689768 +0100
+@@ -0,0 +1,13 @@
++// -*- MPC -*-
++// ace_xt.mpb,v
++
++project : ace_x11 {
++  macros   += ACE_HAS_XT
++
++  // Depends on configration from include/makeinclude/platform_*.GNU
++  verbatim(gnuace,local) {
++	CPPFLAGS += $(PLATFORM_XT_CPPFLAGS) $(PLATFORM_X11_CPPFLAGS)
++	LIBS += $(PLATFORM_XT_LIBS) $(PLATFORM_X11_LIBS)
++	LDFLAGS += $(PLATFORM_XT_LDFLAGS) $(PLATFORM_X11_LDFLAGS)
++  }
++}
+diff -Nru ACE_wrappers.orig/bin/MakeProjectCreator/config/tao_qtreactor.mpb ACE_wrappers/bin/MakeProjectCreator/config/tao_qtreactor.mpb
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/tao_qtreactor.mpb	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/tao_qtreactor.mpb	2004-11-01 17:38:48.168682016 +0100
+@@ -0,0 +1,7 @@
++// -*- MPC -*-
++
++project : taolib, ace_qtreactor {
++  requires += qt_reactor
++  after    += TAO_QtReactor
++  libs     += TAO_QtReactor
++}
+diff -Nru ACE_wrappers.orig/include/makeinclude/platform_linux_borland.GNU ACE_wrappers/include/makeinclude/platform_linux_borland.GNU
+--- ACE_wrappers.orig/include/makeinclude/platform_linux_borland.GNU	2004-01-22 19:36:31.000000000 +0100
++++ ACE_wrappers/include/makeinclude/platform_linux_borland.GNU	2004-11-01 17:43:19.449441072 +0100
+@@ -21,6 +21,14 @@
+   threads = 1
+ endif
+ 
++PLATFORM_TCL_CPPFLAGS=-I/usr/include/tcl8.4
++PLATFORM_TCL_LIBS=-ltcl8.4
++PLATFORM_TCL_LDFLAGS=
++
++PLATFORM_TK_CPPFLAGS=-I$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_INC_DIR $$TK_DEFS)
++PLATFORM_TK_LIBS=$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_LIB_FLAG)
++PLATFORM_TK_LDFLAGS=
++
+ PLATFORM_AIO_SUPPORT := \
+        $(shell test -e /usr/lib/librt.so && echo -DACE_HAS_AIO_CALLS)
+ 
+diff -Nru ACE_wrappers.orig/include/makeinclude/platform_linux.GNU ACE_wrappers/include/makeinclude/platform_linux.GNU
+--- ACE_wrappers.orig/include/makeinclude/platform_linux.GNU	2004-09-24 18:40:19.000000000 +0200
++++ ACE_wrappers/include/makeinclude/platform_linux.GNU	2004-11-01 17:39:43.217313352 +0100
+@@ -50,6 +50,14 @@
+ PLATFORM_BOOST_LDLAGS ?=
+ PLATFORM_BOOST_UTF_LIBS ?= -lboost_unit_test_framework
+ 
++PLATFORM_TCL_CPPFLAGS=-I/usr/include/tcl8.4
++PLATFORM_TCL_LIBS=-ltcl8.4
++PLATFORM_TCL_LDFLAGS=
++
++PLATFORM_TK_CPPFLAGS=-I$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_INC_DIR $$TK_DEFS)
++PLATFORM_TK_LIBS=$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_LIB_FLAG)
++PLATFORM_TK_LDFLAGS=
++
+ PLATFORM_AIO_SUPPORT := \
+        $(shell test "`ls -L /usr/lib/librt.so* /lib/librt.so*`" && echo -DACE_HAS_AIO_CALLS)
+ 
+@@ -102,7 +110,7 @@
+ LIBS += $(shell test "`ls -L /usr/lib/librt.so* /lib/librt.so*`" && echo -lrt)
+ 
+ PLATFORM_QT_CPPFLAGS=-I$(QTDIR)/include
+-PLATFORM_QT_LIBS=-lqt
++PLATFORM_QT_LIBS=-lqt-mt
+ PLATFORM_QT_LDFLAGS=-L$(QTDIR)/lib
+ 
+ OCFLAGS ?= -O3
+diff -Nru ACE_wrappers.orig/include/makeinclude/platform_linux_icc.GNU ACE_wrappers/include/makeinclude/platform_linux_icc.GNU
+--- ACE_wrappers.orig/include/makeinclude/platform_linux_icc.GNU	2004-09-14 12:20:46.000000000 +0200
++++ ACE_wrappers/include/makeinclude/platform_linux_icc.GNU	2004-11-01 17:43:39.319420376 +0100
+@@ -49,6 +49,14 @@
+ PLATFORM_WX_LIBS    = $(shell wx-config --libs)     $(PLATFORM_GTK_LIBS)
+ PLATFORM_WX_LDFLAGS = $(shell wx-config --ldflags)  $(PLATFORM_GTK_LDFLAGS)
+ 
++PLATFORM_TCL_CPPFLAGS=-I/usr/include/tcl8.4
++PLATFORM_TCL_LIBS=-ltcl8.4
++PLATFORM_TCL_LDFLAGS=
++
++PLATFORM_TK_CPPFLAGS=-I$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_INC_DIR $$TK_DEFS)
++PLATFORM_TK_LIBS=$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_LIB_FLAG)
++PLATFORM_TK_LDFLAGS=
++
+ PLATFORM_AIO_SUPPORT := \
+        $(shell test -e /usr/lib/librt.so && echo -DACE_HAS_AIO_CALLS)
+ 
+diff -Nru ACE_wrappers.orig/include/makeinclude/platform_linux_pgi.GNU ACE_wrappers/include/makeinclude/platform_linux_pgi.GNU
+--- ACE_wrappers.orig/include/makeinclude/platform_linux_pgi.GNU	2004-10-26 12:55:58.000000000 +0200
++++ ACE_wrappers/include/makeinclude/platform_linux_pgi.GNU	2004-11-01 17:43:50.989646232 +0100
+@@ -46,6 +46,14 @@
+ PLATFORM_WX_LIBS    = $(shell wx-config --libs)     $(PLATFORM_GTK_LIBS)
+ PLATFORM_WX_LDFLAGS = $(shell wx-config --ldflags)  $(PLATFORM_GTK_LDFLAGS)
+ 
++PLATFORM_TCL_CPPFLAGS=-I/usr/include/tcl8.4
++PLATFORM_TCL_LIBS=-ltcl8.4
++PLATFORM_TCL_LDFLAGS=
++
++PLATFORM_TK_CPPFLAGS=-I$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_INC_DIR $$TK_DEFS)
++PLATFORM_TK_LIBS=$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_LIB_FLAG)
++PLATFORM_TK_LDFLAGS=
++
+ PLATFORM_AIO_SUPPORT := \
+        $(shell test -e /usr/lib/librt.so && echo -DACE_HAS_AIO_CALLS)
+ 
+diff -Nru ACE_wrappers.orig/include/makeinclude/platform_lynxos.GNU ACE_wrappers/include/makeinclude/platform_lynxos.GNU
+--- ACE_wrappers.orig/include/makeinclude/platform_lynxos.GNU	2004-05-29 16:17:57.000000000 +0200
++++ ACE_wrappers/include/makeinclude/platform_lynxos.GNU	2004-11-01 17:44:21.338032576 +0100
+@@ -105,6 +105,14 @@
+ PLATFORM_X11_LIBS=-lXpm -lXext -lX11 -lSM -lICE
+ PLATFORM_X11_LDFLAGS=
+ 
++PLATFORM_TCL_CPPFLAGS=-I/usr/include/tcl8.4
++PLATFORM_TCL_LIBS=-ltcl8.4
++PLATFORM_TCL_LDFLAGS=
++
++PLATFORM_TK_CPPFLAGS=-I$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_INC_DIR $$TK_DEFS)
++PLATFORM_TK_LIBS=$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_LIB_FLAG)
++PLATFORM_TK_LDFLAGS=
++
+ pipes ?= 1
+ 
+ CC              = gcc
+diff -Nru ACE_wrappers.orig/include/makeinclude/platform_sunos5_g++.GNU ACE_wrappers/include/makeinclude/platform_sunos5_g++.GNU
+--- ACE_wrappers.orig/include/makeinclude/platform_sunos5_g++.GNU	2004-03-03 01:17:37.000000000 +0100
++++ ACE_wrappers/include/makeinclude/platform_sunos5_g++.GNU	2004-11-01 17:46:57.513290328 +0100
+@@ -73,6 +73,15 @@
+ PLATFORM_X11_LIBS =-lX11
+ PLATFORM_X11_LDFLAGS=
+ 
++# TODO: Fix the parameters
++#PLATFORM_TCL_CPPFLAGS=-I/usr/include/tcl8.4
++#PLATFORM_TCL_LIBS=-ltcl8.4
++#PLATFORM_TCL_LDFLAGS=
++#
++#PLATFORM_TK_CPPFLAGS=-I$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_INC_DIR $$TK_DEFS)
++#PLATFORM_TK_LIBS=$(shell . /usr/lib/tk8.4/tkConfig.sh && echo -n $$TK_LIB_FLAG)
++#PLATFORM_TK_LDFLAGS=
++
+ ## Unfortunately, gcc 3.0 fails to many cpp files with
+ ## optimization enabled.  Even -O causes the compiler
+ ## to core dump on some files.
+diff -Nru ACE_wrappers.orig/include/makeinclude/platform_sunos5_sunc++.GNU ACE_wrappers/include/makeinclude/platform_sunos5_sunc++.GNU
+--- ACE_wrappers.orig/include/makeinclude/platform_sunos5_sunc++.GNU	2004-08-26 06:35:55.000000000 +0200
++++ ACE_wrappers/include/makeinclude/platform_sunos5_sunc++.GNU	2004-11-01 17:47:25.207080232 +0100
+@@ -61,6 +61,10 @@
+ tk_reactor = 0
+ ace_with_x11 = 0
+ 
++PLATFORM_TCL_CPPFLAGS=-I/usr/include/tcl8.4
++PLATFORM_TCL_LIBS=-ltcl8.4
++PLATFORM_TCL_LDFLAGS=
++
+ PLATFORM_TK_CPPFLAGS=
+ PLATFORM_TK_LIBS=-ltk -ltcl
+ PLATFORM_TK_LDFLAGS=
+diff -Nru ACE_wrappers.orig/include/makeinclude/wrapper_macros.GNU ACE_wrappers/include/makeinclude/wrapper_macros.GNU
+--- ACE_wrappers.orig/include/makeinclude/wrapper_macros.GNU	2004-10-14 06:57:50.000000000 +0200
++++ ACE_wrappers/include/makeinclude/wrapper_macros.GNU	2004-11-01 17:38:48.154684144 +0100
+@@ -445,9 +445,6 @@
+ 
+ ifneq ($(xt_reactor),)
+   override ace_with_x11=1
+-  CPPFLAGS += -DACE_HAS_XT $(PLATFORM_XT_CPPFLAGS)
+-  LIBS += $(PLATFORM_XT_LIBS)
+-  LDFLAGS += $(PLATFORM_XT_LDFLAGS)
+   ACE_MAKE_OPTIONS += xt_reactor
+ endif # xt_reactor
+ 
+@@ -459,9 +456,6 @@
+ ifneq ($(fl_reactor),)
+   override ace_with_x11=1
+   override ace_with_gl=1
+-  CPPFLAGS += -DACE_HAS_FL $(PLATFORM_FL_CPPFLAGS)
+-  LIBS += $(PLATFORM_FL_LIBS)
+-  LDFLAGS += $(PLATFORM_FL_LDFLAGS)
+   ACE_MAKE_OPTIONS += rl_reactor
+ endif # fl_reactor
+ 
+@@ -472,9 +466,6 @@
+ 
+ ifneq ($(tk_reactor),)
+   override ace_with_tk=1
+-  CPPFLAGS += -DACE_HAS_TK $(PLATFORM_TK_CPPFLAGS)
+-  LIBS += $(PLATFORM_TK_LIBS)
+-  LDFLAGS += $(PLATFORM_TK_LDFLAGS)
+   ACE_MAKE_OPTIONS += tk_reactor
+ endif # tk_reactor
+ 
+@@ -485,9 +476,6 @@
+ 
+ ifneq ($(qt_reactor),)
+   override ace_with_qt=1
+-  CPPFLAGS += -DACE_HAS_QT $(PLATFORM_QT_CPPFLAGS)
+-  LIBS += $(PLATFORM_QT_LIBS)
+-  LDFLAGS += $(PLATFORM_QT_LDFLAGS)
+   ACE_MAKE_OPTIONS += qt_reactor
+ endif # qt_reactor
+ 
+@@ -543,21 +531,12 @@
+ 
+ ifneq ($(ace_with_gl),)
+   override ace_with_x11 = 1
+-  CPPFLAGS += $(PLATFORM_GL_CPPFLAGS)
+-  LIBS += $(PLATFORM_GL_LIBS)
+-  LDFLAGS += $(PLATFORM_GL_LDFLAGS)
+   ACE_MAKE_OPTIONS += ace_with_gl
+ endif # ace_with_gl
+ 
+ ace_with_x11 ?=
+ ifeq ($(ace_with_x11),0)
+   override ace_with_x11 =
+-endif # ace_with_x11
+-
+-ifneq ($(ace_with_x11),)
+-  CPPFLAGS += $(PLATFORM_X11_CPPFLAGS)
+-  LIBS += $(PLATFORM_X11_LIBS)
+-  LDFLAGS += $(PLATFORM_X11_LDFLAGS)
+   ACE_MAKE_OPTIONS += ace_with_x11
+ endif # ace_with_x11
+ 
+diff -Nru ACE_wrappers.orig/TAO/tao/tao.mpc ACE_wrappers/TAO/tao/tao.mpc
+--- ACE_wrappers.orig/TAO/tao/tao.mpc	2004-09-10 01:00:46.000000000 +0200
++++ ACE_wrappers/TAO/tao/tao.mpc	2004-11-01 17:38:48.000000000 +0100
+@@ -56,8 +56,6 @@
+       default_client.cpp
+       default_server.cpp
+       default_resource.cpp
+-      xt_resource.cpp
+-      qt_resource.cpp
+     }
+     Interpretive_Marshaling {
+       append.cpp
+diff -Nru ACE_wrappers.orig/TAO/tao/tao_qtreactor.mpc ACE_wrappers/TAO/tao/tao_qtreactor.mpc
+--- ACE_wrappers.orig/TAO/tao/tao_qtreactor.mpc	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/TAO/tao/tao_qtreactor.mpc	2004-11-01 17:38:48.159683384 +0100
+@@ -0,0 +1,10 @@
++project(TAO_QtReactor) : acelib, taolib, taoversion, core, tao_output, taodefaults, ace_qt {
++  sharedname   = TAO_QtReactor
++  dynamicflags += TAO_BUILD_DLL
++
++  Source_Files(TAO_COMPONENTS) {
++    Default_Resources {
++      qt_resource.cpp
++	}
++  }
++}
+diff -Nru ACE_wrappers.orig/TAO/tao/tao_xtreactor.mpc ACE_wrappers/TAO/tao/tao_xtreactor.mpc
+--- ACE_wrappers.orig/TAO/tao/tao_xtreactor.mpc	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/TAO/tao/tao_xtreactor.mpc	2004-11-01 17:38:48.160683232 +0100
+@@ -0,0 +1,11 @@
++project(TAO_XtReactor) : acelib, taolib, taoversion, core, tao_output, taodefaults, ace_xt {
++  requires     += xt_reactor
++  sharedname   = TAO_XtReactor
++  dynamicflags = TAO_BUILD_DLL
++
++  Source_Files(TAO_COMPONENTS) {
++    Default_Resources {
++      xt_resource.cpp
++	}
++  }
++}
+diff -Nru ACE_wrappers.orig/TAO/tests/QtTests/QtTests.mpc ACE_wrappers/TAO/tests/QtTests/QtTests.mpc
+--- ACE_wrappers.orig/TAO/tests/QtTests/QtTests.mpc	2004-01-28 20:28:00.000000000 +0100
++++ ACE_wrappers/TAO/tests/QtTests/QtTests.mpc	2004-11-01 17:38:48.166682320 +0100
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id: QtTests.mpc,v 1.4 2004/01/28 19:28:00 elliott_c Exp $
+ 
+-project(*server): taoexe, portableserver, ace_qt, qt_moc {
++project(*server): taoexe, portableserver, tao_qtreactor {
+   requires += qt
+ 
+   MOC_Files {
+@@ -15,7 +15,7 @@
+   }
+ }
+ 
+-project(*client): taoexe, ace_qt, qt_moc {
++project(*client): taoexe, tao_qtreactor {
+   requires += qt
+ 
+   MOC_Files {
+diff -Nru ACE_wrappers.orig/tests/tests.mpc ACE_wrappers/tests/tests.mpc
+--- ACE_wrappers.orig/tests/tests.mpc	2004-10-26 20:19:24.000000000 +0200
++++ ACE_wrappers/tests/tests.mpc	2004-11-01 17:38:48.164682624 +0100
+@@ -1138,7 +1138,7 @@
+   }
+ }
+ 
+-project(QtReactor Test) : acetest, ace_qt, qt_moc {
++project(QtReactor Test) : acetest, ace_qtreactor {
+   exename   = QtReactor_Test
+   requires += qt
+   MOC_Files {
