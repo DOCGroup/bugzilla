@@ -1,0 +1,10 @@
+--- ./TAO/tao/Strategies/SCIOP_Acceptor.cpp.orig	Tue Nov  4 10:36:04 2008
++++ ./TAO/tao/Strategies/SCIOP_Acceptor.cpp	Tue Nov  4 10:36:31 2008
+@@ -13,6 +13,7 @@
+ #if !defined(__ACE_INLINE__)
+ #include "tao/Strategies/SCIOP_Acceptor.inl"
+ #endif /* __ACE_INLINE__ */
++#include <netdb.h>
+ 
+ ACE_RCSID(tao,
+           SCIOP_Acceptor,
