@@ -1,0 +1,557 @@
+--- G:\Dev\C\org\ACE_wrappers\ace\file.cpp	Fri Oct 28 17:14:52 2005
++++ G:\Dev\C\ACE_wrappers\ace\file.cpp	Thu Jan 19 20:21:58 2006
+@@ -79,25 +79,25 @@
+ }
+ 
+ int
+-ACE_FILE::truncate (off_t length)
++ACE_FILE::truncate (ACE_LOFF_T length)
+ {
+   ACE_TRACE ("ACE_FILE::truncate");
+   return ACE_OS::ftruncate (this->get_handle(), length);
+ }
+ 
+-off_t
+-ACE_FILE::seek (off_t offset, int startpos)
++ACE_LOFF_T
++ACE_FILE::seek (ACE_LOFF_T offset, int startpos)
+ {
+-  return ACE_OS::lseek (this->get_handle (),
++  return ACE_OS::llseek (this->get_handle (),
+                         offset,
+                         startpos);
+ }
+ 
+-off_t
++ACE_LOFF_T
+ ACE_FILE::tell (void)
+ {
+   ACE_TRACE ("ACE_FILE::tell");
+-  return ACE_OS::lseek (this->get_handle (), 0, SEEK_CUR);
++  return ACE_OS::llseek (this->get_handle (), 0, SEEK_CUR);
+ }
+ 
+ // Return the local endpoint address.
+--- G:\Dev\C\org\ACE_wrappers\ace\file.h	Fri Oct 28 17:14:52 2005
++++ G:\Dev\C\ACE_wrappers\ace\file.h	Thu Jan 19 20:08:02 2006
+@@ -52,7 +52,7 @@
+   nlink_t nlink_;
+ 
+   /// Size of file
+-  off_t size_;
++  ACE_LOFF_T size_;
+ };
+ 
+ /**
+@@ -81,7 +81,7 @@
+   int get_info (ACE_FILE_Info &finfo);
+ 
+   /// Set filesize to length byte.
+-  int truncate (off_t length);
++  int truncate (ACE_LOFF_T length);
+ 
+   /**
+    * Sets the file pointer as follows:
+@@ -94,11 +94,11 @@
+    *    o  If <whence> is <SEEK_END>, the pointer is set to the size
+    *       of the file plus offset.
+    */
+-  off_t seek (off_t offset,
++  ACE_LOFF_T seek (ACE_LOFF_T offset,
+               int whence = SEEK_CUR);
+ 
+   /// Return an offset for the file handle.
+-  off_t tell (void);
++  ACE_LOFF_T tell (void);
+ 
+   /**
+    * Disable signal @a signum
+--- G:\Dev\C\org\ACE_wrappers\ace\FILE_IO.cpp	Fri Oct 28 17:14:52 2005
++++ G:\Dev\C\ACE_wrappers\ace\FILE_IO.cpp	Mon Jan 30 22:26:54 2006
+@@ -124,7 +124,11 @@
+   ACE_TRACE ("ACE_FILE_IO::recvv");
+ 
+   io_vec->iov_base = 0;
+-  long length = ACE_OS::filesize (this->get_handle ());
++
++  // The following cast is here, as there is no current support for a recv_n() with a buffer size
++  // >2gb on OSes where ACE runs. A down-cast here avoid changing ACE's interfaces for OS calls 
++  // to 64bits, and mistakenly let think users that it's a supported operation.
++  size_t length = static_cast<size_t>(ACE_OS::filesize (this->get_handle ()));
+ 
+   if (length > 0)
+     {
+--- G:\Dev\C\org\ACE_wrappers\ace\filecache.cpp	Fri Oct 28 17:14:52 2005
++++ G:\Dev\C\ACE_wrappers\ace\filecache.cpp	Mon Jan 30 22:26:54 2006
+@@ -130,7 +130,7 @@
+     return this->file_->error ();
+ }
+ 
+-off_t
++ACE_LOFF_T
+ ACE_Filecache_Handle::size (void) const
+ {
+   if (this->file_ == 0)
+@@ -555,7 +555,7 @@
+ }
+ 
+ ACE_Filecache_Object::ACE_Filecache_Object (const ACE_TCHAR *filename,
+-                                            off_t size,
++                                            ACE_LOFF_T size,
+                                             ACE_SYNCH_RW_MUTEX &lock,
+                                             LPSECURITY_ATTRIBUTES sa)
+   : stale_ (0),
+@@ -590,7 +590,7 @@
+     }
+ 
+   // Can we write?
+-  if (ACE_OS::pwrite (this->handle_, "", 1, this->size_ - 1) != 1)
++  if (ACE_OS::pwrite (this->handle_, "", 1, static_cast<off_t>(this->size_ - 1)) != 1)
+     {
+       this->error_i (ACE_Filecache_Object::ACE_WRITE_FAILED,
+                      ACE_LIB_TEXT ("ACE_Filecache_Object::acquire: write"));
+@@ -599,7 +599,10 @@
+     }
+ 
+   // Can we map?
+-  if (this->mmap_.map (this->handle_, this->size_, PROT_RDWR, MAP_SHARED,
++ // The following cast to int (for size) is here, as there is no current support for a recv_n() with a buffer size
++  // >2gb on OSes where ACE runs. A down-cast here avoid changing ACE's interfaces for OS calls 
++  // to 64bits, and mistakenly let think users that it's a supported operation.
++  if (this->mmap_.map (this->handle_, static_cast<int>(this->size_), PROT_RDWR, MAP_SHARED,
+                        0, 0, this->sa_) != 0)
+     {
+       this->error_i (ACE_Filecache_Object::ACE_MEMMAP_FAILED,
+@@ -704,7 +707,7 @@
+   return this->filename_;
+ }
+ 
+-off_t
++ACE_LOFF_T
+ ACE_Filecache_Object::size (void) const
+ {
+   // The existence of the object means a read lock is being held.
+--- G:\Dev\C\org\ACE_wrappers\ace\filecache.h	Fri Oct 28 17:14:52 2005
++++ G:\Dev\C\ACE_wrappers\ace\filecache.h	Thu Jan 19 20:08:13 2006
+@@ -117,7 +117,7 @@
+   int error (void) const;
+ 
+   /// The size of the file.
+-  off_t size (void) const;
++  ACE_LOFF_T size (void) const;
+ 
+ protected:
+   /// Default do nothing constructor.  Prevent it from being called.
+@@ -249,7 +249,7 @@
+ 
+   /// Creates a file for writing.
+   ACE_Filecache_Object (const ACE_TCHAR *filename,
+-                        off_t size,
++                        ACE_LOFF_T size,
+                         ACE_SYNCH_RW_MUTEX &lock,
+                         LPSECURITY_ATTRIBUTES sa = 0);
+ 
+@@ -277,7 +277,7 @@
+   void *address (void) const;
+ 
+   /// size_ accessor.
+-  off_t size (void) const;
++  ACE_LOFF_T size (void) const;
+ 
+   /// True if file on disk is newer than cached file.
+   int update (void) const;
+@@ -327,7 +327,7 @@
+ 
+   /// Used to compare against the real file to test if an update is needed.
+   ACE_stat stat_;
+-  off_t size_;
++  ACE_LOFF_T size_;
+ 
+   /// Status indicators.
+   int action_;
+--- G:\Dev\C\org\ACE_wrappers\ace\mem_map.cpp	Fri Oct 28 17:14:54 2005
++++ G:\Dev\C\ACE_wrappers\ace\mem_map.cpp	Mon Jan 30 22:26:54 2006
+@@ -99,7 +99,7 @@
+                      int prot,
+                      int share,
+                      void *addr,
+-                     off_t offset,
++                     ACE_LOFF_T offset,
+                      LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_Mem_Map::map_it");
+@@ -125,22 +125,25 @@
+   if (result == -1)
+     return -1;
+ #else
+-  long result = ACE_OS::filesize (this->handle_);
++  ACE_LOFF_T result = ACE_OS::filesize (this->handle_);
+ #endif /* CHORUS */
+ 
+   // At this point we know <result> is not negative...
+-  size_t current_file_length = static_cast<size_t> (result);
++  ACE_LOFF_T current_file_length = static_cast<ACE_LOFF_T> (result);
+ 
+   // Flag to indicate if we need to extend the back store
+   int extend_backing_store = 0;
+ 
+   // File length requested by user
+-  size_t requested_file_length = 0;
++  ACE_LOFF_T requested_file_length = 0;
+ 
+   // Check <length_request>
+   if (length_request == -1)
+     // Set length to file_request.
+-    this->length_ = current_file_length - offset;
++	// The following cast is here, as there is no current support for a memory mapping with a size
++	// >2gb on OSes where ACE runs. A down-cast here avoid changing ACE's interfaces for OS calls 
++	// to 64bits, and mistakenly let think users that it's a supported operation.
++    this->length_ = static_cast<size_t>(current_file_length - offset);
+   else
+     {
+       // File length implicitly requested by user
+@@ -184,7 +187,7 @@
+         return -1;
+ #else
+       // This nonsense is to make this code similar to the above code.
+-      size_t actual_file_length;
++      ACE_LOFF_T actual_file_length;
+       if (requested_file_length > 0)
+         // This will make the file size <requested_file_length>
+         actual_file_length = requested_file_length;
+@@ -277,7 +280,7 @@
+                   int prot,
+                   int share,
+                   void *addr,
+-                  off_t offset,
++                  ACE_LOFF_T offset,
+                   LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_Mem_Map::map");
+@@ -318,7 +321,7 @@
+                           int prot,
+                           int share,
+                           void *addr,
+-                          off_t offset,
++                          ACE_LOFF_T offset,
+                           LPSECURITY_ATTRIBUTES sa)
+   : base_addr_ (MAP_FAILED),
+     length_ (0),
+@@ -349,7 +352,7 @@
+                           int prot,
+                           int share,
+                           void *addr,
+-                          off_t offset,
++                          ACE_LOFF_T offset,
+                           LPSECURITY_ATTRIBUTES sa)
+   : base_addr_ (MAP_FAILED),
+     length_ (0),
+--- G:\Dev\C\org\ACE_wrappers\ace\mem_map.h	Sat Nov 26 04:13:14 2005
++++ G:\Dev\C\ACE_wrappers\ace\mem_map.h	Thu Jan 19 20:34:52 2006
+@@ -52,7 +52,7 @@
+                int prot = PROT_RDWR,
+                int share = ACE_MAP_PRIVATE,
+                void *addr = 0,
+-               off_t offset = 0,
++               ACE_LOFF_T offset = 0,
+                LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Map a file specified by <file_name>.
+@@ -63,7 +63,7 @@
+                int prot = PROT_RDWR,
+                int share = ACE_MAP_PRIVATE,
+                void *addr = 0,
+-               off_t offset = 0,
++               ACE_LOFF_T offset = 0,
+                LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Map a file from an open file descriptor <handle>.  This function
+@@ -73,7 +73,7 @@
+            int prot = PROT_RDWR,
+            int share = ACE_MAP_PRIVATE,
+            void *addr = 0,
+-           off_t offset = 0,
++           ACE_LOFF_T offset = 0,
+            LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Remap the file associated with <handle_>.
+@@ -81,7 +81,7 @@
+            int prot = PROT_RDWR,
+            int share = ACE_MAP_PRIVATE,
+            void *addr = 0,
+-           off_t offset = 0,
++           ACE_LOFF_T offset = 0,
+            LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Map a file specified by <filename>.
+@@ -92,7 +92,7 @@
+            int prot = PROT_RDWR,
+            int share = ACE_MAP_PRIVATE,
+            void *addr = 0,
+-           off_t offset = 0,
++           ACE_LOFF_T offset = 0,
+            LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Destructor.
+@@ -183,7 +183,7 @@
+               int prot = PROT_RDWR,
+               int share = MAP_SHARED,
+               void *addr = 0,
+-              off_t offset = 0,
++              ACE_LOFF_T offset = 0,
+               LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   // = Disallow copying and assignment.
+--- G:\Dev\C\org\ACE_wrappers\ace\mem_map.inl	Fri Oct 28 17:14:54 2005
++++ G:\Dev\C\ACE_wrappers\ace\mem_map.inl	Thu Jan 19 20:34:27 2006
+@@ -29,7 +29,7 @@
+                   int prot,
+                   int share,
+                   void *addr,
+-                  off_t offset,
++                  ACE_LOFF_T offset,
+                   LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_Mem_Map::map");
+@@ -43,7 +43,7 @@
+                   int prot,
+                   int share,
+                   void *addr,
+-                  off_t offset,
++                  ACE_LOFF_T offset,
+                   LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_Mem_Map::map");
+@@ -127,7 +127,7 @@
+     {
+       // Write back the contents of the shared memory object to the
+       // file.
+-      const off_t filesize = ACE_OS::filesize (handle_);
++      const ACE_LOFF_T filesize = ACE_OS::filesize (handle_);
+       writeback_result =
+         ACE_OS::lseek (handle_, 0, 0) != -1
+         && ACE_OS::write (handle_,
+@@ -164,7 +164,7 @@
+   if (write_enabled_)
+     {
+       // Write back the contents of the shared memory object to the file.
+-      const off_t filesize = ACE_OS::filesize (handle_);
++      const ACE_LOFF_T filesize = ACE_OS::filesize (handle_);
+       writeback_result =
+         ACE_OS::lseek (handle_, 0, 0) != -1
+         && ACE_OS::write (handle_,
+--- G:\Dev\C\org\ACE_wrappers\ace\MMAP_Memory_Pool.cpp	Fri Oct 28 17:14:54 2005
++++ G:\Dev\C\ACE_wrappers\ace\MMAP_Memory_Pool.cpp	Mon Jan 30 22:26:54 2006
+@@ -394,7 +394,12 @@
+ {
+   ACE_TRACE ("ACE_MMAP_Memory_Pool::remap");
+   //  ACE_DEBUG ((LM_DEBUG,  ACE_LIB_TEXT ("Remapping with fault address at: %X\n"), addr));
+-  off_t current_map_size = ACE_OS::filesize (this->mmap_.handle ());
++
++  // The following cast is here, as there is no current support for a memory mapping with a size
++  // >2gb on OSes where ACE runs. A down-cast here avoid changing ACE's interfaces for OS calls 
++  // to 64bits, and mistakenly let think users that it's a supported operation.
++  // @@TODO: Maybe we should return an error in this case ?
++  size_t current_map_size = static_cast<size_t>(ACE_OS::filesize (this->mmap_.handle ()));
+   // ACE_OS::lseek (this->mmap_.handle (), 0, SEEK_END);
+ 
+   if (!(addr < (void *) ((char *) this->mmap_.addr () + current_map_size)
+@@ -473,7 +478,11 @@
+   if (guess_on_fault_)
+     {
+       // Check if the current mapping is up to date.
+-      off_t current_map_size = ACE_OS::filesize (this->mmap_.handle ());
++      // The following cast is here, as there is no current support for a memory mapping with a size
++	  // >2gb on OSes where ACE runs. A down-cast here avoid changing ACE's interfaces for OS calls 
++	  // to 64bits, and mistakenly let think users that it's a supported operation.
++      // @@TODO: Maybe we should return an error in this case ?
++      size_t current_map_size = static_cast<size_t>(ACE_OS::filesize (this->mmap_.handle ()));
+ 
+       if (static_cast<size_t> (current_map_size) == this->mmap_.size ())
+         {
+--- G:\Dev\C\org\ACE_wrappers\ace\os_ns_sys_mman.h	Fri Oct 28 17:14:54 2005
++++ G:\Dev\C\ACE_wrappers\ace\os_ns_sys_mman.h	Thu Jan 19 20:08:35 2006
+@@ -52,7 +52,7 @@
+               int prot,
+               int flags,
+               ACE_HANDLE handle,
+-              off_t off = 0,
++              ACE_LOFF_T off = 0,
+               ACE_HANDLE *file_mapping = 0,
+               LPSECURITY_ATTRIBUTES sa = 0,
+               const ACE_TCHAR *file_mapping_name = 0);
+--- G:\Dev\C\org\ACE_wrappers\ace\os_ns_sys_mman.inl	Fri Oct 28 17:14:54 2005
++++ G:\Dev\C\ACE_wrappers\ace\os_ns_sys_mman.inl	Thu Jan 19 20:26:43 2006
+@@ -41,7 +41,7 @@
+               int prot,
+               int flags,
+               ACE_HANDLE file_handle,
+-              off_t off,
++              ACE_LOFF_T off,
+               ACE_HANDLE *file_mapping,
+               LPSECURITY_ATTRIBUTES sa,
+               const ACE_TCHAR *file_mapping_name)
+@@ -142,15 +142,15 @@
+ #  if !defined (ACE_HAS_WINCE)
+   void *addr_mapping = ::MapViewOfFileEx (*file_mapping,
+                                           nt_flags,
+-                                          0,
+-                                          off,
++                                          static_cast<DWORD>((off>>32)&0xFFFFFFFF),
++                                          static_cast<DWORD>(off&&0xFFFFFFFF),
+                                           len,
+                                           addr);
+ #  else
+   void *addr_mapping = ::MapViewOfFile (*file_mapping,
+                                         nt_flags,
+-                                        0,
+-                                        off,
++                                        static_cast<DWORD>((off>>32)&0xFFFFFFFF),
++                                        static_cast<DWORD>(off&&0xFFFFFFFF),
+                                         len);
+ #  endif /* ! ACE_HAS_WINCE */
+ 
+@@ -184,7 +184,7 @@
+   else
+     {
+       // The size of the shared memory object must be explicitly set on LynxOS.
+-      const off_t filesize = ACE_OS::filesize (file_handle);
++      const ACE_LOFF_T filesize = ACE_OS::filesize (file_handle);
+       if (::ftruncate (*file_mapping, filesize) == -1)
+         return MAP_FAILED;
+       else
+--- G:\Dev\C\org\ACE_wrappers\ace\os_ns_sys_stat.h	Fri Oct 28 17:14:54 2005
++++ G:\Dev\C\ACE_wrappers\ace\os_ns_sys_stat.h	Thu Jan 19 20:08:43 2006
+@@ -53,10 +53,10 @@
+ 
+   // non-standard
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  long filesize (ACE_HANDLE handle);
++  ACE_LOFF_T filesize (ACE_HANDLE handle);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  long filesize (const ACE_TCHAR *handle);
++  ACE_LOFF_T filesize (const ACE_TCHAR *handle);
+ 
+ 
+   //@}
+--- G:\Dev\C\org\ACE_wrappers\ace\os_ns_sys_stat.inl	Mon Nov 14 09:22:48 2005
++++ G:\Dev\C\ACE_wrappers\ace\os_ns_sys_stat.inl	Thu Jan 19 20:21:01 2006
+@@ -115,19 +115,25 @@
+   // This function returns the number of bytes in the file referenced by
+   // FD.
+ 
+-  ACE_INLINE long
++  ACE_INLINE ACE_LOFF_T
+   filesize (ACE_HANDLE handle)
+   {
+     ACE_OS_TRACE ("ACE_OS::filesize");
+ #if defined (ACE_WIN32)
+-    ACE_WIN32CALL_RETURN (::GetFileSize (handle, 0), long, -1);
++	DWORD  sl,sh;
++	sl=::GetFileSize (handle, &sh);
++	
++	ACE_LOFF_T s=sh;
++	s<<=32;
++	s+=sl;	
++    ACE_WIN32CALL_RETURN (s, long, -1);
+ #else /* !ACE_WIN32 */
+     ACE_stat sb;
+     return ACE_OS::fstat (handle, &sb) == -1 ? -1 : (long) sb.st_size;
+ #endif /* ACE_WIN32 */
+   }
+ 
+-  ACE_INLINE long
++  ACE_INLINE ACE_LOFF_T
+   filesize (const ACE_TCHAR *filename)
+   {
+     ACE_OS_TRACE ("ACE_OS::filesize");
+@@ -135,7 +141,7 @@
+     ACE_HANDLE h = ACE_OS::open (filename, O_RDONLY);
+     if (h != ACE_INVALID_HANDLE)
+       {
+-        long size = ACE_OS::filesize (h);
++        ACE_LOFF_T size = ACE_OS::filesize (h);
+         ACE_OS::close (h);
+         return size;
+       }
+--- G:\Dev\C\org\ACE_wrappers\ace\OS_NS_unistd.h	Fri Oct 28 17:14:54 2005
++++ G:\Dev\C\ACE_wrappers\ace\OS_NS_unistd.h	Thu Jan 19 20:24:54 2006
+@@ -139,7 +139,7 @@
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   int ftruncate (ACE_HANDLE,
+-                 off_t);
++                 ACE_LOFF_T);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   char *getcwd (char *, size_t);
+@@ -301,7 +301,7 @@
+                 long count);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  int truncate (const ACE_TCHAR *filename, off_t length);
++  int truncate (const ACE_TCHAR *filename, ACE_LOFF_T length);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   u_long ualarm (u_long usecs,
+--- G:\Dev\C\org\ACE_wrappers\ace\os_ns_unistd.inl	Fri Nov 04 12:45:58 2005
++++ G:\Dev\C\ACE_wrappers\ace\os_ns_unistd.inl	Mon Jan 30 22:26:54 2006
+@@ -402,11 +402,13 @@
+ }
+ 
+ ACE_INLINE int
+-ACE_OS::ftruncate (ACE_HANDLE handle, off_t offset)
++ACE_OS::ftruncate (ACE_HANDLE handle, ACE_LOFF_T offset)
+ {
+   ACE_OS_TRACE ("ACE_OS::ftruncate");
+ #if defined (ACE_WIN32)
+-  if (::SetFilePointer (handle, offset, 0, FILE_BEGIN) != (unsigned) -1)
++  LARGE_INTEGER loff;
++  loff.QuadPart=offset;
++  if (::SetFilePointerEx (handle, loff, 0, FILE_BEGIN) != (unsigned) -1)
+     ACE_WIN32CALL_RETURN (ACE_ADAPT_RETVAL (::SetEndOfFile (handle), ace_result_), int, -1);
+   else
+     ACE_FAIL_RETURN (-1);
+@@ -416,7 +418,7 @@
+   ACE_UNUSED_ARG (offset);
+   ACE_NOTSUP_RETURN (-1);
+ #elif defined (ACE_PSOS)
+-  ACE_OSCALL_RETURN (::ftruncate_f (handle, offset), int, -1);
++  ACE_OSCALL_RETURN (::ftruncate_f (handle, offset), int, -1); 
+ #else
+   ACE_OSCALL_RETURN (::ftruncate (handle, offset), int, -1);
+ #endif /* ACE_WIN32 */
+@@ -807,7 +809,7 @@
+   return static_cast<off_t> (newptr);
+ # endif /* defined (ACE_PSOS_LACKS_PHILE */
+ #else
+-  ACE_OSCALL_RETURN (::lseek (handle, offset, whence), off_t, -1);
++  ACE_OSCALL_RETURN (::lseek (handle, offset, whence), off_t, -1); 
+ #endif /* ACE_WIN32 */
+ }
+ 
+@@ -1184,17 +1186,20 @@
+ 
+ ACE_INLINE int
+ ACE_OS::truncate (const ACE_TCHAR *filename,
+-                  off_t offset)
++                  ACE_LOFF_T offset)
+ {
+   ACE_OS_TRACE ("ACE_OS::truncate");
+ #if defined (ACE_WIN32)
+   ACE_HANDLE handle = ACE_OS::open (filename,
+                                     O_WRONLY,
+                                     ACE_DEFAULT_FILE_PERMS);
++  LARGE_INTEGER loff;
++  loff.QuadPart=offset;
++
+   if (handle == ACE_INVALID_HANDLE)
+     ACE_FAIL_RETURN (-1);
+-  else if (::SetFilePointer (handle,
+-                             offset,
++  else if (::SetFilePointerEx (handle,
++                             loff,
+                              0,
+                              FILE_BEGIN) != (unsigned) -1)
+     {
