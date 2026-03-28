@@ -1,0 +1,108 @@
+00445B42 ACE_DLL_Manager::open_dll(this=:00D74CBC, dll_name=:00D95158, open_mode=0, handle=NULL)
+00443AD6 ACE_DLL::open_i(this=:00D9502C, dll_filename=:00D95070, open_mode=0, close_handle_on_destruction=1, handle=NULL)
+004439E2 ACE_DLL::open(this=:00D9502C, dll_filename=:00D95070, open_mode=0, close_handle_on_destruction=1)
+004865EF ACE_Location_Node::open_dll(this=:00D95020, yyerrno=:0149E0C8)
+004868ED ACE_Function_Node::symbol(this=:00D95020,  =:00D76750, yyerrno=:0149E0C8, gobbler=:0149E0C4)
+00487099 ACE_Service_Type_Factory::make_service_type(this=:00D95080, cfg=:00D76750)
+004A27FE ACE_Service_Gestalt::initialize(this=:00D76750, stf=:00D95080, parameters=:00D95104)
+0048615A ACE_Dynamic_Node::apply(this=:00D950D0, config=:00D76750, yyerrno=:0149E7DC)
+004B5D44 ace_yyparse(ace_svc_conf_parameter=:0149E7D4)
+004A307B ACE_Service_Gestalt::process_directives_i(this=:00D76750, param=:0149E7D4)
+004A3458 ACE_Service_Gestalt::process_directive(this=:00D76750, directive=:0063A984)
+0049E011 ACE_Service_Config::process_directive(directive=:0063A984)
+005DD384 PortableInterceptor::register_orb_initializer(init=:00D817BC)
+01523EA1 TAO_CSD_Framework_Loader::init()
+015012AF TAO_CSD_ThreadPool::init()
+01501288 _STCON0_()
+3267E2F5 C:\PROGRA~1\Borland\CBUILD~1\Bin\CC3260MT.DLL
+3267E813 C:\PROGRA~1\Borland\CBUILD~1\Bin\CC3260MT.DLL
+0150113C CSD_Framework
+7C91CBAB ntdll.dll
+7C916178 ntdll.dll
+7C9162DA ntdll.dll
+7C801BB9 C:\WINDOWS\system32\kernel32.dll
+7C801D6E C:\WINDOWS\system32\kernel32.dll
+7C801DA4 C:\WINDOWS\system32\kernel32.dll
+004798A8 ACE_OS::dlopen(fname=:00D81C9C, mode=0)
+00443EE2 ACE_DLL_Handle::open(this=:00D8FF9C, dll_name=:00D6F948, open_mode=0, handle=NULL)
+00445C5E ACE_DLL_Manager::open_dll(this=:00D74CBC, dll_name=:00D6F948, open_mode=0, handle=NULL)
+00443AD6 ACE_DLL::open_i(this=:00D8AC54, dll_filename=:00D8AC10, open_mode=0, close_handle_on_destruction=1, handle=NULL)
+004439E2 ACE_DLL::open(this=:00D8AC54, dll_filename=:00D8AC10, open_mode=0, close_handle_on_destruction=1)
+004865EF ACE_Location_Node::open_dll(this=:00D8AC48, yyerrno=:0149F228)
+004868ED ACE_Function_Node::symbol(this=:00D8AC48,  =:00D76750, yyerrno=:0149F228, gobbler=:0149F224)
+00487099 ACE_Service_Type_Factory::make_service_type(this=:00D7F3A8, cfg=:00D76750)
+004A27FE ACE_Service_Gestalt::initialize(this=:00D76750, stf=:00D7F3A8, parameters=:00D89478)
+0048615A ACE_Dynamic_Node::apply(this=:00D6FBF0, config=:00D76750, yyerrno=:0149F970)
+004B5D44 ace_yyparse(ace_svc_conf_parameter=:0149F968)
+004A307B ACE_Service_Gestalt::process_directives_i(this=:00D76750, param=:0149F968)
+004A3251 ACE_Service_Gestalt::process_file(this=:00D76750, file=:00D8ACF4)
+004A3F9D ACE_Service_Gestalt::process_directives(this=:00D76750)
+004A3929 ACE_Service_Gestalt::open_i(this=:00D76750,  =:00D8ABFC,  =:006494B0,  =false,  =false, ignore_debug_flag=false)
+004A41BA ACE_Service_Gestalt::open(this=:00D76750, argc=3, argv=:00D8ABEC, logger_key=:006494B0, ignore_static_svcs=false, ignore_default_svc_conf=false, ignore_debug_flag=false)
+005FE5A1 __UNNS__TAO_Internal_01c7c92cb8adf260::open_private_services_i(pcfg=:00D76750, argc=:0149FAB4, argv=:00D8ABEC, skip_service_config_open=false, ignore_default_svc_conf_file=false)
+005FE30D TAO::ORB::open_services(pcfg=:00D76750, argc=:0149FDAC, argv=:00D74B84)
+005CAC2D CORBA::ORB_init(argc=:0149FDAC, argv=:00D74B84, orbid=NULL)
+013816BF Client_Worker::test_main(this=:00D74C74, argc=0, argv=:00D74B84)
+01383A25 Service_Config_ORB_DLL::svc(this=:00D76588)
+004B8D29 ACE_Task_Base::svc_run(args=:00D76588)
+004B93DC ACE_Thread_Adapter::invoke_i(this=:00D7F3A8)
+004B92D0 ACE_Thread_Adapter::invoke(this=:00D7F3A8)
+00427C55 ace_thread_adapter(args=:00D7F3A8)
+3267F32C C:\PROGRA~1\Borland\CBUILD~1\Bin\CC3260MT.DLL
+3267F35F C:\PROGRA~1\Borland\CBUILD~1\Bin\CC3260MT.DLL
+7C80B683 C:\WINDOWS\system32\kernel32.dll
+
+
+00445B42 ACE_DLL_Manager::open_dll(this=:00D74CBC, dll_name=:00D95158, open_mode=0, handle=NULL)
+00443AD6 ACE_DLL::open_i(this=:00D9502C, dll_filename=:00D95070, open_mode=0, close_handle_on_destruction=1, handle=NULL)
+004439E2 ACE_DLL::open(this=:00D9502C, dll_filename=:00D95070, open_mode=0, close_handle_on_destruction=1)
+004865EF ACE_Location_Node::open_dll(this=:00D95020, yyerrno=:0149E0C8)
+004868ED ACE_Function_Node::symbol(this=:00D95020,  =:00D76750, yyerrno=:0149E0C8, gobbler=:0149E0C4)
+00487099 ACE_Service_Type_Factory::make_service_type(this=:00D95080, cfg=:00D76750)
+004A27FE ACE_Service_Gestalt::initialize(this=:00D76750, stf=:00D95080, parameters=:00D95104)
+0048615A ACE_Dynamic_Node::apply(this=:00D950D0, config=:00D76750, yyerrno=:0149E7DC)
+004B5D44 ace_yyparse(ace_svc_conf_parameter=:0149E7D4)
+004A307B ACE_Service_Gestalt::process_directives_i(this=:00D76750, param=:0149E7D4)
+004A3458 ACE_Service_Gestalt::process_directive(this=:00D76750, directive=:0063A984)
+0049E011 ACE_Service_Config::process_directive(directive=:0063A984)
+005DD384 PortableInterceptor::register_orb_initializer(init=:00D817BC)
+01523EA1 TAO_CSD_Framework_Loader::init()
+015012AF TAO_CSD_ThreadPool::init()
+01501288 _STCON0_()
+3267E2F5 C:\PROGRA~1\Borland\CBUILD~1\Bin\CC3260MT.DLL
+3267E813 C:\PROGRA~1\Borland\CBUILD~1\Bin\CC3260MT.DLL
+0150113C CSD_Framework
+7C91CBAB ntdll.dll
+7C916178 ntdll.dll
+7C9162DA ntdll.dll
+7C801BB9 C:\WINDOWS\system32\kernel32.dll
+7C801D6E C:\WINDOWS\system32\kernel32.dll
+7C801DA4 C:\WINDOWS\system32\kernel32.dll
+004798A8 ACE_OS::dlopen(fname=:00D81C9C, mode=0)
+00443EE2 ACE_DLL_Handle::open(this=:00D8FF9C, dll_name=:00D6F948, open_mode=0, handle=NULL)
+00445C5E ACE_DLL_Manager::open_dll(this=:00D74CBC, dll_name=:00D6F948, open_mode=0, handle=NULL)
+00443AD6 ACE_DLL::open_i(this=:00D8AC54, dll_filename=:00D8AC10, open_mode=0, close_handle_on_destruction=1, handle=NULL)
+004439E2 ACE_DLL::open(this=:00D8AC54, dll_filename=:00D8AC10, open_mode=0, close_handle_on_destruction=1)
+004865EF ACE_Location_Node::open_dll(this=:00D8AC48, yyerrno=:0149F228)
+004868ED ACE_Function_Node::symbol(this=:00D8AC48,  =:00D76750, yyerrno=:0149F228, gobbler=:0149F224)
+00487099 ACE_Service_Type_Factory::make_service_type(this=:00D7F3A8, cfg=:00D76750)
+004A27FE ACE_Service_Gestalt::initialize(this=:00D76750, stf=:00D7F3A8, parameters=:00D89478)
+0048615A ACE_Dynamic_Node::apply(this=:00D6FBF0, config=:00D76750, yyerrno=:0149F970)
+004B5D44 ace_yyparse(ace_svc_conf_parameter=:0149F968)
+004A307B ACE_Service_Gestalt::process_directives_i(this=:00D76750, param=:0149F968)
+004A3251 ACE_Service_Gestalt::process_file(this=:00D76750, file=:00D8ACF4)
+004A3F9D ACE_Service_Gestalt::process_directives(this=:00D76750)
+004A3929 ACE_Service_Gestalt::open_i(this=:00D76750,  =:00D8ABFC,  =:006494B0,  =false,  =false, ignore_debug_flag=false)
+004A41BA ACE_Service_Gestalt::open(this=:00D76750, argc=3, argv=:00D8ABEC, logger_key=:006494B0, ignore_static_svcs=false, ignore_default_svc_conf=false, ignore_debug_flag=false)
+005FE5A1 __UNNS__TAO_Internal_01c7c92cb8adf260::open_private_services_i(pcfg=:00D76750, argc=:0149FAB4, argv=:00D8ABEC, skip_service_config_open=false, ignore_default_svc_conf_file=false)
+005FE30D TAO::ORB::open_services(pcfg=:00D76750, argc=:0149FDAC, argv=:00D74B84)
+005CAC2D CORBA::ORB_init(argc=:0149FDAC, argv=:00D74B84, orbid=NULL)
+013816BF Client_Worker::test_main(this=:00D74C74, argc=0, argv=:00D74B84)
+01383A25 Service_Config_ORB_DLL::svc(this=:00D76588)
+004B8D29 ACE_Task_Base::svc_run(args=:00D76588)
+004B93DC ACE_Thread_Adapter::invoke_i(this=:00D7F3A8)
+004B92D0 ACE_Thread_Adapter::invoke(this=:00D7F3A8)
+00427C55 ace_thread_adapter(args=:00D7F3A8)
+3267F32C C:\PROGRA~1\Borland\CBUILD~1\Bin\CC3260MT.DLL
+3267F35F C:\PROGRA~1\Borland\CBUILD~1\Bin\CC3260MT.DLL
+7C80B683 C:\WINDOWS\system32\kernel32.dll
