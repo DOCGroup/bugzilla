@@ -1,0 +1,76 @@
+cvs -z9 -q diff -u -wb CDR.h (in directory C:\CheckOut\ACE_wrappers\TAO\tao\)
+Index: CDR.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/CDR.h,v
+retrieving revision 1.73
+diff -u -w -b -r1.73 CDR.h
+--- CDR.h	24 Nov 2005 11:05:44 -0000	1.73
++++ CDR.h	19 Jan 2006 15:33:39 -0000
+@@ -277,6 +277,8 @@
+   /// Accessor
+   TAO_ORB_Core *orb_core (void) const;
+ 
++  ACE_Message_Block::Message_Flags
++    clr_mb_flags( ACE_Message_Block::Message_Flags less_flags );
+ 
+   // = TAO specific methods.
+   static void throw_stub_exception (int error_num ACE_ENV_ARG_DECL);
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -q diff -u -wb CDR.cpp (in directory C:\CheckOut\ACE_wrappers\TAO\tao\)
+Index: CDR.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/CDR.cpp,v
+retrieving revision 1.59
+diff -u -w -b -r1.59 CDR.cpp
+--- CDR.cpp	2 Nov 2005 07:13:02 -0000	1.59
++++ CDR.cpp	19 Jan 2006 15:20:51 -0000
+@@ -232,4 +232,10 @@
+     }
+ }
+ 
++ACE_Message_Block::Message_Flags
++TAO_InputCDR::clr_mb_flags( ACE_Message_Block::Message_Flags less_flags )
++{
++  return start_.clr_self_flags( less_flags );
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -q diff -u -wb Synch_Reply_Dispatcher.cpp (in directory C:\CheckOut\ACE_wrappers\TAO\tao\)
+Index: Synch_Reply_Dispatcher.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Synch_Reply_Dispatcher.cpp,v
+retrieving revision 1.24
+diff -u -w -b -r1.24 Synch_Reply_Dispatcher.cpp
+--- Synch_Reply_Dispatcher.cpp	2 Nov 2005 11:03:27 -0000	1.24
++++ Synch_Reply_Dispatcher.cpp	19 Jan 2006 15:26:32 -0000
+@@ -69,6 +69,15 @@
+   //this->message_state_.reset (0);
+ 
+   // Transfer the <params.input_cdr_>'s content to this->reply_cdr_
++  if (ACE_BIT_DISABLED ((*params.input_cdr_).start()->data_block()->flags(),
++                        ACE_Message_Block::DONT_DELETE))
++  {
++    // Data block is on the heap, so just duplicate it.
++    this->reply_cdr_ = *params.input_cdr_;
++    this->reply_cdr_.clr_mb_flags( ACE_Message_Block::DONT_DELETE );
++  }
++  else
++  {
+   ACE_Data_Block *db =
+     this->reply_cdr_.clone_from (*params.input_cdr_);
+ 
+@@ -93,6 +102,7 @@
+     {
+       db->release ();
+     }
++  }
+ 
+   this->state_changed (TAO_LF_Event::LFS_SUCCESS,
+                        this->orb_core_->leader_follower ());
+
+***** CVS exited normally with code 1 *****
