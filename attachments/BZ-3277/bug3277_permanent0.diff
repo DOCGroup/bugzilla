@@ -1,0 +1,201 @@
+Index: Invocation_Base.h
+===================================================================
+--- Invocation_Base.h	(revision 81213)
++++ Invocation_Base.h	(working copy)
+@@ -91,6 +91,9 @@
+     /// Did the invocation got forwarded to a new location?
+     bool is_forwarded (void) const;
+ 
++    /// Was the forward permanent?
++    bool is_permanent_forward (void) const;
++
+     /// Mutator to set the reply status of the invocation.
+     void reply_received (Invocation_Status s);
+ 
+@@ -141,6 +144,9 @@
+     /// If we get nil forward reference we need more reliable indication of forwarding.
+     bool is_forwarded_;
+ 
++    /// Is the forward is permanent?
++    bool is_permanent_forward_;
++
+     /// Is response expected?
+     bool response_expected_;
+ 
+Index: LocateRequest_Invocation_Adapter.cpp
+===================================================================
+--- LocateRequest_Invocation_Adapter.cpp	(revision 81213)
++++ LocateRequest_Invocation_Adapter.cpp	(working copy)
+@@ -84,15 +84,9 @@
+               {
+                 effective_target = synch.steal_forwarded_reference ();
+ 
+-#if TAO_HAS_INTERCEPTORS == 1
+-                CORBA::Boolean const is_permanent_forward =
+-                  (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+-#else
+-                CORBA::Boolean const is_permanent_forward = false;
+-#endif
+                 this->object_forwarded (effective_target,
+                                         resolver.stub (),
+-                                        is_permanent_forward);
++                                        synch.is_permanent_forward ());
+               }
+           }
+         catch (const ::CORBA::INV_POLICY&)
+Index: Invocation_Base.cpp
+===================================================================
+--- Invocation_Base.cpp	(revision 81213)
++++ Invocation_Base.cpp	(working copy)
+@@ -42,6 +42,7 @@
+     : details_ (details)
+     , forwarded_to_ (0)
+     , is_forwarded_ (false)
++    , is_permanent_forward_ (false)
+     , response_expected_ (response_expected)
+     , otarget_ (ot)
+     , target_ (t)
+Index: DynamicInterface/DII_Invocation_Adapter.cpp
+===================================================================
+--- DynamicInterface/DII_Invocation_Adapter.cpp	(revision 81213)
++++ DynamicInterface/DII_Invocation_Adapter.cpp	(working copy)
+@@ -140,15 +140,9 @@
+       {
+         effective_target = synch.steal_forwarded_reference ();
+ 
+-#if TAO_HAS_INTERCEPTORS == 1
+-        CORBA::Boolean const permanent_forward =
+-          (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+-#else
+-        CORBA::Boolean const permanent_forward = false;
+-#endif
+         this->object_forwarded (effective_target,
+                                 r.stub (),
+-                                permanent_forward);
++                                synch.is_permanent_forward ());
+       }
+     return status;
+   }
+Index: Messaging/Asynch_Invocation_Adapter.cpp
+===================================================================
+--- Messaging/Asynch_Invocation_Adapter.cpp	(revision 81213)
++++ Messaging/Asynch_Invocation_Adapter.cpp	(working copy)
+@@ -196,14 +196,9 @@
+       {
+         effective_target = asynch.steal_forwarded_reference ();
+ 
+-#if TAO_HAS_INTERCEPTORS == 1
+-        CORBA::Boolean const permanent_forward =
+-          (asynch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+-#else
+-        CORBA::Boolean const permanent_forward = false;
+-#endif
+-
+-        this->object_forwarded (effective_target, r.stub (), permanent_forward);
++        this->object_forwarded (effective_target,
++                                r.stub (),
++                                asynch.is_permanent_forward ());
+       }
+ 
+     return s;
+Index: Invocation_Base.inl
+===================================================================
+--- Invocation_Base.inl	(revision 81213)
++++ Invocation_Base.inl	(working copy)
+@@ -44,6 +44,12 @@
+     return this->is_forwarded_;
+   }
+ 
++  ACE_INLINE bool
++  Invocation_Base::is_permanent_forward (void) const
++  {
++    return this->is_permanent_forward_;
++  }
++
+   ACE_INLINE CORBA::Boolean
+   Invocation_Base::response_expected (void) const
+   {
+Index: Invocation_Adapter.cpp
+===================================================================
+--- Invocation_Adapter.cpp	(revision 81213)
++++ Invocation_Adapter.cpp	(working copy)
+@@ -170,14 +170,9 @@
+       {
+         effective_target = coll_inv.steal_forwarded_reference ();
+ 
+-#if TAO_HAS_INTERCEPTORS == 1
+-        CORBA::Boolean const is_permanent_forward =
+-          (coll_inv.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+-#else
+-        CORBA::Boolean const is_permanent_forward = false;
+-#endif
+-
+-        this->object_forwarded (effective_target, stub, is_permanent_forward);
++        this->object_forwarded (effective_target,
++                                stub,
++                                coll_inv.is_permanent_forward ());
+       }
+ 
+     return status;
+@@ -306,16 +301,9 @@
+       {
+         effective_target = synch.steal_forwarded_reference ();
+ 
+-#if TAO_HAS_INTERCEPTORS == 1
+-        CORBA::Boolean const is_permanent_forward =
+-          (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+-#else
+-        CORBA::Boolean const is_permanent_forward = false;
+-#endif
+-
+         this->object_forwarded (effective_target,
+                                 r.stub (),
+-                                is_permanent_forward);
++                                synch.is_permanent_forward ());
+       }
+ 
+     return status;
+@@ -335,15 +323,9 @@
+       {
+         effective_target = synch.steal_forwarded_reference ();
+ 
+-#if TAO_HAS_INTERCEPTORS == 1
+-        CORBA::Boolean const is_permanent_forward =
+-          (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
+-#else
+-        CORBA::Boolean const is_permanent_forward = false;
+-#endif
+         this->object_forwarded (effective_target,
+                                 r.stub (),
+-                                is_permanent_forward);
++                                synch.is_permanent_forward ());
+       }
+ 
+     return s;
+Index: Synch_Invocation.cpp
+===================================================================
+--- Synch_Invocation.cpp	(revision 81213)
++++ Synch_Invocation.cpp	(working copy)
+@@ -373,14 +373,17 @@
+ 
+               if (!permanent_forward_condition)
+                 {
+-                   // permanent condition not given
+-                    if (TAO_debug_level > 3)
+-                        ACE_DEBUG ((LM_DEBUG,
+-                               "TAO (%P|%t) - Synch_Twoway_Invocation::"
++                  // permanent condition not given
++                  if (TAO_debug_level > 3)
++                    ACE_DEBUG ((LM_DEBUG,
++                                "TAO (%P|%t) - Synch_Twoway_Invocation::"
+                                 "check_reply_status: unexpected LOCATION_FORWARD_PERM reply\n"));
+ 
+-                   throw ::CORBA::INTERNAL (0, CORBA::COMPLETED_NO);
++                  throw ::CORBA::INTERNAL (0, CORBA::COMPLETED_NO);
+                 }
++
++              // This is the only place where we set in permanent forward state.
++              this->is_permanent_forward_ = true;
+             }
+ 
+           return s;
