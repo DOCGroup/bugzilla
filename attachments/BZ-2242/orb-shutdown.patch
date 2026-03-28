@@ -1,0 +1,220 @@
+diff -r -u tao.orig/Default_Thread_Lane_Resources_Manager.cpp tao/Default_Thread_Lane_Resources_Manager.cpp
+--- tao.orig/Default_Thread_Lane_Resources_Manager.cpp	2005-07-27 08:38:57.302800500 -0400
++++ tao/Default_Thread_Lane_Resources_Manager.cpp	2005-09-28 09:01:43.326037600 -0400
+@@ -80,6 +80,12 @@
+   this->lane_resources_->cleanup_rw_transports ();
+ }
+ 
++void
++TAO_Default_Thread_Lane_Resources_Manager::cleanup_transports (void)
++{
++  this->lane_resources_->cleanup_transports ();
++}
++
+ int
+ TAO_Default_Thread_Lane_Resources_Manager::is_collocated (const TAO_MProfile &mprofile)
+ {
+Only in tao: Default_Thread_Lane_Resources_Manager.cpp~
+diff -r -u tao.orig/Default_Thread_Lane_Resources_Manager.h tao/Default_Thread_Lane_Resources_Manager.h
+--- tao.orig/Default_Thread_Lane_Resources_Manager.h	2005-07-27 08:38:57.318425300 -0400
++++ tao/Default_Thread_Lane_Resources_Manager.h	2005-09-28 09:01:43.763532000 -0400
+@@ -51,6 +51,9 @@
+   /// Shutdown reactor.
+   virtual void cleanup_rw_transports (void);
+ 
++  /// Cleanup all transports.
++  virtual void cleanup_transports (void);
++
+   /// Does @a mprofile belong to us?
+   int is_collocated (const TAO_MProfile &mprofile);
+ 
+Only in tao: Default_Thread_Lane_Resources_Manager.h~
+diff -r -u tao.orig/IIOP_Connection_Handler.cpp tao/IIOP_Connection_Handler.cpp
+--- tao.orig/IIOP_Connection_Handler.cpp	2005-07-27 08:39:01.693369300 -0400
++++ tao/IIOP_Connection_Handler.cpp	2005-09-27 13:41:10.179908100 -0400
+@@ -54,6 +54,16 @@
+ 
+ TAO_IIOP_Connection_Handler::~TAO_IIOP_Connection_Handler (void)
+ {
++  int result =
++    this->release_os_resources ();
++
++  if (result == -1 && TAO_debug_level)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  "TAO (%P|%t) - TAO_IIOP_Connection_Handler::~TAO_IIOP_Connection_Handler,"
++                  "release_os_resources() failed %m\n"));
++    }
++
+   delete this->transport ();
+ }
+ 
+diff -r -u tao.orig/ORB.cpp tao/ORB.cpp
+--- tao.orig/ORB.cpp	2005-07-27 08:39:03.302723700 -0400
++++ tao/ORB.cpp	2005-09-28 09:54:33.691706400 -0400
+@@ -168,11 +168,18 @@
+ CORBA::ORB::shutdown (CORBA::Boolean wait_for_completion
+                      ACE_ENV_ARG_DECL)
+ {
+-  // We cannot lock the exceptions here. We need to propogate
+-  // BAD_INV_ORDER  exceptions if needed to the caller. Locking
+-  // exceptions down would render us non-compliant with the spec.
+-  this->check_shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
+-  ACE_CHECK;
++  if (this->orb_core () == 0)
++    {
++      // If the ORB_Core pointer is zero, assume that the ORB_Core has
++      // been destroyed.
++
++      // As defined by the CORBA 2.3 specification, throw a
++      // CORBA::OBJECT_NOT_EXIST exception if the ORB has been
++      // destroyed by the time an ORB function is called.
++
++      ACE_THROW (CORBA::OBJECT_NOT_EXIST (0,
++                                          CORBA::COMPLETED_NO));
++    }
+ 
+   this->orb_core ()->shutdown (wait_for_completion
+                                ACE_ENV_ARG_PARAMETER);
+diff -r -u tao.orig/ORB_Core.cpp tao/ORB_Core.cpp
+--- tao.orig/ORB_Core.cpp	2005-07-27 08:39:03.349598100 -0400
++++ tao/ORB_Core.cpp	2005-09-28 10:08:06.103182400 -0400
+@@ -1950,24 +1950,27 @@
+                         ACE_ENV_ARG_DECL)
+   ACE_THROW_SPEC (())
+ {
++  bool was_shutdown;
++
+   ACE_TRY
+     {
+       {
+         ACE_GUARD (TAO_SYNCH_MUTEX, monitor, this->lock_);
+ 
+-        if (this->has_shutdown () != 0)
+-          return;
+-
+-        // Check if we are on the right state, i.e. do not accept
+-        // shutdowns with the 'wait_for_completion' flag set in the middle
+-        // of an upcall (because those deadlock).
+-        this->adapter_registry_.check_close (wait_for_completion
+-                                             ACE_ENV_ARG_PARAMETER);
+-        ACE_TRY_CHECK;
++	was_shutdown = this->has_shutdown ();
+ 
+-        // Set the 'has_shutdown' flag, so any further attempt to shutdown
+-        // becomes a noop.
+-        this->has_shutdown_ = 1;
++	if (!was_shutdown) {
++	  // Check if we are on the right state, i.e. do not accept
++	  // shutdowns with the 'wait_for_completion' flag set in the middle
++	  // of an upcall (because those deadlock).
++	  this->adapter_registry_.check_close (wait_for_completion
++					       ACE_ENV_ARG_PARAMETER);
++	  ACE_TRY_CHECK;
++
++	  // Set the 'has_shutdown' flag, so any further attempt to shutdown
++	  // becomes a noop.
++	  this->has_shutdown_ = 1;
++	}
+ 
+         // need to release the mutex, because some of the shutdown
+         // operations invoke application code, that could (and in practice
+@@ -1975,14 +1978,16 @@
+       }
+ 
+       this->adapter_registry_.close (wait_for_completion
+-                                     ACE_ENV_ARG_PARAMETER);
++				     ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
+-      // Shutdown reactor.
+-      this->thread_lane_resources_manager ().shutdown_reactor ();
++      if (!was_shutdown) {
++	// Shutdown reactor.
++	this->thread_lane_resources_manager ().shutdown_reactor ();
+ 
+-      // Cleanup transports that use the RW strategies
+-      this->thread_lane_resources_manager ().cleanup_rw_transports ();
++	// Cleanup transports that use the RW strategies
++	this->thread_lane_resources_manager ().cleanup_rw_transports ();
++      }
+ 
+       // Grab the thread manager
+       ACE_Thread_Manager *tm = this->thr_mgr ();
+@@ -1997,7 +2002,13 @@
+       // Explicitly destroy the object reference table since it
+       // contains references to objects, which themselves may contain
+       // reference to this ORB.
+-      this->object_ref_table_.destroy ();
++      if (!was_shutdown) {
++	this->object_ref_table_.destroy ();
++      }
++
++      if (wait_for_completion != 0) {
++	this->thread_lane_resources_manager ().cleanup_transports ();
++      }
+ 
+ #if (TAO_HAS_INTERCEPTORS == 1)
+       this->pi_current_ = 0;  // For the sake of consistency.
+diff -r -u tao.orig/Thread_Lane_Resources.cpp tao/Thread_Lane_Resources.cpp
+--- tao.orig/Thread_Lane_Resources.cpp	2005-07-27 08:39:15.802563700 -0400
++++ tao/Thread_Lane_Resources.cpp	2005-09-28 09:01:42.779169600 -0400
+@@ -546,3 +546,32 @@
+       (*handler)->transport ()->remove_reference ();
+     }
+ }
++
++void
++TAO_Thread_Lane_Resources::cleanup_transports (void)
++{
++  // Set of handlers still in the connection cache.
++  TAO::Connection_Handler_Set handlers;
++
++  // Close the transport cache and return the handlers that were still
++  // registered.  The cache will decrease the #REFCOUNT# on the
++  // handler when it removes the handler from cache.  However,
++  // #REFCOUNT# is increased when the handler is placed in the handler
++  // set.
++  this->transport_cache_->close (handlers);
++
++  // Go through the handler set, closing the connections and removing
++  // the references.
++  TAO_Connection_Handler **handler = 0;
++
++  for (TAO::Connection_Handler_Set::iterator iter (handlers);
++       iter.next (handler);
++       iter.advance ())
++    {
++      // Connection is closed.  Potential removal from the Reactor.
++      (*handler)->close_connection ();
++
++      // #REFCOUNT# related to the handler set decreases.
++      (*handler)->transport ()->remove_reference ();
++    }
++}
+diff -r -u tao.orig/Thread_Lane_Resources.h tao/Thread_Lane_Resources.h
+--- tao.orig/Thread_Lane_Resources.h	2005-07-27 08:39:15.833813300 -0400
++++ tao/Thread_Lane_Resources.h	2005-09-28 09:12:20.521006400 -0400
+@@ -83,6 +83,9 @@
+   /// threads up.
+   void cleanup_rw_transports (void);
+ 
++  /// Cleanup all transports.
++  void cleanup_transports (void);
++
+   /// @named Accessors
+   //@{
+ 
+diff -r -u tao.orig/Thread_Lane_Resources_Manager.h tao/Thread_Lane_Resources_Manager.h
+--- tao.orig/Thread_Lane_Resources_Manager.h	2005-07-27 08:39:15.896312500 -0400
++++ tao/Thread_Lane_Resources_Manager.h	2005-09-28 09:01:44.247900800 -0400
+@@ -65,6 +65,9 @@
+   /// ways to wake threads up waiting on those sockets.
+   virtual void cleanup_rw_transports (void) = 0;
+ 
++  /// Cleanup all transports.
++  virtual void cleanup_transports (void) = 0;
++
+   /// Does @a mprofile belong to us?
+   virtual int is_collocated (const TAO_MProfile& mprofile) = 0;
+ 
