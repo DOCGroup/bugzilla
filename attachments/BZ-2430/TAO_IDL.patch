@@ -1,0 +1,41 @@
+Index: TAO/TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp,v
+retrieving revision 1.7
+diff -u -r1.7 field_cdr_cs.cpp
+--- TAO/TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp	19 Aug 2005 08:02:25 -0000	1.7
++++ TAO/TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp	10 Mar 2006 21:33:36 -0000
+@@ -952,8 +952,6 @@
+                          "visit_array - "),
+                         -1);
+     }
+-
+-  ACE_NOTREACHED (return 0);
+ }
+ 
+ int
+Index: TAO/TAO_IDL/util/utl_global.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/util/utl_global.cpp,v
+retrieving revision 1.141
+diff -u -r1.141 utl_global.cpp
+--- TAO/TAO_IDL/util/utl_global.cpp	28 Feb 2006 10:24:52 -0000	1.141
++++ TAO/TAO_IDL/util/utl_global.cpp	10 Mar 2006 21:01:43 -0000
+@@ -1424,8 +1424,7 @@
+ #if defined (ACE_WIN32)
+   // No wait or anything in Win32.
+   return 0;
+-#endif /* ACE_WIN32 */
+-
++#else
+   // Wait for gperf to complete.
+   ACE_exitcode wait_status = 0;
+   if (process.wait (&wait_status) == -1)
+@@ -1463,6 +1462,7 @@
+           return -1;
+         }
+     }
++#endif /* ACE_WIN32 */
+ }
+ 
+ void
