@@ -1,0 +1,176 @@
+Index: common/LocatorImpl.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ACEXML/common/LocatorImpl.cpp,v
+retrieving revision 1.6
+diff -u -r1.6 LocatorImpl.cpp
+--- common/LocatorImpl.cpp	30 May 2003 03:31:48 -0000	1.6
++++ common/LocatorImpl.cpp	29 Dec 2003 22:41:27 -0000
+@@ -16,20 +16,24 @@
+ 
+ ACEXML_LocatorImpl::ACEXML_LocatorImpl (const ACEXML_Char* systemId,
+                                         const ACEXML_Char* publicId)
+-  : publicId_ (publicId ? ACE::strnew (publicId) : 0),
+-    systemId_ (systemId ? ACE::strnew (systemId) : 0),
+-    lineNumber_ (1),
+-    columnNumber_ (0)
++  : publicId_ (ACE::strnew (publicId))
++  , systemId_ (ACE::strnew (systemId))
++  , lineNumber_ (1)
++  , columnNumber_ (0)
+ {
++  // Since we take a const pointers, we should just create and own our
++  // pointers.
+ }
+ 
+ 
+ ACEXML_LocatorImpl::ACEXML_LocatorImpl (const ACEXML_Locator& locator)
+-  : publicId_ (locator.getPublicId() ? ACE::strnew(locator.getPublicId ()): 0),
+-    systemId_ (locator.getSystemId() ? ACE::strnew(locator.getSystemId ()): 0),
+-    lineNumber_ (locator.getLineNumber ()),
+-    columnNumber_ (locator.getColumnNumber ())
++  : publicId_ (ACE::strnew(locator.getPublicId ()))
++  , systemId_ (ACE::strnew(locator.getSystemId ()))
++  , lineNumber_ (locator.getLineNumber ())
++  , columnNumber_ (locator.getColumnNumber ())
+ {
++  // Since we take a const pointers, we should just create and own our
++  // pointers.
+ }
+ 
+ ACEXML_LocatorImpl::~ACEXML_LocatorImpl (void)
+Index: parser/parser/Parser.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ACEXML/parser/parser/Parser.cpp,v
+retrieving revision 1.28
+diff -u -r1.28 Parser.cpp
+--- parser/parser/Parser.cpp	7 Nov 2003 20:27:29 -0000	1.28
++++ parser/parser/Parser.cpp	29 Dec 2003 22:41:28 -0000
+@@ -55,6 +55,19 @@
+ 
+ ACEXML_Parser::~ACEXML_Parser (void)
+ {
++  ACEXML_Parser_Context *popped = 0 ;
++
++  while (this->ctx_stack_.pop (popped) != -1)
++    {
++      delete popped;
++    }
++
++  ACEXML_Char* temp = 0;
++
++  while (this->GE_reference_.pop (temp) != -1)
++    ;
++  while (this->PE_reference_.pop (temp) != -1)
++    ;
+ }
+ 
+ int
+@@ -2867,8 +2880,12 @@
+                              const ACEXML_Char* publicId)
+ {
+   ACEXML_InputSource* input = 0;
+-  ACE_NEW_RETURN (input, ACEXML_InputSource (cstream), -1);
+-  return this->switch_input (input, systemId, publicId);
++  ACE_NEW_RETURN (input,
++                  ACEXML_InputSource (cstream),
++                  -1);
++  return this->switch_input (input,
++                             systemId,
++                             publicId);
+ }
+ 
+ int
+@@ -2877,17 +2894,27 @@
+                              const ACEXML_Char* publicId)
+ {
+   ACEXML_LocatorImpl* locator = 0;
++
+   if (!systemId)
+     systemId = input->getSystemId();
+-  ACE_NEW_RETURN (locator, ACEXML_LocatorImpl (systemId, publicId), -1);
++
++  ACE_NEW_RETURN (locator,
++                  ACEXML_LocatorImpl (systemId,
++                                      publicId), -1);
++
+   ACEXML_Parser_Context* new_context = 0;
+-  ACE_NEW_RETURN (new_context, ACEXML_Parser_Context(input, locator), -1);
++
++  ACE_NEW_RETURN (new_context,
++                  ACEXML_Parser_Context (input,
++                                         locator), -1);
++
+   if (this->push_context (new_context) != 0)
+     {
+       ACE_ERROR ((LM_ERROR, "Unable to switch input streams"));
+       delete new_context;
+       return -1;
+     }
++
+   this->current_ = new_context;
+   this->content_handler_->setDocumentLocator (this->current_->getLocator());
+   return 0;
+@@ -3298,7 +3325,8 @@
+   if (this->ctx_stack_.pop (this->current_) == -1)
+     ACE_ERROR ((LM_ERROR,
+                 ACE_TEXT ("Mismatched push/pop of Context stack")));
+-  delete this->current_->getLocator();
++  //   delete this->current_->getLocator();
++  delete this->current_;
+   this->current_ = 0;
+ 
+   ACEXML_Char* temp = 0;
+Index: parser/parser/ParserContext.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ACEXML/parser/parser/ParserContext.cpp,v
+retrieving revision 1.3
+diff -u -r1.3 ParserContext.cpp
+--- parser/parser/ParserContext.cpp	1 Nov 2003 11:15:07 -0000	1.3
++++ parser/parser/ParserContext.cpp	29 Dec 2003 22:41:29 -0000
+@@ -8,17 +8,18 @@
+ 
+ ACEXML_Parser_Context::~ACEXML_Parser_Context()
+ {
+-  delete this->instream_;
++  // @@ Kitty, need to be careful with this delete. Sometimes this
++  // seems to come off the stack
++  // delete this->instream_;
+   this->instream_ = 0;
+   delete this->locator_;
+   this->locator_ = 0;
+ }
+ 
+ #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+-template class ACE_Swap <ACEXML_InputSource*>; 
+-template class ACE_Swap <ACEXML_LocatorImpl*>; 
++template class ACE_Swap <ACEXML_InputSource*>;
++template class ACE_Swap <ACEXML_LocatorImpl*>;
+ #elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+ #  pragma instantiate ACE_Swap <ACEXML_InputSource*>
+ #  pragma instantiate ACE_Swap <ACEXML_LocatorImpl*>
+ #endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
+-
+Index: parser/parser/ParserContext.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ACEXML/parser/parser/ParserContext.inl,v
+retrieving revision 1.3
+diff -u -r1.3 ParserContext.inl
+--- parser/parser/ParserContext.inl	20 Dec 2003 17:49:56 -0000	1.3
++++ parser/parser/ParserContext.inl	29 Dec 2003 22:41:30 -0000
+@@ -15,7 +15,6 @@
+   : instream_ (instream),
+     locator_ (locator)
+ {
+-
+ }
+ 
+ ACEXML_INLINE
+@@ -23,6 +22,8 @@
+   : instream_ (src.instream_),
+     locator_ (src.locator_)
+ {
++  // @@ Kitty, this is totally wrong. You should do a deep copy
++  // here. That is why we have a copy constructor
+ 
+ }
+ 
