@@ -1,0 +1,43 @@
+diff -ur ACE_wrappers/ace/OS_NS_sys_mman.inl ACE_wrappers.autopatch/ace/OS_NS_sys_mman.inl
+--- ACE_wrappers/ace/OS_NS_sys_mman.inl	2005-07-19 03:27:12.000000000 -0700
++++ ACE_wrappers.autopatch/ace/OS_NS_sys_mman.inl	2005-10-19 12:52:45.295628000 -0700
+@@ -18,6 +18,12 @@
+ typedef char *ACE_MMAP_TYPE;
+ #endif /* ACE_HAS_VOIDPTR_MMAP */
+ 
++#if defined (ACE_LACKS_MADVISE_PROTOTYPE)
++// Needed for OS's that hide the madvise
++// for POSIX compliance
++extern "C" int madvise(caddr_t, size_t, int);
++#endif
++
+ ACE_INLINE int
+ ACE_OS::madvise (caddr_t addr, size_t len, int map_advice)
+ {
+diff -ur ACE_wrappers/configure.ac ACE_wrappers.autopatch/configure.ac
+--- ACE_wrappers/configure.ac	2005-07-07 15:14:36.000000000 -0700
++++ ACE_wrappers.autopatch/configure.ac	2005-10-19 12:19:43.949280000 -0700
+@@ -3816,6 +3816,23 @@
+ ACE_CHECK_LACKS_FUNCS(mkstemp mktemp)
+ 
+ ACE_CHECK_LACKS_FUNCS(madvise)
++if test "$ac_cv_func_madvise" = yes; then
++  dnl Check if _XOPEN_SOURCE=500 or -D__EXTENSIONS__ hides the
++  dnl madvise prototype
++  ACE_CACHE_CHECK([for madvise prototype],
++    [ace_cv_lib_has_madvise_prototype],
++    [
++     AC_EGREP_HEADER([[^_]+madvise], [sys/mman.h],
++       [
++        ace_cv_lib_has_madvise_prototype=yes
++       ],
++       [
++        ace_cv_lib_has_madvise_prototype=no
++       ])
++    ],, [AC_DEFINE([ACE_LACKS_MADVISE_PROTOTYPE])])
++  AH_TEMPLATE([ACE_LACKS_MADVISE_PROTOTYPE],
++  [Define to 1 if platform lacks madvise() declaration in <sys/mman.h>.])
++fi
+ 
+ if test "$ac_cv_header_sys_priocntl_h" = yes; then
+   AC_CHECK_FUNC([priocntl],
