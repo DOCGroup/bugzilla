@@ -1,0 +1,27 @@
+*** x:/ACE_wrappers/ace/ACE.inl	Tue Nov 30 03:50:28 2004
+--- ACE.inl	Mon Apr  4 11:54:41 2005
+***************
+*** 276,286 ****
+  ACE_INLINE u_long
+  ACE::log2 (u_long num)
+  {
+    u_long log = 0;
+  
+!   for (; num > 0; ++log)
+      num >>= 1;
+  
+    return log;
+  }
+  
+--- 276,286 ----
+  ACE_INLINE u_long
+  ACE::log2 (u_long num)
+  {
+    u_long log = 0;
+  
+!   for (; num > 1; ++log)
+      num >>= 1;
+  
+    return log;
+  }
+  
