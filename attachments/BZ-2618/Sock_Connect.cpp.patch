@@ -1,0 +1,100 @@
+Index: Sock_Connect.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Sock_Connect.cpp,vretrieving revision 1.66
+diff -u -b -r1.66 Sock_Connect.cpp
+--- Sock_Connect.cpp    1 Jun 2006 09:15:42 -0000       1.66
++++ Sock_Connect.cpp    30 Jul 2006 04:24:38 -0000
+@@ -1128,13 +1128,13 @@
+   // what it returned, so increase the num_ifs by one.
+   ++num_ifs;
+  
+-  struct ifreq *ifs = 0;
++  struct lifreq *ifs = 0;
+   ACE_NEW_RETURN (ifs,
+-                  struct ifreq[num_ifs],
++                  struct lifreq[num_ifs],
+                   -1);
+-  ACE_OS::memset (ifs, 0, num_ifs * sizeof (struct ifreq));
++  ACE_OS::memset (ifs, 0, num_ifs * sizeof (struct lifreq));
+  
+-  ACE_Auto_Array_Ptr<struct ifreq> p_ifs (ifs);
++  ACE_Auto_Array_Ptr<struct lifreq> p_ifs (ifs);
+  
+   if (p_ifs.get() == 0)
+     {
+@@ -1143,15 +1143,15 @@
+       return -1;
+     }
+  
+-  struct ifconf ifcfg;
+-  ACE_OS::memset (&ifcfg, 0, sizeof (struct ifconf));
+-  ifcfg.ifc_req = p_ifs.get ();
+-  ifcfg.ifc_len = num_ifs * sizeof (struct ifreq);
++  struct lifconf ifcfg;
++  ACE_OS::memset (&ifcfg, 0, sizeof (struct lifconf));
++  ifcfg.lifc_req = p_ifs.get ();
++  ifcfg.lifc_len = num_ifs * sizeof (struct lifreq);
+  
+ #if defined (AIX)
+   int cmd = CSIOCGIFCONF;
+ #else
+-  int cmd = SIOCGIFCONF;
++  int cmd = SIOCGLIFCONF;
+ #endif /* AIX */
+   if (ACE_OS::ioctl (handle,
+                      cmd,
+@@ -1173,8 +1173,8 @@
+                   ACE_INET_Addr[num_ifs],
+                   -1); // caller must free
+  
+-  struct ifreq *pcur = p_ifs.get ();
+-  num_ifs_found = ifcfg.ifc_len / sizeof (struct ifreq); // get the number of returned ifs
++  struct lifreq *pcur = p_ifs.get ();
++  num_ifs_found = ifcfg.lifc_len / sizeof (struct lifreq); // get the number of returned ifs
+  
+   // Pull the address out of each INET interface.  Not every interface
+   // is for IP, so be careful to count properly.  When setting the
+@@ -1186,11 +1186,11 @@
+        i < num_ifs_found;
+        i++)
+     {
+-      if (pcur->ifr_addr.sa_family == AF_INET)
++      if (pcur->lifr_addr.ss_family == AF_INET)
+         {
+ #if !defined(_UNICOS)
+           struct sockaddr_in *addr =
+-            reinterpret_cast<sockaddr_in *> (&pcur->ifr_addr);
++            reinterpret_cast<sockaddr_in *> (&pcur->lifr_addr);
+  
+           // Sometimes the kernel returns 0.0.0.0 as the interface
+           // address, skip those...
+@@ -1219,6 +1219,20 @@
+             }
+ #endif /* ! _UNICOS */
+         }
++      else if (pcur->lifr_addr.ss_family == AF_INET6)
++        {
++          struct sockaddr_in6 *addr =
++            reinterpret_cast<sockaddr_in6 *> (&pcur->lifr_addr);
++          // Sometimes the kernel returns 0.0.0.0 as the interface
++          // address, skip those...
++          if (addr->sin6_addr.s6_addr[0] != 0 ||
++              addr->sin6_addr.s6_addr[15] !=0 )
++            {
++              addrs[count].set (reinterpret_cast<sockaddr_in *>(addr),
++                                sizeof (sockaddr_in6));
++              count++;
++            }
++        }
+  
+ #if !defined(AIX) && !defined (__QNX__) && !defined (__FreeBSD__) && !defined(__NetBSD__)
+       ++pcur;
+@@ -1347,7 +1361,7 @@
+ #if defined (sparc) && defined (SIOCGIFNUM)
+   int tmp_how_many; // For 64 bit Solaris
+   if (ACE_OS::ioctl (handle,
+-                     SIOCGIFNUM,
++                     SIOCGLIFNUM,
+                      (caddr_t) &tmp_how_many) == -1)
+     ACE_ERROR_RETURN ((LM_ERROR,
+                        ACE_LIB_TEXT ("%p\n"),
