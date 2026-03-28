@@ -1,0 +1,20 @@
+Index: ace/OS_NS_Thread.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/OS_NS_Thread.inl,v
+retrieving revision 1.27
+diff -u -r1.27 OS_NS_Thread.inl
+--- ace/OS_NS_Thread.inl	24 Aug 2004 19:07:00 -0000	1.27
++++ ace/OS_NS_Thread.inl	1 Sep 2004 19:31:02 -0000
+@@ -668,9 +668,9 @@
+     {
+ #   if defined (ACE_HAS_PTHREADS_DRAFT7) || defined (ACE_HAS_PTHREADS_STD)
+ #     if defined (_POSIX_THREAD_PROCESS_SHARED) && !defined (ACE_LACKS_MUTEXATTR_PSHARED)
+-      ACE_ADAPT_RETVAL (::pthread_mutexattr_setpshared (attributes,
+-                                                        lock_scope),
+-                        result);
++      (void) ACE_ADAPT_RETVAL (::pthread_mutexattr_setpshared (attributes,
++                                                               lock_scope),
++                               result);
+ #     endif /* _POSIX_THREAD_PROCESS_SHARED && !ACE_LACKS_MUTEXATTR_PSHARED */
+ #   else /* Pthreads draft 6 */
+ #     if !defined (ACE_LACKS_MUTEXATTR_PSHARED)
