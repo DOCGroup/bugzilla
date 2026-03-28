@@ -1,0 +1,23 @@
+*** CORBANAME_Parser.cpp.orig	Wed Apr  6 11:42:29 2005
+--- CORBANAME_Parser.cpp	Wed Apr  6 12:25:46 2005
+***************
+*** 112,119 ****
+  
+          }
+  
+!       ACE_CString name_service ("/NameService", 0, 1);
+!       corbaloc_addr += name_service;
+  
+        // Obtain a reference to the naming context
+        CORBA::Object_var name_context =
+--- 112,121 ----
+  
+          }
+  
+!       if (corbaloc_addr.find ("/") == ACE_CString::npos) {
+! 	ACE_CString name_service ("/NameService", 0, 1);
+! 	corbaloc_addr += name_service;
+!       }
+  
+        // Obtain a reference to the naming context
+        CORBA::Object_var name_context =
