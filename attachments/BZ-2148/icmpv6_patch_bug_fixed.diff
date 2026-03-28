@@ -1,0 +1,2036 @@
+diff -Nru ACE_wrappers/ace/ICMP_Socket.cpp ACE_wrappers_icmpv6/ace/ICMP_Socket.cpp
+--- ACE_wrappers/ace/ICMP_Socket.cpp	2005-05-27 19:51:12.000000000 +0300
++++ ACE_wrappers_icmpv6/ace/ICMP_Socket.cpp	2005-05-28 15:29:04.000000000 +0300
+@@ -20,7 +20,6 @@
+ 
+ ACE_ALLOC_HOOK_DEFINE (ACE_ICMP_Socket)
+ 
+-
+ void
+ ACE_ICMP_Socket::dump (void) const
+ {
+@@ -28,6 +27,9 @@
+ }
+ 
+ ACE_ICMP_Socket::ACE_ICMP_Socket (void)
++#if defined (ACE_HAS_IPV6)
++    : effective_v4_ (0)
++#endif /*ACE_HAS_IPV6 */
+ {
+   ACE_TRACE ("ACE_ICMP_Socket::ACE_ICMP_Socket");
+ }
+@@ -41,10 +43,10 @@
+   ACE_TRACE ("ACE_ICMP_Socket::send");
+ 
+   return ACE_OS::sendto (this->get_handle (),
+-                         (char const *) buf,
++                         static_cast<char const *> (buf),
+                          n,
+                          flags,
+-                         (sockaddr const *) addr.get_addr (),
++                         static_cast<sockaddr const *> (addr.get_addr ()),
+                          addr.get_size ());
+ }
+ 
+@@ -58,11 +60,11 @@
+ 
+   int addr_len = addr.get_size ();
+   ssize_t status = ACE_OS::recvfrom (this->get_handle (),
+-                                     (char *) buf,
++                                     static_cast<char *> (buf),
+                                      n,
+                                      flags,
+-                                     (sockaddr *) addr.get_addr (),
+-                                     (int*) &addr_len);
++                                     static_cast<sockaddr *> (addr.get_addr ()),
++                                     &addr_len);
+   addr.set_size (addr_len);
+ 
+   return status;
+@@ -90,37 +92,37 @@
+ {
+   ACE_TRACE ("ACE_ICMP_Socket::open");
+ 
+-  // Check if icmp protocol is supported on this host
+-  int proto_number = -1;
+-  protoent *proto;
+-
+-  if (! (proto = getprotobyname ("icmp")))
+-    {
+-      ACE_ERROR_RETURN
+-        ((LM_ERROR,
+-          ACE_LIB_TEXT ("(%P|%t) ACE_ICMP_Socket::open: %p; %s\n"),
+-          ACE_LIB_TEXT ("getprotobyname"),
+-          ACE_LIB_TEXT ("ICMP protocol is not properly configured ")
+-          ACE_LIB_TEXT ("or not supported.")),
+-         -1);
+-    }
+-  proto_number = proto->p_proto;
+-
+-  if (proto_number != IPPROTO_ICMP || proto_number != protocol)
+-    {
+-      ACE_ERROR_RETURN ((LM_ERROR,
+-                         ACE_LIB_TEXT ("(%P|%t) ACE::ICMP_Socket::open - ")
+-                         ACE_LIB_TEXT ("only IPPROTO_ICMP protocol is ")
+-                         ACE_LIB_TEXT ("currently supported.\n")),
+-                        -1);
++  int use_ipv6 = 0;
++
++#if defined (ACE_HAS_IPV6)
++
++  if ( protocol == IPPROTO_ICMP)
++    {
++      // This is a hint for us to run IPv4, even when IPv6 is configured
++      this->effective_v4_ = 1;
++      use_ipv6 = 0;
++    }
++  else
++    {
++      // Correcting the protocol, when e.g. ACE configured to support IPV6,
++      // but the operating system is not.
++      protocol = (use_ipv6 = ACE::ipv6_enabled ()) ? IPPROTO_ICMPV6 : IPPROTO_ICMP;
++
++      this->effective_v4_ = ! use_ipv6;
+     }
+ 
++#endif /*ACE_HAS_IPV6 */
++
+   if (ACE_SOCK::open (SOCK_RAW,
+-                      AF_INET,
++                      use_ipv6 ? PF_INET6 : PF_INET,
+                       protocol,
+                       reuse_addr) == -1)
+     {
+-      return -1;
++      ACE_ERROR_RETURN 
++          ((LM_ERROR,
++            ACE_LIB_TEXT ("ACE_ICMP_Socket::open: %p\n"),
++            ACE_LIB_TEXT ("open raw socket")),
++           -1);
+     }
+ 
+   return this->shared_open (local);
+@@ -134,13 +136,15 @@
+   int error = 0;
+   if (local == ACE_Addr::sap_any)
+     {
+-      if (ACE::bind_port (this->get_handle ()) == -1)
++#if !defined (ACE_HAS_IPV6)
++        if (ACE::bind_port (this->get_handle ()) == -1)
+         {
+           error = 1;
+         }
++#endif /* !ACE_HAS_IPV6 */
+     }
+   else if (ACE_OS::bind (this->get_handle (),
+-                         reinterpret_cast<sockaddr *> (local.get_addr ()),
++                         static_cast<sockaddr *> (local.get_addr ()),
+                          local.get_size ()) == -1)
+     {
+       error = 1;
+@@ -170,7 +174,8 @@
+ 
+   if (nleft == 1)
+     {
+-      *((unsigned char *) &answer) = *((unsigned char *) w);
++      *(reinterpret_cast<unsigned char *> (&answer)) = 
++          *(reinterpret_cast<unsigned char *> (w));
+       sum += answer;
+     }
+ 
+diff -Nru ACE_wrappers/ace/ICMP_Socket.h ACE_wrappers_icmpv6/ace/ICMP_Socket.h
+--- ACE_wrappers/ace/ICMP_Socket.h	2005-05-27 19:50:56.000000000 +0300
++++ ACE_wrappers_icmpv6/ace/ICMP_Socket.h	2005-05-28 15:29:05.000000000 +0300
+@@ -6,7 +6,7 @@
+  *
+  *  $Id: ICMP_Socket.h,v 1.4 2005/05/19 22:52:41 shuston Exp $
+  *
+- *  @author Robert S. Iakobashvili <coroberti@gmail.com> <coroberti@walla.co.il>
++ *  @author Robert Iakobashvili <coroberti@gmail.com> <coroberti@bezeqint.net>
+  *  @author Gonzalo A. Diethelm <gonzalo.diethelm@aditiva.com>
+  */
+ //=============================================================================
+@@ -28,6 +28,7 @@
+ #include "ace/Time_Value.h"
+ #include "ace/os_include/netinet/os_in.h"
+ 
++
+ /**
+  * @class ICMP_Socket
+  *
+@@ -62,7 +63,8 @@
+                 ACE_Addr & addr,
+                 int flags = 0) const;
+ 
+-  /// TODO: comment
++  /// Receive an @a n byte @a buf from the datagram socket, 
++  /// uses @c recvfrom(3), and waiting up to @timeout time.
+   ssize_t recv (void * buf,
+                 size_t n,
+                 int flags,
+@@ -72,9 +74,14 @@
+ 
+   /// Wrapper around the BSD-style @c socket system call (no QoS).
+   int open (ACE_Addr const & local = ACE_Addr::sap_any,
+-            int protocol = IPPROTO_ICMP,
++            int protocol = 
++#if defined (ACE_HAS_IPV6)
++            IPPROTO_ICMPV6,
++#else
++            IPPROTO_ICMP,
++#endif /*ACE_HAS_IPV6 */
+             int reuse_addr = 0);
+-
++ 
+   /// Dump the state of object.
+   void dump (void) const;
+ 
+@@ -90,7 +97,12 @@
+ 
+   /// Constructor that takes a local listening address.
+   ACE_ICMP_Socket (ACE_Addr const & local,
+-                   int protocol = IPPROTO_ICMP,
++                   int protocol = 
++#if defined (ACE_HAS_IPV6)
++                   IPPROTO_ICMPV6,
++#else
++                   IPPROTO_ICMP,
++#endif /*ACE_HAS_IPV6 */
+                    int reuse_addr = 0);
+ 
+   /// Wrapper around BSD-style @c bind system call.
+@@ -99,6 +111,14 @@
+   /// Calculates check-sum.
+   unsigned short calculate_checksum (unsigned short* paddress,
+                                      int len);
++
++#if defined (ACE_HAS_IPV6)
++
++  /// When ACE_HAS_IPV6 configured (and even supported by OS)an, but protocol
++  /// passed is IPPROTO_ICMP, we effectively work IPv4 and ICMP-v4, e.g. to 
++  /// ping an IPv4 mapped IPv6 address, which requires IPv4 packets to be sent.
++  int effective_v4_;
++#endif /*ACE_HAS_IPV6 */
+ };
+ 
+ #if defined (__ACE_INLINE__)
+diff -Nru ACE_wrappers/ace/os_include/netinet/os_in.h ACE_wrappers_icmpv6/ace/os_include/netinet/os_in.h
+--- ACE_wrappers/ace/os_include/netinet/os_in.h	2005-04-11 11:27:21.000000000 +0300
++++ ACE_wrappers_icmpv6/ace/os_include/netinet/os_in.h	2005-05-28 15:31:16.000000000 +0300
+@@ -132,6 +132,12 @@
+ #   define IP_MAX_MEMBERSHIPS 0
+ # endif /* IP_MAX_MEMBERSHIP */
+ 
++# if defined (ACE_HAS_IPV6)
++# if !defined (IPPROTO_ICMPV6)
++#   define IPPROTO_ICMPV6 58
++# endif /* IPPROTO_ICMPV6 */
++# endif /* ACE_HAS_IPV6 */
++  
+ #ifdef __cplusplus
+ }
+ #endif /* __cplusplus */
+diff -Nru ACE_wrappers/ace/Ping_Socket.cpp ACE_wrappers_icmpv6/ace/Ping_Socket.cpp
+--- ACE_wrappers/ace/Ping_Socket.cpp	2005-05-27 19:51:43.000000000 +0300
++++ ACE_wrappers_icmpv6/ace/Ping_Socket.cpp	2005-06-04 16:43:05.000000000 +0300
+@@ -9,7 +9,7 @@
+ #include "ace/OS_NS_string.h"
+ #include "ace/OS_NS_sys_time.h"
+ #include "ace/OS_NS_sys_socket.h"
+-
++#include "ace/ACE.h"
+ #if !defined (__ACE_INLINE__)
+ # include "ace/Ping_Socket.inl"
+ #endif  /* !__ACE_INLINE__ */
+@@ -31,10 +31,19 @@
+ /*
+  * This is where ICMP-related stuff is defined on any sane system...
+  */
++#include /**/ <netinet/in.h>
+ #include /**/ <netinet/in_systm.h>
+ #include /**/ <netinet/ip.h>
+ #include /**/ <netinet/ip_icmp.h>
+ 
++// When defined ACE_HAS_IPV6 we are still may willing to use icmp-v4, when
++// e.g. the operating system not configured to use ipv6.
++//
++#if defined (ACE_HAS_IPV6)
++#include /**/ <netinet/ip6.h>
++#include /**/ <netinet/icmp6.h>
++#endif /*ACE_HAS_IPV6 */
++
+ #else  /* #if ! defined (ACE_WIN32) */
+ 
+ /*
+@@ -43,8 +52,13 @@
+  * the MSDN ping.c program and modified.
+  */
+ 
++#if !defined (ICMP_ECHO)
+ #define ICMP_ECHO       8
++#endif /* ICMP_ECHO */
++
++#if !defined (ICMP_ECHOREPLY)
+ #define ICMP_ECHOREPLY  0
++#endif /* ICMP_ECHOREPLY */
+ 
+ struct ip
+ {
+@@ -71,13 +85,132 @@
+   unsigned long  icmp_data;      // time data
+ };
+ 
+-#endif /* #if ! defined (ACE_WIN32) */
++
++#if defined (ACE_HAS_IPV6)
++
++//
++// From RFC 3542 structure of IPv6 header
++//
++struct ip6_hdr 
++{
++  union 
++  {
++    struct ip6_hdrctl 
++    {
++        ACE_UINT32 ip6_un1_flow; // 4 bits version, 8 bits TC, 20 bits flow-ID
++        ACE_UINT16 ip6_un1_plen; // payload length
++        ACE_UINT8  ip6_un1_nxt;    // next header
++        ACE_UINT8  ip6_un1_hlim;   // hop limit
++     } ip6_un1;
++          
++      ACE_UINT8 ip6_un2_vfc;     // 4 bits version, top 4 bits tclass
++  } ip6_ctlun;
++        
++    struct in6_addr ip6_src;   // source address
++    struct in6_addr ip6_dst;   // destination address
++};
++#define ip6_vfc   ip6_ctlun.ip6_un2_vfc
++#define ip6_flow  ip6_ctlun.ip6_un1.ip6_un1_flow
++#define ip6_plen  ip6_ctlun.ip6_un1.ip6_un1_plen
++#define ip6_nxt   ip6_ctlun.ip6_un1.ip6_un1_nxt
++#define ip6_hlim  ip6_ctlun.ip6_un1.ip6_un1_hlim
++#define ip6_hops  ip6_ctlun.ip6_un1.ip6_un1_hlim
++
++
++//
++// From RFC 3542 structure of ICMPv6 header
++//
++struct icmp6_hdr 
++{
++    ACE_UINT8     icmp6_type;      // type field
++    ACE_UINT8     icmp6_code;     // code field
++    ACE_UINT16    icmp6_cksum;  // checksum field
++  union 
++  {
++      ACE_UINT32  icmp6_un_data32[1]; // type-specific field
++      ACE_UINT16  icmp6_un_data16[2]; // type-specific field
++      ACE_UINT8   icmp6_un_data8[4];    // type-specific field
++  } icmp6_dataun;
++};
++#define icmp6_data32    icmp6_dataun.icmp6_un_data32
++#define icmp6_data16    icmp6_dataun.icmp6_un_data16
++#define icmp6_data8     icmp6_dataun.icmp6_un_data8
++#define icmp6_pptr      icmp6_data32[0]  // parameter prob
++#define icmp6_mtu       icmp6_data32[0]  // packet too big
++#define icmp6_id        icmp6_data16[0]    // echo request/reply
++#define icmp6_seq       icmp6_data16[1]  // echo request/reply
++#define icmp6_maxdelay  icmp6_data16[0]  // mcast group membership
++
++
++
++/* Remove it, if some header on wins defines it */
++#if !defined (ICMP6_ECHO_REQUEST)
++#define ICMP6_ECHO_REQUEST          128
++#endif /* ICMP6_ECHO_REQUEST*/
++
++/* Remove it, if some header on wins defines it */
++#if !defined (ICMP6_ECHO_REPLY)
++#define ICMP6_ECHO_REPLY            129
++#endif /* ICMP6_ECHO_REPLY */
++
++/* Remove it, if some header on wins defines it */
++#if !defined (IPPROTO_ICMPV6)
++#define IPPROTO_ICMPV6   58
++#endif /* IPPROTO_ICMPV6 */
++
++/* Remove it, if some header on wins defines it */
++struct icmp6_filter 
++{
++  ACE_UINT32 icmp6_filt[8];  /* 8*32 = 256 bits */
++};
++
++/* Remove it, if some header on wins defines it */
++#if !defined (ICMP6_FILTER)
++#define ICMP6_FILTER 18
++#endif /* ICMP6_FILTER */
++
++/* Remove it, if some header on wins defines it */
++#if !defined (ICMP6_FILTER_SETPASS)
++#define ICMP6_FILTER_SETPASS(type, filterp) \
++        ((((filterp)->icmp6_filt[(type) >> 5]) |= \
++          (1 << ((type) & 31))))
++#endif /* ICMP6_FILTER_SETPASS */
++
++/* Remove it, if some header on wins defines it */
++#if !defined (ICMP6_FILTER_SETBLOCKALL)
++#define ICMP6_FILTER_SETBLOCKALL(filterp) \
++        memset((filterp), 0, sizeof(struct icmp6_filter))
++#endif /* ICMP6_FILTER_SETBLOCKALL */
++
++/* Remove it, if some header on wins defines it */
++#if !defined (IN6_IS_ADDR_V4MAPPED)
++#define IN6_IS_ADDR_V4MAPPED(_addr) \
++	(   (((const u_long *)(_addr))[0] == 0)		\
++	 && (((const u_long *)(_addr))[1] == 0)		\
++	 && (((const u_long *)(_addr))[2] == 0xffff0000)) /* Note byte order reversed */
++/* 	    (((const u_long *)(_addr))[2] == ntohl(0x0000ffff))) */
++#endif /* IN6_IS_ADDR_V4MAPPED */
++
++/* Remove it, if some header on wins defines it */
++#if !defined (IN6_IS_ADDR_V4COMPAT)
++#define IN6_IS_ADDR_V4COMPAT(_addr) \
++	(   (((const u_long *)(_addr))[0] == 0)		\
++	 && (((const u_long *)(_addr))[1] == 0)		\
++	 && (((const u_long *)(_addr))[2] == 0)		\
++	 && (((const u_long *)(_addr))[3] != 0)		\
++	 && (((const u_long *)(_addr))[3] != 0x01000000)) /* Note byte order reversed */
++/*           (ntohl (((const u_long *)(_addr))[3]) > 1 ) */
++#endif /* IN6_IS_ADDR_V4COMPAT */
++
++#endif  /* ACE_HAS_IPV6 */
++
++#endif /* #if defined (ACE_WIN32) */
+ 
+ 
+ int const ICMP_MIN = 8;  // Minimal size of ICMP packet, header only
+ int const ICMP_DATA_LENGTH = 56;  // For ICMP data with Echo request
+-ACE_Time_Value const ACE_Ping_Socket::time_default_ (0, 500000);
+ 
++ACE_Time_Value const ACE_Ping_Socket::time_default_ (0, 500000);
+ 
+ void
+ ACE_Ping_Socket::dump (void) const
+@@ -86,6 +219,9 @@
+ }
+ 
+ ACE_Ping_Socket::ACE_Ping_Socket (void)
++  : process_id_ (getpid ()),
++    sequence_number_ (0),
++    connected_socket_ (0)
+ {
+   ACE_TRACE ("ACE_Ping_Socket::ACE_Ping_Socket");
+ }
+@@ -93,7 +229,8 @@
+ ACE_Ping_Socket::ACE_Ping_Socket (ACE_Addr const & local,
+                                   int protocol,
+                                   int reuse_addr)
+-  : sequence_number_ (0),
++  : process_id_ (getpid ()),
++    sequence_number_ (0),
+     connected_socket_ (0)
+ {
+   ACE_TRACE ("ACE_Ping_Socket::ACE_Ping_Socket");
+@@ -106,17 +243,7 @@
+       ACE_DEBUG ((LM_DEBUG,
+                   ACE_LIB_TEXT ("ACE_Ping_Socket::ACE_Ping_Socket: %p\n"),
+                   ACE_LIB_TEXT ("open")));
+-      return;
+     }
+-
+-  // trying to increase the size of socket receive buffer - some
+-  // protection from multiple responces e.g., when falling to the
+-  // multi-cast address
+-  int size = 64 * 1024;
+-  ACE_SOCK::set_option (SOL_SOCKET,
+-                        SO_RCVBUF,
+-                        (void *) &size,
+-                        sizeof (size));
+ }
+ 
+ ACE_Ping_Socket::~ACE_Ping_Socket (void)
+@@ -130,7 +257,63 @@
+                        int reuse_addr)
+ {
+   ACE_TRACE ("ACE_Ping_Socket::open");
+-  return inherited::open (local, protocol, reuse_addr);
++
++  if (inherited::open (local, 
++                       protocol, 
++                       reuse_addr) == -1)
++    {
++        ACE_ERROR_RETURN
++            ((LM_ERROR,
++              ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::")
++              ACE_LIB_TEXT ("open ")
++              ACE_LIB_TEXT ("- inherited infrustructure returns error.\n")),
++             -1);
++    }
++
++  // Trying to increase the size of socket receive buffer - certain
++  // protection from multiple responces e.g., when falling to the
++  // multi-cast address
++  int size = 64 * 1024;
++  ACE_SOCK::set_option (SOL_SOCKET,
++                        SO_RCVBUF,
++                        (void *) &size,
++                        sizeof (size));
++
++#if defined (ACE_HAS_IPV6)
++
++  /*
++   * ICMPV6 raw socket can potentially receive huge amount of 
++   * messages of different protocols and types. To limit the flow, we 
++   * are using here an application specific filter to get only ICMPv6 
++   * protocol and only ICMP6_ECHO_REPLY.
++   *
++   * For example, the filter enables us not to see 
++   * ICMP6_ECHO_REQUEST messages, while pinging loopback interface.
++   */
++
++  icmp6_filter echo_reply_filter;
++  if (this->effective_v4_ == 0)
++    {
++        // block all messages in the filter
++        ICMP6_FILTER_SETBLOCKALL (&echo_reply_filter);
++
++        // enable only ICMP6_ECHO_REPLY
++        ICMP6_FILTER_SETPASS ( ICMP6_ECHO_REPLY, &echo_reply_filter);
++
++        if (ACE_SOCK::set_option (IPPROTO_ICMPV6,
++                                  ICMP6_FILTER,
++                                  (void *) &echo_reply_filter,
++                                  sizeof (echo_reply_filter)) == -1)
++          {
++              ACE_DEBUG ((LM_DEBUG,
++                          ACE_LIB_TEXT ("ACE_Ping_Socket::open:  %p\n"),
++                          ACE_LIB_TEXT ("set_option ICMP6_FILTER failed\n")));
++          }
++    }
++
++#endif /* ACE_HAS_IPV6 */
++
++  return 0;
+ }
+ 
+ int
+@@ -149,7 +332,7 @@
+   do
+     {
+       int rval_recv = inherited::recv (icmp_recv_buff_,
+-                                       sizeof icmp_recv_buff_,
++                                       sizeof (icmp_recv_buff_),
+                                        0,
+                                        wait_time);
+       if (rval_recv < 0)
+@@ -172,7 +355,8 @@
+             }
+           return -1;
+         }
+-      else if (!this->process_incoming_dgram (icmp_recv_buff_, rval_recv))
++      else if (this->process_incoming_dgram (icmp_recv_buff_, 
++                                             rval_recv) == 0)
+         {
+           return 0; //= success
+         }
+@@ -181,7 +365,6 @@
+           after = ACE_OS::gettimeofday ();
+           if ((after - before) >= *timeout)
+             {
+-              errno = ETIMEDOUT;
+               break;
+             }
+           // new timeout, we are coming back to sit on select
+@@ -196,56 +379,67 @@
+ int
+ ACE_Ping_Socket::process_incoming_dgram (char * ptr, ssize_t len)
+ {
++#if defined (ACE_HAS_IPV6)
++  if (this->effective_v4_)
++    {
++        return this->process_ipv4 (ptr, len);
++    }
++  else
++    {
++        return this->process_ipv6 (ptr, len);
++    }
++#else
++  return this->process_ipv4 (ptr, len);  
++#endif /* ACE_HAS_IPV6 */
++}
++
++int
++ACE_Ping_Socket::process_ipv4 (char * ptr, ssize_t len)
++{
+   unsigned char hlen1;
+   int icmplen;
+-  struct ip * ip;
+-  struct icmp * icmp;
++  icmp * _icmp = 0;  
++  ip * _ip = (ip *) ptr;                 // start of IP header
+ 
+-  ip = (struct ip *) ptr;                 // start of IP header
++  // The first byte of the IPv4-header has the IP-version in the left-most 4 bits and 
++  // the length in the other 4 bits.
+ 
+-  // Warning... using knowledge of IP header layout. This avoids a maze of
+-  // #if blocks for various systems. The first byte of the header has the
+-  // IP version in the left-most 4 bits and the length in the other 4 bits.
+-#if 0
+-  hlen1 = ip->ip_hl;                      // length of IP header
+-#else
+   hlen1 = static_cast<unsigned char>(*ptr);
+   hlen1 <<= 4;                            // Bump the version off
+   hlen1 >>= 4;                            // Zero-extended length remains
+-#endif
+   hlen1 <<= 2;                            // Now it counts bytes, not words
+ 
+-  icmp = (struct icmp *) (ptr + hlen1);   // start of ICMP header
++  _icmp = (icmp *) (ptr + hlen1);   // start of ICMP header
+ 
+   if ((icmplen = len - hlen1) < ICMP_MIN)
+     {
+       ACE_DEBUG
+         ((LM_DEBUG,
+-          ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::process_incoming_dgram")
++          ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::process_ipv4")
+           ACE_LIB_TEXT (" - ICMP length is %d < 8.\n"),
+           icmplen));
+       ACE_ERROR_RETURN
+         ((LM_ERROR,
+-          ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::process_incoming_dgram - ")
+-          ACE_LIB_TEXT ("The ICMP header either not received or is corrupted.")),
++          ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::process_ipv4 - ")
++          ACE_LIB_TEXT ("The ICMP header either not received or is corrupted.\n")),
+          -1);
+     }
+ 
+-  if (icmp->icmp_type == ICMP_ECHOREPLY)
++  if (_icmp->icmp_type == ICMP_ECHOREPLY)
+     {
+       ACE_DEBUG
+         ((LM_DEBUG,
+-          ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::process_incoming_dgram")
++          ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::process_ipv4")
+           ACE_LIB_TEXT (" - ICMP_ECHOREPLY received.\n")));
+ 
+-      if (icmp->icmp_id != getpid ())
++      if (_icmp->icmp_id != this->process_id_)
+         {
+           ACE_ERROR_RETURN
+             ((LM_ERROR,
+               ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::")
+-              ACE_LIB_TEXT ("process_incoming_dgram ")
++              ACE_LIB_TEXT ("process_ipv4 ")
+               ACE_LIB_TEXT ("- The ICMP header received is a reply")
+-              ACE_LIB_TEXT (" to request of another process.")),
++              ACE_LIB_TEXT (" to request of another process.\n")),
+              -1);
+         }
+       if (icmplen < 16)
+@@ -253,31 +447,145 @@
+           ACE_ERROR_RETURN
+             ((LM_ERROR,
+               ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::")
+-              ACE_LIB_TEXT ("process_incoming_dgram - ICMP length ")
+-              ACE_LIB_TEXT ("is %d < 16."),
++              ACE_LIB_TEXT ("process_ipv4 - ICMP length ")
++              ACE_LIB_TEXT ("is %d < 16.\n"),
+               icmplen),
+              -1);
+         }
+ 
+       ACE_DEBUG
+         ((LM_DEBUG,
+-          ACE_LIB_TEXT ("(%P|%t) ACE::Ping_Socket::process_incoming_dgram - ")
++          ACE_LIB_TEXT ("(%P|%t) ACE::Ping_Socket::process_ipv4 - ")
+           ACE_LIB_TEXT ("received ")
+           ACE_LIB_TEXT ("ICMP datagram with length of %d bytes (not counting ")
+           ACE_LIB_TEXT ("IP-header): seq=%u, ttl=%d.\n"),
+-          icmplen, icmp->icmp_seq, ip->ip_ttl));
++          icmplen, _icmp->icmp_seq, _ip->ip_ttl));
+ 
+       return 0; //= success
+     }
+ 
+   ACE_DEBUG
+     ((LM_DEBUG,
+-      ACE_LIB_TEXT ("(%P|%t) ACE::Ping_Socket::process_incoming_dgram - ")
++      ACE_LIB_TEXT ("(%P|%t) ACE::Ping_Socket::process_ipv4 - ")
+       ACE_LIB_TEXT ("received datagram that is not ICMP_ECHOREPLY.\n")));
+ 
+   return -1;
+ }
+ 
++#if defined (ACE_HAS_IPV6)
++
++int
++ACE_Ping_Socket::process_ipv6 (char * ptr, ssize_t len)
++{
++  /*
++   * Surprisingly for me, on linux systems (at least when pinging loopback) we get 
++   * here only ICMP part without IPv6 header, although <len> reports the full 64 byte length. 
++   * Great ping6 utility is aware about such behavior and takes care about the input 
++   * without IPv6 header as well as with the header.
++   *
++   * Is there any specific reason not follow this practice?
++   */
++
++#if 0
++  char obuf [256];
++  ACE_OS::memset (obuf, 0, sizeof (obuf));
++  ACE::format_hexdump (ptr, len, obuf, sizeof (obuf));
++  fprintf (stderr, "buffer is %s.\n", obuf);
++#endif /* 0 or 1*/
++
++  int icmp6len = 0;
++  icmp6_hdr * icmp6 = 0;
++  unsigned char hlen1 = sizeof (ip6_hdr);
++
++  if ((icmp6len = len - hlen1) < ICMP_MIN)
++    {
++        ACE_DEBUG
++            ((LM_DEBUG,
++              ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::process_ipv6")
++              ACE_LIB_TEXT (" - ICMP6 length is %d < 8.\n"),
++              icmp6len));
++        ACE_ERROR_RETURN
++        ((LM_ERROR,
++          ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::process_ipv6 - ")
++          ACE_LIB_TEXT ("The ICMP6 header either not received or is corrupted.\n")),
++         -1);
++    }
++
++  icmp6 = reinterpret_cast<icmp6_hdr *> (ptr);
++  if (icmp6->icmp6_type == ICMP6_ECHO_REPLY) // the first case
++    {
++      //= Trying the case without IPv6 header, when only ICMPv6 
++      //= header comes.
++      return process_icmp6_echo_reply (icmp6, icmp6len);
++    }
++  else // the second case
++    {  
++      //= Attempting the case with both IPv6 header and ICMPv6
++      //= headers
++
++      ip6_hdr * ip6 = reinterpret_cast<ip6_hdr *> (ptr); // start of IPv6 header
++      
++      if (ip6->ip6_nxt != IPPROTO_ICMPV6)
++        {
++          ACE_ERROR_RETURN
++              ((LM_DEBUG,
++                ACE_LIB_TEXT ("(%P|%t) ACE::Ping_Socket::process_ipv6 - ")
++                ACE_LIB_TEXT ("received IP-datagram that is not ICMP6_ECHO_REPLY.\n")),
++               -1);
++        }
++
++      // start of the ICMPv6 header after 40 byte IPv6 header offset
++      // What about potential IPv6 options? Neither Richard Stevens,
++      // nor ping6 pay attention to that.
++      icmp6 = reinterpret_cast<icmp6_hdr *> (ptr + hlen1);
++
++      return process_icmp6_echo_reply (icmp6, icmp6len);
++    }
++  return -1;
++}
++
++int
++ACE_Ping_Socket::process_icmp6_echo_reply (icmp6_hdr * _icmp6,
++                                           int _icmp6len)
++{
++  ACE_DEBUG
++      ((LM_DEBUG,
++        ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::process_icmp_echo_reply ")
++        ACE_LIB_TEXT (" - ICMP6_ECHO_REPLY received.\n")));
++
++  if (_icmp6->icmp6_id != this->process_id_)
++    {
++      ACE_ERROR_RETURN
++          ((LM_ERROR,
++            ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::")
++            ACE_LIB_TEXT ("process_icmp_echo_reply ")
++            ACE_LIB_TEXT ("- The ICMP header received is a reply")
++            ACE_LIB_TEXT (" to request of another process.\n")),
++           -1);
++    }
++
++  if (_icmp6len < 16)
++    {
++      ACE_ERROR_RETURN
++          ((LM_ERROR,
++            ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::")
++            ACE_LIB_TEXT ("process_icmp_echo_reply - ICMP length is %d < 16.\n"),
++            _icmp6len),
++           -1);
++    }
++
++  ACE_DEBUG
++      ((LM_DEBUG,
++        ACE_LIB_TEXT ("(%P|%t) ACE::Ping_Socket::process_ipv6 - ")
++        ACE_LIB_TEXT ("received ICMP datagram with length of %d bytes ")
++        ACE_LIB_TEXT (" (not counting) IP-header: seq=%u.\n"),
++        _icmp6len, _icmp6->icmp6_seq));
++  
++  return 0;
++}
++#endif /* ACE_HAS_IPV6 */
++
++
+ int
+ ACE_Ping_Socket::send_echo_check (ACE_INET_Addr &remote_addr,
+                                   int to_connect)
+@@ -288,53 +596,181 @@
+       return -1;
+     }
+ 
+-  sockaddr_in *addr_connect = 0;
+-  addr_connect = (sockaddr_in *) remote_addr.get_addr ();
++  sockaddr * addr_connect = 0;
++  int sending_icmp_v4 = 1;
++
++#if defined (ACE_HAS_IPV6)
++
++  const int is_remote_addr_ipv6 = remote_addr.get_type () == PF_INET6;
++
++  sockaddr_in6 * sock6_addr = 0;
++
++  if (is_remote_addr_ipv6)
++    {
++        sock6_addr = static_cast<sockaddr_in6 *> (remote_addr.get_addr ());
++    }
+ 
+   /*
+-   * Nulling port field to prevent strange behavior, when a raw
+-   * socket is "connected" to a sockaddr_in with a non-nulled port.
++   * When both the raw socket is initialized to use PF_INET6 
++   * family (IPv6) and the remote address is IPv6, we still need 
++   * to ensure, that the remote address is not an IPv4 mapped to IPv6.
++   * Should we check for IN6_IS_ADDR_V4COMPAT also ?
+    */
+-  ACE_OS::memset ((void*) &addr_connect->sin_port,
+-                  0,
+-                  sizeof (addr_connect->sin_port));
++  const int is_remote_addr_ipv4_mapped_ipv6 = 
++      (is_remote_addr_ipv6 &&
++       IN6_IS_ADDR_V4MAPPED (sock6_addr->sin6_addr.s6_addr));
++
++  if ((is_remote_addr_ipv6 && is_remote_addr_ipv4_mapped_ipv6 == 0) 
++      && this->effective_v4_)
++    {
++      ACE_ERROR_RETURN
++          ((LM_ERROR,
++            ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::")
++            ACE_LIB_TEXT ("send_echo_check - error, the remote address provided ")
++            ACE_LIB_TEXT ("is IPv6, but not IPV4 mapped to IPV6, while the local ")
++            ACE_LIB_TEXT ("ACE_Ping_Socket is initialized for PF_INET (IPv4).\n")),
++           -1);
++    }
++
++   if (is_remote_addr_ipv6 == 0 && this->effective_v4_ == 0)
++    {
++      ACE_ERROR_RETURN
++          ((LM_ERROR,
++            ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::")
++            ACE_LIB_TEXT ("send_echo_check - error, the remote address provided ")
++            ACE_LIB_TEXT ("is IPv4, while the local ACE_Ping_Socket is initialized ")
++            ACE_LIB_TEXT ("for PF_INET6 (IPv6).\n")),
++           -1);
++    }
++
++  if (this->effective_v4_ == 0 && is_remote_addr_ipv6)
++    {
++      /*
++       * When the remote address is an IPv4 mapped IPv6 address, 
++       * we can use, according to Richard Stevens, only IPv4 to ping on it.
++       */
++      if (is_remote_addr_ipv4_mapped_ipv6)
++        {
++          ACE_ERROR_RETURN
++              ((LM_ERROR,
++                ACE_LIB_TEXT ("(%P|%t) ACE_Ping_Socket::")
++                ACE_LIB_TEXT ("send_echo_check - the remote address provided ")
++                ACE_LIB_TEXT ("is an IPv4 mapped IPv6 address. In order to ping such address, ")
++                ACE_LIB_TEXT ("please, use ACE_Ping_Socket, constructed or ")
++                ACE_LIB_TEXT ("initialized, using non-default protocol family PF_INET (IPv4).\n")),
++               -1);
++        }
++      else
++      {
++         // nulling port field
++        sock6_addr->sin6_port = 0;
++        
++        // The socket initialized to use PF_INET6 family (IPv6) and the remote 
++        // address is IPv6 (and not IPv4 mapped to IPv6), so we can use ICMPv6.
++        //
++        addr_connect = reinterpret_cast<sockaddr *> (sock6_addr);
++        
++        sending_icmp_v4 = 0; // sending IPv6, not IPv4
++      }
++    }
+ 
+-  // to connect the socket
+-  if (to_connect && !this->connected_socket_)
++  // TODO: Attention !!! I am not sure, what will happen in the case, when
++  //
++  // if (this->effective_v4_&& is_remote_addr_ipv4_mapped_ipv6)
++  //  {
++  // ACE_HAS_IPV6 defined, local ACE_Ping_Socket constructed as INET
++  // and remote address is IPV4 mapped to IPV6
++  // It should be a separate test case for that.
++  // 
++
++#endif /* ACE_HAS_IPV6 */
++
++  if (addr_connect == 0)
++  {
++    /*
++     * If coming here, we are working IPv4 and ICMP protocols, 
++     * whatever is the reason, and even, if the flag ACE_HAS_IPV6
++     * is defined.
++     */
++    sockaddr_in * sock4_addr = 
++        static_cast<sockaddr_in *> (remote_addr.get_addr ());
++    
++    /*
++     * Nulling port field to prevent strange behavior, when a raw
++     * socket is "connected" to a sockaddr_in with a non-nulled port.
++     */
++    sock4_addr->sin_port = 0;
++    addr_connect = reinterpret_cast<sockaddr *> (sock4_addr);
++    sending_icmp_v4 = 1;
++  }
++
++  // connecting the socket
++  if (to_connect && ! this->connected_socket_)
+     {
+       if (ACE_OS::connect (this->get_handle (),
+-                           (sockaddr*) addr_connect,
++                           addr_connect,
+                            remote_addr.get_size ()) == -1)
+         {
+           if (errno != EINTR)
+             return -1;
+-       }
++        }
+       this->connected_socket_ = 1;
+     }
+ 
+   ACE_OS::memset (this->icmp_send_buff_, 0, sizeof this->icmp_send_buff_);
+-  int datalen = ICMP_DATA_LENGTH;
+-  struct icmp *_icmp;
+ 
+-  _icmp = (struct icmp *) this->icmp_send_buff_;
+-  _icmp->icmp_type = ICMP_ECHO;
+-  _icmp->icmp_code = 0;
+-  _icmp->icmp_id = getpid ();
+-  _icmp->icmp_seq = sequence_number_++;
++  const int length_icmp = ICMP_MIN + ICMP_DATA_LENGTH;
++
++  if (sending_icmp_v4)
++    {
++      // sending ICMP over IPv4
+ 
++      icmp *_icmp = 0;
++      
++      _icmp = reinterpret_cast<icmp *> (this->icmp_send_buff_);
++      _icmp->icmp_type = ICMP_ECHO;
++      _icmp->icmp_code = 0;
++      _icmp->icmp_id = this->process_id_;
++      _icmp->icmp_seq = sequence_number_++;
++      
+ #if defined (ACE_WIN32)
+-  _icmp->icmp_data = GetTickCount ();
++      _icmp->icmp_data = GetTickCount ();
+ #else  /* #if defined (ACE_WIN32) */
+-  gettimeofday ((struct timeval *) &_icmp->icmp_data, 0);
++      gettimeofday (reinterpret_cast<timeval *> (&_icmp->icmp_data), 0);
+ #endif  /* #if defined (ACE_WIN32) */
++      
++      // checksum ICMP header and data.
++      _icmp->icmp_cksum = 0;
++      _icmp->icmp_cksum = inherited::calculate_checksum (
++          reinterpret_cast<u_short *> (_icmp),
++          length_icmp);
++    }
++  else
++  {
++    // sending ICMPv6 over IPv6 
++    
++#if defined (ACE_HAS_IPV6)
++
++    icmp6_hdr * _icmp6 = 0;
++    _icmp6 = (icmp6_hdr *) this->icmp_send_buff_;
++    _icmp6->icmp6_type = ICMP6_ECHO_REQUEST;
++    _icmp6->icmp6_code = 0;
++    _icmp6->icmp6_id = this->process_id_;
++    _icmp6->icmp6_seq = sequence_number_++;
++    
++#if defined (ACE_WIN32)
++    _icmp6->icmp6_data32[1] = (unsigned int )GetTickCount ();
++#else  /* #if defined (ACE_WIN32) */
++    gettimeofday (reinterpret_cast<timeval *> (_icmp6 + 1), 0);
++#endif  /* #if defined (ACE_WIN32) */
++    
++   // By default kernel calculates the checksum in ICMPv6
++    
++#endif /* ACE_HAS_IPV6 */     
++  }
+ 
+-  int length_icmp = ICMP_MIN + datalen; // checksum ICMP header and data.
+-  _icmp->icmp_cksum = 0;
+-  _icmp->icmp_cksum = inherited::calculate_checksum ((u_short *) _icmp,
+-                                                     length_icmp);
+   int rval_send = -1;
+-
+-  if ((rval_send = send ((void const *) icmp_send_buff_,
++  if ((rval_send = send (static_cast <void const *> (icmp_send_buff_),
+                          length_icmp,
+                          remote_addr)) != length_icmp)
+     {
+@@ -352,7 +788,9 @@
+ 
+   if ((rval_send = this->send_echo_check (remote_addr,
+                                           to_connect)) == -1)
+-    return -1;
++    {
++      return -1;
++    }
+ 
+   ACE_DEBUG
+     ((LM_DEBUG,
+diff -Nru ACE_wrappers/ace/Ping_Socket.h ACE_wrappers_icmpv6/ace/Ping_Socket.h
+--- ACE_wrappers/ace/Ping_Socket.h	2005-05-27 19:51:30.000000000 +0300
++++ ACE_wrappers_icmpv6/ace/Ping_Socket.h	2005-05-28 15:29:11.000000000 +0300
+@@ -6,7 +6,7 @@
+  *
+  *  $Id: Ping_Socket.h,v 1.6 2005/05/19 22:52:41 shuston Exp $
+  *
+- *  @author Robert S. Iakobashvili <coroberti@gmail.com> <coroberti@walla.co.il>
++ *  @author Robert Iakobashvili <coroberti@gmail.com> <coroberti@bezeqint.net>
+  *  @author Gonzalo A. Diethelm <gonzalo.diethelm@aditiva.com>
+  */
+ //=============================================================================
+@@ -26,14 +26,16 @@
+ 
+ #include "ace/ICMP_Socket.h"
+ 
++// forward declarations
+ class ACE_INET_Addr;
++struct icmp6_hdr;
+ 
+ /**
+  * @class ACE_Ping_Socket
+  *
+- * @brief This class is useful to perform ICMP echo checks (pinging)
+- * on the party of your interest.  It may be used as well to check
+- * LAN-adapters against 3rd parties.
++ * @brief This class is useful to perform ICMP or ICMPv6 echo 
++ * checks (pinging) of the party of your interest.
++ * It may be used as well to check LAN-adapters against 3rd parties.
+  */
+ class ACE_Export ACE_Ping_Socket : public ACE_ICMP_Socket
+ {
+@@ -46,31 +48,50 @@
+   /// Default constructor.
+   ACE_Ping_Socket (void);
+ 
++  /// Constructor. 
++  /// To make echo-checks of an IPv4 mapped IPv6 address, when 
++  /// ACE_HAS_IPV6 defined, pass IPPROTO_ICMP, and not 
++  /// IPPROTO_ICMPV6.
+   ACE_Ping_Socket (ACE_Addr const & local,
+-                   int protocol    = IPPROTO_ICMP,
++                   int protocol =
++#if defined (ACE_HAS_IPV6)
++                   IPPROTO_ICMPV6,
++#else
++                   IPPROTO_ICMP,
++#endif /*ACE_HAS_IPV6 */
+                    int reuse_addr  = 0);
+ 
+   /// Destructor.
+   ~ACE_Ping_Socket (void);
+ 
+   /// Wrapper around the BSD-style @c socket system call (no QoS).
++  /// To make echo-checks of an IPv4 mapped IPv6 address, when 
++  /// ACE_HAS_IPV6 defined, pass IPPROTO_ICMP, and not the default 
++  /// IPPROTO_ICMPV6.
+   int open (ACE_Addr const & local = ACE_Addr::sap_any,
+-            int protocol = IPPROTO_ICMP,
++            int protocol = 
++#if defined (ACE_HAS_IPV6)
++            IPPROTO_ICMPV6,
++#else
++            IPPROTO_ICMP,
++#endif /*ACE_HAS_IPV6 */
+             int reuse_addr = 0);
+ 
+   /// @a toConnect = 1 - makes connect to remote address
+   int send_echo_check (ACE_INET_Addr & remote_addr,
+                        int to_connect = 0);
+ 
+-  /// To receive @c ICMP_ECHOREPLY. To be called after successfully
+-  /// sending @c ICMP_ECHO.
++  /// To receive @c ICMP/ICMP6 ECHO_REPLY. To be called after successfully
++  /// sending @c ICMP/ICMP6 ECHO_REQUEST.
+   int process_incoming_dgram (char * ptr, ssize_t len);
+ 
+-  /// @a toConnect = 1 - makes connect to remote address
++  /// Makes echo check of the @a remote_addr limited by @a timeout. 
++  /// When @a to_connect = 1, connects the raw socket to @a remote_addr
+   int make_echo_check (ACE_INET_Addr & remote_addr,
+                        int to_connect = 0,
+                        ACE_Time_Value const * timeout = &time_default_);
+ 
++  /// Access to the receive buffer
+   char * icmp_recv_buff (void);
+ 
+   /// Dump the state of an object.
+@@ -83,23 +104,47 @@
+ 
+   enum
+     {
+-      PING_BUFFER_SIZE = (1024 * 2)
++      PING_BUFFER_SIZE = (1024)
+     };
+ 
+   static ACE_Time_Value const time_default_;
+ 
+ private:
+ 
++  /// Processes input to the raw socket in search for
++  /// ICMP_ECHO_REPLY messages
++  int process_ipv4 (char * ptr, ssize_t len);
++
++#if defined (ACE_HAS_IPV6)
++
++  /// Processes input to the raw socket in search for
++  /// ICMP6_ECHO_REPLY messages
++  int process_ipv6 (char * ptr, ssize_t len);
++
++  int process_icmp6_echo_reply (icmp6_hdr * _icmp6,
++                                int _icmp6len);
++#endif /* ACE_HAS_IPV6 */
++  
++  /// Waits for @a timeout to receive ICMP/ICMP6 ECHO_REPLY messages.
+   int receive_echo_reply (ACE_Time_Value const * timeout);
+ 
+   /// Do not allow this function to percolate up to this interface.
+   int get_remote_addr (ACE_INET_Addr &addr) const;
+ 
++  /// The process-id. Used as the identity in ICMP/ICMPV6 
++  /// messages.
++  const ACE_UINT16 process_id_;
++
++  /// Buffer used to send echo requests
+   char icmp_send_buff_[PING_BUFFER_SIZE];
+-  char icmp_recv_buff_[PING_BUFFER_SIZE];
+ 
++  /// Buffer used to receive echo responses
++  char icmp_recv_buff_[(4 * PING_BUFFER_SIZE)];
++
++  /// Incremented counter used to mark outbound echo requests.
+   ACE_UINT16 sequence_number_;
+ 
++  /// Whether the raw socket is connected to the remote address.
+   int connected_socket_;
+ 
+ };
+diff -Nru ACE_wrappers/tests/Network_Adapters_Test.cpp ACE_wrappers_icmpv6/tests/Network_Adapters_Test.cpp
+--- ACE_wrappers/tests/Network_Adapters_Test.cpp	2005-05-27 19:52:26.000000000 +0300
++++ ACE_wrappers_icmpv6/tests/Network_Adapters_Test.cpp	2005-05-28 15:29:28.000000000 +0300
+@@ -12,7 +12,7 @@
+ //    Tests the ICMP-echo support in ACE.
+ //
+ // = AUTHOR
+-//    Robert S. Iakobashvili <coroberti@gmail.com> <coroberti@walla.co.il>
++//    Robert Iakobashvili <coroberti@gmail.com> <coroberti@bezeqint.net>
+ //    Gonzalo A. Diethelm <gonzalo.diethelm@aditiva.com>
+ //
+ // ============================================================================
+@@ -67,12 +67,15 @@
+  *
+  * Command line options:
+  *
+- * -b  IPv4 of the interface to bind to the socket (only for the
++ * -b  IP address of the interface to bind to the socket (only for the
+  *     purpose 1), e.g. -b 192.168.5.5;
+  *
+- * -p  IPv4 addresses of the remote CEs, which we are going to check
++ * -i   Linux specific. The name of the local network adapter, e.g. eth0,
++ *      to be used for pinging of remote hosts.
++ *
++ * -p  IP addresses of the remote CEs, which we are going to check
+  *     (purpose 2), or they are 3rd points for the purpose 1,
+- *     e.g. “-p 192.168.5.120: 192.168.5.122: 192.168.5.125
++ *     e.g. -p 192.168.5.120; 192.168.5.122; 192.168.5.125
+  *
+  * -w  milliseconds to wait for echo-reply, on lan 100-200 msec, on
+  *     WAN may be 2000-5000 msec, for GPRS may reach 10000 - 20000
+@@ -143,39 +146,52 @@
+                     int                    connect_to_remote)
+ {
+   if (this->reactor ())
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
+-                       ACE_TEXT ("reactor is already set. \n")),
+-                      -1);
+-  if (!reactor)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open - failed : ")
+-                       ACE_TEXT ("NULL pointer to reactor provided. \n")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
++                         ACE_TEXT ("reactor is already set. \n")),
++                        -1);
++    }
++  if (! reactor)
++    {
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_TEXT ("(%P|%t) Echo_Handler::open - failed : ")
++                           ACE_TEXT ("NULL pointer to reactor provided. \n")),
++                          -1);
++    }
+ 
+   this->reactor (reactor);
+   this->reply_wait_ = reply_wait;
+ 
+   if (this->remote_addrs_)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
+-                       ACE_TEXT ("remote_addrs_ already initialized.\n")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
++                         ACE_TEXT ("remote_addrs_ already initialized.\n")),
++                        -1);
++    }
+ 
+-  ACE_NEW_RETURN (this->remote_addrs_, ACE_INET_Addr, -1);
++  ACE_NEW_RETURN (this->remote_addrs_, 
++                  ACE_INET_Addr, 
++                  -1);
+ 
+   // now copy to keep it locally
+   this->remote_addrs_[0] = remote_addr;
+   this->number_remotes_ = 1;
++
+   if (this->success_status_)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
+-                       ACE_TEXT ("success_status_ already initialized.\n")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
++                         ACE_TEXT ("success_status_ already initialized.\n")),
++                        -1);
++    }
+ 
+   if (! success_status)
+     {
+-      ACE_NEW_RETURN (this->success_status_, ACE_TCHAR, -1);
++      ACE_NEW_RETURN (this->success_status_, 
++                      ACE_TCHAR, 
++                      -1);
+       this->delete_success_status_ = 1;
+     }
+   else
+@@ -189,21 +205,31 @@
+   this->max_attempts_num_ = max_attempts_num;
+   this->current_attempt_ = this->max_attempts_num_;
+ 
+-  if (this->ping_socket ().open (local_addr) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open: %p\n"),
+-                       ACE_TEXT ("ping_socket_")),
+-                      -1);
++  if (this->ping_socket ().open (local_addr,
++#if defined (ACE_HAS_IPV6)
++                                 IPPROTO_ICMPV6,
++#else
++                                 IPPROTO_ICMP,
++#endif /*ACE_HAS_IPV6 */
++                                 0 ) == -1)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open: %p\n"),
++                         ACE_TEXT ("ping_socket initialization.\n")),
++                        -1);
++    }
+ 
+   this->connect_to_remote_ = connect_to_remote;
+ 
+   // Register with the reactor for input.
+   if (this->reactor ()->register_handler (this,
+                                           ACE_Event_Handler::READ_MASK) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open: %p\n"),
+-                       ACE_TEXT ("register_handler for input")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open: %p\n"),
++                         ACE_TEXT ("register_handler for input.\n")),
++                        -1);
++    }
+   return 0;
+ }
+ 
+@@ -217,39 +243,49 @@
+                     ACE_Addr const & local_addr)
+ {
+   if (this->reactor ())
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
+-                       ACE_TEXT ("reactor is already set.\n")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
++                         ACE_TEXT ("reactor is already set.\n")),
++                        -1);
++    }
+ 
+-  if (!reactor)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: NULL ")
+-                       ACE_TEXT ("pointer to reactor provided.\n")),
+-                      -1);
++  if (! reactor)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: NULL ")
++                         ACE_TEXT ("pointer to reactor provided.\n")),
++                        -1);
++    }
+ 
+   this->reactor (reactor);
+   this->reply_wait_ = reply_wait;
+ 
+-  if (!remote_addrs)
+-    ACE_ERROR_RETURN ((LM_ERROR,
++  if (! remote_addrs)
++   {
++      ACE_ERROR_RETURN ((LM_ERROR,
+                        ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
+                        ACE_TEXT ("NULL remote_addr pointer provided.\n")),
+                       -1);
++   }
+ 
+-  if (!number_remotes)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
+-                       ACE_TEXT ("size of remote_addrs array is 0.\n")),
+-                      -1);
++  if (! number_remotes)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
++                         ACE_TEXT ("size of remote_addrs array is 0.\n")),
++                        -1);
++    }
+ 
+   this->number_remotes_ = number_remotes;
+ 
+   if (this->remote_addrs_)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
+-                       ACE_TEXT ("remote_addrs_ already initialized.\n")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
++                         ACE_TEXT ("remote_addrs_ already initialized.\n")),
++                        -1);
++    }
+ 
+   ACE_NEW_RETURN (this->remote_addrs_,
+                   ACE_INET_Addr[this->number_remotes_],
+@@ -262,10 +298,12 @@
+     }
+ 
+   if (this->success_status_)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
+-                       ACE_TEXT ("success_status_ already initialized.\n")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open - failed: ")
++                         ACE_TEXT ("success_status_ already initialized.\n")),
++                        -1);
++    }
+ 
+   if (! success_status)
+     {
+@@ -288,19 +326,29 @@
+   this->max_attempts_num_ = max_attempts_num;
+   this->current_attempt_ = this->max_attempts_num_;
+ 
+-  if (this->ping_socket ().open (local_addr) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open: %p\n"),
+-                       ACE_TEXT ("ping_socket_")),
+-                      -1);
++  if (this->ping_socket ().open (local_addr,
++#if defined (ACE_HAS_IPV6)
++                                 IPPROTO_ICMPV6,
++#else
++                                 IPPROTO_ICMP,
++#endif /*ACE_HAS_IPV6 */          
++                                 0) == -1)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open: %p\n"),
++                         ACE_TEXT ("ping_socket_")),
++                        -1);
++    }
+ 
+   // register with the reactor for input
+   if (this->reactor ()->register_handler (this,
+                                           ACE_Event_Handler::READ_MASK) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::open: %p\n"),
+-                       ACE_TEXT ("register_handler for input")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::open: %p\n"),
++                         ACE_TEXT ("register_handler for input")),
++                        -1);
++    }
+   return 0;
+ }
+ 
+@@ -328,28 +376,30 @@
+     {
+       if (this->success_status_[i] != 0)
+         {
+-          if (this->ping_socket ().send_echo_check (
+-                this->remote_addrs_[i],
+-                this->connect_to_remote_) == -1)
+-            ACE_ERROR
+-              ((LM_ERROR,
+-                ACE_TEXT ("(%P|%t) Echo_Handler::dispatch_echo_checks - ")
+-                ACE_TEXT ("failed for this->remote_addrs_[%d].\n"),
+-                i));
++          if (this->ping_socket ().send_echo_check (this->remote_addrs_[i],
++                                                    this->connect_to_remote_) == -1)
++            {
++              ACE_ERROR
++                  ((LM_ERROR,
++                    ACE_TEXT ("(%P|%t) Echo_Handler::dispatch_echo_checks - ")
++                    ACE_TEXT ("failed for this->remote_addrs_[%d].\n"),
++                    i));
++            }
+         }
+     }
+ 
+   int rval_sched = -1;
+-  if ((rval_sched =
+-         this->reactor ()->schedule_timer (this,
++  if ((rval_sched = this->reactor ()->schedule_timer (this,
+                                            0,
+                                            ACE_Time_Value (1),
+                                            this->reply_wait_)) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Echo_Handler::dispatch_echo_checks:")
+-                       ACE_TEXT (" %p\n"),
+-                       ACE_TEXT ("schedule_timer")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Echo_Handler::dispatch_echo_checks:")
++                         ACE_TEXT (" %p\n"),
++                         ACE_TEXT ("schedule_timer")),
++                        -1);
++    }
+   return 0;
+ }
+ 
+@@ -359,18 +409,8 @@
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("(%P|%t) Echo_Handler::handle_close - started.\n")));
+ 
+-#if 0
+-  this->ping_socket ().close ();
+-#endif
+-
+   this->reactor ()->cancel_timer (this);
+ 
+-#if 0
+-  this->reactor ()->remove_handler (this,
+-                                    ACE_Event_Handler::ALL_EVENTS_MASK |
+-                                    ACE_Event_Handler::DONT_CALL);
+-#endif
+-
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("(%P|%t) Echo_Handler::handle_close - completed.\n")));
+   return 0;
+@@ -425,17 +465,39 @@
+     default:
+       ACE_DEBUG ((LM_INFO,
+                   ACE_TEXT ("(%P|%t) Echo_Handler::handle_input - ")
+-                  ACE_TEXT ("message from %d bytes received.\n"),
++                  ACE_TEXT ("message with length %d bytes received.\n"),
+                   rval_recv));
+ 
+       if (! this->ping_socket ().process_incoming_dgram (
+              this->ping_socket ().icmp_recv_buff (),
+              rval_recv))
+         {
++            char peer_addr_buff [32], remote_addr_buff [32];
++
++          // works for IPv4, IPV6 and mapped IPv4-IPv6
++          if (! addr.get_host_addr (peer_addr_buff, 
++                                    sizeof (peer_addr_buff)))
++            {
++              ACE_ERROR_RETURN ((LM_ERROR,
++                                 ACE_TEXT ("(%P|%t) Echo_Handler::handle_input  - %p\n"),
++                                 ACE_TEXT ("get_host_addr () failed for peer.")),
++                                -1);
++            }
++
+           for (size_t k = 0; k <this->number_remotes_; ++k)
+             {
+-              if (addr.get_ip_address () ==
+-                  this->remote_addrs_[k].get_ip_address ())
++              if (! this->remote_addrs_[k].get_host_addr (remote_addr_buff, 
++                                                          sizeof (remote_addr_buff)))
++                { 
++                  ACE_ERROR_RETURN ((LM_ERROR,
++                                     ACE_TEXT ("(%P|%t) Echo_Handler::handle_input  - %p\n"),
++                                     ACE_TEXT ("get_host_addr () failed for remote_address with index %d."), 
++                                     k),
++                                    -1);
++                }
++              
++              // Now we can compair two strings and it works for IPv4, IPV6 and mapped IPv4-IPv6
++              if (ACE_OS::strcmp (peer_addr_buff, remote_addr_buff) == 0)
+                 {
+                   if (addr.addr_to_string (buf, sizeof buf) == -1)
+                     {
+@@ -489,22 +551,24 @@
+         }
+     }
+ 
+-  if (!need_to_proceed)
++  if (need_to_proceed == 0)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+                   ACE_TEXT ("(%P|%t) Echo_Handler::handle_timeout - ")
+                   ACE_TEXT ("need_to_proceed == 0. ")
+-                  ACE_TEXT ("Completed echo-checks.\n")));
++                  ACE_TEXT ("Completed successfully echo-checks.\n")));
+     }
+ 
+-  if (!this->current_attempt_ || !need_to_proceed)
++  if (this->current_attempt_== 0 || need_to_proceed == 0)
+     {
+-      ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("(%P|%t) Echo_Handler::handle_timeout - ")
+-                  ACE_TEXT ("completed ECHO-checks for handle (%d).\n"),
+-                  this->ping_socket ().get_handle ()));
++      ACE_DEBUG
++          ((LM_INFO,
++            ACE_TEXT ("(%P|%t) Echo_Handler::handle_timeout ")
++            ACE_TEXT("- completing test by raising SIGINT.\n")));
++
++      ::raise (SIGINT);
++      
+       return -1; // to de-register from Reactor and make clean-up
+-                 // in handle-close
+     }
+ 
+   if (this->current_attempt_)
+@@ -534,7 +598,6 @@
+   return 0;
+ }
+ 
+-
+ Stop_Handler::Stop_Handler (ACE_Reactor * const reactor)
+   : counter_ ((counter_sig) 1)
+ {
+@@ -554,23 +617,29 @@
+ {
+   // Register the signal handler object to catch the signals.
+   if (this->reactor ()->register_handler (SIGINT, this) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Stop_Handler::open: %p\n"),
+-                       ACE_TEXT ("register_handler for SIGINT")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Stop_Handler::open: %p\n"),
++                         ACE_TEXT ("register_handler for SIGINT")),
++                        -1);
++    }
+ 
+   if (this->reactor ()->register_handler (SIGTERM, this) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Stop_Handler::open: %p\n"),
+-                       ACE_TEXT ("register_handler for SIGTERM")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Stop_Handler::open: %p\n"),
++                         ACE_TEXT ("register_handler for SIGTERM")),
++                        -1);
++    }
+ 
+ #if ! defined (ACE_WIN32)
+   if (this->reactor ()->register_handler (SIGQUIT, this) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Stop_Handler::open: %p\n"),
+-                       ACE_TEXT ("register_handler for SIGQUIT")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Stop_Handler::open: %p\n"),
++                         ACE_TEXT ("register_handler for SIGQUIT")),
++                        -1);
++    }
+ #endif /* #if ! defined (ACE_WIN32) */
+   return 0;
+ }
+@@ -582,6 +651,7 @@
+ {
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("(%P|%t) Stop_Handler::handle_signal - started.\n")));
++
+   if (! --this->counter_)
+     {
+       ACE_DEBUG ((LM_INFO, ACE_TEXT ("\n-- Stop_Handler::handle_signal --- ")
+@@ -589,8 +659,10 @@
+                   signum));
+       return reactor ()->notify (this, ACE_Event_Handler::READ_MASK);
+     }
++
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Stop_Handler::handle_signal - ")
+               ACE_TEXT ("finished.\n")));
++
+   return 0;
+ }
+ 
+@@ -617,8 +689,8 @@
+               this->reactor ()->cancel_timer (this->handlers_to_stop_[i]);
+               this->reactor ()->remove_handler
+                 (this->handlers_to_stop_[i],
+-                 ACE_Event_Handler::ALL_EVENTS_MASK
+-                 | ACE_Event_Handler::DONT_CALL);
++                 ACE_Event_Handler::ALL_EVENTS_MASK | 
++                 ACE_Event_Handler::DONT_CALL);
+ #if defined ACE_HAS_EXCEPTIONS
+             }
+           catch (...)
+@@ -655,15 +727,18 @@
+ {
+   ACE_DEBUG ((LM_INFO,
+               ACE_TEXT ("(%P|%t) Stop_Handler::handle_close - entered.\n")));
++
+   this->reactor ()->remove_handler (this,
+                                     ACE_Event_Handler::SIGNAL_MASK |
+                                     ACE_Event_Handler::DONT_CALL);
+ 
+   if (reactor ()->end_reactor_event_loop () == -1)
+-    ACE_ERROR_RETURN ((LM_DEBUG,
+-                       ACE_TEXT ("Stop_Handler::handle_close: %p\n"),
+-                       ACE_TEXT ("end_reactor_event_loop")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_DEBUG,
++                         ACE_TEXT ("Stop_Handler::handle_close: %p\n"),
++                         ACE_TEXT ("end_reactor_event_loop")),
++                        -1);
++    }
+   return 0;
+ }
+ 
+@@ -674,15 +749,16 @@
+   return 0;
+ }
+ 
+-// Register handler with us for stopping.
+ int
+ Stop_Handler::register_handler (ACE_Event_Handler *handler)
+ {
+-  if (!handler)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Stop_Handler::register_handler - ")
+-                       ACE_TEXT ("error, handler is a null pointer.\n")),
+-                      -1);
++  if (! handler)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Stop_Handler::register_handler - ")
++                         ACE_TEXT ("error, handler is a null pointer.\n")),
++                        -1);
++    }
+ 
+   size_t index = 0;
+ 
+@@ -710,11 +786,13 @@
+ int
+ Stop_Handler::unregister_handler (ACE_Event_Handler *handler)
+ {
+-  if (!handler)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Stop_Handler::unregister_handler - ")
+-                       ACE_TEXT ("error, handler is a null pointer.\n")),
+-                      -1);
++  if (! handler)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Stop_Handler::unregister_handler - ")
++                         ACE_TEXT ("error, handler is a null pointer.\n")),
++                        -1);
++    }
+ 
+   size_t index = 0;
+ 
+@@ -733,13 +811,13 @@
+                       -1);
+ 
+   entrance = index;
++
+   // null the entrance. Nulled entrances cannot be destroyed
+   this->handlers_to_stop_[entrance] = 0;
+ 
+   return 0;
+ }
+ 
+-
+ Repeats_Handler::Repeats_Handler (void)
+   : check_handler_ (0),
+     seconds_timer_ (60),
+@@ -758,32 +836,38 @@
+                        ACE_Reactor * const reactor,
+                        unsigned int seconds_timer)
+ {
+-  if (!check_handler)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Repeats_Handler::open - error: ")
+-                       ACE_TEXT ("NULL check_handler.\n")),
+-                      -1);
++  if (! check_handler)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Repeats_Handler::open - error: ")
++                         ACE_TEXT ("NULL check_handler.\n")),
++                        -1);
++    }
+ 
+   this->check_handler_ = check_handler;
+ 
+-  if (!reactor)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Stop_Handler::open - error: ")
+-                       ACE_TEXT ("NULL reactor.\n")),
+-                      -1);
++  if (! reactor)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Stop_Handler::open - error: ")
++                         ACE_TEXT ("NULL reactor.\n")),
++                        -1);
++    }
+ 
+   this->reactor (reactor);
+   this->seconds_timer_ = seconds_timer;
+ 
+-  if (this->reactor ()->schedule_timer (
+-        this,
+-        0,
+-        ACE_Time_Value (1),
+-        ACE_Time_Value (this->seconds_timer_)) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("(%P|%t) Repeats_Handler::open: %p\n"),
+-                       ACE_TEXT ("schedule_timer")),
+-                      -1);
++  if (this->reactor ()->schedule_timer (this,
++                                        0,
++                                        ACE_Time_Value (1),
++                                        ACE_Time_Value (this->seconds_timer_)) 
++      == -1)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("(%P|%t) Repeats_Handler::open: %p\n"),
++                         ACE_TEXT ("schedule_timer")),
++                        -1);
++    }
+   return 0;
+ }
+ 
+@@ -807,8 +891,14 @@
+                                  void const *)
+ {
+   this->counter_++ ;
++
+   if (one_button_test && this->counter_ > 3)
+     {
++        ACE_DEBUG
++            ((LM_INFO,
++              ACE_TEXT ("(%P|%t) Repeats_Handler::handle_timeout ")
++              ACE_TEXT("- completing test by raising SIGINT.\n")));
++
+       ::raise (SIGINT);
+     }
+   if (this->check_handler_)
+@@ -873,6 +963,7 @@
+ static char ping_points_ips [MAX_NUMBER_OF_PING_POINTS][16];
+ static ACE_INET_Addr ping_points_addrs [MAX_NUMBER_OF_PING_POINTS];
+ static ACE_TCHAR local_ip_to_bind [16];
++static ACE_TCHAR linux_network_interface [16];
+ 
+ static int wait_echo_reply_timer = 500; // 500 ms to wait is the default
+ static int repeats_seconds_timer = 60; // 60 seconds between repeats
+@@ -885,21 +976,25 @@
+   int rc = ACE::get_ip_interfaces (how_many, the_addr_array);
+ 
+   if (rc != 0)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("is_ip_address_local: %p\n"),
+-                       ACE_TEXT ("ACE::get_ip_interfaces")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("is_ip_address_local: %p\n"),
++                         ACE_TEXT ("ACE::get_ip_interfaces")),
++                        -1);
++    }
+ 
+   if (how_many == 0)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("is_ip_address_local: "),
+-                       ACE_TEXT ("No interfaces presently configured ")
+-                       ACE_TEXT ("in the kernel\n")),
+-                      -1);
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("is_ip_address_local: "),
++                         ACE_TEXT ("No interfaces presently configured ")
++                         ACE_TEXT ("in kernel.\n")),
++                        -1);
++    }
+ 
+   // debugging messages
+   ACE_DEBUG ((LM_DEBUG,
+-              ACE_TEXT ("is_ip_address_local () - there are %d interfaces\n"),
++              ACE_TEXT ("is_ip_address_local () - there are %d interfaces.\n"),
+               how_many));
+ 
+   for (size_t i = 0; i < how_many; ++i)
+@@ -924,6 +1019,7 @@
+ {
+   ACE_OS::memset (ping_points_ips, 0, sizeof ping_points_ips);
+   ACE_OS::memset (local_ip_to_bind, 0, sizeof local_ip_to_bind);
++  ACE_OS::memset (linux_network_interface, 0, sizeof (linux_network_interface));
+ 
+   if (argc == 1) // one button test
+     {
+@@ -932,14 +1028,18 @@
+       number_of_ping_points = 1;
+ 
+       ACE_OS::strncpy (ping_points_ips [0],
++#if defined (ACE_HAS_IPV6)
++                       "::1",
++#else
+                        "127.0.0.1",
++#endif /* ACE_HAS_IPV6 */   
+                        sizeof ping_points_ips [0]);
+ 
+       ping_points_addrs[0].set ((u_short) 0, ping_points_ips[0]);
+       return 0;
+     }
+ 
+-  ACE_Get_Opt get_opt (argc, argv, ACE_TEXT ("b:p:t:w:"));
++  ACE_Get_Opt get_opt (argc, argv, ACE_TEXT ("b:i:p:t:w:"));
+   int c, counter = 0;
+   ACE_INET_Addr b_temp_addr;
+   ACE_TCHAR *token = 0;
+@@ -950,15 +1050,14 @@
+         case 'b':     // ip-address of the interface to bind to
+           ACE_OS::strncpy (local_ip_to_bind,
+                            get_opt.optarg,
+-                           sizeof local_ip_to_bind);
++                           sizeof (local_ip_to_bind));
+ 
+           if (!ACE_OS::strlen (local_ip_to_bind) ||
+               b_temp_addr.set ((u_short)0, local_ip_to_bind) != 0)
+             {
+               ACE_ERROR ((LM_ERROR,
+                           ACE_TEXT ("-b  should be followed by a valid ")
+-                          ACE_TEXT ("IPv4 address.\n")));
+-              // print_usage ();
++                          ACE_TEXT ("IPv4 or IPv6 address.\n")));
+               return -1;
+             }
+           if (is_ip_address_local (local_ip_to_bind) == -1)
+@@ -973,20 +1072,37 @@
+             }
+           break;
+ 
+-        case 'p':  // ping-point (target) ip-addresses, separated by ":'"
++        case 'i':    // linux specific, the interface to be used by IPv6-ICMPv6
++
++          ACE_OS::strncpy (linux_network_interface,
++                           get_opt.optarg,
++                           sizeof (linux_network_interface));
++
++          if (!ACE_OS::strlen (linux_network_interface))
++            {
++              ACE_ERROR ((LM_ERROR,
++                          ACE_TEXT ("-i  should be followed by a valid name of ")
++                          ACE_TEXT ("name of local network interface, e.g. eth0 .\n")));
++              return -1;
++            } 
++          break;
++
++        case 'p':  // ping-point (target) ip-addresses, separated by ";'"
+ 
+           // tokenizing the string
+-          for (token = ACE_OS::strtok (get_opt.optarg, ACE_TEXT (":"));
++          for (token = ACE_OS::strtok (get_opt.optarg, ACE_TEXT (";"));
+                token != 0 && counter < MAX_NUMBER_OF_PING_POINTS;
+-               token = ACE_OS::strtok (0, ACE_TEXT (":")))
++               token = ACE_OS::strtok (0, ACE_TEXT (";")))
+             {
+               if (ping_points_addrs[counter].set ((u_short)0, token) != 0)
+-                ACE_ERROR_RETURN
+-                  ((LM_ERROR,
+-                    ACE_TEXT ("Error: the address \"%s\" is not ")
+-                    ACE_TEXT ("a valid IPv4 address.\n"),
+-                    token),
+-                   -1);
++                {
++                  ACE_ERROR_RETURN
++                      ((LM_ERROR,
++                        ACE_TEXT ("Error: the address \"%s\" is not ")
++                        ACE_TEXT ("a valid IPv4 or IPv6 address/es.\n"),
++                        token),
++                       -1);
++                }
+               ++number_of_ping_points;
+               ++counter;
+             }
+@@ -1001,9 +1117,7 @@
+           break;
+ 
+         default:
+-          // return print_usage (argc,argv);
+           break;
+-
+         }
+     }
+ 
+@@ -1015,6 +1129,23 @@
+                         -1);
+     }
+ 
++#if defined (ACE_HAS_IPV6) && defined (__linux__)
++  if (ACE_OS::strlen (linux_network_interface))
++    {
++      for (int i = 0; i < number_of_ping_points; i++)
++        {
++          if (ping_points_addrs[counter].set_interface (linux_network_interface) == -1)
++            {
++              ACE_ERROR_RETURN
++                  ((LM_ERROR,
++                    ACE_TEXT ("Failed to set the interface name \"%s\" to address/es.\n"),
++                   linux_network_interface),
++                  -1);
++            }
++        }    
++    }
++#endif /* __linux && ACE_HAS_IPV6 */
++
+   return 0;
+ }
+ 
+@@ -1040,11 +1171,13 @@
+     }
+ 
+   ACE_Reactor * main_reactor = 0;
+-  ACE_NEW_RETURN (main_reactor, ACE_Reactor, -1);
++  ACE_NEW_RETURN (main_reactor, 
++                  ACE_Reactor, 
++                  -1);
+ 
+   (void) ACE_High_Res_Timer::global_scale_factor ();
+-  main_reactor->timer_queue ()->gettimeofday
+-    (&ACE_High_Res_Timer::gettimeofday_hr);
++  main_reactor->timer_queue ()->
++      gettimeofday (&ACE_High_Res_Timer::gettimeofday_hr);
+ 
+   /**
+    * Stop_Handler's is supposed to stop the activity of all
+@@ -1059,11 +1192,13 @@
+       ACE_ERROR ((LM_ERROR,
+                   ACE_TEXT ("(%P|%t) %p\n"),
+                   ACE_TEXT ("main() - stop_handler->open")));
+-      ACE_OS::exit(-2);
++      ACE_OS::exit (-2);
+     }
+ 
+   ACE_TCHAR *ping_status = 0;
+-  ACE_NEW_RETURN (ping_status, ACE_TCHAR[number_of_ping_points], -1);
++  ACE_NEW_RETURN (ping_status, 
++                  ACE_TCHAR[number_of_ping_points], 
++                  -1);
+ 
+   // wait_echo_reply_timer is in msec
+   int seconds = 0;
+@@ -1072,8 +1207,10 @@
+   milliseconds =  wait_echo_reply_timer % 1000;
+   ACE_Time_Value const wait_timer (seconds, milliseconds);
+ 
+-  Echo_Handler *ping_handler;
+-  ACE_NEW_RETURN (ping_handler, Echo_Handler, -1);
++  Echo_Handler *ping_handler = 0;
++  ACE_NEW_RETURN (ping_handler, 
++                  Echo_Handler, 
++                  -1);
+ 
+   if (ACE_OS::strlen (local_ip_to_bind))
+     {
+@@ -1115,8 +1252,11 @@
+         }
+     }
+ 
+-  Repeats_Handler *repeats_handler;
+-  ACE_NEW_RETURN (repeats_handler, Repeats_Handler, -1);
++  Repeats_Handler *repeats_handler = 0;
++  ACE_NEW_RETURN (repeats_handler, 
++                  Repeats_Handler, 
++                  -1);
++
+   if (repeats_handler->open (ping_handler,
+                              main_reactor,
+                              repeats_seconds_timer) == -1)
+@@ -1164,7 +1304,7 @@
+               ACE_TEXT ("(%P|%t|%T) \"Network_Adapters_Test\" main() - ")
+               ACE_TEXT ("ICMP support not configured.\n")
+               ACE_TEXT ("Define ACE_HAS_ICMP_SUPPORT = 1 in your config.h ")
+-              ACE_TEXT ("file to enable.\n")));
++              ACE_TEXT ("file to enable it.\n")));
+ 
+   ACE_END_TEST;
+ 
+diff -Nru ACE_wrappers/tests/Network_Adapters_Test.h ACE_wrappers_icmpv6/tests/Network_Adapters_Test.h
+--- ACE_wrappers/tests/Network_Adapters_Test.h	2005-05-27 19:52:16.000000000 +0300
++++ ACE_wrappers_icmpv6/tests/Network_Adapters_Test.h	2005-05-28 15:29:29.000000000 +0300
+@@ -14,7 +14,7 @@
+ //    Definitions for Network_Adapters_Test.cpp.
+ //
+ // = AUTHOR
+-//    Robert S. Iakobashvili <roberti@go-WLAN.com> <coroberti@walla.co.il>
++//    Robert Iakobashvili <coroberti@gmail.com> <coroberti@bezeqint.net>
+ //    Gonzalo A. Diethelm <gonzalo.diethelm@aditiva.com> made aceing
+ //
+ // ============================================================================
+
+
