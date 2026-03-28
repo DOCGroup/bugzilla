@@ -1,0 +1,16 @@
+Index: ace/Get_Opt.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Get_Opt.cpp,v
+retrieving revision 4.50
+diff -u -r4.50 Get_Opt.cpp
+--- ace/Get_Opt.cpp	28 Oct 2005 16:14:52 -0000	4.50
++++ ace/Get_Opt.cpp	10 Mar 2006 00:35:10 -0000
+@@ -494,7 +494,7 @@
+   // isalnum, otherwise, it will crash the program.
+   if (short_option > 0 &&
+       short_option < 256 &&
+-      ACE_OS::ace_isalnum (short_option) != 0)
++      ACE_OS::ace_isalnum ((ACE_TCHAR)short_option) != 0)
+ #else
+   if (ACE_OS::ace_isalnum (short_option) != 0)
+ #endif /* _MSC_VER && _MSC_VER >= 1300 */
