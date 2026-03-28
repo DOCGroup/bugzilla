@@ -1,0 +1,89 @@
+"############################### All Threads ################################"
+ >    t@1  a  l@1   ?()   running          in  _libc_poll() 
+      t@2  b  l@2   ?()   running          in  __signotifywait() 
+      t@3      ?()   sleep on (unknown) in  _reap_wait() 
+      t@4  a  l@4   ?()   sleep on 0xffffffff7c121cf8  in  __lwp_sema_wait() 
+      t@5  a  l@3   ?()   sleep on 0x100176ee8  in  __lwp_sema_wait() 
+      t@7  a  l@9   ?()   running          in  _libc_poll() 
+      t@8  a l@10   ?()   sleep on 0xffffffff7a8036b8  in  __lwp_sema_wait() 
+      t@9  b l@12   _co_timerset()   running          in  private___lwp_cond_wait() 
+"################################ Thread t@1 ################################"
+current thread: t@1
+  [1] _libc_poll(0xffffffff7fffd910, 0x2, 0xffffffffffffffff, 0x40, 0x0, 0x9), at 0xffffffff7bea5a68 
+  [2] _libc_select(0xffffffff7bfbc7a0, 0xffffffff7fffd910, 0xffffffff7bfbc7a8, 0xffffffff7bfbc7a8, 0x100192ca0, 0x100192c98), at 0xffffffff7be55570 
+  [3] _ti_select(0x9, 0x100192c98, 0x0, 0x0, 0x0, 0x100186c60), at 0xffffffff7c01e508 
+=>[4] ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::wait_for_multiple_events(this = ???, dispatch_set = CLASS, max_wait_time = ???) (optimized), at 0xffffffff7e3c2808 (line ~1151) in "Select_Reactor_T.cpp"
+  [5] ACE_TP_Reactor::dispatch_i(this = ???, max_wait_time = ???, guard = CLASS) (optimized), at 0xffffffff7d9ca9c8 (line ~248) in "TP_Reactor.cpp"
+  [6] ACE_TP_Reactor::handle_events(this = ???, max_wait_time = ???) (optimized), at 0xffffffff7d9ca7ec (line ~171) in "TP_Reactor.cpp"
+  [7] TAO_ORB_Core::run(this = ???, tv = ???, perform_work = ???) (optimized), at 0xffffffff7defe4e4 (line ~1983) in "ORB_Core.cpp"
+  [8] main(argc = ???, argv = ???) (optimized), at 0x10001bf80 (line ~88) in "ORB.i"
+"################################ Thread t@2 ################################"
+current thread: t@2
+=>[1] __signotifywait(0xffffffff7c132740, 0xffffffff7c120000, 0x0, 0x0, 0x0, 0x0), at 0xffffffff7bea71e0 
+  [2] _dynamiclwps(0xffffffff7c120000, 0x0, 0xffffffff7b800848, 0xffffffff7b800848, 0x3, 0x0), at 0xffffffff7c011744 
+"################################ Thread t@3 ################################"
+current thread: t@3
+=>[1] _reap_wait(0xffffffff7c1260c8, 0xffffffff7c120000, 0x0, 0x0, 0x0, 0x0), at 0xffffffff7c0107b8 
+  [2] _reaper(0xffffffff7c121d18, 0xffffffff7c1260c8, 0x0, 0xffffffff7c121cf0, 0x0, 0x1000), at 0xffffffff7c010508 
+"################################ Thread t@4 ################################"
+current thread: t@4
+=>[1] __lwp_sema_wait(0xffffffff7b00bd60, 0x0, 0xffffffff7b00bc50, 0xffffffff7c120000, 0x1, 0x0), at 0xffffffff7bea76dc 
+  [2] _park(0xffffffff7b00bd60, 0xffffffff7c120000, 0x0, 0xffffffff7b00bc50, 0x1, 0xffffffff7c121c74), at 0xffffffff7c00c3a0 
+  [3] _swtch(0xffffffff7b00bc50, 0xffffffffffffffff, 0xffffffff7c120000, 0x0, 0x5, 0x1000), at 0xffffffff7c00c06c 
+  [4] _reap_wait_cancel(0xffffffff7c121cf8, 0x0, 0xffffffff7d9c262c, 0xffffffff7e200bd0, 0xffffffff7f7258e8, 0x0), at 0xffffffff7c010810 
+  [5] _thrp_join(0xffffffff7c121cf8, 0xffffffffffffffff, 0xffffffff7c120000, 0x0, 0x0, 0xffffffff7ae09c50), at 0xffffffff7c012be4 
+  [6] _thr_join(0x5, 0x0, 0x0, 0xffffffff7d9c0930, 0xffffffff7db3c448, 0x1001546a8), at 0xffffffff7c0127fc 
+  [7] ACE_OS::thr_join(thr_handle = ???, status = ???) (optimized), at 0xffffffff7d9c262c (line ~2821) in "OS_NS_Thread.inl"
+  [8] ACE_Thread_Manager::wait_task(this = ???, task = ???) (optimized), at 0xffffffff7d9c09dc (line ~134) in "Thread.inl"
+  [9] TAO_Thread_Pool::wait(this = ???) (optimized), at 0xffffffff7efd0d68 (line ~286) in "Thread_Pool.cpp"
+  [10] TAO_Thread_Pool_Manager::destroy_threadpool_i(this = ???, thread_pool_id = ???) (optimized), at 0xffffffff7efd1ca0 (line ~916) in "Thread_Pool.cpp"
+  [11] TAO_Thread_Pool_Manager::destroy_threadpool(this = ???, threadpool = ???) (optimized), at 0xffffffff7efd17b4 (line ~777) in "Thread_Pool.cpp"
+  [12] Task::svc(this = ???) (optimized), at 0x10001bb40 (line ~337) in "server.cpp"
+  [13] ACE_Task_Base::svc_run(args = ???) (optimized), at 0xffffffff7d9ba684 (line ~252) in "Task.cpp"
+  [14] ACE_Thread_Adapter::invoke(this = ???) (optimized), at 0xffffffff7d9bb05c (line ~93) in "Thread_Adapter.cpp"
+"################################ Thread t@5 ################################"
+current thread: t@5
+=>[1] __lwp_sema_wait(0xffffffff7ae09d60, 0x0, 0x1001bda40, 0x100128bc0, 0x0, 0xffffffff7dec95e0), at 0xffffffff7bea76dc 
+  [2] _park(0xffffffff7ae09d60, 0xffffffff7c120000, 0x0, 0xffffffff7ae09c50, 0x2, 0xffffffff7c121c74), at 0xffffffff7c00c3a0 
+  [3] _swtch(0xffffffff7ae09c50, 0x100176ee8, 0xffffffff7c120000, 0x0, 0x5, 0x1000), at 0xffffffff7c00c06c 
+  [4] _mutex_adaptive_lock(0x100176ee8, 0xffffffff7c12f5d8, 0x4c00, 0x1000, 0xfffeffff, 0x1), at 0xffffffff7c00db38 
+  [5] pthread_mutex_lock(0x0, 0x100176ee8, 0xffffffff7c120000, 0x4, 0x5, 0x1000), at 0xffffffff7c00e654 
+  [6] ACE_OS::mutex_lock(m = ???) (optimized), at 0xffffffff7d963c44 (line ~2250) in "OS_NS_Thread.cpp"
+  [7] TAO_RT_New_Leader_Generator::no_leaders_available(this = ???) (optimized), at 0xffffffff7efcfbac (line ~3526) in "OS_NS_Thread.inl"
+  [8] TAO_Leader_Follower::elect_new_leader(this = ???) (optimized), at 0xffffffff7dec977c (line ~40) in "Leader_Follower.i"
+  [9] TAO_LF_Strategy_Complete::reset_event_loop_thread(this = ???, call_reset = ???, lf = CLASS) (optimized), at 0xffffffff7dec965c (line ~46) in "LF_Strategy_Complete.cpp"
+  [10] TAO_ORB_Core::run(this = ???, tv = ???, perform_work = ???) (optimized), at 0xffffffff7defe590 (line ~2009) in "ORB_Core.cpp"
+  [11] TAO_Thread_Pool_Threads::svc(this = ???) (optimized), at 0xffffffff7efcfeb8 (line ~107) in "Thread_Pool.cpp"
+  [12] ACE_Task_Base::svc_run(args = ???) (optimized), at 0xffffffff7d9ba684 (line ~252) in "Task.cpp"
+  [13] ACE_Thread_Adapter::invoke(this = ???) (optimized), at 0xffffffff7d9bb05c (line ~93) in "Thread_Adapter.cpp"
+"################################ Thread t@7 ################################"
+current thread: t@7
+=>[1] _libc_poll(0xffffffff7aa05490, 0x2, 0xffffffffffffffff, 0x40, 0x0, 0xf), at 0xffffffff7bea5a68 
+  [2] _libc_select(0xffffffff7bfbc7a0, 0xffffffff7aa05490, 0xffffffff7bfbc7a8, 0xffffffff7bfbc7a8, 0x1001ea780, 0x1001ea778), at 0xffffffff7be55570 
+  [3] _ti_select(0xf, 0x1001ea778, 0x0, 0x0, 0x0, 0x1001de740), at 0xffffffff7c01e508 
+  [4] ACE_Select_Reactor_T<ACE_Select_Reactor_Token_T<ACE_Token> >::wait_for_multiple_events(this = ???, dispatch_set = CLASS, max_wait_time = ???) (optimized), at 0xffffffff7e3c2808 (line ~1151) in "Select_Reactor_T.cpp"
+  [5] ACE_TP_Reactor::dispatch_i(this = ???, max_wait_time = ???, guard = CLASS) (optimized), at 0xffffffff7d9ca9c8 (line ~248) in "TP_Reactor.cpp"
+  [6] ACE_TP_Reactor::handle_events(this = ???, max_wait_time = ???) (optimized), at 0xffffffff7d9ca7ec (line ~171) in "TP_Reactor.cpp"
+  [7] TAO_ORB_Core::run(this = ???, tv = ???, perform_work = ???) (optimized), at 0xffffffff7defe4e4 (line ~1983) in "ORB_Core.cpp"
+  [8] TAO_Thread_Pool_Threads::svc(this = ???) (optimized), at 0xffffffff7efcfeb8 (line ~107) in "Thread_Pool.cpp"
+  [9] ACE_Task_Base::svc_run(args = ???) (optimized), at 0xffffffff7d9ba684 (line ~252) in "Task.cpp"
+  [10] ACE_Thread_Adapter::invoke(this = ???) (optimized), at 0xffffffff7d9bb05c (line ~93) in "Thread_Adapter.cpp"
+"################################ Thread t@8 ################################"
+current thread: t@8
+=>[1] __lwp_sema_wait(0xffffffff7a803d60, 0xffffffff7c120000, 0x180d0, 0xffffffff7d9938e0, 0xffffffff7dec9500, 0x0), at 0xffffffff7bea76dc 
+  [2] _park(0xffffffff7a803d60, 0xffffffff7c120000, 0x0, 0xffffffff7a803c50, 0x3, 0xffffffff7c121c74), at 0xffffffff7c00c3a0 
+  [3] _swtch(0xffffffff7a803c50, 0x0, 0xffffffff7c120000, 0x0, 0x5, 0x1000), at 0xffffffff7c00c06c 
+  [4] cond_wait(0xffffffff7a803c50, 0x0, 0x0, 0x1001f07f8, 0xffffffff7a8036b8, 0xffffffff7c120000), at 0xffffffff7c00ae54 
+  [5] _ti_pthread_cond_wait(0xffffffff7a8036b8, 0x1001f07f8, 0x1001f0828, 0x0, 0x21c2b8, 0xffffffff7c00e59c), at 0xffffffff7c00ad18 
+  [6] ACE_Condition_Thread_Mutex::wait(this = ???, abstime = ???) (optimized), at 0xffffffff7d920494 (line ~232) in "Time_Value.inl"
+  [7] ACE_Token::shared_acquire(this = ???, sleep_hook_func = ???, arg = ???, timeout = ???, op_type = ???) (optimized), at 0xffffffff7d9c91f4 (line ~262) in "Token.cpp"
+  [8] ACE_TP_Token_Guard::grab_token(this = ???, max_wait_time = ???) (optimized), at 0xffffffff7d9ca460 (line ~89) in "Token.inl"
+  [9] ACE_TP_Reactor::handle_events(this = ???, max_wait_time = ???) (optimized), at 0xffffffff7d9ca770 (line ~158) in "TP_Reactor.cpp"
+  [10] TAO_ORB_Core::run(this = ???, tv = ???, perform_work = ???) (optimized), at 0xffffffff7defe4e4 (line ~1983) in "ORB_Core.cpp"
+  [11] TAO_Thread_Pool_Threads::svc(this = ???) (optimized), at 0xffffffff7efcfeb8 (line ~107) in "Thread_Pool.cpp"
+  [12] ACE_Task_Base::svc_run(args = ???) (optimized), at 0xffffffff7d9ba684 (line ~252) in "Task.cpp"
+  [13] ACE_Thread_Adapter::invoke(this = ???) (optimized), at 0xffffffff7d9bb05c (line ~93) in "Thread_Adapter.cpp"
+"################################ Thread t@9 ################################"
+current thread: t@9
+=>[1] private___lwp_cond_wait(0xffffffff7c121c20, 0xffffffff7c121c08, 0x0, 0x0, 0xffffffff7a601b88, 0x1), at 0xffffffff7c01c66c 
+  [2] _co_timerset(0xffffffff7c121c20, 0xffffffff7c120000, 0xffffffff7c121c08, 0x3, 0x0, 0x0), at 0xffffffff7c00b654 
