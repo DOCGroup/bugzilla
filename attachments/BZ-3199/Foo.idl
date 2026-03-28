@@ -1,0 +1,9 @@
+#ifndef FOO_IDL_
+#define FOO_IDL_
+
+interface Foo
+{
+  void Bar();
+};
+
+#endif /* FOO_IDL_ */
