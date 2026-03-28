@@ -1,0 +1,386 @@
+diff -Nu ACE_wrappers/ace/High_Res_Timer.h ACE_wrappers-patched-hrt6/ace/High_Res_Timer.h
+--- ACE_wrappers/ace/High_Res_Timer.h	2006-01-25 21:50:07.000000000 +0200
++++ ACE_wrappers-patched-hrt6/ace/High_Res_Timer.h	2006-08-23 12:04:05.000000000 +0300
+@@ -89,9 +89,26 @@
+  * (laptops for example, but probably also embedded devices),
+  * do change the cycle rate while running.
+  * Some pentiums can run on (at least) two clock frequency's.
+- * Another problem arises with multiprocessor computers, there
+- * are reports that the different RDTSC's are not always kept
+- * in sync.
++ *
++ * Another problem arises with multiprocessor computers, where
++ * readings of RDTSC counter may occur from different CPUs
++ * or being corrupted in shared cacheline on Intel chipsets, supporting 
++ * hyperthreading or dual/multi cores.
++ * The problem is addressed on linux by binding the thread, containing 
++ * ACE_High_Res_Timer object, to a chosen single CPU, which is enough
++ * for AMD SMP systems, and additionally for Intel chipsets by adding 
++ * a one more serializing assembler instruction (cpuid) prior and after 
++ * RDTSC in order to force memory writing. To bind a thread, running
++ * ACE_High_Res_Timer object to a specific CPU, use 
++ * ACE_OS::bind_thread_to_cpu () and ACE_OS::unbind_thread_from_cpu ().
++ *
++ * In many cases, however, multicore and hyperthreaded HW do not
++ * suffer from the above mentioned problems on linux due to specific 
++ * hardware implementation. ACE takes by default a safe approach by 
++ * serializing RDTSC instruction fetch. Still one may try to improve 
++ * performance of a timer intensive application by disabling this safe 
++ * default simply defining ACE_SKIPS_RDTSC_SERIALIZATION flag.  
++ *
+  * A windows "timer chip" NOTE: (8254-compatible real-time clock)
+  * When ::QueryPerformanceCounter() uses the 8254 it has a
+  * frequency off about 1.193 Mhz (or sometimes 3.579 Mhz?) and
+diff -Nu ACE_wrappers/ace/Object_Manager.cpp ACE_wrappers-patched-hrt6/ace/Object_Manager.cpp
+--- ACE_wrappers/ace/Object_Manager.cpp	2006-05-17 23:28:51.000000000 +0300
++++ ACE_wrappers-patched-hrt6/ace/Object_Manager.cpp	2006-08-13 14:19:00.000000000 +0300
+@@ -19,6 +19,10 @@
+ #include "ace/Atomic_Op.h"
+ #include "ace/OS_NS_sys_time.h"
+ 
++#if defined (linux)
++#include "ace/OS_NS_time.h"
++#endif /* linux */
++
+ #if defined (ACE_HAS_TRACE)
+ #include "ace/Trace.h"
+ #endif /* ACE_HAS_TRACE */
+@@ -195,6 +199,10 @@
+           ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long>::init_functions ();
+ #     endif /* ACE_HAS_BUILTIN_ATOMIC_OP */
+ 
++#if defined (linux)
++          ACE_OS::init_gethrtime ();
++#endif /* linux */
++
+ #     if !defined (ACE_LACKS_ACE_SVCCONF)
+           // Construct the ACE_Service_Config's signal handler.
+           ACE_NEW_RETURN (ace_service_config_sig_handler_,
+Common subdirectories: ACE_wrappers/ace/os_include and ACE_wrappers-patched-hrt6/ace/os_include
+diff -Nu ACE_wrappers/ace/OS_NS_Thread.cpp ACE_wrappers-patched-hrt6/ace/OS_NS_Thread.cpp
+--- ACE_wrappers/ace/OS_NS_Thread.cpp	2006-06-07 11:23:48.000000000 +0300
++++ ACE_wrappers-patched-hrt6/ace/OS_NS_Thread.cpp	2006-08-21 20:42:20.000000000 +0300
+@@ -22,6 +22,7 @@
+ #include "ace/Thread_Mutex.h"
+ #include "ace/Condition_T.h"
+ #include "ace/Guard_T.h"
++#include "ace/OS_NS_time.h"
+ 
+ extern "C" void
+ ACE_MUTEX_LOCK_CLEANUP_ADAPTER_NAME (void *args)
+@@ -4888,6 +4889,102 @@
+ #endif
+ }
+ 
++#if defined (linux)
++int ACE_OS::bind_thread_to_cpu (cpu_set_t cpu_mask, cpu_set_t *kept_cpu_mask)
++{
++  if (!ACE_OS::get_cpu_smp ())
++  {
++	  // This is useful to have the same code for SMP as well as UP machines.
++	  // On UP CPUs this code will take a doing nothing approach, avoiding
++	  // extra syscalls.
++	  return 0;
++  }
++
++  ACE_hthread_t thr_id;
++  ACE_OS::thr_self (thr_id);
++
++  // Works only with linux-threads or NPTL.
++  if (ACE_OS::thr_get_affinity (
++                                thr_id,
++                                sizeof (cpu_set_t),
++                                kept_cpu_mask) == -1)
++  {
++	  ACE_DEBUG ((LM_DEBUG, 
++		      ACE_LIB_TEXT ("\nACE_OS::thr_get_affinity () failed to get affinity info.\n")
++		      ACE_LIB_TEXT ("May happen when NPTL thread-id passed to sched_getaffinity ().\n")
++		      ACE_LIB_TEXT ("Trying to get affinity info for the whole process.\n")));
++
++	  thr_id = ACE_OS::getpid ();
++
++	  //  Trying to bind the whole process. Works with NPTL as well, 
++	  //  but binds the whole process to a cpu
++	  if (ACE_OS::thr_get_affinity (
++                                    thr_id,
++                                    sizeof (cpu_set_t),
++                                    kept_cpu_mask) == -1)
++	  {
++		  ACE_ERROR_RETURN ((LM_ERROR, 
++			      ACE_LIB_TEXT ("\nACE_OS::thr_get_affinity () failed with errno %d\n")
++			      ACE_LIB_TEXT ("If errno is 0, still, probably, sched_getaffinity () failed")
++			      ACE_LIB_TEXT (" on kernel 2.4 with the syscall not supported in kernel.\n")
++			      ACE_LIB_TEXT ("Run strace to see ENOSYS - Function not implemented.\n"),
++			      errno), 
++			      -1);
++	  }
++  }
++
++  // Binds either a thread or the whole process <thr_id>, 
++  // whatever is supported, to the <cpu_mask>.
++  if (ACE_OS::thr_set_affinity (
++                                thr_id,
++                                sizeof (cpu_set_t),
++                                &cpu_mask) == -1)
++  {
++	  ACE_ERROR_RETURN ((LM_ERROR, 
++                    ACE_LIB_TEXT ("\nACE_OS::thr_set_affinity ()  with errno %d\n")
++		     ACE_LIB_TEXT ("If errno is 0, still, probably, sched_setaffinity () failed")
++		     ACE_LIB_TEXT (" on kernel 2.4 with the syscall not supported in kernel.\n")
++		     ACE_LIB_TEXT ("Run strace to see ENOSYS - Function not implemented.\n"),
++		     errno),
++                    -1);
++  }
++
++  return 0;
++}
++
++int ACE_OS::unbind_thread_from_cpu (cpu_set_t kept_cpu_mask)
++{
++  ACE_hthread_t thr_id;
++  ACE_OS::thr_self (thr_id);
++
++  // Restores cpu mask to the status prior to bind_thread_to_cpu ()
++  if (ACE_OS::thr_set_affinity (
++                                thr_id,
++                                sizeof (cpu_set_t),
++                                &kept_cpu_mask) == -1)
++  {
++    ACE_DEBUG ((LM_DEBUG, 
++                ACE_LIB_TEXT ("ACE_OS::thr_set_affinity () failed with errno %d\n"),
++                errno));
++    
++    thr_id = ACE_OS::getpid ();
++
++    if (ACE_OS::thr_set_affinity (
++                                thr_id,
++                                sizeof (cpu_set_t),
++                                &kept_cpu_mask) == -1)
++      {
++        ACE_ERROR_RETURN ((LM_ERROR, 
++                           ACE_LIB_TEXT ("ACE_OS::thr_set_affinity () failed with errno %d\n"),
++                           errno),
++                          -1);
++      }
++  }
++
++  return 0;
++}
++#endif /* defined (linux) */
++
+ int
+ ACE_OS::thr_key_used (ACE_thread_key_t key)
+ {
+diff -Nu ACE_wrappers/ace/OS_NS_Thread.h ACE_wrappers-patched-hrt6/ace/OS_NS_Thread.h
+--- ACE_wrappers/ace/OS_NS_Thread.h	2006-05-30 16:15:25.000000000 +0300
++++ ACE_wrappers-patched-hrt6/ace/OS_NS_Thread.h	2006-08-13 15:53:25.000000000 +0300
+@@ -1616,7 +1616,7 @@
+    * linux-threads a thread is seen as a process, it does the job.
+    * @param cpu_set_size The size of the cpu_mask
+    * @param cpu_mask Is a bitmask of CPUs to bind to, e.g value 1 binds the
+-   * thread to the "CPU 0", etc
++   * thread to the "CPU 0", etc.
+    */
+   extern ACE_Export
+   int thr_get_affinity (ACE_hthread_t id,
+@@ -1633,13 +1633,44 @@
+    * linux-threads a thread is seen as a process, it does the job.
+    * @param cpu_set_size The size of the cpu_mask
+    * @param cpu_mask Is a bitmask of CPUs to bind to, e.g value 1 binds the
+-   * thread to the "CPU 0", etc
++   * thread to the "CPU 0", etc. Use CPU_ZERO and CPU_SET macros from <sched.h> 
++   * to set thread affinity to a chosen single or multiple CPUs.
+    */
+   extern ACE_Export
+   int thr_set_affinity (ACE_hthread_t thr_id,
+                         size_t cpu_set_size,
+                         const cpu_set_t * cpu_mask);
+ 
++#if defined (linux)
++ /**
++  * Binds current thread to a chosen single CPU.
++  * <cpu_mask> is a bitmask of CPUs to bind to, e.g value 1 binds the 
++  * thread to the "CPU 0", 3 to the "CPU 1", etc. make sure, that you
++  * are binding the timer thread to a single CPU.
++  * Use CPU_ZERO and CPU_SET macros from <sched.h> to bind
++  * to a chosen single CPU.
++  * <kept_cpu_mask> is a cpu-mask prior to the call; to be used in unbind
++  * to restore the previous cpu-mask. Pass pointer to nulled cpu_set_t object here.
++  *
++  * By itself it is enough for RDTSC-based High_Res_Timer to work 
++  * properly on linux with AMD chipsets. In the case of Intel HW with 
++  * hyperthreading,  the result of rdtsc instruction should be forced 
++  * to be written to memory in order not to be corrupted by being kept 
++  * in shared by the hyper-threads or multi-cores cacheline. 
++  */
++  extern ACE_Export
++  int bind_thread_to_cpu (cpu_set_t cpu_mask, cpu_set_t *kept_cpu_mask);
++
++  /**
++  * Unbinds current thread from a chosen single CPU, restoring previous
++  * CPU-mask
++  * <kept_cpu_mask> is a cpu-mask prior to bind_thread_to_cpu (); used
++  * to restore the previous cpu-mask.
++  */
++  extern ACE_Export
++  int unbind_thread_from_cpu (cpu_set_t kept_cpu_mask);
++#endif /* defined (linux) */
++
+   /**
+    * @note the "inst" arg is deprecated.  It will be ignored.
+    */
+diff -Nu ACE_wrappers/ace/OS_NS_time.cpp ACE_wrappers-patched-hrt6/ace/OS_NS_time.cpp
+--- ACE_wrappers/ace/OS_NS_time.cpp	2006-06-21 01:17:53.000000000 +0300
++++ ACE_wrappers-patched-hrt6/ace/OS_NS_time.cpp	2006-08-17 21:36:02.000000000 +0300
+@@ -53,6 +53,27 @@
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
++#if defined (linux)
++
++bool ACE_OS::cpu_smp_ = false;
++  
++void ACE_OS::init_gethrtime (void)
++{
++	bool if_smp = (ACE_OS::num_processors () > 1) ? true : false;
++	ACE_OS::set_cpu_smp (if_smp);
++}
++  
++bool ACE_OS::get_cpu_smp (void)
++{
++	return ACE_OS::cpu_smp_;
++}
++
++void ACE_OS::set_cpu_smp (bool val)
++{
++	ACE_OS::cpu_smp_ = val;
++}
++#endif /* linux */
++
+ # if defined (ACE_HAS_WINCE)
+ ACE_TCHAR *
+ ACE_OS::ctime_r (const time_t *clock, ACE_TCHAR *buf, int buflen)
+diff -Nu ACE_wrappers/ace/OS_NS_time.h ACE_wrappers-patched-hrt6/ace/OS_NS_time.h
+--- ACE_wrappers/ace/OS_NS_time.h	2006-06-20 23:27:41.000000000 +0300
++++ ACE_wrappers-patched-hrt6/ace/OS_NS_time.h	2006-08-17 21:35:13.000000000 +0300
+@@ -29,6 +29,9 @@
+ #include "ace/Basic_Types.h"
+ #include "ace/os_include/os_time.h"
+ #include "ace/ACE_export.h"
++#if defined (linux)
++#include "ace/OS_NS_unistd.h"
++#endif /* linux */
+ 
+ #if defined (ACE_EXPORT_MACRO)
+ #  undef ACE_EXPORT_MACRO
+@@ -272,6 +275,21 @@
+   ACE_NAMESPACE_INLINE_FUNCTION
+   void tzset (void);
+ 
++#if defined (linux)
++  extern ACE_Export bool cpu_smp_;
++
++  extern ACE_Export
++  bool get_cpu_smp (void);
++
++  extern ACE_Export
++  void set_cpu_smp (bool val);
++
++  extern ACE_Export
++  void init_gethrtime (void);
++
++  
++#endif /* linux */
++
+   //@}
+ } /* namespace ACE_OS */
+ 
+diff -Nu ACE_wrappers/ace/OS_NS_time.inl ACE_wrappers-patched-hrt6/ace/OS_NS_time.inl
+--- ACE_wrappers/ace/OS_NS_time.inl	2006-07-31 21:20:52.000000000 +0300
++++ ACE_wrappers-patched-hrt6/ace/OS_NS_time.inl	2006-08-23 11:42:08.000000000 +0300
+@@ -221,33 +221,70 @@
+   ACE_UNUSED_ARG (op);
+   // Use .obj/gethrtime.o, which was compiled with g++.
+   return ACE_GETHRTIME_NAME ();
+-#elif (defined(__KCC) || defined (__GNUG__) || defined (__INTEL_COMPILER)) && !defined (ACE_WIN32) && !defined(ACE_VXWORKS) && defined (ACE_HAS_PENTIUM)
++#elif (defined(__KCC) || defined (__GNUG__) || defined (__INTEL_COMPILER)) && !defined (ACE_WIN32) && !defined(ACE_VXWORKS) && (defined (ACE_HAS_PENTIUM) || defined (__amd64__))
+   ACE_UNUSED_ARG (op);
++
++  volatile ACE_UINT32 least, most;
++
++#if defined (__amd64__)
++  asm volatile ("rdtsc" : "=a" (least), "=d" (most) : : "memory"); // _amd64__, g++-4, Schuler, Andreas, Andreas.Schuler@med.ge.com
++
+ # if defined (ACE_LACKS_LONGLONG_T)
+-  double now;
++  ACE_hrtime_t ret (least, most);
++  return ret;
+ # else  /* ! ACE_LACKS_LONGLONG_T */
+   ACE_hrtime_t now;
++  return now = ((ACE_hrtime_t) least) | (((ACE_hrtime_t)most) <<32);
+ # endif /* ! ACE_LACKS_LONGLONG_T */
+ 
+-  // See comments about the RDTSC Pentium instruction for the ACE_WIN32
+-  // version of ACE_OS::gethrtime (), below.
++#else /* ! __amd64__ - means Intel CPUs */
++
++  // Intel recommends, that on its hyperthreading and dual-core chipsets
++  // a serializing instruction (e.g. cpuid) will be called before 
++  // and after rdtsc. Note, that this is still not enough for some
++  // CPUs/chipsets and the thread should be bound to a particular
++  // cpu (see cpu-affinity).
++  // Still, when confident/tested, that some particular hw does not
++  // make problems, ACE-user may overwrite this safe default by
++  // defining a preprocessing flag ACE_SKIPS_RDTSC_SERIALIZATION
+   //
+-  // Read the high-res tick counter directly into memory variable "now".
+-  // The A constraint signifies a 64-bit int.
+-  asm volatile ("rdtsc" : "=A" (now) : : "memory");
++#if !defined (ACE_SKIPS_RDTSC_SERIALIZATION)
++  if (ACE_OS::cpu_smp_)
++  {
++    asm volatile (
++                  /*do we need alignment ? ".align 64\n\t"*/
++                  "cpuid\n\t"/* Is it faster to call cpuid, when eax has some valid value? "xor %%eax,%%eax\n\t"*/
++                  "cpuid\n\t"
++                  "cpuid\n\t"
++                  "rdtsc\n\t"
++                  "mov %%eax, %0\n\t"
++                  "mov %%edx, %1\n\t"
++                  "cpuid\n\t"
++                  : "=m" (least), "=m" (most)
++                  :
++                  : "eax", "ecx", "edx");
++  }
++  else
++  {
++    // Not doing serialized RDTSC for a single Intel CPU.
++    asm volatile ("rdtsc" : "=a" (least), "=d" (most) : : "memory");
++  }
++#else /* ACE_SKIPS_RDTSC_SERIALIZATION */
++  asm volatile ("rdtsc" : "=a" (least), "=d" (most) : : "memory");
++#endif /* ACE_SKIPS_RDTSC_SERIALIZATION */
+ 
+ # if defined (ACE_LACKS_LONGLONG_T)
+-  ACE_UINT32 least, most;
+-  ACE_OS::memcpy (&least, &now, sizeof (ACE_UINT32));
+-  ACE_OS::memcpy (&most, (u_char *) &now + sizeof (ACE_UINT32),
+-                  sizeof (ACE_UINT32));
+-
+   ACE_hrtime_t ret (least, most);
+   return ret;
+ # else  /* ! ACE_LACKS_LONGLONG_T */
+-  return now;
++  ACE_hrtime_t now;
++  return now = ((ACE_hrtime_t) least) | (((ACE_hrtime_t)most) <<32);
+ # endif /* ! ACE_LACKS_LONGLONG_T */
++
++#endif /* __amd64__ */
++
+ #elif defined (linux) && defined (ACE_HAS_ALPHA_TIMER)
++
+   // NOTE:  alphas only have a 32 bit tick (cycle) counter.  The rpcc
+   // instruction actually reads 64 bits, but the high 32 bits are
+   // implementation-specific.  Linux and Digital Unix, for example,
+Common subdirectories: ACE_wrappers/ace/QoS and ACE_wrappers-patched-hrt6/ace/QoS
+Common subdirectories: ACE_wrappers/ace/SSL and ACE_wrappers-patched-hrt6/ace/SSL
