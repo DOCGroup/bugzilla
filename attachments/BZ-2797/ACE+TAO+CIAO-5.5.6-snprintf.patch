@@ -1,0 +1,115 @@
+diff -ru 5.5.6/ACE_wrappers/ace/Process.cpp 5.5.6-patched/ACE_wrappers/ace/Process.cpp
+--- 5.5.6/ACE_wrappers/ace/Process.cpp	2007-01-05 22:55:24.000000000 +0100
++++ 5.5.6-patched/ACE_wrappers/ace/Process.cpp	2007-01-31 17:29:26.000000000 +0100
+@@ -1069,7 +1069,9 @@
+ #if !defined (ACE_LACKS_VSNPRINTF)
+   // sprintf the format and args into command_line_buf__.
+   ACE_OS::vsnprintf (command_line_buf_,
+-                     command_line_buf_len_ - 1,
++                     command_line_buf_len_, // ACE_OS::vsnprintf writes at
++                                            // most n-1 characters plus the
++                                            // trailing null.
+                      format,
+                      argp);
+ #else
+diff -ru 5.5.6/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/Method_Request_Dispatch.cpp 5.5.6-patched/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/Method_Request_Dispatch.cpp
+--- 5.5.6/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/Method_Request_Dispatch.cpp	2006-03-14 07:14:35.000000000 +0100
++++ 5.5.6-patched/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/Method_Request_Dispatch.cpp	2007-01-31 17:18:53.000000000 +0100
+@@ -132,7 +132,7 @@
+       {
+         id_path.push_back (id);
+         char idbuf[20];
+-        ACE_OS::snprintf (idbuf, sizeof(idbuf)-1, "/%d", static_cast<int> (id));
++        ACE_OS::snprintf (idbuf, sizeof(idbuf), "/%d", static_cast<int> (id));
+         textpath += idbuf;
+       }
+       else
+diff -ru 5.5.6/ACE_wrappers/TAO/orbsvcs/tests/FT_App/FT_Creator.cpp 5.5.6-patched/ACE_wrappers/TAO/orbsvcs/tests/FT_App/FT_Creator.cpp
+--- 5.5.6/ACE_wrappers/TAO/orbsvcs/tests/FT_App/FT_Creator.cpp	2005-10-04 13:38:20.000000000 +0200
++++ 5.5.6-patched/ACE_wrappers/TAO/orbsvcs/tests/FT_App/FT_Creator.cpp	2007-01-31 17:17:03.000000000 +0100
+@@ -199,7 +199,7 @@
+       ACE_CHECK_RETURN (1);
+ 
+       char iogr_filename[1000];
+-      ACE_OS::snprintf (iogr_filename, sizeof(iogr_filename)-1, "%s%s_%d.iogr",
++      ACE_OS::snprintf (iogr_filename, sizeof(iogr_filename), "%s%s_%d.iogr",
+         this->prefix_,
+         role,
+         this->iogr_seq_);
+@@ -220,7 +220,7 @@
+     if(this->ns_register_)
+     {
+       char iogr_name[1000];
+-      ACE_OS::snprintf (iogr_name, sizeof(iogr_name)-1, "%s_%s_%d",
++      ACE_OS::snprintf (iogr_name, sizeof(iogr_name), "%s_%s_%d",
+         this->prefix_,
+         role,
+         this->iogr_seq_);
+diff -ru 5.5.6/ACE_wrappers/TAO/orbsvcs/tests/FT_App/TAO_Object_Group_Creator.cpp 5.5.6-patched/ACE_wrappers/TAO/orbsvcs/tests/FT_App/TAO_Object_Group_Creator.cpp
+--- 5.5.6/ACE_wrappers/TAO/orbsvcs/tests/FT_App/TAO_Object_Group_Creator.cpp	2005-10-04 13:38:20.000000000 +0200
++++ 5.5.6-patched/ACE_wrappers/TAO/orbsvcs/tests/FT_App/TAO_Object_Group_Creator.cpp	2007-01-31 17:15:33.000000000 +0100
+@@ -391,11 +391,10 @@
+ 
+           char replica_ior_filename[200]; // "${role}_$ (location)_${factory_id}.ior"
+ 
+-          ACE_OS::snprintf (replica_ior_filename, sizeof (replica_ior_filename)-1, "%s_%s_%lu.ior",
++          ACE_OS::snprintf (replica_ior_filename, sizeof (replica_ior_filename), "%s_%s_%lu.ior",
+             role,
+             loc_name,
+             static_cast<unsigned long> (ulong_id));
+-          replica_ior_filename[sizeof (replica_ior_filename)-1] = '\0';
+ 
+           ACE_ERROR ( (LM_INFO,
+             "%T %n (%P|%t) Object_Group_Creator: Writing ior for created object to %s\n",
+diff -ru 5.5.6/ACE_wrappers/TAO/tao/ORB_Core.cpp 5.5.6-patched/ACE_wrappers/TAO/tao/ORB_Core.cpp
+--- 5.5.6/ACE_wrappers/TAO/tao/ORB_Core.cpp	2007-01-15 10:45:01.000000000 +0100
++++ 5.5.6-patched/ACE_wrappers/TAO/tao/ORB_Core.cpp	2007-01-31 17:13:03.000000000 +0100
+@@ -1253,13 +1253,11 @@
+       static char const mcast_fmt[] = "mcast://:%d::";
+       static size_t const PORT_BUF_SIZE = 256;
+ 
+-      char def_init_ref[PORT_BUF_SIZE] = { 0 }; // snprintf() doesn't
+-                                                // null terminate.
+-                                                // Make sure we do.
++      char def_init_ref[PORT_BUF_SIZE] = { 0 };
+ 
+       ACE_OS::snprintf (def_init_ref,
+-                        PORT_BUF_SIZE - 1, // Account for null
+-                                           // terminator.
++                        PORT_BUF_SIZE, // ACE_OS::snprintf writes at most n-1
++                                       // characters plus the trailing null.
+                         mcast_fmt,
+                         ns_port);
+ 
+diff -ru 5.5.6/ACE_wrappers/TAO/tao/ORB.cpp 5.5.6-patched/ACE_wrappers/TAO/tao/ORB.cpp
+--- 5.5.6/ACE_wrappers/TAO/tao/ORB.cpp	2006-12-28 12:46:39.000000000 +0100
++++ 5.5.6-patched/ACE_wrappers/TAO/tao/ORB.cpp	2007-01-31 17:13:53.000000000 +0100
+@@ -1033,13 +1033,11 @@
+       static char const mcast_fmt[] = "mcast://:%d::";
+       static size_t const PORT_BUF_SIZE = 256;
+ 
+-      char def_init_ref[PORT_BUF_SIZE] = { 0 }; // snprintf() doesn't
+-                                                // null terminate.
+-                                                // Make sure we do.
++      char def_init_ref[PORT_BUF_SIZE] = { 0 };
+ 
+       ACE_OS::snprintf (def_init_ref,
+-                        PORT_BUF_SIZE - 1, // Account for null
+-                                           // terminator.
++                        PORT_BUF_SIZE, // ACE_OS::snprintf writes at most n-1
++                                       // characters plus the trailing null.
+                         mcast_fmt,
+                         port);
+ 
+diff -ru 5.5.6/ACE_wrappers/tests/SOCK_Dgram_Bcast_Test.cpp 5.5.6-patched/ACE_wrappers/tests/SOCK_Dgram_Bcast_Test.cpp
+--- 5.5.6/ACE_wrappers/tests/SOCK_Dgram_Bcast_Test.cpp	2006-07-14 09:29:27.000000000 +0200
++++ 5.5.6-patched/ACE_wrappers/tests/SOCK_Dgram_Bcast_Test.cpp	2007-01-31 17:46:49.000000000 +0100
+@@ -47,7 +47,7 @@
+ {
+     static char dgram_buffer[BUFSIZ];
+ 
+-    ACE_OS::snprintf (dgram_buffer, sizeof(dgram_buffer) - 1,
++    ACE_OS::snprintf (dgram_buffer, sizeof(dgram_buffer),
+                       "Datagram %d", datagram_no);
+     if (socket.send (dgram_buffer,
+                      ACE_OS::strlen (dgram_buffer) + 1,
