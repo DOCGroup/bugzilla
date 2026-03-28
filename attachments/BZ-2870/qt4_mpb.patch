@@ -1,0 +1,121 @@
+Index: qt.mpb
+===================================================================
+--- qt.mpb	(revision 1159)
++++ qt.mpb	(working copy)
+@@ -36,4 +36,15 @@
+     pre_extension    = _moc
+     source_outputext = .cpp
+   }
++  Define_Custom(QRC) {
++    automatic        = 1
++    command          = $(QTDIR)/bin/rcc
++    output_option    =  -o
++    commandflags     = -name <%input_noext%> 
++    pch_postrule     = 1
++    inputext         = .qrc
++    pre_extension    = _qrc 
++    source_outputext = .cpp
++ 
+ }
++}
+Index: qt4_core.mpb
+===================================================================
+--- qt4_core.mpb	(revision 1159)
++++ qt4_core.mpb	(working copy)
+@@ -3,7 +3,7 @@
+ 
+ project {
+   requires += qt4
+-  includes += $(QTDIR)/include
++  includes += $(QTDIR)/include/QtCore
+   libpaths += $(QTDIR)/lib
+   lit_libs += QtCore$(QTDEBUG)
+ }
+Index: qt4_gui.mpb
+===================================================================
+--- qt4_gui.mpb	(revision 1159)
++++ qt4_gui.mpb	(working copy)
+@@ -3,22 +3,5 @@
+ 
+ project: qt4_core {
+   lit_libs += QtGui$(QTDEBUG)
+-
+-  Define_Custom(UIC) {
+-    automatic        = 1
+-    command          = $(QTDIR)/bin/uic
+-    output_option    = -o
+-    inputext         = .ui
+-    header_outputext = .h
+-  }
+-
+-  Define_Custom(MOC) {
+-    automatic        = 0
+-    command          = $(QTDIR)/bin/moc
+-    output_option    = -o
+-    pch_postrule     = 1
+-    inputext         = .h
+-    pre_extension    = _moc
+-    source_outputext = .cpp
+-  }
++ includes += $(QTDIR)/include/QtGui
+ }
+Index: qt4_network.mpb
+===================================================================
+--- qt4_network.mpb	(revision 1159)
++++ qt4_network.mpb	(working copy)
+@@ -3,4 +3,5 @@
+ 
+ project: qt4_core {
+   lit_libs += QtNetwork$(QTDEBUG)
++ includes += $(QTDIR)/include/QtNetwork
+ }
+Index: qt4_opengl.mpb
+===================================================================
+--- qt4_opengl.mpb	(revision 1159)
++++ qt4_opengl.mpb	(working copy)
+@@ -3,4 +3,5 @@
+ 
+ project: qt4_gui {
+   lit_libs += QtOpenGL$(QTDEBUG)
++ includes += $(QTDIR)/include/QtOpenGL
+ }
+Index: qt4_sql.mpb
+===================================================================
+--- qt4_sql.mpb	(revision 1159)
++++ qt4_sql.mpb	(working copy)
+@@ -3,4 +3,5 @@
+ 
+ project: qt4_core {
+   lit_libs += QtSql$(QTDEBUG)
++ includes += $(QTDIR)/include/QtSql
+ }
+Index: qt4_svg.mpb
+===================================================================
+--- qt4_svg.mpb	(revision 1159)
++++ qt4_svg.mpb	(working copy)
+@@ -3,4 +3,5 @@
+ 
+ project: qt4_xml {
+   lit_libs += QtSvg$(QTDEBUG)
++ includes += $(QTDIR)/include/QtSvg
+ }
+Index: qt4_test.mpb
+===================================================================
+--- qt4_test.mpb	(revision 1159)
++++ qt4_test.mpb	(working copy)
+@@ -3,4 +3,5 @@
+ 
+ project: qt4_core {
+   lit_libs += QtTest$(QTDEBUG)
++ includes += $(QTDIR)/include/QtTest
+ }
+Index: qt4_xml.mpb
+===================================================================
+--- qt4_xml.mpb	(revision 1159)
++++ qt4_xml.mpb	(working copy)
+@@ -3,4 +3,5 @@
+ 
+ project: qt4_core {
+   lit_libs += QtXml$(QTDEBUG)
++ includes += $(QTDIR)/include/QtXml
+ }
