@@ -1,0 +1,32 @@
+Index: ace/Vector_T.h
+===================================================================
+--- ace/Vector_T.h	(revision 255)
++++ ace/Vector_T.h	(working copy)
+@@ -185,6 +185,8 @@
+    */
+   bool operator!= (const ACE_Vector<T, DEFAULT_SIZE> &s) const;
+ 
++  void swap (ACE_Vector& rhs);
++
+ protected:
+ 
+   /**
+Index: ace/Vector_T.inl
+===================================================================
+--- ace/Vector_T.inl	(revision 255)
++++ ace/Vector_T.inl	(working copy)
+@@ -51,6 +51,14 @@
+   return !(*this == s);
+ }
+ 
++template <class T, size_t DEFAULT_SIZE> ACE_INLINE void
++ACE_Vector<T, DEFAULT_SIZE>::swap (ACE_Vector& rhs)
++{
++  this->ACE_Array<T>::swap (rhs);
++  std::swap (this->length_, rhs.length_);
++  std::swap (this->curr_max_size_, rhs.curr_max_size_);
++}
++
+ // ****************************************************************
+ 
+ template <class T, size_t DEFAULT_SIZE> ACE_INLINE void
