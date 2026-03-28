@@ -1,0 +1,32 @@
+--- Thread_Manager.cpp	(revision 85271)
++++ Thread_Manager.cpp	(working copy)
+@@ -1412,7 +1412,7 @@
+   ACE_TRACE ("ACE_Thread_Manager::join");
+ 
+   bool found = false;
+-  ACE_Thread_Descriptor_Base tdb;
++  ACE_hthread_t thread_handle;
+ 
+   {
+     ACE_MT (ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, this->lock_, -1));
+@@ -1447,9 +1447,9 @@
+             (ACE_BIT_DISABLED (iter.next ()->flags_, THR_DETACHED | THR_DAEMON)
+              || ACE_BIT_ENABLED (iter.next ()->flags_, THR_JOINABLE)))
+           {
+-            tdb = *iter.next ();
++            thread_handle = iter.next ()->thr_handle_;
+             ACE_SET_BITS (iter.next ()->thr_state_, ACE_THR_JOINING);
+-            found = 1;
++            found = true;
+             break;
+           }
+       }
+@@ -1459,7 +1459,7 @@
+     // Didn't find the thread we want or the thread is not joinable.
+   }
+ 
+-  if (ACE_Thread::join (tdb.thr_handle_, status) == -1)
++  if (ACE_Thread::join (thread_handle, status) == -1)
+     return -1;
+ 
+   return 0;
