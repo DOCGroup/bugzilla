@@ -1,0 +1,104 @@
+--- ACE_wrappers.orig/ace/Obstack.h	2003-07-19 15:04:12.000000000 -0400
++++ ACE_wrappers/ace/Obstack.h	2005-09-01 22:25:20.000000000 -0400
+@@ -19,9 +19,9 @@
+ # pragma once
+ #endif /* ACE_LACKS_PRAGMA_ONCE */
+ 
+-typedef ACE_Obstack_T<char> ACE_Obstack;
+-
+ ACE_SINGLETON_DECLARATION (ACE_Obstack_T <char>;)
+ 
++typedef ACE_Obstack_T<char> ACE_Obstack;
++
+ #include /**/ "ace/post.h"
+ #endif /* ACE_OBSTACK_H */
+--- ACE_wrappers.orig/ace/Based_Pointer_Repository.h	2005-10-10 13:10:45.000000000 -0400
++++ ACE_wrappers/ace/Based_Pointer_Repository.h	2005-10-10 16:54:55.000000000 -0400
+@@ -77,13 +77,13 @@
+ 
+ #include "ace/Singleton.h"
+ 
++/// Declare a process wide singleton
++ACE_MEMORY_SINGLETON_DECLARE(ACE_Singleton, ACE_Based_Pointer_Repository, ACE_SYNCH_RW_MUTEX)
++
+ /// Provide a Singleton access point to the based pointer repository.
+ typedef ACE_Singleton<ACE_Based_Pointer_Repository, ACE_SYNCH_RW_MUTEX>
+         ACE_BASED_POINTER_REPOSITORY;
+ 
+-/// Declare a process wide singleton
+-ACE_MEMORY_SINGLETON_DECLARE(ACE_Singleton, ACE_Based_Pointer_Repository, ACE_SYNCH_RW_MUTEX)
+-
+ #include /**/ "ace/post.h"
+ 
+ #endif /* ACE_BASED_POINTER_REPOSITORY_H */
+--- ACE_wrappers.orig/ace/Timeprobe.h	2005-04-15 14:40:25.000000000 -0400
++++ ACE_wrappers/ace/Timeprobe.h	2005-09-01 22:25:20.000000000 -0400
+@@ -147,13 +147,13 @@
+ #    define ACE_TIMEPROBE_SINGLETON_LOCK_TYPE ACE_SYNCH_MUTEX
+ #  endif /* ACE_TSS_TIMEPROBES */
+ 
+-typedef ACE_TIMEPROBE_SINGLETON_TYPE<ACE_TIMEPROBE_WITH_LOCKING, ACE_TIMEPROBE_SINGLETON_LOCK_TYPE>
+-        ACE_TIMEPROBE_SINGLETON;
+-
+ ACE_SINGLETON_DECLARE (ACE_TIMEPROBE_SINGLETON_TYPE, \
+                                            ACE_TIMEPROBE_WITH_LOCKING, \
+                                            ACE_TIMEPROBE_SINGLETON_LOCK_TYPE)
+ 
++typedef ACE_TIMEPROBE_SINGLETON_TYPE<ACE_TIMEPROBE_WITH_LOCKING, ACE_TIMEPROBE_SINGLETON_LOCK_TYPE>
++        ACE_TIMEPROBE_SINGLETON;
++
+ #endif /* ACE_COMPILE_TIMEPROBES */
+ 
+ // If ACE_ENABLE_TIMEPROBES is defined, the macros below will
+--- ACE_wrappers.orig/ace/config-g++-common.h	2005-05-19 03:41:57.000000000 -0400
++++ ACE_wrappers/ace/config-g++-common.h	2005-09-01 22:25:20.000000000 -0400
+@@ -72,10 +72,28 @@
+ # define ACE_HAS_CUSTOM_EXPORT_MACROS
+ # define ACE_Proper_Export_Flag __attribute__ ((visibility("default")))
+ # define ACE_Proper_Import_Flag
+-# define ACE_EXPORT_SINGLETON_DECLARATION(T)
+-# define ACE_EXPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
+-#define ACE_IMPORT_SINGLETON_DECLARATION(T)
+-#define ACE_IMPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
++
++// Sadly, G++ 4.x silently ignores visibility attributes on
++// template instantiations, which breaks singletons.
++// As a workaround, we use the GCC visibility pragmas.
++// And to make them fit in a macro, we use C99's _Pragma()
++// http://gcc.gnu.org/bugzilla/show_bug.cgi?id=17470
++# if 0 /* ... replace if/when gcc bug 17470 is fixed */
++#  define ACE_EXPORT_SINGLETON_DECLARATION(T) template class __attribute__ ((visibility("default"))) T
++#  define ACE_EXPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) template class __attribute__ ((visibility("default"))) SINGLETON_TYPE <CLASS, LOCK>;
++# else  /* ! GCC_HAS_TEMPLATE_INSTANTIATION_VISIBILITY_ATTRS */
++#  define ACE_EXPORT_SINGLETON_DECLARATION(T)     \
++	_Pragma ("GCC visibility push(default)")  \
++	template class T                          \
++	_Pragma ("GCC visibility pop")
++#  define ACE_EXPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) \
++	_Pragma ("GCC visibility push(default)")                    \
++	template class SINGLETON_TYPE <CLASS, LOCK>;                \
++	_Pragma ("GCC visibility pop")
++# endif /* ! GCC_HAS_TEMPLATE_INSTANTIATION_VISIBILITY_ATTRS */
++
++# define ACE_IMPORT_SINGLETON_DECLARATION(T) extern template class T
++# define ACE_IMPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) extern template class SINGLETON_TYPE <CLASS, LOCK>;
+ #endif  /* __GNU__ > 3 */
+ 
+ #if defined (ACE_HAS_GNU_REPO)
+--- ACE_wrappers.orig/examples/Export/dll.h	2004-03-23 08:24:29.000000000 -0500
++++ ACE_wrappers/examples/Export/dll.h	2005-10-10 17:01:12.000000000 -0400
+@@ -57,7 +57,6 @@
+ #   pragma option push -Jgx
+ # endif
+ #endif
+-typedef ACE_Singleton<test_class, ACE_Null_Mutex> TEST_SINGLETON;
+ TEST_SINGLETON_DECLARE (ACE_Singleton, test_class, ACE_Null_Mutex)
+ #if defined (__BORLANDC__)
+ # if !defined (TEST_BUILD_DLL)
+@@ -65,4 +64,6 @@
+ # endif
+ #endif
+ 
++typedef ACE_Singleton<test_class, ACE_Null_Mutex> TEST_SINGLETON;
++
+ Test_Export test_class *get_dll_singleton ();
