@@ -1,0 +1,19 @@
+Index: TAO/TAO_IDL/driver/drv_args.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/driver/drv_args.cpp,v
+retrieving revision 1.82
+diff -u -r1.82 drv_args.cpp
+--- TAO/TAO_IDL/driver/drv_args.cpp	17 Jun 2003 15:09:23 -0000	1.82
++++ TAO/TAO_IDL/driver/drv_args.cpp	13 Aug 2003 17:11:15 -0000
+@@ -255,6 +255,11 @@
+     ));
+   ACE_DEBUG ((
+       LM_DEBUG,
++      ACE_TEXT (" -GH \t\tGenerate the code for using AMH server-side")
++      ACE_TEXT (" async model\n")
++    ));
++  ACE_DEBUG ((
++      LM_DEBUG,
+       ACE_TEXT (" -Gd \t\tGenerate the code for direct collocation. Default")
+       ACE_TEXT ("is thru-POA collocation\n")
+     ));
