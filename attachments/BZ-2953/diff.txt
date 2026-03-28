@@ -1,0 +1,890 @@
+Index: ORB_Core.cpp
+===================================================================
+--- ORB_Core.cpp	(revision 78746)
++++ ORB_Core.cpp	(working copy)
+@@ -148,30 +148,17 @@
+ 
+ TAO_ORB_Core_Static_Resources::TAO_ORB_Core_Static_Resources (void)
+   : sync_scope_hook_ (0),
+-    protocols_hooks_name_ ("Protocols_Hooks"),
+     network_priority_protocols_hooks_name_ (
+       "Network_Priority_Protocols_Hooks"),
+     timeout_hook_ (0),
+     connection_timeout_hook_ (0),
+-    endpoint_selector_factory_name_ ("Default_Endpoint_Selector_Factory"),
+-    thread_lane_resources_manager_factory_name_
+-      ("Default_Thread_Lane_Resources_Manager_Factory"),
+-
+     collocation_resolver_name_ ("Default_Collocation_Resolver"),
+-    stub_factory_name_ ("Default_Stub_Factory"),
+     resource_factory_name_ ("Resource_Factory"),
+     dynamic_adapter_name_ ("Dynamic_Adapter"),
+     ifr_client_adapter_name_ ("IFR_Client_Adapter"),
+     typecodefactory_adapter_name_ ("TypeCodeFactory_Adapter"),
+     iorinterceptor_adapter_factory_name_ ("IORInterceptor_Adapter_Factory"),
+     valuetype_adapter_factory_name_ ("Valuetype_Adapter_Factory"),
+-    poa_factory_name_ ("TAO_Object_Adapter_Factory"),
+-    poa_factory_directive_
+-      (ACE_TEXT_ALWAYS_CHAR
+-        (ACE_DYNAMIC_SERVICE_DIRECTIVE("TAO_Object_Adapter_Factory",
+-                                       "TAO_PortableServer",
+-                                       "_make_TAO_Object_Adapter_Factory",
+-                                       ""))),
+     alt_connection_timeout_hook_ (0)
+ {
+ }
+@@ -180,17 +167,11 @@
+ TAO_ORB_Core_Static_Resources::operator=(const TAO_ORB_Core_Static_Resources& other)
+ {
+   this->sync_scope_hook_ = other.sync_scope_hook_;
+-  this->protocols_hooks_name_ = other.protocols_hooks_name_;
+   this->network_priority_protocols_hooks_name_ =
+     other.network_priority_protocols_hooks_name_;
+   this->timeout_hook_ = other.timeout_hook_;
+   this->connection_timeout_hook_ = other.connection_timeout_hook_;
+-  this->endpoint_selector_factory_name_ =
+-    other.endpoint_selector_factory_name_;
+-  this->thread_lane_resources_manager_factory_name_ =
+-    other.thread_lane_resources_manager_factory_name_;
+   this->collocation_resolver_name_ = other.collocation_resolver_name_;
+-  this->stub_factory_name_ = other.stub_factory_name_;
+   this->resource_factory_name_ = other.resource_factory_name_;
+   this->dynamic_adapter_name_ = other.dynamic_adapter_name_;
+   this->ifr_client_adapter_name_ = other.ifr_client_adapter_name_;
+@@ -199,8 +180,6 @@
+     other.iorinterceptor_adapter_factory_name_;
+   this->valuetype_adapter_factory_name_ =
+     other.valuetype_adapter_factory_name_;
+-  this->poa_factory_name_ = other.poa_factory_name_;
+-  this->poa_factory_directive_ = other.poa_factory_directive_;
+   this->alt_connection_timeout_hook_ = other.alt_connection_timeout_hook_;
+   return *this;
+ }
+@@ -1333,13 +1312,12 @@
+   this->flushing_strategy_ = trf->create_flushing_strategy ();
+ 
+   // Look in the service repository for an instance of the Protocol Hooks.
+-  const ACE_CString &protocols_hooks_name =
+-     TAO_ORB_Core_Static_Resources::instance ()->protocols_hooks_name_;
++  const char *protocols_hooks_name = this->orb_params ()->protocols_hooks_name ();
+ 
+   this->protocols_hooks_ =
+     ACE_Dynamic_Service<TAO_Protocols_Hooks>::instance
+     (this->configuration (),
+-     ACE_TEXT_CHAR_TO_TCHAR (protocols_hooks_name.c_str()));
++     ACE_TEXT_CHAR_TO_TCHAR (protocols_hooks_name));
+ 
+   if (this->protocols_hooks_ != 0)
+     {
+@@ -1347,6 +1325,17 @@
+       this->protocols_hooks_->init_hooks (this);
+     }
+ 
++  // If available, allow the Adapter Factory to setup.
++  ACE_Service_Object *adapter_factory =
++    ACE_Dynamic_Service<ACE_Service_Object>::instance (
++      this->configuration (),
++      this->orb_params ()->poa_factory_name ());
++
++  if (adapter_factory != 0)
++    {
++      adapter_factory->init (0, 0);
++    }
++
+   // Look in the service repository for an instance of the
+   // Network Priority Protocol Hooks.
+   const ACE_CString &network_priority_protocols_hooks_name =
+@@ -1438,13 +1427,6 @@
+ }
+ 
+ void
+-TAO_ORB_Core::set_thread_lane_resources_manager_factory (const char *thread_lane_resources_manager_factory_name)
+-{
+-  TAO_ORB_Core_Static_Resources::instance ()->thread_lane_resources_manager_factory_name_ =
+-    thread_lane_resources_manager_factory_name;
+-}
+-
+-void
+ TAO_ORB_Core::set_collocation_resolver (const char *collocation_resolver_name)
+ {
+   TAO_ORB_Core_Static_Resources::instance ()->collocation_resolver_name_ =
+@@ -1452,13 +1434,6 @@
+ }
+ 
+ void
+-TAO_ORB_Core::set_stub_factory (const char *stub_factory_name)
+-{
+-  TAO_ORB_Core_Static_Resources::instance ()->stub_factory_name_ =
+-    stub_factory_name;
+-}
+-
+-void
+ TAO_ORB_Core::set_resource_factory (const char *resource_factory_name)
+ {
+   TAO_ORB_Core_Static_Resources::instance ()->resource_factory_name_ =
+@@ -1577,13 +1552,13 @@
+     return *this->thread_lane_resources_manager_;
+ 
+   // If not, lookup the corresponding factory and ask it to make one.
+-  const ACE_CString &thread_lane_resources_manager_factory_name =
+-    TAO_ORB_Core_Static_Resources::instance ()->thread_lane_resources_manager_factory_name_;
++  const char *thread_lane_resources_manager_factory_name =
++    this->orb_params ()->thread_lane_resources_manager_factory_name ();
+ 
+   TAO_Thread_Lane_Resources_Manager_Factory *factory =
+     ACE_Dynamic_Service<TAO_Thread_Lane_Resources_Manager_Factory>::instance
+       (this->configuration (),
+-       ACE_TEXT_CHAR_TO_TCHAR (thread_lane_resources_manager_factory_name.c_str()));
++       ACE_TEXT_CHAR_TO_TCHAR (thread_lane_resources_manager_factory_name));
+ 
+   this->thread_lane_resources_manager_ =
+     factory->create_thread_lane_resources_manager (*this);
+@@ -1683,40 +1658,17 @@
+     return this->stub_factory_;
+ 
+   // If not, look in the service repository for an instance.
+-  const ACE_CString &stub_factory_name =
+-    TAO_ORB_Core_Static_Resources::instance ()->stub_factory_name_;
++  const char *stub_factory_name =
++    this->orb_params ()->stub_factory_name ();
+ 
+   this->stub_factory_ =
+     ACE_Dynamic_Service<TAO_Stub_Factory>::instance
+       (this->configuration (),
+-       ACE_TEXT_CHAR_TO_TCHAR (stub_factory_name.c_str()));
++       ACE_TEXT_CHAR_TO_TCHAR (stub_factory_name));
+ 
+   return this->stub_factory_;
+ }
+ 
+-void
+-TAO_ORB_Core::set_poa_factory (const char *poa_factory_name,
+-                               const char *poa_factory_directive)
+-{
+-  TAO_ORB_Core_Static_Resources::instance ()->poa_factory_name_ =
+-    poa_factory_name;
+-  TAO_ORB_Core_Static_Resources::instance ()->poa_factory_directive_ =
+-    poa_factory_directive;
+-}
+-
+-const ACE_CString &
+-TAO_ORB_Core::poa_factory_name (void)
+-{
+-  return TAO_ORB_Core_Static_Resources::instance ()->poa_factory_name_;
+-}
+-
+-void
+-TAO_ORB_Core::set_endpoint_selector_factory (const char *endpoint_selector_factory_name)
+-{
+-  TAO_ORB_Core_Static_Resources::instance ()->endpoint_selector_factory_name_ =
+-    endpoint_selector_factory_name;
+-}
+-
+ TAO_Endpoint_Selector_Factory *
+ TAO_ORB_Core::endpoint_selector_factory (void)
+ {
+@@ -1725,26 +1677,18 @@
+     return this->endpoint_selector_factory_;
+ 
+   // If not, look in the service repository for an instance.
+-  const ACE_CString &endpoint_selector_factory_name =
+-    TAO_ORB_Core_Static_Resources::instance ()->endpoint_selector_factory_name_;
++  const char* endpoint_selector_factory_name =
++    this->orb_params ()->endpoint_selector_factory_name ();
+ 
+   this->endpoint_selector_factory_ =
+     ACE_Dynamic_Service<TAO_Endpoint_Selector_Factory>::instance
+       (this->configuration (),
+-       ACE_TEXT_CHAR_TO_TCHAR (endpoint_selector_factory_name.c_str()));
++       ACE_TEXT_CHAR_TO_TCHAR (endpoint_selector_factory_name));
+ 
+   return this->endpoint_selector_factory_;
+ }
+ 
+ void
+-TAO_ORB_Core::set_protocols_hooks (const char *protocols_hooks_name)
+-{
+-  // Is synchronization necessary?
+-  TAO_ORB_Core_Static_Resources::instance ()->protocols_hooks_name_ =
+-    protocols_hooks_name;
+-}
+-
+-void
+ TAO_ORB_Core::set_network_priority_protocols_hooks (
+   const char *network_priority_protocols_hooks_name)
+ {
+@@ -1867,18 +1811,18 @@
+       TAO_Adapter_Factory *factory =
+         ACE_Dynamic_Service<TAO_Adapter_Factory>::instance
+           (this->configuration (),
+-          static_resources->poa_factory_name_.c_str());
++          this->orb_params ()->poa_factory_name ());
+ 
+       if (factory == 0)
+         {
+           this->configuration()->process_directive (
+            ACE_TEXT_CHAR_TO_TCHAR (
+-             static_resources->poa_factory_directive_.c_str()));
++             this->orb_params ()->poa_factory_directive ()));
+ 
+           factory =
+             ACE_Dynamic_Service<TAO_Adapter_Factory>::instance
+               (this->configuration (),
+-              static_resources->poa_factory_name_.c_str());
++              this->orb_params ()->poa_factory_name ());
+         }
+ 
+       if (factory == 0)
+Index: params.h
+===================================================================
+--- params.h	(revision 78746)
++++ params.h	(working copy)
+@@ -218,6 +218,24 @@
+   void ami_collication (bool opt);
+   bool ami_collication (void) const;
+ 
++  void protocols_hooks_name (const char *s);
++  const char *protocols_hooks_name (void) const;
++
++  void thread_lane_resources_manager_factory_name (const char *s);
++  const char *thread_lane_resources_manager_factory_name (void) const;
++
++  void stub_factory_name (const char *s);
++  const char *stub_factory_name (void) const;
++
++  void poa_factory_name (const char *s);
++  const char *poa_factory_name (void) const;
++
++  void poa_factory_directive (const char *s);
++  const char *poa_factory_directive (void) const;
++
++  void endpoint_selector_factory_name (const char *s);
++  const char *endpoint_selector_factory_name (void) const;
++
+ private:
+   // Each "endpoint" is of the form:
+   //
+@@ -374,6 +392,53 @@
+ 
+   /// Do we make collocated ami calls
+   bool ami_collication_;
++
++  /**
++   * Name of the protocols_hooks that needs to be instantiated.
++   * The default value is "Protocols_Hooks". If RTCORBA option is
++   * set, its value will be set to be "RT_Protocols_Hooks".
++   */
++  ACE_CString protocols_hooks_name_;
++
++  /**
++   * Name of the stub factory that needs to be instantiated.
++   * The default value is "Default_Stub_Factory". If TAO_RTCORBA is
++   * linked, the set_stub_factory will be called to set the value
++   * to be "RT_Stub_Factory".
++   */
++  ACE_CString stub_factory_name_;
++
++  /**
++   * Name of the endpoint selector factory that needs to be instantiated.
++   * The default value is "Default_Endpoint_Selector_Factory". If
++   * TAO_RTCORBA is linked, the set_endpoint_selector_factory will be
++   * called to set the value to be "RT_Endpoint_Selector_Factory".
++   */
++  ACE_CString endpoint_selector_factory_name_;
++
++  /**
++   * Name of the thread lane resources manager that needs to be
++   * instantiated.  The default value is
++   * "Default_Thread_Lane_Resources_Manager_Factory". If TAO_RTCORBA
++   * is linked, the set_thread_lane_resources_manager will be called
++   * to set the value to be
++   * "RT_Thread_Lane_Resources_Manager_Factory".
++   */
++  ACE_CString thread_lane_resources_manager_factory_name_;
++
++  /**
++   * Name of the service object used to create the RootPOA.  The
++   * default value is "TAO_POA".  If TAO_RTCORBA is loaded, this
++   * will be changed to TAO_RT_POA so that a POA equipped with
++   * realtime extensions will be returned.
++   */
++  ACE_CString poa_factory_name_;
++
++  /**
++   * The service configurator directive used to load
++   * poa_factory_name_ dynamically.
++   */
++  ACE_CString poa_factory_directive_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: params.cpp
+===================================================================
+--- params.cpp	(revision 78746)
++++ params.cpp	(working copy)
+@@ -8,8 +8,8 @@
+ #endif /* __ACE_INLINE__ */
+ 
+ #include "ace/OS_NS_Thread.h"
++#include "ace/Service_Config.h"
+ 
+-
+ ACE_RCSID (tao,
+            params,
+            "$Id$")
+@@ -49,6 +49,17 @@
+ #endif /* ACE_HAS_IPV6 */
+   , negotiate_codesets_ (true)
+   , ami_collication_ (true)
++  , protocols_hooks_name_ ("Protocols_Hooks")
++  , endpoint_selector_factory_name_ ("Default_Endpoint_Selector_Factory")
++  , thread_lane_resources_manager_factory_name_ ("Default_Thread_Lane_Resources_Manager_Factory")
++  , stub_factory_name_ ("Default_Stub_Factory")
++  , poa_factory_name_ ("TAO_Object_Adapter_Factory")
++  , poa_factory_directive_
++      (ACE_TEXT_ALWAYS_CHAR
++        (ACE_DYNAMIC_SERVICE_DIRECTIVE("TAO_Object_Adapter_Factory",
++                                       "TAO_PortableServer",
++                                       "_make_TAO_Object_Adapter_Factory",
++                                       "")))
+ {
+   for (int i = 0; i != TAO_NO_OF_MCAST_SERVICES; ++i)
+     {
+@@ -323,4 +334,76 @@
+ }
+ #endif /* ACE_HAS_IPV6 */
+ 
++void
++TAO_ORB_Parameters::protocols_hooks_name (const char *s)
++{
++  this->protocols_hooks_name_ = s;
++}
++
++const char *
++TAO_ORB_Parameters::protocols_hooks_name (void) const
++{
++  return this->protocols_hooks_name_.c_str ();
++}
++
++void
++TAO_ORB_Parameters::thread_lane_resources_manager_factory_name (const char *s)
++{
++  this->thread_lane_resources_manager_factory_name_ = s;
++}
++
++const char *
++TAO_ORB_Parameters::thread_lane_resources_manager_factory_name (void) const
++{
++  return this->thread_lane_resources_manager_factory_name_.c_str ();
++}
++
++void
++TAO_ORB_Parameters::stub_factory_name (const char *s)
++{
++  this->stub_factory_name_ = s;
++}
++
++const char *
++TAO_ORB_Parameters::stub_factory_name (void) const
++{
++  return this->stub_factory_name_.c_str ();
++}
++
++void
++TAO_ORB_Parameters::poa_factory_name (const char *s)
++{
++  this->poa_factory_name_ = s;
++}
++
++const char *
++TAO_ORB_Parameters::poa_factory_name (void) const
++{
++  return this->poa_factory_name_.c_str ();
++}
++
++void
++TAO_ORB_Parameters::poa_factory_directive (const char *s)
++{
++  this->poa_factory_directive_ = s;
++}
++
++const char *
++TAO_ORB_Parameters::poa_factory_directive (void) const
++{
++  return this->poa_factory_directive_.c_str ();
++}
++
++void
++TAO_ORB_Parameters::endpoint_selector_factory_name (const char *s)
++{
++  this->endpoint_selector_factory_name_ = s;
++}
++
++const char *
++TAO_ORB_Parameters::endpoint_selector_factory_name (void) const
++{
++  return this->endpoint_selector_factory_name_.c_str ();
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: TAO_Internal.cpp
+===================================================================
+--- TAO_Internal.cpp	(revision 78746)
++++ TAO_Internal.cpp	(working copy)
+@@ -451,7 +451,7 @@
+ #endif /* TAO_PLATFORM_SVC_CONF_FILE_NOTSUP */
+ 
+     // Copy command line parameter to allow conversion
+-    ACE_Argv_Type_Converter command_line (argc, argv); 
++    ACE_Argv_Type_Converter command_line (argc, argv);
+ 
+     return pcfg->open (command_line.get_argc (),
+                        command_line.get_TCHAR_argv (),
+@@ -573,17 +573,6 @@
+           (ACE_TEXT_CHAR_TO_TCHAR (server_strategy_factory_args));
+       }
+ 
+-    // If available, allow the Adapter Factory to setup.
+-    ACE_Service_Object *adapter_factory =
+-      ACE_Dynamic_Service<ACE_Service_Object>::instance (
+-        pcfg,
+-        TAO_ORB_Core::poa_factory_name ().c_str ());
+-
+-    if (adapter_factory != 0)
+-      {
+-        adapter_factory->init (0, 0);
+-      }
+-
+     ACE_Service_Object * const pi_server_loader =
+       ACE_Dynamic_Service<ACE_Service_Object>::instance (
+         pcfg,
+Index: ORB_Core.h
+===================================================================
+--- ORB_Core.h	(revision 78746)
++++ ORB_Core.h	(working copy)
+@@ -298,17 +298,9 @@
+ 
+   //@}
+ 
+-  /// Sets the value of
+-  /// TAO_ORB_Core::thread_lane_resources_manager_factory_name_
+-  static void set_thread_lane_resources_manager_factory (const char *
+-    thread_lane_resources_manager_factory_name);
+-
+   /// Sets the value of TAO_ORB_Core::collocation_resolver_name_
+   static void set_collocation_resolver (const char *collocation_resolver_name);
+ 
+-  /// Sets the value of TAO_ORB_Core::stub_factory_name_
+-  static void set_stub_factory (const char *stub_factory_name);
+-
+   /// Sets the value of TAO_ORB_Core::resource_factory_
+   static void set_resource_factory (const char *resource_factory_name);
+ 
+@@ -319,25 +311,10 @@
+    */
+   static void set_gui_resource_factory (TAO::GUIResource_Factory *gui_factory);
+ 
+-  /// Sets the value of TAO_ORB_Core::protocols_hooks_
+-  static void set_protocols_hooks (const char *protocols_hooks_name);
+-
+   /// Sets the value of TAO_ORB_Core::network_priority_protocols_hooks_
+   static void set_network_priority_protocols_hooks (
+     const char *network_priority_protocols_hooks_name);
+ 
+-  /// Sets the value of TAO_ORB_Core::endpoint_selector_factory_
+-  static void set_endpoint_selector_factory (
+-    const char *endpoint_selector_factory_name);
+-
+-  /// Sets the name of the POA factory and the dynamic service
+-  /// configurator directive to load it if needed.
+-  static void set_poa_factory (const char *poa_factory_name,
+-                               const char *poa_factory_directive);
+-
+-  /// Access the POA factory name.
+-  static const ACE_CString &poa_factory_name (void);
+-
+   /// Gets the value of TAO_ORB_Core::protocols_hooks__
+   TAO_Protocols_Hooks * get_protocols_hooks (void);
+ 
+@@ -1275,14 +1252,6 @@
+   TAO_ORB_Core::Sync_Scope_Hook sync_scope_hook_;
+ 
+   /**
+-   * Name of the protocols_hooks that needs to be instantiated.
+-   * The default value is "Protocols_Hooks". If RTCORBA option is
+-   * set, its value will be set to be "RT_Protocols_Hooks".
+-   */
+-  ACE_CString protocols_hooks_name_;
+-
+-
+-  /**
+    * Name of the network_priority_protocols_hooks that needs to be instantiated.
+   */
+   ACE_CString network_priority_protocols_hooks_name_;
+@@ -1294,24 +1263,6 @@
+   TAO_ORB_Core::Timeout_Hook connection_timeout_hook_;
+ 
+   /**
+-   * Name of the endpoint selector factory that needs to be instantiated.
+-   * The default value is "Default_Endpoint_Selector_Factory". If
+-   * TAO_RTCORBA is linked, the set_endpoint_selector_factory will be
+-   * called to set the value to be "RT_Endpoint_Selector_Factory".
+-   */
+-  ACE_CString endpoint_selector_factory_name_;
+-
+-  /**
+-   * Name of the thread lane resources manager that needs to be
+-   * instantiated.  The default value is
+-   * "Default_Thread_Lane_Resources_Manager_Factory". If TAO_RTCORBA
+-   * is linked, the set_thread_lane_resources_manager will be called
+-   * to set the value to be
+-   * "RT_Thread_Lane_Resources_Manager_Factory".
+-   */
+-  ACE_CString thread_lane_resources_manager_factory_name_;
+-
+-  /**
+    * Name of the collocation resolver that needs to be instantiated.
+    * The default value is "Default_Collocation_Resolver". If
+    * TAO_RTCORBA is linked, the set_collocation_resolver will be
+@@ -1320,14 +1271,6 @@
+   ACE_CString collocation_resolver_name_;
+ 
+   /**
+-   * Name of the stub factory that needs to be instantiated.
+-   * The default value is "Default_Stub_Factory". If TAO_RTCORBA is
+-   * linked, the set_stub_factory will be called to set the value
+-   * to be "RT_Stub_Factory".
+-   */
+-  ACE_CString stub_factory_name_;
+-
+-  /**
+    * Name of the resource factory that needs to be instantiated.
+    * The default value is "Resource_Factory". If TAO_Strategies is
+    * linked, the set_resource_factory will be called to set the value
+@@ -1380,20 +1323,6 @@
+    */
+   ACE_CString valuetype_adapter_factory_name_;
+ 
+-  /**
+-   * Name of the service object used to create the RootPOA.  The
+-   * default value is "TAO_POA".  If TAO_RTCORBA is loaded, this
+-   * will be changed to TAO_RT_POA so that a POA equipped with
+-   * realtime extensions will be returned.
+-   */
+-  ACE_CString poa_factory_name_;
+-
+-  /**
+-   * The service configurator directive used to load
+-   * poa_factory_name_ dynamically.
+-   */
+-  ACE_CString poa_factory_directive_;
+-
+   /// An alternative hook to be set for the ConnectionTimeoutPolicy
+   TAO_ORB_Core::Timeout_Hook alt_connection_timeout_hook_;
+ 
+Index: Strategies/OC_Endpoint_Selector_Factory.h
+===================================================================
+--- Strategies/OC_Endpoint_Selector_Factory.h	(revision 78746)
++++ Strategies/OC_Endpoint_Selector_Factory.h	(working copy)
+@@ -61,7 +61,6 @@
+   /// Destructor.
+   virtual ~TAO_OC_Endpoint_Selector_Factory (void);
+ 
+-
+   virtual int init (int argc, ACE_TCHAR *argv[]);
+ 
+   /// Get an Invocation's endpoint selection strategy and
+Index: PI/PolicyFactory_Registry.cpp
+===================================================================
+--- PI/PolicyFactory_Registry.cpp	(revision 78746)
++++ PI/PolicyFactory_Registry.cpp	(working copy)
+@@ -58,7 +58,7 @@
+         {
+           // PolicyFactory of given type already exists.
+           throw ::CORBA::BAD_INV_ORDER (CORBA::OMGVMCID | 16,
+-                                           CORBA::COMPLETED_NO);
++                                        CORBA::COMPLETED_NO);
+         }
+       else
+         {
+@@ -70,8 +70,7 @@
+ 
+ CORBA::Policy_ptr
+ TAO_PolicyFactory_Registry::create_policy (CORBA::PolicyType type,
+-                                           const CORBA::Any &value
+-                                           )
++                                           const CORBA::Any &value)
+ {
+   PortableInterceptor::PolicyFactory_ptr policy_factory =
+     PortableInterceptor::PolicyFactory::_nil ();
+Index: CSD_Framework/CSD_Object_Adapter.h
+===================================================================
+--- CSD_Framework/CSD_Object_Adapter.h	(revision 78746)
++++ CSD_Framework/CSD_Object_Adapter.h	(working copy)
+@@ -47,8 +47,7 @@
+   /// Hand the request to the Service_Dispatching_Strategy_Proxy for
+   /// dispatching.
+   virtual void do_dispatch (TAO_ServerRequest& req,
+-                            TAO::Portable_Server::Servant_Upcall& upcall
+-                           );
++                            TAO::Portable_Server::Servant_Upcall& upcall);
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: CSD_Framework/CSD_Framework_Loader.cpp
+===================================================================
+--- CSD_Framework/CSD_Framework_Loader.cpp	(revision 78746)
++++ CSD_Framework/CSD_Framework_Loader.cpp	(working copy)
+@@ -3,6 +3,8 @@
+ #include "tao/CSD_Framework/CSD_Framework_Loader.h"
+ #include "tao/CSD_Framework/CSD_Object_Adapter_Factory.h"
+ #include "tao/CSD_Framework/CSD_Strategy_Repository.h"
++#include "tao/CSD_Framework/CSD_ORBInitializer.h"
++#include "tao/ORBInitializer_Registry.h"
+ #include "ace/Dynamic_Service.h"
+ #include "ace/Service_Gestalt.h"
+ 
+@@ -21,11 +23,36 @@
+      (ace_svc_desc_TAO_CSD_Object_Adapter_Factory);
+ 
+   ACE_Service_Config::process_directive
+-  (ace_svc_desc_TAO_CSD_Strategy_Repository);
++    (ace_svc_desc_TAO_CSD_Strategy_Repository);
+ 
+-  TAO_ORB_Core::set_poa_factory ("TAO_CSD_Object_Adapter_Factory",
+-                                 "dynamic TAO_CSD_Object_Adapter_Factory Service_Object * TAO_CSD_Framework:_make_TAO_CSD_Object_Adapter_Factory()");
++  // Register the ORB initializer.
++  try
++    {
++      PortableInterceptor::ORBInitializer_ptr temp_orb_initializer =
++        PortableInterceptor::ORBInitializer::_nil ();
+ 
++      /// Register the RTCORBA ORBInitializer.
++      ACE_NEW_THROW_EX (temp_orb_initializer,
++                        TAO_CSD_ORBInitializer,
++                        CORBA::NO_MEMORY (
++                          CORBA::SystemException::_tao_minor_code (
++                            TAO::VMCID,
++                            ENOMEM),
++                          CORBA::COMPLETED_NO));
++
++      PortableInterceptor::ORBInitializer_var orb_initializer;
++      orb_initializer = temp_orb_initializer;
++
++      PortableInterceptor::register_orb_initializer (orb_initializer.in ());
++    }
++  catch (const ::CORBA::Exception& ex)
++    {
++      ex._tao_print_exception (
++        "Unexpected exception caught while "
++        "initializing the RTORB");
++      return 1;
++    }
++
+   return 0;
+ }
+ 
+Index: CSD_Framework/CSD_ORBInitializer.cpp
+===================================================================
+--- CSD_Framework/CSD_ORBInitializer.cpp	(revision 0)
++++ CSD_Framework/CSD_ORBInitializer.cpp	(revision 0)
+@@ -0,0 +1,58 @@
++#include "tao/CSD_Framework/CSD_ORBInitializer.h"
++
++ACE_RCSID (CSD,
++           CSD_ORBInitializer,
++           "$Id$")
++
++
++#include "tao/Exception.h"
++#include "tao/ORB_Core.h"
++#include "tao/PI/ORBInitInfo.h"
++#include "tao/debug.h"
++
++#include "ace/Service_Repository.h"
++#include "ace/Svc_Conf.h"
++#include "ace/Sched_Params.h"
++
++static const char rt_poa_factory_name[] = "TAO_CSD_Object_Adapter_Factory";
++static const ACE_TCHAR rt_poa_factory_directive[] =
++  ACE_DYNAMIC_SERVICE_DIRECTIVE(
++    "TAO_CSD_Object_Adapter_Factory",
++    "TAO_RTPortableServer",
++    "_make_TAO_CSD_Object_Adapter_Factory",
++    "");
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++void
++TAO_CSD_ORBInitializer::pre_init (PortableInterceptor::ORBInitInfo_ptr info)
++{
++  // Narrow to a TAO_ORBInitInfo object to get access to the
++  // orb_core() TAO extension.
++  TAO_ORBInitInfo_var tao_info = TAO_ORBInitInfo::_narrow (info);
++
++  if (CORBA::is_nil (tao_info.in ()))
++    {
++      if (TAO_debug_level > 0)
++        ACE_ERROR ((LM_ERROR,
++                    "(%P|%t) TAO_CSD_ORBInitializer::pre_init:\n"
++                    "(%P|%t)    Unable to narrow "
++                    "\"PortableInterceptor::ORBInitInfo_ptr\" to\n"
++                    "(%P|%t)   \"TAO_ORBInitInfo *.\"\n"));
++
++      throw ::CORBA::INTERNAL ();
++    }
++
++  // If the application resolves the root POA, make sure we load the CSD POA.
++  tao_info->orb_core ()->orb_params ()->poa_factory_name ("TAO_CSD_Object_Adapter_Factory");
++
++  tao_info->orb_core ()->orb_params ()->poa_factory_directive ("dynamic TAO_CSD_Object_Adapter_Factory Service_Object * TAO_CSD_Framework:_make_TAO_CSD_Object_Adapter_Factory()");
++}
++
++void
++TAO_CSD_ORBInitializer::post_init (PortableInterceptor::ORBInitInfo_ptr)
++{
++}
++
++TAO_END_VERSIONED_NAMESPACE_DECL
++
+
+Property changes on: CSD_Framework\CSD_ORBInitializer.cpp
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: CSD_Framework/CSD_ORBInitializer.h
+===================================================================
+--- CSD_Framework/CSD_ORBInitializer.h	(revision 0)
++++ CSD_Framework/CSD_ORBInitializer.h	(revision 0)
+@@ -0,0 +1,57 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ *  @file RT_ORBInitializer.h
++ *
++ *  $Id$
++ *
++ *  @author Ossama Othman <ossama@uci.edu>
++ */
++//=============================================================================
++
++
++#ifndef TAO_CSD_ORB_INITIALIZER_H
++#define TAO_CSD_ORB_INITIALIZER_H
++
++#include /**/ "ace/pre.h"
++
++#include "tao/orbconf.h"
++
++#include "tao/CSD_Framework/CSD_FW_Export.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++#include "tao/PI/PI.h"
++#include "tao/LocalObject.h"
++
++// This is to remove "inherits via dominance" warnings from MSVC.
++// MSVC is being a little too paranoid.
++#if defined(_MSC_VER)
++#pragma warning(push)
++#pragma warning(disable:4250)
++#endif /* _MSC_VER */
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++class TAO_CSD_ORBInitializer
++  : public virtual PortableInterceptor::ORBInitializer
++  , public virtual TAO_Local_RefCounted_Object
++{
++public:
++  virtual void pre_init (PortableInterceptor::ORBInitInfo_ptr info);
++
++  virtual void post_init (PortableInterceptor::ORBInitInfo_ptr info);
++};
++
++TAO_END_VERSIONED_NAMESPACE_DECL
++
++#if defined(_MSC_VER)
++#pragma warning(pop)
++#endif /* _MSC_VER */
++
++#include /**/ "ace/post.h"
++
++#endif /* TAO_CSD_ORB_INITIALIZER_H */
+
+Property changes on: CSD_Framework\CSD_ORBInitializer.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: ORBInitializer_Registry.cpp
+===================================================================
+--- ORBInitializer_Registry.cpp	(revision 78746)
++++ ORBInitializer_Registry.cpp	(working copy)
+@@ -62,7 +62,6 @@
+           ACE_Dynamic_Service<TAO::ORBInitializer_Registry_Adapter>::instance
+             ("ORBInitializer_Registry");
+       }
+-
+   #endif /* !TAO_AS_STATIC_LIBS */
+ 
+     if (orbinitializer_registry_ != 0)
+Index: RTCORBA/RT_ORBInitializer.cpp
+===================================================================
+--- RTCORBA/RT_ORBInitializer.cpp	(revision 78746)
++++ RTCORBA/RT_ORBInitializer.cpp	(working copy)
+@@ -68,25 +68,29 @@
+   // Register all of the RT related services.
+   //
+ 
++  // Narrow to a TAO_ORBInitInfo object to get access to the
++  // orb_core() TAO extension.
++  TAO_ORBInitInfo_var tao_info = TAO_ORBInitInfo::_narrow (info);
++
+   // Set the name of the Protocol_Hooks to be RT_Protocols_Hooks.
+-  TAO_ORB_Core::set_protocols_hooks ("RT_Protocols_Hooks");
++  tao_info->orb_core ()->orb_params ()->protocols_hooks_name ("RT_Protocols_Hooks");
+   ACE_Service_Config::process_directive (ace_svc_desc_TAO_RT_Protocols_Hooks);
+ 
+   // Set the name of the stub factory to be RT_Stub_Factory.
+-  TAO_ORB_Core::set_stub_factory ("RT_Stub_Factory");
++  tao_info->orb_core ()->orb_params ()->stub_factory_name ("RT_Stub_Factory");
+   ACE_Service_Config::process_directive (ace_svc_desc_TAO_RT_Stub_Factory);
+ 
+   // Set the name of the stub factory to be RT_Stub_Factory.
+-  TAO_ORB_Core::set_endpoint_selector_factory ("RT_Endpoint_Selector_Factory");
++  tao_info->orb_core ()->orb_params ()->endpoint_selector_factory_name ("RT_Endpoint_Selector_Factory");
+   ACE_Service_Config::process_directive (ace_svc_desc_RT_Endpoint_Selector_Factory);
+ 
+   // Set the name of the thread lane resources manager to be RT_Thread_Lane_Resources_Manager.
+-  TAO_ORB_Core::set_thread_lane_resources_manager_factory ("RT_Thread_Lane_Resources_Manager_Factory");
++  tao_info->orb_core ()->orb_params ()->thread_lane_resources_manager_factory_name ("RT_Thread_Lane_Resources_Manager_Factory");
+   ACE_Service_Config::process_directive (ace_svc_desc_TAO_RT_Thread_Lane_Resources_Manager_Factory);
+ 
+   // If the application resolves the root POA, make sure we load the RT POA.
+-  TAO_ORB_Core::set_poa_factory (rt_poa_factory_name,
+-                                 ACE_TEXT_ALWAYS_CHAR (rt_poa_factory_directive));
++  tao_info->orb_core ()->orb_params ()->poa_factory_name (rt_poa_factory_name);
++  tao_info->orb_core ()->orb_params ()->poa_factory_directive (ACE_TEXT_ALWAYS_CHAR (rt_poa_factory_directive));
+ 
+   // Create the initial priority mapping instance.
+   TAO_Priority_Mapping *pm = 0;
+@@ -155,10 +159,6 @@
+   info->register_initial_reference ("NetworkPriorityMappingManager",
+                                     network_manager);
+ 
+-  // Narrow to a TAO_ORBInitInfo object to get access to the
+-  // orb_core() TAO extension.
+-  TAO_ORBInitInfo_var tao_info = TAO_ORBInitInfo::_narrow (info);
+-
+   if (CORBA::is_nil (tao_info.in ()))
+     {
+       if (TAO_debug_level > 0)
