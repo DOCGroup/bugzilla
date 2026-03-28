@@ -1,0 +1,83 @@
+Index: Transport.h
+===================================================================
+--- Transport.h	(revision 74479)
++++ Transport.h	(working copy)
+@@ -532,6 +532,9 @@
+   /// Perform all the actions when this transport get opened
+   bool post_open (size_t id);
+ 
++  /// do what needs to be done when closing the transport
++  void pre_close (void);
++
+   /// Get the connection handler for this transport
+   TAO_Connection_Handler * connection_handler (void);
+ 
+Index: Connection_Handler.cpp
+===================================================================
+--- Connection_Handler.cpp	(revision 74479)
++++ Connection_Handler.cpp	(working copy)
+@@ -307,7 +307,7 @@
+                    handle));
+     }
+ 
+-  this->transport ()->purge_entry ();
++  this->transport ()->pre_close();
+ 
+   // @@ This seems silly, but if we have no reason to be in the
+   // reactor, then we dont remove ourselves.
+Index: Transport.cpp
+===================================================================
+--- Transport.cpp	(revision 74479)
++++ Transport.cpp	(working copy)
+@@ -194,11 +194,32 @@
+   // By the time the destructor is reached here all the connection stuff
+   // *must* have been cleaned up.
+ 
+-  // The following assert is needed for the test "Bug_2494_Regression".
+-  // See the bugzilla bug #2494 for details.
+-  ACE_ASSERT (this->head_ == 0);
+-  ACE_ASSERT (this->cache_map_entry_ == 0);
++  if (this->head_ != 0)
++    {
++      if (TAO_debug_level)
++        {
++          ACE_DEBUG ((LM_DEBUG,"(%P|%t) TAO_Transport::dtor: head not null\n"));
++          if (TAO_debug_level > 2)
++            // The following assert is needed for the test "Bug_2494_Regression".
++            // See the bugzilla bug #2494 for details.
++            ACE_ASSERT (this->head_ == 0);
++        }
++      this->cleanup_queue_i();
++    }
+ 
++  if (this->cache_map_entry_ != 0)
++    {
++      if (TAO_debug_level)
++        {
++          ACE_DEBUG ((LM_DEBUG,"(%P|%t) TAO_Transport::dtor: still in cache\n"));
++          if (TAO_debug_level > 2)
++            // The following assert is needed for the test "Bug_2494_Regression".
++            // See the bugzilla bug #2494 for details.
++            ACE_ASSERT (this->cache_map_entry_ == 0);
++        }
++      this->purge_entry();
++    }
++
+   /*
+    * Hook to add code that cleans up components
+    * belong to the concrete protocol implementation.
+@@ -2447,6 +2468,14 @@
+   return this->messaging_object ()->out_stream ();
+ }
+ 
++void
++TAO_Transport::pre_close (void)
++{
++  this->is_connected_ = false;
++  this->purge_entry ();
++  this->cleanup_queue_i ();
++}
++
+ bool
+ TAO_Transport::post_open (size_t id)
+ {
