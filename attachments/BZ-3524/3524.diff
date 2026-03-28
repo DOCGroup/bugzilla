@@ -1,0 +1,137 @@
+Index: PortableServer/BD_String_SArgument_T.cpp
+===================================================================
+--- PortableServer/BD_String_SArgument_T.cpp	(revision 83944)
++++ PortableServer/BD_String_SArgument_T.cpp	(working copy)
+@@ -20,7 +20,12 @@
+   )
+ {
+   typedef typename S_var::s_traits::to_type to_type;
+-  return cdr >> to_type (this->x_.out (), BOUND);
++  CORBA::Boolean demarshalled = cdr >> to_type (this->x_.out (), BOUND);
++  if (!demarshalled && ACE_OS::strlen (this->x_.in ()) >= BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -52,6 +57,10 @@
+   )
+ {
+   typedef typename S_var::s_traits::from_type from_type;
++  if (this->x_.in () != 0 && ACE_OS::strlen (this->x_.in ()) >= BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
+   return cdr << from_type (this->x_.in (), BOUND);
+ }
+ 
+@@ -64,7 +73,12 @@
+   )
+ {
+   typedef typename S_var::s_traits::to_type to_type;
+-  return cdr >> to_type (this->x_.out (), BOUND);
++  CORBA::Boolean demarshalled = cdr >> to_type (this->x_.out (), BOUND);
++  if (!demarshalled && ACE_OS::strlen (this->x_.in ()) >= BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -96,6 +110,10 @@
+   )
+ {
+   typedef typename S_var::s_traits::from_type from_type;
++  if (this->x_.in () != 0 && ACE_OS::strlen (this->x_.in ()) >= BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
+   return cdr << from_type (this->x_.in (), BOUND);
+ }
+ 
+@@ -128,6 +146,10 @@
+   )
+ {
+   typedef typename S_var::s_traits::from_type from_type;
++  if (this->x_.in () != 0 && ACE_OS::strlen (this->x_.in ()) >= BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
+   return cdr << from_type (this->x_.in (), BOUND);
+ }
+ 
+Index: BD_String_Argument_T.cpp
+===================================================================
+--- BD_String_Argument_T.cpp	(revision 83944)
++++ BD_String_Argument_T.cpp	(working copy)
+@@ -20,6 +20,10 @@
+   )
+ {
+   typedef typename S_var::s_traits::from_type from_type;
++  if (this->x_ != 0 && ACE_OS::strlen (this->x_) >= BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
+   return cdr << from_type (this->x_, BOUND);
+ }
+ 
+@@ -80,6 +84,10 @@
+   )
+ {
+   typedef typename S_var::s_traits::from_type from_type;
++  if (this->x_ != 0 && ACE_OS::strlen (this->x_) >= BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
+   return cdr << from_type (this->x_, BOUND);
+ }
+ 
+@@ -92,8 +100,15 @@
+   )
+ {
+   typedef typename S_var::s_traits::to_type to_type;
+-  delete [] this->x_;
+-  return cdr >> to_type (this->x_, BOUND);
++  S_var tmp = this->x_;
++  CORBA::Boolean demarshalled = cdr >> to_type (this->x_, BOUND);
++  if (!demarshalled && ACE_OS::strlen (this->x_) >= BOUND)
++    {
++      S_var for_deletion = this->x_;
++      this->x_ = tmp._retn ();
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -125,7 +140,12 @@
+   )
+ {
+   typedef typename S_var::s_traits::to_type to_type;
+-  return cdr >> to_type (this->x_, BOUND);
++  CORBA::Boolean demarshalled = cdr >> to_type (this->x_, BOUND);
++  if (!demarshalled && ACE_OS::strlen (this->x_) >= BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -157,7 +177,12 @@
+   )
+ {
+   typedef typename S_var::s_traits::to_type to_type;
+-  return cdr >> to_type (this->x_.out (), BOUND);
++  CORBA::Boolean demarshalled = cdr >> to_type (this->x_.out (), BOUND);
++  if (!demarshalled && ACE_OS::strlen (this->x_.out ()) >= BOUND)
++    {
++      throw ::CORBA::BAD_PARAM ();
++    }
++  return demarshalled;
+ }
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
