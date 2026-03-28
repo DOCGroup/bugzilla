@@ -1,0 +1,149 @@
+--- orig/fullA.cpp	2005-03-23 11:40:26.849938000 -0800
++++ mod/fullA.cpp	2005-03-23 12:10:38.537272800 -0800
+@@ -266,7 +266,7 @@
+ 
+ // Copying insertion.
+ void
+-operator<<= (
++mod2::operator<<= (
+     CORBA::Any &_tao_any,
+     mod2::fwd_ptr _tao_elem
+   )
+@@ -278,7 +278,7 @@
+ 
+ // Non-copying insertion.
+ void
+-operator<<= (
++mod2::operator<<= (
+     CORBA::Any &_tao_any,
+     mod2::fwd_ptr *_tao_elem
+   )
+@@ -292,7 +292,7 @@
+ }
+ 
+ CORBA::Boolean
+-operator>>= (
++mod2::operator>>= (
+     const CORBA::Any &_tao_any,
+     mod2::fwd_ptr &_tao_elem
+   )
+@@ -310,7 +310,8 @@
+ // c:\projects\ace_win\ace_wrappers\tao\tao_idl\be\be_visitor_union/any_op_cs.cpp:54
+ 
+ // Copying insertion.
+-void operator<<= (
++void 
++mod2::operator<<= (
+     CORBA::Any &_tao_any,
+     const mod2::fwd::un &_tao_elem
+   )
+@@ -324,7 +325,8 @@
+ }
+ 
+ // Non-copying insertion.
+-void operator<<= (
++void 
++mod2::operator<<= (
+     CORBA::Any &_tao_any,
+     mod2::fwd::un *_tao_elem
+   )
+@@ -338,7 +340,8 @@
+ }
+ 
+ // Extraction to non-const pointer (deprecated).
+-CORBA::Boolean operator>>= (
++CORBA::Boolean 
++mod2::operator>>= (
+     const CORBA::Any &_tao_any,
+     mod2::fwd::un *&_tao_elem
+   )
+@@ -350,7 +353,8 @@
+ }
+ 
+ // Extraction to const pointer.
+-CORBA::Boolean operator>>= (
++CORBA::Boolean 
++mod2::operator>>= (
+     const CORBA::Any &_tao_any,
+     const mod2::fwd::un *&_tao_elem
+   )
+@@ -368,7 +372,8 @@
+ // c:\projects\ace_win\ace_wrappers\tao\tao_idl\be\be_visitor_sequence/any_op_cs.cpp:54
+ 
+ // Copying insertion.
+-void operator<<= (
++void 
++mod2::operator<<= (
+     CORBA::Any &_tao_any,
+     const mod2::fwd::full_seq &_tao_elem
+   )
+@@ -382,7 +387,8 @@
+ }
+ 
+ // Non-copying insertion.
+-void operator<<= (
++void 
++mod2::operator<<= (
+     CORBA::Any &_tao_any,
+     mod2::fwd::full_seq *_tao_elem
+   )
+@@ -396,7 +402,8 @@
+ }
+ 
+ // Extraction to non-const pointer (deprecated).
+-CORBA::Boolean operator>>= (
++CORBA::Boolean 
++mod2::operator>>= (
+     const CORBA::Any &_tao_any,
+     mod2::fwd::full_seq *&_tao_elem
+   )
+@@ -408,7 +415,8 @@
+ }
+ 
+ // Extraction to const pointer.
+-CORBA::Boolean operator>>= (
++CORBA::Boolean 
++mod2::operator>>= (
+     const CORBA::Any &_tao_any,
+     const mod2::fwd::full_seq *&_tao_elem
+   )
+@@ -453,7 +461,8 @@
+ }
+ 
+ // Copying insertion.
+-void operator<<= (
++void 
++mod2::operator<<= (
+     CORBA::Any &_tao_any,
+     const mod2::fwd::bar &_tao_elem
+   )
+@@ -467,7 +476,8 @@
+ }
+ 
+ // Non-copying insertion.
+-void operator<<= (
++void 
++mod2::operator<<= (
+     CORBA::Any &_tao_any,
+     mod2::fwd::bar *_tao_elem
+   )
+@@ -481,7 +491,8 @@
+ }
+ 
+ // Extraction to non-const pointer (deprecated).
+-CORBA::Boolean operator>>= (
++CORBA::Boolean 
++mod2::operator>>= (
+     const CORBA::Any &_tao_any,
+     mod2::fwd::bar *&_tao_elem
+   )
+@@ -493,7 +504,8 @@
+ }
+ 
+ // Extraction to const pointer.
+-CORBA::Boolean operator>>= (
++CORBA::Boolean 
++mod2::operator>>= (
+     const CORBA::Any &_tao_any,
+     const mod2::fwd::bar *&_tao_elem
+   )
