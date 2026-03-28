@@ -1,0 +1,56 @@
+*** Root_POA.cpp.orig	Tue Jun  7 09:27:44 2005
+--- Root_POA.cpp	Tue Jun  7 09:39:55 2005
+***************
+*** 738,745 ****
+    // Lock access for the duration of this transaction.
+    TAO_POA_GUARD_RETURN (0);
+  
+!   return this->id_to_servant_i (oid
+!                                 ACE_ENV_ARG_PARAMETER);
+  }
+  
+  CORBA::Object_ptr
+--- 738,753 ----
+    // Lock access for the duration of this transaction.
+    TAO_POA_GUARD_RETURN (0);
+  
+!   PortableServer::Servant servant =
+!     this->id_to_servant_i (oid
+! 			   ACE_ENV_ARG_PARAMETER);
+! 
+!   if (servant != 0) {
+!     servant->_add_ref (ACE_ENV_SINGLE_ARG_PARAMETER);
+!     ACE_CHECK_RETURN (0);
+!   }
+! 
+!   return servant;
+  }
+  
+  CORBA::Object_ptr
+***************
+*** 1496,1503 ****
+                          0);
+      }
+  
+!   return this->active_policy_strategies_.request_processing_strategy()->
+      system_id_to_servant (system_id ACE_ENV_ARG_PARAMETER);
+  }
+  
+  bool
+--- 1504,1519 ----
+                          0);
+      }
+  
+!   PortableServer::Servant servant =
+!     this->active_policy_strategies_.request_processing_strategy()->
+      system_id_to_servant (system_id ACE_ENV_ARG_PARAMETER);
++ 
++   if (servant != 0) {
++     servant->_add_ref (ACE_ENV_SINGLE_ARG_PARAMETER);
++     ACE_CHECK_RETURN (0);
++   }
++ 
++   return servant;
+  }
+  
+  bool
