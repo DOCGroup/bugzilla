@@ -1,0 +1,37 @@
+// -*- IDL -*-
+
+//=============================================================================
+/**
+ * @file test.idl
+ *
+ * $Id: test.idl,v 1.1 2000/12/26 19:18:54 othman Exp $
+ *
+ * "test" IDL interface for the IORInterceptor test.
+ *
+ * @author Ossama Othman <ossama@uci.edu>
+ */
+//=============================================================================
+
+
+#include "tao/IOP.pidl"
+
+module FOO
+{
+
+  typedef unsigned short OTSPolicyValue;
+
+  const OTSPolicyValue REQUIRES = 1;
+  const OTSPolicyValue FORBIDS =2;
+  const OTSPolicyValue ADAPTS =3;
+
+  
+  interface test
+  {
+    oneway void shutdown ();
+  };
+
+  // @@ Hopefully, this tagged component ID won't be reserved by
+  //    anything, anytime soon.
+  const IOP::ComponentId COMPONENT_ID = 3456;
+
+};
