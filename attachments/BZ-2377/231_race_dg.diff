@@ -1,0 +1,50 @@
+Index: Profile.cpp
+===================================================================
+--- Profile.cpp	(revision 77799)
++++ Profile.cpp	(working copy)
+@@ -37,6 +37,7 @@
+     , are_policies_parsed_ (false)
+     , addressing_mode_ (0)
+     , tagged_profile_ (0)
++    , tagged_profile_lock_ ()
+     , ref_object_key_ (0)
+     , tag_ (tag)
+     , orb_core_ (orb_core)
+@@ -55,6 +56,7 @@
+     , are_policies_parsed_ (false)
+     , addressing_mode_ (0)
+     , tagged_profile_ (0)
++    , tagged_profile_lock_ ()
+     , ref_object_key_ (0)
+     , tag_ (tag)
+     , orb_core_ (orb_core)
+@@ -258,6 +260,15 @@
+ IOP::TaggedProfile *
+ TAO_Profile::create_tagged_profile (void)
+ {
++  if (this->tagged_profile_ != 0)
++    return this->tagged_profile_;
++
++  ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
++                    guard,
++                    this->tagged_profile_lock_,
++                    this->tagged_profile_);
++
++  // .. DCL
+   if (this->tagged_profile_ == 0)
+     {
+       ACE_NEW_RETURN (this->tagged_profile_,
+Index: Profile.h
+===================================================================
+--- Profile.h	(revision 77799)
++++ Profile.h	(working copy)
+@@ -375,6 +375,9 @@
+   /// Our tagged profile
+   IOP::TaggedProfile *tagged_profile_;
+ 
++  /// A lock that protects creation of the tagged profile
++  TAO_SYNCH_MUTEX tagged_profile_lock_;
++
+   /// object_key associated with this profile.
+   TAO::Refcounted_ObjectKey *ref_object_key_;
+ 
