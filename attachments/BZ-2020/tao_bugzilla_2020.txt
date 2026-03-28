@@ -1,0 +1,58 @@
+
+To: tao-bugs@cs.wustl.edu
+Subject: undefined reference during make in TAO directory: 
+
+    TAO VERSION: 1.4.3
+    ACE VERSION: 5.4.3
+
+    HOST MACHINE and OPERATING SYSTEM:
+        If on Windows based OS's, which version of WINSOCK do you
+        use?: X86, Windows 2000 version 5.00.2195  with cygwin
+
+    TARGET MACHINE and OPERATING SYSTEM, if different from HOST:
+    COMPILER NAME AND VERSION (AND PATCHLEVEL):gcc version 3.3.3 (cygwin special)
+
+    CONTENTS OF $ACE_ROOT/ace/config.h : #include "ace/config-cygwin32.h"
+
+    CONTENTS OF $ACE_ROOT/include/makeinclude/platform_macros.GNU :
+	include $(ACE_ROOT)/include/makeinclude/platform_cygwin32.GNU
+
+    CONTENTS OF $ACE_ROOT/bin/MakeProjectCreator/config/default.features
+    (used by MPC when you generate your own makefiles):
+
+    AREA/CLASS/EXAMPLE AFFECTED:
+	performing make in TAO directory.
+Creating library file: libTAO.dll.a .shobj/UTF16_BOM_Translator.o(.text+0x17e):
+ In function `_ZN20UTF16_BOM_TranslatorD2Ev': C:/tao/ACE_wrappers/ace/CDR_Stream.h:1075:
+ undefined reference to `__imp___ZTV28ACE_WChar_Codeset_Translator'
+ .shobj/UTF16_BOM_Translator.o(.text+0x19e): In function `_ZN20UTF16_BOM_TranslatorD1Ev': C:/tao/ACE_wrappers/ace/CDR_Stream.h:1075: undefined reference to
+ `__imp___ZTV28ACE_WChar_Codeset_Translator' .shobj/UTF16_BOM_Translator.o(.text+0x1bd):
+ In function `_ZN20UTF16_BOM_TranslatorD0Ev': C:/tao/ACE_wrappers/ace/CDR_Stream.h:1075:
+ undefined reference to `__imp___ZTV28ACE_WChar_Codeset_Translator' collect2:
+ ld returned 1 exit status 
+
+
+    DOES THE PROBLEM AFFECT:
+        COMPILATION?
+            If so, what do your $ACE_ROOT/ace/config.h and
+            $ACE_ROOT/include/makeinclude/platform_macros.GNU contain?
+        LINKING?
+            On Unix systems, did you run make realclean first? YES, performed make clean before starting make
+        EXECUTION?
+        OTHER (please specify)? Failed to create libTAO.dll.a
+	This is effects the building of TAO.  I was able to build ACE with no problems and also ran
+	 the "tests" perl script to run the test.
+
+    SYNOPSIS:
+[Brief description of the problem]
+
+    DESCRIPTION:
+While performing make in TAO directory the creating of the libTAO.dll.a failed with an undefined reference error. 
+    REPEAT BY:
+ Verified that environment variables for both ACE and TAO were correct. Verified that the ACE dll
+ was being found by renaming it and trying again just to be sure that paths were correct.
+  Verified that the above class, WChar_Codeset_Translator, actually is declared.
+
+    SAMPLE FIX/WORKAROUND:
+do not have one at this time.
+
