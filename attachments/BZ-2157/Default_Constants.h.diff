@@ -1,0 +1,19 @@
+--- /software/src/policy/ACE/ACE_wrappers/ace/Default_Constants.h	2004-04-12 11:23:27.000000000 -0400
++++ Default_Constants.h	2005-06-16 11:38:39.000000000 -0400
+@@ -354,6 +354,16 @@
+ #   define ACE_MAXLOGMSGLEN 4 * 1024
+ # endif /* ACE_MAXLOGMSGLEN */
+ 
++
++#define TIMESTAMP_CHANGE
++#if defined (TIMESTAMP_CHANGE)
++// Max size of an ACE Log timestamp data buffer.  This can be reset in
++// the config.h file if you'd like to increase or decrease the size.
++# if !defined (ACE_MAXLOGDATETIME)
++#   define ACE_MAXLOGDATETIME 40
++# endif /* ACE_MAXLOGDATETIME */
++#endif
++
+ // Max size of an ACE Token.
+ # define ACE_MAXTOKENNAMELEN 40
+ 
