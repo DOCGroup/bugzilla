@@ -1,0 +1,27 @@
+
+
+1. Task 1 mentions early and late binding time for monitor points, then
+   clarifies that by saying that 'late' means enabling at compilation
+   time, then using runtime mechanisms mentioned in Task 2. Task 2 lists
+   only reading, resetting, and constraint triggering. Does this mean
+   that interactive toggling isn't required?
+
+2. Are non-CORBA use cases envisioned? By 'non-CORBA' we mean applications
+   without CORBA or anything equivalent to it.
+
+3. Some older feedback on the SOW indicates that a complex rule/constraint
+   language is too heavyweight. In that feedback, the Extended Trader
+   Constraint Language (ETCL) that's used in the Notification Service was
+   explicitly rejected, but it has since crept into our discussion on
+   this end. We need to get clear about what is desired, especially in
+   light of the answer to 2.
+
+4. The SOW seems to imply that distributed ACE logging is needed to meet
+   the requirements (remote access, wide range of info destinations).
+   ACE distributed logging consists of a central logging server and client
+   logging 'proxies', where users of the service connect to the latter.
+   While this approach will certainly meet the logging requirements, it
+   might make it harder to meet the overhead requirements. By getting clearer
+   on the logging requirements, we can better avoid overkill on the
+   implementation.
+
