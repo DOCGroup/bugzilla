@@ -1,0 +1,45 @@
+--- /software/src/policy/ACE/ACE_wrappers/ace/Log_Msg.h	2004-04-15 16:54:05.000000000 -0400
++++ Log_Msg.h	2005-06-16 15:01:34.000000000 -0400
+@@ -582,6 +582,19 @@
+   /// Declare the dynamic allocation hooks.
+   ACE_ALLOC_HOOK_DECLARE;
+ 
++#if defined (TIMESTAMP_CHANGE)
++  int append_usecs (void);
++  //  void append_usecs (int);
++  int append_utc (void);
++  //  void append_utc (int);
++  const ACE_TCHAR *date_time_fmt (void);
++  //  void date_time_fmt (ACE_TCHAR *);
++  void date_time_format (ACE_TCHAR *,int append_usecs=1,
++                         int append_utc=0, ACE_TCHAR separator='|');
++  ACE_TCHAR utc_separator(void);
++  //  void utc_separator(ACE_TCHAR);
++#endif
++
+ private:
+   /// Status of operation (-1 means failure, >= 0 means success).
+   int status_;
+@@ -681,6 +694,22 @@
+    */
+   static u_long default_priority_mask_;
+ 
++#if defined(TIMESTAMP_CHANGE)
++  /// Indicates whether the timestamp should have the usecs appended
++  /// to it.
++  static int append_usecs_;
++
++  /// Indicates whether the timestamp should have the UTC time_t value
++  /// appended to it.
++  static int append_utc_;
++
++  /// The date/time buffer format.
++  static ACE_TCHAR date_time_fmt_[ACE_MAXLOGDATETIME + 1]; // Add one for NUL-terminator.
++
++  /// Separator to be used when outputting utc in date/timestamp
++  static ACE_TCHAR utc_separator_;
++#endif
++
+   /// Anonymous struct since there will only be one instance.  This
+   /// struct keeps information stored away in case we actually end up
+   /// calling log() if the log priority is correct.
