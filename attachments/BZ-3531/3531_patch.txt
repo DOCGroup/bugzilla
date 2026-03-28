@@ -1,0 +1,81 @@
+--- Leader_Follower.inl.orig    2008-12-11 23:22:21.541651000 -0500
++++ Leader_Follower.inl 2008-12-11 23:23:55.005917000 -0500
+@@ -139,6 +139,13 @@
+
+       this->elect_new_leader ();
+     }
++  else if (tss->client_leader_thread_ > 0)
++    {
++      ACE_GUARD (TAO_SYNCH_MUTEX, ace_mon, this->lock ());
++      this->reset_client_leader_thread ();
++
++      this->elect_new_leader ();
++    }
+ }
+
+ ACE_INLINE int
+@@ -160,10 +167,16 @@
+ TAO_Leader_Follower::reset_client_leader_thread (void)
+ {
+   TAO_ORB_Core_TSS_Resources *tss = this->get_tss_resources ();
++  // We may have already been called via set_upcall_thread before we
++  // get called via ~TAO_LF_Client_Leader_Thread_Helper, so we need to
++  // check that client_leader_thread_ is not already zero.
++  if (tss->client_leader_thread_ > 0)
++    {
+   --tss->client_leader_thread_;
+   --this->leaders_;
+   --this->client_thread_is_leader_;
+ }
++}
+
+ ACE_INLINE int
+ TAO_Leader_Follower::is_client_leader_thread (void) const
+
+--- Leader_Follower.cpp.orig    2008-12-11 23:22:29.086914000 -0500
++++ Leader_Follower.cpp 2008-12-11 23:25:58.950248000 -0500
+@@ -223,6 +223,19 @@
+     TAO_LF_Client_Thread_Helper client_thread_helper (*this);
+     ACE_UNUSED_ARG (client_thread_helper);
+
++    // The loop here is for when we get elected (client) leader and
++    // then later relinquish the leader position and our event has
++    // still not completed (and we haven't run out of time).
++
++    // All the conditions below are basically the various ways the
++    // leader loop below can end, other than the event being complete
++
++    while (event->keep_waiting ()
++           && !(result == 0 &&
++                max_wait_time != 0 &&
++                *max_wait_time == ACE_Time_Value::zero)
++           && result != -1)
++      {
+     // Check if there is a leader.  Note that it cannot be us since we
+     // gave up our leadership when we became a client.
+     if (this->leader_available ())
+@@ -421,6 +434,13 @@
+           if (result == -1)
+             break;
+
++          // Has an event loop thread become available to take over?
++          if (this->event_loop_threads_waiting_)
++            break;
++
++          // Did we give up leadership?
++          if (!this->is_client_leader_thread ())
++            break;
+           // Otherwise, keep going...
+         }
+
+@@ -451,6 +471,10 @@
+                        t_id),
+                       -1);
+
++  // If (event loop?) thread is ready to be a leader then we loop
++  // around and become a follower - otherwise we continue below
++  }
++
+   if (result == -1 && !this->reactor_->reactor_event_loop_done ())
+     ACE_ERROR_RETURN ((LM_ERROR,
+                        "TAO (%P|%t) - Leader_Follower[%d]::wait_for_event,"
