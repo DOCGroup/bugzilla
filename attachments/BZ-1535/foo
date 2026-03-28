@@ -1,0 +1,145 @@
+Index: ORB_Core.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.cpp,v
+retrieving revision 1.477
+diff -u -r1.477 ORB_Core.cpp
+--- ORB_Core.cpp	8 Jun 2003 15:38:57 -0000	1.477
++++ ORB_Core.cpp	12 Jun 2003 19:38:32 -0000
+@@ -1669,11 +1669,8 @@
+             TAO_Adapter_Registry *ar =
+               other_core->adapter_registry ();
+ 
+-             x = ar->create_collocated_object (stub,
+-                                               mprofile);
+-
+-             if (x != 0)
+-               return x;
++            return ar->create_collocated_object (stub,
++                                                 mprofile);
+           }
+       }
+   }
+Index: PortableServer/Object_Adapter.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Object_Adapter.cpp,v
+retrieving revision 1.51
+diff -u -r1.51 Object_Adapter.cpp
+--- PortableServer/Object_Adapter.cpp	1 May 2003 20:34:06 -0000	1.51
++++ PortableServer/Object_Adapter.cpp	12 Jun 2003 19:38:32 -0000
+@@ -810,19 +810,24 @@
+                                       ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
+-      if (sb)
+-        {
+-          CORBA::Object_ptr x;
+-          ACE_NEW_RETURN (x,
+-                          CORBA::Object (stub,
+-                                         1,
+-                                         sb),
+-                          CORBA::Object::_nil ());
+-
+-          // Here we set the strategized Proxy Broker.
+-          x->_proxy_broker (the_tao_strategized_object_proxy_broker ());
+-          return x;
+-        }
++      // Set the servant ORB.  Do not duplicate the ORB here since
++      // TAO_Stub::servant_orb() duplicates it.
++      stub->servant_orb (this->orb_core_.orb ());
++
++      // It is ok to create a collocated object even when <sb> is
++      // zero.
++      CORBA::Object_ptr x;
++      ACE_NEW_RETURN (x,
++                      CORBA::Object (stub,
++                                     1,
++                                     sb),
++                      CORBA::Object::_nil ());
++
++      // Here we set the strategized Proxy Broker.
++      x->_proxy_broker (the_tao_strategized_object_proxy_broker ());
++
++      // Success.
++      return x;
+     }
+   ACE_CATCHANY
+     {
+@@ -830,7 +835,8 @@
+     }
+   ACE_ENDTRY;
+ 
+-  return 0;
++  // Failure.
++  return CORBA::Object::_nil ();
+ }
+ 
+ CORBA::Long
+@@ -852,15 +858,18 @@
+                                       ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
+-      if (sb)
+-        {
+-          obj->set_collocated_servant (sb);
++      // Set the servant ORB.  Do not duplicate the ORB here since
++      // TAO_Stub::servant_orb() duplicates it.
++      stub->servant_orb (this->orb_core_.orb ());
++
++      // Set the servant.
++      obj->set_collocated_servant (sb);
+ 
+-          // Here we set the strategized Proxy Broker.
+-          obj->_proxy_broker (the_tao_strategized_object_proxy_broker ());
++      // Here we set the strategized Proxy Broker.
++      obj->_proxy_broker (the_tao_strategized_object_proxy_broker ());
+ 
+-          return 0;
+-        }
++      // Success.
++      return 0;
+     }
+   ACE_CATCHANY
+     {
+@@ -868,6 +877,7 @@
+     }
+   ACE_ENDTRY;
+ 
++  // Failure.
+   return -1;
+ }
+ 
+@@ -890,29 +900,14 @@
+ 
+       TAO_ServantBase *servant = 0;
+ 
+-      TAO_SERVANT_LOCATION servant_location =
+-        this->find_servant (objkey.in (),
+-                            servant
+-                            ACE_ENV_ARG_PARAMETER);
++      this->find_servant (objkey.in (),
++                          servant
++                          ACE_ENV_ARG_PARAMETER);
+       ACE_CHECK_RETURN (0);
+ 
+-      if (servant_location != TAO_SERVANT_NOT_FOUND)
+-        {
+-          // Found collocated object.  Perhaps we can get around
+-          // by simply setting the servant_orb, but let get this
+-          // to work first.
+-
+-          // There could only be one ORB which is us.
+-
+-          // @@ Do not duplicate the ORB here!
+-          //    TAO_Stub::servant_orb()  duplicates it.
+-          //       -Ossama
+-          stub->servant_orb (this->orb_core_.orb ());
+-
+-          return servant;
+-        }
+-
++      return servant;
+     }
++
+   return 0;
+ }
+ 
