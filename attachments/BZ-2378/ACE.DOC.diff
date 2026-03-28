@@ -1,0 +1,99 @@
+Index: ChangeLog
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ChangeLog,v
+retrieving revision 4.9739
+diff -u -r4.9739 ChangeLog
+--- ChangeLog	24 Jan 2006 17:00:50 -0000	4.9739
++++ ChangeLog	24 Jan 2006 17:35:57 -0000
+@@ -1,3 +1,13 @@
++Tue Jan 24 17:30:37 UTC 2006  Ossama Othman  <ossama_othman at symantec dot com>
++
++        * ace/config-sunos5.5.h:
++        * include/makeinclude/platform_sunos5_sunc++.GNU:
++
++          Added Sun Studio 8 or better symbol visibility/scope support.
++          Provides improved shared libraries by reducing footprint
++          (e.g. 17% reduction for ACE), reducing symbol clashes with
++          third party libraries and increasing run-time performance.
++
+ Tue Jan 24 16:56:51 UTC 2006  Steve Huston  <shuston@riverace.com>
+ 
+         * ace/OS_NS_signal.inl: Removed explicit ACE_OS from sigaction
+Index: ace/config-sunos5.5.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/config-sunos5.5.h,v
+retrieving revision 4.124
+diff -u -r4.124 config-sunos5.5.h
+--- ace/config-sunos5.5.h	2 Dec 2005 09:34:20 -0000	4.124
++++ ace/config-sunos5.5.h	24 Jan 2006 17:39:19 -0000
+@@ -83,6 +83,29 @@
+     /* If you want to disable threading with Sun CC, remove -mt
+        from your CFLAGS, e.g., using make threads=0. */
+ 
++
++// Take advantage of Sun Studio 8 (Sun C++ 5.5) or better symbol
++// visibility to generate improved shared library binaries.
++#  if (__SUNPRO_CC > 0x540)
++
++#    if defined (ACE_HAS_CUSTOM_EXPORT_MACROS) && ACE_HAS_CUSTOM_EXPORT_MACROS == 0
++#     undef ACE_HAS_CUSTOM_EXPORT_MACROS
++#    else
++#      ifndef ACE_HAS_CUSTOM_EXPORT_MACROS
++#        define ACE_HAS_CUSTOM_EXPORT_MACROS
++#      endif  /* !ACE_HAS_CUSTOM_EXPORT_MACROS */
++#      define ACE_Proper_Export_Flag __symbolic
++#      define ACE_Proper_Import_Flag __global
++
++#      define ACE_EXPORT_SINGLETON_DECLARATION(T) template class ACE_Proper_Export_Flag T
++#      define ACE_EXPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) template class ACE_Proper_Export_Flag SINGLETON_TYPE <CLASS, LOCK>;
++
++#      define ACE_IMPORT_SINGLETON_DECLARATION(T) extern template class T
++#      define ACE_IMPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) extern template class SINGLETON_TYPE<CLASS, LOCK>;
++
++#    endif  /* ACE_HAS_CUSTOM_EXPORT_MACROS == 0 */
++#  endif  /* __SUNPRO_CC > 0x540 (> Sun C++ 5.4) */
++
+ #elif defined (__GNUG__)
+   // config-g++-common.h undef's ACE_HAS_STRING_CLASS with -frepo, so
+   // this must appear before its #include.
+Index: include/makeinclude/platform_sunos5_sunc++.GNU
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/include/makeinclude/platform_sunos5_sunc++.GNU,v
+retrieving revision 4.95
+diff -u -r4.95 platform_sunos5_sunc++.GNU
+--- include/makeinclude/platform_sunos5_sunc++.GNU	11 Aug 2005 19:14:13 -0000	4.95
++++ include/makeinclude/platform_sunos5_sunc++.GNU	24 Jan 2006 17:39:56 -0000
+@@ -65,7 +65,7 @@
+ CC              = cc
+ CXX             = CC
+ 
+-CC_VERSION = $(shell $(CXX) -V 2>&1)
++CC_VERSION := $(shell $(CXX) -V 2>&1)
+ 
+ ifeq (C++ 5.6,$(findstring C++ 5.6,$(CC_VERSION)))
+   PLATFORM_STLPORT_CPPFLAGS = -library=stlport4
+@@ -228,6 +228,24 @@
+   endif
+ endif # ! exceptions
+ 
++ifeq ($(shared_libs), 1)
++  ifneq ($(static_libs_only), 1)
++
++   # Sun Studio 8 or better has version greater than 5.3.
++    SUN_STUDIO_8_OR_BETTER := $(shell a=`echo $(CC_VERSION) | sed -e 's/[^0-9]*\([0-9]*\)\.\([0-9]*\).*$$/\1\2/g'`; if test "$$a" -gt 53; then echo 1; else echo 0; fi)
++
++    # Take advantage of Sun Studio 8 (v5.5) symbol scopes to
++    # generate improved shared library binaries.
++    ifeq ($(SUN_STUDIO_8_OR_BETTER),1)
++      ifneq ($(no_hidden_visibility),1)
++        CCFLAGS += -xldscope=hidden
++      else
++        CPPFLAGS += -DACE_HAS_CUSTOM_EXPORT_MACROS=0
++      endif # no_hidden_visibility
++    endif # Sun Studio 8 (C++ 5.5) or better.
++  endif # static_libs_only
++endif # shared_libs
++
+ LD              = $(CXX)
+ ifeq ($(distrib),0)
+   LDFLAGS       += -R $(ACE_ROOT)/lib -R./
