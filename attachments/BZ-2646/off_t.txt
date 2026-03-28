@@ -1,0 +1,520 @@
+Index: Filecache.h
+===================================================================
+--- Filecache.h	(revision 74210)
++++ Filecache.h	(working copy)
+@@ -117,7 +117,7 @@
+   int error (void) const;
+ 
+   /// The size of the file.
+-  ACE_LOFF_T size (void) const;
++  ACE_OFF_T size (void) const;
+ 
+ protected:
+   /// Default do nothing constructor.  Prevent it from being called.
+@@ -277,7 +277,7 @@
+   void *address (void) const;
+ 
+   /// size_ accessor.
+-  ACE_LOFF_T size (void) const;
++  ACE_OFF_T size (void) const;
+ 
+   /// True if file on disk is newer than cached file.
+   int update (void) const;
+@@ -327,7 +327,7 @@
+ 
+   /// Used to compare against the real file to test if an update is needed.
+   ACE_stat stat_;
+-  ACE_LOFF_T size_;
++  ACE_OFF_T size_;
+ 
+   /// Status indicators.
+   int action_;
+Index: OS_NS_sys_mman.inl
+===================================================================
+--- OS_NS_sys_mman.inl	(revision 74210)
++++ OS_NS_sys_mman.inl	(working copy)
+@@ -41,7 +41,7 @@
+               int prot,
+               int flags,
+               ACE_HANDLE file_handle,
+-              off_t off,
++              ACE_OFF_T off,
+               ACE_HANDLE *file_mapping,
+               LPSECURITY_ATTRIBUTES sa,
+               const ACE_TCHAR *file_mapping_name)
+Index: OS_NS_unistd.h
+===================================================================
+--- OS_NS_unistd.h	(revision 74210)
++++ OS_NS_unistd.h	(working copy)
+@@ -139,7 +139,7 @@
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   int ftruncate (ACE_HANDLE,
+-                 ACE_LOFF_T);
++                 ACE_OFF_T);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   char *getcwd (char *, size_t);
+@@ -230,7 +230,7 @@
+   ssize_t pwrite (ACE_HANDLE handle,
+                   const void *buf,
+                   size_t nbyte,
+-                  ACE_LOFF_T offset);
++                  ACE_OFF_T offset);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   ssize_t read (ACE_HANDLE handle,
+@@ -315,7 +315,8 @@
+                 long count);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  int truncate (const ACE_TCHAR *filename, ACE_LOFF_T length);
++  int truncate (const ACE_TCHAR *filename,
++                ACE_OFF_T length);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   useconds_t ualarm (useconds_t usecs,
+Index: FILE.h
+===================================================================
+--- FILE.h	(revision 74210)
++++ FILE.h	(working copy)
+@@ -52,7 +52,7 @@
+   nlink_t nlink_;
+ 
+   /// Size of file
+-  ACE_LOFF_T size_;
++  ACE_OFF_T size_;
+ };
+ 
+ /**
+Index: OS_NS_sys_stat.inl
+===================================================================
+--- OS_NS_sys_stat.inl	(revision 74210)
++++ OS_NS_sys_stat.inl	(working copy)
+@@ -95,7 +95,7 @@
+   // This function returns the number of bytes in the file referenced by
+   // FD.
+ 
+-  ACE_INLINE ACE_LOFF_T
++  ACE_INLINE ACE_OFF_T
+   filesize (ACE_HANDLE handle)
+   {
+     ACE_OS_TRACE ("ACE_OS::filesize");
+@@ -103,7 +103,7 @@
+     return ACE_OS::fstat (handle, &sb) == -1 ? -1 : sb.st_size;
+   }
+ 
+-  ACE_INLINE ACE_LOFF_T
++  ACE_INLINE ACE_OFF_T
+   filesize (const ACE_TCHAR *filename)
+   {
+     ACE_OS_TRACE ("ACE_OS::filesize");
+@@ -111,7 +111,7 @@
+     ACE_HANDLE h = ACE_OS::open (filename, O_RDONLY);
+     if (h != ACE_INVALID_HANDLE)
+       {
+-        ACE_LOFF_T size = ACE_OS::filesize (h);
++        ACE_OFF_T size = ACE_OS::filesize (h);
+         ACE_OS::close (h);
+         return size;
+       }
+Index: os_include/sys/os_types.h
+===================================================================
+--- os_include/sys/os_types.h	(revision 74210)
++++ os_include/sys/os_types.h	(working copy)
+@@ -91,6 +91,12 @@
+    typedef loff_t ACE_LOFF_T;
+ #endif
+ 
++#if defined(ACE_WIN32)
++  typedef __int64 ACE_OFF_T;
++#else
++  typedef off_t ACE_OFF_T;
++#endif
++
+ #if defined (ACE_WIN32)
+ #  if !defined (__BORLANDC__)
+      typedef DWORD nlink_t;
+Index: Mem_Map.cpp
+===================================================================
+--- Mem_Map.cpp	(revision 74210)
++++ Mem_Map.cpp	(working copy)
+@@ -95,7 +95,7 @@
+ 
+ int
+ ACE_Mem_Map::map_it (ACE_HANDLE handle,
+-                     ssize_t length_request,
++                     ACE_OFF_T length_request,
+                      int prot,
+                      int share,
+                      void *addr,
+@@ -115,7 +115,7 @@
+   this->base_addr_ = addr;
+   this->handle_ = handle;
+ 
+-  ACE_LOFF_T const result = ACE_OS::filesize (this->handle_);
++  ACE_OFF_T const result = ACE_OS::filesize (this->handle_);
+ 
+   // At this point we know <result> is not negative...
+   size_t const current_file_length = static_cast<size_t> (result);
+@@ -124,7 +124,7 @@
+   bool extend_backing_store = false;
+ 
+   // File length requested by user
+-  size_t requested_file_length = 0;
++  ACE_OFF_T requested_file_length = 0;
+ 
+   // Check <length_request>
+   if (length_request == -1)
+@@ -245,7 +245,7 @@
+ 
+ int
+ ACE_Mem_Map::map (const ACE_TCHAR *file_name,
+-                  ssize_t len,
++                  ACE_OFF_T len,
+                   int flags,
+                   int mode,
+                   int prot,
+@@ -286,7 +286,7 @@
+ // Map a file specified by FILE_NAME.
+ 
+ ACE_Mem_Map::ACE_Mem_Map (const ACE_TCHAR *file_name,
+-                          ssize_t len,
++                          ACE_OFF_T len,
+                           int flags,
+                           int mode,
+                           int prot,
+@@ -319,7 +319,7 @@
+ // lookup the length of the file if it is not given.
+ 
+ ACE_Mem_Map::ACE_Mem_Map (ACE_HANDLE handle,
+-                          ssize_t len,
++                          ACE_OFF_T len,
+                           int prot,
+                           int share,
+                           void *addr,
+Index: Filecache.cpp
+===================================================================
+--- Filecache.cpp	(revision 74210)
++++ Filecache.cpp	(working copy)
+@@ -130,7 +130,7 @@
+     return this->file_->error ();
+ }
+ 
+-ACE_LOFF_T
++ACE_OFF_T
+ ACE_Filecache_Handle::size (void) const
+ {
+   if (this->file_ == 0)
+@@ -704,7 +704,7 @@
+   return this->filename_;
+ }
+ 
+-ACE_LOFF_T
++ACE_OFF_T
+ ACE_Filecache_Object::size (void) const
+ {
+   // The existence of the object means a read lock is being held.
+Index: MMAP_Memory_Pool.cpp
+===================================================================
+--- MMAP_Memory_Pool.cpp	(revision 74210)
++++ MMAP_Memory_Pool.cpp	(working copy)
+@@ -187,7 +187,7 @@
+ // memory.
+ int
+ ACE_MMAP_Memory_Pool::commit_backing_store_name (size_t rounded_bytes,
+-                                                 ACE_LOFF_T &map_size)
++                                                 ACE_OFF_T &map_size)
+ {
+   ACE_TRACE ("ACE_MMAP_Memory_Pool::commit_backing_store_name");
+ 
+@@ -236,7 +236,7 @@
+ // Memory map the file up to <map_size> bytes.
+ 
+ int
+-ACE_MMAP_Memory_Pool::map_file (ACE_LOFF_T map_size)
++ACE_MMAP_Memory_Pool::map_file (ACE_OFF_T map_size)
+ {
+   ACE_TRACE ("ACE_MMAP_Memory_Pool::map_file");
+ #if (ACE_HAS_POSITION_INDEPENDENT_POINTERS == 1)
+@@ -302,7 +302,7 @@
+   // ACE_DEBUG ((LM_DEBUG, "(%P|%t) acquiring more chunks, nbytes =
+   // %d, rounded_bytes = %d\n", nbytes, rounded_bytes));
+ 
+-  ACE_LOFF_T map_size;
++  ACE_OFF_T map_size;
+ 
+   if (this->commit_backing_store_name (rounded_bytes,
+                                        map_size) == -1)
+@@ -396,7 +396,7 @@
+ {
+   ACE_TRACE ("ACE_MMAP_Memory_Pool::remap");
+   //  ACE_DEBUG ((LM_DEBUG,  ACE_LIB_TEXT ("Remapping with fault address at: %X\n"), addr));
+-  off_t const current_map_size = ACE_OS::filesize (this->mmap_.handle ());
++  ACE_OFF_T const current_map_size = ACE_OS::filesize (this->mmap_.handle ());
+   // ACE_OS::lseek (this->mmap_.handle (), 0, SEEK_END);
+ 
+   if (!(addr < (void *) ((char *) this->mmap_.addr () + current_map_size)
+@@ -410,7 +410,7 @@
+ ACE_MMAP_Memory_Pool_Options::ACE_MMAP_Memory_Pool_Options (const void *base_addr,
+                                                             int use_fixed_addr,
+                                                             int write_each_page,
+-                                                            ACE_LOFF_T minimum_bytes,
++                                                            ACE_OFF_T minimum_bytes,
+                                                             u_int flags,
+                                                             int guess_on_fault,
+                                                             LPSECURITY_ATTRIBUTES sa,
+@@ -477,7 +477,7 @@
+   if (guess_on_fault_)
+     {
+       // Check if the current mapping is up to date.
+-      ACE_LOFF_T const current_map_size = ACE_OS::filesize (this->mmap_.handle ());
++      ACE_OFF_T const current_map_size = ACE_OS::filesize (this->mmap_.handle ());
+ 
+       if (static_cast<size_t> (current_map_size) == this->mmap_.size ())
+         {
+Index: Mem_Map.inl
+===================================================================
+--- Mem_Map.inl	(revision 74210)
++++ Mem_Map.inl	(working copy)
+@@ -25,7 +25,7 @@
+ 
+ ACE_INLINE int
+ ACE_Mem_Map::map (ACE_HANDLE handle,
+-                  ssize_t length,
++                  ACE_OFF_T length,
+                   int prot,
+                   int share,
+                   void *addr,
+@@ -39,7 +39,7 @@
+ // Remap the file associated with <this->handle_>.
+ 
+ ACE_INLINE int
+-ACE_Mem_Map::map (ssize_t length,
++ACE_Mem_Map::map (ACE_OFF_T length,
+                   int prot,
+                   int share,
+                   void *addr,
+@@ -88,7 +88,7 @@
+ // This function returns the number of bytes currently mapped in the
+ // file.
+ 
+-ACE_INLINE size_t
++ACE_INLINE ACE_OFF_T
+ ACE_Mem_Map::size (void) const
+ {
+   ACE_TRACE ("ACE_Mem_Map::size");
+@@ -211,7 +211,7 @@
+ // then change protection of all pages in the mapped region.
+ 
+ ACE_INLINE int
+-ACE_Mem_Map::protect (ssize_t len, int prot)
++ACE_Mem_Map::protect (ACE_OFF_T len, int prot)
+ {
+   ACE_TRACE ("ACE_Mem_Map::protect");
+   if (len < 0)
+@@ -235,7 +235,7 @@
+ ACE_Mem_Map::advise (int behavior, int len)
+ {
+   ACE_TRACE ("ACE_Mem_Map::advise");
+-  const size_t advise_len =
++  const ACE_OFF_T advise_len =
+     len < 0 ? this->length_ : static_cast<size_t> (len);
+ 
+   return ACE_OS::madvise ((caddr_t) this->base_addr_,
+Index: OS_NS_unistd.cpp
+===================================================================
+--- OS_NS_unistd.cpp	(revision 74210)
++++ OS_NS_unistd.cpp	(working copy)
+@@ -499,7 +499,7 @@
+ ACE_OS::pwrite (ACE_HANDLE handle,
+                 const void *buf,
+                 size_t nbytes,
+-                ACE_LOFF_T offset)
++                ACE_OFF_T offset)
+ {
+ # if defined (ACE_HAS_P_READ_WRITE)
+ #   if defined (ACE_WIN32)
+Index: OS_NS_sys_mman.h
+===================================================================
+--- OS_NS_sys_mman.h	(revision 74210)
++++ OS_NS_sys_mman.h	(working copy)
+@@ -52,7 +52,7 @@
+               int prot,
+               int flags,
+               ACE_HANDLE handle,
+-              off_t off = 0,
++              ACE_OFF_T off = 0,
+               ACE_HANDLE *file_mapping = 0,
+               LPSECURITY_ATTRIBUTES sa = 0,
+               const ACE_TCHAR *file_mapping_name = 0);
+Index: Mem_Map.h
+===================================================================
+--- Mem_Map.h	(revision 74210)
++++ Mem_Map.h	(working copy)
+@@ -48,7 +48,7 @@
+   /// Map a file from an open file descriptor @a handle.  This function
+   /// will lookup the length of the file if it is not given.
+   ACE_Mem_Map (ACE_HANDLE handle,
+-               ssize_t length = -1,
++               ACE_OFF_T length = -1,
+                int prot = PROT_RDWR,
+                int share = ACE_MAP_PRIVATE,
+                void *addr = 0,
+@@ -57,7 +57,7 @@
+ 
+   /// Map a file specified by @a file_name.
+   ACE_Mem_Map (const ACE_TCHAR *filename,
+-               ssize_t length = -1,
++               ACE_OFF_T length = -1,
+                int flags = O_RDWR | O_CREAT,
+                int mode = ACE_DEFAULT_FILE_PERMS,
+                int prot = PROT_RDWR,
+@@ -69,7 +69,7 @@
+   /// Map a file from an open file descriptor @a handle.  This function
+   /// will lookup the length of the file if it is not given.
+   int map (ACE_HANDLE handle,
+-           ssize_t length = -1,
++           ACE_OFF_T length = -1,
+            int prot = PROT_RDWR,
+            int share = ACE_MAP_PRIVATE,
+            void *addr = 0,
+@@ -77,7 +77,7 @@
+            LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Remap the file associated with <handle_>.
+-  int map (ssize_t length = -1,
++  int map (ACE_OFF_T length = -1,
+            int prot = PROT_RDWR,
+            int share = ACE_MAP_PRIVATE,
+            void *addr = 0,
+@@ -86,7 +86,7 @@
+ 
+   /// Map a file specified by <filename>.
+   int map (const ACE_TCHAR *filename,
+-           ssize_t length = -1,
++           ACE_OFF_T length = -1,
+            int flags = O_RDWR | O_CREAT,
+            int mode = ACE_DEFAULT_FILE_PERMS,
+            int prot = PROT_RDWR,
+@@ -126,7 +126,7 @@
+ 
+   /// This function returns the number of bytes currently mapped in the
+   /// file.
+-  size_t size (void) const;
++  ACE_OFF_T size (void) const;
+ 
+   /// Unmap the region starting at <base_addr_>.
+   int unmap (ssize_t len = -1);
+@@ -150,7 +150,7 @@
+    * starting at <base_addr_> up to <len> bytes.  If <len> == -1 then
+    * change protection of all pages in the mapped region.
+    */
+-  int protect (ssize_t len = -1, int prot = PROT_RDWR);
++  int protect (ACE_OFF_T len = -1, int prot = PROT_RDWR);
+ 
+   /// Change the protection of the pages of the mapped region to <prot>
+   /// starting at <addr> up to <len> bytes.
+@@ -179,7 +179,7 @@
+   /// This method does the dirty work of actually calling ::mmap to map
+   /// the file into memory.
+   int map_it (ACE_HANDLE handle,
+-              ssize_t len = -1,
++              ACE_OFF_T len = -1,
+               int prot = PROT_RDWR,
+               int share = MAP_SHARED,
+               void *addr = 0,
+@@ -199,7 +199,7 @@
+   ACE_TCHAR filename_[MAXPATHLEN + 1];
+ 
+   /// Length of the mapping.
+-  size_t length_;
++  ACE_OFF_T length_;
+ 
+   /// HANDLE for the open file.
+   ACE_HANDLE handle_;
+Index: OS_NS_sys_stat.h
+===================================================================
+--- OS_NS_sys_stat.h	(revision 74210)
++++ OS_NS_sys_stat.h	(working copy)
+@@ -61,10 +61,10 @@
+ 
+   // non-standard
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  ACE_LOFF_T filesize (ACE_HANDLE handle);
++  ACE_OFF_T filesize (ACE_HANDLE handle);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  ACE_LOFF_T filesize (const ACE_TCHAR *handle);
++  ACE_OFF_T filesize (const ACE_TCHAR *handle);
+   //@}
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+Index: MMAP_Memory_Pool.h
+===================================================================
+--- MMAP_Memory_Pool.h	(revision 74210)
++++ MMAP_Memory_Pool.h	(working copy)
+@@ -67,7 +67,7 @@
+   ACE_MMAP_Memory_Pool_Options (const void *base_addr = ACE_DEFAULT_BASE_ADDR,
+                                 int use_fixed_addr = ALWAYS_FIXED,
+                                 int write_each_page = 1,
+-                                ACE_LOFF_T minimum_bytes = 0,
++                                ACE_OFF_T minimum_bytes = 0,
+                                 u_int flags = 0,
+                                 int guess_on_fault = 1,
+                                 LPSECURITY_ATTRIBUTES sa = 0,
+@@ -95,8 +95,8 @@
+   /// on?
+   int write_each_page_;
+ 
+-  /// What the minimim bytes of the initial segment should be.
+-  ACE_LOFF_T minimum_bytes_;
++  /// What the minimum bytes of the initial segment should be.
++  ACE_OFF_T minimum_bytes_;
+ 
+   /// Any special flags that need to be used for @c mmap.
+   u_int flags_;
+@@ -222,10 +222,10 @@
+   /// Compute the new @a map_size of the backing store and commit the
+   /// memory.
+   virtual int commit_backing_store_name (size_t rounded_bytes,
+-                                         ACE_LOFF_T &map_size);
++                                         ACE_OFF_T &map_size);
+ 
+   /// Memory map the file up to @a map_size bytes.
+-  virtual int map_file (ACE_LOFF_T map_size);
++  virtual int map_file (ACE_OFF_T map_size);
+ 
+   /// Handle SIGSEGV and SIGBUS signals to remap shared memory
+   /// properly.
+@@ -255,7 +255,7 @@
+   int write_each_page_;
+ 
+   /// What the minimum bytes of the initial segment should be.
+-  ACE_LOFF_T minimum_bytes_;
++  ACE_OFF_T minimum_bytes_;
+ 
+   /// Name of the backing store where the shared memory pool is kept.
+   ACE_TCHAR backing_store_name_[MAXPATHLEN + 1];
+Index: OS_NS_unistd.inl
+===================================================================
+--- OS_NS_unistd.inl	(revision 74210)
++++ OS_NS_unistd.inl	(working copy)
+@@ -351,7 +351,7 @@
+ }
+ 
+ ACE_INLINE int
+-ACE_OS::ftruncate (ACE_HANDLE handle, ACE_LOFF_T offset)
++ACE_OS::ftruncate (ACE_HANDLE handle, ACE_OFF_T offset)
+ {
+   ACE_OS_TRACE ("ACE_OS::ftruncate");
+ #if defined (ACE_WIN32)
+@@ -979,7 +979,7 @@
+ 
+ ACE_INLINE int
+ ACE_OS::truncate (const ACE_TCHAR *filename,
+-                  ACE_LOFF_T offset)
++                  ACE_OFF_T offset)
+ {
+   ACE_OS_TRACE ("ACE_OS::truncate");
+ #if defined (ACE_WIN32)
