@@ -1,0 +1,138 @@
+Index: tao/IIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Connection_Handler.cpp,v
+retrieving revision 1.104
+diff -u -r1.104 IIOP_Connection_Handler.cpp
+--- tao/IIOP_Connection_Handler.cpp	2 Nov 2005 07:13:03 -0000	1.104
++++ tao/IIOP_Connection_Handler.cpp	20 Jan 2006 16:30:59 -0000
+@@ -130,6 +130,20 @@
+     return -1;
+ #endif /* ! ACE_LACKS_TCP_NODELAY */
+ 
++  int keepalive = this->orb_core ()->orb_params ()->sock_keepalive ();
++
++  if (keepalive)
++    {
++      if (this->peer ().set_option (SOL_SOCKET,
++                                    SO_KEEPALIVE,
++                                    (void *) &keepalive,
++                                    sizeof (int)) == -1
++          && errno != ENOTSUP)
++        {
++          return -1;
++        }
++    }
++
+   if (this->transport ()->wait_strategy ()->non_blocking ()
+       || this->transport ()->opened_as () == TAO::TAO_SERVER_ROLE)
+     {
+Index: tao/ORB_Core.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.cpp,v
+retrieving revision 1.582
+diff -u -r1.582 ORB_Core.cpp
+--- tao/ORB_Core.cpp	22 Dec 2005 14:54:50 -0000	1.582
++++ tao/ORB_Core.cpp	20 Jan 2006 16:30:59 -0000
+@@ -326,6 +326,9 @@
+   // Use TCP_NODELAY.
+   int nodelay = 1;
+ 
++  // Use SO_KEEPALIVE (default 0).
++  int so_keepalive = 0;
++
+   // Use dotted decimal addresses
+   // @@ This option will be treated as a suggestion to each loaded
+   //    protocol to use a character representation for the numeric
+@@ -434,6 +437,15 @@
+           arg_shifter.consume_arg ();
+         }
+       else if ((current_arg = arg_shifter.get_the_parameter
++                (ACE_LIB_TEXT("-ORBKeepalive"))))
++        {
++          // Use SO_KEEPALIVE or not.
++          so_keepalive =
++            ACE_OS::atoi (current_arg);
++
++          arg_shifter.consume_arg ();
++        }
++      else if ((current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBTradingServicePort"))))
+         {
+           // Specify the port number for the TradingService.
+@@ -1117,6 +1129,7 @@
+                                              || dotted_decimal_addresses);
+   this->orb_params ()->linger (linger);
+   this->orb_params ()->nodelay (nodelay);
++  this->orb_params ()->sock_keepalive (so_keepalive);
+   if (rcv_sock_size >= 0)
+     this->orb_params ()->sock_rcvbuf_size (rcv_sock_size);
+   if (snd_sock_size >= 0)
+Index: tao/params.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/params.cpp,v
+retrieving revision 1.79
+diff -u -r1.79 params.cpp
+--- tao/params.cpp	2 Nov 2005 11:03:27 -0000	1.79
++++ tao/params.cpp	20 Jan 2006 16:30:59 -0000
+@@ -24,6 +24,7 @@
+   , sock_rcvbuf_size_ (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+   , sock_sndbuf_size_ (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+   , nodelay_ (1)
++  , sock_keepalive_ (0)
+   , cdr_memcpy_tradeoff_ (ACE_DEFAULT_CDR_MEMCPY_TRADEOFF)
+   , use_lite_protocol_ (0)
+   , use_dotted_decimal_addresses_ (0)
+Index: tao/params.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/params.h,v
+retrieving revision 1.93
+diff -u -r1.93 params.h
+--- tao/params.h	2 Nov 2005 11:03:27 -0000	1.93
++++ tao/params.h	20 Jan 2006 16:30:59 -0000
+@@ -85,6 +85,10 @@
+   int nodelay (void) const;
+   void nodelay (int);
+ 
++  /// Set/Get whether we should set SO_KEEPALIVE on the socket or not.
++  int sock_keepalive (void);
++  void sock_keepalive (int);
++
+   /**
+    * Octet sequences are marshalled without doing any copies, we
+    * simply append a block to the CDR message block chain. When the
+@@ -227,6 +231,9 @@
+   /// 1 if we're using TCP_NODELAY and 0 otherwise.
+   int nodelay_;
+ 
++  /// 1 if we're using SO_KEEPALIV and 0 otherwise (default 0).
++  int sock_keepalive_;
++
+   /// Control the strategy for copying vs. appeding octet sequences in
+   /// CDR streams.
+   int cdr_memcpy_tradeoff_;
+Index: tao/params.i
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/params.i,v
+retrieving revision 1.60
+diff -u -r1.60 params.i
+--- tao/params.i	2 Nov 2005 11:03:27 -0000	1.60
++++ tao/params.i	20 Jan 2006 16:30:59 -0000
+@@ -139,6 +139,18 @@
+ }
+ 
+ ACE_INLINE int
++TAO_ORB_Parameters::sock_keepalive (void)
++{
++  return this->sock_keepalive_;
++}
++
++ACE_INLINE void
++TAO_ORB_Parameters::sock_keepalive (int x)
++{
++  this->sock_keepalive_ = x;
++}
++
++ACE_INLINE int
+ TAO_ORB_Parameters::ace_sched_policy (void) const
+ {
+   return this->ace_sched_policy_;
