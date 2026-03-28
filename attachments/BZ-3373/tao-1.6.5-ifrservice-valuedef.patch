@@ -1,0 +1,199 @@
+diff -r -u TAO/orbsvcs/orbsvcs/IFRService.orig/Container_i.cpp TAO/orbsvcs/orbsvcs/IFRService/Container_i.cpp
+--- TAO/orbsvcs/orbsvcs/IFRService.orig/Container_i.cpp	2008-07-22 09:54:56.784832500 -0400
++++ TAO/orbsvcs/orbsvcs/IFRService/Container_i.cpp	2008-07-22 11:47:30.282759600 -0400
+@@ -359,6 +359,54 @@
+                                   break;
+                                 }
+                             }
++                        }
++                    }
++
++                  if (so_far_so_good)
++                    {
++                      break;
++                    }
++                  else
++                    {
++                      ACE_Configuration_Section_Key members_key;
++                      status =
++                        this->repo_->config ()->open_section (iter_key,
++                                                              "members",
++                                                              0,
++                                                              members_key);
++
++                      if (status == 0)
++                        {
++                          index = 0;
++
++                          while (this->repo_->config ()->enumerate_sections (
++                                                             members_key,
++                                                             index++,
++                                                             section_name
++                                                           )
++                                  == 0)
++                            {
++                              this->repo_->config ()->open_section (
++                                  members_key,
++                                  section_name.c_str (),
++                                  0,
++                                  work_key
++                               );
++
++                              ACE_TString member_name;
++                              this->repo_->config ()->get_string_value (
++                                                          work_key,
++                                                          "name",
++                                                          member_name
++                                                        );
++
++                              // If we're here, name has only one segment.
++                              if (member_name == work_string)
++                                {
++                                  so_far_so_good = 1;
++                                  break;
++                                }
++                            }
+ 
+                           if (so_far_so_good)
+                             {
+@@ -502,6 +550,20 @@
+                                     exclude_inherited);
+         }
+     }
++  else if (def_kind == CORBA::dk_Value)
++    {
++      if (limit_type == CORBA::dk_ValueMember
++          || limit_type == CORBA::dk_all)
++        {
++          TAO_ValueDef_i value (this->repo_);
++          value.section_key (this->section_key_);
++
++          value.value_contents (kind_queue,
++				path_queue,
++				limit_type,
++				exclude_inherited);
++        }
++    }
+ 
+   CORBA::ULong size = static_cast<CORBA::ULong> (kind_queue.size ());
+   retval->length (size);
+diff -r -u TAO/orbsvcs/orbsvcs/IFRService.orig/ValueDef_i.cpp TAO/orbsvcs/orbsvcs/IFRService/ValueDef_i.cpp
+--- TAO/orbsvcs/orbsvcs/IFRService.orig/ValueDef_i.cpp	2008-07-22 09:54:59.034861300 -0400
++++ TAO/orbsvcs/orbsvcs/IFRService/ValueDef_i.cpp	2008-07-22 11:31:01.999251300 -0400
+@@ -1709,4 +1709,98 @@
+   desc.base_value = holder.fast_rep ();
+ }
+ 
++void
++TAO_ValueDef_i::value_contents (
++    ACE_Unbounded_Queue<CORBA::DefinitionKind> &kind_queue,
++    ACE_Unbounded_Queue<ACE_TString> &path_queue,
++    CORBA::DefinitionKind limit_type,
++    CORBA::Boolean exclude_inherited
++  )
++{
++  ACE_TString id;
++  this->repo_->config ()->get_string_value (this->section_key_,
++                                            "id",
++                                            id);
++
++  ACE_TString path;
++  this->repo_->config ()->get_string_value (this->repo_->repo_ids_key (),
++                                            id.c_str (),
++                                            path);
++
++  ACE_TString section_name;
++  int index = 0;
++  int status = 0;
++
++  // Value Members
++  if (limit_type == CORBA::dk_ValueMember
++      || limit_type == CORBA::dk_all)
++    {
++      ACE_Configuration_Section_Key members_key;
++      status =
++        this->repo_->config ()->open_section (this->section_key_,
++                                              "members",
++                                              0,
++                                              members_key);
++
++      // Only if we have any.
++      if (status == 0)
++        {
++          while (this->repo_->config ()->enumerate_sections (members_key,
++                                                             index++,
++                                                             section_name)
++                  == 0)
++            {
++              kind_queue.enqueue_tail (CORBA::dk_ValueMember);
++
++              path_queue.enqueue_tail (
++                  path + "\\members\\" + section_name.c_str ()
++                );
++            }
++        }
++    }
++
++  if (exclude_inherited == 0)
++    {
++      // Must recurse through the base value.
++      ACE_Configuration_Section_Key base_key;
++      status =
++        this->repo_->config ()->open_section (this->section_key_,
++                                              "base",
++                                              0,
++                                              base_key);
++
++      if (status == 0)
++        {
++          ACE_TString base_path;
++          ACE_Configuration_Section_Key base_key;
++          ACE_Configuration::VALUETYPE type;
++          index = 0;
++
++          while (this->repo_->config ()->enumerate_values (base_key,
++                                                           index++,
++                                                           section_name,
++                                                           type)
++                  == 0)
++            {
++              this->repo_->config ()->get_string_value (base_key,
++                                                        section_name.c_str (),
++                                                        base_path);
++
++              this->repo_->config ()->expand_path (this->repo_->root_key (),
++                                                   base_path,
++                                                   base_key,
++                                                   0);
++
++              TAO_ValueDef_i base_value (this->repo_);
++              base_value.section_key (base_key);
++
++              base_value.value_contents (kind_queue,
++					 path_queue,
++					 limit_type,
++					 exclude_inherited);
++            }
++        }
++    }
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+diff -r -u TAO/orbsvcs/orbsvcs/IFRService.orig/ValueDef_i.h TAO/orbsvcs/orbsvcs/IFRService/ValueDef_i.h
+--- TAO/orbsvcs/orbsvcs/IFRService.orig/ValueDef_i.h	2008-07-22 09:54:59.128612500 -0400
++++ TAO/orbsvcs/orbsvcs/IFRService/ValueDef_i.h	2008-07-22 11:31:02.499257700 -0400
+@@ -248,6 +248,14 @@
+   static int name_clash (const char *name);
+ 
+   void fill_value_description (CORBA::ValueDescription &desc);
++
++  /// Gathers the members of all the ancestors.
++  void value_contents (
++      ACE_Unbounded_Queue<CORBA::DefinitionKind> &kind_queue,
++      ACE_Unbounded_Queue<ACE_TString> &path_queue,
++      CORBA::DefinitionKind limit_type,
++      CORBA::Boolean exclude_inherited
++    );
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
