@@ -1,0 +1,684 @@
+Index: tao/Transport.h
+===================================================================
+--- tao/Transport.h	(revision 80433)
++++ tao/Transport.h	(working copy)
+@@ -289,7 +289,7 @@
+   TAO_Wait_Strategy *wait_strategy (void) const;
+ 
+   /// Callback method to reactively drain the outgoing data queue
+-  int handle_output (void);
++  int handle_output (ACE_Time_Value *max_wait_time);
+ 
+   /// Get the bidirectional flag
+   int bidirectional_flag (void) const;
+@@ -687,7 +687,7 @@
+   /// @param max_wait_time The maximum time that the operation can
+   ///            block, used in the implementation of timeouts.
+   int queue_message_i (const ACE_Message_Block *message_block,
+-                       ACE_Time_Value *max_wait_time);
++                       ACE_Time_Value *max_wait_time, bool back=true);
+ 
+ public:
+   /// Format and queue a message for @a stream
+@@ -786,10 +786,10 @@
+    * Returns 0 if there is more data to send, -1 if there was an error
+    * and 1 if the message was completely sent.
+    */
+-  int drain_queue (void);
++  int drain_queue (ACE_Time_Value *max_wait_time);
+ 
+   /// Implement drain_queue() assuming the lock is held
+-  int drain_queue_i (void);
++  int drain_queue_i (ACE_Time_Value *max_wait_time);
+ 
+   /// Check if there are messages pending in the queue
+   /**
+@@ -801,7 +801,7 @@
+   bool queue_is_empty_i (void);
+ 
+   /// A helper routine used in drain_queue_i()
+-  int drain_queue_helper (int &iovcnt, iovec iov[]);
++  int drain_queue_helper (int &iovcnt, iovec iov[], ACE_Time_Value *max_wait_time);
+ 
+   /// These classes need privileged access to:
+   /// - schedule_output_i()
+Index: tao/Leader_Follower_Flushing_Strategy.h
+===================================================================
+--- tao/Leader_Follower_Flushing_Strategy.h	(revision 80433)
++++ tao/Leader_Follower_Flushing_Strategy.h	(working copy)
+@@ -38,7 +38,7 @@
+   virtual int flush_message (TAO_Transport *transport,
+                              TAO_Queued_Message *msg,
+                              ACE_Time_Value *max_wait_time);
+-  virtual int flush_transport (TAO_Transport *transport);
++  virtual int flush_transport (TAO_Transport *transport, ACE_Time_Value *max_wait_time);
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/Reactive_Flushing_Strategy.h
+===================================================================
+--- tao/Reactive_Flushing_Strategy.h	(revision 80433)
++++ tao/Reactive_Flushing_Strategy.h	(working copy)
+@@ -36,7 +36,8 @@
+   virtual int flush_message (TAO_Transport *transport,
+                              TAO_Queued_Message *msg,
+                              ACE_Time_Value *max_wait_time);
+-  virtual int flush_transport (TAO_Transport *transport);
++  virtual int flush_transport (TAO_Transport *transport
++                               , ACE_Time_Value *max_wait_time);
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/Reactive_Flushing_Strategy.cpp
+===================================================================
+--- tao/Reactive_Flushing_Strategy.cpp	(revision 80433)
++++ tao/Reactive_Flushing_Strategy.cpp	(working copy)
+@@ -51,7 +51,8 @@
+ }
+ 
+ int
+-TAO_Reactive_Flushing_Strategy::flush_transport (TAO_Transport *transport)
++TAO_Reactive_Flushing_Strategy::flush_transport (TAO_Transport *transport
++                                                 , ACE_Time_Value *max_wait_time)
+ {
+   // @@ Should we pass this down?  Can we?
+   try
+@@ -60,7 +61,7 @@
+ 
+       while (!transport->queue_is_empty ())
+         {
+-          if (orb_core->run (0, 1) == -1)
++          if (orb_core->run (max_wait_time, 1) == -1)
+             return -1;
+         }
+     }
+Index: tao/Block_Flushing_Strategy.cpp
+===================================================================
+--- tao/Block_Flushing_Strategy.cpp	(revision 80433)
++++ tao/Block_Flushing_Strategy.cpp	(working copy)
+@@ -23,22 +23,23 @@
+ int
+ TAO_Block_Flushing_Strategy::flush_message (TAO_Transport *transport,
+                                             TAO_Queued_Message *msg,
+-                                            ACE_Time_Value *)
++                                            ACE_Time_Value *max_wait_time)
+ {
+   while (!msg->all_data_sent ())
+     {
+-      if (transport->handle_output () == -1)
++      if (transport->handle_output (max_wait_time) == -1)
+         return -1;
+     }
+   return 0;
+ }
+ 
+ int
+-TAO_Block_Flushing_Strategy::flush_transport (TAO_Transport *transport)
++TAO_Block_Flushing_Strategy::flush_transport (TAO_Transport *transport
++                                              , ACE_Time_Value *max_wait_time)
+ {
+   while (!transport->queue_is_empty ())
+     {
+-      if (transport->handle_output () == -1)
++      if (transport->handle_output (max_wait_time) == -1)
+         return -1;
+     }
+   return 0;
+Index: tao/Leader_Follower_Flushing_Strategy.cpp
+===================================================================
+--- tao/Leader_Follower_Flushing_Strategy.cpp	(revision 80433)
++++ tao/Leader_Follower_Flushing_Strategy.cpp	(working copy)
+@@ -40,7 +40,8 @@
+ 
+ int
+ TAO_Leader_Follower_Flushing_Strategy::flush_transport (
+-    TAO_Transport *transport)
++    TAO_Transport *transport,
++    ACE_Time_Value *max_wait_time)
+ {
+   // @todo This is not the right way to do this....
+ 
+@@ -50,7 +51,7 @@
+ 
+       while (!transport->queue_is_empty ())
+         {
+-          if (orb_core->run (0, 1) == -1)
++          if (orb_core->run (max_wait_time, 1) == -1)
+             return -1;
+         }
+     }
+Index: tao/IIOP_Transport.h
+===================================================================
+--- tao/IIOP_Transport.h	(revision 80433)
++++ tao/IIOP_Transport.h	(working copy)
+@@ -90,12 +90,7 @@
+ 
+   virtual ssize_t recv (char *buf, size_t len, const ACE_Time_Value *s = 0);
+ 
+-  virtual int send_message_shared (TAO_Stub *stub,
+-                                   TAO_Message_Semantics message_semantics,
+-                                   const ACE_Message_Block *message_block,
+-                                   ACE_Time_Value *max_wait_time);
+ 
+-
+ public:
+ 
+   /// Bridge method to call a similar method on the connection handler
+Index: tao/Flushing_Strategy.h
+===================================================================
+--- tao/Flushing_Strategy.h	(revision 80433)
++++ tao/Flushing_Strategy.h	(working copy)
+@@ -75,7 +75,7 @@
+                              ACE_Time_Value *max_wait_time) = 0;
+ 
+   /// Wait until the transport has no messages queued.
+-  virtual int flush_transport (TAO_Transport *transport) = 0;
++  virtual int flush_transport (TAO_Transport *transport, ACE_Time_Value *max_wait_time) = 0;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/Connection_Handler.cpp
+===================================================================
+--- tao/Connection_Handler.cpp	(revision 80433)
++++ tao/Connection_Handler.cpp	(working copy)
+@@ -201,7 +201,7 @@
+       return return_value;
+     }
+ 
+-  return_value = this->transport ()->handle_output ();
++  return_value = this->transport ()->handle_output (0);
+ 
+   this->pos_io_hook (return_value);
+ 
+Index: tao/Transport.cpp
+===================================================================
+--- tao/Transport.cpp	(revision 80433)
++++ tao/Transport.cpp	(working copy)
+@@ -29,6 +29,7 @@
+ #include "ace/Reactor.h"
+ #include "ace/os_include/sys/os_uio.h"
+ #include "ace/High_Res_Timer.h"
++#include "ace/Countdown_Time.h"
+ #include "ace/CORBA_macros.h"
+ 
+ /*
+@@ -306,6 +307,10 @@
+ 
+   if (result == -1)
+     {
++      // The connection needs to be closed here.
++      // In the case of a partially written message this is the only way to cleanup
++      //  the physical connection as well as the Transport. An EOF on the remote end
++      //  will cancel the partially received message.
+       this->close_connection ();
+     }
+ 
+@@ -480,7 +485,7 @@
+  *
+  */
+ int
+-TAO_Transport::handle_output (void)
++TAO_Transport::handle_output (ACE_Time_Value *max_wait_time)
+ {
+   if (TAO_debug_level > 3)
+     {
+@@ -492,7 +497,7 @@
+   // The flushing strategy (potentially via the Reactor) wants to send
+   // more data, first check if there is a current message that needs
+   // more sending...
+-  int const retval = this->drain_queue ();
++  int const retval = this->drain_queue (max_wait_time);
+ 
+   if (TAO_debug_level > 3)
+     {
+@@ -532,7 +537,7 @@
+ int
+ TAO_Transport::send_message_block_chain_i (const ACE_Message_Block *mb,
+                                            size_t &bytes_transferred,
+-                                           ACE_Time_Value *)
++                                           ACE_Time_Value *max_wait_time)
+ {
+   size_t const total_length = mb->total_length ();
+ 
+@@ -542,7 +547,7 @@
+ 
+   synch_message.push_back (this->head_, this->tail_);
+ 
+-  int const n = this->drain_queue_i ();
++  int const n = this->drain_queue_i (max_wait_time);
+ 
+   if (n == -1)
+     {
+@@ -570,98 +575,74 @@
+   // We are going to block, so there is no need to clone
+   // the message block.
+   TAO_Synch_Queued_Message synch_message (mb, this->orb_core_);
+-  size_t const message_length = synch_message.message_length ();
+ 
+   synch_message.push_back (this->head_, this->tail_);
+ 
+-  int const n = this->send_synch_message_helper_i (synch_message,
+-                                                   0 /*ignored*/);
+-  if (n == -1 || n == 1)
++  int const result = this->send_synch_message_helper_i (synch_message,
++                                                        max_wait_time);
++  // A timeout doesn't return -1
++  if (result == -1 || result == 1)
+     {
+-      return n;
++      return result;
+     }
+ 
+-  // @todo: Check for timeouts!
+-  // if (max_wait_time != 0 && errno == ETIME) return -1;
+-  TAO_Flushing_Strategy *flushing_strategy =
+-    this->orb_core ()->flushing_strategy ();
+-  int result = flushing_strategy->schedule_output (this);
+-  if (result == -1)
++  if (max_wait_time == 0 || errno != ETIME)
+     {
+-      synch_message.remove_from_list (this->head_, this->tail_);
+-      if (TAO_debug_level > 0)
++      TAO_Flushing_Strategy *flushing_strategy =
++        this->orb_core ()->flushing_strategy ();
++      int result = flushing_strategy->schedule_output (this);
++      if (result == -1)
+         {
+-          ACE_ERROR ((LM_ERROR,
+-                      ACE_TEXT ("TAO (%P|%t) - Transport[%d]::")
+-                      ACE_TEXT ("send_synchronous_message_i, ")
+-                      ACE_TEXT ("error while scheduling flush - %m\n"),
+-                      this->id ()));
++          synch_message.remove_from_list (this->head_, this->tail_);
++          if (TAO_debug_level > 0)
++            {
++              ACE_ERROR ((LM_ERROR,
++                          ACE_TEXT ("TAO (%P|%t) - Transport[%d]::")
++                          ACE_TEXT ("send_synchronous_message_i, ")
++                          ACE_TEXT ("error while scheduling flush - %m\n"),
++                          this->id ()));
++            }
++          return -1;
+         }
+-      return -1;
+-    }
+ 
+-  // No need to check for result == TAO_Flushing_Strategy::MUST_FLUSH,
+-  // because we're always going to flush anyway.
++      // No need to check for result == TAO_Flushing_Strategy::MUST_FLUSH,
++      // because we're always going to flush anyway.
+ 
+-  // Release the mutex, other threads may modify the queue as we
+-  // block for a long time writing out data.
+-  {
+-    typedef ACE_Reverse_Lock<ACE_Lock> TAO_REVERSE_LOCK;
+-    TAO_REVERSE_LOCK reverse (*this->handler_lock_);
+-    ACE_GUARD_RETURN (TAO_REVERSE_LOCK, ace_mon, reverse, -1);
++      // Release the mutex, other threads may modify the queue as we
++      // block for a long time writing out data.
++      {
++        typedef ACE_Reverse_Lock<ACE_Lock> TAO_REVERSE_LOCK;
++        TAO_REVERSE_LOCK reverse (*this->handler_lock_);
++        ACE_GUARD_RETURN (TAO_REVERSE_LOCK, ace_mon, reverse, -1);
+ 
+-    result = flushing_strategy->flush_message (this,
+-                                               &synch_message,
+-                                               max_wait_time);
+-  }
++        result = flushing_strategy->flush_message (this,
++                                                   &synch_message,
++                                                   max_wait_time);
++      }
++    }
+ 
++  // The result could be -1 from either the send_synch_message_helper_i() call
++  // or the later flush. In either case return -1.
+   if (result == -1)
+     {
+       synch_message.remove_from_list (this->head_, this->tail_);
+ 
+-      if (errno == ETIME)
+-        {
+-          // If partially sent, then we must queue the remainder.
+-          if (message_length != synch_message.message_length ())
+-            {
+-              // This is a timeout, there is only one nasty case: the
+-              // message has been partially sent!  We simply cannot take
+-              // the message out of the queue, because that would corrupt
+-              // the connection.
+-              //
+-              // What we do is replace the queued message with an
+-              // asynchronous message, that contains only what remains of
+-              // the timed out request.  If you think about sending
+-              // CancelRequests in this case: there is no much point in
+-              // doing that: the receiving ORB would probably ignore it,
+-              // and figuring out the request ID would be a bit of a
+-              // nightmare.
+-              //
+-              TAO_Queued_Message *queued_message = 0;
+-              ACE_NEW_RETURN (queued_message,
+-                              TAO_Asynch_Queued_Message (
+-                                  synch_message.current_block (),
+-                                  this->orb_core_,
+-                                  0, // no timeout
+-                                  0,
+-                                  true),
+-                              -1);
+-              queued_message->push_front (this->head_, this->tail_);
+-            }
+-        }
++      // We don't need to do anything special for the timeout case.
++      // The connection is going to get closed and the Transport destroyed.
++      // The only thing to do maybe is to empty the queue.
+ 
+       if (TAO_debug_level > 0)
+         {
+           ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("TAO (%P|%t) - Transport[%d]::send_synchronous_message_i, ")
+-             ACE_TEXT ("error while flushing message - %m\n"),
++             ACE_TEXT ("error while sending message - %m\n"),
+              this->id ()));
+         }
+ 
+       return -1;
+     }
+ 
+-  return 1;
++  return result;
+ }
+ 
+ 
+@@ -677,6 +658,7 @@
+   int const n =
+     this->send_synch_message_helper_i (synch_message, max_wait_time);
+ 
++  // What about partially sent messages.
+   if (n == -1 || n == 1)
+     {
+       return n;
+@@ -730,10 +712,9 @@
+ 
+ int
+ TAO_Transport::send_synch_message_helper_i (TAO_Synch_Queued_Message &synch_message,
+-                                            ACE_Time_Value * /*max_wait_time*/)
++                                            ACE_Time_Value * max_wait_time)
+ {
+-  // @todo: Need to send timeouts for writing..
+-  int const n = this->drain_queue_i ();
++  int const n = this->drain_queue_i (max_wait_time);
+ 
+   if (n == -1)
+     {
+@@ -851,7 +832,9 @@
+           typedef ACE_Reverse_Lock<ACE_Lock> TAO_REVERSE_LOCK;
+           TAO_REVERSE_LOCK reverse (*this->handler_lock_);
+           ACE_GUARD_RETURN (TAO_REVERSE_LOCK, ace_mon, reverse, -1);
+-          (void) flushing_strategy->flush_transport (this);
++          if (flushing_strategy->flush_transport (this, 0) == -1) {
++            return -1;
++          }
+         }
+     }
+ 
+@@ -859,10 +842,10 @@
+ }
+ 
+ int
+-TAO_Transport::drain_queue (void)
++TAO_Transport::drain_queue (ACE_Time_Value *max_wait_time)
+ {
+   ACE_GUARD_RETURN (ACE_Lock, ace_mon, *this->handler_lock_, -1);
+-  int const retval = this->drain_queue_i ();
++  int const retval = this->drain_queue_i (max_wait_time);
+ 
+   if (retval == 1)
+     {
+@@ -880,9 +863,10 @@
+ }
+ 
+ int
+-TAO_Transport::drain_queue_helper (int &iovcnt, iovec iov[])
++TAO_Transport::drain_queue_helper (int &iovcnt, iovec iov[], ACE_Time_Value *max_wait_time)
+ {
+   size_t byte_count = 0;
++  ACE_Countdown_Time countdown (max_wait_time);
+ 
+   // ... send the message ...
+   ssize_t retval = -1;
+@@ -895,7 +879,7 @@
+                              byte_count);
+   else
+ #endif  /* TAO_HAS_SENDFILE==1 */
+-    retval = this->send (iov, iovcnt, byte_count);
++    retval = this->send (iov, iovcnt, byte_count, max_wait_time);
+ 
+   if (TAO_debug_level == 5)
+     {
+@@ -956,7 +940,7 @@
+ }
+ 
+ int
+-TAO_Transport::drain_queue_i (void)
++TAO_Transport::drain_queue_i (ACE_Time_Value *max_wait_time)
+ {
+   // This is the vector used to send data, it must be declared outside
+   // the loop because after the loop there may still be data to be
+@@ -1007,7 +991,8 @@
+       // IOV_MAX elements ...
+       if (iovcnt == ACE_IOV_MAX)
+         {
+-          int const retval = this->drain_queue_helper (iovcnt, iov);
++          int const retval = this->drain_queue_helper (iovcnt, iov,
++	                                               max_wait_time);
+ 
+           now = ACE_High_Res_Timer::gettimeofday_hr ();
+ 
+@@ -1034,7 +1019,7 @@
+ 
+   if (iovcnt != 0)
+     {
+-      int const retval = this->drain_queue_helper (iovcnt, iov);
++      int const retval = this->drain_queue_helper (iovcnt, iov, max_wait_time);
+ 
+       if (TAO_debug_level > 4)
+         {
+@@ -1299,6 +1284,9 @@
+         }
+     }
+ 
++  bool partially_sent = false;
++  bool timeout_encountered = false;
++
+   if (try_sending_first)
+     {
+       ssize_t n = 0;
+@@ -1322,6 +1310,7 @@
+       n = this->send_message_block_chain_i (message_block,
+                                             byte_count,
+                                             max_wait_time);
++
+       if (n == -1)
+         {
+           // ... if this is just an EWOULDBLOCK we must schedule the
+@@ -1354,10 +1343,15 @@
+           return 0;
+         }
+ 
+-      // If it was partially sent, then we can't allow a timeout
+-      if (byte_count > 0)
+-        max_wait_time = 0;
++      if (byte_count > 0) {
++        partially_sent = true;
++      }
+ 
++      // If it was partially sent, then push to front of queue and don't flush
++      if (errno == ETIME) {
++        timeout_encountered = true;
++      }
++
+       if (TAO_debug_level > 6)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+@@ -1388,7 +1382,9 @@
+          this->id ()));
+     }
+ 
+-  if (this->queue_message_i (message_block, max_wait_time) == -1)
++  bool front = (partially_sent ? true: false);
++
++  if (this->queue_message_i (message_block, max_wait_time, front) == -1)
+   {
+     if (TAO_debug_level > 0)
+       {
+@@ -1401,44 +1397,56 @@
+     return -1;
+   }
+ 
+-  // ... if the queue is full we need to activate the output on the
+-  // queue ...
+-  bool must_flush = false;
+-  const bool constraints_reached =
+-    this->check_buffering_constraints_i (stub,
+-                                         must_flush);
++  // We can't flush if we have already encountered a timeout
++  if (!timeout_encountered)
++    {
++      // ... if the queue is full we need to activate the output on the
++      // queue ...
++      bool must_flush = false;
++      const bool constraints_reached =
++        this->check_buffering_constraints_i (stub,
++                                             must_flush);
+ 
+-  // ... but we also want to activate it if the message was partially
+-  // sent.... Plus, when we use the blocking flushing strategy the
+-  // queue is flushed as a side-effect of 'schedule_output()'
++      // ... but we also want to activate it if the message was partially
++      // sent.... Plus, when we use the blocking flushing strategy the
++      // queue is flushed as a side-effect of 'schedule_output()'
+ 
+-  TAO_Flushing_Strategy *flushing_strategy =
+-    this->orb_core ()->flushing_strategy ();
++      TAO_Flushing_Strategy *flushing_strategy =
++        this->orb_core ()->flushing_strategy ();
+ 
+-  if (constraints_reached || try_sending_first)
+-    {
+-      int const result = flushing_strategy->schedule_output (this);
+-      if (result == TAO_Flushing_Strategy::MUST_FLUSH)
++      if (constraints_reached || try_sending_first)
+         {
+-          must_flush = true;
++          int const result = flushing_strategy->schedule_output (this);
++          if (result == TAO_Flushing_Strategy::MUST_FLUSH)
++            {
++              must_flush = true;
++            }
+         }
+-    }
+ 
+-  if (must_flush)
+-    {
+-      typedef ACE_Reverse_Lock<ACE_Lock> TAO_REVERSE_LOCK;
+-      TAO_REVERSE_LOCK reverse (*this->handler_lock_);
+-      ACE_GUARD_RETURN (TAO_REVERSE_LOCK, ace_mon, reverse, -1);
++      if (must_flush)
++        {
++          typedef ACE_Reverse_Lock<ACE_Lock> TAO_REVERSE_LOCK;
++          TAO_REVERSE_LOCK reverse (*this->handler_lock_);
++          ACE_GUARD_RETURN (TAO_REVERSE_LOCK, ace_mon, reverse, -1);
+ 
+-      (void) flushing_strategy->flush_transport (this);
++          if (flushing_strategy->flush_transport (this, max_wait_time) == -1) {
++            // We may need to empty the transport queue here.
++            return -1;
++          }
++        }
+     }
++  else {
++    // We may need to empty the transport queue here as well.
++    // encountered a timeout
++    return -1;
++  }
+ 
+   return 0;
+ }
+ 
+ int
+ TAO_Transport::queue_message_i (const ACE_Message_Block *message_block,
+-                                ACE_Time_Value *max_wait_time)
++                                ACE_Time_Value *max_wait_time, bool back)
+ {
+   TAO_Queued_Message *queued_message = 0;
+   ACE_NEW_RETURN (queued_message,
+@@ -1448,7 +1456,12 @@
+                                              0,
+                                              true),
+                   -1);
+-  queued_message->push_back (this->head_, this->tail_);
++  if (back) {
++    queued_message->push_back (this->head_, this->tail_);
++  }
++  else {
++    queued_message->push_front (this->head_, this->tail_);
++  }
+ 
+   return 0;
+ }
+Index: tao/Block_Flushing_Strategy.h
+===================================================================
+--- tao/Block_Flushing_Strategy.h	(revision 80433)
++++ tao/Block_Flushing_Strategy.h	(working copy)
+@@ -35,7 +35,8 @@
+   virtual int flush_message (TAO_Transport *transport,
+                              TAO_Queued_Message *msg,
+                              ACE_Time_Value *max_wait_time);
+-  virtual int flush_transport (TAO_Transport *transport);
++  virtual int flush_transport (TAO_Transport *transport
++                               , ACE_Time_Value *max_wait_time);
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/IIOP_Transport.cpp
+===================================================================
+--- tao/IIOP_Transport.cpp	(revision 80433)
++++ tao/IIOP_Transport.cpp	(working copy)
+@@ -66,7 +66,6 @@
+     this->connection_handler_->peer ().sendv (iov,
+                                               iovcnt,
+                                               max_wait_time);
+-
+   if (retval > 0)
+     bytes_transferred = retval;
+   else
+@@ -259,30 +258,6 @@
+ }
+ 
+ int
+-TAO_IIOP_Transport::send_message_shared (
+-  TAO_Stub *stub,
+-  TAO_Message_Semantics message_semantics,
+-  const ACE_Message_Block *message_block,
+-  ACE_Time_Value *max_wait_time)
+-{
+-  int r;
+-
+-  {
+-    ACE_GUARD_RETURN (ACE_Lock, ace_mon, *this->handler_lock_, -1);
+-
+-    r = this->send_message_shared_i (stub, message_semantics,
+-                                     message_block, max_wait_time);
+-  }
+-
+-  if (r == -1)
+-    {
+-      this->close_connection ();
+-    }
+-
+-  return r;
+-}
+-
+-int
+ TAO_IIOP_Transport::generate_request_header (TAO_Operation_Details &opdetails,
+                                              TAO_Target_Specification &spec,
+                                              TAO_OutputCDR &msg)
