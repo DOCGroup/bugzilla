@@ -1,0 +1,497 @@
+Index: protocols/ace/RMCast/RMCast.mpc
+===================================================================
+--- protocols/ace/RMCast/RMCast.mpc	(revision 80604)
++++ protocols/ace/RMCast/RMCast.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*-
+ // $Id$
+
+-project(RMCast) : acelib, install, threads {
++project(RMCast) : acelib, ace_output, install, threads {
+   avoids = ace_for_tao
+   sharedname   = ACE_RMCast
+   dynamicflags = ACE_RMCAST_BUILD_DLL
+Index: protocols/ace/TMCast/TMCast.mpc
+===================================================================
+--- protocols/ace/TMCast/TMCast.mpc	(revision 80604)
++++ protocols/ace/TMCast/TMCast.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*-
+ // $Id$
+
+-project : acelib, install, exceptions, threads {
++project : acelib, ace_output, install, exceptions, threads {
+   avoids = ace_for_tao
+   sharedname    = ACE_TMCast
+   dynamicflags += TMCAST_BUILD_DLL
+Index: protocols/ace/HTBP/HTBP.mpc
+===================================================================
+--- protocols/ace/HTBP/HTBP.mpc	(revision 80604)
++++ protocols/ace/HTBP/HTBP.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*-
+ // $Id$
+
+-project(HTBP) : acelib, install {
++project(HTBP) : acelib, ace_output, install {
+   avoids      += ace_for_tao
+   sharedname   = ACE_HTBP
+   dynamicflags = HTBP_BUILD_DLL
+Index: ace/ace_xtreactor.mpc
+===================================================================
+--- ace/ace_xtreactor.mpc	(revision 80604)
++++ ace/ace_xtreactor.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*- now wouldn't this be cool...
+ // $Id$
+
+-project(ACE_XtReactor) : acedefaults, install, acelib, ace_xt {
++project(ACE_XtReactor) : acedefaults, install, acelib, ace_output, ace_xt {
+
+   sharedname   = ACE_XtReactor
+   dynamicflags = ACE_XTREACTOR_BUILD_DLL
+Index: ace/ace_tkreactor.mpc
+===================================================================
+--- ace/ace_tkreactor.mpc	(revision 80604)
++++ ace/ace_tkreactor.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*- now wouldn't this be cool...
+ // $Id$
+
+-project(ACE_TkReactor) : acedefaults, install, acelib, ace_tk {
++project(ACE_TkReactor) : acedefaults, install, acelib, ace_output, ace_tk {
+
+   sharedname   = ACE_TkReactor
+   dynamicflags = ACE_TKREACTOR_BUILD_DLL
+Index: ace/ace_flreactor.mpc
+===================================================================
+--- ace/ace_flreactor.mpc	(revision 80604)
++++ ace/ace_flreactor.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*- now wouldn't this be cool...
+ // $Id$
+
+-project(ACE_FlReactor) : acedefaults, install, acelib, ace_fl{
++project(ACE_FlReactor) : acedefaults, install, acelib, ace_output, ace_fl{
+
+   sharedname   = ACE_FlReactor
+   dynamicflags = ACE_FLREACTOR_BUILD_DLL
+Index: ace/SSL/ssl.mpc
+===================================================================
+--- ace/SSL/ssl.mpc	(revision 80604)
++++ ace/SSL/ssl.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*-
+ // $Id$
+
+-project(SSL) : acelib, install, ace_openssl {
++project(SSL) : acelib, ace_output, install, ace_openssl {
+   avoids      += ace_for_tao
+   requires    += ssl
+   sharedname   = ACE_SSL
+Index: ace/SSL/ssl_for_tao.mpc
+===================================================================
+--- ace/SSL/ssl_for_tao.mpc	(revision 80604)
++++ ace/SSL/ssl_for_tao.mpc	(working copy)
+@@ -2,7 +2,7 @@
+ //
+ // $Id$
+
+-project(SSL_FOR_TAO) : acelib, install, ace_openssl {
++project(SSL_FOR_TAO) : acelib, ace_output, install, ace_openssl {
+   requires    += ssl ace_for_tao
+   sharedname   = ACE_SSL_FOR_TAO
+   dynamicflags = ACE_SSL_BUILD_DLL
+Index: ace/ace_qtreactor.mpc
+===================================================================
+--- ace/ace_qtreactor.mpc	(revision 80604)
++++ ace/ace_qtreactor.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*- now wouldn't this be cool...
+ // $Id$
+
+-project(ACE_QtReactor) : acedefaults, install, acelib, ace_qt {
++project(ACE_QtReactor) : acedefaults, install, acelib, ace_output, ace_qt {
+
+   sharedname   = ACE_QtReactor
+   dynamicflags = ACE_QTREACTOR_BUILD_DLL
+Index: ace/QoS/qos.mpc
+===================================================================
+--- ace/QoS/qos.mpc	(revision 80604)
++++ ace/QoS/qos.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*-
+ // $Id$
+
+-project(QoS) : acelib, install {
++project(QoS) : acelib, ace_output, install {
+   requires    += qos
+   sharedname   = ACE_QoS
+   dynamicflags = ACE_QoS_BUILD_DLL
+Index: ace/ace_foxreactor.mpc
+===================================================================
+--- ace/ace_foxreactor.mpc	(revision 80604)
++++ ace/ace_foxreactor.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*- now wouldn't this be cool...
+ // $Id$
+
+-project(ACE_FoxReactor) : acedefaults, install, acelib, ace_fox {
++project(ACE_FoxReactor) : acedefaults, install, acelib, ace_output, ace_fox {
+
+   sharedname   = ACE_FoxReactor
+   dynamicflags = ACE_FOXREACTOR_BUILD_DLL
+Index: Kokyu/Kokyu.mpc
+===================================================================
+--- Kokyu/Kokyu.mpc	(revision 80604)
++++ Kokyu/Kokyu.mpc	(working copy)
+@@ -1,16 +1,16 @@
+ //  -*- MPC -*- now wouldn't this be cool...
+ // $Id$
+
+-project(Kokyu) : acelib, install {
++project(Kokyu) : acelib, ace_output, install {
+   sharedname  = Kokyu
+   dynamicflags = KOKYU_BUILD_DLL
+
+   Source_Files {
+-    Dispatcher_Impl.cpp
+-    Kokyu.cpp
+-    Default_Dispatcher_Impl.cpp
+-    Dispatcher_Task.cpp
+-    Kokyu_defs.cpp
++    Dispatcher_Impl.cpp
++    Kokyu.cpp
++    Default_Dispatcher_Impl.cpp
++    Dispatcher_Task.cpp
++    Kokyu_defs.cpp
+   }
+
+   Template_Files {
+@@ -18,10 +18,10 @@
+     DSRT_Direct_Dispatcher_Impl_T.cpp
+     DSRT_Dispatcher_Impl_T.cpp
+     DSRT_Dispatch_Item_T.cpp
+-    DSRT_Sched_Queue_T.cpp
++    DSRT_Sched_Queue_T.cpp
+   }
+
+   Pkgconfig_Files {
+-    Kokyu.pc.in
+-  }
++    Kokyu.pc.in
++  }
+ }
+Index: tests/SSL/acetest.mpb
+===================================================================
+--- tests/SSL/acetest.mpb	(revision 80604)
++++ tests/SSL/acetest.mpb	(working copy)
+@@ -5,6 +5,7 @@
+
+   after += Test_Output
+   libs  += Test_Output
++  libpaths += ..
+
+   Source_Files {
+     ../Main.cpp
+Index: tests/run_test.pl
+===================================================================
+--- tests/run_test.pl	(revision 80604)
++++ tests/run_test.pl	(working copy)
+@@ -27,6 +27,8 @@
+
+ $config_list = new PerlACE::ConfigList;
+
++PerlACE::add_lib_path("$ENV{ACE_ROOT}/tests");
++
+ ################################################################################
+
+ sub check_for_more_configs ()
+Index: apps/Gateway/Gateway/gateway.mpc
+===================================================================
+--- apps/Gateway/Gateway/gateway.mpc	(revision 80604)
++++ apps/Gateway/Gateway/gateway.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(Gateway) : acelib {
++project(Gateway) : acelib, ace_output {
+   sharedname = Gateway
+   Source_Files {
+     Concrete_Connection_Handlers.cpp
+Index: apps/Gateway/Peer/peer.mpc
+===================================================================
+--- apps/Gateway/Peer/peer.mpc	(revision 80604)
++++ apps/Gateway/Peer/peer.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(Gateway_Peer) : acelib {
++project(Gateway_Peer) :  ace_output, acelib {
+   sharedname = Gateway_Peer
+   Source_Files {
+     Options.cpp
+Index: apps/JAWS/server/server.mpc
+===================================================================
+--- apps/JAWS/server/server.mpc	(revision 80604)
++++ apps/JAWS/server/server.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(JAWS) : acelib {
++project(JAWS) : ace_output, acelib {
+   sharedname   = JAWS
+   dynamicflags = ACE_BUILD_SVC_DLL
+   requires    += ace_filecache
+Index: apps/JAWS2/HTTPU/httpu.mpc
+===================================================================
+--- apps/JAWS2/HTTPU/httpu.mpc	(revision 80604)
++++ apps/JAWS2/HTTPU/httpu.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(HTTPU) : acelib {
++project(HTTPU) : ace_output, acelib {
+     sharedname = HTTPU
+     dynamicflags += HTTPU_BUILD_DLL
+     avoids += uses_wchar ace_for_tao
+Index: apps/JAWS2/JAWS/jaws2.mpc
+===================================================================
+--- apps/JAWS2/JAWS/jaws2.mpc	(revision 80604)
++++ apps/JAWS2/JAWS/jaws2.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(JAWS2) : acelib {
++project(JAWS2) : ace_output, acelib {
+     sharedname = JAWS2
+     dynamicflags += JAWS_BUILD_DLL
+     avoids += uses_wchar ace_for_tao
+Index: apps/JAWS3/jaws3/jaws3.mpc
+===================================================================
+--- apps/JAWS3/jaws3/jaws3.mpc	(revision 80604)
++++ apps/JAWS3/jaws3/jaws3.mpc	(working copy)
+@@ -1,12 +1,12 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(JAWS3) : acelib {
++project(JAWS3) : ace_output, acelib {
+     sharedname = JAWS3
+     dynamicflags = JAWS_BUILD_DLL
+     avoids += uses_wchar
+     avoids += ace_for_tao
+-
++
+     specific(automake) {
+       includes += $(srcdir)/..
+     } else {
+Index: bin/PerlACE/Run_Test.pm
+===================================================================
+--- bin/PerlACE/Run_Test.pm	(revision 80604)
++++ bin/PerlACE/Run_Test.pm	(working copy)
+@@ -233,6 +233,9 @@
+   }
+ }
+
++# Add PWD to the load library path
++add_lib_path ('.');
++
+ $sleeptime = 5;
+
+ 1;
+Index: bin/MakeProjectCreator/config/ace_output.mpb
+===================================================================
+--- bin/MakeProjectCreator/config/ace_output.mpb	(revision 0)
++++ bin/MakeProjectCreator/config/ace_output.mpb	(revision 0)
+@@ -0,0 +1,12 @@
++// -*- MPC -*-
++// $Id$
++
++project {
++  libout = $(ACE_ROOT)/lib
++
++  specific(automake) {
++    libout -= $(ACE_ROOT)/lib
++    libout += $(top_builddir)/lib
++  }
++}
++
+
+Property changes on: bin/MakeProjectCreator/config/ace_output.mpb
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: bin/MakeProjectCreator/config/acelib.mpb
+===================================================================
+--- bin/MakeProjectCreator/config/acelib.mpb	(revision 80604)
++++ bin/MakeProjectCreator/config/acelib.mpb	(working copy)
+@@ -2,10 +2,5 @@
+ // $Id$
+
+ project: acedefaults, acenosubsets, ace_for_tao, versioned_namespace, pkgconfig {
+-  libout    = $(ACE_ROOT)/lib
+
+-  specific(automake) {
+-    libout -= $(ACE_ROOT)/lib
+-    libout += $(top_builddir)/lib
+-  }
+ }
+Index: bin/tao_orb_tests.lst
+===================================================================
+--- bin/tao_orb_tests.lst	(revision 80604)
++++ bin/tao_orb_tests.lst	(working copy)
+@@ -48,20 +48,27 @@
+ TAO/tests/Leader_Followers/run_test_mt.pl: !ST !ACE_FOR_TAO
+ TAO/tests/Multiple_Inheritance/run_test.pl: !CORBA_E_MICRO
+ TAO/tests/Bug_933_Regression/run_test.pl:
+-TAO/tests/Bug_1269_Regression/run_test.pl: !Win32 !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO
++TAO/tests/Bug_1269_Regression/run_test.pl: !Win32 !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !QUICK
++TAO/tests/Bug_1269_Regression/run_test.pl -quick : QUICK
+ TAO/tests/Bug_1495_Regression/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !DISABLE_INTERCEPTORS
+ TAO/tests/Bug_1535_Regression/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO
+ TAO/tests/Bug_1568_Regression/run_test.pl: !NO_MESSAGING !CORBA_E_MICRO
+ TAO/tests/Bug_1670_Regression/run_test.pl: !NO_MESSAGING !CORBA_E_MICRO
+-TAO/tests/Bug_1270_Regression/run_test.pl: !Win32 !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO
+-TAO/tests/Bug_1020_Basic_Regression/run_test.pl: !Win32 !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !VxWorks
+-TAO/tests/Bug_1020_Regression/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !Win32
++TAO/tests/Bug_1270_Regression/run_test.pl: !Win32 !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !QUICK
++TAO/tests/Bug_1270_Regression/run_test.pl -quick : QUICK
++TAO/tests/Bug_1020_Basic_Regression/run_test.pl: !Win32 !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !VxWorks !QUICK
++TAO/tests/Bug_1020_Basic_Regression/run_test.pl -quick : QUICK
++TAO/tests/Bug_1020_Regression/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !Win32 !QUICK
++TAO/tests/Bug_1020_Regression/run_test.pl -quick : QUICK
+ TAO/tests/Bug_1254_Regression/run_test.pl:
+ TAO/tests/Bug_1330_Regression/run_test.pl:
+-TAO/tests/Bug_1361_Regression/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !Win32 !IRIX
++TAO/tests/Bug_1361_Regression/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !Win32 !IRIX !QUICK
++TAO/tests/Bug_1361_Regression/run_test.pl -quick : QUICK
+ TAO/tests/Bug_1476_Test/run_test.pl: !NO_MESSAGING !CORBA_E_MICRO
+-TAO/tests/Bug_1482_Regression/run_test.pl: !VxWorks !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !VxWorks_RTP
+-TAO/tests/Bug_1551_Regression/run_test.pl: !VxWorks !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !IRIX !OpenVMS_IA64Crash
++TAO/tests/Bug_1482_Regression/run_test.pl: !VxWorks !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !VxWorks_RTP !QUICK
++TAO/tests/Bug_1482_Regression/run_test.pl -quick : QUICK
++TAO/tests/Bug_1551_Regression/run_test.pl: !VxWorks !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !IRIX !OpenVMS_IA64Crash !QUICK
++TAO/tests/Bug_1551_Regression/run_test.pl -quick: QUICK
+ TAO/tests/Bug_1676_Regression/run_test.pl:
+ TAO/tests/Bug_2084_Regression/run_test.pl: !ST
+ TAO/tests/Bug_2134_Regression/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO
+@@ -167,7 +174,8 @@
+ TAO/tests/Smart_Proxies/Policy/run_test.pl:
+ TAO/tests/Smart_Proxies/run_test.pl:
+ TAO/tests/Smart_Proxies/dtor/run_test.pl:
+-TAO/tests/Stack_Recursion/run_test.pl: !ST !DISABLE_ToFix_LynxOS_PPC
++TAO/tests/Stack_Recursion/run_test.pl: !ST !DISABLE_ToFix_LynxOS_PPC !QUICK
++TAO/tests/Stack_Recursion/run_test.pl -quick : QUICK
+ TAO/tests/Faults/run_test.pl: !VxWorks !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST !OpenVMS_IA64Crash
+ TAO/tests/CallbackTest/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO
+ TAO/tests/CallbackTest/run_test_ipv6.pl: IPV6 !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO
+@@ -175,7 +183,8 @@
+ TAO/tests/Crashed_Callback/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !OpenVMS_IA64Crash
+ # Disabled Crash On Write on Win32, see bugzilla 959 why
+ TAO/tests/Crash_On_Write/run_test.pl: !VxWorks !ST !Win32
+-TAO/tests/Nested_Upcall_Crash/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !OpenVMS_IA64Crash
++TAO/tests/Nested_Upcall_Crash/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !OpenVMS_IA64Crash !QUICK
++TAO/tests/Nested_Upcall_Crash/run_test.pl -quick: QUICK
+ TAO/tests/NestedUpcall/Simple/run_test.pl: !ST
+ TAO/tests/NestedUpcall/MT_Client_Test/run_test.pl: !ST !CORBA_E_MICRO
+ TAO/tests/NestedUpcall/Triangle_Test/run_test.pl: !CORBA_E_MICRO
+@@ -333,7 +342,8 @@
+ TAO/tests/CSD_Strategy_Tests/TP_Test_Static/run_test.pl: !ST !CORBA_E_MICRO !LynxOS
+ TAO/tests/CSD_Collocation/run_test.pl: !ST !CORBA_E_COMPACT !CORBA_E_MICRO !MINIMUM !LynxOS
+ TAO/tests/Permanent_Forward/run_test.pl:
+-TAO/tests/Parallel_Connect_Strategy/run_test.pl:
++TAO/tests/Parallel_Connect_Strategy/run_test.pl: !QUICK
++TAO/tests/Parallel_Connect_Strategy/run_test.pl -quick : QUICK
+ TAO/tests/DII_Collocation_Tests/oneway/run_test.pl: !ST !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO
+ TAO/tests/DII_Collocation_Tests/twoway/run_test.pl: !ST !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO
+ TAO/tests/Compression/run_test.pl: ZLIB
+Index: ACEXML/apps/svcconf/svcconf.mpc
+===================================================================
+--- ACEXML/apps/svcconf/svcconf.mpc	(revision 80604)
++++ ACEXML/apps/svcconf/svcconf.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ //  -*- MPC -*-
+ // $Id$
+
+-project(ACEXML_XML_Svc_Conf_Parser): acelib, acexml, install {
++project(ACEXML_XML_Svc_Conf_Parser): ace_output, acelib, acexml, install {
+   sharedname = ACEXML_XML_Svc_Conf_Parser
+ }
+Index: ACEXML/common/common.mpc
+===================================================================
+--- ACEXML/common/common.mpc	(revision 80604)
++++ ACEXML/common/common.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*-
+ // $Id$
+
+-project(ACEXML): acelib, codecs, install, zzip, zlib {
++project(ACEXML): acelib, ace_output, codecs, install, zzip, zlib {
+   avoids       += ace_for_tao
+   sharedname    = ACEXML
+   dynamicflags += ACEXML_BUILD_DLL
+Index: ACEXML/parser/parser/parser.mpc
+===================================================================
+--- ACEXML/parser/parser/parser.mpc	(revision 80604)
++++ ACEXML/parser/parser/parser.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*-
+ // $Id$
+
+-project(ACEXML_Parser): acelib, install {
++project(ACEXML_Parser): acelib, ace_output, install {
+   avoids       += ace_for_tao
+   sharedname    = ACEXML_Parser
+   after        += ACEXML
+Index: websvcs/lib/lib.mpc
+===================================================================
+--- websvcs/lib/lib.mpc	(revision 80604)
++++ websvcs/lib/lib.mpc	(working copy)
+@@ -1,11 +1,11 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(websvcs): acelib {
++project(websvcs): ace_output, acelib {
+   sharedname    = websvcs
+   dynamicflags += ACE_WEBSVCS_BUILD_DLL
+   Source_Files {
+     URL_Addr.cpp
+   }
+-
++
+ }
+Index: netsvcs/lib/lib.mpc
+===================================================================
+--- netsvcs/lib/lib.mpc	(revision 80604)
++++ netsvcs/lib/lib.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(netsvcs): acelib {
++project(netsvcs): ace_output, acelib {
+   avoids       += ace_for_tao
+   sharedname    = netsvcs
+   dynamicflags += ACE_NETSVCS_BUILD_DLL
+Index: ASNMP/asnmp/asnmp.mpc
+===================================================================
+--- ASNMP/asnmp/asnmp.mpc	(revision 80604)
++++ ASNMP/asnmp/asnmp.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ // $Id$
+
+-project (asnmp_lib) : acelib {
++project (asnmp_lib) : ace_output, acelib {
+   sharedname   = asnmp
+   dynamicflags = ASNMP_BUILD_DLL
+   includes += $(ACE_ROOT)/ASNMP
