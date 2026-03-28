@@ -1,0 +1,395 @@
+Index: Service_Object.cpp
+===================================================================
+--- Service_Object.cpp	(.../trunk/ACE/ace)	(revision 84016)
++++ Service_Object.cpp	(.../branches/bugzilla_fix_3334/ace)	(revision 84016)
+@@ -119,6 +119,40 @@
+ }
+ 
+ int
++ACE_Service_Type::fini_delete (void)
++{
++  if (ACE::debug ())
++    ACE_DEBUG ((LM_DEBUG,
++                ACE_TEXT ("ACE (%P|%t) ST::fini_delete - destroying name=%s, dll=%s\n"),
++                this->name_,
++                this->dll_.dll_name_));
++
++  if (this->fini_already_called_)
++    return 0;
++
++  this->fini_already_called_ = true;
++
++  if (this->type_ == 0)
++    {
++      // Returning 1 currently only makes sense for dummy instances, used
++      // to "reserve" a spot (kind of like forward-declarations) for a
++      // dynamic service. This is necessary to help enforce the correct
++      // finalization order, when such service also has any (dependent)
++      // static services
++
++      return 1; // No implementation was found.
++    }
++
++  int ret = this->type_->fini_delete ();
++
++  // Ensure that closing the DLL is done after type_->fini() as it may
++  // require access to the code for the service object destructor,
++  // which resides in the DLL
++  return (ret | this->dll_.close());
++
++}
++
++int
+ ACE_Service_Type::suspend (void) const
+ {
+   ACE_TRACE ("ACE_Service_Type::suspend");
+Index: Service_Types.h
+===================================================================
+--- Service_Types.h	(.../trunk/ACE/ace)	(revision 84016)
++++ Service_Types.h	(.../branches/bugzilla_fix_3334/ace)	(revision 84016)
+@@ -43,7 +43,8 @@
+   ACE_Service_Type_Impl (void *object,
+                          const ACE_TCHAR *s_name,
+                          u_int flags = 0,
+-                         ACE_Service_Object_Exterminator gobbler = 0);
++                         ACE_Service_Object_Exterminator gobbler = 0,
++                         int stype = ACE_Service_Type::INVALID_TYPE);
+   virtual ~ACE_Service_Type_Impl (void);
+ 
+   // = Pure virtual interface (must be defined by the subclass).
+@@ -51,6 +52,7 @@
+   virtual int resume (void) const = 0;
+   virtual int init (int argc, ACE_TCHAR *argv[]) const = 0;
+   virtual int fini (void) const;
++  virtual int fini_delete (void) const;
+   virtual int info (ACE_TCHAR **str, size_t len) const = 0;
+ 
+   /// The pointer to the service.
+@@ -65,6 +67,10 @@
+   /// Dump the state of an object.
+   void dump (void) const;
+ 
++  /// Getter and setter for service_type_.
++  int service_type(void) const;
++  void service_type(int stype); 
++
+   /// Declare the dynamic allocation hooks.
+   ACE_ALLOC_HOOK_DECLARE;
+ 
+@@ -81,6 +87,11 @@
+ 
+   /// Flags that control serivce behavior (particularly deletion).
+   u_int flags_;
++
++  /// Stores the enum that represents the concrete type of this ACE_Service_Type_Impl.
++  /// Possible values are ACE_Service_Type::SERVICE_OBJECT, ACE_Service_Type::MODULE, and
++  /// ACE_Service_Type::STREAM.
++  int service_type_;
+ };
+ 
+ /**
+@@ -96,7 +107,8 @@
+   ACE_Service_Object_Type (void *so,
+                            const ACE_TCHAR *name,
+                            u_int flags = 0,
+-                           ACE_Service_Object_Exterminator gobbler = 0);
++                           ACE_Service_Object_Exterminator gobbler = 0,
++			   int stype = ACE_Service_Type::SERVICE_OBJECT);
+ 
+   ~ACE_Service_Object_Type (void);
+ 
+@@ -124,7 +136,8 @@
+   // = Initialization method.
+   ACE_Module_Type (void *m, // Really an ACE_Module *.
+                    const ACE_TCHAR *identifier,
+-                   u_int flags = 0);
++                   u_int flags = 0,
++		   int stype = ACE_Service_Type::MODULE);
+ 
+   ~ACE_Module_Type (void);
+ 
+@@ -164,8 +177,10 @@
+   // = Initialization method.
+   ACE_Stream_Type (void *s, // Really an ACE_Stream *.
+                    const ACE_TCHAR *identifier,
+-                   u_int flags = 0);
++                   u_int flags = 0,
++		   int stype = ACE_Service_Type::STREAM);
+ 
++
+   ~ACE_Stream_Type (void);
+ 
+   // = Implement the hooks for <ACE_Streams>.
+Index: Service_Repository.cpp
+===================================================================
+--- Service_Repository.cpp	(.../trunk/ACE/ace)	(revision 84016)
++++ Service_Repository.cpp	(.../branches/bugzilla_fix_3334/ace)	(revision 84016)
+@@ -131,8 +131,11 @@
+                 ACE_TEXT ("ACE_Service_Repository")));
+ }
+ 
++
+ // Finalize (call <fini> and possibly delete) all the services.
+-
++// ACE_Stream_Types instances are closed first to get ACE_Module cleanup to occur first.
++// Then, ACE_Service_Type and ACE_Module_Type instances are finalized.
++// <fini_delete> is called on ACE_Module_Type(s) only to perform cleanup.
+ int
+ ACE_Service_Repository::fini (void)
+ {
+@@ -143,47 +146,96 @@
+     return 0;
+ 
+   int retval = 0;
+-
+-  // Do not be tempted to use the prefix decrement operator.  Use
+-  // postfix decrement operator since the index is unsigned and may
+-  // wrap around the 0
+-  for (size_t i = this->current_size_; i-- != 0; )
++  
++  bool removeStreams = true;
++  for (int i = 0; i < 2; i++)
+     {
+-      // <fini> the services in reverse order.
+-      ACE_Service_Type *s =
+-        const_cast<ACE_Service_Type *> (this->service_vector_[i]);
+-
+-#ifndef ACE_NLOGGING
+-      if (ACE::debug ())
++      if (i == 1)
+         {
++          removeStreams = false;
++        }
++      // Do not be tempted to use the prefix decrement operator.  Use
++      // postfix decrement operator since the index is unsigned and may
++      // wrap around the 0
++      for (size_t i = this->current_size_; i-- != 0;) 
++        {
++          // <fini> the services in reverse order.
++          ACE_Service_Type *s =
++            const_cast<ACE_Service_Type *> (this->service_vector_[i]);
++      
+           if (s != 0)
+-            ACE_DEBUG ((LM_DEBUG,
+-                        ACE_TEXT ("ACE (%P|%t) SR::fini, repo=%@ [%d] (%d), ")
+-                        ACE_TEXT ("name=%s, type=%@, object=%@, active=%d\n"),
+-                        this,
+-                        i,
+-                        this->total_size_,
+-                        s->name(),
+-                        s->type (),
+-                        (s->type () != 0) ? s->type ()->object () : 0,
+-                        s->active ()));
+-          else
+-            ACE_DEBUG ((LM_DEBUG,
+-                        ACE_TEXT ("ACE (%P|%t) SR::fini, repo=%@ [%d] (%d) -> 0\n"),
+-                        this,
+-                        i,
+-                        this->total_size_));
++            {
++              if (s->type()->service_type() == ACE_Service_Type::STREAM && removeStreams)
++                {
++#ifndef ACE_NLOGGING
++                  if (ACE::debug()) 
++                    {
++                      ACE_DEBUG((LM_DEBUG,
++                                 ACE_TEXT("ACE (%P|%t) SR::fini, repo=%@ [%d] (%d), ")
++                                 ACE_TEXT("name=%s, type=%@, object=%@, active=%d\n"),
++                                 this,
++                                 i,
++                                 this->total_size_,
++                                 s->name(),
++                                 s->type(),
++                                 (s->type() != 0) ? s->type()->object() : 0,
++                                 s->active()));
++                    }
++#endif
++          
++                  retval += s->fini();
++                }
++        
++              if (s->type()->service_type() != ACE_Service_Type::STREAM && !removeStreams) 
++                {
++                  if (s->type()->service_type() == ACE_Service_Type::MODULE) 
++                    {
++#ifndef ACE_NLOGGING
++                      if (ACE::debug()) 
++                        {
++                          ACE_DEBUG((LM_DEBUG,
++                                     ACE_TEXT("ACE (%P|%t) SR::fini_delete, repo=%@ [%d] (%d), ")
++                                     ACE_TEXT("name=%s, type=%@, object=%@, active=%d\n"),
++                                     this,
++                                     i,
++                                     this->total_size_,
++                                     s->name(),
++                                     s->type(),
++                                     (s->type() != 0) ? s->type()->object() : 0,
++                                     s->active()));
++                        }
++#endif
++                      retval += s->fini_delete();
++                    } 
++                  else 
++                    {
++#ifndef ACE_NLOGGING
++                      if (ACE::debug()) 
++                        {
++                          ACE_DEBUG((LM_DEBUG,
++                                     ACE_TEXT("ACE (%P|%t) SR::fini, repo=%@ [%d] (%d), ")
++                                     ACE_TEXT("name=%s, type=%@, object=%@, active=%d\n"),
++                                     this,
++                                     i,
++                                     this->total_size_,
++                                     s->name(),
++                                     s->type(),
++                                     (s->type() != 0) ? s->type()->object() : 0,
++                                     s->active()));
++                        }
++#endif
++                      retval += s->fini();
++                    }
++                }
++        
++            }
+         }
+-#endif
+-
+-      // Collect any errors.
+-      if (s != 0)
+-        retval += s->fini ();
+     }
+-
++  
+   return (retval == 0) ? 0 : -1;
+ }
+ 
++
+ // Close down all the services.
+ 
+ int
+Index: Service_Object.h
+===================================================================
+--- Service_Object.h	(.../trunk/ACE/ace)	(revision 84016)
++++ Service_Object.h	(.../branches/bugzilla_fix_3334/ace)	(revision 84016)
+@@ -119,6 +119,10 @@
+   /// Calls <fini> on <type_>
+   int fini (void);
+ 
++  /// Calls <fini_delete> on <type_>. Only used on ACE_Module_Type instances to cleanup
++  /// during shutdown.
++  int fini_delete (void);
++
+   /// Check if the service has been fini'ed.
+   bool fini_called (void) const;
+ 
+Index: Service_Types.cpp
+===================================================================
+--- Service_Types.cpp	(.../trunk/ACE/ace)	(revision 84016)
++++ Service_Types.cpp	(.../branches/bugzilla_fix_3334/ace)	(revision 84016)
+@@ -35,11 +35,13 @@
+ ACE_Service_Type_Impl::ACE_Service_Type_Impl (void *so,
+                                               const ACE_TCHAR *s_name,
+                                               u_int f,
+-                                              ACE_Service_Object_Exterminator gobbler)
++                                              ACE_Service_Object_Exterminator gobbler,
++                                              int stype)
+   : name_ (0),
+     obj_ (so),
+     gobbler_ (gobbler),
+-    flags_ (f)
++    flags_ (f),
++    service_type_(stype)
+ {
+   ACE_TRACE ("ACE_Service_Type_Impl::ACE_Service_Type_Impl");
+   this->name (s_name);
+@@ -79,11 +81,19 @@
+   return 0;
+ }
+ 
++int
++ACE_Service_Type_Impl::fini_delete (void) const
++{
++  ACE_TRACE ("ACE_Service_Type_Impl::fini_delete");
++  return ACE_Service_Type_Impl::fini ();
++}
++
+ ACE_Service_Object_Type::ACE_Service_Object_Type (void *so,
+                                                   const ACE_TCHAR *s_name,
+                                                   u_int f,
+-                                                  ACE_Service_Object_Exterminator gobbler)
+-  : ACE_Service_Type_Impl (so, s_name, f, gobbler)
++                                                  ACE_Service_Object_Exterminator gobbler,
++                                                  int stype)
++  : ACE_Service_Type_Impl (so, s_name, f, gobbler, stype)
+   , initialized_ (-1)
+ {
+   ACE_TRACE ("ACE_Service_Object_Type::ACE_Service_Object_Type");
+@@ -164,8 +174,9 @@
+ 
+ ACE_Module_Type::ACE_Module_Type (void *m,
+                                   const ACE_TCHAR *m_name,
+-                                  u_int f)
+-  : ACE_Service_Type_Impl (m, m_name, f)
++                                  u_int f,
++                                  int stype)
++  : ACE_Service_Type_Impl (m, m_name, f, 0, stype)
+ {
+   ACE_TRACE ("ACE_Module_Type::ACE_Module_Type");
+ }
+@@ -230,21 +241,8 @@
+ ACE_Module_Type::fini (void) const
+ {
+   ACE_TRACE ("ACE_Module_Type::fini");
+-
+-  void *obj = this->object ();
+-  MT_Module *mod = (MT_Module *) obj;
+-  MT_Task *reader = mod->reader ();
+-  MT_Task *writer = mod->writer ();
+-
+-  if (reader != 0)
+-    reader->fini ();
+-
+-  if (writer != 0)
+-    writer->fini ();
+-
+-  // Close the module and delete the memory.
+-  mod->close (MT_Module::M_DELETE);
+-  return ACE_Service_Type_Impl::fini ();
++  // ACE_Module_Type(s) get deleted by fini_delete Bugzilla #3334
++  return 0;
+ }
+ 
+ int
+@@ -324,8 +322,9 @@
+ 
+ ACE_Stream_Type::ACE_Stream_Type (void *s,
+                                   const ACE_TCHAR *s_name,
+-                                  u_int f)
+-  : ACE_Service_Type_Impl (s, s_name, f),
++                                  u_int f,
++                                  int stype)
++  : ACE_Service_Type_Impl (s, s_name, f, 0, stype),
+     head_ (0)
+ {
+   ACE_TRACE ("ACE_Stream_Type::ACE_Stream_Type");
+Index: Service_Types.inl
+===================================================================
+--- Service_Types.inl	(.../trunk/ACE/ace)	(revision 84016)
++++ Service_Types.inl	(.../branches/bugzilla_fix_3334/ace)	(revision 84016)
+@@ -29,4 +29,16 @@
+   this->name_ = ACE::strnew (n);
+ }
+ 
++ACE_INLINE int
++ACE_Service_Type_Impl::service_type(void) const
++{
++  return service_type_;
++}
++ 
++ACE_INLINE void
++ACE_Service_Type_Impl::service_type(int stype)
++{
++  service_type_ = stype;
++}
++
+ ACE_END_VERSIONED_NAMESPACE_DECL
