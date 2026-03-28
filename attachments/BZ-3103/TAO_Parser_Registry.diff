@@ -1,0 +1,26 @@
+Index: tao/Parser_Registry.cpp
+===================================================================
+--- tao/Parser_Registry.cpp	(revision 79790)
++++ tao/Parser_Registry.cpp	(working copy)
+@@ -51,9 +51,10 @@
+         ACE_Dynamic_Service<TAO_IOR_Parser>::instance (orb_core->configuration (),
+                                                        names [i]);
+ 
+-      if (this->parsers_[i] == 0)
++      if (TAO_debug_level >= 1 && this->parsers_[i] == 0)
+         {
+-          return -1;
++          ACE_DEBUG ((LM_DEBUG, "TAO (%P|%t) Failed to find Service Object "
++                      "for %s.\n", names[i]));
+         }
+     }
+ 
+@@ -65,7 +66,7 @@
+ {
+   for (Parser_Iterator i = this->begin (); i != this->end (); ++i)
+     {
+-      if ((*i)->match_prefix (ior_string))
++      if (*i && (*i)->match_prefix (ior_string))
+         {
+           return *i;
+         }
