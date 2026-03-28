@@ -1,0 +1,335 @@
+Index: Event/Basic/BCast.h
+===================================================================
+--- Event/Basic/BCast.h	(revision 78432)
++++ Event/Basic/BCast.h	(working copy)
+@@ -59,25 +59,4 @@
+   u_short bcast_port_;
+ };
+ 
+-// ****************************************************************
+-
+-/**
+- * @class Simple_Address_Server
+- *
+- * A fixed address server
+- */
+-class Simple_Address_Server : public POA_RtecUDPAdmin::AddrServer
+-{
+-public:
+-  /// constructo
+-  Simple_Address_Server (const ACE_INET_Addr& address);
+-
+-  virtual void get_addr (const RtecEventComm::EventHeader& header,
+-                         RtecUDPAdmin::UDP_Addr& address);
+-
+-private:
+-  /// The UDP addres...
+-  RtecUDPAdmin::UDP_Addr address_;
+-};
+-
+ #endif /* EC_BCAST_H */
+Index: Event/Basic/BCast.cpp
+===================================================================
+--- Event/Basic/BCast.cpp	(revision 78432)
++++ Event/Basic/BCast.cpp	(working copy)
+@@ -133,19 +133,3 @@
+ {
+   this->EC_Driver::dump_results ();
+ }
+-
+-// ****************************************************************
+-
+-Simple_Address_Server::
+-Simple_Address_Server (const ACE_INET_Addr& address)
+-{
+-  this->address_.ipaddr = address.get_ip_address ();
+-  this->address_.port   = address.get_port_number ();
+-}
+-
+-void
+-Simple_Address_Server::get_addr (const RtecEventComm::EventHeader&,
+-                                 RtecUDPAdmin::UDP_Addr& address)
+-{
+-  address = this->address_;
+-}
+Index: Event/Mcast/RTEC_MCast_Federated/EchoEventConsumer_i.cpp
+===================================================================
+--- Event/Mcast/RTEC_MCast_Federated/EchoEventConsumer_i.cpp	(revision 78432)
++++ Event/Mcast/RTEC_MCast_Federated/EchoEventConsumer_i.cpp	(working copy)
+@@ -27,7 +27,7 @@
+     // Extract event data from the any.
+     const char* eventData;
+     std::ostringstream out;
+-    out << "Received event,"
++    out << "[" << getpid() << "] Received event,"
+          << "  type: "   << events[i].header.type
+          << "  source: " << events[i].header.source;
+     if (events[i].data.any_value >>= eventData) {
+Index: Event/Mcast/RTEC_MCast_Federated/SimpleAddressServer.cpp
+===================================================================
+--- Event/Mcast/RTEC_MCast_Federated/SimpleAddressServer.cpp	(revision 78432)
++++ Event/Mcast/RTEC_MCast_Federated/SimpleAddressServer.cpp	(working copy)
+@@ -3,16 +3,38 @@
+ // SimpleAddressServer.cpp
+ 
+ #include "SimpleAddressServer.h"
+-#include <ace/INET_Addr.h>
++#include "tao/SystemException.h"
+ 
+-SimpleAddressServer::SimpleAddressServer (const ACE_INET_Addr& address) {
+-  this->address_.ipaddr = address.get_ip_address ();
+-  this->address_.port   = address.get_port_number ();
++SimpleAddressServer::SimpleAddressServer (const ACE_INET_Addr& address)
++{
++  this->addr_ = address;
+ }
+ 
+ void
+ SimpleAddressServer::get_addr (const RtecEventComm::EventHeader&,
+-             RtecUDPAdmin::UDP_Addr& address)
+-    throw (CORBA::SystemException) {
+-  address = this->address_;
++                               RtecUDPAdmin::UDP_Addr& address)
++{
++#if defined (ACE_HAS_IPV6)
++  if (this->addr_.get_type() == PF_INET6)
++    throw CORBA::DATA_CONVERSION(0, CORBA::COMPLETED_YES);
++#endif /* ACE_HAS_IPV6 */
++  address.ipaddr = this->addr_.get_ip_address ();
++  address.port   = this->addr_.get_port_number ();
+ }
++
++void
++SimpleAddressServer::get_ip_address (const RtecEventComm::EventHeader& ,
++                                     RtecUDPAdmin::UDP_IP_Address_out addr)
++{
++  ACE_NEW_THROW_EX (addr,
++                    RtecUDPAdmin::UDP_IP_Address
++                    (this->addr_.get_addr_size(),
++                     this->addr_.get_addr_size(),
++                     (unsigned char *)this->addr_.get_addr()),
++                    CORBA::NO_MEMORY
++                    (CORBA::SystemException::_tao_minor_code
++                     (TAO::VMCID,
++                      ENOMEM),
++                     CORBA::COMPLETED_NO)
++                    );
++}
+Index: Event/Mcast/RTEC_MCast_Federated/SimpleAddressServer.h
+===================================================================
+--- Event/Mcast/RTEC_MCast_Federated/SimpleAddressServer.h	(revision 78432)
++++ Event/Mcast/RTEC_MCast_Federated/SimpleAddressServer.h	(working copy)
+@@ -6,20 +6,20 @@
+ #define SIMPLEADDRESSSERVER_H
+ 
+ #include <orbsvcs/RtecUDPAdminS.h>
++#include <ace/INET_Addr.h>
+ 
+-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+-class ACE_INET_Addr;
+-ACE_END_VERSIONED_NAMESPACE_DECL
+-
+ class SimpleAddressServer : public POA_RtecUDPAdmin::AddrServer {
+ public:
+   SimpleAddressServer (const ACE_INET_Addr& address);
+   virtual void get_addr (const RtecEventComm::EventHeader& header,
+-                         RtecUDPAdmin::UDP_Addr& address)
+-    throw (CORBA::SystemException);
++                         RtecUDPAdmin::UDP_Addr& address);
+ 
++  virtual void get_ip_address (const RtecEventComm::EventHeader& header,
++                               RtecUDPAdmin::UDP_IP_Address_out addr6);
++
++
+ private:
+-  RtecUDPAdmin::UDP_Addr address_;
++  ACE_INET_Addr addr_;
+ };
+ 
+ #endif
+Index: Event/Mcast/RTEC_MCast_Federated/run_test.pl
+===================================================================
+--- Event/Mcast/RTEC_MCast_Federated/run_test.pl	(revision 78432)
++++ Event/Mcast/RTEC_MCast_Federated/run_test.pl	(working copy)
+@@ -14,6 +14,7 @@
+   print "  run_test [-h] [-debug]\n\n";
+   print "    -udp          -- Federate using udp\n";
+   print "    -mcast        -- Federate using multicast (the default)\n";
++  print "    -ipv6         -- Use an IPv6 mcast addr for federating\n";
+   print "    -h            -- Prints this information\n";
+   print "    -debug        -- Sets the debug flag for the test\n";
+   exit;
+@@ -21,6 +22,8 @@
+ 
+ my $udp = 0;
+ my $i = 0;
++my $mcast_addr = "224.9.9.2";
++
+ my $flags = "";
+ while ($i <= $#ARGV) {
+   if ($ARGV[$i] eq "-h" || $ARGV[$i] eq "-help" ||
+@@ -32,6 +35,8 @@
+     $udp = 1;
+   } elsif ($ARGV[$i] eq "-mcast") {
+     $udp = 0;
++  } elsif ($ARGV[$i] eq "-ipv6") {
++    $mcast_addr = "FF01::255";
+   } else {
+     print "ERROR: Unknown Option: ".$ARGV[$i]."\n\n";
+     usage ();
+@@ -84,8 +89,11 @@
+ if ($udp) {
+   $args1 .= " -udp -ecname ec1 -port $port1 -listenport $port2 ";
+ } else {
+-  $args1 .= " -ecname ec1 -address 224.9.9.2 -port $mport ";
++  $args1 .= " -ecname ec1 -address $mcast_addr -port $mport ";
+ }
++
++print "starting first supplier with args $args1\n";
++
+ $S1 = new PerlACE::Process("EchoEventSupplier", $args1);
+ $S1->Spawn();
+ 
+@@ -93,8 +101,12 @@
+ if ($udp) {
+   $args2 .= " -udp -ecname ec2 -port $port2 -listenport $port1 ";
+ } else {
+-  $args2 .= " -ecname ec2 -address 224.9.9.2 -port $mport ";
++  $args2 .= " -ecname ec2 -address $mcast_addr -port $mport ";
+ }
++
++print "starting second supplier with args $args2\n";
++
++
+ $S2 = new PerlACE::Process("EchoEventSupplier", $args2);
+ $S2->Spawn();
+ 
+Index: Event/UDP/AddrServer.cpp
+===================================================================
+--- Event/UDP/AddrServer.cpp	(revision 78432)
++++ Event/UDP/AddrServer.cpp	(working copy)
+@@ -1,17 +1,41 @@
+ // $Id$
+ 
+ #include "AddrServer.h"
++#include "tao/SystemException.h"
+ 
+ ACE_RCSID(EC_Examples, AddrServer, "$Id$")
+ 
+-AddrServer::AddrServer (const RtecUDPAdmin::UDP_Addr& addr)
+-  : addr_ (addr)
++AddrServer::AddrServer (const ACE_INET_Addr& addr)
+ {
++  this->addr_ = addr;
+ }
+ 
+ void
+ AddrServer::get_addr (const RtecEventComm::EventHeader&,
+                       RtecUDPAdmin::UDP_Addr_out addr)
+ {
+-  addr = this->addr_;
++#if defined (ACE_HAS_IPV6)
++  if (this->addr_.get_type() == PF_INET6)
++    throw CORBA::DATA_CONVERSION(0, CORBA::COMPLETED_YES);
++#endif /* ACE_HAS_IPV6 */
++  addr.ipaddr = this->addr_.get_ip_address ();
++  addr.port   = this->addr_.get_port_number ();
+ }
++
++
++void
++AddrServer::get_ip_address (const RtecEventComm::EventHeader& ,
++                            RtecUDPAdmin::UDP_IP_Address_out addr)
++{
++  ACE_NEW_THROW_EX (addr,
++                    RtecUDPAdmin::UDP_IP_Address
++                    (this->addr_.get_addr_size(),
++                     this->addr_.get_addr_size(),
++                     (unsigned char *)this->addr_.get_addr()),
++                    CORBA::NO_MEMORY
++                    (CORBA::SystemException::_tao_minor_code
++                     (TAO::VMCID,
++                      ENOMEM),
++                     CORBA::COMPLETED_NO)
++                    );
++}
+Index: Event/UDP/receiver.cpp
+===================================================================
+--- Event/UDP/receiver.cpp	(revision 78432)
++++ Event/UDP/receiver.cpp	(working copy)
+@@ -139,12 +139,8 @@
+       ACE_DEBUG ((LM_DEBUG,
+                   "udp mcast address is: %s\n",
+                   udp_mcast_address));
+-      RtecUDPAdmin::UDP_Addr addr;
+-      addr.ipaddr = udp_addr.get_ip_address ();
+-      addr.port   = udp_addr.get_port_number ();
+-
+       // Now we create and activate the servant
+-      AddrServer as_impl (addr);
++      AddrServer as_impl (udp_addr);
+       RtecUDPAdmin::AddrServer_var address_server =
+         as_impl._this ();
+ 
+@@ -333,4 +329,3 @@
+   // Indicates sucessful parsing of the command line
+   return 0;
+ }
+-
+Index: Event/UDP/AddrServer.h
+===================================================================
+--- Event/UDP/AddrServer.h	(revision 78432)
++++ Event/UDP/AddrServer.h	(working copy)
+@@ -19,6 +19,7 @@
+ #include /**/ "ace/pre.h"
+ 
+ #include "orbsvcs/RtecUDPAdminS.h"
++#include "ace/INET_Addr.h"
+ 
+ class AddrServer : public POA_RtecUDPAdmin::AddrServer
+ {
+@@ -35,15 +36,19 @@
+   //   provided at initialization time.
+   //
+ public:
+-  AddrServer (const RtecUDPAdmin::UDP_Addr& addr);
++  AddrServer (const ACE_INET_Addr& addr);
+   // Constructor
+ 
+   // = The RtecUDPAdmin::AddrServer methods
+   virtual void get_addr (const RtecEventComm::EventHeader& header,
+                          RtecUDPAdmin::UDP_Addr_out addr);
+ 
++  virtual void get_ip_address (const RtecEventComm::EventHeader& header,
++                               RtecUDPAdmin::UDP_IP_Address_out addr6);
++
++
+ private:
+-  RtecUDPAdmin::UDP_Addr addr_;
++  ACE_INET_Addr addr_;
+   // The address
+ };
+ 
+Index: Event/UDP/sender.cpp
+===================================================================
+--- Event/UDP/sender.cpp	(revision 78432)
++++ Event/UDP/sender.cpp	(working copy)
+@@ -126,12 +126,9 @@
+       ACE_DEBUG ((LM_DEBUG,
+                   "udp mcast address is: %s\n",
+                   udp_mcast_address));
+-      RtecUDPAdmin::UDP_Addr addr;
+-      addr.ipaddr = udp_addr.get_ip_address ();
+-      addr.port   = udp_addr.get_port_number ();
+ 
+       // Now we create and activate the servant
+-      AddrServer as_impl (addr);
++      AddrServer as_impl (udp_addr);
+       RtecUDPAdmin::AddrServer_var address_server =
+         as_impl._this ();
+ 
+@@ -282,4 +279,3 @@
+   // Indicates sucessful parsing of the command line
+   return 0;
+ }
+-
