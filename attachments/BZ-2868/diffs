@@ -1,0 +1,126 @@
+Index: SSLIOP_Endpoint.h
+===================================================================
+--- SSLIOP_Endpoint.h	(revision 77747)
++++ SSLIOP_Endpoint.h	(working copy)
+@@ -65,6 +65,12 @@
+       /// Destructor.
+       virtual ~TAO_SSLIOP_Endpoint (void);
+ 
++
++      /// Need to have an assignment operator since the SSLIOP_Profile class
++      /// may have to reorder its list of endpoints based on filtering by
++      /// the EndpointPolicy.
++      TAO_SSLIOP_Endpoint & operator= (const TAO_SSLIOP_Endpoint& other);
++
+       /**
+        * @name TAO_Endpoint Methods
+        *
+Index: SSLIOP_Endpoint.cpp
+===================================================================
+--- SSLIOP_Endpoint.cpp	(revision 77747)
++++ SSLIOP_Endpoint.cpp	(working copy)
+@@ -86,6 +86,22 @@
+   this->trust_.trust_in_client = 1;
+ }
+ 
++
++TAO_SSLIOP_Endpoint &
++TAO_SSLIOP_Endpoint::operator= (const TAO_SSLIOP_Endpoint &other)
++{
++  this->object_addr_ = other.object_addr_;
++  this->qop_ = other.qop_;
++  this->trust_ = other.trust_;
++  this->ssl_component_ = other.ssl_component_;
++
++  this->next_ = 0; // do not copy list membership, since we are only cloning the values
++
++  this->iiop_endpoint(other.iiop_endpoint_,
++                      other.destroy_iiop_endpoint_);
++  return *this;
++}
++
+ TAO_SSLIOP_Endpoint::~TAO_SSLIOP_Endpoint (void)
+ {
+   if (this->destroy_iiop_endpoint_)
+Index: SSLIOP_Profile.h
+===================================================================
+--- SSLIOP_Profile.h	(revision 77747)
++++ SSLIOP_Profile.h	(working copy)
+@@ -98,6 +98,14 @@
+        */
+       void add_endpoint (TAO_SSLIOP_Endpoint * endp);
+ 
++
++      /**
++       * Remove @a endp from this profile's list of endpoints.
++       */
++      void remove_endpoint (TAO_SSLIOP_Endpoint * endp);
++
++      void remove_generic_endpoint (TAO_Endpoint *ep);
++
+     protected:
+ 
+       /// Destructor.
+Index: SSLIOP_Profile.cpp
+===================================================================
+--- SSLIOP_Profile.cpp	(revision 77747)
++++ SSLIOP_Profile.cpp	(working copy)
+@@ -349,4 +351,58 @@
+    }
+ }
+ 
++
++void
++TAO_SSLIOP_Profile::remove_endpoint (TAO_SSLIOP_Endpoint *endp)
++{
++  if (endp == 0)
++    return;
++
++  // special handling for the target matching the base endpoint
++  if (endp == &this->ssl_endpoint_)
++    {
++      if (--this->count_ > 0)
++        {
++          TAO_SSLIOP_Endpoint* ssl_n = this->ssl_endpoint_.next_;
++          this->ssl_endpoint_ = *ssl_n;
++          // since the assignment operator does not copy the next_
++          // pointer, we must do it by hand
++          this->ssl_endpoint_.next_ = ssl_n->next_;
++          delete ssl_n;
++          TAO_IIOP_Endpoint *n = this->endpoint_.next_;
++          this->endpoint_ = *n;
++          this->endpoint_.next_ = n->next_;
++          delete n;
++        }
++      return;
++    }
++
++  TAO_SSLIOP_Endpoint* last = &this->ssl_endpoint_;
++  TAO_SSLIOP_Endpoint* cur = this->ssl_endpoint_.next_;
++
++  while (cur != 0)
++  {
++    if (cur == endp)
++      break;
++    last = cur;
++    cur = cur->next_;
++  }
++
++  if (cur != 0)
++  {
++    TAO_IIOP_Endpoint *base = cur->iiop_endpoint();
++    last->iiop_endpoint(base->next_, true);
++    last->next_ = cur->next_;
++    cur->next_ = 0;
++    --this->count_;
++    delete cur;
++  }
++}
++
++void
++TAO_SSLIOP_Profile::remove_generic_endpoint (TAO_Endpoint *ep)
++{
++  this->remove_endpoint(dynamic_cast<TAO_SSLIOP_Endpoint *>(ep));
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
