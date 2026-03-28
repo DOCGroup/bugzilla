@@ -1,0 +1,81 @@
+diff -ru ACE_wrappers.orig/ace/ACE.cpp ACE_wrappers/ace/ACE.cpp
+--- ACE_wrappers.orig/ace/ACE.cpp	2008-01-17 11:25:28.000000000 -0800
++++ ACE_wrappers/ace/ACE.cpp	2008-03-03 10:16:51.000000000 -0800
+@@ -2381,7 +2381,8 @@
+ 
+ // Returns the current timestamp in the form
+ // "hour:minute:second:microsecond."  The month, day, and year are
+-// also stored in the beginning of the date_and_time array.
++// also stored in the beginning of the date_and_time array
++// using ISO-8601 format.
+ 
+ ACE_TCHAR *
+ ACE::timestamp (ACE_TCHAR date_and_time[],
+@@ -2430,48 +2431,34 @@
+   ::GetLocalTime (&local);
+ 
+   ACE_OS::sprintf (date_and_time,
+-                   ACE_TEXT ("%3s %3s %2d %04d %02d:%02d:%02d.%06d"),
++                   ACE_TEXT ("%04d-%02d-%02d %02d:%02d:%02d.%06d"),
+                    day_of_week_name[local.wDayOfWeek],
+-                   month_name[local.wMonth - 1],
+-                   (int) local.wDay,
+                    (int) local.wYear,
++                   (int) local.wMonth,
++                   (int) (local.wDay+1),
+                    (int) local.wHour,
+                    (int) local.wMinute,
+                    (int) local.wSecond,
+                    (int) (local.wMilliseconds * 1000));
+-  return &date_and_time[15 + (return_pointer_to_first_digit != 0)];
+ #else  /* UNIX */
+-  ACE_TCHAR timebuf[26]; // This magic number is based on the ctime(3c) man page.
+   ACE_Time_Value cur_time = ACE_OS::gettimeofday ();
+   time_t secs = cur_time.sec ();
+ 
+-  ACE_OS::ctime_r (&secs,
+-                   timebuf,
+-                   sizeof timebuf);
+-  // date_and_timelen > sizeof timebuf!
+-  ACE_OS::strsncpy (date_and_time,
+-                    timebuf,
+-                    date_and_timelen);
+-  ACE_TCHAR yeartmp[5];
+-  ACE_OS::strsncpy (yeartmp,
+-                    &date_and_time[20],
+-                    5);
+-  ACE_TCHAR timetmp[9];
+-  ACE_OS::strsncpy (timetmp,
+-                    &date_and_time[11],
+-                    9);
+-  ACE_OS::sprintf (&date_and_time[11],
+-#  if defined (ACE_USES_WCHAR)
+-                   ACE_TEXT ("%ls %ls.%06ld"),
+-#  else
+-                   ACE_TEXT ("%s %s.%06ld"),
+-#  endif /* ACE_USES_WCHAR */
+-                   yeartmp,
+-                   timetmp,
+-                   cur_time.usec ());
+-  date_and_time[33] = '\0';
+-  return &date_and_time[15 + (return_pointer_to_first_digit != 0)];
++  struct tm tms;
++  ACE_OS::localtime_r (&secs,
++                       &tms);
++  ACE_OS::sprintf (date_and_time,
++                   ACE_LIB_TEXT ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%06ld"),
++                   (tms.tm_year+1900),
++                   (tms.tm_mon+1),
++                   (tms.tm_mday),
++                   (tms.tm_hour),
++                   (tms.tm_min),
++                   (tms.tm_sec),
++                   (cur_time.usec()));
+ #endif /* WIN32 */
++  date_and_time[26] = '\0';
++  return &date_and_time[11 + (return_pointer_to_first_digit != 0)];
+ }
+ 
+ // This function rounds the request to a multiple of the page size.
+Only in ACE_wrappers/ace: ACE.cpp.orig
+Only in ACE_wrappers: TAO
