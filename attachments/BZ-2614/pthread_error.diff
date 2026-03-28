@@ -1,0 +1,16 @@
+--- config-linux.org	2006-08-07 13:40:51.889736152 +0200
++++ config-linux.h	2006-08-07 13:43:21.950923384 +0200
+@@ -22,6 +22,13 @@
+ #endif
+ 
+ #if ACE_MT_SAFE
++
++// Error out, if _REENTRANT is not defined, as this could lead
++// to serious ODR problems.
++#if !defined (_REENTRANT)
++#  error "Compiler threading support is not turned on. Please set the correct command line options for threading: -pthread or -D_REENTRANT"
++#endif
++
+ // Yes, we do have threads.
+ #define ACE_HAS_THREADS
+ // And they're even POSIX pthreads (LinuxThreads implementation)
