@@ -1,0 +1,364 @@
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libComplexCanonical-v1-autotestImpls-vtao145-0-rhel5-gcc41-d-vtao145-6.0.0.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libComplexCanonical-v1-autotestImpls-vtao145-0-rhel5-gcc41-d-vtao145-6.0.0.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libComplexCanonical-vtao145-1-rhel5-gcc41-d-vtao145-6.0.0.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libComplexCanonical-vtao145-1-rhel5-gcc41-d-vtao145-6.0.0.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libPassiveCanonical-vtao145-1-rhel5-gcc41-d-vtao145-6.0.0.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libPassiveCanonical-vtao145-1-rhel5-gcc41-d-vtao145-6.0.0.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libDCT_DIME-rhel5-gcc41-d-vtao145-6.0.0.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libDCT_DIME-rhel5-gcc41-d-vtao145-6.0.0.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTENA_Testing-rhel5-gcc41-d-vtao145-6.0.0.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTENA_Testing-rhel5-gcc41-d-vtao145-6.0.0.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libDCT_Utils-rhel5-gcc41-d-vtao145-6.0.0.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libDCT_Utils-rhel5-gcc41-d-vtao145-6.0.0.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTENA_Middleware-rhel5-gcc41-d-vtao145-6.0.0.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTENA_Middleware-rhel5-gcc41-d-vtao145-6.0.0.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libACE-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libACE-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_AnyTypeCode-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_AnyTypeCode-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_BiDirGIOP-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_BiDirGIOP-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CodecFactory-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CodecFactory-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CosConcurrency-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CosConcurrency-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CosNaming-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CosNaming-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CosNaming_Serv-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CosNaming_Serv-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CosNaming_Skel-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_CosNaming_Skel-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_DynamicInterface-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_DynamicInterface-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_IORTable-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_IORTable-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Messaging-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Messaging-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_PI-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_PI-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_PI_Server-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_PI_Server-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_PortableServer-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_PortableServer-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_RTEvent-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_RTEvent-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_RTEvent_Serv-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_RTEvent_Serv-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_RTEvent_Skel-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_RTEvent_Skel-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_RTSched-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_RTSched-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Strategies-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Strategies-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Svc_Utils-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Svc_Utils-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Utils-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Utils-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Valuetype-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Valuetype-rhel5-gcc41-d-1.6.5a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libboost_regex-rhel5-gcc41-d-1.34.1a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libboost_regex-rhel5-gcc41-d-1.34.1a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libboost_thread-rhel5-gcc41-d-1.34.1a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libboost_thread-rhel5-gcc41-d-1.34.1a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libboost_filesystem-rhel5-gcc41-d-1.34.1a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libboost_filesystem-rhel5-gcc41-d-1.34.1a.so
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libSimpleCanonical-vtao145-1-rhel5-gcc41-d-vtao145-6.0.0.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libSimpleCanonical-vtao145-1-rhel5-gcc41-d-vtao145-6.0.0.so
+Reading symbols from /usr/lib/libstdc++.so.6...done.
+Loaded symbols for /usr/lib/libstdc++.so.6
+Reading symbols from /lib/i686/nosegneg/libm.so.6...done.
+Loaded symbols for /lib/i686/nosegneg/libm.so.6
+Reading symbols from /lib/libgcc_s.so.1...done.
+Loaded symbols for /lib/libgcc_s.so.1
+Reading symbols from /lib/i686/nosegneg/libc.so.6...done.
+Loaded symbols for /lib/i686/nosegneg/libc.so.6
+Reading symbols from /lib/i686/nosegneg/libpthread.so.0...done.
+Loaded symbols for /lib/i686/nosegneg/libpthread.so.0
+Reading symbols from /lib/libdl.so.2...done.
+Loaded symbols for /lib/libdl.so.2
+Reading symbols from /lib/i686/nosegneg/librt.so.1...done.
+Loaded symbols for /lib/i686/nosegneg/librt.so.1
+Reading symbols from /lib/ld-linux.so.2...done.
+Loaded symbols for /lib/ld-linux.so.2
+Reading symbols from /lib/libnss_files.so.2...done.
+Loaded symbols for /lib/libnss_files.so.2
+Reading symbols from /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Codeset-rhel5-gcc41-d-1.6.5a.so...done.
+Loaded symbols for /data0/tenabuild/DAD/box59679/tenadir/TENA/lib/libTAO_Codeset-rhel5-gcc41-d-1.6.5a.so
+Core was generated by `/data0/tenabuild/DAD/box59679/tenadir/TENA/tao145-6.0.0/bin/rhel5-gcc41-d/Compl'.
+Program terminated with signal 6, Aborted.
+#0  0xb7f75402 in __kernel_vsyscall ()
+(gdb) info thr
+  6 process 20193  0xb7f75402 in __kernel_vsyscall ()
+  5 process 20195  0xb7f75402 in __kernel_vsyscall ()
+  4 process 20196  0xb7f75402 in __kernel_vsyscall ()
+  3 process 20197  0xb7f75402 in __kernel_vsyscall ()
+  2 process 20198  0xb7f75402 in __kernel_vsyscall ()
+* 1 process 20194  0xb7f75402 in __kernel_vsyscall ()
+(gdb) thr 1
+[Switching to thread 1 (process 20194)]#0  0xb7f75402 in __kernel_vsyscall ()
+(gdb) bt
+#0  0xb7f75402 in __kernel_vsyscall ()
+#1  0x00bc3da0 in raise () from /lib/i686/nosegneg/libc.so.6
+#2  0x00bc5781 in abort () from /lib/i686/nosegneg/libc.so.6
+#3  0x00bfa96b in __libc_message () from /lib/i686/nosegneg/libc.so.6
+#4  0x00c026a6 in _int_free () from /lib/i686/nosegneg/libc.so.6
+#5  0x00c05c10 in free () from /lib/i686/nosegneg/libc.so.6
+#6  0x057b8691 in operator delete () from /usr/lib/libstdc++.so.6
+#7  0x057b86ed in operator delete[] () from /usr/lib/libstdc++.so.6
+#8  0xb6442774 in ~ACE_Array_Map (this=0xb58547bc)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/Array_Map.cpp:81
+#9  0xb6442845 in ACE_Array_Map<unsigned int, TAO_Service_Context_Handler*, std::equal_to<unsigned int> >::grow (this=0x88225c4, s=1)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/Array_Map.cpp:267
+#10 0xb64428af in ACE_Array_Map<unsigned int, TAO_Service_Context_Handler*, std::equal_to<unsigned int> >::insert (this=0x88225c4, x=@0xb5854840)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/Array_Map.cpp:109
+#11 0xb6442969 in ACE_Array_Map<unsigned int, TAO_Service_Context_Handler*, std::equal_to<unsigned int> >::operator[] (this=0x88225c4, k=@0xb2500a8c)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/Array_Map.inl:129
+#12 0xb6442421 in TAO_Service_Context_Registry::process_service_contexts (
+    this=0x88225c4, server_request=@0xb585491c)
+    at Service_Context_Handler_Registry.cpp:25
+#13 0xb63dd46d in TAO_GIOP_Message_Generator_Parser_12::parse_request_header (
+    this=0xb250067c, request=@0xb585491c)
+    at GIOP_Message_Generator_Parser_12.cpp:291
+#14 0xb63d85be in TAO_GIOP_Message_Base::process_request (this=0xb2500670, 
+    transport=0xb25005a0, cdr=@0xb5854d48, output=@0xb5854cec, 
+    parser=0xb250067c) at GIOP_Message_Base.cpp:848
+#15 0xb63d96cd in TAO_GIOP_Message_Base::process_request_message (
+    this=0xb2500670, transport=0xb25005a0, qd=0x88dd798)
+    at GIOP_Message_Base.cpp:669
+#16 0xb6467dc8 in TAO_Transport::process_parsed_messages (this=0xb25005a0, 
+    qd=0x88dd798, rh=@0xb5854f58) at Transport.cpp:2358
+#17 0xb646826e in TAO_Transport::process_queue_head (this=0xb25005a0, 
+    rh=@0xb5854f58) at Transport.cpp:2491
+#18 0xb6469647 in TAO_Transport::handle_input (this=0xb25005a0, 
+    rh=@0xb5854f58, max_wait_time=0x0) at Transport.cpp:1564
+#19 0xb63c15aa in TAO_Connection_Handler::handle_input_internal (
+    this=0xb250050c, h=-1, eh=0xb25004a0) at Connection_Handler.cpp:273
+#20 0xb63c17a7 in TAO_Connection_Handler::handle_input_eh (this=0xb250050c, 
+    h=-1, eh=0xb25004a0) at Connection_Handler.cpp:232
+#21 0xb63edf58 in TAO_IIOP_Connection_Handler::handle_input (this=0xb25004a0, 
+    h=-1) at IIOP_Connection_Handler.cpp:294
+#22 0xb66299e9 in ACE_Select_Reactor_Notify::dispatch_notify (this=0x8824128, 
+    buffer=@0xb5855060) at Select_Reactor_Base.cpp:837
+#23 0xb664ea3a in ACE_TP_Reactor::handle_notify_events (this=0x8823810, 
+    guard=@0xb58550d4) at TP_Reactor.cpp:381
+#24 0xb664f1c0 in ACE_TP_Reactor::dispatch_i (this=0x8823810, 
+    max_wait_time=0xb5855238, guard=@0xb58550d4) at TP_Reactor.cpp:233
+#25 0xb664f39f in ACE_TP_Reactor::handle_events (this=0x8823810, 
+    max_wait_time=0xb5855238) at TP_Reactor.cpp:173
+#26 0xb6625034 in ACE_Reactor::handle_events (this=0x8823450, 
+    max_wait_time=0xb5855238)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/Reactor.inl:188
+#27 0xb642577f in TAO_ORB_Core::run (this=0x8822248, tv=0xb5855238, 
+    perform_work=0) at ORB_Core.cpp:2140
+#28 0xb641ed23 in CORBA::ORB::run (this=0x8824178, tv=0xb5855238)
+    at ORB.cpp:194
+#29 0xb641ed4e in CORBA::ORB::run (this=0x8824178, tv=@0xb5855238)
+    at ORB.cpp:186
+#30 0xb715878c in DIME::Dispatch::Dispatcher::dispatchORB (this=0x881e2d8, 
+    pORB=0x8824178, dispatchInterval=
+        {static zero = {static zero = <same as static member of an already seen type>, static max_time = {static zero = <same as static member of an already seen type>, static max_time = <same as static member of an already seen type>, tv_ = {tv_sec = 2147483647, tv_usec = 999999}}, tv_ = {tv_sec = 0, tv_usec = 0}}, static max_time = <same as static member of an already seen type>, tv_ = {tv_sec = 0, tv_usec = 27687}})
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/Dispatcher.cpp:400
+#31 0xb7158910 in DIME::Dispatch::Dispatcher::dispatchServerORB (
+    this=0x881e2d8, dispatchInterval=@0xb58552a8)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/Dispatcher.cpp:434
+#32 0xb716be34 in DIME::Dispatch::ORBthread::run (this=0x882fc78)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/ORBthread.cpp:53
+#33 0xb716ccd8 in DIME::Dispatch::ThreadManager::svc_run (
+    pThreadManager=0x882fc78)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/ThreadManager.cpp:104
+#34 0xb6643565 in ACE_Thread_Adapter::invoke_i (this=0x884f5a8)
+    at Thread_Adapter.cpp:149
+#35 0xb6643626 in ACE_Thread_Adapter::invoke (this=0x884f5a8)
+    at Thread_Adapter.cpp:98
+#36 0xb659fd54 in ace_thread_adapter (args=0x884f5a8)
+    at Base_Thread_Adapter.cpp:124
+#37 0x00d14482 in start_thread () from /lib/i686/nosegneg/libpthread.so.0
+#38 0x00c6b2be in clone () from /lib/i686/nosegneg/libc.so.6
+(gdb) thr 2
+[Switching to thread 2 (process 20198)]#0  0xb7f75402 in __kernel_vsyscall ()
+(gdb) bt
+#0  0xb7f75402 in __kernel_vsyscall ()
+#1  0x00d182c6 in pthread_cond_wait@@GLIBC_2.3.2 ()
+   from /lib/i686/nosegneg/libpthread.so.0
+#2  0x00c77dfd in pthread_cond_wait@@GLIBC_2.3.2 ()
+   from /lib/i686/nosegneg/libc.so.6
+#3  0xb65fcd14 in ACE_OS::cond_wait (cv=0x88579a8, external_mutex=0x885798c)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/OS_NS_Thread.inl:330
+#4  0xb6cc2d3b in ACE_Condition<ACE_Thread_Mutex>::wait (this=0x88579a8)
+    at /data0/tenabuild/DAD/box59679/tenadir/TENA/tao145-6.0.0/include/ace/Condition_T.cpp:90
+#5  0xb6cbb708 in TENA::Middleware::Diagnostics::DiagnosticsThread::run (
+    this=0x8857908)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/TENA/Middleware/Diagnostics/DiagnosticsThread.cpp:122
+#6  0xb716ccd8 in DIME::Dispatch::ThreadManager::svc_run (
+    pThreadManager=0x8857908)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/ThreadManager.cpp:104
+#7  0xb6643565 in ACE_Thread_Adapter::invoke_i (this=0x884f5a8)
+    at Thread_Adapter.cpp:149
+#8  0xb6643626 in ACE_Thread_Adapter::invoke (this=0x884f5a8)
+    at Thread_Adapter.cpp:98
+#9  0xb659fd54 in ace_thread_adapter (args=0x884f5a8)
+    at Base_Thread_Adapter.cpp:124
+#10 0x00d14482 in start_thread () from /lib/i686/nosegneg/libpthread.so.0
+#11 0x00c6b2be in clone () from /lib/i686/nosegneg/libc.so.6
+(gdb) thr 3
+[Switching to thread 3 (process 20197)]#0  0xb7f75402 in __kernel_vsyscall ()
+(gdb) bt
+#0  0xb7f75402 in __kernel_vsyscall ()
+#1  0x00d182c6 in pthread_cond_wait@@GLIBC_2.3.2 ()
+   from /lib/i686/nosegneg/libpthread.so.0
+#2  0x00c77dfd in pthread_cond_wait@@GLIBC_2.3.2 ()
+   from /lib/i686/nosegneg/libc.so.6
+#3  0xb65fcd14 in ACE_OS::cond_wait (cv=0x881e088, external_mutex=0x881e06c)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/OS_NS_Thread.inl:330
+#4  0xb6cc2d3b in ACE_Condition<ACE_Thread_Mutex>::wait (this=0x881e088)
+    at /data0/tenabuild/DAD/box59679/tenadir/TENA/tao145-6.0.0/include/ace/Condition_T.cpp:90
+#5  0xb6cc4ab3 in TENA::Middleware::Diagnostics::AlertThread::run (
+    this=0x881dfa8)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/TENA/Middleware/Diagnostics/AlertThread.cpp:141
+#6  0xb716ccd8 in DIME::Dispatch::ThreadManager::svc_run (
+    pThreadManager=0x881dfa8)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/ThreadManager.cpp:104
+#7  0xb6643565 in ACE_Thread_Adapter::invoke_i (this=0x884f5a8)
+    at Thread_Adapter.cpp:149
+#8  0xb6643626 in ACE_Thread_Adapter::invoke (this=0x884f5a8)
+    at Thread_Adapter.cpp:98
+#9  0xb659fd54 in ace_thread_adapter (args=0x884f5a8)
+    at Base_Thread_Adapter.cpp:124
+#10 0x00d14482 in start_thread () from /lib/i686/nosegneg/libpthread.so.0
+#11 0x00c6b2be in clone () from /lib/i686/nosegneg/libc.so.6
+(gdb) thr 4
+[Switching to thread 4 (process 20196)]#0  0xb7f75402 in __kernel_vsyscall ()
+(gdb) bt
+#0  0xb7f75402 in __kernel_vsyscall ()
+#1  0x00d1854c in pthread_cond_timedwait@@GLIBC_2.3.2 ()
+   from /lib/i686/nosegneg/libpthread.so.0
+#2  0x00c77e44 in pthread_cond_timedwait@@GLIBC_2.3.2 ()
+   from /lib/i686/nosegneg/libc.so.6
+#3  0xb65fcf11 in ACE_OS::cond_timedwait (cv=0x881e388, 
+    external_mutex=0x881e36c, timeout=0xb4453234)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/OS_NS_Thread.inl:359
+#4  0xb65aeb15 in ACE_Condition_Thread_Mutex::wait (this=0x881e388, 
+    mutex=@0x881e36c, abstime=0xb4453234) at Condition_Thread_Mutex.cpp:100
+#5  0xb65aeb4a in ACE_Condition_Thread_Mutex::wait (this=0x881e388, 
+    abstime=0xb4453234) at Condition_Thread_Mutex.cpp:107
+#6  0xb71558bc in DIME::Dispatch::CommandQueue::waitQueueNotEmpty (
+    this=0x881e36c, absoluteTimeout=@0xb4453234)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/CommandQueue.cpp:103
+#7  0xb715675d in DIME::Dispatch::CommandSynchronizer::runCommands (
+    this=0x881e348, maxWaitInterval=@0xb44532c0)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/CommandSynchronizer.cpp:195
+#8  0xb71580e7 in DIME::Dispatch::Dispatcher::runCommands (this=0x881e2d8, 
+    maxWaitInterval=@0xb44532c0)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/Dispatcher.cpp:569
+#9  0xb7154d11 in DIME::Dispatch::CommandExecutorThread::run (this=0x884f508)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/CommandExecutorThread.cpp:62
+#10 0xb716ccd8 in DIME::Dispatch::ThreadManager::svc_run (
+    pThreadManager=0x884f508)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/ThreadManager.cpp:104
+#11 0xb6643565 in ACE_Thread_Adapter::invoke_i (this=0x884f5a8)
+    at Thread_Adapter.cpp:149
+#12 0xb6643626 in ACE_Thread_Adapter::invoke (this=0x884f5a8)
+    at Thread_Adapter.cpp:98
+#13 0xb659fd54 in ace_thread_adapter (args=0x884f5a8)
+    at Base_Thread_Adapter.cpp:124
+#14 0x00d14482 in start_thread () from /lib/i686/nosegneg/libpthread.so.0
+t#15 0x00c6b2be in clone () from /lib/i686/nosegneg/libc.so.6
+(gdb) thr 5
+[Switching to thread 5 (process 20195)]#0  0xb7f75402 in __kernel_vsyscall ()
+(gdb) bt
+#0  0xb7f75402 in __kernel_vsyscall ()
+#1  0x00c7809e in __lll_mutex_lock_wait () from /lib/i686/nosegneg/libc.so.6
+#2  0x00c06968 in _L_lock_14108 () from /lib/i686/nosegneg/libc.so.6
+#3  0x00c05c04 in free () from /lib/i686/nosegneg/libc.so.6
+#4  0x057b8691 in operator delete () from /usr/lib/libstdc++.so.6
+#5  0x057b86ed in operator delete[] () from /usr/lib/libstdc++.so.6
+#6  0xb63dac03 in TAO::details::unbounded_value_allocation_traits<unsigned char, true>::freebuf (buffer=0x88d5410 "\001??")
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/TAO/tao/Unbounded_Value_Allocation_Traits_T.h:45
+#7  0xb63dac27 in TAO::unbounded_value_sequence<unsigned char>::freebuf (
+    buffer=0x88d5410 "\001??")
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/TAO/tao/Unbounded_Octet_Sequence_T.h:248
+#8  0xb6415e9b in ~unbounded_value_sequence (this=0x88d93ec)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/TAO/tao/Unbounded_Octet_Sequence_T.h:77
+#9  0xb641ad2c in ~OctetSeq (this=0x88d93e8) at OctetSeqC.cpp:103
+#10 0xb63dac74 in ~ServiceContext (this=0x88d93e4)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/TAO/tao/IOP_IORC.h:403
+#11 0xb63dae2f in TAO::details::unbounded_value_allocation_traits<IOP::ServiceContext, true>::freebuf (buffer=0x88d93e4)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/TAO/tao/Unbounded_Value_Allocation_Traits_T.h:45
+#12 0xb63dae63 in TAO::details::generic_sequence<IOP::ServiceContext, TAO::details::unbounded_value_allocation_traits<IOP::ServiceContext, true>, TAO::details::value_traits<IOP::ServiceContext, true> >::freebuf (buffer=0x88d93e4)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/TAO/tao/Generic_Sequence_T.h:317
+#13 0xb63dae95 in ~generic_sequence (this=0xb4e5347c)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/TAO/tao/Generic_Sequence_T.h:142
+#14 0xb63ffe23 in TAO::unbounded_value_sequence<IOP::ServiceContext>::~unbounded_value_sequence$base ()
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/TAO/tao/Transport_Selection_Guard.h:85
+#15 0xb63ff234 in ~ServiceContextList (this=0xb4e53478) at IOP_IORC.cpp:314
+#16 0xb63fd675 in ~TAO_Service_Context (this=0xb4e53478)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/TAO/tao/Service_Context.h:61
+t#17 0xb645e11d in ~TAO_ServerRequest (this=0xb4e5344c)
+    at TAO_Server_Request.cpp:202
+#18 0xb63d8e5d in TAO_GIOP_Message_Base::process_request (this=0xb2500670, 
+    transport=0xb25005a0, cdr=@0xb4e53878, output=@0xb4e5381c, 
+    parser=0xb250067c) at GIOP_Message_Base.cpp:1033
+#19 0xb63d96cd in TAO_GIOP_Message_Base::process_request_message (
+    this=0xb2500670, transport=0xb25005a0, qd=0xb4e53e58)
+    at GIOP_Message_Base.cpp:669
+#20 0xb6467dc8 in TAO_Transport::process_parsed_messages (this=0xb25005a0, 
+    qd=0xb4e53e58, rh=@0xb4e53f78) at Transport.cpp:2358
+h#21 0xb6468e2d in TAO_Transport::handle_input_parse_data (this=0xb25005a0, 
+    rh=@0xb4e53f78, max_wait_time=0x0) at Transport.cpp:2282
+#22 0xb64697f9 in TAO_Transport::handle_input (this=0xb25005a0, 
+    rh=@0xb4e53f78, max_wait_time=0x0) at Transport.cpp:1610
+#23 0xb63c15aa in TAO_Connection_Handler::handle_input_internal (
+    this=0xb250050c, h=13, eh=0xb25004a0) at Connection_Handler.cpp:273
+#24 0xb63c17a7 in TAO_Connection_Handler::handle_input_eh (this=0xb250050c, 
+    h=13, eh=0xb25004a0) at Connection_Handler.cpp:232
+r#25 0xb63edf58 in TAO_IIOP_Connection_Handler::handle_input (this=0xb25004a0, 
+    h=13) at IIOP_Connection_Handler.cpp:294
+#26 0xb664effd in ACE_TP_Reactor::dispatch_socket_event (this=0x8823810, 
+    dispatch_info=@0xb4e54054) at TP_Reactor.cpp:575
+#27 0xb664f125 in ACE_TP_Reactor::handle_socket_events (this=0x8823810, 
+    event_count=@0xb4e54098, guard=@0xb4e540d4) at TP_Reactor.cpp:445
+#28 0xb664f1f1 in ACE_TP_Reactor::dispatch_i (this=0x8823810, 
+    max_wait_time=0xb4e54238, guard=@0xb4e540d4) at TP_Reactor.cpp:244
+#29 0xb664f39f in ACE_TP_Reactor::handle_events (this=0x8823810, 
+    max_wait_time=0xb4e54238) at TP_Reactor.cpp:173
+#30 0xb6625034 in ACE_Reactor::handle_events (this=0x8823450, 
+    max_wait_time=0xb4e54238)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/Reactor.inl:188
+ #31 0xb642577f in TAO_ORB_Core::run (this=0x8822248, tv=0xb4e54238, 
+    perform_work=0) at ORB_Core.cpp:2140
+#32 0xb641ed23 in CORBA::ORB::run (this=0x8824178, tv=0xb4e54238)
+    at ORB.cpp:194
+#33 0xb641ed4e in CORBA::ORB::run (this=0x8824178, tv=@0xb4e54238)
+    at ORB.cpp:186
+#34 0xb715878c in DIME::Dispatch::Dispatcher::dispatchORB (this=0x881e2d8, 
+    pORB=0x8824178, dispatchInterval=
+        {static zero = {static zero = <same as static member of an already seen type>, static max_time = {static zero = <same as static member of an already seen type>, static max_time = <same as static member of an already seen type>, tv_ = {tv_sec = 2147483647, tv_usec = 999999}}, tv_ = {tv_sec = 0, tv_usec = 0}}, static max_time = <same as static member of an already seen type>, tv_ = {tv_sec = 0, tv_usec = 999999}})
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/Dispatcher.cpp:400
+#35 0xb7158910 in DIME::Dispatch::Dispatcher::dispatchServerORB (
+    this=0x881e2d8, dispatchInterval=@0xb4e542a8)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/Dispatcher.cpp:434
+#36 0xb716be34 in DIME::Dispatch::ORBthread::run (this=0x884f470)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/ORBthread.cpp:53
+#37 0xb716ccd8 in DIME::Dispatch::ThreadManager::svc_run (
+    pThreadManager=0x884f470)
+    at /data0/tenabuild/DAD/box59679/src/tenamw-vtao145-6.0.0/DCT/DIME/Dispatch/ThreadManager.cpp:104
+#38 0xb6643565 in ACE_Thread_Adapter::invoke_i (this=0x884f5a8)
+    at Thread_Adapter.cpp:149
+#39 0xb6643626 in ACE_Thread_Adapter::invoke (this=0x884f5a8)
+    at Thread_Adapter.cpp:98
+#40 0xb659fd54 in ace_thread_adapter (args=0x884f5a8)
+    at Base_Thread_Adapter.cpp:124
+#41 0x00d14482 in start_thread () from /lib/i686/nosegneg/libpthread.so.0
+#42 0x00c6b2be in clone () from /lib/i686/nosegneg/libc.so.6
+(gdb) thr 6
+[Switching to thread 6 (process 20193)]#0  0xb7f75402 in __kernel_vsyscall ()
+(gdb) bt
+#0  0xb7f75402 in __kernel_vsyscall ()
+#1  0x00c2aaf6 in nanosleep () from /lib/i686/nosegneg/libc.so.6
+#2  0xb65ff154 in ACE_OS::sleep (tv=@0xbf876c38)
+    at /usr/local/TAO/1.6.5a/rhel5-gcc41-d/ace/OS_NS_unistd.inl:921
+#3  0x08058767 in main (argc=1, argv=0xbf876d74)
+    at main/publish_Message_CplxMsg.cpp:204
+(gdb) 
