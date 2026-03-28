@@ -1,0 +1,38 @@
+--- Task.i@@/main/4	2004-04-12 11:23:34.000000000 -0400
++++ Task.i	2005-12-20 15:44:23.000000000 -0500
+@@ -22,7 +22,7 @@
+ ACE_Task_Base::thr_count (void) const
+ {
+   ACE_TRACE ("ACE_Task_Base::thr_count");
+-  ACE_MT (ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, (ACE_Thread_Mutex &) this->lock_, 0));
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon, (ACE_Recursive_Thread_Mutex &) this->lock_, 0));
+ 
+   return this->thr_count_;
+ }
+@@ -33,7 +33,7 @@
+ ACE_Task_Base::thr_count_dec (void)
+ {
+   ACE_TRACE ("ACE_Task_Base::thr_count_dec");
+-  ACE_MT (ACE_GUARD (ACE_Thread_Mutex, ace_mon, this->lock_));
++  ACE_MT (ACE_GUARD (ACE_Recursive_Thread_Mutex, ace_mon, this->lock_));
+ 
+   this->thr_count_--;
+ }
+@@ -93,7 +93,7 @@
+ ACE_Task_Base::grp_id (void) const
+ {
+   ACE_TRACE ("ACE_Task_Base::grp_id");
+-  ACE_MT (ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, (ACE_Thread_Mutex &) this->lock_, -1));
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon, (ACE_Recursive_Thread_Mutex &) this->lock_, -1));
+   return this->grp_id_;
+ }
+ 
+@@ -103,7 +103,7 @@
+ ACE_Task_Base::grp_id (int id)
+ {
+   ACE_TRACE ("ACE_Task_Base::grp_id");
+-  ACE_MT (ACE_GUARD (ACE_Thread_Mutex, ace_mon, this->lock_));
++  ACE_MT (ACE_GUARD (ACE_Recursive_Thread_Mutex, ace_mon, this->lock_));
+ 
+   // Cache the group id in the task and then set it in the
+   // Thread_Manager, if there is one.
