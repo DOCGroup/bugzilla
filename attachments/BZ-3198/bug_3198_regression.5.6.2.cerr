@@ -1,0 +1,20 @@
+TAO (19418|3085870800) Initializing the process-wide services
+TAO (19418|3085870800) Default ORB - global initialization completed.
+TAO (19418|3085870800) Initializing the orb-specific services
+TAO (19418|3085870800) Default_Resource_Factory - codeset manager=0x8a57a58
+TAO (19418|3085870800) - Codeset_Manager_i::init_ccs, Loaded Codeset translator <UTF8_Latin1_Factory>, ncs = 00010001 tcs = 05010001
+TAO (19418|3085870800) - UTF16_BOM_Translator: forceBE 0
+TAO (19418|3085870800) Loaded default protocol <IIOP_Factory>
+TAO (19418|3085870800) created new ORB <>
+TAO (19418|3085870800) - Transport_Cache_Manager::find_i, no idle transport is available
+TAO (19418|3085870800) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (19418|3085870800) - IIOP_Connector::begin_connection, to <localhost:12345> which should block
+TAO (19418|3085870800) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[145078456]
+TAO (19418|3085870800) - Leader_Follower[145078456]::wait_for_event, (leader) enter reactor event loop
+TAO (19418|3085870800) - Leader_Follower[145078456]::wait_for_event, (leader) exit reactor event loop
+TAO (19418|3085870800) - Transport_Connector::wait_for_connection_completion, transport [145078456], wait done result = -1
+TAO (19418|3085870800) - Transport_Connector::wait_for_connection_completion, transport [145078456], wait for completion failed (107) : Transport endpoint is not connected
+TAO (19418|3085870800) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (19418|3085870800) - IIOP_Connector::complete_connection, connection to <localhost:12345> failed (errno: Transport endpoint is not connected)
+TAO (19418|3085870800) - Transport[145078456]::cleanup_queue_i, cleaning up complete queue
+TAO (19418|3085870800) - Transport[145078456]::cleanup_queue_i, discarded 0 messages, 0 bytes.
