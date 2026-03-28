@@ -1,0 +1,54 @@
+diff -ru ACE_wrappers.orig/ace/svcconf.mpb ACE_wrappers/ace/svcconf.mpb
+--- ACE_wrappers.orig/ace/svcconf.mpb	2007-07-25 15:05:59.000000000 +0300
++++ ACE_wrappers/ace/svcconf.mpb	2007-07-25 14:24:21.000000000 +0300
+@@ -41,8 +41,8 @@
+     "       -e 's/\([^d]\) char /\$1 ACE_TCHAR /g' \\"
+     "       -e 's/(char/(ACE_TCHAR/g' \\"
+     "       -e 's/ NULL/ 0/g' \\"
+-    "       -e 's/ace_yyerror[ ]*(\"/ace_yyerror (ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, \"/g' \\"
+-    "       -e 's/ace_yyerror[ ]*(ace_yymsg/ace_yyerror (ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, ace_yymsg/g' \\"
++    "       -e 's/ace_yyerror[ ]*(\"/ace_yyerror (++ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, \"/g' \\"
++    "       -e 's/ace_yyerror[ ]*(ace_yymsg/ace_yyerror (++ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, ace_yymsg/g' \\"
+     "       -e 's/ace_yyerror (int ace_yyerrno, int ace_yylineno, const ACE_TCHAR/ace_yyerror (int ace_yyerrno, int ace_yylineno, const char/' \\"
+     "       -e 's@#include <stdio\.h>@@' \\"
+     "       -e 's/Svc_Conf\\.tab\\.c/Svc_Conf_y.cpp/g' < Svc_Conf.tab.c > /tmp/$@"
+diff -ru ACE_wrappers.orig/ace/Svc_Conf_y.cpp ACE_wrappers/ace/Svc_Conf_y.cpp
+--- ACE_wrappers.orig/ace/Svc_Conf_y.cpp	2007-06-22 11:32:38.000000000 +0300
++++ ACE_wrappers/ace/Svc_Conf_y.cpp	2007-07-25 14:31:51.000000000 +0300
+@@ -526,7 +526,7 @@
+     }								\
+   else								\
+     { 								\
+-      ace_yyerror (ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, "syntax error: cannot back up");\
++      ace_yyerror (++ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, "syntax error: cannot back up");\
+       ACE_YYERROR;							\
+     }								\
+ while (0)
+@@ -1496,15 +1496,15 @@
+       ace_yyprefix = " or ";
+           }
+     }
+-        ace_yyerror (ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, ace_yymsg);
++        ace_yyerror (++ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, ace_yymsg);
+         ACE_YYSTACK_FREE (ace_yymsg);
+       }
+     else
+-      ace_yyerror (ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, "syntax error; also virtual memory exhausted");
++      ace_yyerror (++ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, "syntax error; also virtual memory exhausted");
+   }
+       else
+ #endif /* ACE_YYERROR_VERBOSE */
+-  ace_yyerror (ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, "syntax error");
++  ace_yyerror (++ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, "syntax error");
+     }
+ 
+ 
+@@ -1625,7 +1625,7 @@
+ | ace_yyoverflowlab -- parser overflow comes here.  |
+ `----------------------------------------------*/
+ ace_yyoverflowlab:
+-  ace_yyerror (ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, "parser stack overflow");
++  ace_yyerror (++ACE_SVC_CONF_PARAM->yyerrno, ACE_SVC_CONF_PARAM->yylineno, "parser stack overflow");
+   ace_yyresult = 2;
+   /* Fall through.  */
+ #endif
