@@ -1,0 +1,123 @@
+Index: ORB_Core.cpp
+===================================================================
+--- ORB_Core.cpp	(revision 77790)
++++ ORB_Core.cpp	(working copy)
+@@ -722,6 +722,15 @@
+ 
+           arg_shifter.consume_arg ();
+         }
++      else if ((current_arg = arg_shifter.get_the_parameter
++                (ACE_TEXT("-ORBUseIPV6LinkLocal"))))
++        {
++          int use_ipv6_link_local = ACE_OS::atoi (current_arg);
++          if (use_ipv6_link_local)
++            this->orb_params ()->use_ipv6_link_local (true);
++          else
++            this->orb_params ()->use_ipv6_link_local (false);
++        }
+ #endif /* ACE_HAS_IPV6 */
+       else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBCDRTradeoff"))))
+Index: IIOP_Acceptor.cpp
+===================================================================
+--- IIOP_Acceptor.cpp	(revision 77790)
++++ IIOP_Acceptor.cpp	(working copy)
+@@ -875,6 +875,7 @@
+ #if defined (ACE_HAS_IPV6)
+   size_t ipv4_cnt = 0;
+   size_t ipv4_lo_cnt = 0;
++  size_t ipv6_ll = 0;
+   bool ipv6_non_ll = false;
+   // Scan for IPv4 interfaces since these should not be included
+   // when IPv6-only is selected.
+@@ -891,6 +892,11 @@
+       {
+         ipv6_non_ll = true; // we have at least 1 non-local IPv6 if
+       }
++    else if (!orb_core->orb_params ()->use_ipv6_link_local () &&
++             if_addrs[j].is_linklocal ())
++      {
++        ++ipv6_ll;  // count link local addrs to exclude them afterwards
++      }
+ #endif /* ACE_HAS_IPV6 */
+ 
+   // The instantiation for this template is in
+@@ -941,9 +947,9 @@
+     lo_cnt = ipv4_lo_cnt;
+ 
+   if (!ignore_lo)
+-    this->endpoint_count_ = static_cast<CORBA::ULong> (if_ok_cnt);
++    this->endpoint_count_ = static_cast<CORBA::ULong> (if_ok_cnt - ipv6_ll);
+   else
+-    this->endpoint_count_ = static_cast<CORBA::ULong> (if_ok_cnt - lo_cnt);
++    this->endpoint_count_ = static_cast<CORBA::ULong> (if_ok_cnt - ipv6_ll - lo_cnt);
+ #else /* ACE_HAS_IPV6 */
+   // If the loopback interface is the only interface then include it
+   // in the list of interfaces to query for a hostname, otherwise
+@@ -1003,6 +1009,11 @@
+           (if_addrs[i].get_type () != AF_INET6 ||
+            if_addrs[i].is_ipv4_mapped_ipv6 ()))
+         continue;
++
++      // Ignore all IPv6 link local interfaces when so required.
++      if (!orb_core->orb_params ()->use_ipv6_link_local () &&
++          if_addrs[i].is_linklocal ())
++        continue;
+ #else /* ACE_HAS_IPV6 */
+       // Ignore any loopback interface if there are other
+       // non-loopback interfaces.
+Index: params.h
+===================================================================
+--- params.h	(revision 77790)
++++ params.h	(working copy)
+@@ -207,6 +207,9 @@
+ 
+   void connect_ipv6_only (bool p);
+   bool connect_ipv6_only (void) const;
++
++  void use_ipv6_link_local (bool p);
++  bool use_ipv6_link_local (void) const;
+ #endif /* ACE_HAS_IPV6 */
+ 
+   void negotiate_codesets (bool c);
+@@ -358,6 +361,9 @@
+    * IPv6 interfaces Yes or No.
+    */
+   bool connect_ipv6_only_;
++
++  /// Include Link Local IPv6 profiles to IOR Yes or No.
++  bool use_ipv6_link_local_;
+ #endif /* ACE_HAS_IPV6 */
+ 
+   /// Enable the use of codeset negotiation
+Index: params.cpp
+===================================================================
+--- params.cpp	(revision 77790)
++++ params.cpp	(working copy)
+@@ -45,6 +45,7 @@
+ #if defined (ACE_HAS_IPV6)
+   , prefer_ipv6_interfaces_ (false)
+   , connect_ipv6_only_ (false)
++  , use_ipv6_link_local_ (false)
+ #endif /* ACE_HAS_IPV6 */
+   , negotiate_codesets_ (true)
+ {
+@@ -307,6 +308,18 @@
+ {
+   return this->connect_ipv6_only_;
+ }
++
++void
++TAO_ORB_Parameters::use_ipv6_link_local (bool p)
++{
++  this->use_ipv6_link_local_ = p;
++}
++
++bool
++TAO_ORB_Parameters::use_ipv6_link_local (void) const
++{
++  return this->use_ipv6_link_local_;
++}
+ #endif /* ACE_HAS_IPV6 */
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
