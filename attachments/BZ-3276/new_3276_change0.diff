@@ -1,0 +1,106 @@
+Index: tao/PortableServer/Direct_Collocation_Upcall_Wrapper.h
+===================================================================
+--- tao/PortableServer/Direct_Collocation_Upcall_Wrapper.h	(revision 81162)
++++ tao/PortableServer/Direct_Collocation_Upcall_Wrapper.h	(working copy)
+@@ -56,6 +56,7 @@
+     void upcall (
+       CORBA::Object_ptr obj,
+       CORBA::Object_out forward_obj,
++      bool & is_forwarded,
+       TAO::Argument ** args,
+       int num_args,
+       const char * op,
+Index: tao/PortableServer/Upcall_Wrapper.cpp
+===================================================================
+--- tao/PortableServer/Upcall_Wrapper.cpp	(revision 81162)
++++ tao/PortableServer/Upcall_Wrapper.cpp	(working copy)
+@@ -200,8 +200,7 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+   // Don't bother marshaling inout/out/return values if an interceptor
+   // caused a location forward.
+- CORBA::Object_var forward_to_end = server_request.forward_location ();
+-  if (CORBA::is_nil (forward_to_end.in ()))
++  if (!server_request.is_forwarded ())
+ #endif  /* TAO_HAS_INTERCEPTORS == 1 */
+     {
+       if (server_request.outgoing ())
+Index: tao/PortableServer/Direct_Collocation_Upcall_Wrapper.cpp
+===================================================================
+--- tao/PortableServer/Direct_Collocation_Upcall_Wrapper.cpp	(revision 81162)
++++ tao/PortableServer/Direct_Collocation_Upcall_Wrapper.cpp	(working copy)
+@@ -21,6 +21,7 @@
+ TAO::Direct_Collocation_Upcall_Wrapper::upcall (
+   CORBA::Object_ptr obj,
+   CORBA::Object_out forward_obj,
++  bool & is_forwarded,
+   TAO::Argument ** args,
+   int num_args,
+   const char * op,
+@@ -47,6 +48,7 @@
+     {
+       forward_obj =
+         CORBA::Object::_duplicate (forward_request.forward_reference.in ());
++      is_forwarded = true;
+     }
+ #else
+   ACE_UNUSED_ARG (forward_obj);
+Index: tao/Collocated_Invocation.cpp
+===================================================================
+--- tao/Collocated_Invocation.cpp	(revision 81162)
++++ tao/Collocated_Invocation.cpp	(working copy)
+@@ -75,11 +75,14 @@
+             dispatcher->dispatch (orb_core,
+                                   request,
+                                   this->forwarded_to_.out ());
++
++            this->is_forwarded_ = request.is_forwarded ();
+           }
+         else
+           {
+             cpb->dispatch (this->effective_target (),
+                            this->forwarded_to_.out (),
++                           this->is_forwarded_,
+                            this->details_.args (),
+                            this->details_.args_num (),
+                            this->details_.opname (),
+@@ -121,7 +124,7 @@
+           this->handle_any_exception (&ex);
+ 
+         if (status == PortableInterceptor::LOCATION_FORWARD ||
+-          status == PortableInterceptor::TRANSPORT_RETRY)
++            status == PortableInterceptor::TRANSPORT_RETRY)
+           s = TAO_INVOKE_RESTART;
+         else
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: TAO_IDL/be/be_visitor_interface/strategized_proxy_broker_sh.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_interface/strategized_proxy_broker_sh.cpp	(revision 81162)
++++ TAO_IDL/be/be_visitor_interface/strategized_proxy_broker_sh.cpp	(working copy)
+@@ -59,6 +59,7 @@
+       << "dispatch (" << be_idt << be_idt_nl
+       << "::CORBA::Object_ptr obj," << be_nl
+       << "::CORBA::Object_out forward_obj," << be_nl
++      << "bool & is_forwarded," << be_nl
+       << "TAO::Argument ** args," << be_nl
+       << "int num_args," << be_nl
+       << "const char * op," << be_nl
+Index: TAO_IDL/be/be_visitor_interface/strategized_proxy_broker_ss.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_interface/strategized_proxy_broker_ss.cpp	(revision 81162)
++++ TAO_IDL/be/be_visitor_interface/strategized_proxy_broker_ss.cpp	(working copy)
+@@ -82,6 +82,7 @@
+       << "dispatch (" << be_idt << be_idt_nl
+       << "::CORBA::Object_ptr obj," << be_nl
+       << "::CORBA::Object_out forward_obj," << be_nl
++      << "bool & is_forwarded," << be_nl
+       << "TAO::Argument ** args," << be_nl
+       << "int num_args," << be_nl
+       << "const char * op," << be_nl
+@@ -93,6 +94,7 @@
+       << "collocation_upcall_wrapper.upcall (" << be_idt_nl
+       << "obj," << be_nl
+       << "forward_obj," << be_nl
++      << "is_forwarded," << be_nl
+       << "args," << be_nl
+       << "num_args," << be_nl
+       << "op," << be_nl
