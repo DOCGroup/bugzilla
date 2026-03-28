@@ -1,0 +1,106 @@
+--- /software/src/policy/ACE/ACE_wrappers/ace/Log_Msg.cpp	2004-04-15 16:49:11.000000000 -0400
++++ Log_Msg.cpp	2005-06-16 16:01:26.000000000 -0400
+@@ -466,6 +466,82 @@
+                                              | LM_CRITICAL
+                                              | LM_ALERT
+                                              | LM_EMERGENCY;
++
++#if defined(TIMESTAMP_CHANGE)
++/// Default is to append usecs to date_time string.
++int ACE_Log_Msg::append_usecs_ = 1;
++/// Default is not to append UTC value to date_time string.
++int ACE_Log_Msg::append_utc_ = 0;
++/// Date/timestamp format
++ACE_TCHAR ACE_Log_Msg::date_time_fmt_[ACE_MAXLOGDATETIME + 1]="%a %b %d %Y %H:%M:%S";
++/// Default utc separator is '|'
++ACE_TCHAR ACE_Log_Msg::utc_separator_='|';
++
++void
++ACE_Log_Msg::date_time_format (ACE_TCHAR date_time_fmt[],
++                               int append_usecs,
++                               int append_utc,
++                               char utc_separator)
++{
++  ACE_TRACE ("ACE_Log_Msg::date_time_format");
++  ACE_MT (ACE_GUARD (ACE_Recursive_Thread_Mutex, ace_mon,
++                     *ACE_Log_Msg_Manager::get_lock ()));
++  ACE_OS::strncpy(ACE_Log_Msg::date_time_fmt_,date_time_fmt,ACE_MAXLOGDATETIME);
++  ACE_Log_Msg::date_time_fmt_[ACE_MAXLOGDATETIME] = '\0';
++  ACE_Log_Msg::append_usecs_ = append_usecs;
++  ACE_Log_Msg::append_utc_ = append_utc;
++  ACE_Log_Msg::utc_separator_ = utc_separator;
++}
++
++int
++ACE_Log_Msg::append_usecs (void)
++{
++  ACE_TRACE ("ACE_Log_Msg::append_usecs");
++  int result;
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon,
++                            *ACE_Log_Msg_Manager::get_lock (), 0));
++
++  result = ACE_Log_Msg::append_usecs_;
++  return result;
++}
++
++int
++ACE_Log_Msg::append_utc (void)
++{
++  ACE_TRACE ("ACE_Log_Msg::append_utc");
++  int result;
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon,
++                            *ACE_Log_Msg_Manager::get_lock (), 0));
++
++  result = ACE_Log_Msg::append_utc_;
++  return result;
++}
++
++const ACE_TCHAR *
++ACE_Log_Msg::date_time_fmt (void)
++{
++  ACE_TRACE ("ACE_Log_Msg::append_utc");
++  ACE_TCHAR *result;
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon,
++                            *ACE_Log_Msg_Manager::get_lock (), 0));
++
++  result = ACE_Log_Msg::date_time_fmt_;
++  return result;
++}
++
++ACE_TCHAR
++ACE_Log_Msg::utc_separator (void)
++{
++  ACE_TRACE ("ACE_Log_Msg::utc_separator");
++  ACE_TCHAR result;
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon,
++                            *ACE_Log_Msg_Manager::get_lock (), 0));
++
++  result = ACE_Log_Msg::utc_separator_;
++  return result;
++}
++#endif	/* TIMESTAMP_CHANGE */
++
+ void
+ ACE_Log_Msg::close (void)
+ {
+@@ -1538,12 +1614,18 @@
+                     break;
+                   }
+ 
+-                case 'D': // Format the timestamp in month/day/year
+-                          // hour:minute:sec:usec format.
++                case 'D': // Format the date and timestamp in user
++                          // defined format
+                   {
++#if !defined (TIMESTAMP_CHANGE)
+                     ACE_TCHAR day_and_time[35];
+                     ACE::timestamp (day_and_time,
+                                     sizeof day_and_time);
++#else
++                    ACE_TCHAR day_and_time[ACE_MAXLOGDATETIME+1];
++                    ACE::formatted_timestamp (day_and_time,
++                                              sizeof day_and_time);
++#endif
+                     ACE_OS::strcpy (fp, ACE_LIB_TEXT ("s"));
+                     if (can_check)
+                       this_len = ACE_OS::snprintf
