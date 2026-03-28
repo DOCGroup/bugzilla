@@ -1,0 +1,72 @@
+6a7,9
+> // For Windows and platforms that defines ACE_HAS_ICONV the clas-names
+> // do not reflects the actual work. For these platform the conversion
+> // operated is Locale => UTF16 and UTF16 => locale
+54a58
+> #if !defined (ACE_HAS_ICONV)
+55a60
+> #endif
+61c66,84
+< # else /* ACE_WIN32 */
+---
+> # elif defined (ACE_HAS_ICONV) /* ACE_VXWORKS */
+>   wchar_t *wstri=const_cast<wchar_t*>(wstr); 
+>   size_t lensi=ACE_MAX_ICONV_BUFFER,lenwi=len*sizeof(wchar_t);
+>   char buf[ACE_MAX_ICONV_BUFFER];
+>   char *stri=buf;
+>   
+>   if(iconv (ACE_Wide_To_Ascii_iconv_env, (char**)&wstri, &lenwi, &stri, &lensi)==size_t(-1)){
+> 	// Error, we fallback to the default "conversion"
+> 	char *str=new char[len];
+> 	for (size_t i = 0; i < len; i++){
+> 		wchar_t *t = const_cast <wchar_t *> (wstr);
+> 		str[i] = static_cast<char> (*(t + i));
+> 	}
+> 
+> 	return str;
+>   }
+>   char *str=new char[ACE_MAX_ICONV_BUFFER-lensi];
+>   ::memcpy(str,buf,ACE_MAX_ICONV_BUFFER-lensi);  
+> # else /* ACE_HAS_ICONV */
+73d95
+<   : s_ (ACE_Wide_To_Ascii::convert (s))
+74a97,101
+> #if defined(ACE_HAS_ICONV)
+> 	if(ACE_Wide_To_Ascii_iconv_env==NULL)
+> 		ACE_Wide_To_Ascii_iconv_env=iconv_open("","WCHAR_T");
+> #endif
+> 	s_=ACE_Wide_To_Ascii::convert (s);
+102a130
+> #if !defined (ACE_HAS_ICONV)
+103a132
+> #endif
+109c138,156
+< # else /* ACE_WIN32 */
+---
+> # elif defined (ACE_HAS_ICONV) /* ACE_VXWORKS */
+>   char *stri=const_cast<char*>(str);
+>   size_t lensi=len,lenwi=ACE_MAX_ICONV_BUFFER;
+>   wchar_t buf[ACE_MAX_ICONV_BUFFER/sizeof(wchar_t)];
+>   wchar_t *wstri=buf;
+> 
+>   if(iconv(ACE_Ascii_To_Wide_iconv_env, &stri, &lensi, (char**)&wstri, &lenwi)==size_t(-1)){
+> 	// Error during conversion we fallback to the default one	
+> 	wchar_t *wstr=new wchar_t[len*sizeof(wchar_t)];
+> 	for (size_t i = 0; i < len; i++){
+> 		char *t = const_cast<char *> (str);
+> 		wstr[i] = static_cast<wchar_t> (*((unsigned char*)t + i));
+> 	}
+> 
+> 	return wstr;
+>   }
+>   wchar_t *wstr=new wchar_t[(ACE_MAX_ICONV_BUFFER-lenwi)/sizeof(wchar_t)];
+>   ::memcpy(wstr,buf,ACE_MAX_ICONV_BUFFER-lenwi);
+> # else /* ACE_HAS_ICONV */
+121d167
+<   : s_ (ACE_Ascii_To_Wide::convert (s))
+122a169,173
+> #if defined(ACE_HAS_ICONV)
+> 	if(ACE_Ascii_To_Wide_iconv_env==NULL)
+> 		ACE_Ascii_To_Wide_iconv_env=iconv_open("WCHAR_T","");
+> #endif
+> 	s_=ACE_Ascii_To_Wide::convert (s);
