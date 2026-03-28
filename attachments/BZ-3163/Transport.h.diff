@@ -1,0 +1,15 @@
+--- Transport.h	4 Oct 2007 18:44:18 -0000	1.1.1.1
++++ Transport.h	5 Dec 2007 16:36:14 -0000
+@@ -328,6 +328,12 @@
+    */
+   bool queue_is_empty (void);
+ 
++  /// Check to see if a specific message is pending in the queue
++  /**
++   * @return true if the queue contains the specified message
++   */
++  bool queue_contains(TAO_Queued_Message * msg);
++
+   /// Added event handler to the handlers set.
+   /**
+    * Called by the cache when the cache is closing.
