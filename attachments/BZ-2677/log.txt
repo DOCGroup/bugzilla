@@ -1,0 +1,179 @@
+lothar@zaphod$ ./build.sh mpc
+ACE_ROOT=/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers
+TAO_ROOT=/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO
+CIAO_ROOT=/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO/CIAO
+DDS_ROOT=/tmp/notthere
+Using .../1.5.7/ACE_wrappers/bin/MakeProjectCreator/config/MPC.cfg
+Generating 'gnuace' output using default input
+Generation Time: 1s
+make[1]: Entering directory `/home/lothar/tmp/bug2677-new'
+touch .depend.sig
+make[1]: Leaving directory `/home/lothar/tmp/bug2677-new'
+make[1]: Entering directory `/home/lothar/tmp/bug2677-new'
+
+GNUmakefile: /home/lothar/tmp/bug2677-new/GNUmakefile.sig MAKEFLAGS=w
+
+rm -f -r \
+        *.o *~ *.bak *.rpo *.sym lib*.*_pure_* \
+        GNUmakefile.old core-r  \
+        cxx_repository ptrepository ti_files \
+        gcctemp.c gcctemp so_locations *.ics \
+        templateregistry templateregistry.* ir.out core.* *.core .obj/sig.o .obj/sig.o .obj/sig.o
+make[1]: Leaving directory `/home/lothar/tmp/bug2677-new'
+make[1]: Entering directory `/home/lothar/tmp/bug2677-new'
+touch .depend.tradescape
+make[1]: Leaving directory `/home/lothar/tmp/bug2677-new'
+make[1]: Entering directory `/home/lothar/tmp/bug2677-new'
+
+GNUmakefile: /home/lothar/tmp/bug2677-new/GNUmakefile.tradescape MAKEFLAGS=w
+
+rm -f -r \
+        *.o *~ *.bak *.rpo *.sym lib*.*_pure_* \
+        GNUmakefile.old core-r  \
+        cxx_repository ptrepository ti_files \
+        gcctemp.c gcctemp so_locations *.ics \
+        templateregistry templateregistry.* ir.out core.* *.core  .shobj/DllOrb.o
+make[1]: Leaving directory `/home/lothar/tmp/bug2677-new'
+make[1]: Entering directory `/home/lothar/tmp/bug2677-new'
+
+GNUmakefile: /home/lothar/tmp/bug2677-new/GNUmakefile.sig MAKEFLAGS=w
+
+/opt2/linux/ix86/x86_64-pc-linux-gnu/bin/g++ -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -m64 -I/opt2/linux/x86_64/include -W -Wall -Wpointer-arith -O3 -g -pipe    -pipe -DNO_LOG4CPLUS -DACE_USE_RCSID=0 -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO  -c -o .obj/sig.o sig.cpp
+sig.cpp:30: warning: unused parameter ‘argc’
+/opt2/linux/ix86/x86_64-pc-linux-gnu/bin/g++ -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -m64 -I/opt2/linux/x86_64/include -W -Wall -Wpointer-arith -O3 -g -pipe    -pipe -DNO_LOG4CPLUS -DACE_USE_RCSID=0 -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO  -m64 -I/opt2/linux/x86_64/include -L/opt2/linux/x86_64/lib -Wl,-E -L/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/ace -L./ -L/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib -L/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO/tao -L. -L/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib -o sig .obj/sig.o -lTAO -lACE -ldl -lpthread -lrt
+make[1]: Leaving directory `/home/lothar/tmp/bug2677-new'
+make[1]: Entering directory `/home/lothar/tmp/bug2677-new'
+
+GNUmakefile: /home/lothar/tmp/bug2677-new/GNUmakefile.tradescape MAKEFLAGS=w
+
+/opt2/linux/ix86/x86_64-pc-linux-gnu/bin/g++ -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -m64 -I/opt2/linux/x86_64/include -W -Wall -Wpointer-arith -O3 -g -pipe    -pipe -DNO_LOG4CPLUS -DACE_USE_RCSID=0 -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO -DTRADESCAPE_BUILD_DLL  -c -fPIC -o .shobj/DllOrb.o DllOrb.cpp
+DllOrb.cpp: In member function ‘virtual int DllOrb::init(int, char**)’:
+DllOrb.cpp:64: warning: unused variable ‘c_failPrePostInit’
+/opt2/linux/ix86/x86_64-pc-linux-gnu/bin/g++ -Wl,-O3 -DNO_LOG4CPLUS -DACE_USE_RCSID=0 -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO -DTRADESCAPE_BUILD_DLL -shared -Wl,-h -Wl,libtradescape.so.1.5.7 -o libtradescape.so.1.5.7 .shobj/DllOrb.o -m64 -I/opt2/linux/x86_64/include -L/opt2/linux/x86_64/lib -Wl,-E -L/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/ace -L./ -L/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib -L/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/TAO/tao -L. -L/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib -lTAO_PortableServer -lTAO_AnyTypeCode -lTAO -lACE -ldl -lpthread -lrt
+rm -f libtradescape.so
+ln -s libtradescape.so.1.5.7 libtradescape.so
+chmod a+rx libtradescape.so.1.5.7
+make[1]: Leaving directory `/home/lothar/tmp/bug2677-new'
+LD_LIBRARY_PATH=.:/opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib:/opt2/linux/x86_64/lib
+1.5.7
+TAO (10127|46912512873056) Initializing the process-wide services
+TAO (10127|46912512873056) Default ORB - global initialization completed.
+TAO (10127|46912512873056) Initializing the orb-specific services
+TAO (10127|46912512873056) Default_Resource_Factory - codeset manager=0x5783c0
+TAO (10127|46912512873056) - Codeset_Manager_i::init_ccs, Loaded Codeset translator <UTF8_Latin1_Factory>, ncs = 00010001 tcs = 05010001
+TAO (10127|46912512873056) - UTF16_BOM_Translator: forceBE 0
+TAO (10127|46912512873056) Loaded default protocol <IIOP_Factory>
+TAO (10127|46912512873056) created new ORB <testORB>
+got ORB
+TAO (10127|46912512873056) - IIOP_Acceptor::open_i, listening on: <192.168.1.102:54281>
+TAO (10127|46912512873056) - IIOP_Acceptor::open_i, listening on: <192.168.203.1:54281>
+TAO (10127|46912512873056) - IIOP_Acceptor::open_i, listening on: <192.168.97.1:54281>
+got root POA
+narrowed root POA
+got POA manager
+activated POA manager
+ORB runs with 1 threads
+ORB initialization done
+loading ORB (1) done
+mv_orb->run ...
+TAO (10127|1082132832) - ORB_Core::run, start [run]
+TAO (10127|1082132832) - ORB_Core::run, calling handle_events()
+unloading ORB (1) ...
+mv_poaManager->deactivate(1, 1) ...
+mv_poaManager->deactivate(1, 1) done
+mv_orb->shutdown(1) ...
+TAO (10127|1082132832) - ORB_Core::run, handle_events() returns 0
+mv_orb->shutdown(1) done
+wait() ...
+TAO (10127|1082132832) - ORB_Core::run, ends with result = 0
+mv_orb->run done
+wait() done
+mv_orb->destroy() ...
+CORBA::ORB::destroy() called on ORB <testORB>.
+Destroying ORB <testORB>
+./build.sh: line 102: 10127 Segmentation fault      (core dumped) ./sig
+<~/tmp/bug2677-new>
+lothar@zaphod$ gdb --core core sig
+GNU gdb 6.4-debian
+Copyright 2005 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu"...Using host libthread_db library "/lib/libthread_db.so.1".
+
+Core was generated by `./sig'.
+Program terminated with signal 11, Segmentation fault.
+Reading symbols from /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libTAO.so.1.5.7...done.
+Loaded symbols for /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libTAO.so.1.5.7
+Reading symbols from /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libACE.so.5.5.7...done.
+Loaded symbols for /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libACE.so.5.5.7
+Reading symbols from /lib/libdl.so.2...done.
+Loaded symbols for /lib/libdl.so.2
+Reading symbols from /lib/libpthread.so.0...done.
+Loaded symbols for /lib/libpthread.so.0
+Reading symbols from /lib/librt.so.1...done.
+Loaded symbols for /lib/librt.so.1
+Reading symbols from /usr/lib/libstdc++.so.6...done.
+Loaded symbols for /usr/lib/libstdc++.so.6
+Reading symbols from /lib/libm.so.6...done.
+Loaded symbols for /lib/libm.so.6
+Reading symbols from /lib/libgcc_s.so.1...done.
+Loaded symbols for /lib/libgcc_s.so.1
+Reading symbols from /lib/libc.so.6...done.
+Loaded symbols for /lib/libc.so.6
+Reading symbols from /lib/ld-linux-x86-64.so.2...done.
+Loaded symbols for /lib64/ld-linux-x86-64.so.2
+Reading symbols from /home/lothar/tmp/bug2677-new/libtradescape.so...done.
+Loaded symbols for ./libtradescape.so
+Reading symbols from /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libTAO_PortableServer.so.1.5.7...done.
+Loaded symbols for /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libTAO_PortableServer.so.1.5.7
+Reading symbols from /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libTAO_AnyTypeCode.so.1.5.7...done.
+Loaded symbols for /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libTAO_AnyTypeCode.so.1.5.7
+Reading symbols from /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libTAO_Codeset.so...done.
+Loaded symbols for /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libTAO_Codeset.so
+Reading symbols from /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libACEXML_XML_Svc_Conf_Parser.so...done.
+Loaded symbols for /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libACEXML_XML_Svc_Conf_Parser.so
+Reading symbols from /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libACEXML_Parser.so.5.5.7...done.
+Loaded symbols for /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libACEXML_Parser.so.5.5.7
+Reading symbols from /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libACEXML.so.5.5.7...done.
+Loaded symbols for /opt2/linux/x86_64/ACE/1.5.7/ACE_wrappers/lib/libACEXML.so.5.5.7
+#0  0x00002aaaac3d36a0 in ?? ()
+(gdb) where
+#0  0x00002aaaac3d36a0 in ?? ()
+#1  0x00002aaaaaecbaaa in ACE_Service_Type_Impl::fini (this=0x56e8e0) at Service_Types.cpp:74
+#2  0x00002aaaaaeca022 in ACE_Service_Type::fini (this=0x56e930) at Service_Object.cpp:106
+#3  0x00002aaaaaeca056 in ~ACE_Service_Type (this=0x56e8a0) at Service_Object.cpp:82
+#4  0x00002aaaaaecb1ea in ACE_Service_Repository::close (this=0x550620) at Service_Repository.cpp:220
+#5  0x00002aaaaaecb368 in ~ACE_Service_Repository (this=0x550620) at Service_Repository.cpp:238
+#6  0x00002aaaaaec73e3 in ACE_Service_Gestalt::close (this=0x5505c0) at Service_Gestalt.cpp:1307
+#7  0x00002aaaaacc5f51 in TAO::ORB::close_services (pcfg=0x5505c0) at TAO_Internal.cpp:416
+#8  0x00002aaaaac9ae18 in ~TAO_ORB_Core (this=0x549780) at ORB_Core.cpp:377
+#9  0x00002aaaaac9cc53 in TAO_ORB_Core::fini (this=0x549780) at ORB_Core.cpp:1413
+#10 0x00002aaaaaca3b21 in TAO::ORB_Table::unbind (this=0x5495c8, orb_id=<value optimized out>) at ORB_Core.inl:29
+#11 0x00002aaaaac923e2 in CORBA::ORB::destroy (this=0x578390) at ORB.cpp:178
+#12 0x00002aaaabdeefba in DllOrb::fini (this=0x5426e0) at DllOrb.cpp:198
+#13 0x00002aaaaaecbc8b in ACE_Service_Object_Type::fini (this=<value optimized out>) at Service_Types.cpp:129
+#14 0x00002aaaaaeca022 in ACE_Service_Type::fini (this=0x5427a0) at Service_Object.cpp:106
+#15 0x00002aaaaaeca056 in ~ACE_Service_Type (this=0x56e8a0) at Service_Object.cpp:82
+#16 0x00002aaaaaecacb4 in ACE_Service_Repository::remove (this=<value optimized out>, name=0x50f5b0 "testDllOrb", ps=0x0)
+---Type <return> to continue, or q <return> to quit---
+    at Service_Repository.cpp:467
+#17 0x00002aaaabaae8e1 in ACEXML_Svcconf_Handler::startElement (this=0x583ca0, qName=<value optimized out>, alist=<value optimized out>)
+    at Svcconf_Handler.cpp:469
+#18 0x00002aaaabbbba26 in ACEXML_Parser::parse_element (this=0x583b18, is_root=<value optimized out>) at Parser.cpp:900
+#19 0x00002aaaabbbbe06 in ACEXML_Parser::parse_content (this=0x583b18, startname=0x50e250 "ACE_Svc_Conf", ns_uri=@0x7fffff8de3b8,
+    ns_lname=@0x7fffff8de3b0, ns_flag=0) at Parser.cpp:1093
+#20 0x00002aaaabbbba3d in ACEXML_Parser::parse_element (this=0x583b18, is_root=<value optimized out>) at Parser.cpp:985
+#21 0x00002aaaabbbf56a in ACEXML_Parser::parse (this=0x583b18, input=<value optimized out>) at Parser.cpp:225
+#22 0x00002aaaabaa9533 in ACEXML_Svcconf_Parser::parse_string (this=0x583b10, str=<value optimized out>) at Svcconf.cpp:99
+#23 0x00002aaaaaec6381 in ACE_Service_Gestalt::process_directive (this=0x5025d8,
+    directive=0x401388 "<ACE_Svc_Conf><remove id=\"testDllOrb\"></remove></ACE_Svc_Conf>") at Service_Gestalt.cpp:1023
+#24 0x0000000000400e1c in main (argc=<value optimized out>, argv=<value optimized out>) at Service_Config.inl:142
+(gdb) up
+#1  0x00002aaaaaecbaaa in ACE_Service_Type_Impl::fini (this=0x56e8e0) at Service_Types.cpp:74
+74              gobbler_ (this->object ());
+(gdb) p *this
+$1 = {_vptr.ACE_Service_Type_Impl = 0x2aaaab093850, name_ = 0x0, obj_ = 0x56e8a0, gobbler_ = 0x2aaaac3d36a0, flags_ = 3}
+(gdb)
+
