@@ -1,0 +1,18 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 03-compile-lifecycle.dpatch by Thomas Girard <thomas.g.girard@free.fr>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: compile LifeCycle.
+
+@DPATCH@
+--- ACE_wrappers.orig/TAO/orbsvcs/LifeCycle_Service/Makefile.am
++++ ACE_wrappers/TAO/orbsvcs/LifeCycle_Service/Makefile.am
+@@ -18,7 +18,7 @@
+ 
+ if BUILD_EXCEPTIONS
+ 
+-noinst_PROGRAMS = LifeCycle_Service
++bin_PROGRAMS = LifeCycle_Service
+ 
+ LifeCycle_Service_CPPFLAGS = \
+   -I$(ACE_ROOT) \
