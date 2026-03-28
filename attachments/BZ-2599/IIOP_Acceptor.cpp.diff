@@ -1,0 +1,86 @@
+Index: IIOP_Acceptor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Acceptor.cpp,v
+retrieving revision 1.118
+diff -u -b -r1.118 IIOP_Acceptor.cpp
+--- IIOP_Acceptor.cpp	14 Jul 2006 21:48:29 -0000	1.118
++++ IIOP_Acceptor.cpp	14 Jul 2006 21:52:10 -0000
+@@ -654,45 +654,57 @@
+     specified_hostname.clear();
+   }
+ 
+-  const char *port_separator_loc = ACE_OS::strchr (address, ':');
++  const char *port_separator_loc = ACE_OS::strrchr (address, ':');
+   char tmp_host[MAXHOSTNAMELEN + 1];
+ 
+ #if defined (ACE_HAS_IPV6)
+   // IPv6 numeric address in host string?
+-  bool ipv6_in_host = false;
++  // An IPv6 address will always have at least 2 colons, therefore
+ 
++  bool ipv6_in_host = (ACE_OS::strchr(addres,':') != port_separator_loc);
++  // now, if there are 0 or 1 colons, ipv6_in_host will be false
++  // and so the address should not be framed in brackets. If there are
++  // more than 1 colon, the address must be framed in brackets.
+ 
+-  // Check if this is a (possibly) IPv6 supporting profile containing a
+-  // numeric IPv6 address representation.
+-  if ((this->version_.major > TAO_MIN_IPV6_IIOP_MAJOR ||
+-        this->version_.minor >= TAO_MIN_IPV6_IIOP_MINOR) &&
+-      address[0] == '[')
+-    {
+-      // In this case we have to find the end of the numeric address and
+-      // start looking for the port separator from there.
+-      const char *cp_pos = ACE_OS::strchr(address, ']');
+-      if (cp_pos == 0)
++  if (ipv6_in_host)
++    {
++      // if there are at least two colons, the rest of the address
++      // format must be validated, that means that the version should
++
++      bool is_minimum_version =
++        this->version_.major > TAO_MIN_IPV6_IIOP_MAJOR ||
++        (this->version_.major == TAO_MIN_IPV6_IIOP_MAJOR &&
++         this->version_.minor >= TAO_MIN_IPV6_IIOP_MINOR);
++      const char * cp_pos = strrchr(address,']');
++
++      if (!is_minimum_version ||
++          address[0] != '[' ||
++          cp_pos == 0 ||
++          (port_separator_loc > cp_pos + 1))
+         {
+           // No valid IPv6 address specified.
+           ACE_ERROR_RETURN ((LM_ERROR,
+                              ACE_TEXT ("TAO (%P|%t) - ")
+                              ACE_TEXT ("IIOP_Acceptor::open, ")
+-                             ACE_TEXT ("Invalid IPv6 decimal address specified\n\n")),
++                             ACE_TEXT ("Invalid IPv6 decimal ")
++                             ACE_TEXT ("address specified\n\n")),
+                             -1);
+         }
+-      else
+-        {
+-          if (cp_pos[1] == ':')    // Look for a port
+-            port_separator_loc = cp_pos + 1;
+-          else
+-            port_separator_loc = 0;
++
++      // now we have a nominally correct IPv6 address. We need to
++      // possibly reset the port_separator_char. If it is to the left
++      // of the right bracket, then it is really part of the IPv6
++      // address specifier, and no port was given.
++      if (port_separator_char < cp_pos)
++        port_separator_char = 0;
++
++
+           // Extract out just the host part of the address.
+           const size_t len = cp_pos - (address + 1);
+           ACE_OS::memcpy (tmp_host, address + 1, len);
+           tmp_host[len] = '\0';
+-          ipv6_in_host = true; // host string contains full IPv6 numeric address
+-        }
+     }
++
+ #endif /* ACE_HAS_IPV6 */
+ 
+   if (port_separator_loc == address)
