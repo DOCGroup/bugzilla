@@ -1,0 +1,46 @@
+Index: ace/Service_Gestalt.cpp
+===================================================================
+--- ace/Service_Gestalt.cpp	(revision 75280)
++++ ace/Service_Gestalt.cpp	(working copy)
+@@ -1251,10 +1251,6 @@
+   if (this->is_opened_ > 0)
+     return 0;
+ 
+-  // Delete the service repository.  All the objects inside the
+-  // service repository should already have been finalized.
+-  //  ACE_Service_Config::close_svcs ();
+-
+   // Delete the list fo svc.conf files
+   delete this->svc_conf_file_queue_;
+   this->svc_conf_file_queue_ = 0;
+iliyan@oci1179:/opt/local/tao/HEAD/ACE_wrappers
+$ svn diff ace/Service_Config.cpp
+Index: ace/Service_Config.cpp
+===================================================================
+--- ace/Service_Config.cpp	(revision 75280)
++++ ace/Service_Config.cpp	(working copy)
+@@ -450,9 +450,6 @@
+ 
+   ACE_Service_Config::signum_ = signum;
+ 
+-  // Initialize the Service Repository.
+-  //  ACE_Service_Repository::instance (static_cast<int> (size));
+-
+   // Make sure ACE_OS_Object_Manager is initialized.
+   (void)ACE_OS_Object_Manager::instance ();
+ 
+@@ -582,7 +579,13 @@
+ int
+ ACE_Service_Config::close (void)
+ {
+-  return ACE_Service_Config::current ()->close ();
++  int result1 = ACE_Service_Config::current ()->close ();
++
++  // Delete the service repository.  All the objects inside the
++  // service repository should already have been finalized.
++  int result2 = ACE_Service_Config::close_svcs ();
++
++  return (result1 | result2); 
+ }
+ 
+ int
