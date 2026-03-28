@@ -1,0 +1,1588 @@
+[build@shelob tests]$ cd Bug_3108_Regression/
+[build@shelob Bug_3108_Regression]$ export ACE_DEBUG=1
+[build@shelob Bug_3108_Regression]$ perl run_test.pl
+ACE (26694|92872144) SG::ctor - this = 0x5893d88, pss = (nil)
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - TAO_Codeset, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [0] (1024), name=TAO_Codeset, type=0x589a378, object=0x589a310, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - TAO_Codeset
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_ORB_Core_Static_Resources type=(nil) => (nil)
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - TAO_ORB_Core_Static_Resources, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [1] (1024), name=TAO_ORB_Core_Static_Resources, type=0x58a4e58, object=0x58a4ab8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - TAO_ORB_Core_Static_Resources
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_ORB_Core_Static_Resources type=0x58a4e58 => 0x58a4ab8
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - TAO_NVList_Adapter, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [2] (1024), name=TAO_NVList_Adapter, type=0x58b0b70, object=0x58b0b08, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - TAO_NVList_Adapter
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - AnyTypeCode_Adapter, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [3] (1024), name=AnyTypeCode_Adapter, type=0x58b7d88, object=0x58b7d20, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - AnyTypeCode_Adapter
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - IdAssignmentStrategySystem, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [4] (1024), name=IdAssignmentStrategySystem, type=0x58be2e0, object=0x58be278, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - IdAssignmentStrategySystem
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - IdAssignmentStrategyUser, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [5] (1024), name=IdAssignmentStrategyUser, type=0x58c4850, object=0x58c47e8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - IdAssignmentStrategyUser
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - IdUniquenessStrategyMultiple, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [6] (1024), name=IdUniquenessStrategyMultiple, type=0x58cadc0, object=0x58cad58, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - IdUniquenessStrategyMultiple
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - IdUniquenessStrategyUnique, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [7] (1024), name=IdUniquenessStrategyUnique, type=0x58d1338, object=0x58d12c8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - IdUniquenessStrategyUnique
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - IdUniquenessStrategyUniqueFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [8] (1024), name=IdUniquenessStrategyUniqueFactory, type=0x58d78a8, object=0x58d7840, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - IdUniquenessStrategyUniqueFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ImplicitActivationStrategyExplicit, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [9] (1024), name=ImplicitActivationStrategyExplicit, type=0x58dde30, object=0x58dddc8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ImplicitActivationStrategyExplicit
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ImplicitActivationStrategyImplicit, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [10] (1024), name=ImplicitActivationStrategyImplicit, type=0x58e43b8, object=0x58e4350, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ImplicitActivationStrategyImplicit
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ThreadStrategyFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [11] (1024), name=ThreadStrategyFactory, type=0x58ea940, object=0x58ea8d8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ThreadStrategyFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ThreadStrategySingleFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [12] (1024), name=ThreadStrategySingleFactory, type=0x58f0e98, object=0x58f0e30, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ThreadStrategySingleFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - LifespanStrategyFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [13] (1024), name=LifespanStrategyFactory, type=0x58f7408, object=0x58f73a0, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - LifespanStrategyFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - LifespanStrategyPersistentFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [14] (1024), name=LifespanStrategyPersistentFactory, type=0x58fd960, object=0x58fd8f8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - LifespanStrategyPersistentFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - LifespanStrategyTransientFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [15] (1024), name=LifespanStrategyTransientFactory, type=0x5903ee8, object=0x5903e80, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - LifespanStrategyTransientFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - IdAssignmentStrategyFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [16] (1024), name=IdAssignmentStrategyFactory, type=0x590a470, object=0x590a408, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - IdAssignmentStrategyFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - IdUniquenessStrategyFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [17] (1024), name=IdUniquenessStrategyFactory, type=0x59109e0, object=0x5910978, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - IdUniquenessStrategyFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ImplicitActivationStrategyFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [18] (1024), name=ImplicitActivationStrategyFactory, type=0x5916f50, object=0x5916ee8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ImplicitActivationStrategyFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - RequestProcessingStrategyFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [19] (1024), name=RequestProcessingStrategyFactory, type=0x591d4d8, object=0x591d470, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - RequestProcessingStrategyFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - RequestProcessingStrategyAOMOnlyFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [20] (1024), name=RequestProcessingStrategyAOMOnlyFactory, type=0x5923a60, object=0x59239f8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - RequestProcessingStrategyAOMOnlyFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - RequestProcessingStrategyDefaultServantFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [21] (1024), name=RequestProcessingStrategyDefaultServantFactory, type=0x5929fe8, object=0x5929f80, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - RequestProcessingStrategyDefaultServantFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - RequestProcessingStrategyServantActivatorFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [22] (1024), name=RequestProcessingStrategyServantActivatorFactory, type=0x5930588, object=0x5930520, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - RequestProcessingStrategyServantActivatorFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - RequestProcessingStrategyServantLocatorFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [23] (1024), name=RequestProcessingStrategyServantLocatorFactory, type=0x5936b40, object=0x5936ad8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - RequestProcessingStrategyServantLocatorFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ServantRetentionStrategyFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [24] (1024), name=ServantRetentionStrategyFactory, type=0x593d0e0, object=0x593d078, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ServantRetentionStrategyFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ServantRetentionStrategyRetainFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [25] (1024), name=ServantRetentionStrategyRetainFactory, type=0x5943650, object=0x59435e8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ServantRetentionStrategyRetainFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ServantRetentionStrategyNonRetainFactory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [26] (1024), name=ServantRetentionStrategyNonRetainFactory, type=0x5949bd8, object=0x5949b70, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ServantRetentionStrategyNonRetainFactory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ThreadStrategyORBControl, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [27] (1024), name=ThreadStrategyORBControl, type=0x5950178, object=0x5950110, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ThreadStrategyORBControl
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ThreadStrategySingle, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [28] (1024), name=ThreadStrategySingle, type=0x5956718, object=0x5956680, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ThreadStrategySingle
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - TAO_POA_Current_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [29] (1024), name=TAO_POA_Current_Factory, type=0x595cc70, object=0x595cc08, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - TAO_POA_Current_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - TAO_Object_Adapter_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [30] (1024), name=TAO_Object_Adapter_Factory, type=0x59631c8, object=0x5963160, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - TAO_Object_Adapter_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - TAO_Network_Priority_Hook, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [31] (1024), name=TAO_Network_Priority_Hook, type=0x5969738, object=0x59696d0, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - TAO_Network_Priority_Hook
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - TAO_Acceptor_Filter_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [32] (1024), name=TAO_Acceptor_Filter_Factory, type=0x596fca8, object=0x596fc40, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - TAO_Acceptor_Filter_Factory
+ACE (26694|92872144) Service_Config_Guard:<ctor=0x7ff0005d0> - config=0x5893d88 repo=0x5893eb8 superceded by repo=0x5893eb8
+ACE (26694|92872144) Service_Config_Guard:<ctor=0x7ff000500> - config=0x5893d88 repo=0x5893eb8 superceded by repo=0x5893eb8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_Codeset type=0x589a378 => 0x589a310
+ACE (26694|92872144) SG::process_directive, repo=0x5893eb8 - remove TAO_Codeset
+ACE (26694|92872144) Service_Config_Guard:<ctor=0x7ff000350> - config=0x5893d88 repo=0x5893eb8 superceded by repo=0x5893eb8
+ACE (26694|92872144) SG::process_directives_i, repo=0x5893eb8 - remove TAO_Codeset
+ACE (26694|92872144) ST::fini - destroying TAO_Codeset, flags = 3
+ACE (26694|92872144) Remove_Node::apply - did remove on TAO_Codeset, error = 0
+ACE (26694|92872144) Service_Config_Guard:<dtor=0x7ff000350> - new repo=0x5893eb8
+ACE (26694|92872144) SG::process_directive, repo=0x5893eb8 - dynamic TAO_Codeset Service_Object * TAO_Codeset:_make_TAO_Codeset_Manager_Factory() ""
+ACE (26694|92872144) Service_Config_Guard:<ctor=0x7ff000350> - config=0x5893d88 repo=0x5893eb8 superceded by repo=0x5893eb8
+ACE (26694|92872144) SG::process_directives_i, repo=0x5893eb8 - dynamic TAO_Codeset Service_Object * TAO_Codeset:_make_TAO_Codeset_Manager_Factory() ""
+ACE (26694|92872144) SG::initialize - repo=0x5893eb8, looking up dynamic service 'TAO_Codeset' to initialize
+ACE (26694|92872144) STDG::<ctor>, repo=0x5893eb8 [32], name=TAO_Codeset, type=0x59a58d0, impl=(nil), object=(nil), active=0 - inserting dummy forward
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [32] (1024), name=TAO_Codeset, type=(nil), object=(nil), active=0
+ACE (26694|92872144) LN::open_dll - path=TAO_Codeset
+ACE (26694|92872144) DLL_Handle::open ("TAO_Codeset.so", 0x101) -> failed: TAO_Codeset.so: cannot open shared object file: No such file or directory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - UTF8_Latin1_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [33] (1024), name=UTF8_Latin1_Factory, type=0x59b0e38, object=0x59b0dc8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - UTF8_Latin1_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - UTF16_BOM_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [34] (1024), name=UTF16_BOM_Factory, type=0x59b73a8, object=0x59b7330, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - UTF16_BOM_Factory
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_Codeset type=(nil) => (nil)
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - TAO_Codeset, dll=<null>, force=1
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [32] (1024), name=TAO_Codeset, type=0x59c1ae0, object=0x59c1a78, active=0
+ACE (26694|92872144) SR::insert - destroying (replacing), repo=0x5893eb8 [32] (1024), name=TAO_Codeset, type=(nil), object=(nil), active=0
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_Codeset type=0x59c1ae0 => 0x59c1a78
+ACE (26694|92872144) DLL_Handle::open ("libTAO_Codeset.so", 0x101) -> succeeded: no error
+ACE (26694|92872144) DLL_Handle::open - TAO_Codeset (94045904), refcount=1
+ACE (26694|92872144) DLL_Handle::open - TAO_Codeset (94045904), refcount=2
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [32] (1024), name=TAO_Codeset, type=0x59d0500, object=0x59d0498, active=1
+ACE (26694|92872144) SR::insert - destroying (replacing), repo=0x5893eb8 [32] (1024), name=TAO_Codeset, type=0x59c1ae0, object=0x59c1a78, active=0
+ACE (26694|92872144) ST::fini - destroying TAO_Codeset, flags = 3
+ACE (26694|92872144) STDG::<dtor>, repo=0x5893eb8, name=TAO_Codeset - updating [32 - 35]
+ACE (26694|92872144) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (26694|92872144) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (26694|92872144) SR::relocate, repo=0x5893eb8 [33] (size=1024): name=UTF8_Latin1_Factory - DLL from=0 to=94045904
+ACE (26694|92872144) DLL_Handle::open - TAO_Codeset (94045904), refcount=3
+ACE (26694|92872144) SR::relocate, repo=0x5893eb8 [34] (size=1024): name=UTF16_BOM_Factory - DLL from=0 to=94045904
+ACE (26694|92872144) DLL_Handle::open - TAO_Codeset (94045904), refcount=4
+ACE (26694|92872144) STDG::<dtor>, repo=0x5893eb8 [32], name=TAO_Codeset, type=0x59d0598, impl=0x59d0500, object=0x59d0498, active=1 - loaded
+ACE (26694|92872144) Dynamic_Node::apply - Did dynamic on TAO_Codeset (yyerrno=0)
+ACE (26694|92872144) DLL_Handle::close - TAO_Codeset (handle=94045904, refcount=3)
+ACE (26694|92872144) Service_Config_Guard:<dtor=0x7ff000350> - new repo=0x5893eb8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_Codeset type=0x59d0500 => 0x59d0498
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - Resource_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [35] (1024), name=Resource_Factory, type=0x59f39f8, object=0x59f3820, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - Resource_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - Client_Strategy_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [36] (1024), name=Client_Strategy_Factory, type=0x59f9f70, object=0x59f9ee8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - Client_Strategy_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - Server_Strategy_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [37] (1024), name=Server_Strategy_Factory, type=0x5a00510, object=0x5a00460, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - Server_Strategy_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - IIOP_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [38] (1024), name=IIOP_Factory, type=0x5a06a70, object=0x5a06a00, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - IIOP_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - MCAST_Parser, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [39] (1024), name=MCAST_Parser, type=0x5a0cfd8, object=0x5a0cf48, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - MCAST_Parser
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - CORBANAME_Parser, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [40] (1024), name=CORBANAME_Parser, type=0x5a13518, object=0x5a134b0, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - CORBANAME_Parser
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - CORBALOC_Parser, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [41] (1024), name=CORBALOC_Parser, type=0x5a19a70, object=0x5a19a08, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - CORBALOC_Parser
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - FILE_Parser, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [42] (1024), name=FILE_Parser, type=0x5a1ffb0, object=0x5a1ff48, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - FILE_Parser
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - DLL_Parser, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [43] (1024), name=DLL_Parser, type=0x5a264f0, object=0x5a26488, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - DLL_Parser
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - HTTP_Parser, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [44] (1024), name=HTTP_Parser, type=0x5a2ca30, object=0x5a2c9c8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - HTTP_Parser
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - Default_Stub_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [45] (1024), name=Default_Stub_Factory, type=0x5a32f70, object=0x5a32f08, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - Default_Stub_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - Default_Endpoint_Selector_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [46] (1024), name=Default_Endpoint_Selector_Factory, type=0x5a39508, object=0x5a39460, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - Default_Endpoint_Selector_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - Default_Thread_Lane_Resources_Manager_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [47] (1024), name=Default_Thread_Lane_Resources_Manager_Factory, type=0x5a3fa90, object=0x5a3fa28, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - Default_Thread_Lane_Resources_Manager_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - Default_Collocation_Resolver, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [48] (1024), name=Default_Collocation_Resolver, type=0x5a46030, object=0x5a45fc8, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - Default_Collocation_Resolver
+ACE (26694|92872144) SG::init_svc_conf_file_queue - this=0x5893d88, repo=0x5893eb8
+(26694|92872144) SC::open_i - this=0x5893d88, opened=0, loadstatics=0
+starting up daemon ././server
+ACE (26694|92872144) SG::init_svc_conf_file_queue - this=0x5893d88, repo=0x5893eb8
+ACE (26694|92872144) SG::open_i - this=0x5893d88, opened=0, loadstatics=0
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ACE_Service_Manager, dll=<null>, force=1
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [49] (1024), name=ACE_Service_Manager, type=0x5a5c6e0, object=0x5a5c668, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ACE_Service_Manager
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ACE_Naming_Context, dll=<null>, force=1
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [50] (1024), name=ACE_Naming_Context, type=0x5a63dc8, object=0x5a62bd0, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ACE_Naming_Context
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=PI_Server_Loader type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=BiDirGIOP_Loader type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=Messaging_Loader type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=RT_ORB_Loader type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=RTScheduler_Loader type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=CSD_Framework_Loader type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=EndpointPolicy_Initializer type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=DiffservPolicy_Initializer type=(nil) => (nil)
+ACE (26694|92872144) Service_Config_Guard:<dtor=0x7ff000500> - new repo=0x5893eb8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ORBInitializer_Registry type=(nil) => (nil)
+ACE (26694|92872144) SG::process_directive, repo=0x5893eb8 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (26694|92872144) Service_Config_Guard:<ctor=0x7ff000470> - config=0x5893d88 repo=0x5893eb8 superceded by repo=0x5893eb8
+ACE (26694|92872144) SG::process_directives_i, repo=0x5893eb8 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (26694|92872144) SG::initialize - repo=0x5893eb8, looking up dynamic service 'ORBInitializer_Registry' to initialize
+ACE (26694|92872144) STDG::<ctor>, repo=0x5893eb8 [51], name=ORBInitializer_Registry, type=0x5a92650, impl=(nil), object=(nil), active=0 - inserting dummy forward
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [51] (1024), name=ORBInitializer_Registry, type=(nil), object=(nil), active=0
+ACE (26694|92872144) LN::open_dll - path=TAO_PI
+ACE (26694|92872144) DLL_Handle::open ("TAO_PI.so", 0x101) -> failed: TAO_PI.so: cannot open shared object file: No such file or directory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - CodecFactory_Loader, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [52] (1024), name=CodecFactory_Loader, type=0x5cb7770, object=0x5a92f98, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - CodecFactory_Loader
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - PolicyFactory_Loader, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [53] (1024), name=PolicyFactory_Loader, type=0x5cbe108, object=0x5cbe0a0, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - PolicyFactory_Loader
+ACE (26694|92872144) DLL_Handle::open ("libTAO_PI.so", 0x101) -> succeeded: no error
+ACE (26694|92872144) DLL_Handle::open - TAO_PI (97218208), refcount=1
+ACE (26694|92872144) DLL_Handle::open - TAO_PI (97218208), refcount=2
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - ClientRequestInterceptor_Adapter_Factory, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [54] (1024), name=ClientRequestInterceptor_Adapter_Factory, type=0x5ccb0e8, object=0x5ccb080, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - ClientRequestInterceptor_Adapter_Factory
+ACE (26694|92872144) SG::process_directive_i, repo=0x5893eb8 - PICurrent_Loader, dll=<null>, force=0
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [55] (1024), name=PICurrent_Loader, type=0x5cd1688, object=0x5cd1620, active=0
+ACE (26694|92872144) SG::add_processed_static_svc, repo=0x5893eb8 - PICurrent_Loader
+ACE (26694|92872144) SR::insert - repo=0x5893eb8 [51] (1024), name=ORBInitializer_Registry, type=0x5cc8db8, object=0x5cc8d00, active=1
+ACE (26694|92872144) SR::insert - destroying (replacing), repo=0x5893eb8 [51] (1024), name=ORBInitializer_Registry, type=(nil), object=(nil), active=0
+ACE (26694|92872144) STDG::<dtor>, repo=0x5893eb8, name=ORBInitializer_Registry - updating [51 - 56]
+ACE (26694|92872144) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (26694|92872144) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (26694|92872144) SR::relocate, repo=0x5893eb8 [52] (size=1024): name=CodecFactory_Loader - DLL from=0 to=97218208
+ACE (26694|92872144) DLL_Handle::open - TAO_PI (97218208), refcount=3
+ACE (26694|92872144) SR::relocate, repo=0x5893eb8 [53] (size=1024): name=PolicyFactory_Loader - DLL from=0 to=97218208
+ACE (26694|92872144) DLL_Handle::open - TAO_PI (97218208), refcount=4
+ACE (26694|92872144) SR::relocate, repo=0x5893eb8 [54] (size=1024): name=ClientRequestInterceptor_Adapter_Factory - DLL from=0 to=97218208
+ACE (26694|92872144) DLL_Handle::open - TAO_PI (97218208), refcount=5
+ACE (26694|92872144) SR::relocate, repo=0x5893eb8 [55] (size=1024): name=PICurrent_Loader - DLL from=0 to=97218208
+ACE (26694|92872144) DLL_Handle::open - TAO_PI (97218208), refcount=6
+ACE (26694|92872144) STDG::<dtor>, repo=0x5893eb8 [51], name=ORBInitializer_Registry, type=0x5cc8e58, impl=0x5cc8db8, object=0x5cc8d00, active=1 - loaded
+ACE (26694|92872144) Dynamic_Node::apply - Did dynamic on ORBInitializer_Registry (yyerrno=0)
+ACE (26694|92872144) DLL_Handle::close - TAO_PI (handle=97218208, refcount=5)
+ACE (26694|92872144) Service_Config_Guard:<dtor=0x7ff000470> - new repo=0x5893eb8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ORBInitializer_Registry type=0x5cc8db8 => 0x5cc8d00
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_ORB_Core_Static_Resources type=0x58a4e58 => 0x58a4ab8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=Resource_Factory type=0x59f39f8 => 0x59f3820
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=DLL_Parser type=0x5a264f0 => 0x5a26488
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=FILE_Parser type=0x5a1ffb0 => 0x5a1ff48
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=CORBALOC_Parser type=0x5a19a70 => 0x5a19a08
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=CORBANAME_Parser type=0x5a13518 => 0x5a134b0
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=MCAST_Parser type=0x5a0cfd8 => 0x5a0cf48
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=HTTP_Parser type=0x5a2ca30 => 0x5a2c9c8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=Default_Thread_Lane_Resources_Manager_Factory type=0x5a3fa90 => 0x5a3fa28
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=Server_Strategy_Factory type=0x5a00510 => 0x5a00460
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_Codeset type=0x59d0500 => 0x59d0498
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=UTF8_Latin1_Factory type=0x59b0e38 => 0x59b0dc8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=UTF16_BOM_Factory type=0x59b73a8 => 0x59b7330
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=IIOP_Factory type=0x5a06a70 => 0x5a06a00
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=Protocols_Hooks type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_Object_Adapter_Factory type=0x59631c8 => 0x5963160
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_ORB_Core_Static_Resources type=0x58a4e58 => 0x58a4ab8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=Network_Priority_Protocols_Hooks type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=FT_ClientService_Activate type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=PolicyFactory_Loader type=0x5cbe108 => 0x5cbe0a0
+ACE (26694|92872144) Service_Config_Guard:<dtor=0x7ff0005d0> - new repo=0x5893eb8
+ACE (26694|92872144) Service_Config_Guard:<ctor=0x7ff000540> - config=0x5893d88 repo=0x5893eb8 superceded by repo=0x5893eb8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_Object_Adapter_Factory type=0x59631c8 => 0x5963160
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=BiDirGIOP_Loader type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=BiDirGIOP_Loader type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_Network_Priority_Hook type=0x5969738 => 0x59696d0
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ThreadStrategyFactory type=0x58ea940 => 0x58ea8d8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ThreadStrategyORBControl type=0x5950178 => 0x5950110
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=IdAssignmentStrategyFactory type=0x590a470 => 0x590a408
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=IdAssignmentStrategySystem type=0x58be2e0 => 0x58be278
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=IdUniquenessStrategyFactory type=0x59109e0 => 0x5910978
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=IdUniquenessStrategyUniqueFactory type=0x58d78a8 => 0x58d7840
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ServantRetentionStrategyFactory type=0x593d0e0 => 0x593d078
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ServantRetentionStrategyRetainFactory type=0x5943650 => 0x59435e8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=RequestProcessingStrategyFactory type=0x591d4d8 => 0x591d470
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=RequestProcessingStrategyAOMOnlyFactory type=0x5923a60 => 0x59239f8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=LifespanStrategyFactory type=0x58f7408 => 0x58f73a0
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=LifespanStrategyTransientFactory type=0x5903ee8 => 0x5903e80
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ImplicitActivationStrategyFactory type=0x5916f50 => 0x5916ee8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ImplicitActivationStrategyImplicit type=0x58e43b8 => 0x58e4350
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_ORB_Core_Static_Resources type=0x58a4e58 => 0x58a4ab8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=IORInterceptor_Adapter_Factory type=(nil) => (nil)
+ACE (26694|92872144) Service_Config_Guard:<dtor=0x7ff000540> - new repo=0x5893eb8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ORT_Adapter_Factory type=(nil) => (nil)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_Acceptor_Filter_Factory type=0x596fca8 => 0x596fc40
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=Client_Strategy_Factory type=0x59f9f70 => 0x59f9ee8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=Default_Stub_Factory type=0x5a32f70 => 0x5a32f08
+==26694== Use of uninitialised value of size 8
+==26694==    at 0x52668CF: CORBA::ORB::object_to_string(CORBA::Object*) (ORB.cpp:1466)
+==26694==    by 0x4052D4: main (server.cpp:75)
+==26694==
+==26694== Use of uninitialised value of size 8
+==26694==    at 0x52668E1: CORBA::ORB::object_to_string(CORBA::Object*) (ORB.cpp:1467)
+==26694==    by 0x4052D4: main (server.cpp:75)
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=TAO_ORB_Core_Static_Resources type=0x58a4e58 => 0x58a4ab8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=IORInterceptor_Adapter_Factory type=(nil) => (nil)
+ACE (26694|92872144) Service_Config_Guard:<ctor=0x7ff0005f0> - config=0x5893d88 repo=0x5893eb8 superceded by repo=0x5893eb8
+ACE (26695|86983056) SG::ctor - this = 0x52f5d88, pss = (nil)
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - TAO_Codeset, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [0] (1024), name=TAO_Codeset, type=0x52fc378, object=0x52fc310, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - TAO_Codeset
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=(nil) => (nil)
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - TAO_ORB_Core_Static_Resources, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [1] (1024), name=TAO_ORB_Core_Static_Resources, type=0x5306e58, object=0x5306ab8, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - TAO_ORB_Core_Static_Resources
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|86983056) Service_Config_Guard:<ctor=0x7ff000550> - config=0x52f5d88 repo=0x52f5eb8 superceded by repo=0x52f5eb8
+ACE (26695|86983056) Service_Config_Guard:<ctor=0x7ff000480> - config=0x52f5d88 repo=0x52f5eb8 superceded by repo=0x52f5eb8
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_Codeset type=0x52fc378 => 0x52fc310
+ACE (26695|86983056) SG::process_directive, repo=0x52f5eb8 - remove TAO_Codeset
+ACE (26695|86983056) Service_Config_Guard:<ctor=0x7ff0002d0> - config=0x52f5d88 repo=0x52f5eb8 superceded by repo=0x52f5eb8
+ACE (26695|86983056) SG::process_directives_i, repo=0x52f5eb8 - remove TAO_Codeset
+ACE (26695|86983056) ST::fini - destroying TAO_Codeset, flags = 3
+ACE (26695|86983056) Remove_Node::apply - did remove on TAO_Codeset, error = 0
+ACE (26695|86983056) Service_Config_Guard:<dtor=0x7ff0002d0> - new repo=0x52f5eb8
+ACE (26695|86983056) SG::process_directive, repo=0x52f5eb8 - dynamic TAO_Codeset Service_Object * TAO_Codeset:_make_TAO_Codeset_Manager_Factory() ""
+ACE (26695|86983056) Service_Config_Guard:<ctor=0x7ff0002d0> - config=0x52f5d88 repo=0x52f5eb8 superceded by repo=0x52f5eb8
+ACE (26695|86983056) SG::process_directives_i, repo=0x52f5eb8 - dynamic TAO_Codeset Service_Object * TAO_Codeset:_make_TAO_Codeset_Manager_Factory() ""
+ACE (26695|86983056) SG::initialize - repo=0x52f5eb8, looking up dynamic service 'TAO_Codeset' to initialize
+ACE (26695|86983056) STDG::<ctor>, repo=0x52f5eb8 [1], name=TAO_Codeset, type=0x5340308, impl=(nil), object=(nil), active=0 - inserting dummy forward
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [1] (1024), name=TAO_Codeset, type=(nil), object=(nil), active=0
+ACE (26695|86983056) LN::open_dll - path=TAO_Codeset
+ACE (26695|86983056) DLL_Handle::open ("TAO_Codeset.so", 0x101) -> failed: TAO_Codeset.so: cannot open shared object file: No such file or directory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - UTF8_Latin1_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [2] (1024), name=UTF8_Latin1_Factory, type=0x534b870, object=0x534b800, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - UTF8_Latin1_Factory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - UTF16_BOM_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [3] (1024), name=UTF16_BOM_Factory, type=0x5351de0, object=0x5351d68, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - UTF16_BOM_Factory
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_Codeset type=(nil) => (nil)
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - TAO_Codeset, dll=<null>, force=1
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [1] (1024), name=TAO_Codeset, type=0x535c518, object=0x535c4b0, active=0
+ACE (26695|86983056) SR::insert - destroying (replacing), repo=0x52f5eb8 [1] (1024), name=TAO_Codeset, type=(nil), object=(nil), active=0
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_Codeset type=0x535c518 => 0x535c4b0
+ACE (26695|86983056) DLL_Handle::open ("libTAO_Codeset.so", 0x101) -> succeeded: no error
+ACE (26695|86983056) DLL_Handle::open - TAO_Codeset (87339272), refcount=1
+ACE (26695|86983056) DLL_Handle::open - TAO_Codeset (87339272), refcount=2
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [1] (1024), name=TAO_Codeset, type=0x536af28, object=0x536aec0, active=1
+ACE (26695|86983056) SR::insert - destroying (replacing), repo=0x52f5eb8 [1] (1024), name=TAO_Codeset, type=0x535c518, object=0x535c4b0, active=0
+ACE (26695|86983056) ST::fini - destroying TAO_Codeset, flags = 3
+ACE (26695|86983056) STDG::<dtor>, repo=0x52f5eb8, name=TAO_Codeset - updating [1 - 4]
+ACE (26695|86983056) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (26695|86983056) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (26695|86983056) SR::relocate, repo=0x52f5eb8 [2] (size=1024): name=UTF8_Latin1_Factory - DLL from=0 to=87339272
+ACE (26695|86983056) DLL_Handle::open - TAO_Codeset (87339272), refcount=3
+ACE (26695|86983056) SR::relocate, repo=0x52f5eb8 [3] (size=1024): name=UTF16_BOM_Factory - DLL from=0 to=87339272
+ACE (26695|86983056) DLL_Handle::open - TAO_Codeset (87339272), refcount=4
+ACE (26695|86983056) STDG::<dtor>, repo=0x52f5eb8 [1], name=TAO_Codeset, type=0x536afc0, impl=0x536af28, object=0x536aec0, active=1 - loaded
+ACE (26695|86983056) Dynamic_Node::apply - Did dynamic on TAO_Codeset (yyerrno=0)
+ACE (26695|86983056) DLL_Handle::close - TAO_Codeset (handle=87339272, refcount=3)
+ACE (26695|86983056) Service_Config_Guard:<dtor=0x7ff0002d0> - new repo=0x52f5eb8
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_Codeset type=0x536af28 => 0x536aec0
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - Resource_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [4] (1024), name=Resource_Factory, type=0x538e420, object=0x538e248, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - Resource_Factory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - Client_Strategy_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [5] (1024), name=Client_Strategy_Factory, type=0x5394998, object=0x5394910, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - Client_Strategy_Factory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - Server_Strategy_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [6] (1024), name=Server_Strategy_Factory, type=0x539af38, object=0x539ae88, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - Server_Strategy_Factory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - IIOP_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [7] (1024), name=IIOP_Factory, type=0x53a1498, object=0x53a1428, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - IIOP_Factory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - MCAST_Parser, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [8] (1024), name=MCAST_Parser, type=0x53a7a00, object=0x53a7970, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - MCAST_Parser
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - CORBANAME_Parser, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [9] (1024), name=CORBANAME_Parser, type=0x53adf40, object=0x53aded8, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - CORBANAME_Parser
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - CORBALOC_Parser, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [10] (1024), name=CORBALOC_Parser, type=0x53b4498, object=0x53b4430, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - CORBALOC_Parser
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - FILE_Parser, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [11] (1024), name=FILE_Parser, type=0x53ba9d8, object=0x53ba970, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - FILE_Parser
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - DLL_Parser, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [12] (1024), name=DLL_Parser, type=0x53c0f18, object=0x53c0eb0, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - DLL_Parser
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - HTTP_Parser, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [13] (1024), name=HTTP_Parser, type=0x53c7458, object=0x53c73f0, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - HTTP_Parser
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - Default_Stub_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [14] (1024), name=Default_Stub_Factory, type=0x53cd998, object=0x53cd930, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - Default_Stub_Factory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - Default_Endpoint_Selector_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [15] (1024), name=Default_Endpoint_Selector_Factory, type=0x53d3f30, object=0x53d3e88, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - Default_Endpoint_Selector_Factory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - Default_Thread_Lane_Resources_Manager_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [16] (1024), name=Default_Thread_Lane_Resources_Manager_Factory, type=0x53da4b8, object=0x53da450, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - Default_Thread_Lane_Resources_Manager_Factory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - Default_Collocation_Resolver, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [17] (1024), name=Default_Collocation_Resolver, type=0x53e0a58, object=0x53e09f0, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - Default_Collocation_Resolver
+ACE (26695|86983056) SG::init_svc_conf_file_queue - this=0x52f5d88, repo=0x52f5eb8
+(26695|86983056) SC::open_i - this=0x52f5d88, opened=0, loadstatics=0
+starting up daemon ././client
+ACE (26695|86983056) SG::init_svc_conf_file_queue - this=0x52f5d88, repo=0x52f5eb8
+ACE (26695|86983056) SG::open_i - this=0x52f5d88, opened=0, loadstatics=0
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - ACE_Service_Manager, dll=<null>, force=1
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [18] (1024), name=ACE_Service_Manager, type=0x5606120, object=0x53f4fa0, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - ACE_Service_Manager
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - ACE_Naming_Context, dll=<null>, force=1
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [19] (1024), name=ACE_Naming_Context, type=0x560d808, object=0x560c610, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - ACE_Naming_Context
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=PI_Server_Loader type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=BiDirGIOP_Loader type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=Messaging_Loader type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=RT_ORB_Loader type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=RTScheduler_Loader type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=CSD_Framework_Loader type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=EndpointPolicy_Initializer type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=DiffservPolicy_Initializer type=(nil) => (nil)
+ACE (26695|86983056) Service_Config_Guard:<dtor=0x7ff000480> - new repo=0x52f5eb8
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=ORBInitializer_Registry type=(nil) => (nil)
+ACE (26695|86983056) SG::process_directive, repo=0x52f5eb8 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (26695|86983056) Service_Config_Guard:<ctor=0x7ff0003f0> - config=0x52f5d88 repo=0x52f5eb8 superceded by repo=0x52f5eb8
+ACE (26695|86983056) SG::process_directives_i, repo=0x52f5eb8 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (26695|86983056) SG::initialize - repo=0x52f5eb8, looking up dynamic service 'ORBInitializer_Registry' to initialize
+ACE (26695|86983056) STDG::<ctor>, repo=0x52f5eb8 [20], name=ORBInitializer_Registry, type=0x56485f0, impl=(nil), object=(nil), active=0 - inserting dummy forward
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [20] (1024), name=ORBInitializer_Registry, type=(nil), object=(nil), active=0
+ACE (26695|86983056) LN::open_dll - path=TAO_PI
+ACE (26695|86983056) DLL_Handle::open ("TAO_PI.so", 0x101) -> failed: TAO_PI.so: cannot open shared object file: No such file or directory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - TAO_NVList_Adapter, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [21] (1024), name=TAO_NVList_Adapter, type=0x5653e28, object=0x5653dc0, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - TAO_NVList_Adapter
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - AnyTypeCode_Adapter, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [22] (1024), name=AnyTypeCode_Adapter, type=0x565b040, object=0x565afd8, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - AnyTypeCode_Adapter
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - CodecFactory_Loader, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [23] (1024), name=CodecFactory_Loader, type=0x5661598, object=0x5661530, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - CodecFactory_Loader
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - PolicyFactory_Loader, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [24] (1024), name=PolicyFactory_Loader, type=0x5667f30, object=0x5667ec8, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - PolicyFactory_Loader
+ACE (26695|86983056) DLL_Handle::open ("libTAO_PI.so", 0x101) -> succeeded: no error
+ACE (26695|86983056) DLL_Handle::open - TAO_PI (90509984), refcount=1
+ACE (26695|86983056) DLL_Handle::open - TAO_PI (90509984), refcount=2
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - ClientRequestInterceptor_Adapter_Factory, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [25] (1024), name=ClientRequestInterceptor_Adapter_Factory, type=0x5674f10, object=0x5674ea8, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - ClientRequestInterceptor_Adapter_Factory
+ACE (26695|86983056) SG::process_directive_i, repo=0x52f5eb8 - PICurrent_Loader, dll=<null>, force=0
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [26] (1024), name=PICurrent_Loader, type=0x567b4b0, object=0x567b448, active=0
+ACE (26695|86983056) SG::add_processed_static_svc, repo=0x52f5eb8 - PICurrent_Loader
+ACE (26695|86983056) SR::insert - repo=0x52f5eb8 [20] (1024), name=ORBInitializer_Registry, type=0x5672be0, object=0x5672b28, active=1
+ACE (26695|86983056) SR::insert - destroying (replacing), repo=0x52f5eb8 [20] (1024), name=ORBInitializer_Registry, type=(nil), object=(nil), active=0
+ACE (26695|86983056) STDG::<dtor>, repo=0x52f5eb8, name=ORBInitializer_Registry - updating [20 - 27]
+ACE (26695|86983056) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (26695|86983056) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (26695|86983056) SR::relocate, repo=0x52f5eb8 [21] (size=1024): name=TAO_NVList_Adapter - DLL from=0 to=90509984
+ACE (26695|86983056) DLL_Handle::open - TAO_PI (90509984), refcount=3
+ACE (26695|86983056) SR::relocate, repo=0x52f5eb8 [22] (size=1024): name=AnyTypeCode_Adapter - DLL from=0 to=90509984
+ACE (26695|86983056) DLL_Handle::open - TAO_PI (90509984), refcount=4
+ACE (26695|86983056) SR::relocate, repo=0x52f5eb8 [23] (size=1024): name=CodecFactory_Loader - DLL from=0 to=90509984
+ACE (26695|86983056) DLL_Handle::open - TAO_PI (90509984), refcount=5
+ACE (26695|86983056) SR::relocate, repo=0x52f5eb8 [24] (size=1024): name=PolicyFactory_Loader - DLL from=0 to=90509984
+ACE (26695|86983056) DLL_Handle::open - TAO_PI (90509984), refcount=6
+ACE (26695|86983056) SR::relocate, repo=0x52f5eb8 [25] (size=1024): name=ClientRequestInterceptor_Adapter_Factory - DLL from=0 to=90509984
+ACE (26695|86983056) DLL_Handle::open - TAO_PI (90509984), refcount=7
+ACE (26695|86983056) SR::relocate, repo=0x52f5eb8 [26] (size=1024): name=PICurrent_Loader - DLL from=0 to=90509984
+ACE (26695|86983056) DLL_Handle::open - TAO_PI (90509984), refcount=8
+ACE (26695|86983056) STDG::<dtor>, repo=0x52f5eb8 [20], name=ORBInitializer_Registry, type=0x5672c80, impl=0x5672be0, object=0x5672b28, active=1 - loaded
+ACE (26695|86983056) Dynamic_Node::apply - Did dynamic on ORBInitializer_Registry (yyerrno=0)
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=90509984, refcount=7)
+ACE (26695|86983056) Service_Config_Guard:<dtor=0x7ff0003f0> - new repo=0x52f5eb8
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=ORBInitializer_Registry type=0x5672be0 => 0x5672b28
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=Resource_Factory type=0x538e420 => 0x538e248
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=DLL_Parser type=0x53c0f18 => 0x53c0eb0
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=FILE_Parser type=0x53ba9d8 => 0x53ba970
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=CORBALOC_Parser type=0x53b4498 => 0x53b4430
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=CORBANAME_Parser type=0x53adf40 => 0x53aded8
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=MCAST_Parser type=0x53a7a00 => 0x53a7970
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=HTTP_Parser type=0x53c7458 => 0x53c73f0
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=Default_Thread_Lane_Resources_Manager_Factory type=0x53da4b8 => 0x53da450
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=Server_Strategy_Factory type=0x539af38 => 0x539ae88
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_Codeset type=0x536af28 => 0x536aec0
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=UTF8_Latin1_Factory type=0x534b870 => 0x534b800
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=UTF16_BOM_Factory type=0x5351de0 => 0x5351d68
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=IIOP_Factory type=0x53a1498 => 0x53a1428
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=Protocols_Hooks type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_Object_Adapter_Factory type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=Network_Priority_Protocols_Hooks type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=FT_ClientService_Activate type=(nil) => (nil)
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=PolicyFactory_Loader type=0x5667f30 => 0x5667ec8
+ACE (26695|86983056) Service_Config_Guard:<dtor=0x7ff000550> - new repo=0x52f5eb8
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=Client_Strategy_Factory type=0x5394998 => 0x5394910
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=Default_Stub_Factory type=0x53cd998 => 0x53cd930
+ACE (26695|110106944) SG::ctor - this = 0x5e1e440, pss = (nil)
+ACE (26695|162556224) SG::ctor - this = 0x5e28818, pss = (nil)
+ACE (26695|173046080) SG::ctor - this = 0x5e2ff40, pss = (nil)
+ACE (26695|183535936) SG::ctor - this = 0x5e399b0, pss = (nil)
+ACE (26695|225495360) SG::ctor - this = 0x5e41340, pss = (nil)
+ACE (26695|215005504) SG::ctor - this = 0x5e497c8, pss = (nil)
+ACE (26695|162556224) Service_Config_Guard:<ctor=0x9b05f00> - config=0x5e28818 repo=0x5e288a0 superceded by repo=0x52f5eb8
+ACE (26695|340883776) SG::ctor - this = 0x5e64578, pss = (nil)
+ACE (26695|340883776) Service_Config_Guard:<ctor=0x14516f00> - config=0x5e64578 repo=0x5e64600 superceded by repo=0x52f5eb8
+ACE (26695|162556224) DSB::instance, repo=0x52f5eb8, name=Default_Endpoint_Selector_Factory type=0x53d3f30 => 0x53d3e88
+ACE (26695|183535936) Service_Config_Guard:<ctor=0xaf07f00> - config=0x5e399b0 repo=0x5e39a38 superceded by repo=0x52f5eb8
+ACE (26695|110106944) Service_Config_Guard:<ctor=0x6900f00> - config=0x5e1e440 repo=0x5e1e4c8 superceded by repo=0x52f5eb8
+ACE (26695|498231616) SG::ctor - this = 0x5e85560, pss = (nil)
+ACE (26695|162556224) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|561170752) SG::ctor - this = 0x5e9c590, pss = (nil)
+ACE (26695|571660608) SG::ctor - this = 0x5ea5b48, pss = (nil)
+ACE (26695|561170752) Service_Config_Guard:<ctor=0x2172bf00> - config=0x5e9c590 repo=0x5e9c618 superceded by repo=0x52f5eb8
+ACE (26695|561170752) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|120596800) SG::ctor - this = 0x5e5f288, pss = (nil)
+ACE (26695|120596800) Service_Config_Guard:<ctor=0x7301f00> - config=0x5e5f288 repo=0x5e5f310 superceded by repo=0x52f5eb8
+ACE (26695|215005504) Service_Config_Guard:<ctor=0xcd0af00> - config=0x5e497c8 repo=0x5e49850 superceded by repo=0x52f5eb8
+ACE (26695|215005504) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|361863488) SG::ctor - this = 0x5ed8288, pss = (nil)
+ACE (26695|340883776) DSB::instance, repo=0x52f5eb8, name=Default_Endpoint_Selector_Factory type=0x53d3f30 => 0x53d3e88
+ACE (26695|361863488) Service_Config_Guard:<ctor=0x15918f00> - config=0x5ed8288 repo=0x5ed8310 superceded by repo=0x52f5eb8
+==26695== Thread 7:
+==26695== Syscall param writev(vector[...]) points to uninitialised byte(s)
+==26695==    at 0x3C738C64C3: writev (in /lib64/libc-2.5.so)
+==26695==    by 0x50052A9: ACE::sendv(int, iovec const*, int, ACE_Time_Value const*) (OS_NS_sys_uio.inl:48)
+==26695==    by 0x4CADB62: TAO_IIOP_Transport::send(iovec*, int, unsigned long&, ACE_Time_Value const*) (SOCK_IO.inl:108)
+==26695==    by 0x4D041F4: TAO_Transport::drain_queue_helper(int&, iovec*) (Transport.cpp:901)
+==26695==    by 0x4D0488F: TAO_Transport::drain_queue_i() (Transport.cpp:1041)
+==26695==    by 0x4D0491D: TAO_Transport::send_synch_message_helper_i(TAO_Synch_Queued_Message&, ACE_Time_Value*) (Transport.cpp:738)
+==26695==    by 0x4D066C7: TAO_Transport::send_synchronous_message_i(ACE_Message_Block const*, ACE_Time_Value*) (Transport.cpp:578)
+==26695==    by 0x4D06A85: TAO_Transport::send_message_shared_i(TAO_Stub*, int, ACE_Message_Block const*, ACE_Time_Value*) (Transport.cpp:1258)
+==26695==    by 0x4CAE04E: TAO_IIOP_Transport::send_message_shared(TAO_Stub*, int, ACE_Message_Block const*, ACE_Time_Value*) (IIOP_Transport.cpp:279)
+==26695==    by 0x4CADC65: TAO_IIOP_Transport::send_message(TAO_OutputCDR&, TAO_Stub*, int, ACE_Time_Value*) (IIOP_Transport.cpp:247)
+==26695==    by 0x4CAD951: TAO_IIOP_Transport::send_request(TAO_Stub*, TAO_ORB_Core*, TAO_OutputCDR&, int, ACE_Time_Value*) (IIOP_Transport.cpp:222)
+==26695==    by 0x4CE55AB: TAO::Remote_Invocation::send_message(TAO_OutputCDR&, short, ACE_Time_Value*) (Remote_Invocation.cpp:180)
+==26695==    by 0x4CEE549: TAO::Synch_Twoway_Invocation::remote_twoway(ACE_Time_Value*) (Synch_Invocation.cpp:111)
+==26695==    by 0x4CB03D3: TAO::Invocation_Adapter::invoke_twoway(TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Profile_Transport_Resolver&, ACE_Time_Value*&) (Invocation_Adapter.cpp:298)
+==26695==    by 0x4CB003A: TAO::Invocation_Adapter::invoke_remote_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, ACE_Time_Value*&) (Invocation_Adapter.cpp:273)
+==26695==    by 0x4CB094F: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:92)
+==26695==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==26695==    by 0x40429E: test::test_method() (testC.cpp:130)
+==26695==    by 0x40367C: Client::svc() (client.cpp:65)
+==26695==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==26695==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+==26695==    by 0x3C744061B4: start_thread (in /lib64/libpthread-2.5.so)
+==26695==    by 0x3C738CD39C: clone (in /lib64/libc-2.5.so)
+==26695==  Address 0x5EEC32E is 3,574 bytes inside a block of size 4,096 alloc'd
+==26695==    at 0x4A055F6: operator new[](unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:211)
+==26695==    by 0x5035AC7: ACE_Local_Memory_Pool::acquire(unsigned long, unsigned long&) (Local_Memory_Pool.cpp:58)
+==26695==    by 0x4C8FBB5: ACE_Malloc_T<ACE_Local_Memory_Pool, ACE_Thread_Mutex, ACE_Control_Block>::open() (Malloc_T.cpp:409)
+==26695==    by 0x4C8FDAB: ACE_Malloc_T<ACE_Local_Memory_Pool, ACE_Thread_Mutex, ACE_Control_Block>::ACE_Malloc_T(char const*) (Malloc_T.cpp:488)
+==26695==    by 0x4C8EE4C: TAO_Default_Resource_Factory::output_cdr_buffer_allocator() (Malloc_T.inl:135)
+==26695==    by 0x4D0068E: TAO_Thread_Lane_Resources::output_cdr_buffer_allocator() (Thread_Lane_Resources.cpp:282)
+==26695==    by 0x4D05878: TAO_Transport::TAO_Transport(unsigned, TAO_ORB_Core*, unsigned long) (Transport.cpp:163)
+==26695==    by 0x4CADAAF: TAO_IIOP_Transport::TAO_IIOP_Transport(TAO_IIOP_Connection_Handler*, TAO_ORB_Core*) (IIOP_Transport.cpp:30)
+==26695==    by 0x4CA3BBF: TAO_IIOP_Connection_Handler::TAO_IIOP_Connection_Handler(TAO_ORB_Core*) (IIOP_Connection_Handler.cpp:45)
+==26695==    by 0x4CA7821: TAO_Connect_Creation_Strategy<TAO_IIOP_Connection_Handler>::make_svc_handler(TAO_IIOP_Connection_Handler*&) (Connector_Impl.cpp:28)
+==26695==    by 0x4CA6F62: ACE_Connector<TAO_IIOP_Connection_Handler, ACE_SOCK_Connector>::connect_i(TAO_IIOP_Connection_Handler*&, TAO_IIOP_Connection_Handler**, ACE_INET_Addr const&, ACE_Synch_Options const&, ACE_INET_Addr const&, int, int, int) (Connector.cpp:369)
+==26695==    by 0x4CA4F0C: TAO_IIOP_Connector::begin_connection(TAO_IIOP_Connection_Handler*&, TAO::Profile_Transport_Resolver*, TAO_IIOP_Endpoint*, ACE_Time_Value*) (Connector.cpp:328)
+==26695==    by 0x4CA5C69: TAO_IIOP_Connector::make_connection(TAO::Profile_Transport_Resolver*, TAO_Transport_Descriptor_Interface&, ACE_Time_Value*) (IIOP_Connector.cpp:195)
+==26695==    by 0x4D0A2A1: TAO_Connector::connect(TAO::Profile_Transport_Resolver*, TAO_Transport_Descriptor_Interface*, ACE_Time_Value*) (Transport_Connector.cpp:375)
+==26695==    by 0x4CE3E69: TAO::Profile_Transport_Resolver::try_connect_i(TAO_Transport_Descriptor_Interface*, ACE_Time_Value*, bool) (Profile_Transport_Resolver.cpp:171)
+==26695==    by 0x4CE3F7A: TAO::Profile_Transport_Resolver::try_connect(TAO_Transport_Descriptor_Interface*, ACE_Time_Value*) (Profile_Transport_Resolver.cpp:114)
+==26695==    by 0x4CB17FA: TAO_Default_Endpoint_Selector::select_endpoint(TAO::Profile_Transport_Resolver*, ACE_Time_Value*) (Invocation_Endpoint_Selectors.cpp:70)
+==26695==    by 0x4CE3BDD: TAO::Profile_Transport_Resolver::resolve(ACE_Time_Value*) (Profile_Transport_Resolver.cpp:88)
+==26695==    by 0x4CAFF46: TAO::Invocation_Adapter::invoke_remote_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, ACE_Time_Value*&) (Invocation_Adapter.cpp:247)
+==26695==    by 0x4CB094F: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:92)
+==26695==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==26695==    by 0x40429E: test::test_method() (testC.cpp:130)
+==26695==    by 0x40367C: Client::svc() (client.cpp:65)
+==26695==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==26695==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+ACE (26695|173046080) Service_Config_Guard:<ctor=0xa506f00> - config=0x5e2ff40 repo=0x5e2ffc8 superceded by repo=0x52f5eb8
+ACE (26695|173046080) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|403822912) SG::ctor - this = 0x5efb4f0, pss = (nil)
+ACE (26695|403822912) Service_Config_Guard:<ctor=0x1811cf00> - config=0x5efb4f0 repo=0x5efb578 superceded by repo=0x52f5eb8
+ACE (26695|403822912) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|183535936) DSB::instance, repo=0x52f5eb8, name=Default_Endpoint_Selector_Factory type=0x53d3f30 => 0x53d3e88
+ACE (26695|183535936) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|456272192) SG::ctor - this = 0x5f00a58, pss = (nil)
+ACE (26695|456272192) Service_Config_Guard:<ctor=0x1b321f00> - config=0x5f00a58 repo=0x22348870 superceded by repo=0x52f5eb8
+ACE (26695|456272192) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|110106944) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|256964928) SG::ctor - this = 0x2235f2c8, pss = (nil)
+ACE (26695|256964928) Service_Config_Guard:<ctor=0xf50ef00> - config=0x2235f2c8 repo=0x2235f350 superceded by repo=0x52f5eb8
+ACE (26695|256964928) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|529701184) SG::ctor - this = 0x2236bb68, pss = (nil)
+ACE (26695|550680896) SG::ctor - this = 0x5ea0858, pss = (nil)
+ACE (26695|540191040) SG::ctor - this = 0x22376168, pss = (nil)
+ACE (26695|225495360) Service_Config_Guard:<ctor=0xd70bf00> - config=0x5e41340 repo=0x5e413c8 superceded by repo=0x52f5eb8
+ACE (26695|550680896) Service_Config_Guard:<ctor=0x20d2af00> - config=0x5ea0858 repo=0x5ea08e0 superceded by repo=0x52f5eb8
+ACE (26695|225495360) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|571660608) Service_Config_Guard:<ctor=0x2212cf00> - config=0x5ea5b48 repo=0x5ea5bd0 superceded by repo=0x52f5eb8
+ACE (26695|571660608) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|298924352) SG::ctor - this = 0x22389140, pss = (nil)
+ACE (26695|298924352) Service_Config_Guard:<ctor=0x11d12f00> - config=0x22389140 repo=0x223891c8 superceded by repo=0x52f5eb8
+ACE (26695|298924352) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|319904064) SG::ctor - this = 0x5ecd1e0, pss = (nil)
+ACE (26695|319904064) Service_Config_Guard:<ctor=0x13114f00> - config=0x5ecd1e0 repo=0x5ecd268 superceded by repo=0x52f5eb8
+ACE (26695|319904064) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|393333056) SG::ctor - this = 0x5edc550, pss = (nil)
+ACE (26695|393333056) Service_Config_Guard:<ctor=0x1771bf00> - config=0x5edc550 repo=0x5edc5d8 superceded by repo=0x52f5eb8
+ACE (26695|393333056) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|194025792) SG::ctor - this = 0x5ee7d08, pss = (nil)
+ACE (26695|194025792) Service_Config_Guard:<ctor=0xb908f00> - config=0x5ee7d08 repo=0x5ee7d90 superceded by repo=0x52f5eb8
+ACE (26695|194025792) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|361863488) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|414312768) SG::ctor - this = 0x223b3178, pss = (nil)
+ACE (26695|414312768) Service_Config_Guard:<ctor=0x18b1df00> - config=0x223b3178 repo=0x223b3200 superceded by repo=0x52f5eb8
+ACE (26695|414312768) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|508721472) SG::ctor - this = 0x223be9e0, pss = (nil)
+ACE (26695|508721472) Service_Config_Guard:<ctor=0x1e526f00> - config=0x223be9e0 repo=0x223bea68 superceded by repo=0x52f5eb8
+ACE (26695|508721472) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|477251904) SG::ctor - this = 0x5f00ee8, pss = (nil)
+ACE (26695|477251904) Service_Config_Guard:<ctor=0x1c723f00> - config=0x5f00ee8 repo=0x5f00f70 superceded by repo=0x52f5eb8
+ACE (26695|477251904) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|529701184) Service_Config_Guard:<ctor=0x1f928f00> - config=0x2236bb68 repo=0x2236bbf0 superceded by repo=0x52f5eb8
+ACE (26695|529701184) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|540191040) Service_Config_Guard:<ctor=0x20329f00> - config=0x22376168 repo=0x223761f0 superceded by repo=0x52f5eb8
+ACE (26695|540191040) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|267454784) SG::ctor - this = 0x5eaf110, pss = (nil)
+ACE (26695|267454784) Service_Config_Guard:<ctor=0xff0ff00> - config=0x5eaf110 repo=0x5eaf198 superceded by repo=0x52f5eb8
+ACE (26695|267454784) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|288434496) SG::ctor - this = 0x5ec0a88, pss = (nil)
+ACE (26695|288434496) Service_Config_Guard:<ctor=0x11311f00> - config=0x5ec0a88 repo=0x5ec0b10 superceded by repo=0x52f5eb8
+ACE (26695|288434496) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|120596800) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|372353344) SG::ctor - this = 0x2239f170, pss = (nil)
+ACE (26695|372353344) Service_Config_Guard:<ctor=0x16319f00> - config=0x2239f170 repo=0x2239f1f8 superceded by repo=0x52f5eb8
+ACE (26695|340883776) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|435292480) SG::ctor - this = 0x2240c3f0, pss = (nil)
+ACE (26695|424802624) SG::ctor - this = 0x224106b8, pss = (nil)
+ACE (26695|435292480) Service_Config_Guard:<ctor=0x19f1ff00> - config=0x2240c3f0 repo=0x2240c478 superceded by repo=0x52f5eb8
+ACE (26695|424802624) Service_Config_Guard:<ctor=0x1951ef00> - config=0x224106b8 repo=0x22410740 superceded by repo=0x52f5eb8
+ACE (26695|435292480) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|519211328) SG::ctor - this = 0x2236fe30, pss = (nil)
+ACE (26695|519211328) Service_Config_Guard:<ctor=0x1ef27f00> - config=0x2236fe30 repo=0x2236feb8 superceded by repo=0x52f5eb8
+ACE (26695|519211328) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|131086656) SG::ctor - this = 0x5e514a0, pss = (nil)
+ACE (26695|131086656) Service_Config_Guard:<ctor=0x7d02f00> - config=0x5e514a0 repo=0x5e51528 superceded by repo=0x52f5eb8
+ACE (26695|131086656) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|204515648) SG::ctor - this = 0x5ec3c98, pss = (nil)
+ACE (26695|204515648) Service_Config_Guard:<ctor=0xc309f00> - config=0x5ec3c98 repo=0x5ec3d20 superceded by repo=0x52f5eb8
+ACE (26695|204515648) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|382843200) SG::ctor - this = 0x223feab0, pss = (nil)
+ACE (26695|382843200) Service_Config_Guard:<ctor=0x16d1af00> - config=0x223feab0 repo=0x223feb38 superceded by repo=0x52f5eb8
+ACE (26695|382843200) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|372353344) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|487741760) SG::ctor - this = 0x5f00b20, pss = (nil)
+ACE (26695|487741760) Service_Config_Guard:<ctor=0x1d124f00> - config=0x5f00b20 repo=0x2234ca70 superceded by repo=0x52f5eb8
+ACE (26695|487741760) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|498231616) Service_Config_Guard:<ctor=0x1db25f00> - config=0x5e85560 repo=0x5e855e8 superceded by repo=0x52f5eb8
+ACE (26695|498231616) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|152066368) SG::ctor - this = 0x5ea9e10, pss = (nil)
+ACE (26695|152066368) Service_Config_Guard:<ctor=0x9104f00> - config=0x5ea9e10 repo=0x5ea9e98 superceded by repo=0x52f5eb8
+ACE (26695|152066368) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|246475072) SG::ctor - this = 0x5eb6838, pss = (nil)
+ACE (26695|246475072) Service_Config_Guard:<ctor=0xeb0df00> - config=0x5eb6838 repo=0x5eb68c0 superceded by repo=0x52f5eb8
+ACE (26695|246475072) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|235985216) SG::ctor - this = 0x22404de8, pss = (nil)
+ACE (26695|235985216) Service_Config_Guard:<ctor=0xe10cf00> - config=0x22404de8 repo=0x22404e70 superceded by repo=0x52f5eb8
+ACE (26695|235985216) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|466762048) SG::ctor - this = 0x22438888, pss = (nil)
+ACE (26695|466762048) Service_Config_Guard:<ctor=0x1bd22f00> - config=0x22438888 repo=0x22443658 superceded by repo=0x52f5eb8
+ACE (26695|466762048) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|277944640) SG::ctor - this = 0x223de2d8, pss = (nil)
+ACE (26695|277944640) Service_Config_Guard:<ctor=0x10910f00> - config=0x223de2d8 repo=0x223de360 superceded by repo=0x52f5eb8
+ACE (26695|277944640) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|330393920) SG::ctor - this = 0x223f5488, pss = (nil)
+ACE (26695|330393920) Service_Config_Guard:<ctor=0x13b15f00> - config=0x223f5488 repo=0x223f5510 superceded by repo=0x52f5eb8
+ACE (26695|445782336) SG::ctor - this = 0x22478b00, pss = (nil)
+ACE (26695|330393920) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|550680896) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|309414208) SG::ctor - this = 0x5ec6ea8, pss = (nil)
+ACE (26695|309414208) Service_Config_Guard:<ctor=0x12713f00> - config=0x5ec6ea8 repo=0x5ec6f30 superceded by repo=0x52f5eb8
+ACE (26695|309414208) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|424802624) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|445782336) Service_Config_Guard:<ctor=0x1a920f00> - config=0x22478b00 repo=0x22478b88 superceded by repo=0x52f5eb8
+ACE (26695|445782336) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|141576512) SG::ctor - this = 0x223cb300, pss = (nil)
+ACE (26695|141576512) Service_Config_Guard:<ctor=0x8703f00> - config=0x223cb300 repo=0x223cb388 superceded by repo=0x52f5eb8
+ACE (26695|141576512) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|351373632) SG::ctor - this = 0x5eef098, pss = (nil)
+ACE (26695|351373632) Service_Config_Guard:<ctor=0x14f17f00> - config=0x5eef098 repo=0x5eef120 superceded by repo=0x52f5eb8
+ACE (26695|351373632) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+ACE (26695|162556224) Service_Config_Guard:<dtor=0x9b05f00> - new repo=0x5e288a0
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+ACE (26695|561170752) Service_Config_Guard:<dtor=0x2172bf00> - new repo=0x5e9c618
+ACE (26695|215005504) Service_Config_Guard:<dtor=0xcd0af00> - new repo=0x5e49850
+ACE (26695|173046080) Service_Config_Guard:<dtor=0xa506f00> - new repo=0x5e2ffc8
+ACE (26695|403822912) Service_Config_Guard:<dtor=0x1811cf00> - new repo=0x5efb578
+ACE (26695|183535936) Service_Config_Guard:<dtor=0xaf07f00> - new repo=0x5e39a38
+ACE (26695|456272192) Service_Config_Guard:<dtor=0x1b321f00> - new repo=0x22348870
+ACE (26695|110106944) Service_Config_Guard:<dtor=0x6900f00> - new repo=0x5e1e4c8
+ACE (26695|256964928) Service_Config_Guard:<dtor=0xf50ef00> - new repo=0x2235f350
+ACE (26695|225495360) Service_Config_Guard:<dtor=0xd70bf00> - new repo=0x5e413c8
+ACE (26695|571660608) Service_Config_Guard:<dtor=0x2212cf00> - new repo=0x5ea5bd0
+ACE (26695|298924352) Service_Config_Guard:<dtor=0x11d12f00> - new repo=0x223891c8
+ACE (26695|319904064) Service_Config_Guard:<dtor=0x13114f00> - new repo=0x5ecd268
+ACE (26695|393333056) Service_Config_Guard:<dtor=0x1771bf00> - new repo=0x5edc5d8
+ACE (26695|194025792) Service_Config_Guard:<dtor=0xb908f00> - new repo=0x5ee7d90
+ACE (26695|361863488) Service_Config_Guard:<dtor=0x15918f00> - new repo=0x5ed8310
+ACE (26695|414312768) Service_Config_Guard:<dtor=0x18b1df00> - new repo=0x223b3200
+ACE (26695|508721472) Service_Config_Guard:<dtor=0x1e526f00> - new repo=0x223bea68
+ACE (26695|477251904) Service_Config_Guard:<dtor=0x1c723f00> - new repo=0x5f00f70
+ACE (26695|529701184) Service_Config_Guard:<dtor=0x1f928f00> - new repo=0x2236bbf0
+ACE (26695|540191040) Service_Config_Guard:<dtor=0x20329f00> - new repo=0x223761f0
+ACE (26695|267454784) Service_Config_Guard:<dtor=0xff0ff00> - new repo=0x5eaf198
+ACE (26695|288434496) Service_Config_Guard:<dtor=0x11311f00> - new repo=0x5ec0b10
+ACE (26695|120596800) Service_Config_Guard:<dtor=0x7301f00> - new repo=0x5e5f310
+ACE (26695|340883776) Service_Config_Guard:<dtor=0x14516f00> - new repo=0x5e64600
+ACE (26695|435292480) Service_Config_Guard:<dtor=0x19f1ff00> - new repo=0x2240c478
+ACE (26695|519211328) Service_Config_Guard:<dtor=0x1ef27f00> - new repo=0x2236feb8
+ACE (26695|131086656) Service_Config_Guard:<dtor=0x7d02f00> - new repo=0x5e51528
+ACE (26695|204515648) Service_Config_Guard:<dtor=0xc309f00> - new repo=0x5ec3d20
+ACE (26695|382843200) Service_Config_Guard:<dtor=0x16d1af00> - new repo=0x223feb38
+ACE (26695|372353344) Service_Config_Guard:<dtor=0x16319f00> - new repo=0x2239f1f8
+ACE (26695|487741760) Service_Config_Guard:<dtor=0x1d124f00> - new repo=0x2234ca70
+ACE (26695|498231616) Service_Config_Guard:<dtor=0x1db25f00> - new repo=0x5e855e8
+ACE (26695|152066368) Service_Config_Guard:<dtor=0x9104f00> - new repo=0x5ea9e98
+ACE (26695|246475072) Service_Config_Guard:<dtor=0xeb0df00> - new repo=0x5eb68c0
+ACE (26695|235985216) Service_Config_Guard:<dtor=0xe10cf00> - new repo=0x22404e70
+ACE (26695|466762048) Service_Config_Guard:<dtor=0x1bd22f00> - new repo=0x22443658
+ACE (26695|277944640) Service_Config_Guard:<dtor=0x10910f00> - new repo=0x223de360
+ACE (26695|330393920) Service_Config_Guard:<dtor=0x13b15f00> - new repo=0x223f5510
+ACE (26695|550680896) Service_Config_Guard:<dtor=0x20d2af00> - new repo=0x5ea08e0
+ACE (26695|309414208) Service_Config_Guard:<dtor=0x12713f00> - new repo=0x5ec6f30
+ACE (26695|424802624) Service_Config_Guard:<dtor=0x1951ef00> - new repo=0x22410740
+ACE (26695|445782336) Service_Config_Guard:<dtor=0x1a920f00> - new repo=0x22478b88
+ACE (26695|141576512) Service_Config_Guard:<dtor=0x8703f00> - new repo=0x223cb388
+ACE (26695|351373632) Service_Config_Guard:<dtor=0x14f17f00> - new repo=0x5eef120
+ACE (26695|86983056) Service_Config_Guard:<ctor=0x7ff000400> - config=0x52f5d88 repo=0x52f5eb8 superceded by repo=0x52f5eb8
+ACE (26695|86983056) DSB::instance, repo=0x52f5eb8, name=TAO_ORB_Core_Static_Resources type=0x5306e58 => 0x5306ab8
+ACE (26695|86983056) Service_Config_Guard:<dtor=0x7ff000400> - new repo=0x52f5eb8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=LifespanStrategyTransientFactory type=0x5903ee8 => 0x5903e80
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=RequestProcessingStrategyAOMOnlyFactory type=0x5923a60 => 0x59239f8
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=IdUniquenessStrategyUniqueFactory type=0x58d78a8 => 0x58d7840
+ACE (26694|92872144) DSB::instance, repo=0x5893eb8, name=ServantRetentionStrategyRetainFactory type=0x5943650 => 0x59435e8
+ACE (26694|92872144) Service_Config_Guard:<dtor=0x7ff0005f0> - new repo=0x5893eb8
+(26694|92872144) server - event loop finished
+==26695==
+==26695== Thread 1:
+==26695== Conditional jump or move depends on uninitialised value(s)
+==26695==    at 0x3C73843955: vfprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x5048126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26695==    by 0x5037D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26695==    by 0x503896B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26695==    by 0x4FFD207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26695==    by 0x4FF57BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26695==    by 0x5045E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26695==
+==26695== Conditional jump or move depends on uninitialised value(s)
+==26695==    at 0x3C738411E8: _itoa_word (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7384434D: vfprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x5048126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26695==    by 0x5037D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26695==    by 0x503896B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26695==    by 0x4FFD207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26695==    by 0x4FF57BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26695==    by 0x5045E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26695==
+==26695== Use of uninitialised value of size 8
+==26695==    at 0x3C738411E1: _itoa_word (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7384434D: vfprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x5048126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26695==    by 0x5037D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26695==    by 0x503896B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26695==    by 0x4FFD207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26695==    by 0x4FF57BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26695==    by 0x5045E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26695==
+==26695== Conditional jump or move depends on uninitialised value(s)
+==26695==    at 0x3C738443C7: vfprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x5048126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26695==    by 0x5037D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26695==    by 0x503896B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26695==    by 0x4FFD207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26695==    by 0x4FF57BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26695==    by 0x5045E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26695==
+==26695== Conditional jump or move depends on uninitialised value(s)
+==26695==    at 0x3C738433B3: vfprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x5048126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26695==    by 0x5037D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26695==    by 0x503896B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26695==    by 0x4FFD207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26695==    by 0x4FF57BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26695==    by 0x5045E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26695==
+==26695== Conditional jump or move depends on uninitialised value(s)
+==26695==    at 0x3C7384340F: vfprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26695==    by 0x5048126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26695==    by 0x5037D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26695==    by 0x503896B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26695==    by 0x4FFD207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26695==    by 0x4FF57BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26695==    by 0x5045E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [26] (1024), name=PICurrent_Loader, type=0x567b4b0, impl=0x567b448, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying PICurrent_Loader, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=90509984, refcount=6)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [25] (1024), name=ClientRequestInterceptor_Adapter_Factory, type=0x5674f10, impl=0x5674ea8, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying ClientRequestInterceptor_Adapter_Factory, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=90509984, refcount=5)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [24] (1024), name=PolicyFactory_Loader, type=0x5667f30, impl=0x5667ec8, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying PolicyFactory_Loader, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=90509984, refcount=4)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [23] (1024), name=CodecFactory_Loader, type=0x5661598, impl=0x5661530, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying CodecFactory_Loader, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=90509984, refcount=3)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [22] (1024), name=AnyTypeCode_Adapter, type=0x565b040, impl=0x565afd8, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying AnyTypeCode_Adapter, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=90509984, refcount=2)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [21] (1024), name=TAO_NVList_Adapter, type=0x5653e28, impl=0x5653dc0, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying TAO_NVList_Adapter, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=90509984, refcount=1)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [20] (1024), name=ORBInitializer_Registry, type=0x5672be0, impl=0x5672b28, object=0x3c00000001, active=86990520
+ACE (26695|86983056) ST::fini - destroying ORBInitializer_Registry, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=90509984, refcount=0)
+ACE (26695|86983056) DLL_Handle::close: Unloading TAO_PI (handle=90509984)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [19] (1024), name=ACE_Naming_Context, type=0x560d808, impl=0x560c610, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying ACE_Naming_Context, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [18] (1024), name=ACE_Service_Manager, type=0x5606120, impl=0x53f4fa0, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying ACE_Service_Manager, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [17] (1024), name=Default_Collocation_Resolver, type=0x53e0a58, impl=0x53e09f0, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying Default_Collocation_Resolver, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [16] (1024), name=Default_Thread_Lane_Resources_Manager_Factory, type=0x53da4b8, impl=0x53da450, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying Default_Thread_Lane_Resources_Manager_Factory, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [15] (1024), name=Default_Endpoint_Selector_Factory, type=0x53d3f30, impl=0x53d3e88, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying Default_Endpoint_Selector_Factory, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [14] (1024), name=Default_Stub_Factory, type=0x53cd998, impl=0x53cd930, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying Default_Stub_Factory, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [13] (1024), name=HTTP_Parser, type=0x53c7458, impl=0x53c73f0, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying HTTP_Parser, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [12] (1024), name=DLL_Parser, type=0x53c0f18, impl=0x53c0eb0, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying DLL_Parser, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [11] (1024), name=FILE_Parser, type=0x53ba9d8, impl=0x53ba970, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying FILE_Parser, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [10] (1024), name=CORBALOC_Parser, type=0x53b4498, impl=0x53b4430, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying CORBALOC_Parser, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [9] (1024), name=CORBANAME_Parser, type=0x53adf40, impl=0x53aded8, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying CORBANAME_Parser, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [8] (1024), name=MCAST_Parser, type=0x53a7a00, impl=0x53a7970, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying MCAST_Parser, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [7] (1024), name=IIOP_Factory, type=0x53a1498, impl=0x53a1428, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying IIOP_Factory, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [6] (1024), name=Server_Strategy_Factory, type=0x539af38, impl=0x539ae88, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying Server_Strategy_Factory, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [5] (1024), name=Client_Strategy_Factory, type=0x5394998, impl=0x5394910, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying Client_Strategy_Factory, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [4] (1024), name=Resource_Factory, type=0x538e420, impl=0x538e248, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying Resource_Factory, flags = 3
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [3] (1024), name=UTF16_BOM_Factory, type=0x5351de0, impl=0x5351d68, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying UTF16_BOM_Factory, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_Codeset (handle=87339272, refcount=2)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [2] (1024), name=UTF8_Latin1_Factory, type=0x534b870, impl=0x534b800, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying UTF8_Latin1_Factory, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_Codeset (handle=87339272, refcount=1)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [1] (1024), name=TAO_Codeset, type=0x536af28, impl=0x536aec0, object=0x3c00000001, active=86990520
+ACE (26695|86983056) ST::fini - destroying TAO_Codeset, flags = 3
+ACE (26695|86983056) DLL_Handle::close - TAO_Codeset (handle=87339272, refcount=0)
+ACE (26695|86983056) DLL_Handle::close: Unloading TAO_Codeset (handle=87339272)
+ACE (26695|86983056) SR::fini, repo=0x52f5eb8 [0] (1024), name=TAO_ORB_Core_Static_Resources, type=0x5306e58, impl=0x5306ab8, object=0x3c00000000, active=86990520
+ACE (26695|86983056) ST::fini - destroying TAO_ORB_Core_Static_Resources, flags = 3
+ACE (26695|86983056) SG::close - complete this=0x52f5d88, repo=0x52f5eb8, owned=0
+==26694==
+==26694== Conditional jump or move depends on uninitialised value(s)
+==26694==    at 0x3C73843955: vfprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x55E5126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26694==    by 0x55D4D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26694==    by 0x55D596B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26694==    by 0x559A207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26694==    by 0x55927BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26694==    by 0x55E2E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26694==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26694==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26694==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26694==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26694==
+==26694== Conditional jump or move depends on uninitialised value(s)
+==26694==    at 0x3C738411E8: _itoa_word (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7384434D: vfprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x55E5126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26694==    by 0x55D4D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26694==    by 0x55D596B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26694==    by 0x559A207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26694==    by 0x55927BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26694==    by 0x55E2E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26694==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26694==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26694==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26694==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26694==
+==26694== Use of uninitialised value of size 8
+==26694==    at 0x3C738411E1: _itoa_word (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7384434D: vfprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+(26695|86983056) SR::<dtor>, this=0x52f5eb8
+==26694==    by 0x55E5126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26694==    by 0x55D4D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26694==    by 0x55D596B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26694==    by 0x559A207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26694==    by 0x55927BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26694==    by 0x55E2E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26694==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26694==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26694==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26694==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26694==
+==26694== Conditional jump or move depends on uninitialised value(s)
+==26694==    at 0x3C738443C7: vfprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x55E5126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26694==    by 0x55D4D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26694==    by 0x55D596B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26694==    by 0x559A207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26694==    by 0x55927BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26694==    by 0x55E2E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26694==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26694==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26694==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26694==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26694==
+==26694== Conditional jump or move depends on uninitialised value(s)
+==26694==    at 0x3C738433B3: vfprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x55E5126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26694==    by 0x55D4D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26694==    by 0x55D596B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26694==    by 0x559A207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26694==    by 0x55927BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26694==    by 0x55E2E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26694==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26694==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26694==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26694==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26694==
+==26694== Conditional jump or move depends on uninitialised value(s)
+==26694==    at 0x3C7384340F: vfprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x3C73866699: vsnprintf (in /lib64/libc-2.5.so)
+==26694==    by 0x55E5126: ACE_OS::snprintf(char*, unsigned long, char const*, ...) (OS_NS_stdio.inl:968)
+==26694==    by 0x55D4D04: ACE_Log_Msg::log(char const*, ACE_Log_Priority, __va_list_tag*) (Log_Msg.cpp:1981)
+==26694==    by 0x55D596B: ACE_Log_Msg::log(ACE_Log_Priority, char const*, ...) (Log_Msg.cpp:949)
+==26694==    by 0x559A207: ACE_Service_Repository::fini() (Service_Repository.cpp:162)
+==26694==    by 0x55927BC: ACE_Service_Config::fini_svcs() (Service_Config.cpp:542)
+==26694==    by 0x55E2E23: ACE_Object_Manager::fini() (Object_Manager.cpp:625)
+==26694==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26694==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26694==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26694==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)(26695|86983056) SR::close, this=0x52f5eb8, size=27
+
+==26694==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [55] (1024), name=PICurrent_Loader, type=0x5cd1688, impl=0x5cd1620, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying PICurrent_Loader, flags = 3
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[26]=0x567b550 (PICurrent_Loader)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[25]=0x5674fc8 (ClientRequestInterceptor_Adapter_Factory)
+ACE (26694|92872144) DLL_Handle::close - TAO_PI (handle=97218208, refcount=4)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[24]=0x5667fd0 (PolicyFactory_Loader)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[23]=0x5661638 (CodecFactory_Loader)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [54] (1024), name=ClientRequestInterceptor_Adapter_Factory, type=0x5ccb0e8, impl=0x5ccb080, object=0x3c00000000, active=92880568
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[22]=0x565b0e0 (AnyTypeCode_Adapter)
+ACE (26694|92872144) ST::fini - destroying ClientRequestInterceptor_Adapter_Factory, flags = 3
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[21]=0x5653ec8 (TAO_NVList_Adapter)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[20]=0x5672c80 (ORBInitializer_Registry)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[19]=0x560d8a8 (ACE_Naming_Context)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[18]=0x56061c0 (ACE_Service_Manager)
+ACE (26694|92872144) DLL_Handle::close - TAO_PI (handle=97218208, refcount=3)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[17]=0x53e0b00 (Default_Collocation_Resolver)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[16]=0x53da570 (Default_Thread_Lane_Resources_Manager_Factory)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [53] (1024), name=PolicyFactory_Loader, type=0x5cbe108, impl=0x5cbe0a0, object=0x3c00000000, active=92880568
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[15]=0x53d3fe0 (Default_Endpoint_Selector_Factory)
+ACE (26694|92872144) ST::fini - destroying PolicyFactory_Loader, flags = 3
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[14]=0x53cda38 (Default_Stub_Factory)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[13]=0x53c74f0 (HTTP_Parser)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[12]=0x53c0fb0 (DLL_Parser)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[11]=0x53baa70 (FILE_Parser)
+ACE (26694|92872144) DLL_Handle::close - TAO_PI (handle=97218208, refcount=2)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[10]=0x53b4530 (CORBALOC_Parser)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[9]=0x53adfe0 (CORBANAME_Parser)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [52] (1024), name=CodecFactory_Loader, type=0x5cb7770, impl=0x5a92f98, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying CodecFactory_Loader, flags = 3
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[8]=0x53a7a98 (MCAST_Parser)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[7]=0x53a1530 (IIOP_Factory)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[6]=0x539afd8 (Server_Strategy_Factory)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[5]=0x5394a38 (Client_Strategy_Factory)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[4]=0x538e4c0 (Resource_Factory)
+ACE (26694|92872144) DLL_Handle::close - TAO_PI (handle=97218208, refcount=1)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[3]=0x5351e80 (UTF16_BOM_Factory)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [51] (1024), name=ORBInitializer_Registry, type=0x5cc8db8, impl=0x5cc8d00, object=0x3c00000001, active=92880568
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[2]=0x534b910 (UTF8_Latin1_Factory)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[1]=0x536afc0 (TAO_Codeset)
+(26695|86983056) SR::close, this=0x52f5eb8, delete so[0]=0x5306f00 (TAO_ORB_Core_Static_Resources)
+ACE (26694|92872144) ST::fini - destroying ORBInitializer_Registry, flags = 3
+ACE (26695|86983056) SG::dtor - this=0x52f5d88, pss = (nil)
+ACE (26694|92872144) DLL_Handle::close - TAO_PI (handle=97218208, refcount=0)
+ACE (26694|92872144) DLL_Handle::close: Unloading TAO_PI (handle=97218208)
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=0, refcount=0)
+ACE (26695|86983056) DLL_Handle::close - TAO_PI (handle=0, refcount=0)
+ACE (26695|86983056) DLL_Handle::close - TAO_Codeset (handle=0, refcount=0)
+ACE (26695|86983056) DLL_Handle::close - TAO_Codeset (handle=0, refcount=0)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [50] (1024), name=ACE_Naming_Context, type=0x5a63dc8, impl=0x5a62bd0, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying ACE_Naming_Context, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [49] (1024), name=ACE_Service_Manager, type=0x5a5c6e0, impl=0x5a5c668, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying ACE_Service_Manager, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [48] (1024), name=Default_Collocation_Resolver, type=0x5a46030, impl=0x5a45fc8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying Default_Collocation_Resolver, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [47] (1024), name=Default_Thread_Lane_Resources_Manager_Factory, type=0x5a3fa90, impl=0x5a3fa28, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying Default_Thread_Lane_Resources_Manager_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [46] (1024), name=Default_Endpoint_Selector_Factory, type=0x5a39508, impl=0x5a39460, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying Default_Endpoint_Selector_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [45] (1024), name=Default_Stub_Factory, type=0x5a32f70, impl=0x5a32f08, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying Default_Stub_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [44] (1024), name=HTTP_Parser, type=0x5a2ca30, impl=0x5a2c9c8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying HTTP_Parser, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [43] (1024), name=DLL_Parser, type=0x5a264f0, impl=0x5a26488, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying DLL_Parser, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [42] (1024), name=FILE_Parser, type=0x5a1ffb0, impl=0x5a1ff48, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying FILE_Parser, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [41] (1024), name=CORBALOC_Parser, type=0x5a19a70, impl=0x5a19a08, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying CORBALOC_Parser, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [40] (1024), name=CORBANAME_Parser, type=0x5a13518, impl=0x5a134b0, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying CORBANAME_Parser, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [39] (1024), name=MCAST_Parser, type=0x5a0cfd8, impl=0x5a0cf48, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying MCAST_Parser, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [38] (1024), name=IIOP_Factory, type=0x5a06a70, impl=0x5a06a00, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying IIOP_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [37] (1024), name=Server_Strategy_Factory, type=0x5a00510, impl=0x5a00460, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying Server_Strategy_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [36] (1024), name=Client_Strategy_Factory, type=0x59f9f70, impl=0x59f9ee8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying Client_Strategy_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [35] (1024), name=Resource_Factory, type=0x59f39f8, impl=0x59f3820, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying Resource_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [34] (1024), name=UTF16_BOM_Factory, type=0x59b73a8, impl=0x59b7330, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying UTF16_BOM_Factory, flags = 3
+ACE (26694|92872144) DLL_Handle::close - TAO_Codeset (handle=94045904, refcount=2)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [33] (1024), name=UTF8_Latin1_Factory, type=0x59b0e38, impl=0x59b0dc8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying UTF8_Latin1_Factory, flags = 3
+ACE (26694|92872144) DLL_Handle::close - TAO_Codeset (handle=94045904, refcount=1)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [32] (1024), name=TAO_Codeset, type=0x59d0500, impl=0x59d0498, object=0x3c00000001, active=92880568
+ACE (26694|92872144) ST::fini - destroying TAO_Codeset, flags = 3
+ACE (26694|92872144) DLL_Handle::close - TAO_Codeset (handle=94045904, refcount=0)
+ACE (26694|92872144) DLL_Handle::close: Unloading TAO_Codeset (handle=94045904)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [31] (1024), name=TAO_Acceptor_Filter_Factory, type=0x596fca8, impl=0x596fc40, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying TAO_Acceptor_Filter_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [30] (1024), name=TAO_Network_Priority_Hook, type=0x5969738, impl=0x59696d0, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying TAO_Network_Priority_Hook, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [29] (1024), name=TAO_Object_Adapter_Factory, type=0x59631c8, impl=0x5963160, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying TAO_Object_Adapter_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [28] (1024), name=TAO_POA_Current_Factory, type=0x595cc70, impl=0x595cc08, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying TAO_POA_Current_Factory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [27] (1024), name=ThreadStrategySingle, type=0x5956718, impl=0x5956680, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying ThreadStrategySingle, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [26] (1024), name=ThreadStrategyORBControl, type=0x5950178, impl=0x5950110, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying ThreadStrategyORBControl, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [25] (1024), name=ServantRetentionStrategyNonRetainFactory, type=0x5949bd8, impl=0x5949b70, object=0x3c00000000, active=92880568
+==ACE (26694|92872144) ST::fini - destroying ServantRetentionStrategyNonRetainFactory, flags = 3
+26695==
+==26695==
+==26695== 16 bytes in 1 blocks are still reachable in loss record 1 of 10
+==26695==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26695==    by 0x503638B: ACE_Log_Msg_Manager::init_backend(unsigned long const*) (Log_Msg.cpp:192)
+==26695==    by 0x5036442: ACE_Log_Msg_Manager::get_lock() (Log_Msg.cpp:219)
+==26695==    by 0x50369EA: ACE_Log_Msg::~ACE_Log_Msg() (Log_Msg.cpp:709)
+==26695==    by 0x5037587: ACE_Log_Msg::close() (Log_Msg.cpp:265)
+==26695==    by 0x5045E43: ACE_Object_Manager::fini() (Object_Manager.cpp:642)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26695==
+==26695==
+==26695== 32 bytes in 1 blocks are still reachable in loss record 2 of 10
+==26695==    at 0x4A04B32: calloc (vg_replace_malloc.c:279)
+==26695==    by 0x3C7400154A: _dlerror_run (in /lib64/libdl-2.5.so)
+==26695==    by 0x3C74000EF0: dlopen@@GLIBC_2.2.5 (in /lib64/libdl-2.5.so)
+==26695==    by 0x502B6E2: ACE_DLL_Handle::open(char const*, int, void*) (OS_NS_dlfcn.inl:135)
+==26695==    by 0x502BB3C: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==26695==    by 0x4FF190A: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==26695==    by 0x4FF2AD5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==26695==    by 0x4FF2BDD: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==26695==    by 0x4FF34BC: ACE_Service_Type_Factory::make_service_type(ACE_Service_Gestalt*) const (Parse_Node.cpp:796)
+==26695==    by 0x4FFA1AE: ACE_Service_Gestalt::initialize(ACE_Service_Type_Factory const*, char const*) (Service_Gestalt.cpp:583)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [24] (1024), name=ServantRetentionStrategyRetainFactory, type=0x5943650, impl=0x59435e8, object=0x3c00000000, active=92880568
+==26695==    by 0x4FF32ED: ACE_Dynamic_Node::apply(ACE_Service_Gestalt*, int&) (Parse_Node.cpp:263)
+==26695==    by 0x4FFEFE4: ace_yyparse(void*) (Svc_Conf_y.cpp:1134)
+==26695==    by 0x4FF7890: ACE_Service_Gestalt::process_directives_i(ACE_Svc_Conf_Param*) (Service_Gestalt.cpp:825)
+==26695==    by 0x4FFA384: ACE_Service_Gestalt::process_directive(char const*) (Service_Gestalt.cpp:960)
+==26695==    by 0x4CFC7A9: TAO::ORB::open_services(ACE_Service_Gestalt*, int&, char**) (Service_Config.inl:142)
+==26695==    by 0x4CC942A: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1317)
+==26695==    by 0x403907: main (client.cpp:79)
+==26695==
+==26695==
+==26695== 48 bytes in 1 blocks are still reachable in loss record 3 of 10
+==26695==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26695==    by 0x5036420: ACE_Log_Msg_Manager::get_lock() (Log_Msg.cpp:214)
+==26695==    by 0x50369EA: ACE_Log_Msg::~ACE_Log_Msg() (Log_Msg.cpp:709)
+==26695==    by 0x5037587: ACE_Log_Msg::close() (Log_Msg.cpp:265)
+==26695==    by 0x5045E43: ACE_Object_Manager::fini() (Object_Manager.cpp:642)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695== ACE (26694|92872144) ST::fini - destroying ServantRetentionStrategyRetainFactory, flags = 3
+   by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26695==
+==26695==
+==26695== 72 bytes in 1 blocks are still reachable in loss record 4 of 10
+==26695==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26695==    by 0x4D0B295: TAO_TSS_Singleton<TAO_TSS_Resources, ACE_Thread_Mutex>::instance() (TAO_Singleton.cpp:168)
+==26695==    by 0x4CCB608: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==26695==    by 0x4CB7387: TAO_Leader_Follower::~TAO_Leader_Follower() (Leader_Follower.cpp:37)
+==26695==    by 0x4D0099F: TAO_Thread_Lane_Resources::finalize() (Thread_Lane_Resources.cpp:416)
+==26695==    by 0x4CD071E: TAO_ORB_Core::fini() (ORB_Core.cpp:1391)
+==26695==    by 0x4CD803C: TAO_Singleton<TAO::ORB_Table, ACE_Thread_Mutex>::~TAO_Singleton() (ORB_Core.inl:29)
+==26695==    by 0x4CD7F9E: TAO_Singleton<TAO::ORB_Table, ACE_Thread_Mutex>::cleanup(void*) (TAO_Singleton.cpp:107)
+==26695==    by 0x501DB35: ACE_OS_Exit_Info::call_hooks() (Cleanup.cpp:183)
+==26695==    by 0x4CFF87B: TAO_Singleton_Manager::fini() (TAO_Singleton_Manager.cpp:232)
+==26695==    by 0x501DAF8: ACE_OS_Exit_Info::call_hooks() (Cleanup.cpp:188)
+==26695==    by 0x5045D33: ACE_Object_Manager::fini() (Object_Manager.cpp:609)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26695==
+==26695==
+==26695== 288 bytes in 1 blocks are still reachable in loss record 5 of 10
+==26695==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26695==    by 0x4D0AF86: ACE_TSS<TAO_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==26695==    by 0x4D0B0C2: ACE_TSS<TAO_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==26695==    by 0x4CCB608: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==26695==    by 0x4CB7387: TAO_Leader_Follower::~TAO_Leader_Follower() (Leader_Follower.cpp:37)
+==26695==    by 0x4D0099F: TAO_Thread_Lane_Resources::finalize() (Thread_Lane_Resources.cpp:416)
+==26695==    by 0x4CD071E: TAO_ORB_Core::fini() (ORB_Core.cpp:1391)
+==26695==    by 0x4CD803C: TAO_Singleton<TAO::ORB_Table, ACE_Thread_Mutex>::~TAO_Singleton() (ORB_Core.inl:29)
+==26695==    by 0x4CD7F9E: TAO_Singleton<TAO::ORB_Table, ACE_Thread_Mutex>::cleanup(void*) (TAO_Singleton.cpp:107)
+==26695==    by 0x501DB35: ACE_OS_Exit_Info::call_hooks() (Cleanup.cpp:183)
+==26695==    by 0x4CFF87B: TAO_Singleton_Manager::fini() (TAO_Singleton_Manager.cpp:232)
+==26695==    by 0x501DAF8: ACE_OS_Exit_Info::call_hooks() (Cleanup.cpp:188)
+==26695==    by 0x5045D33: ACE_Object_Manager::fini() (Object_Manager.cpp:609)
+==26695==    by 0x5045F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26695==    by 0x5046182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26695==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26695==    by 0x4FE2942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x5083BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26695==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26695==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26695==
+==26695==
+==26695== 288 bytes in 1 blocks are definitely lost in loss record 6 of 10
+==26695==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26695==    by 0x4D0AF86: ACE_TSS<TAO_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==26695==    by 0x4D0B0C2: ACE_TSS<TAO_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==26695==    by 0x4CCB608: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==26695==    by 0x4CB6949: TAO_Leader_Follower::reactor() (Leader_Follower.cpp:135)
+==26695==    by 0x4CD569A: TAO_ORB_Core::init(int&, char**) (ORB_Core.cpp:1144)
+==26695==    by 0x4CC955F: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1350)
+==ACE (26694|92872144) SR::fini, repo=0x5893eb8 [23] (1024), name=ServantRetentionStrategyFactory, type=0x593d0e0, impl=0x593d078, object=0x3c00000000, active=92880568
+26695==    by 0x403907: main (client.cpp:79)
+==26695==
+==26695==
+==26695== 2,048 bytes in 1 blocks are still reachable in loss record 7 of 10
+==26695==    at 0x4A0590B: realloc (vg_replace_malloc.c:306)
+==26695==    by 0x3C74406D19: pthread_create@@GLIBC_2.2.5 (in /lib64/libpthread-2.5.so)
+==26695==    by 0x50497E3: ACE_OS::thr_create(void* (*)(void*), void*, long, unsigned long*, unsigned long*, long, void*, unsigned long, ACE_Base_Thread_Adapter*) (OS_NS_Thread.cpp:4274)
+==26695==    by 0x5078BC9: ACE_Thread_Manager::spawn_i(void* (*)(void*), void*, long, unsigned long*, unsigned long*, long, int, void*, unsigned long, ACE_Task_Base*) (Thread.inl:97)
+==26695==    by 0x507AE10: ACE_Thread_Manager::spawn_n(unsigned long, void* (*)(void*), void*, long, long, int, ACE_Task_Base*, unsigned long*, void**, unsigned long*) (Thread_Manager.cpp:739)
+==26695==    by 0x5076904: ACE_Task_Base::activate(long, int, int, long, int, ACE_Task_Base*, unsigned long*, void**, unsigned long*, unsigned long*) (Task.cpp:174)
+==26695==    by 0x403A48: main (client.cpp:95)
+==26695==
+==26695==
+==26695== 3,240 bytes in 45 blocks are indirectly lost in loss record 8 of 10
+==26695==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+ACE (26694|92872144) ST::fini - destroying ServantRetentionStrategyFactory, flags = 3
+==26695==    by 0x4FF7C2B: ACE_Service_Gestalt::init_i() (Service_Gestalt.cpp:269)
+==26695==    by 0x4FF7CFC: ACE_Service_Gestalt::ACE_Service_Gestalt(unsigned long, bool, bool) (Service_Gestalt.cpp:246)
+==26695==    by 0x4FF6D48: ACE_TSS<ACE_Service_Gestalt>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==26695==    by 0x4FF21A2: ACE_TSS<ACE_Service_Gestalt>::ts_get() const (TSS_T.cpp:219)
+==26695==    by 0x4FF686B: ACE_Service_Config_Guard::ACE_Service_Config_Guard(ACE_Service_Gestalt*) (TSS_T.cpp:53)
+==26695==    by 0x4CB08D2: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:61)
+==26695==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==26695==    by 0x40429E: test::test_method() (testC.cpp:130)
+==26695==    by 0x40367C: Client::svc() (client.cpp:65)
+==26695==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==26695==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+==26695==    by 0x3C744061B4: start_thread (in /lib64/libpthread-2.5.so)
+==26695==    by 0x3C738CD39C: clone (in /lib64/libc-2.5.so)
+==26695==
+==26695==
+==26695== 375,840 (3,960 direct, 371,880 indirect) bytes in 45 blocks are definitely lost in loss record 9 of 10
+==26695==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26695==    by 0x4FF6D26: ACE_TSS<ACE_Service_Gestalt>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==26695==    by 0x4FF21A2: ACE_TSS<ACE_Service_Gestalt>::ts_get() const (TSS_T.cpp:219)
+==26695==    by 0x4FF686B: ACE_Service_Config_Guard::ACE_Service_Config_Guard(ACE_Service_Gestalt*) (TSS_T.cpp:53)
+==26695==    by 0x4CB08D2: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:61)
+==26695==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==26695==    by 0x40429E: test::test_method() (testC.cpp:130)
+==26695==    by 0x40367C: Client::svc() (client.cpp:65)
+==26695==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==26695==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+==26695==    by 0x3C744061B4: start_thread (in /lib64/libpthread-2.5.so)
+==26695==    by 0x3C738CD39C: clone (in /lib64/libc-2.5.so)
+==26695==
+==26695==
+==26695== 368,640 bytes in 45 blocks are indirectly lost in loss record 10 of 10
+==26695==    at 0x4A055F6: operator new[](unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:211)
+==26695==    by 0x4FFC1C7: ACE_Service_Repository::open(unsigned long) (Service_Repository.cpp:114)
+==26695==    by 0x4FFC240: ACE_Service_Repository::ACE_Service_Repository(unsigned long) (Service_Repository.cpp:128)
+==26695==    by 0x4FF7C3F: ACE_Service_Gestalt::init_i() (Service_Gestalt.cpp:269)
+==26695==    by 0x4FF7CFC: ACE_Service_Gestalt::ACE_Service_Gestalt(unsigned long, bool, bool) (Service_Gestalt.cpp:246)
+==26695==    by 0x4FF6D48: ACE_TSS<ACE_Service_Gestalt>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==26695==    by 0x4FF21A2: ACE_TSS<ACE_Service_Gestalt>::ts_get() const (TSS_T.cpp:219)
+==26695==    by 0x4FF686B: ACE_Service_Config_Guard::ACE_Service_Config_Guard(ACE_Service_Gestalt*) (TSS_T.cpp:53)
+==26695==    by 0x4CB08D2: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:61)
+==26695==    by 0x4CB0591: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:50)
+==26695==    by 0x40429E: test::test_method() (testC.cpp:130)
+==26695==    by 0x40367C: Client::svc() (client.cpp:65)
+==26695==    by 0x5076A76: ACE_Task_Base::svc_run(void*) (Task.cpp:271)
+==26695==    by 0x50775E6: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:95)
+==26695==    by 0x3C744061B4: start_thread (in /lib64/libpthread-2.5.so)
+==26695==    by 0x3C738CD39C: clone (in /lib64/libc-2.5.so)
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [22] (1024), name=RequestProcessingStrategyServantLocatorFactory, type=0x5936b40, impl=0x5936ad8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying RequestProcessingStrategyServantLocatorFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [21] (1024), name=RequestProcessingStrategyServantActivatorFactory, type=0x5930588, impl=0x5930520, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying RequestProcessingStrategyServantActivatorFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [20] (1024), name=RequestProcessingStrategyDefaultServantFactory, type=0x5929fe8, impl=0x5929f80, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying RequestProcessingStrategyDefaultServantFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [19] (1024), name=RequestProcessingStrategyAOMOnlyFactory, type=0x5923a60, impl=0x59239f8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying RequestProcessingStrategyAOMOnlyFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [18] (1024), name=RequestProcessingStrategyFactory, type=0x591d4d8, impl=0x591d470, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying RequestProcessingStrategyFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [17] (1024), name=ImplicitActivationStrategyFactory, type=0x5916f50, impl=0x5916ee8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying ImplicitActivationStrategyFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [16] (1024), name=IdUniquenessStrategyFactory, type=0x59109e0, impl=0x5910978, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying IdUniquenessStrategyFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [15] (1024), name=IdAssignmentStrategyFactory, type=0x590a470, impl=0x590a408, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying IdAssignmentStrategyFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [14] (1024), name=LifespanStrategyTransientFactory, type=0x5903ee8, impl=0x5903e80, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying LifespanStrategyTransientFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [13] (1024), name=LifespanStrategyPersistentFactory, type=0x58fd960, impl=0x58fd8f8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying LifespanStrategyPersistentFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [12] (1024), name=LifespanStrategyFactory, type=0x58f7408, impl=0x58f73a0, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying LifespanStrategyFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [11] (1024), name=ThreadStrategySingleFactory, type=0x58f0e98, impl=0x58f0e30, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying ThreadStrategySingleFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [10] (1024), name=ThreadStrategyFactory, type=0x58ea940, impl=0x58ea8d8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying ThreadStrategyFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [9] (1024), name=ImplicitActivationStrategyImplicit, type=0x58e43b8, impl=0x58e4350, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying ImplicitActivationStrategyImplicit, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [8] (1024), name=ImplicitActivationStrategyExplicit, type=0x58dde30, impl=0x58dddc8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying ImplicitActivationStrategyExplicit, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [7] (1024), name=IdUniquenessStrategyUniqueFactory, type=0x58d78a8, impl=0x58d7840, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying IdUniquenessStrategyUniqueFactory, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [6] (1024), name=IdUniquenessStrategyUnique, type=0x58d1338, impl=0x58d12c8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying IdUniquenessStrategyUnique, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [5] (1024), name=IdUniquenessStrategyMultiple, type=0x58cadc0, impl=0x58cad58, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying IdUniquenessStrategyMultiple, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [4] (1024), name=IdAssignmentStrategyUser, type=0x58c4850, impl=0x58c47e8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying IdAssignmentStrategyUser, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [3] (1024), name=IdAssignmentStrategySystem, type=0x58be2e0, impl=0x58be278, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying IdAssignmentStrategySystem, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [2] (1024), name=AnyTypeCode_Adapter, type=0x58b7d88, impl=0x58b7d20, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying AnyTypeCode_Adapter, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [1] (1024), name=TAO_NVList_Adapter, type=0x58b0b70, impl=0x58b0b08, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying TAO_NVList_Adapter, flags = 3
+ACE (26694|92872144) SR::fini, repo=0x5893eb8 [0] (1024), name=TAO_ORB_Core_Static_Resources, type=0x58a4e58, impl=0x58a4ab8, object=0x3c00000000, active=92880568
+ACE (26694|92872144) ST::fini - destroying TAO_ORB_Core_Static_Resources, flags = 3
+ACE (26694|92872144) SG::close - complete this=0x5893d88, repo=0x5893eb8, owned=0
+(26694|92872144) SR::<dtor>, this=0x5893eb8
+(26694|92872144) SR::close, this=0x5893eb8, size=56
+(26694|92872144) SR::close, this=0x5893eb8, delete so[55]=0x5cd1728 (PICurrent_Loader)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[54]=0x5ccb1a0 (ClientRequestInterceptor_Adapter_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[53]=0x5cbe1a8 (PolicyFactory_Loader)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[52]=0x5cb7810 (CodecFactory_Loader)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[51]=0x5cc8e58 (ORBInitializer_Registry)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[50]=0x5a63e68 (ACE_Naming_Context)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[49]=0x5a5c780 (ACE_Service_Manager)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[48]=0x5a460d8 (Default_Collocation_Resolver)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[47]=0x5a3fb48 (Default_Thread_Lane_Resources_Manager_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[46]=0x5a395b8 (Default_Endpoint_Selector_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[45]=0x5a33010 (Default_Stub_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[44]=0x5a2cac8 (HTTP_Parser)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[43]=0x5a26588 (DLL_Parser)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[42]=0x5a20048 (FILE_Parser)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[41]=0x5a19b08 (CORBALOC_Parser)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[40]=0x5a135b8 (CORBANAME_Parser)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[39]=0x5a0d070 (MCAST_Parser)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[38]=0x5a06b08 (IIOP_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[37]=0x5a005b0 (Server_Strategy_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[36]=0x59fa010 (Client_Strategy_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[35]=0x59f3a98 (Resource_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[34]=0x59b7448 (UTF16_BOM_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[33]=0x59b0ed8 (UTF8_Latin1_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[32]=0x59d0598 (TAO_Codeset)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[31]=0x596fd50 (TAO_Acceptor_Filter_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[30]=0x59697e0 (TAO_Network_Priority_Hook)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[29]=0x5963270 (TAO_Object_Adapter_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[28]=0x595cd10 (TAO_POA_Current_Factory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[27]=0x59567b8 (ThreadStrategySingle)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[26]=0x5950220 (ThreadStrategyORBControl)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[25]=0x5949c90 (ServantRetentionStrategyNonRetainFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[24]=0x5943700 (ServantRetentionStrategyRetainFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[23]=0x593d188 (ServantRetentionStrategyFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[22]=0x5936bf8 (RequestProcessingStrategyServantLocatorFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[21]=0x5930648 (RequestProcessingStrategyServantActivatorFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[20]=0x592a0a0 (RequestProcessingStrategyDefaultServantFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[19]=0x5923b10 (RequestProcessingStrategyAOMOnlyFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[18]=0x591d588 (RequestProcessingStrategyFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[17]=0x5917000 (ImplicitActivationStrategyFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[16]=0x5910a88 (IdUniquenessStrategyFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[15]=0x590a518 (IdAssignmentStrategyFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[14]=0x5903f98 (LifespanStrategyTransientFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[13]=0x58fda10 (LifespanStrategyPersistentFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[12]=0x58f74a8 (LifespanStrategyFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[11]=0x58f0f40 (ThreadStrategySingleFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[10]=0x58ea9e0 (ThreadStrategyFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[9]=0x58e4468 (ImplicitActivationStrategyImplicit)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[8]=0x58ddee0 (ImplicitActivationStrategyExplicit)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[7]=0x58d7958 (IdUniquenessStrategyUniqueFactory)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[6]=0x58d13e0 (IdUniquenessStrategyUnique)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[5]=0x58cae68 (IdUniquenessStrategyMultiple)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[4]=0x58c48f8 (IdAssignmentStrategyUser)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[3]=0x58be388 (IdAssignmentStrategySystem)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[2]=0x58b7e28 (AnyTypeCode_Adapter)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[1]=0x58b0c10 (TAO_NVList_Adapter)
+(26694|92872144) SR::close, this=0x5893eb8, delete so[0]=0x58a4f00 (TAO_ORB_Core_Static_Resources)
+ACE (26694|92872144) SG::dtor - this=0x5893d88, pss = (nil)
+ACE (26694|92872144) DLL_Handle::close - TAO_PI (handle=0, refcount=0)
+ACE (26694|92872144) DLL_Handle::close - TAO_PI (handle=0, refcount=0)
+ACE (26694|92872144) DLL_Handle::close - TAO_Codeset (handle=0, refcount=0)
+ACE (26694|92872144) DLL_Handle::close - TAO_Codeset (handle=0, refcount=0)
+==26694==
+==26694==
+==26694== 1 bytes in 1 blocks are still reachable in loss record 1 of 9
+==26694==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26694==    by 0x55C9476: ACE_TSS<ACE_Dynamic>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==26694==    by 0x55C9772: ACE_TSS<ACE_Dynamic>::ts_get() const (TSS_T.cpp:219)
+==26694==    by 0x52412F1: TAO_Creation_Strategy<TAO_IIOP_Connection_Handler>::make_svc_handler(TAO_IIOP_Connection_Handler*&) (Svc_Handler.cpp:72)
+==26694==    by 0x52400E0: ACE_Acceptor<TAO_IIOP_Connection_Handler, ACE_SOCK_Acceptor>::handle_input(int) (Acceptor.cpp:383)
+==26694==    by 0x561B9A1: ACE_TP_Reactor::dispatch_socket_event(ACE_EH_Dispatch_Info&) (TP_Reactor.cpp:591)
+==26694==    by 0x561C291: ACE_TP_Reactor::handle_socket_events(int&, ACE_TP_Token_Guard&) (TP_Reactor.cpp:460)
+==26694==    by 0x561C39F: ACE_TP_Reactor::dispatch_i(ACE_Time_Value*, ACE_TP_Token_Guard&) (TP_Reactor.cpp:250)
+==26694==    by 0x561C475: ACE_TP_Reactor::handle_events(ACE_Time_Value*) (TP_Reactor.cpp:174)
+==26694==    by 0x526A426: TAO_ORB_Core::run(ACE_Time_Value*, int) (Reactor.inl:188)
+==26694==    by 0x405327: main (server.cpp:89)
+==26694==
+==26694==
+==26694== 16 bytes in 1 blocks are still reachable in loss record 2 of 9
+==26694==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26694==    by 0x55D338B: ACE_Log_Msg_Manager::init_backend(unsigned long const*) (Log_Msg.cpp:192)
+==26694==    by 0x55D3442: ACE_Log_Msg_Manager::get_lock() (Log_Msg.cpp:219)
+==26694==    by 0x55D39EA: ACE_Log_Msg::~ACE_Log_Msg() (Log_Msg.cpp:709)
+==26694==    by 0x55D4587: ACE_Log_Msg::close() (Log_Msg.cpp:265)
+==26694==    by 0x55E2E43: ACE_Object_Manager::fini() (Object_Manager.cpp:642)
+==26694==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26694==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26694==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26694==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26694==
+==26694==
+==26694== 32 bytes in 1 blocks are still reachable in loss record 3 of 9
+==26694==    at 0x4A04B32: calloc (vg_replace_malloc.c:279)
+==26694==    by 0x3C7400154A: _dlerror_run (in /lib64/libdl-2.5.so)
+==26694==    by 0x3C74000EF0: dlopen@@GLIBC_2.2.5 (in /lib64/libdl-2.5.so)
+==26694==    by 0x55C86E2: ACE_DLL_Handle::open(char const*, int, void*) (OS_NS_dlfcn.inl:135)
+==26694==    by 0x55C8B3C: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==26694==    by 0x558E90A: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==26694==    by 0x558FAD5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==26694==    by 0x558FBDD: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==26694==    by 0x55904BC: ACE_Service_Type_Factory::make_service_type(ACE_Service_Gestalt*) const (Parse_Node.cpp:796)
+==26694==    by 0x55971AE: ACE_Service_Gestalt::initialize(ACE_Service_Type_Factory const*, char const*) (Service_Gestalt.cpp:583)
+==26694==    by 0x55902ED: ACE_Dynamic_Node::apply(ACE_Service_Gestalt*, int&) (Parse_Node.cpp:263)
+==26694==    by 0x559BFE4: ace_yyparse(void*) (Svc_Conf_y.cpp:1134)
+==26694==    by 0x5594890: ACE_Service_Gestalt::process_directives_i(ACE_Svc_Conf_Param*) (Service_Gestalt.cpp:825)
+==26694==    by 0x5597384: ACE_Service_Gestalt::process_directive(char const*) (Service_Gestalt.cpp:960)
+==26694==    by 0x529A7A9: TAO::ORB::open_services(ACE_Service_Gestalt*, int&, char**) (Service_Config.inl:142)
+==26694==    by 0x526742A: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1317)
+==26694==    by 0x405174: main (server.cpp:41)
+==26694==
+==26694==
+==26694== 39 bytes in 2 blocks are still reachable in loss record 4 of 9
+==26694==    at 0x4A055F6: operator new[](unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:211)
+==26694==    by 0x55D9631: ACE_New_Allocator::malloc(unsigned long) (Malloc_Allocator.cpp:118)
+==26694==    by 0x4C92D3F: ACE_String_Base<char>::set(char const*, unsigned long, bool) (String_Base.cpp:138)
+==26694==    by 0x4C8E3EA: TAO_POA_Static_Resources::TAO_POA_Static_Resources() (String_Base.cpp:347)
+==26694==    by 0x4C8E4B9: TAO_POA_Static_Resources::instance() (Root_POA.cpp:2657)
+==26694==    by 0x4C8E535: __static_initialization_and_destruction_0(int, int) (Root_POA.cpp:2644)
+==26694==    by 0x4CC3FB5: (within /home/build/ACE/gcc41/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.1)
+==26694==    by 0x4C73042: (within /home/build/ACE/gcc41/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.1)
+==26694==
+==26694==
+==26694== 48 bytes in 1 blocks are still reachable in loss record 5 of 9
+==26694==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26694==    by 0x55D3420: ACE_Log_Msg_Manager::get_lock() (Log_Msg.cpp:214)
+==26694==    by 0x55D39EA: ACE_Log_Msg::~ACE_Log_Msg() (Log_Msg.cpp:709)
+==26694==    by 0x55D4587: ACE_Log_Msg::close() (Log_Msg.cpp:265)
+==26694==    by 0x55E2E43: ACE_Object_Manager::fini() (Object_Manager.cpp:642)
+==26694==    by 0x55E2F47: ACE_Object_Manager::~ACE_Object_Manager() (Object_Manager.cpp:318)
+==26694==    by 0x55E3182: ACE_Object_Manager_Manager::~ACE_Object_Manager_Manager() (Object_Manager.cpp:765)
+==26694==    by 0x3C7383301D: __cxa_finalize (in /lib64/libc-2.5.so)
+==26694==    by 0x557F942: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x5620BD0: (within /home/build/ACE/gcc41/ACE_wrappers/ace/libACE.so.5.6.1)
+==26694==    by 0x3C73832D34: exit (in /lib64/libc-2.5.so)
+==26694==    by 0x3C7381D8AA: (below main) (in /lib64/libc-2.5.so)
+==26694==
+==26694==
+==26694== 64 bytes in 1 blocks are still reachable in loss record 6 of 9
+==26694==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26694==    by 0x52745E6: ACE_TSS<TAO_ORB_Core_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==26694==    by 0x52557B2: ACE_TSS<TAO_ORB_Core_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==26694==    by 0x5256604: TAO_LF_Strategy_Complete::set_event_loop_thread(ACE_Time_Value*, TAO_Leader_Follower&) (TSS_T.cpp:53)
+==26694==    by 0x526A3A2: TAO_ORB_Core::run(ACE_Time_Value*, int) (LF_Event_Loop_Thread_Helper.inl:16)
+==26694==    by 0x405327: main (server.cpp:89)
+==26694==
+==26694==
+==26694== 80 bytes in 1 blocks are still reachable in loss record 7 of 9
+==26694==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26694==    by 0x4C8E4A9: TAO_POA_Static_Resources::instance() (Root_POA.cpp:2657)
+==26694==    by 0x4C8E535: __static_initialization_and_destruction_0(int, int) (Root_POA.cpp:2644)
+==26694==    by 0x4CC3FB5: (within /home/build/ACE/gcc41/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.1)
+==26694==    by 0x4C73042: (within /home/build/ACE/gcc41/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.1)
+==26694==
+==26694==
+==26694== 192 bytes in 1 blocks are still reachable in loss record 8 of 9
+==26694==    at 0x4A05809: malloc (vg_replace_malloc.c:149)
+==26694==    by 0x3C73410731: add_to_global (in /lib64/ld-2.5.so)
+==26694==    by 0x3C73410B75: dl_open_worker (in /lib64/ld-2.5.so)
+==26694==    by 0x3C7340CC35: _dl_catch_error (in /lib64/ld-2.5.so)
+==26694==    by 0x3C7341036B: _dl_open (in /lib64/ld-2.5.so)
+==26694==    by 0x3C74000F79: dlopen_doit (in /lib64/libdl-2.5.so)
+==26694==    by 0x3C7340CC35: _dl_catch_error (in /lib64/ld-2.5.so)
+==26694==    by 0x3C740014EC: _dlerror_run (in /lib64/libdl-2.5.so)
+==26694==    by 0x3C74000EF0: dlopen@@GLIBC_2.2.5 (in /lib64/libdl-2.5.so)
+==26694==    by 0x55C86E2: ACE_DLL_Handle::open(char const*, int, void*) (OS_NS_dlfcn.inl:135)
+==26694==    by 0x55C8B3C: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==26694==    by 0x558E90A: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==26694==    by 0x558FAD5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==26694==    by 0x558FBDD: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==26694==    by 0x55904BC: ACE_Service_Type_Factory::make_service_type(ACE_Service_Gestalt*) const (Parse_Node.cpp:796)
+==26694==    by 0x55971AE: ACE_Service_Gestalt::initialize(ACE_Service_Type_Factory const*, char const*) (Service_Gestalt.cpp:583)
+==26694==    by 0x55902ED: ACE_Dynamic_Node::apply(ACE_Service_Gestalt*, int&) (Parse_Node.cpp:263)
+==26694==    by 0x559BFE4: ace_yyparse(void*) (Svc_Conf_y.cpp:1134)
+==26694==    by 0x5594890: ACE_Service_Gestalt::process_directives_i(ACE_Svc_Conf_Param*) (Service_Gestalt.cpp:825)
+==26694==    by 0x5597384: ACE_Service_Gestalt::process_directive(char const*) (Service_Gestalt.cpp:960)
+==26694==    by 0x529A7A9: TAO::ORB::open_services(ACE_Service_Gestalt*, int&, char**) (Service_Config.inl:142)
+==26694==    by 0x526742A: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1317)
+==26694==    by 0x405174: main (server.cpp:41)
+==26694==
+==26694==
+==26694== 288 bytes in 1 blocks are still reachable in loss record 9 of 9
+==26694==    at 0x4A05758: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:183)
+==26694==    by 0x52A8F86: ACE_TSS<TAO_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==26694==    by 0x52A90C2: ACE_TSS<TAO_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==26694==    by 0x5269608: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==26694==    by 0x5254949: TAO_Leader_Follower::reactor() (Leader_Follower.cpp:135)
+==26694==    by 0x527369A: TAO_ORB_Core::init(int&, char**) (ORB_Core.cpp:1144)
+==26694==    by 0x526755F: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1350)
+==26694==    by 0x405174: main (server.cpp:41)
+[build@shelob Bug_3108_Regression]$
+
