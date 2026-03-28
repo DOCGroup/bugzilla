@@ -1,0 +1,35 @@
+Index: ACE_wrappers/ace/DLL.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/ace/DLL.cpp,v
+retrieving revision 1.1.1.2
+retrieving revision 1.2
+diff -u -r1.1.1.2 -r1.2
+--- ACE_wrappers/ace/DLL.cpp	18 Jul 2002 19:31:42 -0000	1.1.1.2
++++ ACE_wrappers/ace/DLL.cpp	20 Aug 2003 22:57:21 -0000	1.2
+@@ -142,7 +142,9 @@
+ 
+   this->error_ = 0;
+ 
+-  void *sym = this->dll_handle_->symbol (sym_name, ignore_errors);
++  void *sym = 0;
++  if (this->dll_handle_)
++    sym = this->dll_handle_->symbol (sym_name, ignore_errors);
+ 
+   if (!sym)
+     this->error_ = 1;
+Index: ACE_wrappers/ace/config-linux.h
+===================================================================
+RCS file: /home/src/ACE_wrappers/ace/config-linux.h,v
+retrieving revision 1.1.1.2
+retrieving revision 1.2
+diff -u -r1.1.1.2 -r1.2
+--- ACE_wrappers/ace/config-linux.h	13 Dec 2002 14:34:12 -0000	1.1.1.2
++++ ACE_wrappers/ace/config-linux.h	22 Aug 2003 18:00:39 -0000	1.2
+@@ -13,6 +13,7 @@
+ 
+ #define ACE_HAS_SVR4_DYNAMIC_LINKING
+ #define ACE_HAS_AUTOMATIC_INIT_FINI
++#define ACE_HAS_DLSYM_SEGFAULT_ON_INVALID_HANDLE
+ 
+ #if !defined (ACE_MT_SAFE)
+ #define ACE_MT_SAFE 1                           // JCEJ 12/22/96        #1
