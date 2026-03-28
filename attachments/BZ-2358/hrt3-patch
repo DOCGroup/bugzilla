@@ -1,0 +1,400 @@
+diff -Nru ACE_wrappers/ace/High_Res_Timer.cpp ACE_wrappers-hrt-patched/ace/High_Res_Timer.cpp
+--- ACE_wrappers/ace/High_Res_Timer.cpp	2006-01-04 11:39:14.000000000 +0200
++++ ACE_wrappers-hrt-patched/ace/High_Res_Timer.cpp	2006-08-10 21:41:12.000000000 +0300
+@@ -73,8 +73,10 @@
+ /* static */
+ int ACE_High_Res_Timer::global_scale_factor_status_ = 0;
+ 
+-
+ #if defined (linux)
++/* static */
++int ACE_High_Res_Timer::cpu_smp_ = 0;
++
+ // Determine the apparent CPU clock speed from /proc/cpuinfo
+ ACE_UINT32
+ ACE_High_Res_Timer::get_cpuinfo (void)
+@@ -257,6 +259,12 @@
+ 
+   this->reset ();
+ 
++#if defined (linux)
++  CPU_ZERO (&cpu_mask_saved_);
++  thread_bound_ = 0;
++  (ACE_OS::num_processors () > 1) ? cpu_smp_ = 1 :  cpu_smp_ = 0;
++#endif /* defined (linux) */
++
+   // Make sure that the global scale factor is set.
+   (void) global_scale_factor ();
+ }
+@@ -277,10 +285,18 @@
+       const ACE_Time_Value actual_start =
+         ACE_OS::gettimeofday ();
+       const ACE_hrtime_t start =
+-        ACE_OS::gethrtime ();
++	 ACE_OS::gethrtime (ACE_OS::ACE_HRTIMER_GETTIME
++#if defined (linux)
++		 , ACE_High_Res_Timer::cpu_smp_
++#endif /* defined (linux) */
++		 );
+       ACE_OS::sleep (sleep_time);
+       const ACE_hrtime_t stop =
+-        ACE_OS::gethrtime ();
++        ACE_OS::gethrtime (ACE_OS::ACE_HRTIMER_GETTIME
++#if defined (linux)
++		, ACE_High_Res_Timer::cpu_smp_
++#endif /* defined (linux) */
++		 );
+       const ACE_Time_Value actual_delta =
+         ACE_OS::gettimeofday () - actual_start;
+ 
+@@ -543,4 +559,85 @@
+   return -1;
+ }
+ 
++#if defined (linux)
++int ACE_High_Res_Timer::bind_thread_to_cpu (cpu_set_t cpu_mask)
++{
++  if (ACE_High_Res_Timer::cpu_smp_ == 0)
++  {
++	  // This is useful to have the same code for SMP as well as UP machines.
++	  // On UP CPUs this code will take a doing nothing approach, avoiding
++	  // extra syscalls.
++	  return 0;
++  }
++
++  ACE_OS::thr_self (this->thread_bound_);
++
++  // Works only with linux-threads or NPTL
++  if (ACE_OS::thr_get_affinity (
++                                this->thread_bound_,
++                                sizeof (this->cpu_mask_saved_),
++                                &this->cpu_mask_saved_) == -1)
++  {
++	  ACE_DEBUG ((LM_DEBUG, 
++		      ACE_LIB_TEXT ("\nACE_OS::thr_get_affinity failed () to get affinity info.\n")
++		      ACE_LIB_TEXT ("May happen when NPTL thread-id passed to sched_getaffinity ().\n")
++		      ACE_LIB_TEXT ("Trying to get affinity info for the whole process.\n")));
++
++	  this->thread_bound_ = ACE_OS::getpid ();
++
++	  //  Trying to bind the whole process. Works with NPTL as well, 
++	  //  but binds the whole process to a cpu
++	  if (ACE_OS::thr_get_affinity (
++                                    this->thread_bound_,
++                                    sizeof (this->cpu_mask_saved_),
++                                    &this->cpu_mask_saved_) == -1)
++	  {
++		  ACE_ERROR_RETURN ((LM_ERROR, 
++			      ACE_LIB_TEXT ("\nACE_OS::thr_get_affinity failed with errno %d\n")
++			      ACE_LIB_TEXT ("If errno is 0, probably, sched_getaffinity () failed")
++			      ACE_LIB_TEXT (" on kernel 2.4 with the syscall not supported in kernel.\n")
++			      ACE_LIB_TEXT ("Run strace to see ENOSYS - Function not implemented.\n"),
++			      errno), 
++			      -1);
++	  }
++  }
++
++  // Binds either thread or the whole process <thread_bound_>, 
++  // whatever is supported, to the <cpu_mask>. Saves previous mask
++  // in <cpu_mask_saved_>.
++  if (ACE_OS::thr_set_affinity (
++                                this->thread_bound_,
++                                sizeof (cpu_mask),
++                                &cpu_mask) == -1)
++  {
++	  ACE_ERROR_RETURN ((LM_ERROR, 
++                    ACE_LIB_TEXT ("\nACE_OS::thr_set_affinity failed with errno %d\n")
++		     ACE_LIB_TEXT ("If errno is 0, probably, sched_setaffinity () failed")
++		     ACE_LIB_TEXT (" on kernel 2.4 with the syscall not supported in kernel.\n")
++		     ACE_LIB_TEXT ("Run strace to see ENOSYS - Function not implemented.\n"),
++		     errno),
++                    -1);
++  }
++
++  return 0;
++}
++
++int ACE_High_Res_Timer::unbind_thread_from_cpu ()
++{
++  // Restores cpu mask to the status prior to bind_thread_to_cpu ()
++  if (ACE_OS::thr_set_affinity (
++                                this->thread_bound_,
++                                sizeof (this->cpu_mask_saved_),
++                                &this->cpu_mask_saved_) == -1)
++  {
++	  ACE_ERROR_RETURN ((LM_ERROR, 
++		     ACE_LIB_TEXT ("ACE_OS::thr_set_affinity failed with errno %d\n"),
++		     errno), 
++                    -1);
++  }
++
++  return 0;
++}
++#endif /* defined (linux) */
++
+ ACE_END_VERSIONED_NAMESPACE_DECL
+diff -Nru ACE_wrappers/ace/High_Res_Timer.h ACE_wrappers-hrt-patched/ace/High_Res_Timer.h
+--- ACE_wrappers/ace/High_Res_Timer.h	2006-01-25 21:50:07.000000000 +0200
++++ ACE_wrappers-hrt-patched/ace/High_Res_Timer.h	2006-08-10 21:17:45.000000000 +0300
+@@ -23,6 +23,7 @@
+ #include "ace/Basic_Types.h"
+ #include "ace/OS_NS_time.h"
+ #include "ace/Time_Value.h"
++#include "ace/OS_NS_Thread.h"
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -89,9 +90,18 @@
+  * (laptops for example, but probably also embedded devices),
+  * do change the cycle rate while running.
+  * Some pentiums can run on (at least) two clock frequency's.
+- * Another problem arises with multiprocessor computers, there
+- * are reports that the different RDTSC's are not always kept
+- * in sync.
++ *
++ * Another problem arises with multiprocessor computers, where
++ * readings of RDTSC counter may occur from different CPUs
++ * or being corrupted in shared cacheline on Intel chipsets, supporting 
++ * hyperthreading or dual/multi cores.
++ * The problem is addressed on linux by binding the thread, containing 
++ * ACE_High_Res_Timer object, to a chosen single CPU, which is enough
++ * for AMD SMP systems, and additionally for Intel chipsets by adding 
++ * a one more serializing assembler instruction (cpuid) prior and after 
++ * RDTSC in order to force memory writing. Use bind_thread_to_cpu () and
++ * unbind_thread_from_cpu () to address the issues.
++ *
+  * A windows "timer chip" NOTE: (8254-compatible real-time clock)
+  * When ::QueryPerformanceCounter() uses the 8254 it has a
+  * frequency off about 1.193 Mhz (or sometimes 3.579 Mhz?) and
+@@ -268,6 +278,28 @@
+    * (the default).
+    */
+   static ACE_UINT32 get_cpuinfo (void);
++
++  /**
++  * Binds current thread to a chosen single CPU.
++  * <cpu_mask> is a bitmask of CPUs to bind to, e.g value 1 binds the 
++  * thread to the "CPU 0", 3 to the "CPU 1", etc. make sure, that you
++  * are binding the timer thread to a single CPU.
++  * Use CPU_ZERO and CPU_SET macros from <sched.h> to bind
++  * to a chosen single CPU.
++  *
++  * By itself it is enough for RDTSC-based High_Res_Timer to work 
++  * properly on linux with AMD chipsets. In the case of Intel HW with 
++  * hyperthreading,  the result of rdtsc instruction should be forced 
++  * to be written to memory in order not to be corrupted by being kept 
++  * in shared by the hyper-threads cacheline. 
++  */
++  int bind_thread_to_cpu (cpu_set_t cpu_mask);
++
++  /**
++  * Unbinds current thread from a chosen single CPU, restoring previous
++  * CPU-mask
++  */
++  int unbind_thread_from_cpu ();
+ #endif /* defined (linux) */
+ 
+ private:
+@@ -299,6 +331,14 @@
+   /// Start time of incremental timing.
+   ACE_hrtime_t start_incr_;
+ 
++#if defined (linux)
++  /// Saved cpu-mask to be used by unbind_thread_from_cpu ()
++  cpu_set_t cpu_mask_saved_;
++
++  ///  Kept thread-id or pid-id of whatever is bound to a CPU
++  ACE_hthread_t thread_bound_;
++ #endif /* defined (linux) */
++
+   /// Converts ticks to microseconds.  That is, ticks /
+   /// global_scale_factor_ == microseconds.
+   static ACE_UINT32 global_scale_factor_;
+@@ -310,6 +350,12 @@
+    * -1 = HR timer not supported
+    */
+   static int global_scale_factor_status_;
++
++#if defined (linux)
++  /// 'True', when  linux sees the hw as SMP, 'false', when UP.
++  static int cpu_smp_ ;
++#endif /* defined linux */
++
+ };
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+diff -Nru ACE_wrappers/ace/High_Res_Timer.inl ACE_wrappers-hrt-patched/ace/High_Res_Timer.inl
+--- ACE_wrappers/ace/High_Res_Timer.inl	2005-10-28 18:14:52.000000000 +0200
++++ ACE_wrappers-hrt-patched/ace/High_Res_Timer.inl	2006-08-10 19:58:14.000000000 +0300
+@@ -69,7 +69,7 @@
+ 
+   ACE_Time_Value tv;
+   ACE_High_Res_Timer::hrtime_to_tv (tv,
+-                                    ACE_OS::gethrtime (op));
++                                    ACE_OS::gethrtime (op, ACE_High_Res_Timer::cpu_smp_));
+   return tv;
+ }
+ 
+@@ -105,7 +105,7 @@
+     }
+ #endif /* ACE_WIN32 */
+ 
+-  return ACE_OS::gethrtime (op);
++  return ACE_OS::gethrtime (op, ACE_High_Res_Timer::cpu_smp_);
+ }
+ 
+ ACE_INLINE ACE_hrtime_t
+diff -Nru ACE_wrappers/ace/OS_NS_time.h ACE_wrappers-hrt-patched/ace/OS_NS_time.h
+--- ACE_wrappers/ace/OS_NS_time.h	2006-06-20 23:27:41.000000000 +0300
++++ ACE_wrappers-hrt-patched/ace/OS_NS_time.h	2006-08-10 19:58:14.000000000 +0300
+@@ -206,7 +206,8 @@
+                    time_t t0);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  ACE_hrtime_t gethrtime (const ACE_HRTimer_Op = ACE_HRTIMER_GETTIME);
++  ACE_hrtime_t gethrtime (const ACE_HRTimer_Op = ACE_HRTIMER_GETTIME,
++	  int cpu_smp = 0);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   struct tm *gmtime (const time_t *clock);
+diff -Nru ACE_wrappers/ace/OS_NS_time.inl ACE_wrappers-hrt-patched/ace/OS_NS_time.inl
+--- ACE_wrappers/ace/OS_NS_time.inl	2006-07-31 21:20:52.000000000 +0300
++++ ACE_wrappers-hrt-patched/ace/OS_NS_time.inl	2006-08-10 21:27:33.000000000 +0300
+@@ -203,14 +203,16 @@
+ #endif /* ghs && ACE_HAS_PENTIUM */
+ 
+ ACE_INLINE ACE_hrtime_t
+-ACE_OS::gethrtime (const ACE_HRTimer_Op op)
++ACE_OS::gethrtime (const ACE_HRTimer_Op op, int cpu_smp)
+ {
+   ACE_OS_TRACE ("ACE_OS::gethrtime");
+ #if defined (ACE_HAS_HI_RES_TIMER)
+   ACE_UNUSED_ARG (op);
++  ACE_UNUSED_ARG (cpu_smp);
+   return ::gethrtime ();
+ #elif defined (ACE_HAS_AIX_HI_RES_TIMER)
+   ACE_UNUSED_ARG (op);
++  ACE_UNUSED_ARG (cpu_smp);
+   timebasestruct_t tb;
+ 
+   ::read_real_time(&tb, TIMEBASE_SZ);
+@@ -219,35 +221,74 @@
+   return ACE_hrtime_t(tb.tb_high) * ACE_ONE_SECOND_IN_NSECS + tb.tb_low;
+ #elif defined (ghs) && defined (ACE_HAS_PENTIUM) && !defined (ACE_WIN32)
+   ACE_UNUSED_ARG (op);
++  ACE_UNUSED_ARG (cpu_smp);
+   // Use .obj/gethrtime.o, which was compiled with g++.
+   return ACE_GETHRTIME_NAME ();
+-#elif (defined(__KCC) || defined (__GNUG__) || defined (__INTEL_COMPILER)) && !defined (ACE_WIN32) && !defined(ACE_VXWORKS) && defined (ACE_HAS_PENTIUM)
++#elif (defined(__KCC) || defined (__GNUG__) || defined (__INTEL_COMPILER)) && !defined (ACE_WIN32) && !defined(ACE_VXWORKS) && (defined (ACE_HAS_PENTIUM) || defined (__amd64__))
+   ACE_UNUSED_ARG (op);
++
++  volatile ACE_UINT32 least, most;
++
++#if defined (__amd64__)
++  ACE_UNUSED_ARG (cpu_smp);
++  asm volatile ("rdtsc" : "=a" (least), "=d" (most) : : "memory"); // _amd64__, g++-4, Schuler, Andreas, Andreas.Schuler@med.ge.com
++
+ # if defined (ACE_LACKS_LONGLONG_T)
+-  double now;
++  ACE_hrtime_t ret (least, most);
++  return ret;
+ # else  /* ! ACE_LACKS_LONGLONG_T */
+   ACE_hrtime_t now;
++  return now = ((ACE_hrtime_t) least) | (((ACE_hrtime_t)most) <<32);
+ # endif /* ! ACE_LACKS_LONGLONG_T */
+ 
+-  // See comments about the RDTSC Pentium instruction for the ACE_WIN32
+-  // version of ACE_OS::gethrtime (), below.
++#else /* ! __amd64__ - Intel Chipsets */
++
++  // Intel recommends, that on its hyperthreading and dual-core chipsets
++  // a serializing instruction (e.g. cpuid) will be called before 
++  // and after rdtsc. Note, that this is still not enough for some
++  // CPUs/chipsets and the thread should be bound to a particular
++  // cpu (see cpu-affinity).
++  // Still, when confident/tested, that some particular hw does not
++  // make problems, ACE-user may overwrite this safe default by
++  // defining a preprocessing flag ACE_SKIPS_RDTSC_SERIALIZATION
+   //
+-  // Read the high-res tick counter directly into memory variable "now".
+-  // The A constraint signifies a 64-bit int.
+-  asm volatile ("rdtsc" : "=A" (now) : : "memory");
++#if !defined (ACE_SKIPS_RDTSC_SERIALIZATION)
++  if (cpu_smp)
++  {
++    asm volatile (
++                  /*do we need alignment ? ".align 64\n\t"*/
++                  "cpuid\n\t" /* Is it faster to call cpuid, when eax has some valid value? "xor %%eax,%%eax\n\t"*/
++                  "rdtsc\n\t"
++                  "mov %%eax, %0\n\t"
++                  "mov %%edx, %1\n\t"
++                  "cpuid\n\t" 
++                  : "=m" (least), "=m" (most)
++                  :
++                  : "eax", "ecx", "edx");
++  }
++  else
++  {
++    // Not doing serialized RDTSC for a single Intel CPU.
++    asm volatile ("rdtsc" : "=a" (least), "=d" (most) : : "memory");
++  }
++#else /* ACE_SKIPS_RDTSC_SERIALIZATION */
++  ACE_UNUSED_ARG (cpu_smp);
++  asm volatile ("rdtsc" : "=a" (least), "=d" (most) : : "memory");
++#endif /* ACE_SKIPS_RDTSC_SERIALIZATION */
+ 
+-# if defined (ACE_LACKS_LONGLONG_T)
+-  ACE_UINT32 least, most;
+-  ACE_OS::memcpy (&least, &now, sizeof (ACE_UINT32));
+-  ACE_OS::memcpy (&most, (u_char *) &now + sizeof (ACE_UINT32),
+-                  sizeof (ACE_UINT32));
++#endif /* __amd64__*/
+ 
++# if defined (ACE_LACKS_LONGLONG_T)
+   ACE_hrtime_t ret (least, most);
+   return ret;
+ # else  /* ! ACE_LACKS_LONGLONG_T */
+-  return now;
++  ACE_hrtime_t now;
++  return now = ((ACE_hrtime_t) least) | (((ACE_hrtime_t)most) <<32);
+ # endif /* ! ACE_LACKS_LONGLONG_T */
++
+ #elif defined (linux) && defined (ACE_HAS_ALPHA_TIMER)
++  ACE_UNUSED_ARG (cpu_smp);
++
+   // NOTE:  alphas only have a 32 bit tick (cycle) counter.  The rpcc
+   // instruction actually reads 64 bits, but the high 32 bits are
+   // implementation-specific.  Linux and Digital Unix, for example,
+@@ -265,6 +306,7 @@
+   return now;
+ #elif defined (ACE_WIN32)
+   ACE_UNUSED_ARG(op);
++  ACE_UNUSED_ARG (cpu_smp);
+   LARGE_INTEGER freq;
+ 
+   ::QueryPerformanceCounter (&freq);
+@@ -281,6 +323,7 @@
+   // PowerPC w/ GreenHills or g++.
+ 
+   ACE_UNUSED_ARG (op);
++  ACE_UNUSED_ARG (cpu_smp);
+   u_long most;
+   u_long least;
+ 
+@@ -306,6 +349,7 @@
+ #elif defined (ACE_HAS_CLOCK_GETTIME)
+   // e.g., VxWorks (besides POWERPC && GreenHills) . . .
+   ACE_UNUSED_ARG (op);
++  ACE_UNUSED_ARG (cpu_smp);
+   struct timespec ts;
+ 
+   ACE_OS::clock_gettime (
+@@ -321,6 +365,7 @@
+     ACE_U_ONE_SECOND_IN_NSECS  +  static_cast<ACE_hrtime_t> (ts.tv_nsec);
+ #else
+   ACE_UNUSED_ARG (op);
++  ACE_UNUSED_ARG (cpu_smp);
+   const ACE_Time_Value now = ACE_OS::gettimeofday ();
+ 
+   // Carefully create the return value to avoid arithmetic overflow
