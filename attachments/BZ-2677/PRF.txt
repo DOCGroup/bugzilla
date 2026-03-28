@@ -1,0 +1,80 @@
+To: ace-bugs@cs.wustl.edu
+Subject: [area]: [synopsis]
+
+    ACE VERSION: 5.5.3
+
+    HOST MACHINE and OPERATING SYSTEM:
+Linux janus 2.6.15-27-amd64-generic #1 SMP PREEMPT Sat Sep 16 01:50:50 UTC 2006 x86_64 GNU/Linux
+
+    TARGET MACHINE and OPERATING SYSTEM, if different from HOST:
+    COMPILER NAME AND VERSION (AND PATCHLEVEL):
+gcc (GCC) 4.1.1
+
+    THE $ACE_ROOT/ace/config.h FILE [if you use a link to a platform-
+    specific file, simply state which one]:
+#define ACE_HAS_XML_SVC_CONF
+// workaround for bug in gcc 4.0.x
+#define ACE_LACKS_PRAGMA_ONCE
+#include "ace/config-linux.h"
+
+    THE $ACE_ROOT/include/makeinclude/platform_macros.GNU FILE [if you
+    use a link to a platform-specific file, simply state which one
+    (unless this isn't used in this case, e.g., with Microsoft Visual
+    C++)]: 
+# configure ACE/TAO for our use
+
+templates=automatic
+debug=1
+optimize=1
+exceptions=1
+threads=1
+inline=1
+rtti=1
+versioned_so=1
+ssl=1
+#no_hidden_visibility=1
+
+
+# Disable the RCSID for release/non-debug builds.
+CPPFLAGS += -DACE_USE_RCSID=0
+
+CC = /opt2/linux/ix86/x86_64-pc-linux-gnu/bin/gcc
+CXX = /opt2/linux/ix86/x86_64-pc-linux-gnu/bin/g++
+CFLAGS += -m64 -I/opt2/linux/x86_64/include
+CCFLAGS += -m64 -I/opt2/linux/x86_64/include
+LDFLAGS += -m64 -I/opt2/linux/x86_64/include -L/opt2/linux/x86_64/lib
+
+TAO_IDL_PREPROCESSOR = /opt2/linux/ix86/x86_64-pc-linux-gnu/bin/gcc
+
+include $(ACE_ROOT)/include/makeinclude/platform_linux.GNU
+
+
+    CONTENTS OF $ACE_ROOT/bin/MakeProjectCreator/config/default.features
+    (used by MPC when you generate your own makefiles):
+
+    AREA/CLASS/EXAMPLE AFFECTED:
+[What example failed?  What module failed to compile?]
+
+    DOES THE PROBLEM AFFECT:
+        COMPILATION?
+        LINKING?
+            On Unix systems, did you run make realclean first?
+        EXECUTION?
+        OTHER (please specify)?
+[Please indicate whether ACE, your application, or both are affected.]
+
+    SYNOPSIS:
+[Brief description of the problem]
+
+    DESCRIPTION:
+[Detailed description of problem.  Don't just say "<blah>
+doesn't work, here's a fix," explain what your program does
+to get to the <blah> state. ]
+
+    REPEAT BY:
+[What you did to get the error; include test program or session
+transcript if at all possible.  ]
+
+    SAMPLE FIX/WORKAROUND:
+[If available ]
+
