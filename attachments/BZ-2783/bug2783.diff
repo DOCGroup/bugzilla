@@ -1,0 +1,170 @@
+Index: ace/Basic_Types.h
+===================================================================
+--- ace/Basic_Types.h	(revision 77338)
++++ ace/Basic_Types.h	(working copy)
+@@ -440,7 +440,7 @@
+   reinterpret_cast<PTR_TYPE> (L.lo ())
+ #else  /* ! ACE_LACKS_LONGLONG_T */
+ # define ACE_LONGLONG_TO_PTR(PTR_TYPE, L) \
+-  reinterpret_cast<PTR_TYPE> (static_cast<ptrdiff_t> (L))
++  reinterpret_cast<PTR_TYPE> (static_cast<intptr_t> (L))
+ #endif /* ! ACE_LACKS_LONGLONG_T */
+ 
+ // If the platform lacks an unsigned long long, define one.
+@@ -613,7 +613,7 @@
+ 
+     // @note  the above four accessors are inlined here in
+     // order to minimize the extent of the data_ struct.  It's
+-    // only used here; the .i and .cpp files use the accessors.
++    // only used here; the .inl and .cpp files use the accessors.
+ 
+     /// These functions are used to implement multiplication.
+     ACE_UINT32 ul_shift (ACE_UINT32 a,
+@@ -641,16 +641,16 @@
+ 
+ # endif /* ACE_LACKS_LONGLONG_T */
+ 
++#ifndef ACE_LACKS_DEPRECATED_MACROS
+ // Conversions from ACE_UINT64 to ACE_UINT32.  ACE_CU64_TO_CU32 should
+ // be used on const ACE_UINT64's.
+-# if defined (ACE_LACKS_LONGLONG_T) || defined (ACE_LACKS_UNSIGNEDLONGLONG_T)
+-#   define ACE_U64_TO_U32(n) ((n).lo ())
+-#   define ACE_CU64_TO_CU32(n) ((n).lo ())
+-# else  /* ! ACE_LACKS_LONGLONG_T */
+-#   define ACE_U64_TO_U32(n) (static_cast<ACE_UINT32> (n))
+-#   define ACE_CU64_TO_CU32(n) \
+-     (static_cast<ACE_CAST_CONST ACE_UINT32> (n))
+-# endif /* ! ACE_LACKS_LONGLONG_T */
++/**
++ * @deprecated ACE_{C}U64_TO_{C}U32 is deprecated.  Use
++ *             ACE_Utils::truncate_cast<ACE_UINT32> instead.
++ */
++#   define ACE_U64_TO_U32(n) (ACE_Utils::truncate_cast<ACE_UINT32> (n))
++#   define ACE_CU64_TO_CU32(n) (ACE_Utils::truncate_cast<ACE_UINT32> (n))
++#endif  /* !ACE_LACKS_DEPRECATED_MACROS */
+ 
+ // 64-bit literals require special marking on some platforms.
+ # if defined (ACE_LACKS_LONGLONG_T)
+@@ -770,7 +770,7 @@
+ // on some platforms.
+ # if defined (ACE_LACKS_LONGLONG_T)
+    // Only use the low 32 bits.
+-#   define ACE_UINT64_DBLCAST_ADAPTER(n) ACE_U64_TO_U32 (n)
++#   define ACE_UINT64_DBLCAST_ADAPTER(n)  ((n).lo ())
+ # elif defined (ACE_LACKS_UNSIGNEDLONGLONG_T)
+ #   define ACE_UINT64_DBLCAST_ADAPTER(n) ((n).to_int64 ())
+ # elif defined (ACE_WIN32)
+Index: ace/Truncate.h
+===================================================================
+--- ace/Truncate.h	(revision 77338)
++++ ace/Truncate.h	(working copy)
+@@ -27,9 +27,10 @@
+ #include "ace/If_Then_Else.h"
+ #include "ace/Numeric_Limits.h"
+ 
+-#if defined (__BORLANDC__) && __BORLANDC__ <= 0x590
++#if defined (ACE_LACKS_LONGLONG_T) \
++    || defined (__BORLANDC__) && __BORLANDC__ <= 0x590
+ # include "ace/Basic_Types.h"
+-#endif  /* __BORLANDC__ <= 0x590 */
++#endif  /* ACE_LACKS_LONGLONG_T || __BORLANDC__ <= 0x590 */
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -431,6 +432,21 @@
+     }
+   };
+ 
++
++#if defined (ACE_LACKS_LONGLONG_T) || defined (ACE_LACKS_UNSIGNEDLONGLONG_T)
++  // Partial specialization for the case where we're casting from
++  // ACE_U_LongLong to a smaller integer.
++  template<typename TO>
++  struct Truncator<ACE_U_LongLong, TO>
++  {
++    TO operator() (ACE_U_LongLong const & val)
++    {
++      // ACE_U_LongLong returns a ACE_UINT32.
++      return Truncator<ACE_UINT32, TO> (val.lo ());
++    }
++  };
++#endif /* ACE_LACKS_LONGLONG_T || ACE_LACKS_UNSIGNEDLONGLONG_T */
++
+   // -----------------------------------------------------
+   /**
+    * @struct Noop_Truncator
+@@ -909,6 +925,7 @@
+   };
+ 
+   // -------------------------------------
++
+   template<typename TO, typename FROM>
+   inline TO truncate_cast (FROM val)
+   {
+@@ -919,16 +936,6 @@
+ 
+ #endif  /* !__BORLANDC__ || __BORLANDC__ > 0x590 */
+ 
+-  /**
+-   * @deprecated @c Truncate<> is left in place for backward
+-   *             compatibility.  Use @c truncate_cast<> instead.
+-   */
+-  template<typename TO, typename FROM>
+-  inline TO Truncate (FROM val)
+-  {
+-    return truncate_cast<TO, FROM> (val);
+-  }
+-
+ } // namespace ACE_Utils
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+Index: tests/CDR_File_Test.cpp
+===================================================================
+--- tests/CDR_File_Test.cpp	(revision 77338)
++++ tests/CDR_File_Test.cpp	(working copy)
+@@ -87,9 +87,11 @@
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("\n"
+                         "Char:               %c\n"
+-      "Short:              %u\n"
++                        "Short:              %u\n"
+                         "Long:               %d\n"),
+-                    t.char_, t.word2_, t.word4_));
++              t.char_,
++              t.word2_,
++              t.word4_));
+ 
+   ACE_CDR::ULongLong hi = (t.word8_ >> 32);
+   ACE_CDR::ULongLong lo = (t.word8_ & 0xffffffff);
+@@ -97,12 +99,13 @@
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("\n"
+                         "ULongLong 1st half: %x\n"
+-      "ULongLong 2nd half: %x\n"
++                        "ULongLong 2nd half: %x\n"
+                         "Float:              %f\n"
+                         "Double:             %f\n"),
+-                        ACE_U64_TO_U32(hi),
+-                        ACE_U64_TO_U32(lo),
+-                        t.fpoint_, t.dprec_));
++              ACE_Utils::truncate_cast<ACE_UINT32> (hi),
++              ACE_Utils::truncate_cast<ACE_UINT32> (lo),
++              t.fpoint_,
++              t.dprec_));
+ #else
+   os << "Char:              " << t.char_ << endl
+      << "Short:             " << t.word2_ << endl
+@@ -113,11 +116,11 @@
+ 
+   os << "ULongLong 1st half: "
+      << hex
+-     << ACE_U64_TO_U32 (hi)
++     << ACE_Utils::truncate_cast<ACE_UINT32> (hi)
+      << dec << endl
+      << "ULongLong 2nd half: "
+      << hex
+-     << ACE_U64_TO_U32 (lo)
++     << ACE_Utils::truncate_cast<ACE_UINT32> (lo)
+      << dec << endl
+      << "Float:             " << t.fpoint_ << endl
+      << "Double:            " << t.dprec_ << endl;
