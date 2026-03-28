@@ -1,0 +1,152 @@
+diff -r -a -U 10 ace-5.6.9/tests/Process_Manager_Test.cpp ace-5.6.9-mod/tests/Process_Manager_Test.cpp
+--- ace-5.6.9/tests/Process_Manager_Test.cpp	2009-03-04 09:14:32.000000000 +0100
++++ ace-5.6.9-mod/tests/Process_Manager_Test.cpp	2009-04-18 11:58:34.000000000 +0200
+@@ -76,21 +76,22 @@
+   ACE_ERROR ((LM_ERROR,
+               ACE_TEXT ("usage: %s [-d] [sleep-seconds]\n"),
+               argv0));
+   ACE_OS::exit (0);
+ }
+ 
+ static pid_t
+ spawn_child (const ACE_TCHAR *argv0,
+              ACE_Process_Manager &mgr,
+              int sleep_time,
+-             int my_process_id)
++             int my_process_id,
++             ACE_Process * process = 0)
+ {
+ 
+ #if defined (ACE_WIN32)
+ const ACE_TCHAR *cmdline_format = ACE_TEXT("\"%s\" %s %d");
+ #elif !defined (ACE_USES_WCHAR)
+ const ACE_TCHAR *cmdline_format = ACE_TEXT (".") ACE_DIRECTORY_SEPARATOR_STR ACE_TEXT("%s %s %d");
+ #else
+ const ACE_TCHAR *cmdline_format = ACE_TEXT (".") ACE_DIRECTORY_SEPARATOR_STR ACE_TEXT("%ls %ls %d");
+ #endif
+   ACE_Process_Options opts;
+@@ -138,21 +139,25 @@
+ #else
+   ACE_UNUSED_ARG (my_process_id);
+   prio[0] = ACE_TEXT ('\0');
+ #endif
+ 
+   opts.command_line (cmdline_format,
+                      argv0,
+                      cmd,
+                      sleep_time);
+ 
+-  pid_t result = mgr.spawn (opts);
++  pid_t result = -1;
++  if (process)
++    result = mgr.spawn (process, opts);
++  else
++    result = mgr.spawn (opts);
+ 
+   if (result != ACE_INVALID_PID)
+     ACE_DEBUG ((LM_DEBUG,
+                 ACE_TEXT ("(%P) spawned child: pid %d time %d %s\n"),
+                 int (result), sleep_time, prio));
+   else
+     ACE_ERROR ((LM_ERROR, ACE_TEXT ("%p\n"), ACE_TEXT ("spawn failed")));
+ 
+   return result;
+ }
+@@ -569,27 +574,97 @@
+                               5,
+                               7);
+   /* pid_t child8 = */ spawn_child (argc > 0 ? argv[0] : ACE_TEXT ("Process_Manager_Test"),
+                                     mgr,
+                                     6,
+                                     0);
+ 
+   mgr.register_handler (new Exit_Handler ("specific"),
+                         child7);
+ 
++#if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0) && !defined(ACE_WIN32)
++  // Run the reactor event loop in another thread
++  class Reactor_Worker: public ACE_Task_Base
++  {
++    public:
++      virtual int svc (void)
++      {
++        ACE_Time_Value how_long (15);
++        ACE_Reactor::instance ()->owner (ACE_OS::thr_self ());
++        return ACE_Reactor::instance ()->run_reactor_event_loop (how_long);
++      }
++  } reactor_worker;
++
++  if (reactor_worker.activate () != 0)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  ACE_TEXT ("(%P) Failed to spawn reactor thread\n")));
++      test_status = 1;
++    }
++
++  // ACE_Process::parent is called just after the child process is
++  // spawned but before the child process is added to the
++  // ACE_Process_Manager's list of managed child processes - if we
++  // sleep here we give the reactor an opportunity to cleanup the
++  // child process before it is registered.
++  class Delay_Process : public ACE_Process
++  {
++    public:
++      Delay_Process ()
++        : unmanaged_ (false)
++      {}
++      virtual void parent (pid_t)
++      {
++        // Give the reactor a chance to catch the child process exit
++        if (ACE_OS::sleep (2) != 0 && errno == EINTR)
++        {
++          // child process has exited - give the reactor a little more time
++          ACE_OS::sleep (2);
++        }
++      }
++      virtual void unmanage (void)
++      {
++        this->unmanaged_ = true;
++      }
++      bool unmanaged_;
++  } delay_process;
++
++  spawn_child (argv[0],
++               mgr,
++               0,
++               0,
++               &delay_process);
++
++  reactor_worker.wait ();
++
++#else  /* ACE_MT_SAFE */
+   ACE_Time_Value how_long (10);
+ 
+   ACE_Reactor::instance ()->run_reactor_event_loop (how_long);
++#endif /* ACE_MT_SAFE */
+ 
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("(%P) Reactor loop done!\n") ));
+ 
++#if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0) && !defined (ACE_WIN32)
++  if (delay_process.unmanaged_ == false)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  ACE_TEXT ("(%P) Child process not correctly cleaned-up")
++                  ACE_TEXT (" - check for 'oops' in log\n")));
++      test_status = 1;
++    }
++#endif /* ACE_MT_SAFE */
++
+   size_t nr_procs = mgr.managed ();
+   if (nr_procs != 0)
++    {
+     ACE_ERROR ((LM_ERROR,
+                 ACE_TEXT ("(%P) %d processes left in manager\n"),
+                 nr_procs));
++    test_status = 1;
++    }
+ #endif /* !defined (ACE_OPENVMS) */
+   ACE_END_TEST;
+   return test_status;
+ }
+ 
