@@ -1,0 +1,47 @@
+43a44,59
+> # if defined (ACE_DOESNT_INSTANTIATE_NONSTATIC_OBJECT_MANAGER) 
+> #   define ACE_EXECUTE_ACE_INIT (void)ACE::init();
+> #   define ACE_EXECUTE_ACE_FINI (void)ACE::fini();
+> #   ifndef ACE_LINES_BEFORE_ACE_INIT
+> #     define ACE_LINES_BEFORE_ACE_INIT
+> #   endif
+> #   ifndef ACE_LINES_AFTER_ACE_FINI
+> #     define ACE_LINES_AFTER_ACE_FINI
+> #   endif
+> # else
+> #   define ACE_EXECUTE_ACE_INIT
+> #   define ACE_EXECUTE_ACE_FINI
+> #   define ACE_LINES_BEFORE_ACE_INIT
+> #   define ACE_LINES_AFTER_ACE_FINI
+> # endif
+> 
+45c61,74
+< #   define ACE_TMAIN wmain
+---
+> #   define ACE_TMAIN \
+>       ace_main_i (int, ACE_TCHAR *[]); /* forward declaration */ \
+>       int wmain (int argc, ACE_TCHAR *argv[]) { \
+>         int RetVal = 0; \
+>         ACE_LINES_BEFORE_ACE_INIT \
+>         ACE_EXECUTE_ACE_INIT\
+>         { \
+>            RetVal = ace_main_i (argc, argv); \
+>         } \
+>         ACE_EXECUTE_ACE_FINI\
+>         ACE_LINES_AFTER_ACE_FINI \
+>         return RetVal; \
+>       } \
+>       int ace_main_i
+53a83
+>           int RetVal = 0; \
+55c85,92
+<           return ace_main_i (argc, wide_argv.get_TCHAR_argv ()); \
+---
+>           ACE_LINES_BEFORE_ACE_INIT \
+>           ACE_EXECUTE_ACE_INIT\
+>           { \
+>             RetVal = ace_main_i (argc, wide_argv.get_TCHAR_argv ()); \
+>           } \
+>           ACE_EXECUTE_ACE_FINI\
+>           ACE_LINES_AFTER_ACE_FINI \
+>           return RetVal; \
