@@ -1,0 +1,12 @@
+Index: IIOP_Acceptor.cpp
+===================================================================
+--- IIOP_Acceptor.cpp	(revision 77946)
++++ IIOP_Acceptor.cpp	(working copy)
+@@ -937,6 +937,7 @@
+     {
+       if_ok_cnt = ipv4_cnt;
+       lo_cnt = ipv4_lo_cnt;
++      ipv6_ll = 0;
+     }
+ 
+   // In case there are no non-local IPv6 ifs in the list only exclude
