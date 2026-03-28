@@ -1,0 +1,159 @@
+Index: ace/Parse_Node.cpp
+===================================================================
+--- ace/Parse_Node.cpp	(revision 78195)
++++ ace/Parse_Node.cpp	(working copy)
+@@ -30,15 +30,53 @@
+ #endif /* ACE_HAS_DUMP */
+ }
+ 
++#include "ace/ARGV.h"
++
+ void
+ ACE_Stream_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
+ {
+   ACE_TRACE ("ACE_Stream_Node::apply");
+ 
+-  if (config->initialize (this->node_->record (config),
+-                          this->node_->parameters ()) == -1)
+-    ++yyerrno;
++  const ACE_Service_Type *sst = this->node_->record (config);
++  if (sst == 0)
++      const_cast<ACE_Static_Node *> (this->node_)->apply (config, yyerrno);
++  if (yyerrno != 0) return;
+ 
++  sst = this->node_->record (config);
++  ACE_Stream_Type *st = 
++      dynamic_cast<ACE_Stream_Type *> (const_cast<ACE_Service_Type_Impl *> (sst->type ()));
++
++  for (const ACE_Static_Node *module = dynamic_cast<const ACE_Static_Node*> (this->mods_);
++       module != 0;
++       module = dynamic_cast<ACE_Static_Node*> (module->link()))
++  {
++    ACE_ARGV args (module->parameters ());
++
++    const ACE_Service_Type *mst = module->record (config);
++    if (mst == 0)
++      const_cast<ACE_Static_Node *> (module)->apply (config, yyerrno);
++
++    if (yyerrno != 0)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  ACE_LIB_TEXT ("dynamic initialization failed for Module %s\n"),
++                  module->name ()));
++      yyerrno++;
++    }
++
++    ACE_Module_Type const * const mt1 = static_cast <ACE_Module_Type const *> (module->record (config)->type());
++    ACE_Module_Type *mt = const_cast<ACE_Module_Type *>(mt1);
++
++    if (st->push (mt) == -1)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  ACE_LIB_TEXT ("dynamic initialization failed for Stream %s\n"),
++                  this->node_->name ()));
++      yyerrno++;
++    }
++
++  } 
++
+ #ifndef ACE_NLOGGING
+   if (ACE::debug ())
+     ACE_DEBUG ((LM_DEBUG,
+@@ -76,7 +114,14 @@
+ ACE_Parse_Node::link (ACE_Parse_Node *n)
+ {
+   ACE_TRACE ("ACE_Parse_Node::link");
+-  this->next_ = n;
++
++  // Find the last list entry (if any) ...
++  ACE_Parse_Node *t = this;
++  while (t->next_ != 0)
++      t = t->next_;
++
++  // ... and insert n there.
++  t->next_ = n;
+ }
+ 
+ ACE_Stream_Node::ACE_Stream_Node (const ACE_Static_Node *str_ops,
+Index: ace/Svc_Conf.y
+===================================================================
+--- ace/Svc_Conf.y	(revision 78195)
++++ ace/Svc_Conf.y	(working copy)
+@@ -170,30 +170,6 @@
+ module
+   : dynamic
+     {
+-      ACE_Static_Node *svc_type = $<static_node_>1;
+-
+-      if (svc_type != 0)
+-        {
+-          ACE_Static_Node *module = $<static_node_>-1;
+-
+-          ACE_ARGV args (svc_type->parameters ());
+-          ACE_Module_Type *mt = ace_get_module (module->record (ACE_SVC_CONF_PARAM->config),
+-                                                svc_type->record (ACE_SVC_CONF_PARAM->config),
+-                                                ACE_SVC_CONF_PARAM->yyerrno);
+-          ACE_Stream_Type *st =
+-            dynamic_cast<ACE_Stream_Type *> (const_cast<ACE_Service_Type_Impl *> (module->record (ACE_SVC_CONF_PARAM->config)->type ()));
+-
+-          if (!st
+-              || !mt
+-              || mt->init (args.argc (), args.argv ()) == -1
+-              || st->push (mt) == -1)
+-            {
+-              ACE_ERROR ((LM_ERROR,
+-                          ACE_LIB_TEXT ("dynamic initialization failed for Module %s\n"),
+-                          svc_type->name ()));
+-              ACE_SVC_CONF_PARAM->yyerrno++;
+-            }
+-        }
+     }
+   | static
+     {
+Index: ace/Svc_Conf_y.cpp
+===================================================================
+--- ace/Svc_Conf_y.cpp	(revision 78195)
++++ ace/Svc_Conf_y.cpp	(working copy)
+@@ -1242,30 +1242,6 @@
+   case 26:
+ 
+     {
+-      ACE_Static_Node *svc_type = (ace_yyvsp[0].static_node_);
+-
+-      if (svc_type != 0)
+-        {
+-          ACE_Static_Node *module = (ace_yyvsp[-2].static_node_);
+-
+-          ACE_ARGV args (svc_type->parameters ());
+-          ACE_Module_Type *mt = ace_get_module (module->record (ACE_SVC_CONF_PARAM->config),
+-                                                svc_type->record (ACE_SVC_CONF_PARAM->config),
+-                                                ACE_SVC_CONF_PARAM->yyerrno);
+-          ACE_Stream_Type *st =
+-            dynamic_cast<ACE_Stream_Type *> (const_cast<ACE_Service_Type_Impl *> (module->record (ACE_SVC_CONF_PARAM->config)->type ()));
+-
+-          if (!st
+-              || !mt
+-              || mt->init (args.argc (), args.argv ()) == -1
+-              || st->push (mt) == -1)
+-            {
+-              ACE_ERROR ((LM_ERROR,
+-                          ACE_LIB_TEXT ("dynamic initialization failed for Module %s\n"),
+-                          svc_type->name ()));
+-              ACE_SVC_CONF_PARAM->yyerrno++;
+-            }
+-        }
+     ;}
+     break;
+ 
+@@ -1696,7 +1672,10 @@
+      : static_cast<ACE_Stream_Type const *> (sr->type ()));
+   
+   ACE_Module_Type const * const mt =
+-    static_cast <ACE_Module_Type const *> (sv->type ());
++      (sv == 0
++     ? 0
++     :
++    static_cast <ACE_Module_Type const *> (sv->type ()));
+ 
+   ACE_TCHAR const * const module_type_name =
+     (mt ? mt->name () : ACE_LIB_TEXT ("(nil)"));
