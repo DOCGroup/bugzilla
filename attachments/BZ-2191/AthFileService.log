@@ -1,0 +1,315 @@
+Implementation Repository: Running
+	Ping Interval : 10000ms
+	Startup Timeout : 60s
+	Persistence : Disabled
+	Multicast : Disabled
+	Debug : 1
+	Locked : False
+
+ImR Activator: Starting AIX
+ImR: Activator registered for AIX.
+ImR Activator: Registered with ImR.
+ImR: Add/Update server <AthFileService_POA>.
+Successfully registered <AthFileService_POA>.
+ImR: Add/Update server <NameService>.
+Successfully registered <NameService>.
+Warning: The activate option has been renamed to start.
+ImR: Starting server <NameService>. Attempt 1/1.
+ImR Activator: Successfully started <NameService>. 
+ImR: Waiting for <NameService> to start...
+ImR: Server NameService is running at corbaloc:iiop:1.2@aix:61041/.
+Successfully Activated server <NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%03%00%00%00%01NameService>
+terminate called after throwing an instance of 'CosNaming::NamingContext::AlreadyBound'
+./StartV3Services[84]: 1908956 Abort(coredump)
+ImR: Server AthFileService_POA is running at corbaloc:iiop:1.2@aix:61046/.
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%03%00%00%00%01NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%01%00%00%00%01NameService_0>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%02%00%00%00%01NameService_1>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%03%00%00%00%01NameService_2>
+ImR: Server <AthFileService_POA> is shutting down.
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%03%00%00%00%01NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%03%00%00%00%01NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%01%00%00%00%01NameService_0>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%03%00%00%00%01NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%01%00%00%00%01NameService_0>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%02%00%00%00%01NameService_1>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%01%00%00%00%01NameService_0>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%02%00%00%00%01NameService_1>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%03%00%00%00%01NameService_2>
+ImR: Starting server <AthFileService_POA>. Attempt 1/1.
+ImR Activator: Successfully started <AthFileService_POA>. 
+ImR: Waiting for <AthFileService_POA> to start...
+ImR: Cannot Activate <AthFileService_POA>.
+TAO (1908966|1) Loaded default protocol <IIOP_Factory>
+TAO (1908966|1) created new ORB <>
+TAO (1908966|1) - IIOP_Acceptor::open_i, listening on: <aix:61051>
+Notifying ImR of startup
+TAO (1908966|1) - Transport_Cache_Manager::find_i, no idle transport is available
+TAO (1908966|1) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_maximum = 16383
+TAO (1908966|1) - IIOP_Connector::make_connection, to <aix:12345> which should block
+TAO (1908966|1) - IIOP_Connection_Handler::open, The local addr is <192.168.254.67> 
+TAO (1908966|1) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.254.67:12345> on 8
+TAO (1908966|1) - IIOP_Connector::make_connection, new connected connection to <aix:12345> on Transport[8]
+TAO (1908966|1) - Transport_Cache_Manager::bind_i, 0x2ff219d0 -> 0x20346af8 Transport[8]
+TAO (1908966|1) - Transport_Cache_Manager::bind_i, cache size is [1]
+TAO (1908966|1) - Transport[8]::register_handler
+TAO (1908966|1) - Transport_Connector::connect, opening Transport[8] in TAO_CLIENT_ROLE
+TAO (1908966|1) - Codeset_Manager::set_tcs, setting char translator (00010001)
+TAO (1908966|1) - Codeset_Manager::set_tcs, setting wchar translator (00010109)
+TAO (1908966|1) - Codeset_Manager::get_wchar_trans, Using utf16 BOM translator
+TAO (1908966|1) - Muxed_TMS[8]::request_id, <1>
+TAO (1908966|1) - Codeset_Manager::generate_service_context, using tcs_c = 00010001, tcs_w = 00010109
+TAO (1908966|1) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 176 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 188 bytes
+47 49 4f 50 01 02 00 00  00 00 00 b0 00 00 00 01   GIOP............
+03 00 00 00 00 00 73 74  00 00 00 44 14 01 0f 00   ......st...D....
+4e 55 50 00 00 00 21 00  00 00 00 00 00 00 01 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 01 00 00 00 01   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+00 00 00 06 5f 69 73 5f  61 00 31 09 00 00 00 01   ...._is_a.1.....
+00 00 00 01 00 00 00 0c  00 38 90 00 00 01 00 01   .........8......
+00 01 01 09 6e 67 20 6e  00 00 00 30 49 44 4c 3a   ....ng n...0IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 41 64 6d 69 6e 69 73   pository/Adminis
+74 72 61 74 69 6f 6e 3a  31 2e 30 00               tration:1.0.    
+TAO (1908966|1) - Transport[8]::cleanup_queue, byte_count = 188
+TAO (1908966|1) - Transport[8]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (1908966|1) - Transport[8]::drain_queue_helper, byte_count = 188, head_is_empty = 1
+TAO (1908966|1) - Transport[8]::drain_queue_i, helper retval = 1
+TAO (1908966|1) - Transport[8]::make_idle
+TAO (1908966|1) - Leader_Follower[8]::wait_for_event, (leader) enter reactor event loop
+TAO (1908966|1) - Connection_Handler[8]::handle_input, handle = 8/8
+TAO (1908966|1) - Transport[8]::handle_input
+TAO (1908966|1) - Transport[8]::process_queue_head
+TAO (1908966|1) - Transport[8]::handle_input, read 25 bytes
+TAO (1908966|1) - GIOP_Message_State::parse_message_header_i
+TAO (1908966|1) - GIOP_Message_State::get_version_info
+TAO (1908966|1) - GIOP_Message_State::get_byte_order_info
+TAO (1908966|1) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 13 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 25 bytes
+47 49 4f 50 01 02 00 01  00 00 00 0d 00 00 00 01   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (1908966|1) - TAO_Muxed_TMS::dispatch_reply, id = 1
+TAO (1908966|1) - Connection_Handler[8]::handle_input, handle = 8/8, retval = 0
+TAO (1908966|1) - Leader_Follower[8]::wait_for_event, (leader) exit reactor event loop
+Informing IMR that we are running at: corbaloc:iiop:1.2@aix:61051/
+TAO (1908966|1) - Transport_Cache_Manager::is_entry_idle, state is [0]
+TAO (1908966|1) - Transport_Cache_Manager::find_i, at index 0 (Transport[8]) - idle
+TAO (1908966|1) - Transport_Connector::connect, got an existing connected Transport[8] in role TAO_CLIENT_ROLE
+TAO (1908966|1) - Muxed_TMS[8]::request_id, <2>
+TAO (1908966|1) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 336 data bytes, my endian, Type Request[2]
+GIOP message - HEXDUMP 348 bytes
+47 49 4f 50 01 02 00 00  00 00 01 50 00 00 00 02   GIOP.......P....
+03 00 00 00 00 00 73 74  00 00 00 44 14 01 0f 00   ......st...D....
+4e 55 50 00 00 00 21 00  00 00 00 00 00 00 01 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 01 00 00 00 01   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+00 00 00 12 73 65 72 76  65 72 5f 69 73 5f 72 75   ....server_is_ru
+6e 6e 69 6e 67 00 00 0c  00 00 00 00 00 01 00 01   nning...........
+00 00 00 13 41 74 68 46  69 6c 65 53 65 72 76 69   ....AthFileServi
+63 65 5f 50 4f 41 00 6e  00 00 00 1d 63 6f 72 62   ce_POA.n....corb
+61 6c 6f 63 3a 69 69 6f  70 3a 31 2e 32 40 61 69   aloc:iiop:1.2@ai
+78 3a 36 31 30 35 31 2f  00 2e 30 00 00 00 00 2e   x:61051/..0.....
+49 44 4c 3a 49 6d 70 6c  65 6d 65 6e 74 61 74 69   IDL:Implementati
+6f 6e 52 65 70 6f 73 69  74 6f 72 79 2f 53 65 72   onRepository/Ser
+76 65 72 4f 62 6a 65 63  74 3a 31 2e 30 00 09 6c   verObject:1.0..l
+00 00 00 01 00 00 00 00  00 00 00 60 00 01 02 00   ...........`....
+00 00 00 04 61 69 78 00  ee 7b 00 00 00 00 00 1b   ....aix..{......
+14 01 0f 00 52 53 54 42  d6 95 a7 00 0a 22 f4 00   ....RSTB....."..
+00 00 00 00 00 00 01 00  00 00 01 00 00 00 00 02   ................
+00 00 00 00 00 00 00 08  00 00 00 00 54 41 4f 00   ............TAO.
+00 00 00 01 00 00 00 14  00 00 00 00 00 01 00 01   ................
+00 00 00 00 00 01 01 09  00 00 00 00               ............    
+ImR: Server AthFileService_POA is running at corbaloc:iiop:1.2@aix:61051/.
+TAO (1908966|1) - Transport[8]::cleanup_queue, byte_count = 348
+TAO (1908966|1) - Transport[8]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (1908966|1) - Transport[8]::drain_queue_helper, byte_count = 348, head_is_empty = 1
+TAO (1908966|1) - Transport[8]::drain_queue_i, helper retval = 1
+TAO (1908966|1) - Transport[8]::make_idle
+TAO (1908966|1) - Leader_Follower[8]::wait_for_event, (leader) enter reactor event loop
+TAO (1908966|1) - Connection_Handler[8]::handle_input, handle = 8/8
+TAO (1908966|1) - Transport[8]::handle_input
+TAO (1908966|1) - Transport[8]::process_queue_head
+TAO (1908966|1) - Transport[8]::handle_input, read 24 bytes
+TAO (1908966|1) - GIOP_Message_State::parse_message_header_i
+TAO (1908966|1) - GIOP_Message_State::get_version_info
+TAO (1908966|1) - GIOP_Message_State::get_byte_order_info
+TAO (1908966|1) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 12 data bytes, my endian, Type Reply[2]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 00 01  00 00 00 0c 00 00 00 02   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (1908966|1) - TAO_Muxed_TMS::dispatch_reply, id = 2
+TAO (1908966|1) - Connection_Handler[8]::handle_input, handle = 8/8, retval = 0
+TAO (1908966|1) - Leader_Follower[8]::wait_for_event, (leader) exit reactor event loop
+Successfully notified ImR of Startup
+IMR IOR = 
+corbaloc:iiop:1.2@aix:12345/%14%01%0f%00NUP%00%00%00!%00%00%00%00%00%00%00%01RootPOA%00ImplRepo_Service%00%00%00%00%01%00%00%00%01ImplRepo_Service
+ImR-ified IOR = 
+corbaloc:iiop:1.2@aix:12345/%14%01%0f%00NUP%00%00%00%23%00%00%00%00%00%00%00%01RootPOA%00AthFileService_POA%00%00%00%00%00%00%00%00%01ServerOne
+Running the orb
+TAO (1908966|1) - ORB_Core::run, start [run]
+TAO (1908966|1) - ORB_Core::run, calling handle_events()
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%03%00%00%00%01NameService>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%01%00%00%00%01NameService_0>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%02%00%00%00%01NameService_1>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%01%00%00%00%01NameService_0>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%02%00%00%00%01NameService_1>
+ImR: Forwarding invocation on <NameService> to <corbaloc:iiop:1.2@aix:61041/%14%01%0f%00NUP%00%00%00%1c%00%00%00%00%00%00%00%01RootPOA%00NameService%00%00%00%00%03%00%00%00%01NameService_2>
+ImR: Starting server <AthFileService_POA>. Attempt 1/1.
+ImR Activator: Successfully started <AthFileService_POA>. 
+ImR: Waiting for <AthFileService_POA> to start...
+ImR: Forwarding invocation on <AthFileService_POA> to <corbaloc:iiop:1.2@aix:61051/%14%01%0f%00NUP%00%00%00%23%00%00%00%00%00%00%00%01RootPOA%00AthFileService_POA%00%00%00%00%00%00%00%00%01ServerOne>
+TAO (1908966|1) - Transport_Cache_Manager::fill_set_i, current_size = 1, cache_maximum = 16383
+TAO (1908966|1) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (1908966|1) - IIOP_Connection_Handler::open, The local addr is <192.168.254.67> 
+TAO (1908966|1) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.254.67:61053> on 9
+TAO (1908966|1) - Transport_Cache_Manager::bind_i, 0x2ff20f18 -> 0x20347958 Transport[9]
+TAO (1908966|1) - Transport_Cache_Manager::bind_i, cache size is [2]
+TAO (1908966|1) - Transport[9]::register_handler
+TAO (1908966|1) - Transport_Cache_Manager::fill_set_i, current_size = 2, cache_maximum = 16383
+TAO (1908966|1) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (1908966|1) - IIOP_Connection_Handler::open, The local addr is <192.168.254.67> 
+TAO (1908966|1) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.254.89:3259> on 10
+TAO (1908966|1) - Transport_Cache_Manager::bind_i, 0x2ff20f18 -> 0x2039e428 Transport[10]
+TAO (1908966|1) - Transport_Cache_Manager::bind_i, cache size is [3]
+TAO (1908966|1) - Transport[10]::register_handler
+TAO (1908966|1) - ORB_Core::run, handle_events() returns 1
+TAO (1908966|1) - ORB_Core::run, calling handle_events()
+TAO (1908966|1) - Connection_Handler[9]::handle_input, handle = 9/9
+TAO (1908966|1) - Transport[9]::handle_input
+TAO (1908966|1) - Transport[9]::process_queue_head
+TAO (1908966|1) - Transport[9]::handle_input, read 96 bytes
+TAO (1908966|1) - GIOP_Message_State::parse_message_header_i
+TAO (1908966|1) - GIOP_Message_State::get_version_info
+TAO (1908966|1) - GIOP_Message_State::get_byte_order_info
+TAO (1908966|1) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 84 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 96 bytes
+47 49 4f 50 01 02 00 00  00 00 00 54 00 00 00 01   GIOP.......T....
+03 00 00 00 00 00 74 68  00 00 00 1b 14 01 0f 00   ......th........
+52 53 54 42 d6 95 a7 00  0a 22 f4 00 00 00 00 00   RSTB....."......
+00 00 01 00 00 00 01 65  00 00 00 05 70 69 6e 67   .......e....ping
+00 6e 65 64 00 00 00 01  00 00 00 01 00 00 00 0c   .ned............
+00 00 00 00 00 01 00 01  00 01 01 09 74 20 66 69   ............t fi
+TAO (1908966|1) - Codeset_Manager::process_service_context, using tcsc = 00010001, tcsw = 00010109
+TAO (1908966|1) - Codeset_Manager::get_wchar_trans, Using utf16 BOM translator
+Process 1908966 exited with exit code -1
+TAO (1400930|1) Loaded default protocol <IIOP_Factory>
+TAO (1400930|1) created new ORB <>
+TAO (1400930|1) - IIOP_Acceptor::open_i, listening on: <aix:61054>
+Notifying ImR of startup
+TAO (1400930|1) - Transport_Cache_Manager::find_i, no idle transport is available
+TAO (1400930|1) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_maximum = 16383
+TAO (1400930|1) - IIOP_Connector::make_connection, to <aix:12345> which should block
+TAO (1400930|1) - IIOP_Connection_Handler::open, The local addr is <192.168.254.67> 
+TAO (1400930|1) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.254.67:12345> on 8
+TAO (1400930|1) - IIOP_Connector::make_connection, new connected connection to <aix:12345> on Transport[8]
+TAO (1400930|1) - Transport_Cache_Manager::bind_i, 0x2ff219d0 -> 0x20346af8 Transport[8]
+TAO (1400930|1) - Transport_Cache_Manager::bind_i, cache size is [1]
+TAO (1400930|1) - Transport[8]::register_handler
+TAO (1400930|1) - Transport_Connector::connect, opening Transport[8] in TAO_CLIENT_ROLE
+TAO (1400930|1) - Codeset_Manager::set_tcs, setting char translator (00010001)
+TAO (1400930|1) - Codeset_Manager::set_tcs, setting wchar translator (00010109)
+TAO (1400930|1) - Codeset_Manager::get_wchar_trans, Using utf16 BOM translator
+TAO (1400930|1) - Muxed_TMS[8]::request_id, <1>
+TAO (1400930|1) - Codeset_Manager::generate_service_context, using tcs_c = 00010001, tcs_w = 00010109
+TAO (1400930|1) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 176 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 188 bytes
+47 49 4f 50 01 02 00 00  00 00 00 b0 00 00 00 01   GIOP............
+03 00 00 00 00 00 73 74  00 00 00 44 14 01 0f 00   ......st...D....
+4e 55 50 00 00 00 21 00  00 00 00 00 00 00 01 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 01 00 00 00 01   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+00 00 00 06 5f 69 73 5f  61 00 31 09 00 00 00 01   ...._is_a.1.....
+00 00 00 01 00 00 00 0c  00 38 90 00 00 01 00 01   .........8......
+00 01 01 09 6e 67 20 6e  00 00 00 30 49 44 4c 3a   ....ng n...0IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 41 64 6d 69 6e 69 73   pository/Adminis
+74 72 61 74 69 6f 6e 3a  31 2e 30 00               tration:1.0.    
+TAO (1400930|1) - Transport[8]::cleanup_queue, byte_count = 188
+TAO (1400930|1) - Transport[8]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (1400930|1) - Transport[8]::drain_queue_helper, byte_count = 188, head_is_empty = 1
+TAO (1400930|1) - Transport[8]::drain_queue_i, helper retval = 1
+TAO (1400930|1) - Transport[8]::make_idle
+TAO (1400930|1) - Leader_Follower[8]::wait_for_event, (leader) enter reactor event loop
+TAO (1400930|1) - Connection_Handler[8]::handle_input, handle = 8/8
+TAO (1400930|1) - Transport[8]::handle_input
+TAO (1400930|1) - Transport[8]::process_queue_head
+TAO (1400930|1) - Transport[8]::handle_input, read 25 bytes
+TAO (1400930|1) - GIOP_Message_State::parse_message_header_i
+TAO (1400930|1) - GIOP_Message_State::get_version_info
+TAO (1400930|1) - GIOP_Message_State::get_byte_order_info
+TAO (1400930|1) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 13 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 25 bytes
+47 49 4f 50 01 02 00 01  00 00 00 0d 00 00 00 01   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (1400930|1) - TAO_Muxed_TMS::dispatch_reply, id = 1
+TAO (1400930|1) - Connection_Handler[8]::handle_input, handle = 8/8, retval = 0
+TAO (1400930|1) - Leader_Follower[8]::wait_for_event, (leader) exit reactor event loop
+Informing IMR that we are running at: corbaloc:iiop:1.2@aix:61054/
+TAO (1400930|1) - Transport_Cache_Manager::is_entry_idle, state is [0]
+TAO (1400930|1) - Transport_Cache_Manager::find_i, at index 0 (Transport[8]) - idle
+TAO (1400930|1) - Transport_Connector::connect, got an existing connected Transport[8] in role TAO_CLIENT_ROLE
+TAO (1400930|1) - Muxed_TMS[8]::request_id, <2>
+TAO (1400930|1) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 336 data bytes, my endian, Type Request[2]
+GIOP message - HEXDUMP 348 bytes
+47 49 4f 50 01 02 00 00  00 00 01 50 00 00 00 02   GIOP.......P....
+03 00 00 00 00 00 73 74  00 00 00 44 14 01 0f 00   ......st...D....
+4e 55 50 00 00 00 21 00  00 00 00 00 00 00 01 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 01 00 00 00 01   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+00 00 00 12 73 65 72 76  65 72 5f 69 73 5f 72 75   ....server_is_ru
+6e 6e 69 6e 67 00 00 0c  00 00 00 00 00 01 00 01   nning...........
+00 00 00 13 41 74 68 46  69 6c 65 53 65 72 76 69   ....AthFileServi
+63 65 5f 50 4f 41 00 6e  00 00 00 1d 63 6f 72 62   ce_POA.n....corb
+61 6c 6f 63 3a 69 69 6f  70 3a 31 2e 32 40 61 69   aloc:iiop:1.2@ai
+78 3a 36 31 30 35 34 2f  00 2e 30 00 00 00 00 2e   x:61054/..0.....
+49 44 4c 3a 49 6d 70 6c  65 6d 65 6e 74 61 74 69   IDL:Implementati
+6f 6e 52 65 70 6f 73 69  74 6f 72 79 2f 53 65 72   onRepository/Ser
+76 65 72 4f 62 6a 65 63  74 3a 31 2e 30 00 09 6c   verObject:1.0..l
+00 00 00 01 00 00 00 00  00 00 00 60 00 01 02 00   ...........`....
+00 00 00 04 61 69 78 00  ee 7e 00 00 00 00 00 1b   ....aix..~......
+14 01 0f 00 52 53 54 42  d6 95 ab 00 08 94 88 00   ....RSTB........
+00 00 00 00 00 00 01 00  00 00 01 00 00 00 00 02   ................
+00 00 00 00 00 00 00 08  00 00 00 00 54 41 4f 00   ............TAO.
+00 00 00 01 00 00 00 14  00 00 00 00 00 01 00 01   ................
+00 00 00 00 00 01 01 09  00 00 00 00               ............    
+ImR: Server AthFileService_POA is running at corbaloc:iiop:1.2@aix:61054/.
+TAO (1400930|1) - Transport[8]::cleanup_queue, byte_count = 348
+TAO (1400930|1) - Transport[8]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (1400930|1) - Transport[8]::drain_queue_helper, byte_count = 348, head_is_empty = 1
+TAO (1400930|1) - Transport[8]::drain_queue_i, helper retval = 1
+TAO (1400930|1) - Transport[8]::make_idle
+TAO (1400930|1) - Leader_Follower[8]::wait_for_event, (leader) enter reactor event loop
+TAO (1400930|1) - Connection_Handler[8]::handle_input, handle = 8/8
+TAO (1400930|1) - Transport[8]::handle_input
+TAO (1400930|1) - Transport[8]::process_queue_head
+TAO (1400930|1) - Transport[8]::handle_input, read 24 bytes
+TAO (1400930|1) - GIOP_Message_State::parse_message_header_i
+TAO (1400930|1) - GIOP_Message_State::get_version_info
+TAO (1400930|1) - GIOP_Message_State::get_byte_order_info
+TAO (1400930|1) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 12 data bytes, my endian, Type Reply[2]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 00 01  00 00 00 0c 00 00 00 02   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (1400930|1) - TAO_Muxed_TMS::dispatch_reply, id = 2
+TAO (1400930|1) - Connection_Handler[8]::handle_input, handle = 8/8, retval = 0
+TAO (1400930|1) - Leader_Follower[8]::wait_for_event, (leader) exit reactor event loop
+Successfully notified ImR of Startup
+IMR IOR = 
+corbaloc:iiop:1.2@aix:12345/%14%01%0f%00NUP%00%00%00!%00%00%00%00%00%00%00%01RootPOA%00ImplRepo_Service%00%00%00%00%01%00%00%00%01ImplRepo_Service
+ImR-ified IOR = 
+corbaloc:iiop:1.2@aix:12345/%14%01%0f%00NUP%00%00%00%23%00%00%00%00%00%00%00%01RootPOA%00AthFileService_POA%00%00%00%00%00%00%00%00%01ServerOne
+Running the orb
+TAO (1400930|1) - ORB_Core::run, start [run]
+TAO (1400930|1) - ORB_Core::run, calling handle_events()
