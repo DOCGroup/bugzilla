@@ -1,0 +1,91 @@
+Index: tao/Profile.cpp
+===================================================================
+--- tao/Profile.cpp	(revision 78280)
++++ tao/Profile.cpp	(working copy)
+@@ -37,13 +37,14 @@
+     , are_policies_parsed_ (false)
+     , addressing_mode_ (0)
+     , tagged_profile_ (0)
+-    , tagged_profile_lock_ ()
+     , ref_object_key_ (0)
+     , tag_ (tag)
+     , orb_core_ (orb_core)
+     , forward_to_ (0)
+     , refcount_ (this->orb_core_->
+                    client_factory ()->create_profile_refcount ())
++    , tagged_profile_lock_ ()
++    , tagged_profile_created_ (false)
+ {
+   (void) this->orb_core_->object_key_table ().bind (obj_key,
+                                                     this->ref_object_key_);
+@@ -56,13 +57,14 @@
+     , are_policies_parsed_ (false)
+     , addressing_mode_ (0)
+     , tagged_profile_ (0)
+-    , tagged_profile_lock_ ()
+     , ref_object_key_ (0)
+     , tag_ (tag)
+     , orb_core_ (orb_core)
+     , forward_to_ (0)
+     , refcount_ (this->orb_core_->
+                    client_factory ()->create_profile_refcount ())
++    , tagged_profile_lock_ ()
++    , tagged_profile_created_ (false)
+ {
+ }
+ 
+@@ -259,7 +261,7 @@
+ IOP::TaggedProfile *
+ TAO_Profile::create_tagged_profile (void)
+ {
+-  if (this->tagged_profile_ != 0)
++  if (this->tagged_profile_created_)
+     return this->tagged_profile_;
+ 
+   ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+@@ -268,7 +270,7 @@
+                     this->tagged_profile_);
+ 
+   // .. DCL
+-  if (this->tagged_profile_ == 0)
++  if (!this->tagged_profile_created_)
+     {
+       ACE_NEW_RETURN (this->tagged_profile_,
+                       IOP::TaggedProfile,
+@@ -310,6 +312,8 @@
+           buffer += i->length ();
+         }
+ #endif /* TAO_NO_COPY_OCTET_SEQUENCES == 1 */
++
++      this->tagged_profile_created_ = true;
+     }
+ 
+   return this->tagged_profile_;
+Index: tao/Profile.h
+===================================================================
+--- tao/Profile.h	(revision 78280)
++++ tao/Profile.h	(working copy)
+@@ -368,9 +368,6 @@
+   /// Our tagged profile
+   IOP::TaggedProfile *tagged_profile_;
+ 
+-  /// A lock that protects creation of the tagged profile
+-  TAO_SYNCH_MUTEX tagged_profile_lock_;
+-
+   /// object_key associated with this profile.
+   TAO::Refcounted_ObjectKey *ref_object_key_;
+ 
+@@ -388,6 +385,13 @@
+   /// Number of outstanding references to this object.
+   TAO_Configurable_Refcount refcount_;
+ 
++  /// Having (tagged_profile_ != 0) doesn't mean yet that
++  /// tagged_profile_ buildind is finished.
++  bool tagged_profile_created_;
++
++  /// A lock that protects creation of the tagged profile
++  TAO_SYNCH_MUTEX tagged_profile_lock_;
++
+   //@@ TAO_PROFILE_SPL_PRIVATE_DATA_ADD_HOOK
+ };
+ 
