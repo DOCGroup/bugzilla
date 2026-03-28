@@ -1,0 +1,492 @@
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Factory.cpp
+===================================================================
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Factory.cpp	(revision 81434)
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Factory.cpp	(working copy)
+@@ -8,6 +8,7 @@
+ 
+ #include "tao/debug.h"
+ #include "tao/ORBInitializer_Registry.h"
++#include "tao/PI/DLL_Resident_ORB_Initializer.h"
+ 
+ #include "ace/SSL/sslconf.h"
+ #include "ace/SSL/SSL_Context.h"
+@@ -541,10 +542,26 @@
+ 
+       PortableInterceptor::ORBInitializer_var initializer = tmp;
+ 
+-      PortableInterceptor::register_orb_initializer (initializer.in ());
++  PortableInterceptor::ORBInitializer_ptr temp_dll_initializer =
++        PortableInterceptor::ORBInitializer::_nil ();
+ 
++  ACE_NEW_THROW_EX (temp_dll_initializer,
++        PortableInterceptor::DLL_Resident_ORB_Initializer(
++  initializer.in (),
++  ACE_LIB_TEXT ("TAO_Security")),
++  CORBA::NO_MEMORY (
++  CORBA::SystemException::_tao_minor_code (
++  TAO::VMCID,
++  ENOMEM),
++  CORBA::COMPLETED_NO));
++
++  PortableInterceptor::ORBInitializer_var dll_initializer
++  = temp_dll_initializer;
++
++  PortableInterceptor::register_orb_initializer (dll_initializer.in ());
++
++
+       // Register the SSLIOP ORB initializer.
+-      // PortableInterceptor::ORBInitializer_ptr tmp;
+       ACE_NEW_THROW_EX (tmp,
+                         TAO::SSLIOP::ORBInitializer (this->qop_,
+                                                      csiv2_target_supports,
+@@ -555,10 +572,24 @@
+                             ENOMEM),
+                           CORBA::COMPLETED_NO));
+ 
+-      //PortableInterceptor::ORBInitializer_var initializer = tmp;
+       initializer = tmp;
+ 
+-      PortableInterceptor::register_orb_initializer (initializer.in ());
++  temp_dll_initializer = PortableInterceptor::ORBInitializer::_nil ();
++
++  ACE_NEW_THROW_EX (temp_dll_initializer,
++        PortableInterceptor::DLL_Resident_ORB_Initializer(
++  initializer.in (),
++  ACE_LIB_TEXT ("TAO_SSLIOP")),
++  CORBA::NO_MEMORY (
++  CORBA::SystemException::_tao_minor_code (
++  TAO::VMCID,
++  ENOMEM),
++  CORBA::COMPLETED_NO));
++
++  dll_initializer = temp_dll_initializer;
++
++  PortableInterceptor::register_orb_initializer (dll_initializer.in ());
++
+     }
+   catch (const CORBA::Exception& ex)
+     {
+Index: tao/ORB_Core.cpp
+===================================================================
+--- tao/ORB_Core.cpp	(revision 81434)
++++ tao/ORB_Core.cpp	(working copy)
+@@ -2165,9 +2165,12 @@
+       // Otherwise just continue..
+     }
+ 
++  // wait only in the parent thread.
+   if (this->has_shutdown () == true &&
+-      this->server_factory_->activate_server_connections ())
+-      this->tm_.wait ();
++      (this->server_factory_->activate_server_connections () ||
++       (this->tm_.task() == 0 && this->tm_.count_threads() > 0) ) ) {
++    this->tm_.wait ();
++  }
+ 
+   if (TAO_debug_level > 2)
+     {
+Index: tao/PI/DLL_Resident_ORB_Initializer.cpp
+===================================================================
+--- tao/PI/DLL_Resident_ORB_Initializer.cpp	(revision 0)
++++ tao/PI/DLL_Resident_ORB_Initializer.cpp	(revision 0)
+@@ -0,0 +1,75 @@
++// -*- C++ -*-
++//=============================================================================
++/**
++ *  @file DLL_Resident_ORBInitializer.cpp
++ *
++ *  $Id$
++ *
++ *  @author Dale Wilson <wilsond@ociweb.com>
++ */
++//=============================================================================
++
++#include "tao/PI/DLL_Resident_ORB_Initializer.h"
++
++ACE_RCSID (TAO,
++           DLL_Resident_ORBInitializer,
++           "$Id$")
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++PortableInterceptor::DLL_Resident_ORB_Initializer::DLL_Resident_ORB_Initializer (
++  PortableInterceptor::ORBInitializer_ptr initializer,
++  const ACE_TCHAR * dll_name)
++  : initializer_(PortableInterceptor::ORBInitializer::_duplicate(initializer))
++  , dll_(dll_name)
++{
++  if (TAO_debug_level > 8)
++    {
++      ACE_DEBUG ((LM_DEBUG,
++        ACE_LIB_TEXT ("construct DLL_Resident_ORB_Initializer for @%@\n"),
++        initializer_.operator->()
++        ));
++    }
++}
++
++PortableInterceptor::DLL_Resident_ORB_Initializer::~DLL_Resident_ORB_Initializer ()
++{
++  if (TAO_debug_level > 8)
++    {
++      ACE_DEBUG ((LM_DEBUG,
++        ACE_LIB_TEXT ("Destruct DLL_Resident_ORB_Initializer for @%@\n"),
++        initializer_.operator->()
++        ));
++    }
++  // let the var release the object first
++  initializer_ = PortableInterceptor::ORBInitializer::_nil();
++  // then the ACE_DLL can release the dll on the way out.
++}
++
++
++void
++PortableInterceptor::DLL_Resident_ORB_Initializer::pre_init (
++    ::PortableInterceptor::ORBInitInfo_ptr info
++  )
++  ACE_THROW_SPEC ((
++    ::CORBA::SystemException
++  ))
++{
++  initializer_->pre_init (info);
++}
++
++void
++PortableInterceptor::DLL_Resident_ORB_Initializer::post_init (
++    ::PortableInterceptor::ORBInitInfo_ptr info
++  )
++  ACE_THROW_SPEC ((
++    ::CORBA::SystemException
++  ))
++{
++  initializer_->post_init (info);
++}
++
++
++TAO_END_VERSIONED_NAMESPACE_DECL
++
++
+
+Property changes on: tao/PI/DLL_Resident_ORB_Initializer.cpp
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: tao/PI/ORBInitializer_Registry_Impl.cpp
+===================================================================
+--- tao/PI/ORBInitializer_Registry_Impl.cpp	(revision 81434)
++++ tao/PI/ORBInitializer_Registry_Impl.cpp	(working copy)
+@@ -80,8 +80,15 @@
+ 
+   // Release all initializers in the array
+   size_t const initializer_count (this->initializers_.size ());
+-  for (size_t i = 0; i < initializer_count; ++i)
++  for (size_t i = initializer_count; i > 0;)
+     {
++      --i;
++      if (TAO_debug_level > 8)
++        {
++          ACE_DEBUG((LM_DEBUG, ACE_TEXT("TAO(%P|%t)OrbInitializer::fini clearing %d @%@\n"),
++            i, this->initializers_[i].operator->()
++            ));
++        }
+       this->initializers_[i] = PortableInterceptor::ORBInitializer::_nil();
+     }
+ 
+@@ -105,6 +112,13 @@
+         throw ::CORBA::INTERNAL ();
+ 
+       // Add the given ORBInitializer to the sequence.
++      if (TAO_debug_level > 8)
++        {
++          ACE_DEBUG((LM_DEBUG, ACE_TEXT("TAO(%P|%t)OrbInitializer::register_orb_initializer %d @%@\n"),
++            cur_len, init
++            ));
++        }
++
+       this->initializers_[cur_len] =
+         PortableInterceptor::ORBInitializer::_duplicate (init);
+     }
+Index: tao/PI/DLL_Resident_ORB_Initializer.h
+===================================================================
+--- tao/PI/DLL_Resident_ORB_Initializer.h	(revision 0)
++++ tao/PI/DLL_Resident_ORB_Initializer.h	(revision 0)
+@@ -0,0 +1,90 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ *  @file DLL_Resident_ORBInitializer.h
++ *
++ *  $Id$
++ *
++ *  @author Dale Wilson <wilsond@ociweb.com>
++ */
++//=============================================================================
++
++
++#ifndef PI_DLL_RESIDENT_ORB_INITIALIZER_H
++#define PI_DLL_RESIDENT_ORB_INITIALIZER_H
++
++#include /**/ "ace/pre.h"
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++#include "ace/DLL.h"
++#include "tao/PI/PI.h"
++#include "tao/LocalObject.h"
++//#include "tao/PI/ORBInitializerC.h"
++
++// This is to remove "inherits via dominance" warnings from MSVC.
++// MSVC is being a little too paranoid.
++#if defined(_MSC_VER)
++#pragma warning(push)
++#pragma warning(disable:4250)
++#endif /* _MSC_VER */
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++namespace PortableInterceptor
++{
++
++  /**
++   * @class DLL_Resident_ORB_Initializer
++   *
++   * Decorator for an ORBInitializer implemented in a DLL
++   *
++   * Ensures that the DLL stays loaded while the ORBInitializer exists.
++   */
++  class TAO_PI_Export DLL_Resident_ORB_Initializer
++  : public virtual PortableInterceptor::ORBInitializer
++  {
++    public:
++      DLL_Resident_ORB_Initializer (
++        PortableInterceptor::ORBInitializer_ptr initializer,
++        const ACE_TCHAR * dll_name);
++      virtual ~DLL_Resident_ORB_Initializer ();
++
++      virtual void pre_init (
++        ::PortableInterceptor::ORBInitInfo_ptr info
++      )
++      ACE_THROW_SPEC ((
++        ::CORBA::SystemException
++      ));
++
++    virtual void post_init (
++        ::PortableInterceptor::ORBInitInfo_ptr info
++      )
++      ACE_THROW_SPEC ((
++        ::CORBA::SystemException
++      ));
++
++  private:
++    PortableInterceptor::ORBInitializer_var initializer_;
++#if 1 // to re-inject the CSD vs SSLIOP bug, make this a zero
++    ACE_DLL dll_;
++#else // CSD vs SSLIOP
++    const ACE_TCHAR * dll_;
++#endif // CSD vs SSLIOP
++};
++}
++TAO_END_VERSIONED_NAMESPACE_DECL
++
++#if defined(_MSC_VER)
++#pragma warning(pop)
++#endif /* _MSC_VER */
++
++#include /**/ "ace/post.h"
++
++#endif /* PI_DLL_RESIDENT_ORB_INITIALIZER_H */
++
++
++
++
+
+Property changes on: tao/PI/DLL_Resident_ORB_Initializer.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: tao/CSD_ThreadPool/CSD_TP_Strategy.cpp
+===================================================================
+--- tao/CSD_ThreadPool/CSD_TP_Strategy.cpp	(revision 81434)
++++ tao/CSD_ThreadPool/CSD_TP_Strategy.cpp	(working copy)
+@@ -8,6 +8,7 @@
+ #include "tao/CSD_ThreadPool/CSD_TP_Custom_Asynch_Request.h"
+ #include "tao/CSD_ThreadPool/CSD_TP_Collocated_Synch_With_Server_Request.h"
+ #include "ace/Trace.h"
++#include "tao/ORB_Core.h"
+ 
+ ACE_RCSID (CSD_ThreadPool,
+            TP_Strategy,
+@@ -60,8 +61,9 @@
+ 
+ 
+ bool
+-TAO::CSD::TP_Strategy::poa_activated_event_i()
++TAO::CSD::TP_Strategy::poa_activated_event_i(TAO_ORB_Core& orb_core)
+ {
++  this->task_.thr_mgr(orb_core.thr_mgr());
+   // Activates the worker threads, and waits until all have been started.
+   return (this->task_.open(&(this->num_threads_)) == 0);
+ }
+Index: tao/CSD_ThreadPool/CSD_TP_Strategy.h
+===================================================================
+--- tao/CSD_ThreadPool/CSD_TP_Strategy.h	(revision 81434)
++++ tao/CSD_ThreadPool/CSD_TP_Strategy.h	(working copy)
+@@ -133,7 +133,7 @@
+       /// This will activate the worker thread(s).
+       /// Returns true if the worker threads were activated successfully.
+       /// Otherwise, returns false.
+-      virtual bool poa_activated_event_i();
++      virtual bool poa_activated_event_i(TAO_ORB_Core& orb_core);
+ 
+       /// Event - The POA has been deactivated.
+       /// This will shutdown the worker thread(s).
+Index: tao/CSD_Framework/CSD_Strategy_Proxy.h
+===================================================================
+--- tao/CSD_Framework/CSD_Strategy_Proxy.h	(revision 81434)
++++ tao/CSD_Framework/CSD_Strategy_Proxy.h	(working copy)
+@@ -76,7 +76,7 @@
+ 
+ 
+       /// Event - The POA has been (or is being) activated.
+-      bool poa_activated_event();
++      bool poa_activated_event(TAO_ORB_Core& orb_core);
+ 
+       /// Event - The POA has been deactivated.
+       void poa_deactivated_event();
+Index: tao/CSD_Framework/CSD_POA.cpp
+===================================================================
+--- tao/CSD_Framework/CSD_POA.cpp	(revision 81434)
++++ tao/CSD_Framework/CSD_POA.cpp	(working copy)
+@@ -94,7 +94,7 @@
+ 
+ void TAO_CSD_POA::poa_activated_hook ()
+ {
+-  this->sds_proxy_->poa_activated_event ();
++  this->sds_proxy_->poa_activated_event (this->orb_core_);
+ }
+ 
+ void TAO_CSD_POA::poa_deactivated_hook ()
+Index: tao/CSD_Framework/CSD_Framework_Loader.cpp
+===================================================================
+--- tao/CSD_Framework/CSD_Framework_Loader.cpp	(revision 81434)
++++ tao/CSD_Framework/CSD_Framework_Loader.cpp	(working copy)
+@@ -4,6 +4,7 @@
+ #include "tao/CSD_Framework/CSD_Object_Adapter_Factory.h"
+ #include "tao/CSD_Framework/CSD_Strategy_Repository.h"
+ #include "tao/CSD_Framework/CSD_ORBInitializer.h"
++#include "tao/PI/DLL_Resident_ORB_Initializer.h"
+ #include "tao/ORBInitializer_Registry.h"
+ 
+ ACE_RCSID (CSD_Framework,
+@@ -56,7 +57,7 @@
+       PortableInterceptor::ORBInitializer_ptr temp_orb_initializer =
+         PortableInterceptor::ORBInitializer::_nil ();
+ 
+-      /// Register the RTCORBA ORBInitializer.
++      /// Register the CSD ORBInitializer.
+       ACE_NEW_THROW_EX (temp_orb_initializer,
+                         TAO_CSD_ORBInitializer,
+                         CORBA::NO_MEMORY (
+@@ -68,7 +69,23 @@
+       PortableInterceptor::ORBInitializer_var orb_initializer;
+       orb_initializer = temp_orb_initializer;
+ 
+-      PortableInterceptor::register_orb_initializer (orb_initializer.in ());
++      PortableInterceptor::ORBInitializer_ptr temp_dll_initializer =
++        PortableInterceptor::ORBInitializer::_nil ();
++
++      ACE_NEW_THROW_EX (temp_dll_initializer,
++        PortableInterceptor::DLL_Resident_ORB_Initializer(
++          orb_initializer.in (),
++          ACE_LIB_TEXT ("TAO_CSD_ThreadPool")),
++          CORBA::NO_MEMORY (
++            CORBA::SystemException::_tao_minor_code (
++              TAO::VMCID,
++              ENOMEM),
++            CORBA::COMPLETED_NO));
++
++      PortableInterceptor::ORBInitializer_var dll_initializer;
++      dll_initializer = temp_dll_initializer;
++
++      PortableInterceptor::register_orb_initializer (dll_initializer.in ());
+     }
+   catch (const ::CORBA::Exception& ex)
+     {
+Index: tao/CSD_Framework/CSD_Strategy_Base.cpp
+===================================================================
+--- tao/CSD_Framework/CSD_Strategy_Base.cpp	(revision 81434)
++++ tao/CSD_Framework/CSD_Strategy_Base.cpp	(working copy)
+@@ -67,7 +67,7 @@
+       // The POA is already "active" (since its POAManager is active).
+       // We need to "raise" the poa_activated_event() now.  Otherwise,
+       // the event will be raised when the POAManager does become active.
+-      if (!this->poa_activated_event())
++      if (!this->poa_activated_event( poa_impl->orb_core() ))
+         {
+           // An error has been already been reported to the log with
+           // the detailed reason for the failure to handle the event.
+Index: tao/CSD_Framework/CSD_Strategy_Base.inl
+===================================================================
+--- tao/CSD_Framework/CSD_Strategy_Base.inl	(revision 81434)
++++ tao/CSD_Framework/CSD_Strategy_Base.inl	(working copy)
+@@ -84,10 +84,10 @@
+ 
+ ACE_INLINE
+ bool
+-TAO::CSD::Strategy_Base::poa_activated_event()
++TAO::CSD::Strategy_Base::poa_activated_event(TAO_ORB_Core& orb_core)
+ {
+   // Notify the subclass of the event, saving the result.
+-  this->poa_activated_ = this->poa_activated_event_i();
++  this->poa_activated_ = this->poa_activated_event_i(orb_core);
+ 
+   // Return the result
+   return this->poa_activated_;
+Index: tao/CSD_Framework/CSD_Strategy_Base.h
+===================================================================
+--- tao/CSD_Framework/CSD_Strategy_Base.h	(revision 81434)
++++ tao/CSD_Framework/CSD_Strategy_Base.h	(working copy)
+@@ -100,7 +100,7 @@
+                           PortableServer::Servant         servant) = 0;
+ 
+       /// Event - The POA has been activated.
+-      virtual bool poa_activated_event_i() = 0;
++      virtual bool poa_activated_event_i(TAO_ORB_Core& orb_core) = 0;
+ 
+       /// Event - The POA has been deactivated.
+       virtual void poa_deactivated_event_i() = 0;
+@@ -130,7 +130,7 @@
+ 
+       /// Event - The POA has been activated. This happens when the POA_Manager
+       ///         is activated.
+-      bool poa_activated_event();
++      bool poa_activated_event(TAO_ORB_Core& orb_core);
+ 
+       /// Event - The POA has been deactivated.  This happens when the
+       ///         POAManager is deactivated, or when the POA is destroyed.
+Index: tao/CSD_Framework/CSD_Strategy_Proxy.inl
+===================================================================
+--- tao/CSD_Framework/CSD_Strategy_Proxy.inl	(revision 81434)
++++ tao/CSD_Framework/CSD_Strategy_Proxy.inl	(working copy)
+@@ -37,12 +37,12 @@
+ 
+ ACE_INLINE
+ bool
+-TAO::CSD::Strategy_Proxy::poa_activated_event()
++TAO::CSD::Strategy_Proxy::poa_activated_event(TAO_ORB_Core& orb_core)
+ {
+   // Delegate to the custom strategy object (or return true if this proxy
+   // is not holding a custom strategy).
+   return (this->strategy_impl_ == 0) ? true
+-    : this->strategy_impl_->poa_activated_event();
++    : this->strategy_impl_->poa_activated_event(orb_core);
+ }
+ 
+ 
