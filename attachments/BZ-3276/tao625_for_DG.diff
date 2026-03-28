@@ -1,0 +1,471 @@
+Index: GIOP_Message_Base.cpp
+===================================================================
+--- GIOP_Message_Base.cpp	(revision 81109)
++++ GIOP_Message_Base.cpp	(working copy)
+@@ -865,7 +865,7 @@
+ 
+ //@@ TAO_DISPATCH_RESOLUTION_OPT_COMMENT_HOOK_END
+ 
+-      if (!CORBA::is_nil (forward_to.in ()))
++      if (request.is_forwarded ())
+         {
+           CORBA::Boolean const permanent_forward_condition =
+               this->orb_core_->is_permanent_forward_condition
+@@ -1081,7 +1081,7 @@
+           server_request,
+           forward_to);
+ 
+-      if (!CORBA::is_nil (forward_to.in ()))
++      if (server_request.is_forwarded ())
+         {
+           status_info.status = GIOP::OBJECT_FORWARD;
+           status_info.forward_location_var = forward_to;
+@@ -1103,21 +1103,11 @@
+         {
+           status_info.forward_location_var = server_request.forward_location ();
+ 
+-          if (!CORBA::is_nil (status_info.forward_location_var.in ()))
+-            {
+-              status_info.status = GIOP::OBJECT_FORWARD;
+-              ACE_DEBUG ((LM_DEBUG,
+-                          ACE_TEXT ("TAO (%P|%t) - TAO_GIOP_Message_Base::process_locate_request, ")
+-                          ACE_TEXT ("forwarding\n")));
+-            }
+-          else
+-            {
+-              // Normal exception, so the object is not here
+-              status_info.status = GIOP::UNKNOWN_OBJECT;
+-              ACE_DEBUG ((LM_DEBUG,
+-                          ACE_TEXT ("TAO (%P|%t) - TAO_GIOP_Message_Base::process_locate_request, ")
+-                          ACE_TEXT ("not here\n")));
+-            }
++          // Normal exception, so the object is not here
++          status_info.status = GIOP::UNKNOWN_OBJECT;
++          ACE_DEBUG ((LM_DEBUG,
++                      ACE_TEXT ("TAO (%P|%t) - TAO_GIOP_Message_Base::process_locate_request, ")
++                      ACE_TEXT ("not here\n")));
+         }
+     }
+ 
+Index: PortableServer/Upcall_Wrapper.cpp
+===================================================================
+--- PortableServer/Upcall_Wrapper.cpp	(revision 81109)
++++ PortableServer/Upcall_Wrapper.cpp	(working copy)
+@@ -99,7 +99,7 @@
+         // Don't bother performing the upcall if an interceptor caused a
+         // location forward.
+         CORBA::Object_var forward_to = server_request.forward_location ();
+-        if (CORBA::is_nil (forward_to.in ()))
++        if (!server_request.is_forwarded ())
+           {
+             if (interceptor_adapter != 0)
+               {
+@@ -133,7 +133,7 @@
+           // we'd still need to avoid resetting the reply status to
+           // SUCCESSFUL, however.
+           CORBA::Object_var forward_to_after = server_request.forward_location ();
+-          if (CORBA::is_nil (forward_to_after.in ()))
++          if (!server_request.is_forwarded ())
+             {
+               // No location forward by interceptors and successful upcall.
+               server_request.pi_reply_status (PortableInterceptor::SUCCESSFUL);
+Index: PortableServer/Object_Adapter.cpp
+===================================================================
+--- PortableServer/Object_Adapter.cpp	(revision 81109)
++++ PortableServer/Object_Adapter.cpp	(working copy)
+@@ -757,7 +757,7 @@
+           // thrown, then set the forward_to object reference and return
+           // with the appropriate return status.
+           forward_to.ptr () = request.forward_location ();
+-          if (!CORBA::is_nil (request.forward_location ()))
++          if (request.is_forwarded ())
+             {
+               return TAO_Adapter::DS_FORWARD;
+             }
+@@ -777,7 +777,7 @@
+           // thrown, then set the forward_to object reference and return
+           // with the appropriate return status.
+           forward_to.ptr () = request.forward_location ();
+-          if (!CORBA::is_nil (request.forward_location ()))
++          if (request.is_forwarded ())
+             {
+               return TAO_Adapter::DS_FORWARD;
+             }
+@@ -790,6 +790,7 @@
+ 
+       if (result == TAO_Adapter::DS_FORWARD)
+         {
++          request.reply_status (GIOP::LOCATION_FORWARD);
+           request.forward_location (forward_to.ptr ());
+           if (sri_adapter != 0)
+             {
+Index: Invocation_Base.h
+===================================================================
+--- Invocation_Base.h	(revision 81109)
++++ Invocation_Base.h	(working copy)
+@@ -138,6 +138,9 @@
+     /// Forwarded object reference.
+     CORBA::Object_var forwarded_to_;
+ 
++    /// If we get nil forward reference we need more reliable indication of forwarding.
++    bool is_forwarded_;
++
+     /// Is response expected?
+     bool response_expected_;
+ 
+Index: LocateRequest_Invocation_Adapter.cpp
+===================================================================
+--- LocateRequest_Invocation_Adapter.cpp	(revision 81109)
++++ LocateRequest_Invocation_Adapter.cpp	(working copy)
+@@ -130,8 +130,27 @@
+   {
+     // The object pointer has to be changed to a TAO_Stub pointer
+     // in order to obtain the profiles.
+-    TAO_Stub *stubobj = effective_target->_stubobj ();
++    TAO_Stub *stubobj = 0;
+ 
++    bool nil_forward_ref = false;
++    if (CORBA::is_nil (effective_target))
++      nil_forward_ref = true;
++    else
++      {
++        stubobj =
++          effective_target->_stubobj ();
++
++        if (stubobj && stubobj->base_profiles ().size () == 0)
++          nil_forward_ref = true;
++      }
++
++    if (nil_forward_ref)
++      throw ::CORBA::TRANSIENT (
++        CORBA::SystemException::_tao_minor_code (
++          TAO_INVOCATION_LOCATION_FORWARD_MINOR_CODE,
++          errno),
++        CORBA::COMPLETED_NO);
++
+     if (stubobj == 0)
+       throw ::CORBA::INTERNAL (
+         CORBA::SystemException::_tao_minor_code (
+Index: Invocation_Base.cpp
+===================================================================
+--- Invocation_Base.cpp	(revision 81109)
++++ Invocation_Base.cpp	(working copy)
+@@ -41,6 +41,7 @@
+                                     bool TAO_INTERCEPTOR (request_is_remote))
+     : details_ (details)
+     , forwarded_to_ (0)
++    , is_forwarded_ (false)
+     , response_expected_ (response_expected)
+     , otarget_ (ot)
+     , target_ (t)
+@@ -104,7 +105,7 @@
+             throw;
+           }
+ 
+-        if (this->forwarded_to_.in ())
++        if (this->is_forwarded_)
+           return TAO_INVOKE_RESTART;
+       }
+ 
+@@ -163,7 +164,7 @@
+             throw;
+           }
+ 
+-        if (this->forwarded_to_.in ())
++        if (this->is_forwarded_)
+           return TAO_INVOKE_RESTART;
+       }
+ 
+@@ -182,7 +183,7 @@
+       {
+         this->adapter_->receive_exception (*this);
+ 
+-        if (this->forwarded_to_.in ())
++        if (this->is_forwarded_)
+           {
+             status = PortableInterceptor::LOCATION_FORWARD;
+           }
+@@ -222,6 +223,7 @@
+       this->invoke_status_ = TAO::TAO_INVOKE_USER_EXCEPTION;
+ 
+     this->forwarded_to_ = CORBA::Object::_nil ();
++    this->is_forwarded_ = false;
+     this->caught_exception_ = exception;
+   }
+ 
+Index: Collocated_Invocation.cpp
+===================================================================
+--- Collocated_Invocation.cpp	(revision 81109)
++++ Collocated_Invocation.cpp	(working copy)
+@@ -91,10 +91,10 @@
+         s = TAO_INVOKE_SUCCESS;
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+-        if (this->forwarded_to_.in () ||
++        if (this->is_forwarded_ ||
+             this->response_expected_ == false)
+           {
+-            if (this->forwarded_to_.in ())
++            if (this->is_forwarded_)
+               this->reply_received (TAO_INVOKE_RESTART);
+ 
+             s = this->receive_other_interception ();
+@@ -172,7 +172,7 @@
+       }
+ #endif  /* TAO_HAS_INTERCEPTORS == 1 */
+ 
+-    if (this->forwarded_to_.in () != 0)
++    if (this->is_forwarded_ != 0)
+       s =  TAO_INVOKE_RESTART;
+ 
+     return s;
+Index: ORB_Core.inl
+===================================================================
+--- ORB_Core.inl	(revision 81109)
++++ ORB_Core.inl	(working copy)
+@@ -600,8 +600,9 @@
+   const TAO_Service_Callbacks *service_callback =
+       this->fault_tolerance_service ().service_callback ();
+ 
++  // Since forward location is allowed to be nil then check for it.
+   CORBA::Boolean const permanent_forward_condition =
+-      service_callback &&
++      service_callback && obj &&
+       service_callback->is_permanent_forward_condition (obj,
+                                                         service_context);
+ 
+Index: IORTable/Table_Adapter.cpp
+===================================================================
+--- IORTable/Table_Adapter.cpp	(revision 81109)
++++ IORTable/Table_Adapter.cpp	(working copy)
+@@ -15,6 +15,7 @@
+ #include "tao/Stub.h"
+ #include "tao/ORB.h"
+ #include "tao/Profile.h"
++#include "tao/TAO_Server_Request.h"
+ 
+ ACE_RCSID (IORTable,
+            Table_Adapter,
+@@ -99,7 +100,7 @@
+ 
+ int
+ TAO_Table_Adapter::dispatch (TAO::ObjectKey &key,
+-                             TAO_ServerRequest &,
++                             TAO_ServerRequest &request,
+                              CORBA::Object_out forward_to)
+ {
+   TAO_IOR_Table_Impl_var rootref;
+@@ -113,8 +114,13 @@
+     rootref = this->root_;
+   }
+ 
+-  return this->find_object (key, forward_to) ? TAO_Adapter::DS_FORWARD
+-                                             : TAO_Adapter::DS_MISMATCHED_KEY;
++  if (this->find_object (key, forward_to))
++    {
++      request.forward_location (forward_to);
++      return TAO_Adapter::DS_FORWARD;
++    }
++  else
++    return TAO_Adapter::DS_MISMATCHED_KEY;
+ }
+ 
+ const char *
+Index: DynamicInterface/Dynamic_Implementation.cpp
+===================================================================
+--- DynamicInterface/Dynamic_Implementation.cpp	(revision 81109)
++++ DynamicInterface/Dynamic_Implementation.cpp	(working copy)
+@@ -121,7 +121,7 @@
+   // No need to do any of this if the client isn't waiting.
+   if (request.response_expected ())
+     {
+-      if (!CORBA::is_nil (request.forward_location ()))
++      if (request.is_forwarded ())
+         {
+           request.init_reply ();
+           request.tao_send_reply ();
+Index: TAO_Server_Request.cpp
+===================================================================
+--- TAO_Server_Request.cpp	(revision 81109)
++++ TAO_Server_Request.cpp	(working copy)
+@@ -57,6 +57,7 @@
+     operation_ (0),
+     operation_len_ (0),
+     release_operation_ (false),
++    is_forwarded_ (false),
+     incoming_ (&input),
+     outgoing_ (&output),
+     response_expected_ (false),
+@@ -99,6 +100,7 @@
+     operation_ (CORBA::string_dup (operation)),
+     operation_len_ (operation == 0 ? 0 : ACE_OS::strlen (operation)),
+     release_operation_ (true),
++    is_forwarded_ (false),
+     incoming_ (0),
+     outgoing_ (&output),
+     response_expected_ (response_expected),
+@@ -133,6 +135,7 @@
+     operation_ (details.opname ()),
+     operation_len_ (details.opname_len ()),
+     release_operation_ (false),
++    is_forwarded_ (false),
+     incoming_ (0),
+     outgoing_ (0),
+     response_expected_ (details.response_flags () == TAO_TWOWAY_RESPONSE_FLAG
+@@ -247,7 +250,7 @@
+   reply_params.argument_flag_ = this->argument_flag_;
+ 
+   // Forward exception only.
+-  if (!CORBA::is_nil (this->forward_location_.in ()))
++  if (this->is_forwarded_)
+     {
+       CORBA::Boolean const permanent_forward_condition =
+         this->orb_core_->is_permanent_forward_condition (this->forward_location_.in (),
+Index: Invocation_Base.inl
+===================================================================
+--- Invocation_Base.inl	(revision 81109)
++++ Invocation_Base.inl	(working copy)
+@@ -22,6 +22,7 @@
+   Invocation_Base::forwarded_reference (CORBA::Object_ptr o)
+   {
+     this->forwarded_to_ = CORBA::Object::_duplicate (o);
++    this->is_forwarded_ = true;
+   }
+ 
+   ACE_INLINE CORBA::Object_ptr
+@@ -33,13 +34,14 @@
+   ACE_INLINE CORBA::Object_ptr
+   Invocation_Base::steal_forwarded_reference (void)
+   {
++    this->is_forwarded_ = false;
+     return this->forwarded_to_._retn ();
+   }
+ 
+   ACE_INLINE bool
+   Invocation_Base::is_forwarded (void) const
+   {
+-    return (this->forwarded_to_.in () != 0);
++    return this->is_forwarded_;
+   }
+ 
+   ACE_INLINE CORBA::Boolean
+Index: Adapter_Registry.cpp
+===================================================================
+--- Adapter_Registry.cpp	(revision 81109)
++++ Adapter_Registry.cpp	(working copy)
+@@ -6,6 +6,7 @@
+ #include "tao/Adapter.h"
+ #include "tao/SystemException.h"
+ #include "tao/debug.h"
++#include "tao/TAO_Server_Request.h"
+ 
+ #include "ace/Log_Msg.h"
+ #include "ace/OS_NS_string.h"
+@@ -118,7 +119,7 @@
+         }
+     }
+ 
+-  if (CORBA::is_nil (forward_to))
++  if (!request.is_forwarded ())
+     {
+       throw ::CORBA::OBJECT_NOT_EXIST ();
+     }
+Index: TAO_Server_Request.h
+===================================================================
+--- TAO_Server_Request.h	(revision 81109)
++++ TAO_Server_Request.h	(working copy)
+@@ -208,6 +208,12 @@
+   /// Get the forward_location.
+   CORBA::Object_ptr forward_location (void);
+ 
++  /**
++   * Since forward location is allowed to be nil then this is a proper
++   * method to check if the request is being forwarded.
++   */
++  bool is_forwarded (void);
++
+   /// Get the reply status
+   GIOP::ReplyStatusType reply_status (void);
+ 
+@@ -288,6 +294,8 @@
+ 
+   CORBA::Object_var forward_location_;
+ 
++  bool is_forwarded_;
++
+   /// Incoming stream.
+   TAO_InputCDR *incoming_;
+   /// Outgoing stream.
+Index: Invocation_Adapter.cpp
+===================================================================
+--- Invocation_Adapter.cpp	(revision 81109)
++++ Invocation_Adapter.cpp	(working copy)
+@@ -356,8 +356,27 @@
+   {
+     // The object pointer has to be changed to a TAO_Stub pointer
+     // in order to obtain the profiles.
+-    TAO_Stub *stubobj = effective_target->_stubobj ();
++    TAO_Stub *stubobj = 0;
+ 
++    bool nil_forward_ref = false;
++    if (CORBA::is_nil (effective_target))
++      nil_forward_ref = true;
++    else
++      {
++        stubobj =
++          effective_target->_stubobj ();
++
++        if (stubobj && stubobj->base_profiles ().size () == 0)
++          nil_forward_ref = true;
++      }
++
++    if (nil_forward_ref)
++      throw ::CORBA::TRANSIENT (
++        CORBA::SystemException::_tao_minor_code (
++          TAO_INVOCATION_LOCATION_FORWARD_MINOR_CODE,
++          errno),
++        CORBA::COMPLETED_NO);
++
+     if (stubobj == 0)
+       throw ::CORBA::INTERNAL (
+         CORBA::SystemException::_tao_minor_code (
+Index: CSD_Framework/CSD_FW_Server_Request_Wrapper.cpp
+===================================================================
+--- CSD_Framework/CSD_FW_Server_Request_Wrapper.cpp	(revision 81109)
++++ CSD_Framework/CSD_FW_Server_Request_Wrapper.cpp	(working copy)
+@@ -177,6 +177,10 @@
+   // ACTION: Assignment performs reference-counted copy of object ref.
+   clone_obj->forward_location_ = request->forward_location_;
+ 
++  // TYPE: bool
++  // ACTION: Primitive data type assignment
++  clone_obj->is_forwarded_ = request->is_forwarded_;
++
+   // TYPE: TAO_InputCDR*
+   // ACTION: This *must* be "cloned".
+   if (request->incoming_ != 0)
+Index: TAO_Server_Request.inl
+===================================================================
+--- TAO_Server_Request.inl	(revision 81109)
++++ TAO_Server_Request.inl	(working copy)
+@@ -169,6 +169,7 @@
+ {
+   this->forward_location_ =
+     CORBA::Object::_duplicate (forward_reference);
++  this->is_forwarded_ = true;
+ }
+ 
+ ACE_INLINE CORBA::Object_ptr
+@@ -177,6 +178,12 @@
+   return CORBA::Object::_duplicate (this->forward_location_.in ());
+ }
+ 
++ACE_INLINE bool
++TAO_ServerRequest::is_forwarded (void)
++{
++  return this->is_forwarded_;
++}
++
+ ACE_INLINE GIOP::ReplyStatusType
+ TAO_ServerRequest::reply_status (void)
+ {
