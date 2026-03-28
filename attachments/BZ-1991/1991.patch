@@ -1,0 +1,12 @@
+--- ACE_wrappers.orig/ace/Based_Pointer_Repository.h	2003-08-03 20:53:50.000000000 -0700
++++ ACE_wrappers/ace/Based_Pointer_Repository.h	2005-08-22 12:10:09.723844800 -0700
+@@ -75,6 +75,9 @@
+ typedef ACE_Singleton<ACE_Based_Pointer_Repository, ACE_SYNCH_RW_MUTEX>
+         ACE_BASED_POINTER_REPOSITORY;
+ 
++/// Declare a process wide singleton
++ACE_SINGLETON_DECLARE(ACE_Singleton, ACE_Based_Pointer_Repository, ACE_SYNCH_RW_MUTEX)
++
+ #include /**/ "ace/post.h"
+ 
+ #endif /* ACE_BASED_POINTER_REPOSITORY_H */
