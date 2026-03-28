@@ -1,0 +1,577 @@
+Index: TAO/tao/GIOP_Message_Base.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/GIOP_Message_Base.cpp,v
+retrieving revision 1.114
+diff -u -r1.114 GIOP_Message_Base.cpp
+--- TAO/tao/GIOP_Message_Base.cpp	25 Feb 2006 02:44:31 -0000	1.114
++++ TAO/tao/GIOP_Message_Base.cpp	10 Mar 2006 21:25:35 -0000
+@@ -1840,9 +1840,7 @@
+         {
+           return -1;
+         }
+-    }
+-
+-  return -1;
++    }  
+ }
+ 
+ /* @return -1 error, 0 ok, +1 outstanding fragments */ 
+Index: TAO/tao/GIOP_Message_Generator_Parser_10.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/GIOP_Message_Generator_Parser_10.cpp,v
+retrieving revision 1.34
+diff -u -r1.34 GIOP_Message_Generator_Parser_10.cpp
+--- TAO/tao/GIOP_Message_Generator_Parser_10.cpp	2 Nov 2005 07:13:02 -0000	1.34
++++ TAO/tao/GIOP_Message_Generator_Parser_10.cpp	10 Mar 2006 17:11:29 -0000
+@@ -341,7 +341,7 @@
+ 
+   request.request_id (req_id);
+ 
+-  CORBA::Octet response_flags;
++  CORBA::Octet response_flags = CORBA::Octet();
+   hdr_status = hdr_status && input.read_octet (response_flags);
+   request.response_expected ((response_flags != 0));
+ 
+Index: TAO/tao/GIOP_Message_Generator_Parser_12.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/GIOP_Message_Generator_Parser_12.cpp,v
+retrieving revision 1.31
+diff -u -r1.31 GIOP_Message_Generator_Parser_12.cpp
+--- TAO/tao/GIOP_Message_Generator_Parser_12.cpp	2 Nov 2005 07:13:02 -0000	1.31
++++ TAO/tao/GIOP_Message_Generator_Parser_12.cpp	10 Mar 2006 17:11:29 -0000
+@@ -266,7 +266,7 @@
+ 
+   request.request_id (req_id);
+ 
+-  CORBA::Octet response_flags;
++  CORBA::Octet response_flags = CORBA::Octet();
+   hdr_status = hdr_status && input.read_octet (response_flags);
+ 
+   request.response_expected ((response_flags > 0));
+Index: TAO/tao/GIOP_Message_Lite.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/GIOP_Message_Lite.cpp,v
+retrieving revision 1.91
+diff -u -r1.91 GIOP_Message_Lite.cpp
+--- TAO/tao/GIOP_Message_Lite.cpp	23 Feb 2006 17:20:16 -0000	1.91
++++ TAO/tao/GIOP_Message_Lite.cpp	10 Mar 2006 17:11:29 -0000
+@@ -1347,7 +1347,7 @@
+ 
+   request.request_id (req_id);
+ 
+-   CORBA::Octet response_flags;
++  CORBA::Octet response_flags = CORBA::Octet();
+   hdr_status = hdr_status && input.read_octet (response_flags);
+   request.response_expected ((response_flags != 0));
+ 
+Index: TAO/tao/IIOP_Acceptor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Acceptor.cpp,v
+retrieving revision 1.109
+diff -u -r1.109 IIOP_Acceptor.cpp
+--- TAO/tao/IIOP_Acceptor.cpp	23 Dec 2005 10:39:10 -0000	1.109
++++ TAO/tao/IIOP_Acceptor.cpp	10 Mar 2006 17:11:29 -0000
+@@ -989,7 +989,7 @@
+ #endif /* TAO_NO_COPY_OCTET_SEQUENCES == 1 */
+ 
+   CORBA::Octet major;
+-  CORBA::Octet minor;
++  CORBA::Octet minor = CORBA::Octet();
+ 
+   // Read the version. We just read it here. We don't*do any*
+   // processing.
+Index: TAO/tao/IIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Connection_Handler.cpp,v
+retrieving revision 1.106
+diff -u -r1.106 IIOP_Connection_Handler.cpp
+--- TAO/tao/IIOP_Connection_Handler.cpp	24 Jan 2006 20:52:00 -0000	1.106
++++ TAO/tao/IIOP_Connection_Handler.cpp	10 Mar 2006 00:31:35 -0000
+@@ -253,7 +253,7 @@
+     {
+       struct linger lval;
+       lval.l_onoff = 1;
+-      lval.l_linger = linger;
++      lval.l_linger = (u_short)linger;
+ 
+       if (this->peer ().set_option(SOL_SOCKET,
+                                    SO_LINGER,
+Index: TAO/tao/ORB_Core.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.cpp,v
+retrieving revision 1.587
+diff -u -r1.587 ORB_Core.cpp
+--- TAO/tao/ORB_Core.cpp	1 Mar 2006 15:07:30 -0000	1.587
++++ TAO/tao/ORB_Core.cpp	10 Mar 2006 02:32:30 -0000
+@@ -390,7 +390,7 @@
+       ////////////////////////////////////////////////////////////////
+       // begin with the 'parameterless' flags                       //
+       ////////////////////////////////////////////////////////////////
+-      if ((current_arg = arg_shifter.get_the_parameter
++      if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBDottedDecimalAddresses"))))
+         {
+           // Use dotted decimal addresses
+@@ -400,7 +400,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBNoServerSideNameLookups"))))
+         {
+           // Don't look up the host name for incoming connections
+@@ -409,7 +409,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBNameServicePort"))))
+         {
+           // Specify the port number for the NameService.
+@@ -419,7 +419,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBMulticastDiscoveryEndpoint"))))
+         {
+           // Specify mcast address:port@network_interface for the
+@@ -432,7 +432,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBNodelay"))))
+         {
+           // Use TCP_NODELAY or not.
+@@ -441,7 +441,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_LIB_TEXT("-ORBKeepalive"))))
+         {
+           // Use SO_KEEPALIVE or not.
+@@ -450,7 +450,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBTradingServicePort"))))
+         {
+           // Specify the port number for the TradingService.
+@@ -459,7 +459,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBImplRepoServicePort"))))
+         {
+           // Specify the multicast port number for the Implementation
+@@ -468,7 +468,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBRcvSock"))))
+         {
+           // @@ All protocol implementation may not use sockets, so
+@@ -481,7 +481,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBSndSock"))))
+         {
+           // @@ All protocol implementation may not use sockets, so
+@@ -493,7 +493,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBObjRefStyle"))))
+         {
+           // Specifies the style of printed objrefs: URL or IOR
+@@ -523,7 +523,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBCollocationStrategy"))))
+         {
+           // Specify which collocation policy we want to use.
+@@ -535,7 +535,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBCollocation"))))
+         {
+           // Specify whether we want to optimize against collocation
+@@ -567,7 +567,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBPreferredInterfaces"))))
+         {
+           if (this->orb_params ()->preferred_interfaces (
+@@ -581,7 +581,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBEnforcePreferredInterfaces"))))
+         {
+           int enforce_pref_interfaces = ACE_OS::atoi (current_arg);
+@@ -616,7 +616,7 @@
+           arg_shifter.consume_arg ();
+         }
+ #endif /* ACE_HAS_IPV6 */
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBCDRTradeoff"))))
+         {
+           cdr_tradeoff = ACE_OS::atoi (current_arg);
+@@ -627,7 +627,7 @@
+       // A new <ObjectID>:<IOR> mapping has been specified. This will be
+       // used by the resolve_initial_references ().
+ 
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBInitRef"))))
+         {
+           const ACE_TCHAR *pos = ACE_OS::strchr (current_arg, '=');
+@@ -664,7 +664,7 @@
+             }
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBDefaultInitRef"))))
+         {
+           // Set the list of prefixes from -ORBDefaultInitRef.
+@@ -672,14 +672,14 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBStdProfileComponents"))))
+         {
+           std_profile_components =
+             ACE_OS::atoi (current_arg);
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBResources"))))
+         {
+           ACE_DEBUG ((LM_WARNING,
+@@ -688,7 +688,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBLogFile"))))
+         {
+           // redirect all ACE_DEBUG and ACE_ERROR output to a file
+@@ -740,7 +740,7 @@
+           ACE_LOG_MSG->set_flags (ACE_Log_Msg::OSTREAM);
+ 
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBVerboseLogging"))))
+         {
+           unsigned long verbose_logging = ACE_OS::atoi (current_arg);
+@@ -765,7 +765,7 @@
+ 
+           (ACE_LOG_MSG->*flagop)(value);
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBUseIMR"))))
+         {
+           // Use IR or not.
+@@ -773,14 +773,14 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBIMREndpointsInIOR"))))
+         {
+           this->imr_endpoints_in_ior_ = ACE_OS::atoi (current_arg);
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBid"))))
+         {
+           // The ORBid is actually set in ORB_init(), and then passed
+@@ -799,7 +799,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBServerId"))))
+         {
+           // The this->server_id_ is to uniquely identify a server to
+@@ -809,14 +809,14 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                (ACE_TEXT("-ORBLingerTimeout"))))
+         {
+           linger = ACE_OS::atoi (current_arg);
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBEndpoint"))))
+         {
+           // Each "endpoint" is of the form:
+@@ -845,7 +845,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBListenEndpoints"))))
+         {
+           // This option is similar to the -ORBEndPoint option. May be
+@@ -860,10 +860,10 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
+-                (ACE_TEXT("-ORBLaneEndpoint"))) ||
+-               (current_arg = arg_shifter.get_the_parameter
+-                (ACE_TEXT("-ORBLaneListenEndpoints"))))
++      else if ((0 != (current_arg = arg_shifter.get_the_parameter
++                (ACE_TEXT("-ORBLaneEndpoint")))) ||
++               (0 != (current_arg = arg_shifter.get_the_parameter
++                (ACE_TEXT("-ORBLaneListenEndpoints")))))
+         {
+           // This option is similar to the -ORBEndPoint option but
+           // specifies endpoints for each lane.
+@@ -885,7 +885,7 @@
+                                      ACE_ENV_ARG_PARAMETER);
+           ACE_CHECK_RETURN (-1);
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBNoProprietaryActivation"))))
+         {
+           // This option can be used to set to not use any proprietary
+@@ -898,7 +898,7 @@
+ 
+           ACE_THROW_RETURN (CORBA::NO_IMPLEMENT (), -1);
+         }
+-       else if ((current_arg = arg_shifter.get_the_parameter
++       else if (0 != (current_arg = arg_shifter.get_the_parameter
+                  (ACE_TEXT("-ORBUseSharedProfile"))))
+          {
+            this->orb_params ()->shared_profile
+@@ -906,14 +906,14 @@
+ 
+            arg_shifter.consume_arg ();
+          }
+-       else if ((current_arg = arg_shifter.get_the_parameter
++       else if (0 != (current_arg = arg_shifter.get_the_parameter
+                  (ACE_TEXT("-ORBNegotiateCodesets"))))
+          {
+            negotiate_codesets =
+              (ACE_OS::atoi (current_arg));
+            arg_shifter.consume_arg ();
+          }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBSingleReadOptimization"))))
+         {
+           this->orb_params ()->single_read_optimization
+@@ -921,7 +921,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBDisableRTCollocation"))))
+         {
+           int disable_rt_collocation = ACE_OS::atoi (current_arg);
+@@ -932,7 +932,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_LIB_TEXT("-ORBUseLocalMemoryPool"))))
+         {
+           this->use_local_memory_pool_ = (0 != ACE_OS::atoi (current_arg));
+@@ -1215,26 +1215,10 @@
+ 
+ int
+ TAO_ORB_Core::fini (void)
+-{
+-  ACE_TRY_NEW_ENV
+-    {
+-      // Shutdown the ORB and block until the shutdown is complete.
+-      this->shutdown (1
+-                      ACE_ENV_ARG_PARAMETER);
+-      ACE_TRY_CHECK;
+-    }
+-  ACE_CATCHANY
+-    {
+-      ACE_CString message =
+-        "Exception caught in trying to shutdown ";
+-      message += this->orbid_;
+-      message += "\n";
+-
+-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+-                           message.c_str ());
+-    }
+-  ACE_ENDTRY;
+-
++{  
++  // Shutdown the ORB and block until the shutdown is complete.
++  this->shutdown (1 ACE_ENV_ARG_PARAMETER);
++ 
+   // Wait for any server threads, ignoring any failures.
+   (void) this->thr_mgr ()->wait ();
+ 
+Index: TAO/tao/TAO_Internal.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/TAO_Internal.cpp,v
+retrieving revision 1.75
+diff -u -r1.75 TAO_Internal.cpp
+--- TAO/tao/TAO_Internal.cpp	2 Nov 2005 11:03:27 -0000	1.75
++++ TAO/tao/TAO_Internal.cpp	10 Mar 2006 00:05:11 -0000
+@@ -163,7 +163,7 @@
+           ACE::debug (1);
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT ("-ORBDebugLevel"))))
+         {
+           TAO_debug_level =
+@@ -183,7 +183,7 @@
+           arg_shifter.consume_arg ();
+         }
+       // Continue with flags that accept parameters.
+-      else if ((current_arg = arg_shifter.get_the_parameter (ACE_TEXT ("-ORBSvcConfDirective"))))
++      else if (0 != (current_arg = arg_shifter.get_the_parameter (ACE_TEXT ("-ORBSvcConfDirective"))))
+         {
+           len = svc_config_argv.length ();
+           svc_config_argv.length (len + 2);  // 2 arguments to add
+@@ -197,7 +197,7 @@
+ 
+           arg_shifter.consume_arg ();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter (ACE_TEXT ("-ORBSvcConf"))))
++      else if (0 != (current_arg = arg_shifter.get_the_parameter (ACE_TEXT ("-ORBSvcConf"))))
+         {
+           // Specify the name of the svc.conf file to be used.
+ 
+@@ -231,7 +231,7 @@
+ 
+           arg_shifter.consume_arg();
+         }
+-      else if ((current_arg = arg_shifter.get_the_parameter (ACE_TEXT ("-ORBServiceConfigLoggerKey"))))
++      else if (0 != (current_arg = arg_shifter.get_the_parameter (ACE_TEXT ("-ORBServiceConfigLoggerKey"))))
+         {
+           len = svc_config_argv.length ();
+           svc_config_argv.length (len + 2);  // 2 arguments to add
+Index: TAO/tao/AnyTypeCode/Union_TypeCode.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Union_TypeCode.cpp,v
+retrieving revision 1.6
+diff -u -r1.6 Union_TypeCode.cpp
+--- TAO/tao/AnyTypeCode/Union_TypeCode.cpp	6 Mar 2006 15:32:37 -0000	1.6
++++ TAO/tao/AnyTypeCode/Union_TypeCode.cpp	10 Mar 2006 21:33:36 -0000
+@@ -301,8 +301,6 @@
+ //   ACE_CHECK_RETURN (CORBA::TypeCode::_nil ());
+ 
+   ACE_THROW_RETURN (CORBA::NO_IMPLEMENT (), CORBA::TypeCode::_nil ());
+-
+-  ACE_NOTREACHED (return CORBA::TypeCode::_nil ());
+ }
+ 
+ template <typename StringType,
+Index: TAO/tao/AnyTypeCode/append.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/append.cpp,v
+retrieving revision 1.5
+diff -u -r1.5 append.cpp
+--- TAO/tao/AnyTypeCode/append.cpp	3 Nov 2005 17:38:44 -0000	1.5
++++ TAO/tao/AnyTypeCode/append.cpp	10 Mar 2006 01:58:57 -0000
+@@ -415,13 +415,13 @@
+   ACE_CHECK_RETURN (TAO::TRAVERSE_STOP);
+ 
+   // Save the discriminator value in a temporary variable...
+-  CORBA::Short short_v;
+-  CORBA::UShort ushort_v;
+-  CORBA::Long long_v;
+-  CORBA::ULong ulong_v;
+-  CORBA::ULong enum_v;
+-  CORBA::Char char_v;
+-  CORBA::WChar wchar_v;
++  CORBA::Short short_v = CORBA::Short();
++  CORBA::UShort ushort_v = CORBA::UShort();
++  CORBA::Long long_v = CORBA::Long();
++  CORBA::ULong ulong_v = CORBA::ULong();
++  CORBA::ULong enum_v = CORBA::ULong();
++  CORBA::Char char_v = CORBA::Char();
++  CORBA::WChar wchar_v = CORBA::WChar();
+   CORBA::Boolean boolean_v = false;
+ 
+   switch (kind)
+Index: TAO/tao/AnyTypeCode/skip.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/skip.cpp,v
+retrieving revision 1.3
+diff -u -r1.3 skip.cpp
+--- TAO/tao/AnyTypeCode/skip.cpp	3 Nov 2005 17:38:44 -0000	1.3
++++ TAO/tao/AnyTypeCode/skip.cpp	10 Mar 2006 17:09:30 -0000
+@@ -368,13 +368,13 @@
+   ACE_CHECK_RETURN (TAO::TRAVERSE_STOP);
+ 
+   // Save the discriminator value in a temporary variable...
+-  CORBA::Short short_v;
+-  CORBA::UShort ushort_v;
+-  CORBA::Long long_v;
+-  CORBA::ULong ulong_v;
+-  CORBA::ULong enum_v;
+-  CORBA::Char char_v;
+-  CORBA::WChar wchar_v;
++  CORBA::Short short_v = CORBA::Short();
++  CORBA::UShort ushort_v = CORBA::UShort();
++  CORBA::Long long_v = CORBA::Long();
++  CORBA::ULong ulong_v = CORBA::ULong();
++  CORBA::ULong enum_v = CORBA::ULong();
++  CORBA::Char char_v = CORBA::Char();
++  CORBA::WChar wchar_v = CORBA::WChar();
+   CORBA::Boolean boolean_v = false;;
+ 
+   switch (kind)
