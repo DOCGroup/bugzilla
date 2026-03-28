@@ -1,0 +1,48 @@
+X-UIDL: 3fbe8e4d00000001
+X-Mozilla-Status: 0001
+X-Mozilla-Status2: 00000000
+Return-Path: <drury_h@localhost.localdomain>
+Received: from localhost.localdomain (spider.ociweb.com [132.200.200.28])
+	by armstrong.ociweb.com (8.11.6/8.11.6) with ESMTP id hALMESw17513
+	for <heather@ociweb.com>; Fri, 21 Nov 2003 16:14:28 -0600
+Received: from localhost.localdomain (spider [127.0.0.1])
+	by localhost.localdomain (8.12.8/8.12.8) with ESMTP id hALMDFnX012655
+	for <heather@ociweb.com>; Fri, 21 Nov 2003 16:13:15 -0600
+Received: (from drury_h@localhost)
+	by localhost.localdomain (8.12.8/8.12.8/Submit) id hALMDF6c012653
+	for heather@ociweb.com; Fri, 21 Nov 2003 16:13:15 -0600
+Date: Fri, 21 Nov 2003 16:13:15 -0600
+From: Heather Drury <drury_h@localhost.localdomain>
+Message-Id: <200311212213.hALMDF6c012653@localhost.localdomain>
+To: heather@ociweb.com
+X-AntiVirus: scanned for viruses by AMaViS 0.2.1 (http://amavis.org/)
+Status: 
+X-Spam-Checker-Version: SpamAssassin 2.60 (1.212-2003-09-23-exp) on drurylap
+X-Spam-Status: No, hits=-4.9 required=3.0 tests=BAYES_00 autolearn=ham 
+	version=2.60
+X-Spam-Level: 
+
+//
+// $Id: Test.idl,v 1.1.1.1 2001/12/04 14:34:57 chad Exp $
+//
+
+/// Put the interfaces in a module, to avoid global namespace pollution
+module Test
+{
+  /// A very simple interface
+  interface Hello
+  {
+    typedef sequence<string> stringSeq;
+
+    /// Return a simple string
+    //string get_string (out string test_string);
+    void get_string (out stringSeq test_string);
+
+    /// A method to shutdown the ORB
+    /**
+     * This method is used to simplify the test shutdown process
+     */
+    oneway void shutdown ();
+  };
+};
+
