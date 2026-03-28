@@ -1,0 +1,355 @@
+test_timeouts 1 testing...
+Transient exception during test () invocation 0
+caught transient exception
+test_timeouts 1 passed...
+test_timeouts 2 testing...
+Timeout exception during test () invocation 0
+caught timeout exception
+test_timeouts 2 passed...
+test_timeouts 3 testing...
+Transient exception during test () invocation 0
+caught transient exception
+test_timeouts 3 passed...
+test_timeouts 4 testing...
+Timeout exception during test () invocation 0
+caught timeout exception
+test_timeouts 4 passed...
+test_timeouts 5 testing...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+Sending synch request to shutdown server
+caught timeout exception
+test_timeouts 5 passed...
+test_timeouts 6 testing...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+Sending synch request to shutdown server
+caught timeout exception
+test_timeouts 6 passed...
+test_timeouts 7 testing...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+Sending synch request to shutdown server
+caught timeout exception
+test_timeouts 7 passed...
+test_buffering 1 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+c0
+c1
+s0
+s1
+c2
+s2
+c3
+s3
+c4
+s4
+c5
+s5
+c6
+s6
+c7
+s7
+c8
+s8
+c9
+s9
+request loop complete
+Sending synch request to shutdown server
+test_buffering 1 passed...
+test_buffering 2 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+c0
+c1
+s0
+s1
+s2
+c2
+s3
+c3
+c4
+s4
+c5
+s5
+c6
+s6
+c7
+s7
+c8
+s8
+c9
+s9
+request loop complete
+Sending synch request to shutdown server
+test_buffering 2 passed...
+test_buffering 3 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+Sending synch request to shutdown server
+s0
+s1
+s2
+s3
+s4
+s5
+s6
+s7
+s8
+s9
+test_buffering 3 passed...
+test_buffering 4 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+Sending synch request to shutdown server
+s0
+s1
+s2
+s3
+s4
+s5
+s6
+s7
+s8
+s9
+test_buffering 4 passed...
+test_buffering 5 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+Connected...
+s0
+c0
+s1
+c1
+s2
+c2
+s3
+c3
+c4
+s4
+c5
+s5
+c6
+s6
+c7
+s7
+c8
+s8
+c9
+s9
+request loop complete
+Sending synch request to shutdown server
+test_buffering 5 passed...
+test_buffering 6 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+Connected...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+s0
+s1
+s2
+s3
+s4
+s5
+s6
+s7
+s8
+s9
+Sending synch request to shutdown server
+test_buffering 6 passed...
+test_buffer_count_timeout testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+c0
+c1
+c2
+c3
+c4
+s4
+c5
+c6
+c7
+c8
+c9
+s9
+request loop complete
+Sending synch request to shutdown server
+test_buffer_count_timeout passed...
+test_buffer_bytes_timeout testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+c0
+c1
+s1
+c2
+c3
+c4
+s4
+c5
+c6
+c7
+s7
+c8
+c9
+request loop complete
+Sending synch request to shutdown server
+test_buffer_bytes_timeout passed...
+test_buffer_timeout 1 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+s0
+s1
+s2
+s3
+s4
+s5
+s6
+s7
+s8
+s9
+Sending synch request to shutdown server
+test_buffer_timeout 1 passed...
+test_buffer_timeout 2 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+s0
+s1
+s2
+s3
+s4
+s5
+s6
+s7
+s8
+s9
+Sending synch request to shutdown server
+test_buffer_timeout 2 passed...
+test_buffer_timeout 3 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+Connected...
+s0
+c0
+s1
+c1
+s2
+c2
+s3
+c3
+c4
+s4
+c5
+s5
+c6
+s6
+c7
+s7
+c8
+s8
+c9
+s9
+request loop complete
+Sending synch request to shutdown server
+test_buffer_timeout 3 passed...
+test_one_request testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+c0
+request loop complete
+Sending synch request to shutdown server
+s0
+test_one_request passed...
