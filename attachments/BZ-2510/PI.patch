@@ -1,0 +1,52 @@
+diff -r -u PI.orig/ClientRequestInfo.cpp PI/ClientRequestInfo.cpp
+--- PI.orig/ClientRequestInfo.cpp	2005-12-22 07:54:52.000000000 +0100
++++ PI/ClientRequestInfo.cpp	2006-04-21 11:45:25.972343000 +0200
+@@ -51,6 +51,13 @@
+       // Retrieve the thread scope current.
+       TAO::PICurrent_Impl *tsc = pi_current->tsc ();
+ 
++      if (!tsc)
++      {
++        // this thread has not yet created its tss, do it now
++        pi_current->createTSS ();
++        tsc = pi_current->tsc ();
++      }
++
+       // Logically copy the TSC's slot table to the RSC.
+       this->rs_pi_current_.lc_slot_table (tsc);
+ 
+Only in PI: Kopie von ClientRequestInfo.cpp
+diff -r -u PI.orig/PICurrent.cpp PI/PICurrent.cpp
+--- PI.orig/PICurrent.cpp	2005-11-04 02:26:56.000000000 +0100
++++ PI/PICurrent.cpp	2006-04-20 14:58:12.772370700 +0200
+@@ -121,6 +121,17 @@
+   return 0;
+ }
+ 
++
++int TAO::PICurrent::createTSS()
++{
++      TAO::PICurrent_Impl *impl = 0;
++      ACE_NEW_RETURN (impl,
++                      TAO::PICurrent_Impl,
++                      0);
++
++      return this->orb_core_.set_tss_resource (tss_slot_, impl);
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+ #endif  /* TAO_HAS_INTERCEPTORS == 1 */
+diff -r -u PI.orig/PICurrent.h PI/PICurrent.h
+--- PI.orig/PICurrent.h	2005-11-04 02:26:56.000000000 +0100
++++ PI/PICurrent.h	2006-04-20 14:30:58.818099700 +0200
+@@ -104,6 +104,9 @@
+     /// Initialize the PICurrent object.
+     int initialize (PortableInterceptor::SlotId sc ACE_ENV_ARG_DECL);
+ 
++    /// create the TSS
++    int createTSS();
++
+   protected:
+ 
+     /// Destructor
