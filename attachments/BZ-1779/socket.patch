@@ -1,0 +1,158 @@
+? tao/af
+? tao/Utils/af
+Index: ChangeLog
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/ChangeLog,v
+retrieving revision 1.3922
+diff -u -r1.3922 ChangeLog
+--- ChangeLog	4 Apr 2004 01:24:44 -0000	1.3922
++++ ChangeLog	6 Apr 2004 20:20:30 -0000
+@@ -1,3 +1,24 @@
++Tue Apr  6 16:17:54 2004  Carlos O'Ryan  <coryan@atdesk.com>
++
++	* tao/params.i:
++	  The sock_{snd,rcv}buf_size were silently truncated to
++	  ACE_DEFAULT_MAX_SOCKET_BUFSIZ.  Silent truncation is generally
++	  evil, but in this case it is worse:  the compile-time value
++	  stored in ACE_DEFAULT_MAX_SOCKET_BUFSIZ may have no relationship
++	  with the run-time maximum in the socket.  In some platforms (I
++	  am thinking Linux) you can also change the maximum socket buffer
++	  sizes while the kernel is running, so even an startup-time value
++	  would be wrong.  Better to move that policy decision to the
++	  application.
++	  Removed code in #if 0/#endif blocks, that's what CVS is for.
++
++	* tao/Connection_Handler.cpp:
++	  Do not change the socket buffer size(s) if the application sets
++	  them to 0.  In some platforms, notably Linux, the kernel
++	  adaptively grows the size of the buffer according to the demands
++	  of the application, but *only* if the application does not set
++	  the buffer size explicitly.
++
+ Sat Apr  3 19:22:26 2004  Balachandran Natarajan  <bala@dre.vanderbilt.edu>
+ 
+  	* examples/Simulator/Event_Supplier/Makefile:
+Index: tao/Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Connection_Handler.cpp,v
+retrieving revision 1.45
+diff -u -r1.45 Connection_Handler.cpp
+--- tao/Connection_Handler.cpp	7 Feb 2004 00:47:32 -0000	1.45
++++ tao/Connection_Handler.cpp	6 Apr 2004 20:20:30 -0000
+@@ -57,18 +57,25 @@
+ {
+ #if !defined (ACE_LACKS_SOCKET_BUFSIZ)
+ 
+-  if (sock.set_option (SOL_SOCKET,
+-                       SO_SNDBUF,
+-                       (void *) &snd_size,
+-                       sizeof (snd_size)) == -1
++  if (snd_size != 0
++      && sock.set_option (SOL_SOCKET,
++                          SO_SNDBUF,
++                          (void *) &snd_size,
++                          sizeof (snd_size)) == -1
+       && errno != ENOTSUP)
++  {
+     return -1;
+-  else if (sock.set_option (SOL_SOCKET,
+-                            SO_RCVBUF,
+-                            (void *) &rcv_size,
+-                            sizeof (int)) == -1
+-           && errno != ENOTSUP)
++  }
++  
++  if (rcv_size != 0
++      && sock.set_option (SOL_SOCKET,
++                          SO_RCVBUF,
++                          (void *) &rcv_size,
++                          sizeof (int)) == -1
++      && errno != ENOTSUP)
++  {
+     return -1;
++  }
+ #else
+    ACE_UNUSED_ARG (snd_size);
+    ACE_UNUSED_ARG (rcv_size);
+Index: tao/params.i
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/params.i,v
+retrieving revision 1.51
+diff -u -r1.51 params.i
+--- tao/params.i	3 Jan 2004 05:28:50 -0000	1.51
++++ tao/params.i	6 Apr 2004 20:20:30 -0000
+@@ -27,9 +27,7 @@
+ ACE_INLINE void
+ TAO_ORB_Parameters::sock_rcvbuf_size (int s)
+ {
+-  sock_rcvbuf_size_ = s <= ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+-    ? s
+-    : ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
++  sock_rcvbuf_size_ = s;
+ }
+ 
+ ACE_INLINE int
+@@ -41,9 +39,7 @@
+ ACE_INLINE void
+ TAO_ORB_Parameters::sock_sndbuf_size (int s)
+ {
+-  sock_sndbuf_size_ = s <= ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+-    ? s
+-    : ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
++  sock_sndbuf_size_ = s;
+ }
+ 
+ ACE_INLINE int
+@@ -58,21 +54,6 @@
+   this->cdr_memcpy_tradeoff_ = x;
+ }
+ 
+-#if 0
+-// Supprt has been deprecated.
+-ACE_INLINE int
+-TAO_ORB_Parameters::use_lite_protocol (void) const
+-{
+-  return this->use_lite_protocol_;
+-}
+-
+-ACE_INLINE void
+-TAO_ORB_Parameters::use_lite_protocol (int x)
+-{
+-  this->use_lite_protocol_ = x;
+-}
+-#endif /*if 0*/
+-
+ ACE_INLINE int
+ TAO_ORB_Parameters::use_dotted_decimal_addresses (void) const
+ {
+@@ -214,30 +195,3 @@
+ {
+   this->disable_rt_collocation_resolver_ = x;
+ }
+-
+-#if 0
+-
+-/*
+- *
+- *  TODO: Needs to be removed
+- *
+- */
+-
+-ACE_INLINE TAO_EndpointSet &
+-TAO_ORB_Parameters::preconnects (void)
+-{
+-  return this->preconnects_list_;
+-}
+-
+-ACE_INLINE int
+-TAO_ORB_Parameters::preconnects (ACE_CString &preconnects)
+-{
+-  return this->parse_endpoints (preconnects, this->preconnects ());
+-}
+-
+-ACE_INLINE void
+-TAO_ORB_Parameters::add_preconnect (ACE_CString &preconnect)
+-{
+-  this->preconnects ().enqueue_tail (preconnect);
+-}
+-#endif /*if 0*/
