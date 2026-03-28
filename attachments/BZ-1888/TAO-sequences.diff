@@ -1,0 +1,112 @@
+diff -r -c tao.orig/Makefile.tao tao/Makefile.tao
+*** tao.orig/Makefile.tao	Mon Jul 19 10:59:17 2004
+--- tao/Makefile.tao	Mon Jul 19 10:59:46 2004
+***************
+*** 220,225 ****
+--- 220,227 ----
+    FloatSeqC \
+    OctetSeqC \
+    OctetSeqA \
++   OtherSeqA \
++   OtherSeqC \
+    ShortSeqA \
+    ShortSeqC \
+    StringSeqC \
+diff -r -c tao.orig/OtherSeq.pidl tao/OtherSeq.pidl
+*** tao.orig/OtherSeq.pidl	Mon Jul 19 11:35:59 2004
+--- tao/OtherSeq.pidl	Mon Jul 19 11:37:06 2004
+***************
+*** 0 ****
+--- 1,39 ----
++ // -*- IDL -*-
++ //
++ //
++ 
++ // ================================================================
++ /**
++  *  
++  * This file was used to generate the code in OtherSeq*.*
++  * The command used to generate code is:
++  * 
++  * tao_idl
++  *   -Ge 1 -Sc -GT -GA
++  *      -Wb,export_macro=TAO_Export
++  *      -Wb,pre_include="ace/pre.h"
++  *      -Wb,post_include="ace/post.h"
++  *      OtherSeq.pidl
++  * 
++  */
++ // ================================================================
++ 
++ 
++ #ifndef TAO_CORBA_OTHER_SEQ_IDL
++ #define TAO_CORBA_OTHER_SEQ_IDL
++ 
++ #pragma prefix "omg.org"
++ 
++ module CORBA
++ {
++   typedef sequence<any> AnySeq;
++   typedef sequence<char> CharSeq;
++   typedef sequence<wchar> WCharSeq;
++   typedef sequence<long> LongSeq;
++   typedef sequence<long long> LongLongSeq;
++   typedef sequence<unsigned long long> ULongLongSeq;
++   typedef sequence<double> DoubleSeq;
++   typedef sequence<long double> LongDoubleSeq;
++ };
++ 
++ #endif  /* TAO_CORBA_OTHER_SEQ_IDL */
+diff -r -c tao.orig/TAO.dsp tao/TAO.dsp
+*** tao.orig/TAO.dsp	Mon Jul 19 10:51:00 2004
+--- tao/TAO.dsp	Mon Jul 19 10:52:34 2004
+***************
+*** 818,823 ****
+--- 818,831 ----
+  # End Source File
+  # Begin Source File
+  
++ SOURCE=.\OtherSeqA.cpp
++ # End Source File
++ # Begin Source File
++ 
++ SOURCE=.\OtherSeqC.cpp
++ # End Source File
++ # Begin Source File
++ 
+  SOURCE=.\ParameterMode.cpp
+  # End Source File
+  # Begin Source File
+***************
+*** 1971,1976 ****
+--- 1979,1988 ----
+  # End Source File
+  # Begin Source File
+  
++ SOURCE=.\OtherSeqC.h
++ # End Source File
++ # Begin Source File
++ 
+  SOURCE=.\ParameterMode.h
+  # End Source File
+  # Begin Source File
+diff -r -c tao.orig/orb.idl tao/orb.idl
+*** tao.orig/orb.idl	Mon Jul 19 10:37:26 2004
+--- tao/orb.idl	Mon Jul 19 10:43:16 2004
+***************
+*** 8,15 ****
+--- 8,21 ----
+  #define TAO_ORB_IDL
+  
+  ///FUZZ: disable check_for_include/
++ #include <tao/BooleanSeq.pidl>
++ #include <tao/FloatSeq.pidl>
+  #include <tao/OctetSeq.pidl>
++ #include <tao/OtherSeq.pidl>
++ #include <tao/ShortSeq.pidl>
+  #include <tao/StringSeq.pidl>
++ #include <tao/ULongSeq.pidl>
++ #include <tao/UShortSeq.pidl>
+  
+  #include <tao/Policy.pidl>
+  #include <tao/Services.pidl>
