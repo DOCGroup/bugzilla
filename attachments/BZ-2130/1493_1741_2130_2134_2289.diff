@@ -1,0 +1,1104 @@
+Index: TAO/tao/Adapter.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Adapter.h,v
+retrieving revision 1.28
+diff -u -r1.28 Adapter.h
+--- TAO/tao/Adapter.h   2 Nov 2005 07:13:02 -0000       1.28
++++ TAO/tao/Adapter.h   14 Feb 2006 12:49:25 -0000
+@@ -104,10 +104,9 @@
+   /// Create a collocated object using the given profile and stub.
+   virtual CORBA::Object_ptr create_collocated_object (TAO_Stub *,
+                                                       const TAO_MProfile &) = 0;
+-  /// Initialize a collocated object using the given stub and object
++  /// Initialize a collocated object using the given stub
+   /// pointer for lazily evaluated object references.
+-  virtual CORBA::Long initialize_collocated_object (TAO_Stub *,
+-                                                    CORBA::Object_ptr) = 0;
++  virtual CORBA::Long initialize_collocated_object (TAO_Stub *) = 0;
+ };
+
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: TAO/tao/Adapter_Registry.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Adapter_Registry.cpp,v
+retrieving revision 1.5
+diff -u -r1.5 Adapter_Registry.cpp
+--- TAO/tao/Adapter_Registry.cpp        2 Nov 2005 07:13:02 -0000       1.5
++++ TAO/tao/Adapter_Registry.cpp        14 Feb 2006 12:49:25 -0000
+@@ -1,6 +1,7 @@
+ // $Id: Adapter_Registry.cpp,v 1.5 2005/11/02 07:13:02 ossama Exp $
+
+ #include "Object.h"
++#include "Stub.h"
+ #include "Adapter_Registry.h"
+ #include "Adapter.h"
+ #include "SystemException.h"
+@@ -162,22 +163,38 @@
+         this->adapters_[i]->create_collocated_object (stub,
+                                                       mprofile);
+       if (x != 0)
+-        return x;
++        {
++          if (!stub->collocated_servant ())
++            {
++              // This adapter created an object but it was not able to locate
++              // a servant so we need to give the rest of the adapters a chance to
++              // initialise the stub and find a servant or forward us or whatever.
++              for (CORBA::Long go_on = 1; go_on && i != this->adapters_count_; ++i)
++                {
++                  // initialize_collocated_object only returns 0 if it has completely
++                  // initialised the object.
++                  go_on = this->adapters_[i]->initialize_collocated_object (stub);
++                }
++            }
++          return x;
++        }
+     }
+   return 0;
+ }
+
+ CORBA::Long
+-TAO_Adapter_Registry::initialize_collocated_object (TAO_Stub *stub,
+-                                                    CORBA::Object_ptr obj)
++TAO_Adapter_Registry::initialize_collocated_object (TAO_Stub *stub)
+ {
+   for (size_t i = 0; i != this->adapters_count_; ++i)
+     {
+       int retval =
+-        this->adapters_[i]->initialize_collocated_object (stub,
+-                                                          obj);
+-      if (retval != 0)
+-        return retval;
++        this->adapters_[i]->initialize_collocated_object (stub);
++      if (retval == 0)
++        {
++          // initialize_collocated_object only returns 0 if it has completely
++          // initialised the object. We can return early.
++          return retval;
++        }
+     }
+   return 0;
+ }
+Index: TAO/tao/Adapter_Registry.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Adapter_Registry.h,v
+retrieving revision 1.5
+diff -u -r1.5 Adapter_Registry.h
+--- TAO/tao/Adapter_Registry.h  2 Nov 2005 07:13:02 -0000       1.5
++++ TAO/tao/Adapter_Registry.h  14 Feb 2006 12:49:25 -0000
+@@ -95,8 +95,7 @@
+
+   /// Initialize a collocated object using the given stub and object
+   /// pointer for lazily evaluated object references.
+-  CORBA::Long initialize_collocated_object (TAO_Stub *,
+-                                            CORBA::Object_ptr o);
++  CORBA::Long initialize_collocated_object (TAO_Stub *);
+
+   /// Fetch the adapter named @a name
+   TAO_Adapter *find_adapter (const char *name) const;
+Index: TAO/tao/ORB_Core.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.cpp,v
+retrieving revision 1.584
+diff -u -r1.584 ORB_Core.cpp
+--- TAO/tao/ORB_Core.cpp        20 Jan 2006 17:25:00 -0000      1.584
++++ TAO/tao/ORB_Core.cpp        14 Feb 2006 12:49:26 -0000
+@@ -1804,11 +1804,15 @@
+
+   // @@ We should thow CORBA::NO_MEMORY in platforms with exceptions,
+   // but we are stuck in platforms without exceptions!
+-  CORBA::Object_ptr x;
++  TAO_ORB_Core_Auto_Ptr collocated_orb_core;
++  CORBA::Object_ptr x = 0;
++
+   {
++    // Lock the ORB_Table against concurrent modification while we
++    // iterate through the ORBs.
+     ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+                       guard,
+-                      this->lock_,
++                      TAO::ORB_Table::instance()->lock_,
+                       CORBA::Object::_nil ());
+
+     TAO::ORB_Table * const table = TAO::ORB_Table::instance ();
+@@ -1820,38 +1824,69 @@
+         if (this->is_collocation_enabled (other_core,
+                                           mprofile))
+           {
+-            TAO_Adapter_Registry *ar =
+-              other_core->adapter_registry ();
+-
+-            return ar->create_collocated_object (stub,
+-                                                 mprofile);
++            collocated_orb_core = other_core->_incr_refcnt();
++            break;
+           }
+       }
+   }
+
+-  // The constructor sets the proxy broker as the
+-  // Remote one.
+-  ACE_NEW_RETURN (x,
+-                  CORBA::Object (stub, 0),
+-                  0);
++  if (collocated_orb_core.get ())
++    {
++      TAO_Adapter_Registry *ar =
++        collocated_orb_core.get ()->adapter_registry ();
++
++      x = ar->create_collocated_object (stub,
++                                        mprofile);
++    }
++
++
++  if (!x)
++    {
++      // The constructor sets the proxy broker as the
++      // Remote one.
++      ACE_NEW_RETURN (x,
++                      CORBA::Object (stub, 0),
++                      0);
++    }
++
+   return x;
+ }
+
+ CORBA::Long
+ TAO_ORB_Core::initialize_object (TAO_Stub *stub,
+-                                 CORBA::Object_ptr obj)
++                                 CORBA::Object_ptr)
+ {
+   // @@ What about forwarding.  With this approach we are never forwarded
+   //    when we use collocation!
+   const TAO_MProfile &mprofile =
+     stub->base_profiles ();
++
++  return initialize_object_i (stub,
++                              mprofile);
++}
++
++CORBA::Long
++TAO_ORB_Core::reinitialize_object (TAO_Stub *stub)
++{
++  return initialize_object_i (stub, stub->forward_profiles ()
++                                    ? *(stub->forward_profiles ())
++                                    : stub->base_profiles ());
++}
++
++CORBA::Long
++TAO_ORB_Core::initialize_object_i (TAO_Stub *stub,
++                                   const TAO_MProfile &mprofile)
++
++{
++  CORBA::Long retval = 0;
++  TAO_ORB_Core_Auto_Ptr collocated_orb_core;
++
+   {
+-    // @@ Ossama: maybe we need another lock for the table, to
+-    //    reduce contention on the Static_Object_Lock below, if so
+-    //    then we need to use that lock in the ORB_init() function.
++    // Lock the ORB_Table against concurrent modification while we
++    // iterate through the ORBs.
+     ACE_MT (ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+                               guard,
+-                              this->lock_,
++                              TAO::ORB_Table::instance()->lock_,
+                               0));
+
+     TAO::ORB_Table * const table = TAO::ORB_Table::instance ();
+@@ -1863,16 +1898,21 @@
+         if (this->is_collocation_enabled (other_core,
+                                           mprofile))
+           {
+-            TAO_Adapter_Registry * const ar =
+-              other_core->adapter_registry ();
+-
+-            return ar->initialize_collocated_object (stub,
+-                                                     obj);
++            collocated_orb_core = other_core->_incr_refcnt ();
++            break;
+           }
+       }
+   }
+
+-  return 0;
++  if (collocated_orb_core.get ())
++    {
++      TAO_Adapter_Registry *ar =
++        collocated_orb_core->get ()->adapter_registry ();
++
++      retval = ar->initialize_collocated_object (stub);
++    }
++
++  return retval;
+ }
+
+ CORBA::Boolean
+Index: TAO/tao/ORB_Core.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.h,v
+retrieving revision 1.298
+diff -u -r1.298 ORB_Core.h
+--- TAO/tao/ORB_Core.h  20 Jan 2006 16:34:33 -0000      1.298
++++ TAO/tao/ORB_Core.h  14 Feb 2006 12:49:26 -0000
+@@ -614,6 +614,11 @@
+   CORBA::Long initialize_object (TAO_Stub *the_stub,
+                                  CORBA::Object_ptr obj);
+
++  /// Reinitialise a stub after the effective profile has changed.
++  /// This will happen after a location forward has been received
++  /// or if a location forward supplied new target subsequently fails.
++  CORBA::Long reinitialize_object (TAO_Stub *stub);
++
+   /// Return ORBid string.
+   const char *orbid (void) const;
+
+@@ -956,6 +961,10 @@
+   /// this ORB core.
+   TAO::ORBInitializer_Registry_Adapter *orbinitializer_registry_i (void);
+
++  /// Common code from ::initialize_object and ::reinitialize_object
++  CORBA::Long initialize_object_i (TAO_Stub *the_stub,
++                                   const TAO_MProfile& mprofile);
++
+ private:
+
+   /// The ORB Core should not be copied.
+Index: TAO/tao/ORB_Table.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Table.h,v
+retrieving revision 1.18
+diff -u -r1.18 ORB_Table.h
+--- TAO/tao/ORB_Table.h 2 Nov 2005 07:13:04 -0000       1.18
++++ TAO/tao/ORB_Table.h 14 Feb 2006 12:49:26 -0000
+@@ -61,6 +61,7 @@
+    */
+   class TAO_Export ORB_Table
+   {
++  friend class TAO_ORB_Core;
+   public:
+
+     /// Constructor
+Index: TAO/tao/Object.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object.cpp,v
+retrieving revision 1.170
+diff -u -r1.170 Object.cpp
+--- TAO/tao/Object.cpp  21 Dec 2005 16:20:45 -0000      1.170
++++ TAO/tao/Object.cpp  14 Feb 2006 12:49:26 -0000
+@@ -47,9 +47,7 @@
+                        CORBA::Boolean collocated,
+                        TAO_Abstract_ServantBase * servant,
+                        TAO_ORB_Core *orb_core)
+-  : servant_ (servant)
+-    , is_collocated_ (collocated)
+-    , is_local_ (0)
++  : is_local_ (0)
+     , is_evaluated_ (1)
+     , ior_ (0)
+     , orb_core_ (orb_core)
+@@ -68,23 +66,17 @@
+   this->refcount_lock_ =
+     this->orb_core_->resource_factory ()->create_corba_object_lock ();
+
+-  // If the object is collocated then set the broker using the
+-  // factory otherwise use the remote proxy broker.
+-  if (this->is_collocated_ &&
+-      _TAO_Object_Proxy_Broker_Factory_function_pointer != 0)
+-    this->proxy_broker_ =
+-      _TAO_Object_Proxy_Broker_Factory_function_pointer (this);
+-  else
+-    this->proxy_broker_ =
+-      the_tao_remote_object_proxy_broker ();
++  // Set the collocation marker on the stub. This may not be news to it.
++  // This may also change the stub's object proxy broker.
++  this->protocol_proxy_->is_collocated (collocated);
++
++  // Set the collocated servant pointer (null if not collocated) on the stub.
++  this->protocol_proxy_->collocated_servant (servant);
+ }
+
+ CORBA::Object::Object (IOP::IOR *ior,
+                        TAO_ORB_Core *orb_core)
+-  : servant_ (0)
+-    , proxy_broker_ (0)
+-    , is_collocated_ (0)
+-    , is_local_ (0)
++  : is_local_ (0)
+     , is_evaluated_ (0)
+     , ior_ (ior)
+     , orb_core_ (orb_core)
+@@ -186,7 +178,13 @@
+ TAO_Abstract_ServantBase*
+ CORBA::Object::_servant (void) const
+ {
+-  return this->servant_;
++  if (this->protocol_proxy_ == 0)
++    {
++      // No stub set. Should not happen.
++      return 0;
++    }
++
++  return this->protocol_proxy_->collocated_servant ();
+ }
+
+ // IS_A ... ask the object if it's an instance of the type whose
+@@ -222,7 +220,7 @@
+                          this->_stubobj ()->type_id.in ()) == 0)
+     return 1;
+
+-  return this->proxy_broker_->_is_a (this,
++  return this->proxy_broker ()->_is_a (this,
+                                      type_id
+                                      ACE_ENV_ARG_PARAMETER);
+ }
+@@ -236,7 +234,19 @@
+ CORBA::Boolean
+ CORBA::Object::_is_collocated (void) const
+ {
+-  return this->is_collocated_;
++  if (this->protocol_proxy_)
++    {
++      return this->protocol_proxy_->is_collocated ();
++    }
++
++  return false;
++}
++
++void
++CORBA::Object::set_collocated_servant (TAO_Abstract_ServantBase *b)
++{
++  this->protocol_proxy_->collocated_servant (b);
++  this->protocol_proxy_->is_collocated (true);
+ }
+
+ CORBA::Boolean
+@@ -327,7 +337,7 @@
+ void
+ CORBA::Object::_proxy_broker (TAO::Object_Proxy_Broker *proxy_broker)
+ {
+-  this->proxy_broker_ = proxy_broker;
++  this->protocol_proxy_->object_proxy_broker (proxy_broker);
+ }
+
+ CORBA::Boolean
+@@ -469,7 +479,7 @@
+
+   ACE_TRY
+     {
+-      retval = this->proxy_broker_->_non_existent (this
++      retval = this->proxy_broker ()->_non_existent (this
+                                                    ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+     }
+@@ -492,7 +502,7 @@
+ CORBA::Object::_get_interface (ACE_ENV_SINGLE_ARG_DECL)
+ {
+   TAO_OBJECT_IOR_EVALUATE_RETURN;
+-  return this->proxy_broker_->_get_interface (this
++  return this->proxy_broker ()->_get_interface (this
+                                               ACE_ENV_ARG_PARAMETER);
+ }
+
+@@ -506,7 +516,7 @@
+ CORBA::Object::_get_component (ACE_ENV_SINGLE_ARG_DECL)
+ {
+   TAO_OBJECT_IOR_EVALUATE_RETURN;
+-  return this->proxy_broker_->_get_component (this
++  return this->proxy_broker ()->_get_component (this
+                                               ACE_ENV_ARG_PARAMETER);
+ }
+
+@@ -514,7 +524,7 @@
+ CORBA::Object::_repository_id (ACE_ENV_SINGLE_ARG_DECL)
+ {
+   TAO_OBJECT_IOR_EVALUATE_RETURN;
+-  return this->proxy_broker_->_repository_id (this
++  return this->proxy_broker ()->_repository_id (this
+                                               ACE_ENV_ARG_PARAMETER);
+ }
+
+@@ -579,7 +589,7 @@
+
+   ACE_NEW_THROW_EX (obj,
+                     CORBA::Object (stub,
+-                                  this->is_collocated_),
++                                  this->_is_collocated ()),
+                     CORBA::NO_MEMORY (
+                       CORBA::SystemException::_tao_minor_code (
+                         0,
+@@ -624,7 +634,7 @@
+
+   // If the object is collocated then use non_existent to see whether
+   // it's there.
+-  if (this->is_collocated_)
++  if (this->_is_collocated ())
+       return !(this->_non_existent (ACE_ENV_SINGLE_ARG_PARAMETER));
+
+   TAO::LocateRequest_Invocation_Adapter tao_call (this);
+@@ -672,6 +682,22 @@
+     }
+ }
+
++TAO::Object_Proxy_Broker *
++CORBA::Object::proxy_broker (void) const
++{
++  // Paranoid check. We *should* never access the proxy_broker
++  // when the object has not been initialised so there *should*
++  // alway be a stub, but just in case...
++
++  if (this->protocol_proxy_)
++    {
++      return this->protocol_proxy_->object_proxy_broker ();
++    }
++
++  // We have no stub. We cannot be collocated.
++  return the_tao_remote_object_proxy_broker ();
++}
++
+ /*****************************************************************
+  * Global Functions
+  ****************************************************************/
+@@ -818,21 +844,13 @@
+
+   TAO_Stub_Auto_Ptr safe_objdata (objdata);
+
++  // This call will set the stub proxy broker if necessary
+   if (orb_core->initialize_object (safe_objdata.get (),
+                                    obj) == -1)
+     return;
+
+   obj->protocol_proxy_ = objdata;
+
+-  // If the object is collocated then set the broker using the
+-  // factory otherwise use the remote proxy broker.
+-  if (obj->is_collocated_ &&
+-    _TAO_Object_Proxy_Broker_Factory_function_pointer != 0)
+-    obj->proxy_broker_ =
+-      _TAO_Object_Proxy_Broker_Factory_function_pointer (obj);
+-    else
+-      obj->proxy_broker_ = the_tao_remote_object_proxy_broker ();
+-
+   obj->is_evaluated_ = 1;
+
+   // Release the contents of the ior to keep memory consumption down.
+@@ -1012,9 +1030,7 @@
+ } // close TAO namespace
+
+
+-TAO::Object_Proxy_Broker * (*_TAO_Object_Proxy_Broker_Factory_function_pointer) (
+-    CORBA::Object_ptr obj
+-    ) = 0;
++TAO::Object_Proxy_Broker * (*_TAO_Object_Proxy_Broker_Factory_function_pointer) (void) = 0;
+
+
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: TAO/tao/Object.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object.h,v
+retrieving revision 1.109
+diff -u -r1.109 Object.h
+--- TAO/tao/Object.h    24 Nov 2005 11:05:45 -0000      1.109
++++ TAO/tao/Object.h    14 Feb 2006 12:49:26 -0000
+@@ -279,9 +279,13 @@
+     static CORBA::Boolean marshal (Object_ptr obj,
+                                    TAO_OutputCDR &strm);
+
++    /// Accessor for the cached servant reference held on the stub
++    /// if this object is collocated
+     virtual TAO_Abstract_ServantBase *_servant (void) const;
+
+     /// Is this object collocated with the servant?
++    /// Note this does not return this->is_collocated_ but will instead
++    /// query the underlying stub for its collocation status
+     virtual CORBA::Boolean _is_collocated (void) const;
+
+     /// Is this a local object?
+@@ -353,31 +357,18 @@
+     /// Initializing a local object.
+     Object (int dummy = 0);
+
++    /// Convenience accessor for the object proxy broker of the
++    /// underlying stub.
++    TAO::Object_Proxy_Broker *proxy_broker () const;
++
+   private:
+
+     // = Unimplemented methods
+     Object (const Object &);
+     Object &operator = (const Object &);
+
+-  protected:
+-
+-    /// Servant pointer.  It is 0 except for collocated objects.
+-    TAO_Abstract_ServantBase *servant_;
+-
+   private:
+
+-    /// Pointer to the Proxy Broker
+-    /**
+-     * This cached pointer instance takes care of routing the call for
+-     * standard calls in CORBA::Object like _is_a (), _get_component
+-     * () etc.
+-     */
+-    TAO::Object_Proxy_Broker *proxy_broker_;
+-
+-    /// Flag to indicate collocation.  It is 0 except for collocated
+-    /// objects.
+-    CORBA::Boolean is_collocated_;
+-
+     /// Specify whether this is a local object or not.
+     CORBA::Boolean is_local_;
+
+@@ -452,9 +443,7 @@
+ /// library is present.
+ extern
+   TAO_Export TAO::Object_Proxy_Broker *
+-  (*_TAO_Object_Proxy_Broker_Factory_function_pointer) (
+-      CORBA::Object_ptr obj
+-    );
++  (*_TAO_Object_Proxy_Broker_Factory_function_pointer) (void);
+
+ TAO_Export CORBA::Boolean
+ operator<< (TAO_OutputCDR&, const CORBA::Object*);
+Index: TAO/tao/Object.i
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object.i,v
+retrieving revision 1.45
+diff -u -r1.45 Object.i
+--- TAO/tao/Object.i    2 Nov 2005 07:13:04 -0000       1.45
++++ TAO/tao/Object.i    14 Feb 2006 12:49:26 -0000
+@@ -8,10 +8,7 @@
+
+ ACE_INLINE
+ CORBA::Object::Object (int)
+-  : servant_ (0),
+-    proxy_broker_ (0),
+-    is_collocated_ (false),
+-    is_local_ (true),
++  : is_local_ (true),
+     is_evaluated_ (true),
+     ior_ (),
+     orb_core_ (0),
+@@ -82,13 +79,6 @@
+   return this->is_evaluated_;
+ }
+
+-ACE_INLINE void
+-CORBA::Object::set_collocated_servant (TAO_Abstract_ServantBase *b)
+-{
+-  this->servant_ = b;
+-  this->is_collocated_ = 1;
+-}
+-
+ ACE_INLINE TAO_ORB_Core *
+ CORBA::Object::orb_core (void) const
+ {
+Index: TAO/tao/Stub.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Stub.cpp,v
+retrieving revision 1.167
+diff -u -r1.167 Stub.cpp
+--- TAO/tao/Stub.cpp    2 Nov 2005 11:03:27 -0000       1.167
++++ TAO/tao/Stub.cpp    14 Feb 2006 12:49:26 -0000
+@@ -12,6 +12,7 @@
+ #include "Profile.h"
+ #include "ORB_Core.h"
+ #include "Client_Strategy_Factory.h"
++#include "Remote_Object_Proxy_Broker.h"
+ #include "Transport_Queueing_Strategies.h"
+ #include "debug.h"
+ #include "Policy_Manager.h"
+@@ -36,7 +37,10 @@
+   : type_id (repository_id)
+   , orb_core_ (orb_core)
+   , orb_ ()
++  , is_collocated_ (0)
+   , servant_orb_ ()
++  , collocated_servant_ (0)
++  , object_proxy_broker_ (the_tao_remote_object_proxy_broker ())
+   , base_profiles_ ((CORBA::ULong) 0)
+   , forward_profiles_ (0)
+   , profile_in_use_ (0)
+@@ -267,7 +271,25 @@
+   return 0;
+ }
+
+-
++void
++TAO_Stub::is_collocated (CORBA::Boolean collocated)
++{
++  if (this->is_collocated_ != collocated)
++    {
++      if (collocated &&
++          _TAO_Object_Proxy_Broker_Factory_function_pointer != 0)
++        {
++          this->object_proxy_broker_ =
++            _TAO_Object_Proxy_Broker_Factory_function_pointer ();
++        }
++      else
++        {
++          this->object_proxy_broker_ =
++            the_tao_remote_object_proxy_broker ();
++        }
++      this->is_collocated_ = collocated;
++    }
++}
+
+ // Quick'n'dirty hash of objref data, for partitioning objrefs into
+ // sets.
+@@ -364,7 +386,6 @@
+       from->get_current_profile ()->forward_to (0);
+       this->forward_profiles_ = from;
+     }
+-
+ }
+
+
+Index: TAO/tao/Stub.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Stub.h,v
+retrieving revision 1.111
+diff -u -r1.111 Stub.h
+--- TAO/tao/Stub.h      3 Nov 2005 17:38:44 -0000       1.111
++++ TAO/tao/Stub.h      14 Feb 2006 12:49:26 -0000
+@@ -36,12 +36,14 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ // Forward declarations.
++class TAO_Abstract_ServantBase;
+ class TAO_Policy_Set;
+ class TAO_Profile;
+
+ namespace TAO
+ {
+   class ObjectKey;
++  class Object_Proxy_Broker;
+   class Transport_Queueing_Strategy;
+ }
+
+@@ -200,6 +202,12 @@
+   /// Accessor.
+   TAO_ORB_Core* orb_core (void) const;
+
++  /// Is this stub collocated with the servant?
++  CORBA::Boolean is_collocated (void) const;
++
++  /// Mutator to mark this stub as being collocated with the servant.
++  void is_collocated (CORBA::Boolean);
++
+   /// This returns a duplicated ORB pointer.
+   CORBA::ORB_ptr servant_orb_ptr (void);
+
+@@ -214,6 +222,22 @@
+    */
+   void servant_orb (CORBA::ORB_ptr orb);
+
++  /// Mutator for setting the servant in collocated cases.
++  void collocated_servant (TAO_Abstract_ServantBase* servant);
++
++  /// Accessor for the servant reference in collocated cases.
++  TAO_Abstract_ServantBase* collocated_servant (void) const;
++
++  /// Mutator for setting the object proxy broker pointer.
++  /// CORBA::Objects using this stub will use this for standard calls
++  /// like is_a; get_interface; etc...
++  void object_proxy_broker (TAO::Object_Proxy_Broker *proxy_broker);
++
++  /// Accessor for getting the object proxy broker pointer.
++  /// CORBA::Objects using this stub use this for standard calls
++  /// like is_a; get_interface; etc...
++  TAO::Object_Proxy_Broker *object_proxy_broker (void) const;
++
+   /**
+    * Create the IOP::IOR info. We will create the info at most once.
+    * Get the index of the profile we are using to make the invocation.
+@@ -302,6 +326,10 @@
+    */
+   CORBA::ORB_var orb_;
+
++  /// Flag that indicates that this stub is collocated (and that it
++  /// belongs to an ORB for which collocation optimisation is active).
++  CORBA::Boolean is_collocated_;
++
+   /**
+    * If this stub refers to a collocated object then we need to hold on to
+    * the servant's ORB (which may be different from the client ORB) so that,
+@@ -311,6 +339,18 @@
+    */
+   CORBA::ORB_var servant_orb_;
+
++  /// Servant pointer.  It is 0 except for collocated objects.
++  TAO_Abstract_ServantBase *collocated_servant_;
++
++  /// Pointer to the Proxy Broker
++  /**
++    * This cached pointer instance takes care of routing the call for
++    * standard calls in CORBA::Object like _is_a (), _get_component
++    * () etc.
++    */
++  TAO::Object_Proxy_Broker *object_proxy_broker_;
++
++
+   /// Ordered list of profiles for this object.
+   TAO_MProfile base_profiles_;
+
+Index: TAO/tao/Stub.i
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Stub.i,v
+retrieving revision 1.50
+diff -u -r1.50 Stub.i
+--- TAO/tao/Stub.i      2 Nov 2005 11:03:27 -0000       1.50
++++ TAO/tao/Stub.i      14 Feb 2006 12:49:26 -0000
+@@ -78,13 +78,19 @@
+ ACE_INLINE TAO_Profile *
+ TAO_Stub::next_profile_i (void)
+ {
+-
+   TAO_Profile *pfile_next = 0;
+   if (this->forward_profiles_)
+     {
+       pfile_next = this->next_forward_profile ();
+       if (pfile_next == 0)
+-        pfile_next = this->base_profiles_.get_next ();
++        {
++          // Fall back to base profiles
++          pfile_next = this->base_profiles_.get_next ();
++        }
++
++      // We may have been forwarded to / from a collocated situation
++      // Check for this and apply / remove optimisation if required.
++      this->orb_core_->reinitialize_object (this);
+     }
+   else
+     pfile_next = this->base_profiles_.get_next ();
+@@ -135,6 +141,10 @@
+                             0));
+
+   // first reset things so we start from scratch!
++
++  // @note This reset forward could effect the collocation status
++  // but as this method is only used from the Stub ctr, when the status
++  // is already correctly set, we don't reinitialise here. sm.
+   this->reset_forward ();
+   this->base_profiles_.set (mprofiles);
+   this->reset_base ();
+@@ -152,6 +162,11 @@
+
+   if (this->profile_success_ && this->forward_profiles_)
+     {
++      // We have a forwarded reference that we have managed to *send* a message to
++      // previously in the remote path only (but not counting object proxy broker ops).
++      // @todo I can see little sense to this. It is at best highly inconsistent. sm.
++
++      // In this case we are falling back from the forwarded IOR stright to the base IOR
+       this->reset_profiles_i ();
+       return 1;
+     }
+@@ -199,6 +214,12 @@
+   return this->forward_profiles_;
+ }
+
++ACE_INLINE CORBA::Boolean
++TAO_Stub::is_collocated (void) const
++{
++  return this->is_collocated_;
++}
++
+ ACE_INLINE TAO_ORB_Core*
+ TAO_Stub::orb_core (void) const
+ {
+@@ -225,6 +246,30 @@
+   this->servant_orb_ = CORBA::ORB::_duplicate (orb);
+ }
+
++ACE_INLINE TAO_Abstract_ServantBase *
++TAO_Stub::collocated_servant (void) const
++{
++  return collocated_servant_;
++}
++
++ACE_INLINE void
++TAO_Stub::collocated_servant (TAO_Abstract_ServantBase * servant)
++{
++  this->collocated_servant_ = servant;
++}
++
++ACE_INLINE TAO::Object_Proxy_Broker *
++TAO_Stub::object_proxy_broker (void) const
++{
++  return this->object_proxy_broker_;
++}
++
++ACE_INLINE void
++TAO_Stub::object_proxy_broker (TAO::Object_Proxy_Broker * object_proxy_broker)
++{
++  this->object_proxy_broker_ = object_proxy_broker;
++}
++
+ ACE_INLINE void
+ TAO_Stub::destroy (void)
+ {
+Index: TAO/tao/IORTable/Table_Adapter.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IORTable/Table_Adapter.cpp,v
+retrieving revision 1.13
+diff -u -r1.13 Table_Adapter.cpp
+--- TAO/tao/IORTable/Table_Adapter.cpp  3 Nov 2005 17:38:46 -0000       1.13
++++ TAO/tao/IORTable/Table_Adapter.cpp  14 Feb 2006 12:49:27 -0000
+@@ -11,7 +11,9 @@
+ #include "IOR_Table_Impl.h"
+ #include "tao/ORB_Core.h"
+ #include "tao/Object.h"
++#include "tao/Stub.h"
+ #include "tao/ORB.h"
++#include "tao/Profile.h"
+
+ ACE_RCSID (IORTable,
+            Table_Adapter,
+@@ -64,26 +66,8 @@
+                              ACE_ENV_ARG_DECL)
+     ACE_THROW_SPEC ((CORBA::SystemException))
+ {
+-  CORBA::String_var object_key;
+-  TAO::ObjectKey::encode_sequence_to_string (object_key.out (),
+-                                            key);
+-  ACE_TRY
+-    {
+-      CORBA::String_var ior =
+-        this->root_->find (object_key.in () ACE_ENV_ARG_PARAMETER);
+-      ACE_TRY_CHECK;
+-
+-      forward_to =
+-        this->orb_core_->orb ()->string_to_object (ior.in ()
+-                                                   ACE_ENV_ARG_PARAMETER);
+-      ACE_TRY_CHECK;
+-    }
+-  ACE_CATCH (IORTable::NotFound, nf_ex)
+-    {
+-      return TAO_Adapter::DS_MISMATCHED_KEY;
+-    }
+-  ACE_ENDTRY;
+-  return TAO_Adapter::DS_FORWARD;
++  return this->find_object (key, forward_to) ? TAO_Adapter::DS_FORWARD
++                                             : TAO_Adapter::DS_MISMATCHED_KEY;
+ }
+
+ const char *
+@@ -102,15 +86,88 @@
+ TAO_Table_Adapter::create_collocated_object (TAO_Stub *stub,
+                                              const TAO_MProfile &)
+ {
+-  return new CORBA::Object (stub);
++  CORBA::Object_ptr result = CORBA::Object::_nil ();
++
++  if (! this->initialize_collocated_object (stub)) // 0 == success
++    {
++      // A reference was found in the table. The stub has been forwarded
++      // to this. The collocation indicators are now correct on the stub
++      // (although they may well now indicate that the stub is not in fact
++      // collocated at all).
++      ACE_NEW_RETURN (result,
++                      CORBA::Object (stub,
++                                     stub->is_collocated (),
++                                     stub->collocated_servant ()),
++                      CORBA::Object::_nil ());
++
++    }
++
++  return result;
+ }
+
+ CORBA::Long
+-TAO_Table_Adapter::initialize_collocated_object (TAO_Stub *,
+-                                                 CORBA::Object_ptr )
++TAO_Table_Adapter::initialize_collocated_object (TAO_Stub * stub)
+ {
+-  return 0;
++  // Get the effective profile set.
++  const TAO_MProfile &mp = stub->forward_profiles () ? *(stub->forward_profiles ())
++                                                     : stub->base_profiles ();
++  TAO_PHandle j = 0;
++  // We only look at the key from the 0th profile but we only really care about
++  // corbaloc's here where all profiles share a single object key
++  TAO::ObjectKey_var key = mp.get_profile (j)->_key ();
++
++  CORBA::Object_var forward_to = CORBA::Object::_nil ();
++  CORBA::Boolean found = false;
++
++  ACE_TRY_NEW_ENV
++    {
++      found = this->find_object (key, forward_to.out ());
++    }
++  ACE_CATCHANY
++    {
++    }
++  ACE_ENDTRY;
++
++  if (found)
++    {
++      // This call will set the appropriate collocation values
++      // to correspond to the reference we found in the table.
++      stub->add_forward_profiles (forward_to->_stubobj ()->base_profiles ());
++      stub->next_profile ();
++    }
++
++  // 0 for success
++  return ! found;
++}
++
++CORBA::Long
++TAO_Table_Adapter::find_object (TAO::ObjectKey &key,
++                                CORBA::Object_out forward_to
++                                ACE_ENV_ARG_DECL)
++  ACE_THROW_SPEC ((CORBA::SystemException))
++{
++  CORBA::String_var object_key;
++  TAO::ObjectKey::encode_sequence_to_string (object_key.out (),
++                                            key);
++  ACE_TRY
++    {
++      CORBA::String_var ior =
++        this->root_->find (object_key.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      forward_to =
++        this->orb_core_->orb ()->string_to_object (ior.in ()
++                                                   ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++    }
++  ACE_CATCH (IORTable::NotFound, nf_ex)
++    {
++      return 0;
++    }
++  ACE_ENDTRY;
++  return 1;
+ }
++
+ // ****************************************************************
+
+ TAO_Table_Adapter_Factory::TAO_Table_Adapter_Factory (void)
+Index: TAO/tao/IORTable/Table_Adapter.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IORTable/Table_Adapter.h,v
+retrieving revision 1.11
+diff -u -r1.11 Table_Adapter.h
+--- TAO/tao/IORTable/Table_Adapter.h    3 Nov 2005 17:38:46 -0000       1.11
++++ TAO/tao/IORTable/Table_Adapter.h    14 Feb 2006 12:49:27 -0000
+@@ -56,9 +56,15 @@
+   virtual CORBA::Object_ptr create_collocated_object (TAO_Stub *,
+                                                       const TAO_MProfile &);
+
+-  virtual CORBA::Long initialize_collocated_object (TAO_Stub *,
+-                                                    CORBA::Object_ptr);
++  virtual CORBA::Long initialize_collocated_object (TAO_Stub *);
+ private:
++  /// Helper method to find an object bound in the table.
++  /// @return 1 if found, 0 otherwise.
++  CORBA::Long find_object (TAO::ObjectKey &key,
++                           CORBA::Object_out forward_to
++                           ACE_ENV_ARG_DECL)
++    ACE_THROW_SPEC ((CORBA::SystemException));
++
+   /// The ORB Core we belong to
+   TAO_ORB_Core *orb_core_;
+
+Index: TAO/tao/PortableServer/Collocated_Object_Proxy_Broker.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Collocated_Object_Proxy_Broker.cpp,v
+retrieving revision 1.9
+diff -u -r1.9 Collocated_Object_Proxy_Broker.cpp
+--- TAO/tao/PortableServer/Collocated_Object_Proxy_Broker.cpp   4 Nov 2005 09:26:55 -0000       1.9
++++ TAO/tao/PortableServer/Collocated_Object_Proxy_Broker.cpp   14 Feb 2006 12:49:27 -0000
+@@ -307,11 +307,8 @@
+   return &the_broker;
+ }
+
+-TAO::Object_Proxy_Broker * _TAO_collocation_Object_Proxy_Broker_Factory (
+-                               CORBA::Object_ptr obj
+-                               )
++TAO::Object_Proxy_Broker * _TAO_collocation_Object_Proxy_Broker_Factory (void)
+ {
+-  ACE_UNUSED_ARG (obj);
+   return the_tao_collocated_object_proxy_broker ();
+ }
+
+Index: TAO/tao/PortableServer/Object_Adapter.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Object_Adapter.cpp,v
+retrieving revision 1.87
+diff -u -r1.87 Object_Adapter.cpp
+--- TAO/tao/PortableServer/Object_Adapter.cpp   13 Feb 2006 11:21:01 -0000      1.87
++++ TAO/tao/PortableServer/Object_Adapter.cpp   14 Feb 2006 12:49:27 -0000
+@@ -883,7 +883,8 @@
+   stub->servant_orb (this->orb_core_.orb ());
+
+   // It is ok to create a collocated object even when <sb> is
+-  // zero.
++  // zero. This constructor will set the stub collocated indicator and
++  // the strategized proxy broker if required.
+   CORBA::Object_ptr x;
+   ACE_NEW_RETURN (x,
+                   CORBA::Object (stub,
+@@ -891,20 +892,16 @@
+                                  sb),
+                   CORBA::Object::_nil ());
+
+-  // Here we set the strategized Proxy Broker.
+-  x->_proxy_broker (the_tao_collocated_object_proxy_broker ());
+-
+   // Success.
+   return x;
+ }
+
+ CORBA::Long
+-TAO_Object_Adapter::initialize_collocated_object (TAO_Stub *stub,
+-                                                  CORBA::Object_ptr obj)
++TAO_Object_Adapter::initialize_collocated_object (TAO_Stub *stub)
+ {
+-  // @@ What about forwarding.  With this approach we are never
+-  //    forwarded  when we use collocation!
+-  const TAO_MProfile &mp = stub->base_profiles ();
++  // If we have been forwarded: use the forwarded profiles
++  const TAO_MProfile &mp = stub->forward_profiles () ? *(stub->forward_profiles ())
++                                                     : stub->base_profiles ();
+
+   TAO_ServantBase *sb = this->get_collocated_servant (mp);
+
+@@ -914,13 +911,14 @@
+
+   // It is ok to set the object as a collocated object even when
+   // <sb> is zero.
+-  obj->set_collocated_servant (sb);
++  stub->collocated_servant (sb);
+
+-  // Here we set the strategized Proxy Broker.
+-  obj->_proxy_broker (the_tao_collocated_object_proxy_broker ());
++  // Mark the stub as collocated. This will set the strategized object
++  // proxy broker if required.
++  stub->is_collocated (true);
+
+-  // Success.
+-  return 0;
++  // Return 0 (success) iff we found a servant.
++  return ! sb;
+ }
+
+ TAO_ServantBase *
+Index: TAO/tao/PortableServer/Object_Adapter.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Object_Adapter.h,v
+retrieving revision 1.47
+diff -u -r1.47 Object_Adapter.h
+--- TAO/tao/PortableServer/Object_Adapter.h     4 Nov 2005 09:26:55 -0000       1.47
++++ TAO/tao/PortableServer/Object_Adapter.h     14 Feb 2006 12:49:27 -0000
+@@ -172,8 +172,7 @@
+   virtual CORBA::Object_ptr create_collocated_object (TAO_Stub *,
+                                                       const TAO_MProfile &);
+
+-  virtual CORBA::Long initialize_collocated_object (TAO_Stub *,
+-                                                    CORBA::Object_ptr);
++  virtual CORBA::Long initialize_collocated_object (TAO_Stub *);
+
+ protected:
+
