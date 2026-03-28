@@ -1,0 +1,269 @@
+From:	ace-users-bounces@list.isis.vanderbilt.edu on behalf of Jack Lavender 
+[jack.lavender@seconcepts.com]
+Sent:	Friday, August 01, 2008 3:06 PM
+To:	ace-users@list.isis.vanderbilt.edu
+Subject:	[ace-users] FW: ACE_Service_Object command line parsing issue
+
+
+Subject: [area]: [synopsis]
+
+    ACE VERSION: 5.6.5
+
+    HOST MACHINE and OPERATING SYSTEM: Fedora Core 8 Linux
+
+    TARGET MACHINE and OPERATING SYSTEM, if different from HOST:
+    COMPILER NAME AND VERSION (AND PATCHLEVEL):
+
+    THE $ACE_ROOT/ace/config.h FILE [if you use a link to a platform-
+    specific file, simply state which one]:
+
+---
+// -*- C++ -*-
+//
+// $Id: config.h 425 2008-05-12 22:02:38Z lavender $
+
+// The following configuration file is designed to work for Linux // platforms 
+using GNU C++.
+
+#ifndef ACE_CONFIG_LINUX_H
+#define ACE_CONFIG_LINUX_H
+#include /**/ "ace/pre.h"
+
+#define ACE_PLATFORM_CONFIG config-linux.h
+
+#include "ace/config-linux-common.h"
+
+#define ACE_HAS_SVR4_DYNAMIC_LINKING
+#define ACE_HAS_AUTOMATIC_INIT_FINI
+#define ACE_HAS_DLSYM_SEGFAULT_ON_INVALID_HANDLE
+
+#define ACE_HAS_REACTOR_NOTIFICATION_QUEUE  // Ken Sedgwick 2006-04-19
+
+#if !defined (ACE_MT_SAFE)
+#define ACE_MT_SAFE 1                           // JCEJ 12/22/96        #1
+#endif
+
+#if ACE_MT_SAFE
+// Yes, we do have threads.
+#define ACE_HAS_THREADS
+// And they're even POSIX pthreads (LinuxThreads implementation) #define 
+ACE_HAS_PTHREADS
+
+// On linux this is part of pthreads
+#  if (defined _POSIX_C_SOURCE && (_POSIX_C_SOURCE - 0) >= 199309L)
+#    if !defined (ACE_HAS_CLOCK_GETTIME)
+#      if !defined(__PGI)
+#        define ACE_HAS_CLOCK_GETTIME
+#      endif /* __PGI */
+#      define ACE_HAS_CLOCK_SETTIME
+#    endif  /* !ACE_HAS_CLOCK_GETTIME */
+#  endif  /* _POSIX_C_SOURCE >= 199309L */
+
+#if !defined (ACE_HAS_PTHREADS_UNIX98_EXT) #  define ACE_LACKS_RWLOCK_T #else 
+#  define ACE_HAS_RECURSIVE_MUTEXES #endif  /* !ACE_HAS_PTHREADS_UNIX98_EXT */
+
+#define ACE_HAS_THREAD_SPECIFIC_STORAGE     // jcej 12/22/96         #2
+
+#define ACE_HAS_RECURSIVE_THR_EXIT_SEMANTICS    // JCEJ 1/7-8/96
+
+#if defined(__GLIBC__)
+// Platform supports reentrant functions (i.e., all the POSIX *_r // 
+functions).
+#define ACE_HAS_REENTRANT_FUNCTIONS
+
+#if (__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 1)
+   // Older versions of glibc lacked reentrant netdb functions #  define 
+ACE_LACKS_NETDB_REENTRANT_FUNCTIONS
+
+   // glibc < 2.1 lacks pthread_attr_setstacksize() #  define 
+ACE_LACKS_PTHREAD_ATTR_SETSTACKSIZE
+#endif /* (__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 1) */
+
+// uses ctime_r & asctime_r with only two parameters vs. three #define 
+ACE_HAS_2_PARAM_ASCTIME_R_AND_CTIME_R
+#endif
+
+#else
+// AIO support pulls in the rt library, which pulls in the pthread // library.  
+Disable AIO in single-threaded builds.
+# undef ACE_HAS_AIO_CALLS
+#endif  /* ACE_MT_SAFE */
+
+#define ACE_HAS_IPV6 // Ken Sedgwick 2006-06-14 #define 
+ACE_USES_IPV4_IPV6_MIGRATION // Ken Sedgwick 2006-06-14
+
+#define ACE_HAS_ICMP_SUPPORT 1 // Ken Sedgwick 2006-09-05
+
+#define ACE_GCC_HAS_TEMPLATE_INSTANTIATION_VISIBILITY_ATTRS 1  // Ken Sedgwick 
+2007-05-05
+
+#include /**/ "ace/post.h"
+
+#endif /* ACE_CONFIG_LINUX_H */
+---
+
+
+    THE $ACE_ROOT/include/makeinclude/platform_macros.GNU FILE [if you
+    use a link to a platform-specific file, simply state which one
+    (unless this isn't used in this case, e.g., with Microsoft Visual
+    C++)]:
+
+---
+ssl = 1
+include $(ACE_ROOT)/include/makeinclude/platform_linux.GNU
+x11 = 1
+xt = 1
+tk = 1
+fl = 1
+qt = 1
+gl = 1
+ace_qtreactor = 1
+ace_xtreactor = 1
+ace_tkreactor = 1
+ace_flreactor = 1
+tao_qtresource = 1
+tao_xtresource = 1
+tao_tkresource = 1
+tao_flresource = 1
+# Enable optimization
+#OCFLAGS = -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-
+protector --param=ssp-buffer-size=4 -m32 -march=i386 -mtune=generic -
+fasynchronous-unwind-tables OCCFLAGS = -O0
+---
+
+    CONTENTS OF $ACE_ROOT/bin/MakeProjectCreator/config/default.features
+    (used by MPC when you generate your own makefiles):
+
+using default
+
+    AREA/CLASS/EXAMPLE AFFECTED:
+[What example failed?  What module failed to compile?]  N/A
+
+
+    DOES THE PROBLEM AFFECT:
+        COMPILATION? No
+        LINKING? No
+            On Unix systems, did you run make realclean first? Yes
+        EXECUTION? YES
+        OTHER (please specify)?
+
+
+
+    SYNOPSIS:
+
+My program has used the -b obtion in the svc.conf file to daemonize, as of
+5.6.4 it stopped working.
+The main I use is attached below (very similar to the netsvcs main).  This 
+uses the "ACE_Service_Config::open" call start it all up. When I used gdb to 
+step through the code I discoverd the call to ACE_Service_Config::parse_args_i 
+was not occuring, or it was not occuring before the it needed to be set.
+
+Thanks in advance for your time.
+Jack
+
+    DESCRIPTION:
+
+My Main Program ->
+
+#include "ace/Service_Config.h"
+#include "ace/Logging_Strategy.h"
+#include "ace/Sig_Adapter.h"
+#include "ace/Reactor.h"
+int
+ACE_TMAIN (int argc, ACE_TCHAR *argv[])
+{
+	// Turn off Trace Prints
+	ACE_Trace::stop_tracing();
+
+	// Try to link in the svc.conf entries dynamically, enabling the
+	// "ignore_debug_flag" as the last parameter so that we can override
+	// the default ACE_Log_Priority settings in the svc.conf file.
+	//
+	// Warning - do not try to move the ACE_Reactor signal handling work
+	// up to before this call - if the user specified -b (be a daemon),
+	// all handles will be closed, including the Reactor's pipe.
+
+	if (ACE_Service_Config::open (argc, argv, ACE_DEFAULT_LOGGER_KEY, 1, 0,
+1) == -1)
+	{
+		if (errno != ENOENT)
+			ACE_ERROR_RETURN ((LM_ERROR,"%p\n", "open"), 1);
+		else // Use static linking.
+		{
+			ACE_ERROR_RETURN ((LM_ERROR,"%s\n", "Static Linking not 
+supported at this time"), 1);
+		}
+	}
+	else // Use dynamic linking.
+	{
+		ACE_Sig_Adapter sa ((ACE_Sig_Handler_Ex) 
+ACE_Reactor::end_event_loop);
+		ACE_Sig_Set sig_set;
+		sig_set.sig_add (SIGINT);
+		sig_set.sig_add (SIGQUIT);
+		// sig_set.sig_add (SIGKILL);
+		if (ACE_Reactor::instance ()->register_handler (sig_set,
+&sa) == -1)
+			ACE_ERROR ((LM_ERROR, "%p\n", "register signals"));
+		else
+			ACE_Reactor::instance ()->run_reactor_event_loop ();
+	}
+	return 0;
+}
+
+
+Excerpt from ace/Service_Config.inl (with my comments)->
+
+...
+ACE_INLINE int
+ACE_Service_Config::open (int argc,
+                          ACE_TCHAR *argv[],
+                          const ACE_TCHAR *logger_key,
+                          bool ignore_static_svcs,
+                          bool ignore_default_svc_conf,
+                          bool ignore_debug_fla {
+  ACE_TRACE ("ACE_Service_Config::open");
+
+// singleton returns the ACE_Service_Config object, but does not parse the 
+command line // daemonize decision is made at this level
+
+  if (singleton()->open_i (argv[0],
+                           logger_key,
+                           ignore_static_svcs,
+                           ignore_default_svc_conf,
+                           ignore_debug_flag) == -1)
+    return -1;
+
+// current returns the ACE_Service_Gestalt object, and parses the command 
+line, but useing the gestalt parse, // which does not catch the all the flags.
+
+  return current()->open (argc,
+                          argv,
+                          logger_key,
+                          ignore_static_svcs,
+                          ignore_default_svc_conf,
+                          ignore_debug_flag); } ...
+
+I am probably just confused how to "open" up the Service properly, but I 
+cannot seem to figure out where the ACE_Service_Config::parse_args_i is being 
+done anywhere in the code.
+
+
+As of 5.6.4 the ACE_Service_Gestalt is no longer the parent of the 
+ACE_Service_Object. This would seem to imply that the parse_arg method should 
+not try to up call. I have experimented with fixing it for my use, but I am 
+not sure I understand the full intent of the new relationship structure 
+between the Gestalt and the Service Object. 
+
+
+
+    REPEAT BY: N/A
+
+
+    SAMPLE FIX/WORKAROUND: UNK
+
+
+_______________________________________________
+ace-users mailing list
+ace-users@list.isis.vanderbilt.edu
+http://list.isis.vanderbilt.edu/mailman/listinfo/ace-users
