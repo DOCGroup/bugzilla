@@ -1,0 +1,91 @@
+Index: apps/gperf/src/Gen_Perf.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/apps/gperf/src/Gen_Perf.cpp,v
+retrieving revision 4.21
+diff -u -r4.21 Gen_Perf.cpp
+--- apps/gperf/src/Gen_Perf.cpp	1 Nov 2003 11:15:22 -0000	4.21
++++ apps/gperf/src/Gen_Perf.cpp	10 Mar 2006 20:12:28 -0000
+@@ -102,7 +102,7 @@
+            curr--)
+         union_set[curr] = union_set[curr - 1];
+ 
+-      union_set[curr] = tmp;
++      union_set[curr] = static_cast<char> (tmp);
+     }
+ }
+ 
+Index: apps/gperf/src/Key_List.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/apps/gperf/src/Key_List.cpp,v
+retrieving revision 4.63
+diff -u -r4.63 Key_List.cpp
+--- apps/gperf/src/Key_List.cpp	3 Oct 2005 13:51:58 -0000	4.63
++++ apps/gperf/src/Key_List.cpp	10 Mar 2006 20:10:37 -0000
+@@ -137,7 +137,7 @@
+           delete [] buf;
+           buf = temp;
+         }
+-      buf[i] = c;
++      buf[i] = static_cast<char> (c);
+     }
+ 
+   return 0;
+@@ -256,7 +256,7 @@
+                                                         delimiter))),
+                           -1);
+           for (temp = this->head;
+-               (buffer = input.read ('\n'))
++               (0 != (buffer = input.read ('\n')))
+                  && ACE_OS::strcmp (buffer, "%%");
+                temp = temp->next)
+             {
+Index: apps/gperf/src/List_Node.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/apps/gperf/src/List_Node.cpp,v
+retrieving revision 4.14
+diff -u -r4.14 List_Node.cpp
+--- apps/gperf/src/List_Node.cpp	21 Jan 2005 02:45:12 -0000	4.14
++++ apps/gperf/src/List_Node.cpp	10 Mar 2006 20:09:46 -0000
+@@ -42,7 +42,7 @@
+     {
+       char curr, tmp;
+ 
+-      for (curr = i + 1, tmp = base[curr];
++      for (curr = static_cast<char> (i + 1), tmp = base[curr];
+            curr > 0 && tmp < base[curr-1];
+            curr--)
+         base[curr] = base[curr - 1];
+@@ -81,7 +81,7 @@
+   if (option[STRCASECMP])
+     for (char *p = k; *p; p++)
+       if (isupper (*p))
+-        *p = tolower (*p);
++        *p = static_cast<char> (tolower (*p));
+ 
+   if (option[ALLCHARS])         // Use all the character position in the KEY.
+     for (; *k; k++, ptr++)
+Index: apps/gperf/src/Options.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/apps/gperf/src/Options.cpp,v
+retrieving revision 4.43
+diff -u -r4.43 Options.cpp
+--- apps/gperf/src/Options.cpp	24 Apr 2004 04:21:49 -0000	4.43
++++ apps/gperf/src/Options.cpp	10 Mar 2006 20:08:20 -0000
+@@ -129,7 +129,7 @@
+           // Oh no, a duplicate!!!
+           return 0;
+ 
+-      base[curr] = tmp;
++      base[curr] = static_cast<char> (tmp);
+     }
+ 
+   return 1;
+@@ -523,7 +523,7 @@
+                                        usage),
+                                       -1);
+                   else
+-                    *l_key_pos = value;;
++                    *l_key_pos = static_cast<char> (value);
+ 
+                 *l_key_pos = EOS;
+ 
