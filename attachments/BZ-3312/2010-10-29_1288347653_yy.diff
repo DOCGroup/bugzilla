@@ -1,0 +1,108 @@
+Index: idl.yy
+===================================================================
+--- idl.yy	(revision 92365)
++++ idl.yy	(working copy)
+@@ -2937,7 +2937,38 @@
+         '('
+         {
+ //      '('
++          UTL_Scope *s = idl_global->scopes ().top_non_null ();
++          UTL_ScopedName n ($1,
++                            0);
++          AST_Union *u = 0;
+           idl_global->set_parse_state (IDL_GlobalData::PS_SwitchOpenParSeen);
++
++          /*
++           * Create a node representing an empty union. Add it to its enclosing
++           * scope.
++           */
++          if (s != 0)
++            {
++              u = idl_global->gen ()->create_union (0,
++                                                    &n,
++                                                    s->is_local (),
++                                                    s->is_abstract ());
++
++              AST_Structure *st = AST_Structure::narrow_from_decl (u);
++              AST_Structure::fwd_redefinition_helper (st,
++                                                      s);
++              u = AST_Union::narrow_from_decl (st);
++              (void) s->fe_add_union (u);
++            }
++
++          /*
++           * Push the scope of the union on the scopes stack
++           */
++          idl_global->scopes ().push (u);
++
++          /*
++           * Don't delete $1 yet; we'll need it a bit later.
++           */
+         }
+         switch_type_spec
+         {
+@@ -2947,15 +2978,25 @@
+         ')'
+         {
+ //      ')'
++          /*
++           * The top of the scopes must an empty union we added after we
++           * encountered 'union <id> switch ('. Now we are ready to add a
++           * correct one. Temporarily remove the top so that we setup the
++           * correct union in a right scope. Also temprorarily remove
++           * pragma prefix.
++           */
++          UTL_Scope *top = idl_global->scopes ().top_non_null ();
++          idl_global->scopes ().pop ();
++          char *prefix = 0;
++          idl_global->pragma_prefixes ().pop (prefix);
++
+           UTL_Scope *s = idl_global->scopes ().top_non_null ();
+           UTL_ScopedName n ($1,
+                             0);
+-          AST_Union *u = 0;
+           idl_global->set_parse_state (IDL_GlobalData::PS_SwitchCloseParSeen);
+ 
+           /*
+-           * Create a node representing a union. Add it to its enclosing
+-           * scope.
++           * Create a node representing a union.
+            */
+           if ($6 != 0
+               && s != 0)
+@@ -2969,23 +3010,27 @@
+                 }
+               else
+                 {
++                  /* Create a union with a correct discriminator. */
++                  AST_Union *u = 0;
+                   u = idl_global->gen ()->create_union (tp,
+                                                         &n,
+                                                         s->is_local (),
+                                                         s->is_abstract ());
++                  /* Narrow the enclosing scope. */
++                  AST_Union *e = AST_Union::narrow_from_scope (top);
++
++                  e->redefine (u);
++
++                  u->destroy ();
++                  delete u;
+                 }
+-
+-              AST_Structure *st = AST_Structure::narrow_from_decl (u);
+-              AST_Structure::fwd_redefinition_helper (st,
+-                                                      s);
+-              u = AST_Union::narrow_from_decl (st);
+-              (void) s->fe_add_union (u);
+             }
+ 
+           /*
+-           * Push the scope of the union on the scopes stack
++           * Restore the top.
+            */
+-          idl_global->scopes ().push (u);
++          idl_global->scopes ().push (top);
++          idl_global->pragma_prefixes ().push (prefix);
+ 
+           $1->destroy ();
+           delete $1;
