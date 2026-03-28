@@ -1,0 +1,12 @@
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/orbsvcs/orbsvcs/Naming/Naming_Server.cpp	2005-04-11 01:41:28.000000000 -0700
++++ /opt2/linux/x86_64/ACE/latest/ACE_wrappers/TAO/orbsvcs/orbsvcs/Naming/Naming_Server.cpp	2005-05-27 09:45:14.000000000 -0700
+@@ -533,6 +533,9 @@
+           ACE_TRY_CHECK;
+ 
+         }
++      
++      orb->register_initial_reference ("NameService" ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
+ 
+       // Set the ior of the root Naming Context.
+       this->naming_service_ior_=
