@@ -1,0 +1,119 @@
+Index: ace/config-macros.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/config-macros.h,v
+retrieving revision 4.6
+diff -u -r4.6 config-macros.h
+--- ace/config-macros.h	10 Feb 2006 09:21:21 -0000	4.6
++++ ace/config-macros.h	9 Mar 2006 23:24:17 -0000
+@@ -401,11 +401,7 @@
+ # define ACE_UNUSED_ARG(a) (a)
+ #endif /* ghs || __GNUC__ || ..... */
+ 
+-#if defined (__sgi) || defined (ghs) || defined (__DECCXX) || defined(__BORLANDC__) || defined (__KCC) || defined (ACE_RM544) || defined (__USLC__) || defined (__DCC__) || defined (__PGI) || defined (__TANDEM) || defined (__HP_aCC)
+-# define ACE_NOTREACHED(a)
+-#else  /* __sgi || ghs || ..... */
+-# define ACE_NOTREACHED(a) a
+-#endif /* __sgi || ghs || ..... */
++#define ACE_NOTREACHED(a)
+ 
+ // ============================================================================
+ // ACE_ALLOC_HOOK* macros
+Index: ace/RB_Tree.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/RB_Tree.cpp,v
+retrieving revision 1.44
+diff -u -r1.44 RB_Tree.cpp
+--- ace/RB_Tree.cpp	28 Oct 2005 16:14:54 -0000	1.44
++++ ace/RB_Tree.cpp	9 Mar 2006 23:28:11 -0000
+@@ -711,7 +711,7 @@
+       ++current_size_;
+       return &this->root_->item ();
+     }
+-  return 0;
++  ACE_NOTREACHED (return 0);
+ }
+ 
+ // Inserts a *copy* of the key and the item into the tree: both the
+Index: TAO/TAO_IDL/util/utl_global.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/util/utl_global.cpp,v
+retrieving revision 1.141
+diff -u -r1.141 utl_global.cpp
+--- TAO/TAO_IDL/util/utl_global.cpp	28 Feb 2006 10:24:52 -0000	1.141
++++ TAO/TAO_IDL/util/utl_global.cpp	10 Mar 2006 02:28:38 -0000
+@@ -1427,10 +1427,10 @@
+ #endif /* ACE_WIN32 */
+ 
+   // Wait for gperf to complete.
+-  ACE_exitcode wait_status = 0;
++  ACE_NOTREACHED (ACE_exitcode wait_status = 0;
+   if (process.wait (&wait_status) == -1)
+     {
+-      return -1;
++      ACE_NOTREACHED (return -1);
+     }
+   else
+     {
+@@ -1445,24 +1445,24 @@
+           // exec gperf program, so get the exit code now and set that
+           // to <errno> again, so that it can be used to print error
+           // messages.
+-          errno = WEXITSTATUS (wait_status);
++          ACE_NOTREACHED (errno = WEXITSTATUS (wait_status));
+           if (errno)
+             {
+               // <exec> has failed.
+-              return -1;
++              ACE_NOTREACHED (return -1);
+             }
+           else
+             {
+               // Everything was alright.
+-              return 0;
++              ACE_NOTREACHED (return 0);
+             }
+         }
+       else
+         {
+           // Not a normal exit. No <errno> might be set.
+-          return -1;
++          ACE_NOTREACHED (return -1);
+         }
+-    }
++    })
+ }
+ 
+ void
+Index: TAO/TAO_IDL/fe/y.tab.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/fe/y.tab.cpp,v
+retrieving revision 1.113
+diff -u -r1.113 y.tab.cpp
+--- TAO/TAO_IDL/fe/y.tab.cpp	9 Feb 2006 16:44:15 -0000	1.113
++++ TAO/TAO_IDL/fe/y.tab.cpp	9 Mar 2006 23:53:45 -0000
+@@ -7743,7 +7743,7 @@
+      goto tao_yyerrorlab;
+ #endif
+ 
+-  tao_yyvsp -= tao_yylen;
++  ACE_NOTREACHED (tao_yyvsp -= tao_yylen);
+   tao_yyssp -= tao_yylen;
+   tao_yystate = *tao_yyssp;
+   goto tao_yyerrlab1;
+Index: TAO/tao/GIOP_Message_Base.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/GIOP_Message_Base.cpp,v
+retrieving revision 1.114
+diff -u -r1.114 GIOP_Message_Base.cpp
+--- TAO/tao/GIOP_Message_Base.cpp	25 Feb 2006 02:44:31 -0000	1.114
++++ TAO/tao/GIOP_Message_Base.cpp	10 Mar 2006 02:33:37 -0000
+@@ -1842,7 +1842,7 @@
+         }
+     }
+ 
+-  return -1;
++  ACE_NOTREACHED (return -1);
+ }
+ 
+ /* @return -1 error, 0 ok, +1 outstanding fragments */ 
+
