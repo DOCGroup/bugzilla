@@ -1,0 +1,802 @@
+Index: UIPMC_Connector.h
+===================================================================
+--- UIPMC_Connector.h	(revision 77946)
++++ UIPMC_Connector.h	(working copy)
+@@ -74,22 +74,6 @@
+ 
+   /// Cancel the passed cvs handler from the connector
+   virtual int cancel_svc_handler (TAO_Connection_Handler * svc_handler);
+-
+-private:
+-  // @@ Michael: UDP Addition
+-  ACE_Hash_Map_Manager_Ex < ACE_INET_Addr,
+-                            TAO_UIPMC_Connection_Handler *,
+-                            ACE_Hash < ACE_INET_Addr >,
+-                            ACE_Equal_To < ACE_INET_Addr >,
+-                            ACE_Null_Mutex >
+-    svc_handler_table_;
+-
+-  typedef ACE_Hash_Map_Iterator_Ex < ACE_INET_Addr,
+-                                     TAO_UIPMC_Connection_Handler *,
+-                                     ACE_Hash < ACE_INET_Addr >,
+-                                     ACE_Equal_To < ACE_INET_Addr >,
+-                                     ACE_Null_Mutex >
+-    SvcHandlerIterator;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: UIPMC_Acceptor.cpp
+===================================================================
+--- UIPMC_Acceptor.cpp	(revision 77946)
++++ UIPMC_Acceptor.cpp	(working copy)
+@@ -105,7 +105,7 @@
+   if (address == 0)
+     return -1;
+ 
+-  if (major >=0 && minor >= 0)
++  if (major >= 0 && minor >= 0)
+     this->version_.set_version (static_cast<CORBA::Octet> (major),
+                                 static_cast<CORBA::Octet> (minor));
+   // Parse options
+@@ -202,7 +202,7 @@
+       for (size_t i = 0; i < this->endpoint_count_; ++i)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("\nTAO (%P|%t) UIPMC_Acceptor::open_i - ")
++                      ACE_TEXT ("TAO (%P|%t) - UIPMC_Acceptor::open_i ")
+                       ACE_TEXT ("listening on: <%s:%u>\n"),
+                       this->hosts_[i],
+                       this->addrs_[i].get_port_number ()));
+Index: UIPMC_Connector.cpp
+===================================================================
+--- UIPMC_Connector.cpp	(revision 77946)
++++ UIPMC_Connector.cpp	(working copy)
+@@ -7,6 +7,7 @@
+ #include "tao/ORB_Core.h"
+ #include "tao/Base_Transport_Property.h"
+ #include "tao/Protocols_Hooks.h"
++#include "tao/Thread_Lane_Resources.h"
+ 
+ #include "ace/Connector.h"
+ #include "ace/OS_NS_strings.h"
+@@ -42,14 +43,6 @@
+ int
+ TAO_UIPMC_Connector::close (void)
+ {
+-  SvcHandlerIterator iter (svc_handler_table_);
+-
+-  while (!iter.done ())
+-    {
+-      (*iter).int_id_->remove_reference ();
+-      iter++;
+-    }
+-
+   return 0;
+ }
+ 
+@@ -60,7 +53,7 @@
+     return -1;
+ 
+   TAO_UIPMC_Endpoint *uipmc_endpoint =
+-    dynamic_cast<TAO_UIPMC_Endpoint *> (endpoint );
++    dynamic_cast<TAO_UIPMC_Endpoint *> (endpoint);
+ 
+   if (uipmc_endpoint == 0)
+     return -1;
+@@ -104,33 +97,78 @@
+ 
+   TAO_UIPMC_Connection_Handler *svc_handler = 0;
+ 
+-  if (this->svc_handler_table_.find (remote_address, svc_handler) == -1)
++  ACE_NEW_RETURN (svc_handler,
++                  TAO_UIPMC_Connection_Handler (this->orb_core ()),
++                  0);
++
++  u_short port = 0;
++  const ACE_UINT32 ia_any = INADDR_ANY;
++  ACE_INET_Addr local_addr(port, ia_any);
++
++  svc_handler->local_addr (local_addr);
++  svc_handler->addr (remote_address);
++
++  int retval = svc_handler->open (0);
++
++  // Failure to open a connection.
++  if (retval != 0)
+     {
+-      TAO_UIPMC_Connection_Handler *svc_handler_i = 0;
+-      ACE_NEW_RETURN (svc_handler_i,
+-                      TAO_UIPMC_Connection_Handler (this->orb_core ()),
+-                      0);
++      if (TAO_debug_level > 0)
++        {
++          ACE_ERROR ((LM_ERROR,
++                      "TAO (%P|%t) - UIPMC_Connector::make_connection, "
++                      "could not make a new connection\n"));
++        }
+ 
+-      svc_handler_i->local_addr (ACE_sap_any_cast (ACE_INET_Addr &));
+-      svc_handler_i->addr (remote_address);
++      return 0;
++    }
+ 
+-      svc_handler_i->open (0);
++  if (TAO_debug_level > 2)
++    ACE_DEBUG ((LM_DEBUG,
++                ACE_TEXT ("TAO (%P|%t) - UIPMC_Connector::make_connection, ")
++                ACE_TEXT ("new connection on HANDLE %d\n"),
++                svc_handler->get_handle ()));
+ 
+-      svc_handler_table_.bind (remote_address,
+-                               svc_handler_i);
+-      svc_handler = svc_handler_i;
++  TAO_UIPMC_Transport *transport =
++    dynamic_cast<TAO_UIPMC_Transport *> (svc_handler->transport ());
+ 
+-      if (TAO_debug_level > 2)
+-        ACE_DEBUG ((LM_DEBUG,
+-                    ACE_TEXT ("(%P|%t) UIPMC_Connector::make_connection, ")
+-                    ACE_TEXT ("new connection on HANDLE %d\n"),
+-                    svc_handler->get_handle ()));
+-   }
++  // In case of errors transport is zero
++  if (transport == 0)
++    {
++      // Give users a clue to the problem.
++      if (TAO_debug_level > 3)
++          ACE_ERROR ((LM_ERROR,
++                      "TAO (%P|%t) - UIPMC_Connector::make_connection, "
++                      "connection to <%s:%u> failed (%p)\n",
++                      ACE_TEXT_CHAR_TO_TCHAR (uipmc_endpoint->get_host_addr ()),
++                      uipmc_endpoint->port (),
++                      ACE_TEXT ("errno")));
+ 
+-  // @@ Michael: We do not use traditional connection management.
+-  svc_handler->add_reference ();
++      return 0;
++    }
+ 
+-  return svc_handler->transport ();
++  // Add the handler to Cache
++  retval =
++    this->orb_core ()->lane_resources ().transport_cache ().cache_transport (&desc,
++                                                                             transport);
++
++  // Failure in adding to cache.
++  if (retval != 0)
++    {
++      // Close the handler.
++      svc_handler->close ();
++
++      if (TAO_debug_level > 0)
++        {
++          ACE_ERROR ((LM_ERROR,
++                      "TAO (%P|%t) - UIPMC_Connector::make_connection, "
++                      "could not add the new connection to cache\n"));
++        }
++
++      return 0;
++    }
++
++  return transport;
+ }
+ 
+ 
+Index: UIPMC_Transport.cpp
+===================================================================
+--- UIPMC_Transport.cpp	(revision 77946)
++++ UIPMC_Transport.cpp	(working copy)
+@@ -207,8 +207,8 @@
+               if (TAO_debug_level > 0)
+                 {
+                   ACE_DEBUG ((LM_DEBUG,
+-                              ACE_TEXT ("\n\nTAO (%P|%t) ")
+-                              ACE_TEXT ("UIPMC_Transport::send_i ")
++                              ACE_TEXT ("\n\nTAO (%P|%t) - ")
++                              ACE_TEXT ("UIPMC_Transport::send ")
+                               ACE_TEXT ("Message of size %d needs too many MIOP fragments (max is %d).\n")
+                               ACE_TEXT ("You may be able to increase ACE_MAX_DGRAM_SIZE.\n"),
+                               bytes_to_send,
+@@ -291,7 +291,7 @@
+           if (TAO_debug_level > 0)
+             {
+               ACE_DEBUG ((LM_DEBUG,
+-                          ACE_TEXT ("\n\nTAO (%P|%t) ")
++                          ACE_TEXT ("\n\nTAO (%P|%t) - ")
+                           ACE_TEXT ("UIPMC_Transport::send")
+                           ACE_TEXT (" %p\n\n"),
+                           ACE_TEXT ("Error returned from transport:")));
+@@ -309,7 +309,7 @@
+       if (TAO_debug_level > 0)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      "TAO_UIPMC_Transport::send_i: sent %d bytes to %s:%d\n",
++                      "TAO_UIPMC_Transport::send: sent %d bytes to %s:%d\n",
+                       rc,
+                       addr.get_host_addr (),
+                       addr.get_port_number ()));
+@@ -339,7 +339,7 @@
+   if (TAO_debug_level > 5)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  "TAO_UIPMC_Transport::recv_i: received %d bytes from %s:%d\n",
++                  "TAO_UIPMC_Transport::recv: received %d bytes from %s:%d\n",
+                   n,
+                   from_addr.get_host_addr (),
+                   from_addr.get_port_number ()));
+@@ -351,7 +351,7 @@
+       if (TAO_debug_level > 0)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      "TAO_UIPMC_Transport::recv_i: packet of size %d is too small from %s:%d\n",
++                      "TAO_UIPMC_Transport::recv: packet of size %d is too small from %s:%d\n",
+                       n,
+                       from_addr.get_host_addr (),
+                       from_addr.get_port_number ()));
+@@ -368,7 +368,7 @@
+       if (TAO_debug_level > 0)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      "TAO_UIPMC_Transport::recv_i: UIPMC packet didn't contain magic bytes.\n"));
++                      "TAO_UIPMC_Transport::recv: UIPMC packet didn't contain magic bytes.\n"));
+         }
+ 
+       return 0;
+@@ -404,7 +404,7 @@
+       if (TAO_debug_level > 0)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      "TAO_UIPMC_Transport::recv_i: Invalid ID length.\n"));
++                      "TAO_UIPMC_Transport::recv: Invalid ID length.\n"));
+         }
+ 
+       return 0;
+@@ -417,7 +417,7 @@
+       if (TAO_debug_level > 0)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      "TAO_UIPMC_Transport::recv_i: MIOP packet not large enough for padding.\n"));
++                      "TAO_UIPMC_Transport::recv: MIOP packet not large enough for padding.\n"));
+         }
+ 
+       return 0;
+@@ -480,7 +480,7 @@
+           ACE_DEBUG ((LM_DEBUG,
+                       ACE_TEXT ("TAO: (%P|%t|%N|%l) recv returned error on transport %d after fault %p\n"),
+                       this->id (),
+-                      ACE_TEXT ("handle_input_i ()\n")));
++                      ACE_TEXT ("handle_input ()\n")));
+         }
+ 
+       if (n == -1)
+@@ -591,7 +591,7 @@
+     {
+       if (TAO_debug_level)
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_TEXT ("TAO: (%P|%t|%N|%l) closing transport %d after fault %p\n"),
++                    ACE_TEXT ("TAO: (%P|%t|%N|%l) closing transport %d after fault %m\n"),
+                     this->id (),
+                     ACE_TEXT ("send_message ()\n")));
+ 
+Index: UIPMC_Connection_Handler.cpp
+===================================================================
+--- UIPMC_Connection_Handler.cpp	(revision 77946)
++++ UIPMC_Connection_Handler.cpp	(working copy)
+@@ -17,6 +17,7 @@
+ #include "tao/Thread_Lane_Resources.h"
+ #include "tao/Base_Transport_Property.h"
+ #include "tao/Resume_Handle.h"
++#include "tao/Protocols_Hooks.h"
+ 
+ 
+ ACE_RCSID(PortableGroup,
+@@ -75,8 +76,8 @@
+   if (result == -1 && TAO_debug_level)
+     {
+       ACE_ERROR ((LM_ERROR,
+-                  ACE_TEXT("TAO (%P|%t) - UMPIC_Connection_Handler::")
+-                  ACE_TEXT("~UMPIC_Connection_Handler, ")
++                  ACE_TEXT("TAO (%P|%t) - UIPMC_Connection_Handler::")
++                  ACE_TEXT("~UIPMC_Connection_Handler, ")
+                   ACE_TEXT("release_os_resources() failed %m\n")));
+     }
+ }
+@@ -142,10 +143,10 @@
+ {
+   this->udp_socket_.open (this->local_addr_);
+ 
+-  if(TAO_debug_level > 5)
++  if (TAO_debug_level > 5)
+   {
+      ACE_DEBUG ((LM_DEBUG,
+-                 ACE_TEXT("TAO (%P|%t) TAO_UIPMC_Connection_Handler::open, ")
++                 ACE_TEXT("TAO (%P|%t) - UIPMC_Connection_Handler::open, ")
+                  ACE_TEXT("listening on: <%s:%u>\n"),
+                  this->local_addr_.get_host_addr (),
+                  this->local_addr_.get_port_number ()));
+@@ -158,7 +159,9 @@
+   // compilers
+   if (!this->transport ()->post_open ((size_t) this->udp_socket_.get_handle ()))
+     return -1;
+-
++  this->state_changed (TAO_LF_Event::LFS_SUCCESS,
++                       this->orb_core ()->leader_follower ());
++                         
+   return 0;
+ }
+ 
+@@ -166,10 +169,10 @@
+ TAO_UIPMC_Connection_Handler::open_server (void)
+ {
+   this->mcast_socket_.join (this->local_addr_);
+-  if( TAO_debug_level > 5)
++  if (TAO_debug_level > 5)
+   {
+      ACE_DEBUG ((LM_DEBUG,
+-                 ACE_TEXT("TAO (%P|%t) TAO_UIPMC_Connection_Handler::open_server, ")
++                 ACE_TEXT("TAO (%P|%t) - UIPMC_Connection_Handler::open_server, ")
+                  ACE_TEXT("subcribed to multicast group at %s:%d\n"),
+                  this->local_addr_.get_host_addr (),
+                  this->local_addr_.get_port_number ()
+@@ -253,10 +256,7 @@
+ int
+ TAO_UIPMC_Connection_Handler::close (u_long)
+ {
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED,
+-           this->orb_core ()->leader_follower ());
+-  this->transport ()->remove_reference ();
+-  return 0;
++  return this->close_handler ();
+ }
+ 
+ int
+Index: UIPMC_Endpoint.cpp
+===================================================================
+--- UIPMC_Endpoint.cpp	(revision 77946)
++++ UIPMC_Endpoint.cpp	(working copy)
+@@ -37,6 +37,7 @@
+   this->object_addr (addr);
+ }
+ 
++// Use of this ctr must be avoided
+ TAO_UIPMC_Endpoint::TAO_UIPMC_Endpoint (const CORBA::Octet class_d_address[4],
+                                         CORBA::UShort port)
+   : TAO_Endpoint (IOP::TAG_UIPMC),
+@@ -59,7 +60,6 @@
+ TAO_UIPMC_Endpoint::object_addr (const ACE_INET_Addr &addr)
+ {
+   this->port_ = addr.get_port_number();
+-  this->uint_ip_addr (addr.get_ip_address ());
+ 
+   this->object_addr_.set (addr);
+ }
+@@ -75,7 +75,7 @@
+ TAO_UIPMC_Endpoint::addr_to_string (char *buffer, size_t length)
+ {
+   size_t actual_len =
+-    15                           // chars in dotted decimal addr
++    ACE_OS::strlen (this->object_addr_.get_host_addr ()) // chars in host name
+     + sizeof (':')               // delimiter
+     + 5                          // max port
+     + sizeof ('\0');
+@@ -83,11 +83,8 @@
+   if (length < actual_len)
+     return -1;
+ 
+-  ACE_OS::sprintf (buffer, "%d.%d.%d.%d:%d",
+-                   this->class_d_address_[0],
+-                   this->class_d_address_[1],
+-                   this->class_d_address_[2],
+-                   this->class_d_address_[3],
++  ACE_OS::sprintf (buffer, "%s:%d",
++                   this->object_addr_.get_host_addr (),
+                    this->port_);
+ 
+   return 0;
+@@ -114,15 +111,15 @@
+ CORBA::Boolean
+ TAO_UIPMC_Endpoint::is_equivalent (const TAO_Endpoint *other_endpoint)
+ {
+-  TAO_Endpoint *endpt = const_cast<TAO_Endpoint *> (other_endpoint);
++  const TAO_UIPMC_Endpoint *endpoint =
++    dynamic_cast<const TAO_UIPMC_Endpoint *> (other_endpoint);
+ 
+-  TAO_UIPMC_Endpoint *endpoint = dynamic_cast<TAO_UIPMC_Endpoint *> (endpt);
+   if (endpoint == 0)
+     return 0;
+ 
+   return
+-    this->port_ == endpoint->port_
+-    && ACE_OS::memcmp (this->class_d_address_, endpoint->class_d_address_, 4) == 0;
++    (this->port_ == endpoint->port_
++     && ACE_OS::strcmp (this->get_host_addr (), endpoint->get_host_addr ()) == 0);
+ }
+ 
+ CORBA::ULong
+@@ -140,8 +137,7 @@
+     if (this->hash_val_ != 0)
+       return this->hash_val_;
+ 
+-    this->hash_val_ =
+-      this->uint_ip_addr () + this->port_;
++    this->hash_val_ = this->object_addr_.hash ();
+   }
+ 
+   return this->hash_val_;
+Index: UIPMC_Profile.h
+===================================================================
+--- UIPMC_Profile.h	(revision 77946)
++++ UIPMC_Profile.h	(working copy)
+@@ -134,9 +134,6 @@
+    */
+   TAO_UIPMC_Endpoint endpoint_;
+ 
+-  /// Number of endpoints in the list headed by <endpoint_>.
+-  CORBA::ULong count_;
+-
+ private:
+ 
+   /// Cached version of our tagged profile.
+@@ -151,6 +148,8 @@
+   /// The group reference's version.
+   PortableGroup::ObjectGroupRefVersion ref_version_;
+ 
++  /// A sign whether ref_version is really present
++  bool has_ref_version_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: UIPMC_Profile.cpp
+===================================================================
+--- UIPMC_Profile.cpp	(revision 77946)
++++ UIPMC_Profile.cpp	(working copy)
+@@ -16,7 +16,7 @@
+            UIPMC_Profile,
+            "$Id$")
+ 
+-static const char the_prefix[] = "uipmc";
++static const char the_prefix[] = "miop";
+ 
+ // UIPMC doesn't support object keys, so send profiles by default in the GIOP 1.2 target
+ // specification.
+@@ -38,7 +38,6 @@
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (),
+-    count_ (1),
+     tagged_profile_ ()
+ {
+     addressing_mode_ = default_addressing_mode_;
+@@ -50,7 +49,6 @@
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (addr),
+-    count_ (1),
+     tagged_profile_ ()
+ {
+     addressing_mode_ = default_addressing_mode_;
+@@ -63,7 +61,6 @@
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (class_d_address, port),
+-    count_ (1),
+     tagged_profile_ ()
+ {
+     addressing_mode_ = default_addressing_mode_;
+@@ -77,7 +74,6 @@
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (),
+-    count_ (1),
+     tagged_profile_ ()
+ {
+   this->add_group_component ();
+@@ -85,16 +81,6 @@
+   addressing_mode_ = default_addressing_mode_;
+ }
+ 
+-TAO_UIPMC_Profile::TAO_UIPMC_Profile (TAO_ORB_Core *orb_core)
+-  : TAO_Profile (TAO_TAG_UIPMC_PROFILE,
+-                 orb_core,
+-                 TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+-    endpoint_ (),
+-    count_ (1),
+-    tagged_profile_ ()
+-{
+-  addressing_mode_ = default_addressing_mode_;
+-}
+ */
+ 
+ TAO_UIPMC_Profile::~TAO_UIPMC_Profile (void)
+@@ -118,7 +104,7 @@
+       if (TAO_debug_level > 0)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("TAO (%P|%t) - Profile::decode - v%d.%d\n"),
++                      ACE_TEXT ("TAO (%P|%t) - UIPMC_Profile::decode - v%d.%d\n"),
+                       this->version_.major,
+                       this->version_.minor));
+         }
+@@ -170,7 +156,7 @@
+     {
+       if (TAO_debug_level > 0)
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_TEXT ("TAO (%P|%t) UIPMC_Profile::decode - ")
++                    ACE_TEXT ("TAO (%P|%t) - UIPMC_Profile::decode - ")
+                     ACE_TEXT ("Couldn't unmarshal address and port!\n")));
+       return -1;
+     }
+@@ -265,13 +251,10 @@
+   // Parse the group_domain_id.
+   // The Domain ID is terminated with a '-'.
+ 
+-  // Wrap the string in a ACE_CString
+-  ACE_CString ace_str (string, 0, false);
+-
+   // Look for the group domain delimitor.
+-  ACE_CString::size_type pos = ace_str.find ('-');
++  const char *pos = ACE_OS::strchr (string, '-');
+ 
+-  if (pos == ACE_CString::npos)
++  if (pos == 0)
+     {
+       // The group_domain_id is mandatory, so throw an
+       // exception if it isn't found.
+@@ -283,18 +266,18 @@
+     }
+ 
+   // Save the group_domain_id.
+-  ACE_CString group_domain_id = ace_str.substring (0, pos);
++  ACE_CString group_domain_id (string, pos - string);
+ 
+   // Parse the group_id.
+   // The group_id is terminated with a '-' or a '/'.
+ 
+   // Skip past the last '-'.
+-  ++pos;
+-  ACE_CString::size_type end_pos = ace_str.find ('-',pos);
++  string = pos + 1;
++  pos = ACE_OS::strchr (string, '-');
+ 
+   CORBA::Boolean parse_group_ref_version_flag = 0;
+ 
+-  if (end_pos != ACE_CString::npos)
++  if (pos != 0)
+     {
+       // String was terminated by a '-', so there's a group
+       // reference version to be parsed.
+@@ -303,9 +286,9 @@
+   else
+     {
+       // Look for a slash as the separator.
+-      end_pos = ace_str.find ('/', pos);
++      pos = ACE_OS::strchr (string, '/');
+ 
+-      if (end_pos == ACE_CString::npos)
++      if (pos == 0)
+         {
+           // The Group ID is mandatory, so throw an exception.
+           throw CORBA::INV_OBJREF (
+@@ -316,22 +299,37 @@
+         }
+     }
+ 
+-  // Get the domain_id.
+-  ACE_CString str_domain_id = ace_str.substring (pos, end_pos - pos);
++  const char* str_check;
++  for (str_check = string; str_check < pos; str_check++)
++    {
++      if (!isdigit (str_check[0]))
++        {
++          // Throw an exception if it's not a proper number
++          throw CORBA::INV_OBJREF (
++            CORBA::SystemException::_tao_minor_code (
++              TAO::VMCID,
++              EINVAL),
++            CORBA::COMPLETED_NO);
++        }
++    }
+ 
++  // Get the group_id.
++  ACE_CString str_group_id (string, pos - string);
++
+   // Convert the domain_id into numerical form.
+   // @@ group_id is actually 64 bits, but strtoul only can parse 32 bits.
+   // @@ Need a 64 bit strtoul...
+   PortableGroup::ObjectGroupId group_id =
+-    ACE_OS::strtoul (str_domain_id.c_str (), 0, 10);
++    ACE_OS::strtoul (str_group_id.c_str (), 0, 10);
+ 
++  this->has_ref_version_ = false;
+   PortableGroup::ObjectGroupRefVersion ref_version = 0;
+   if (parse_group_ref_version_flag)
+     {
+       // Try to find the group version.  It is terminated by a '/'.
+-      pos = end_pos + 1;
+-      end_pos = ace_str.find ('/', pos);
+-      if (end_pos == ACE_CString::npos)
++      string = pos + 1;
++      pos = ACE_OS::strchr (string, '/');
++      if (pos == 0)
+         {
+           // The group version was expected but not found,
+           // so throw an exception.
+@@ -342,18 +340,32 @@
+             CORBA::COMPLETED_NO);
+         }
+ 
+-      ACE_CString str_group_ref_ver = ace_str.substring (pos, end_pos - pos);
++      for (str_check = string; str_check < pos; str_check++)
++        {
++          if (!isdigit (str_check[0]))
++            {
++              // Throw an exception if it's not a proper number
++              throw CORBA::INV_OBJREF (
++                CORBA::SystemException::_tao_minor_code (
++                  TAO::VMCID,
++                  EINVAL),
++               CORBA::COMPLETED_NO);
++            }
++        }
+ 
++      ACE_CString str_group_ref_ver (string, pos - string);
++
+       ref_version =
+         ACE_OS::strtoul (str_group_ref_ver.c_str (), 0, 10);
++      this->has_ref_version_ = true;
+     }
+ 
+   // Parse the group multicast address.
+   // The multicast address is terminated by a ':'.
+-  pos = end_pos + 1;
+-  end_pos = ace_str.find (':', pos);
++  string = pos + 1;
++  pos = ACE_OS::strchr (string, ':');
+ 
+-  if (end_pos == ACE_CString::npos)
++  if (pos == 0)
+     {
+       // The multicast address is mandatory, so throw an exception,
+       // since it wasn't found.
+@@ -364,13 +376,26 @@
+         CORBA::COMPLETED_NO);
+     }
+ 
+-  ACE_CString mcast_addr = ace_str.substring (pos, end_pos - pos);
++  for (str_check = string; str_check < pos; str_check++)
++    {
++      if (!isdigit (str_check[0]) && str_check[0] != '.')
++        {
++          // Throw an exception if it's not a proper IPv4 address
++          throw CORBA::INV_OBJREF (
++            CORBA::SystemException::_tao_minor_code (
++              TAO::VMCID,
++              EINVAL),
++            CORBA::COMPLETED_NO);
++        }
++    }
+ 
++  ACE_CString mcast_addr (string, pos - string);
++  string = pos + 1;
++
+   // Parse the multicast port number.
+ 
+   // First check that there's something left in the string.
+-  pos = end_pos + 1;
+-  if (ace_str[pos] == '\0')
++  if (string[0] == '\0')
+     {
+       // The multicast port is mandatory, so throw an exception,
+       // since it wasn't found.
+@@ -381,8 +406,21 @@
+         CORBA::COMPLETED_NO);
+     }
+ 
++  for (str_check = string; str_check[0] != '\0'; str_check++)
++    {
++      if (!isdigit (str_check[0]))
++        {
++          // Throw an exception if it's not a proper number
++          throw CORBA::INV_OBJREF (
++            CORBA::SystemException::_tao_minor_code (
++              TAO::VMCID,
++              EINVAL),
++            CORBA::COMPLETED_NO);
++        }
++    }
++
+   CORBA::UShort mcast_port =
+-      static_cast<CORBA::UShort> (ACE_OS::strtoul (ace_str.c_str () + pos, 0, 10));
++      static_cast<CORBA::UShort> (ACE_OS::strtoul (string, 0, 10));
+ 
+   //
+   // Finally, set all of the fields of the profile.
+@@ -394,7 +432,6 @@
+   this->set_group_info (group_domain_id.c_str (),
+                         group_id,
+                         ref_version);
+-
+ }
+ 
+ CORBA::Boolean
+@@ -442,27 +479,56 @@
+ char *
+ TAO_UIPMC_Profile::to_string (void)
+ {
+-  // @@ Frank: Update to pull out GroupID information...
++  // corbaloc:miop:1.2@1.0-group_id-1-1/host:port
+ 
+-  size_t buflen = (ACE_OS::strlen (::the_prefix) +
+-                   3 /* "loc" */ +
++  size_t buflen = (8 /* "corbaloc" */ +
+                    1 /* colon separator */ +
+-                   2 /* double-slash separator */ +
++                   ACE_OS::strlen (::the_prefix) + /* "miop" */
++                   1 /* colon separator */ +
+                    1 /* major version */ +
+                    1 /* decimal point */ +
+                    1 /* minor version */ +
+                    1 /* `@' character */ +
+-                   15 /* dotted decimal IPv4 address */ +
++                   1 /* component major version */ +
++                   1 /* decimal point */ +
++                   1 /* component minor version */ +
++                   1 /* `-' character */ +
++                   this->group_domain_id_.length () + /* domain id */
++                   1 /* `-' character */ +
++                   20 /* group id */ +
++                   1 /* `-' character */ +
++                   10 /* group reference version */ +
++                   1 /* `/' character */ +
++                   15 /* IPv4 address */ +
+                    1 /* colon separator */ +
+                    5 /* port number */);
+ 
++  static const char digits [] = "0123456789";
++
+   char * buf = CORBA::string_alloc (static_cast<CORBA::ULong> (buflen));
+ 
+   ACE_OS::sprintf (buf,
+-                   "corbaloc:%s://1.0@%s:%d",
++                   "corbaloc:%s:%c.%c@%c.%c-%s-%llu",
+                    ::the_prefix,
++                   digits [this->version_.major],
++                   digits [this->version_.minor],
++                   digits [TAO_DEF_MIOP_MAJOR],
++                   digits [TAO_DEF_MIOP_MINOR],
++                   this->group_domain_id_.c_str (),
++                   this->group_id_);
++
++  if (this->has_ref_version_)
++    {
++      ACE_OS::sprintf (&buf[ACE_OS::strlen (buf)],
++                       "-%lu",
++                       this->ref_version_);
++    }
++
++  ACE_OS::sprintf (&buf[ACE_OS::strlen (buf)],
++                   "/%s:%d",
+                    this->endpoint_.get_host_addr (),
+                    this->endpoint_.port ());
++
+   return buf;
+ }
+ 
+@@ -739,7 +805,7 @@
+     if (TAO_debug_level > 0)
+       {
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_TEXT ("TAO (%P|%t) UIPMC_Profile::extract_group_component - v%d.%d\n"),
++                    ACE_TEXT ("TAO (%P|%t) - UIPMC_Profile::extract_group_component - v%d.%d\n"),
+                     major,
+                     minor));
+       }
+@@ -755,7 +821,7 @@
+     {
+       if (TAO_debug_level > 0)
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_TEXT ("TAO (%P|%t) UIPMC_Profile::extract_group_component - Couldn't unmarshal address and port!\n")));
++                    ACE_TEXT ("TAO (%P|%t) - UIPMC_Profile::extract_group_component - Couldn't unmarshal address and port!\n")));
+       return -1;
+     }
+ 
