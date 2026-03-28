@@ -1,0 +1,23 @@
+Index: ACE_wrappers/TAO/tao/PortableServer/Object_Adapter.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/PortableServer/Object_Adapter.cpp,v
+retrieving revision 1.2
+diff -u -r1.2 Object_Adapter.cpp
+--- ACE_wrappers/TAO/tao/PortableServer/Object_Adapter.cpp	10 Apr 2003 22:51:26 -0000	1.2
++++ ACE_wrappers/TAO/tao/PortableServer/Object_Adapter.cpp	12 Jun 2003 17:32:26 -0000
+@@ -867,7 +867,14 @@
+       ACE_ENDTRY;
+     }
+ 
+-  return 0;
++  stub->servant_orb(this->orb_core_.orb());
++  CORBA::Object_ptr x;
++  ACE_NEW_RETURN (x,
++      CORBA::Object (stub, 1, 0),
++      CORBA::Object::_nil ());
++  x->_proxy_broker(the_tao_strategized_object_proxy_broker());
++
++  return x;
+ }
+ 
+ // ****************************************************************
