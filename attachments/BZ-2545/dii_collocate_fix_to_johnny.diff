@@ -1,0 +1,721 @@
+Index: tao/Invocation_Adapter.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Invocation_Adapter.cpp,v
+retrieving revision 1.26
+diff -u -r1.26 Invocation_Adapter.cpp
+--- tao/Invocation_Adapter.cpp	29 Mar 2006 16:32:14 -0000	1.26
++++ tao/Invocation_Adapter.cpp	22 May 2006 01:58:29 -0000
+@@ -45,7 +45,8 @@
+                                       this->args_,
+                                       this->number_args_,
+                                       ex_data,
+-                                      ex_count);
++                                      ex_count,
++                                      this->is_dii_request_);
+ 
+     this->invoke_i (stub,
+                     op_details
+Index: tao/Invocation_Adapter.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Invocation_Adapter.h,v
+retrieving revision 1.20
+diff -u -r1.20 Invocation_Adapter.h
+--- tao/Invocation_Adapter.h	29 Mar 2006 06:26:34 -0000	1.20
++++ tao/Invocation_Adapter.h	22 May 2006 04:49:31 -0000
+@@ -108,6 +108,9 @@
+      *
+      * @param mode Invocation mode. This information is also available
+      * in the IDL file and in the generated code.
++     *
++     * @param is_dii_request DII request flag. This flag defaults to 0,
++     *  it's set to be 1 when invoking via DynamicInterface.
+      */
+     Invocation_Adapter (CORBA::Object_ptr target,
+                         Argument **args,
+@@ -116,7 +119,8 @@
+                         size_t op_len,
+                         Collocation_Proxy_Broker *cpb,
+                         TAO::Invocation_Type type = TAO_TWOWAY_INVOCATION,
+-                        TAO::Invocation_Mode mode = TAO_SYNCHRONOUS_INVOCATION);
++                        TAO::Invocation_Mode mode = TAO_SYNCHRONOUS_INVOCATION,                        
++                        CORBA::Boolean is_dii_request = 0);
+ 
+     virtual ~Invocation_Adapter (void);
+ 
+@@ -280,6 +284,8 @@
+     /// The invocation mode
+     Invocation_Mode const mode_;
+ 
++    /// Flag that indicates a dii request.
++    CORBA::Boolean  is_dii_request_;
+   };
+ } // End namespace TAO
+ 
+Index: tao/Invocation_Adapter.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Invocation_Adapter.inl,v
+retrieving revision 1.7
+diff -u -r1.7 Invocation_Adapter.inl
+--- tao/Invocation_Adapter.inl	2 Nov 2005 07:13:03 -0000	1.7
++++ tao/Invocation_Adapter.inl	22 May 2006 02:36:21 -0000
+@@ -15,7 +15,8 @@
+       size_t op_len,
+       Collocation_Proxy_Broker *p,
+       Invocation_Type type,
+-      Invocation_Mode mode)
++      Invocation_Mode mode,
++      CORBA::Boolean  is_dii_request)
+     : target_ (target)
+     , args_ (args)
+     , number_args_  (arg_number)
+@@ -24,6 +25,7 @@
+     , cpb_ (p)
+     , type_ (type)
+     , mode_ (mode)
++    , is_dii_request_ (is_dii_request)
+   {
+   }
+ }
+Index: tao/operation_details.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/operation_details.h,v
+retrieving revision 1.29
+diff -u -r1.29 operation_details.h
+--- tao/operation_details.h	10 Mar 2006 07:19:07 -0000	1.29
++++ tao/operation_details.h	26 May 2006 17:06:22 -0000
+@@ -76,7 +76,8 @@
+                          TAO::Argument **args = 0,
+                          CORBA::ULong num_args = 0,
+                          TAO::Exception_Data *ex_data = 0,
+-                         CORBA::ULong ex_count = 0);
++                         CORBA::ULong ex_count = 0,
++                         CORBA::Boolean is_dii_request = 0);
+ 
+   /// Operation name
+   const char* opname (void) const;
+@@ -162,6 +163,16 @@
+   void ft_retention_id (CORBA::Long request_id);
+   CORBA::Long ft_retention_id (void) const;
+ 
++  /// Modifiers for the argumet list
++  /// These modifiers are used for DII collocated requests.
++  /// The server side uses the modifiers to set the argument list
++  /// after it converts the NVList_Argument to list of *_SArguments.
++  void args (TAO::Argument **);
++  void args_num (CORBA::ULong);
++
++  /// Accessor for is_dii_request_ flag.
++  CORBA::Boolean is_dii_request (void) const;
++
+ private:
+ 
+   /// Name of the operation being invoked.
+@@ -210,6 +221,9 @@
+   /// FT request retention id
+   CORBA::Long ft_retention_id_;
+ #endif /*TAO_HAS_INTERCEPTORS == 1*/
++
++  /// The dii request flag.
++  CORBA::Boolean is_dii_request_;  
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/operation_details.i
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/operation_details.i,v
+retrieving revision 1.19
+diff -u -r1.19 operation_details.i
+--- tao/operation_details.i	19 Apr 2006 08:48:59 -0000	1.19
++++ tao/operation_details.i	26 May 2006 16:49:48 -0000
+@@ -11,7 +11,8 @@
+                                               TAO::Argument **args,
+                                               CORBA::ULong num,
+                                               TAO::Exception_Data *data,
+-                                              CORBA::ULong count)
++                                              CORBA::ULong count,
++                                              CORBA::Boolean is_dii_request)
+   : opname_ (name)
+     , opname_len_ (len)
+     , request_id_ (0)
+@@ -26,6 +27,7 @@
+     , ft_expiration_time_ (0)
+     , ft_retention_id_ (0)
+ #endif /*TAO_HAS_INTERCEPTORS == 1*/
++    , is_dii_request_ (is_dii_request)
+ {
+ }
+ 
+@@ -197,4 +199,22 @@
+ }
+ #endif /*TAO_HAS_INTERCEPTORS == 1*/
+ 
++ACE_INLINE void
++TAO_Operation_Details::args (TAO::Argument ** args) 
++{
++  this->args_ = args;
++}
++
++ACE_INLINE void
++TAO_Operation_Details::args_num (CORBA::ULong num_args) 
++{
++  this->num_args_ = num_args;
++}
++
++ACE_INLINE CORBA::Boolean
++TAO_Operation_Details::is_dii_request (void) const
++{
++  return this->is_dii_request_;
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/TAO_Server_Request.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/TAO_Server_Request.cpp,v
+retrieving revision 1.52
+diff -u -r1.52 TAO_Server_Request.cpp
+--- tao/TAO_Server_Request.cpp	20 Apr 2006 12:37:17 -0000	1.52
++++ tao/TAO_Server_Request.cpp	22 May 2006 04:43:49 -0000
+@@ -131,7 +131,7 @@
+ 
+ // Constructor used in Thru-POA collocation code.
+ TAO_ServerRequest::TAO_ServerRequest (TAO_ORB_Core * orb_core,
+-                                      TAO_Operation_Details const & details,
++                                      TAO_Operation_Details & details,
+                                       CORBA::Object_ptr target)
+   : mesg_base_ (0),
+     operation_ (details.opname ()),
+Index: tao/TAO_Server_Request.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/TAO_Server_Request.h,v
+retrieving revision 1.39
+diff -u -r1.39 TAO_Server_Request.h
+--- tao/TAO_Server_Request.h	10 Mar 2006 07:19:06 -0000	1.39
++++ tao/TAO_Server_Request.h	22 May 2006 04:41:17 -0000
+@@ -122,7 +122,7 @@
+ 
+   /// Constructor used by thru-POA collocated invocation path.
+   TAO_ServerRequest (TAO_ORB_Core * orb_core,
+-                     TAO_Operation_Details const & details,
++                     TAO_Operation_Details & details,
+                      CORBA::Object_ptr target);
+ 
+   /// Destructor.
+@@ -341,7 +341,7 @@
+   /// Used to pad CDR stream if we have used DSI.
+   ptrdiff_t dsi_nvlist_align_;
+ 
+-  TAO_Operation_Details const * operation_details_;
++  TAO_Operation_Details * operation_details_;
+ 
+   /**
+    * An argument flag to indicate whether there is any data that is
+Index: tao/CSD_Framework/CSD_FW_Server_Request_Wrapper.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/CSD_Framework/CSD_FW_Server_Request_Wrapper.cpp,v
+retrieving revision 1.7
+diff -u -r1.7 CSD_FW_Server_Request_Wrapper.cpp
+--- tao/CSD_Framework/CSD_FW_Server_Request_Wrapper.cpp	17 May 2006 19:12:46 -0000	1.7
++++ tao/CSD_Framework/CSD_FW_Server_Request_Wrapper.cpp	25 May 2006 05:36:35 -0000
+@@ -300,20 +300,17 @@
+ 
+ 
+ bool
+-TAO::CSD::FW_Server_Request_Wrapper::clone (TAO_Operation_Details const *& from,
+-                                            TAO_Operation_Details const *& to, 
++TAO::CSD::FW_Server_Request_Wrapper::clone (TAO_Operation_Details *& from,
++                                            TAO_Operation_Details *& to, 
+                                             TAO_InputCDR*& cdr)
+ {
+-  TAO_Operation_Details *& from_non_const
+-    = const_cast <TAO_Operation_Details *&>(from);
+-
+-  char* cloned_op_name = new char[from_non_const->opname_len_ + 1];
+-  ACE_OS::strncpy(cloned_op_name, from_non_const->opname_, from_non_const->opname_len_);
+-  cloned_op_name[from_non_const->opname_len_] = '\0';
++  char* cloned_op_name = new char[from->opname_len_ + 1];
++  ACE_OS::strncpy(cloned_op_name, from->opname_, from->opname_len_);
++  cloned_op_name[from->opname_len_] = '\0';
+ 
+   TAO_OutputCDR outcdr;
+ 
+-  if (! from_non_const->marshal_args (outcdr))
++  if (! from->marshal_args (outcdr))
+     {
+       ACE_ERROR ((LM_ERROR,
+                   ACE_TEXT("(%P|%T) TAO::CSD::FW_Server_Request_Wrapper::")
+@@ -329,11 +326,10 @@
+   // CSD-TBD: Eventually need to use allocators.
+ 
+   // CSD-TBD: Assert that this->ex_data_ and this->ex_count_ are both == 0
+-  TAO_Operation_Details* to_non_const;
+-  ACE_NEW_RETURN (to_non_const,
++  ACE_NEW_RETURN (to,
+                   TAO_Operation_Details(cloned_op_name,
+-                                        from_non_const->opname_len_,
+-                                        from_non_const->argument_flag_,
++                                        from->opname_len_,
++                                        from->argument_flag_,
+                                         0,
+                                         0,
+                                         0,
+@@ -360,19 +356,17 @@
+   //
+   //    ACTION: Use assignment op to copy from "this" object to the clone.
+   //
+-  to_non_const->request_id_      = from->request_id_;
+-  to_non_const->response_flags_  = from->response_flags_;
+-  to_non_const->addressing_mode_ = from->addressing_mode_;
++  to->request_id_      = from->request_id_;
++  to->response_flags_  = from->response_flags_;
++  to->addressing_mode_ = from->addressing_mode_;
+ 
+   // DATA MEMBER: TAO_Service_Context request_service_info_;
+   // DATA MEMBER: TAO_Service_Context reply_service_info_;
+   //
+   //    ACTION: Use the TAO_Service_Context clone() method.
+   //
+-  this->clone (from_non_const->request_service_info_, to_non_const->request_service_info_);
+-  this->clone (from_non_const->reply_service_info_, to_non_const->reply_service_info_);
+-
+-  to = to_non_const;
++  this->clone (from->request_service_info_, to->request_service_info_);
++  this->clone (from->reply_service_info_, to->reply_service_info_);
+ 
+   return true;
+ }
+Index: tao/CSD_Framework/CSD_FW_Server_Request_Wrapper.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/CSD_Framework/CSD_FW_Server_Request_Wrapper.h,v
+retrieving revision 1.3
+diff -u -r1.3 CSD_FW_Server_Request_Wrapper.h
+--- tao/CSD_Framework/CSD_FW_Server_Request_Wrapper.h	10 Mar 2006 07:19:07 -0000	1.3
++++ tao/CSD_Framework/CSD_FW_Server_Request_Wrapper.h	25 May 2006 05:34:13 -0000
+@@ -92,8 +92,8 @@
+       /// code to determine whether the arguments are in the operation_details_ 
+       /// object or should be demarshalled from the incoming_ stream in the request_
+       /// object.
+-      bool clone (TAO_Operation_Details const *& from,
+-                  TAO_Operation_Details const *& to, 
++      bool clone (TAO_Operation_Details *& from,
++                  TAO_Operation_Details *& to, 
+                   TAO_InputCDR* & cdr);
+ 
+       /// Clone the TAO_Tagged_Profile object.
+Index: tao/DynamicInterface/DII_Arguments.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/DynamicInterface/DII_Arguments.h,v
+retrieving revision 1.6
+diff -u -r1.6 DII_Arguments.h
+--- tao/DynamicInterface/DII_Arguments.h	10 Mar 2006 07:19:08 -0000	1.6
++++ tao/DynamicInterface/DII_Arguments.h	24 May 2006 04:56:24 -0000
+@@ -81,6 +81,8 @@
+     // deals with the argument list as a whole.
+     void interceptor_paramlist (Dynamic::ParameterList *);
+ 
++    CORBA::NVList_ptr arg () const;
++
+   private:
+     CORBA::NVList_ptr x_;
+ 
+Index: tao/DynamicInterface/DII_Arguments.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/DynamicInterface/DII_Arguments.inl,v
+retrieving revision 1.3
+diff -u -r1.3 DII_Arguments.inl
+--- tao/DynamicInterface/DII_Arguments.inl	3 Nov 2005 17:38:45 -0000	1.3
++++ tao/DynamicInterface/DII_Arguments.inl	24 May 2006 04:57:03 -0000
+@@ -28,6 +28,13 @@
+       , lazy_evaluation_ (lazy_eval)
+   {
+   }
++
++  ACE_INLINE
++  CORBA::NVList_ptr 
++  NVList_Argument::arg () const
++  {
++    return this->x_;
++  }
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/DynamicInterface/DII_Arguments_Converter_Impl.cpp
+===================================================================
+RCS file: tao/DynamicInterface/DII_Arguments_Converter_Impl.cpp
+diff -N tao/DynamicInterface/DII_Arguments_Converter_Impl.cpp
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ tao/DynamicInterface/DII_Arguments_Converter_Impl.cpp	26 May 2006 06:50:33 -0000
+@@ -0,0 +1,108 @@
++// $Id: DII_Arguments_Converter_Impl.cpp,v 1.20 2006/04/19 09:39:20 jwillemsen Exp $
++
++#include "tao/DynamicInterface/DII_Arguments_Converter_Impl.h"
++#include "tao/DynamicInterface/DII_Arguments.h"
++#include "tao/AnyTypeCode/NVList.h"
++#include "tao/AnyTypeCode/Any_Impl.h"
++#include "tao/operation_details.h"
++
++
++ACE_RCSID (DynamicInterface,
++           DII_Arguments_Converter_Impl,
++           "$Id: DII_Arguments_Converter_Impl.cpp,v 1.20 2006/04/19 09:39:20 jwillemsen Exp $")
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++
++TAO_DII_Arguments_Converter_Impl::~TAO_DII_Arguments_Converter_Impl (void)
++{
++}
++
++
++void
++TAO_DII_Arguments_Converter_Impl::convert (
++    TAO_ServerRequest & server_request,
++    TAO::Argument * const args[],
++    size_t nargs
++    ACE_ENV_ARG_DECL
++  )
++{
++  // The DII requests on client side always have two arguments
++  // - one is the return argument and the other is NVList_Argument.
++  // Since the argument list in the client side is used by server side
++  // in collocation case and the server expects the list of arguments
++  // and not the NVList_Argument, we need expand the NVList_Argument
++  // to be list of Arguments.
++
++  // Before expanding NVList_Argument logic was added, the
++  // $TAO_ROOT/tests/DII_Collocated_Tests/run_test.pl should fail.
++  // The servant will get incorrect "IN" parameter from the oneway
++  // operation with single "IN" parameter and get access violation on
++  // get_in_arg () from the oneway operation with multiple "IN"
++  // parameters.
++  CORBA::NVList_ptr lst
++    = static_cast<TAO::NVList_Argument *> (server_request.operation_details ()->args()[1])->arg ();
++
++  CORBA::ULong sz = lst->count (ACE_ENV_SINGLE_ARG_PARAMETER);
++  ACE_CHECK;
++
++  if (sz != nargs - 1)
++    {
++      ACE_THROW (CORBA::BAD_PARAM ());
++    }
++
++  // To avoid the use of extraction operators on CORBA::Any, we will
++  // marshal the arguments in the NVList into an output cdr and then
++  // demarshal them into the TAO::Argument array.
++  TAO_OutputCDR output;
++  for (CORBA::ULong i = 0; i < sz; ++i)
++    {
++      CORBA::NamedValue_ptr theitem = lst->item (i
++                                                  ACE_ENV_ARG_PARAMETER);
++      ACE_CHECK;
++      if (!(theitem->value ()->impl ()->marshal_value (output)))
++        {
++          ACE_THROW (CORBA::BAD_PARAM ());
++        }
++    }
++
++  TAO_InputCDR input (output);
++  for (CORBA::ULong j = 0; j < sz; ++j)
++    {
++      if (!(args[j + 1]->demarshal (input)))
++        {
++          ACE_THROW (CORBA::BAD_PARAM ());
++        }
++    }
++
++  TAO_Operation_Details* details
++    = const_cast <TAO_Operation_Details*> (server_request.operation_details ());
++  details->args (const_cast<TAO::Argument**> (args));
++  details->args_num (nargs);
++}
++
++
++// *********************************************************************
++
++// Initialization and registration of dynamic service object.
++
++int
++TAO_DII_Arguments_Converter_Impl::Initializer (void)
++{
++  return ACE_Service_Config::process_directive (ace_svc_desc_TAO_DII_Arguments_Converter_Impl);
++}
++
++TAO_END_VERSIONED_NAMESPACE_DECL
++
++ACE_STATIC_SVC_DEFINE (
++    TAO_DII_Arguments_Converter_Impl,
++    ACE_TEXT ("DII_Arguments_Converter"),
++    ACE_SVC_OBJ_T,
++    &ACE_SVC_NAME (TAO_DII_Arguments_Converter_Impl),
++    ACE_Service_Type::DELETE_THIS | ACE_Service_Type::DELETE_OBJ,
++    0
++  )
++
++ACE_FACTORY_DEFINE (TAO_DynamicInterface, TAO_DII_Arguments_Converter_Impl)
++
++
+Index: tao/DynamicInterface/DII_Arguments_Converter_Impl.h
+===================================================================
+RCS file: tao/DynamicInterface/DII_Arguments_Converter_Impl.h
+diff -N tao/DynamicInterface/DII_Arguments_Converter_Impl.h
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ tao/DynamicInterface/DII_Arguments_Converter_Impl.h	26 May 2006 06:49:47 -0000
+@@ -0,0 +1,67 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ *  @file    DII_Arguments_Converter_Impl.h
++ *
++ *  $Id: DII_Arguments_Converter_Impl.h,v 1.15 2006/03/10 07:19:10 jtc Exp $
++ *
++ *  @author  Yan Dai <dai_y@ociweb.com>
++ */
++//=============================================================================
++
++
++#ifndef TAO_DII_ARGUMENTS_CONVERTER_IMPL_H
++#define TAO_DII_ARGUMENTS_CONVERTER_IMPL_H
++
++#include /**/ "ace/pre.h"
++
++#include "tao/DynamicInterface/dynamicinterface_export.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++#include "tao/PortableServer/DII_Arguments_Converter.h"
++
++#include "ace/Service_Config.h"
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++
++/**
++ * @class DII_Arguments_Converter_Impl
++ *
++ * @brief DII_Arguments_Converter_Impl.
++ *
++ * This class provides the implementation to expand the DII arguments in NVList 
++ * to the list of arguments. 
++ */
++class TAO_DynamicInterface_Export TAO_DII_Arguments_Converter_Impl
++  : public TAO_DII_Arguments_Converter
++{
++public:
++  virtual ~TAO_DII_Arguments_Converter_Impl (void);
++
++  virtual void convert ( TAO_ServerRequest & server_request,
++                         TAO::Argument * const args[],
++                         size_t nargs
++                         ACE_ENV_ARG_DECL );
++ 
++  // Used to force the initialization of the ORB code.
++  static int Initializer (void);
++};
++
++static int
++TAO_Requires_DII_Arguments_Converter_Initializer =
++  TAO_DII_Arguments_Converter_Impl::Initializer ();
++
++TAO_END_VERSIONED_NAMESPACE_DECL
++
++ACE_STATIC_SVC_DECLARE (TAO_DII_Arguments_Converter_Impl)
++ACE_FACTORY_DECLARE (TAO_DynamicInterface, TAO_DII_Arguments_Converter_Impl)
++
++
++#include /**/ "ace/post.h"
++
++#endif /* TAO_DII_ARGUMENTS_CONVERTER_IMPL_H */
+Index: tao/DynamicInterface/DII_Invocation_Adapter.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/DynamicInterface/DII_Invocation_Adapter.cpp,v
+retrieving revision 1.14
+diff -u -r1.14 DII_Invocation_Adapter.cpp
+--- tao/DynamicInterface/DII_Invocation_Adapter.cpp	29 Mar 2006 16:32:14 -0000	1.14
++++ tao/DynamicInterface/DII_Invocation_Adapter.cpp	24 May 2006 18:30:17 -0000
+@@ -14,7 +14,7 @@
+ #include "ace/os_include/os_errno.h"
+ 
+ ACE_RCSID (tao,
+-           Invocation_Adapter,
++           DII_Invocation_Adapter,
+            "$Id: DII_Invocation_Adapter.cpp,v 1.14 2006/03/29 16:32:14 frehberger Exp $")
+ 
+ 
+@@ -38,7 +38,8 @@
+                           op_len,
+                           0, // Collocation Proxy broker pointer
+                           TAO_TWOWAY_INVOCATION,
+-                          m)
++                          m,
++                          1) // is a dii request
+       , exception_list_ (excp)
+       , request_ (r)
+   {
+@@ -118,7 +119,8 @@
+                           op_len,
+                           b,
+                           TAO_TWOWAY_INVOCATION,
+-                          mode)
++                          mode,
++                          1) // is a dii request
+       , request_ (req)
+       , rd_ (0)
+       , orb_core_ (oc)
+Index: tao/DynamicInterface/Request.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/DynamicInterface/Request.cpp,v
+retrieving revision 1.43
+diff -u -r1.43 Request.cpp
+--- tao/DynamicInterface/Request.cpp	19 Apr 2006 09:40:15 -0000	1.43
++++ tao/DynamicInterface/Request.cpp	23 May 2006 22:34:53 -0000
+@@ -217,7 +217,9 @@
+       this->opname_,
+       static_cast<CORBA::ULong> (ACE_OS::strlen (this->opname_)),
+       0,
+-      TAO::TAO_ONEWAY_INVOCATION);
++      TAO::TAO_ONEWAY_INVOCATION,
++      TAO::TAO_SYNCHRONOUS_INVOCATION,
++      1); // is_dii_request
+ 
+   _tao_call.invoke (0,
+                     0
+Index: tao/PortableServer/DII_Arguments_Converter.h
+===================================================================
+RCS file: tao/PortableServer/DII_Arguments_Converter.h
+diff -N tao/PortableServer/DII_Arguments_Converter.h
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ tao/PortableServer/DII_Arguments_Converter.h	26 May 2006 06:46:03 -0000
+@@ -0,0 +1,54 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ *  @file    DII_Arguments_Converter.h
++ *
++ *  $Id: DII_Arguments_Converter.h,v 1.17 2005/11/02 07:13:03 ossama Exp $
++ *
++ *  @author  Yan Dai <dai_y@ociweb.com>
++ */
++//=============================================================================
++
++
++#ifndef TAO_DII_ARGUMENTS_CONVERTER_H
++#define TAO_DII_ARGUMENTS_CONVERTER_H
++
++#include /**/ "ace/pre.h"
++
++#include "portableserver_export.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++#include "tao/TAO_Server_Request.h"
++#include "ace/Service_Object.h"
++
++
++TAO_BEGIN_VERSIONED_NAMESPACE_DECL
++
++/**
++ * @class TAO_DII_Arguments_Converter
++ *
++ * @brief TAO_DII_Arguments_Converter.
++ *
++ * Abstract class that convert the DII arguments in NVList to the
++ * list of arguments. This is a base class for the actual implementation 
++ * in the DynamicInterface library.
++ */
++class TAO_PortableServer_Export TAO_DII_Arguments_Converter : public ACE_Service_Object
++{
++public:
++  
++  virtual void convert ( TAO_ServerRequest & server_request,
++                         TAO::Argument * const args[],
++                         size_t nargs
++                         ACE_ENV_ARG_DECL ) = 0;
++
++};
++
++TAO_END_VERSIONED_NAMESPACE_DECL
++
++#include /**/ "ace/post.h"
++#endif /* TAO_DII_ARGUMENTS_CONVERTER_H */
+Index: tao/PortableServer/get_arg.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/get_arg.h,v
+retrieving revision 1.3
+diff -u -r1.3 get_arg.h
+--- tao/PortableServer/get_arg.h	4 Nov 2005 09:26:56 -0000	1.3
++++ tao/PortableServer/get_arg.h	24 May 2006 18:41:12 -0000
+@@ -79,12 +79,24 @@
+                 TAO::Argument * const * skel_args,
+                 size_t i)
+     {
+-      return
+-        (details != 0 && details->args () != 0)
+-        ? static_cast<typename TAO::Arg_Traits<T>::in_arg_val *> (
+-            details->args ()[i])->arg ()
+-        : static_cast<typename TAO::SArg_Traits<T>::in_arg_val *> (
++      if (details != 0 && details->is_dii_request ()) 
++        {
++          // The NVList_Argument in collocated dii request is expanded to 
++          // the list of *_SArgument, we need get the arguments from those
++          // *_SArgument.
++          return static_cast<typename TAO::SArg_Traits<T>::in_arg_val *> (
++            details->args ()[i])->arg ();
++        }
++      else if (details != 0 && details->args () != 0)
++        {
++          return static_cast<typename TAO::Arg_Traits<T>::in_arg_val *> (
++            details->args ()[i])->arg ();
++        }
++      else
++      	{
++          return static_cast<typename TAO::SArg_Traits<T>::in_arg_val *> (
+             skel_args[i])->arg ();
++        }
+     }
+ 
+     /// Get "inout" argument.
+Index: tao/PortableServer/Upcall_Wrapper.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Upcall_Wrapper.cpp,v
+retrieving revision 1.17
+diff -u -r1.17 Upcall_Wrapper.cpp
+--- tao/PortableServer/Upcall_Wrapper.cpp	20 Apr 2006 12:37:17 -0000	1.17
++++ tao/PortableServer/Upcall_Wrapper.cpp	26 May 2006 16:07:03 -0000
+@@ -2,6 +2,7 @@
+ 
+ #include "tao/PortableServer/Upcall_Wrapper.h"
+ #include "tao/PortableServer/Upcall_Command.h"
++#include "tao/PortableServer/DII_Arguments_Converter.h"
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+ # include "tao/ServerRequestInterceptor_Adapter.h"
+@@ -38,6 +39,24 @@
+                              ACE_ENV_ARG_DECL
+                              )
+ {
++  if (server_request.collocated ()
++    && server_request.operation_details ()->is_dii_request ())
++    {
++      TAO_DII_Arguments_Converter* dii_arguments_converter 
++          = ACE_Dynamic_Service<TAO_DII_Arguments_Converter>::instance ("DII_Arguments_Converter");
++      
++      if (dii_arguments_converter != 0)
++        {  
++          dii_arguments_converter->convert (server_request,
++                                            args,
++                                            nargs 
++                                            ACE_ENV_ARG_PARAMETER);
++          ACE_CHECK;
++        }
++      else
++        ACE_THROW (CORBA::NO_IMPLEMENT ());
++    }
++
+   if (server_request.incoming ())
+     {
+       this->pre_upcall (*server_request.incoming (),
