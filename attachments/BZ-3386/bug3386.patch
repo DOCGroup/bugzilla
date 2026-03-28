@@ -1,0 +1,54 @@
+Index: ace/Service_Config.cpp
+===================================================================
+--- ace/Service_Config.cpp	(revision 83295)
++++ ace/Service_Config.cpp	(working copy)
+@@ -183,11 +183,6 @@
+                       ACE_Get_Opt::RETURN_IN_ORDER);
+   //FUZZ: enable check_for_lack_ACE_OS
+ 
+-  // Keep a list of all unknown arguments, begin with the
+-  // executable's name
+-  ACE_ARGV superargv;
+-  superargv.add (argv[0]);
+-
+   //FUZZ: disable check_for_lack_ACE_OS
+   for (int c; (c = getopt ()) != -1; )
+   //FUZZ: enable check_for_lack_ACE_OS
+@@ -216,19 +211,11 @@
+ #endif /* ACE_LACKS_UNIX_SIGNALS */
+           break;
+         }
+-      default:
+-        superargv.add (argv[getopt.opt_ind () - 1], true);
+-      }
++      default:; // unknown arguments are benign
+ 
+-  // Collect any argumets that were left
+-  for (int c = getopt.opt_ind (); c < argc; ++c)
+-    superargv.add (argv[c-1], true);
+-
+-  bool ignore_default_svc_conf_file = false;
+-  return instance_->parse_args_i (superargv.argc (),
+-                                  superargv.argv (),
+-                                  ignore_default_svc_conf_file);
++      }
+ 
++  return 0;
+ } /* parse_args_i () */
+ 
+ 
+Index: ace/Service_Config.inl
+===================================================================
+--- ace/Service_Config.inl	(revision 83295)
++++ ace/Service_Config.inl	(working copy)
+@@ -40,6 +40,10 @@
+                           bool ignore_debug_flag)
+ {
+   ACE_TRACE ("ACE_Service_Config::open");
++
++  if (singleton()->parse_args_i(argc, argv) == -1)
++    return -1;
++
+   if (singleton()->open_i (argv[0],
+                            logger_key,
+                            ignore_static_svcs,
