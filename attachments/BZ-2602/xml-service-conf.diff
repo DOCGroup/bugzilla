@@ -1,0 +1,529 @@
+Index: ace/DLL_Manager.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/DLL_Manager.cpp,v
+retrieving revision 4.46
+diff -b -u -r4.46 DLL_Manager.cpp
+--- ace/DLL_Manager.cpp	14 Jul 2006 21:27:23 -0000	4.46
++++ ace/DLL_Manager.cpp	18 Jul 2006 19:14:30 -0000
+@@ -121,16 +121,23 @@
+           ACE_TString *name = 0;
+           while (name_iter.next (name))
+             {
+-              if (ACE::debug ())
+-                ACE_DEBUG ((LM_DEBUG,
+-                            ACE_LIB_TEXT ("(%P|%t) ACE_DLL_Handle::open: ")
+-                            ACE_LIB_TEXT ("calling dlopen on ")
+-                            ACE_LIB_TEXT ("\"%s\"\n"), name->c_str ()));
+-
+               // The ACE_SHLIB_HANDLE object is obtained.
+               this->handle_ = ACE_OS::dlopen (name->c_str (),
+                                               open_mode);
+ 
++              if (ACE::debug () > 1)
++                {
++                  ACE_DEBUG ((LM_DEBUG,
++                              ACE_LIB_TEXT ("ACE (%P|%t) DLL_Handle::open ")
++                              ACE_LIB_TEXT ("(\"%s\", 0x%x) -> %s: %s\n"), 
++                              name->c_str (), 
++                              open_mode,
++                              ACE_LIB_TEXT ((this->handle_ != ACE_SHLIB_INVALID_HANDLE) 
++                                            ? "succeeded"
++                                            : "failed"),
++                              this->error()->c_str()));
++                }
++
+               if (this->handle_ != ACE_SHLIB_INVALID_HANDLE)   // Good one?
+                 break;
+ 
+@@ -140,11 +147,11 @@
+               // mask it.
+               // @TODO: If we've found our DLL _and_ it's
+               // broken, should we continue at all?
+-              if (ACE::debug () && (errno != 0) && (errno != ENOENT))
++              if ((errno != 0) && (errno != ENOENT) && ACE::debug ())
+                 ACE_ERROR ((LM_ERROR,
+-                            ACE_LIB_TEXT ("(%P|%t) ACE_DLL_Handle::open: ")
+-                            ACE_LIB_TEXT ("Attempt to open \'%s\' failed ")
+-                            ACE_LIB_TEXT ("(%d): %s\n"),
++                            ACE_LIB_TEXT ("ACE (%P|%t) DLL_Handle::open ")
++                            ACE_LIB_TEXT ("(\'%s\') failed, errno=")
++                            ACE_LIB_TEXT ("%d: %s\n"),
+                             name->c_str (),
+                             errno,
+                             this->error ()->c_str ()));
+@@ -163,11 +170,18 @@
+                   ACE_OS::strcat (aix_pathname, ACE_LIB_TEXT ("(shr.o)"));
+                   open_mode |= RTLD_MEMBER;
+ 
+-                  if (ACE::debug ())
++                  if (ACE::debug () > 1)
++                    {
+                     ACE_DEBUG ((LM_DEBUG,
+-                                ACE_LIB_TEXT ("(%P|%t) ACE_DLL_Handle::open: ")
+-                                ACE_LIB_TEXT ("calling dlopen on ")
+-                                ACE_LIB_TEXT ("\"%s\"\n"), aix_pathname));
++                                  ACE_LIB_TEXT ("ACE (%P|%t) DLL_Handle::open ")
++                                  ACE_LIB_TEXT ("(\"%s\", 0x%x) -> %s: %s\n"), 
++                                  aix_pathname, 
++                                  open_mode,
++                                  ACE_LIB_TEXT ((this->handle_ != ACE_SHLIB_INVALID_HANDLE) 
++                                                ? "succeeded"
++                                                : "failed"),
++                                  this->error()->c_str()));
++                    }
+ 
+                   this->handle_ = ACE_OS::dlopen (aix_pathname, open_mode);
+                   if (this->handle_ != ACE_SHLIB_INVALID_HANDLE)
+@@ -181,9 +195,9 @@
+                   // should we continue at all?
+                   if (ACE::debug () && (errno != 0) && (errno != ENOENT))
+                     ACE_ERROR ((LM_ERROR,
+-                                ACE_LIB_TEXT ("(%P|%t) ACE_DLL_Handle::open: ")
+-                                ACE_LIB_TEXT ("Attempt to open \'%s\' failed")
+-                                ACE_LIB_TEXT (" (%d): %s\n"),
++                                ACE_LIB_TEXT ("ACE (%P|%t) DLL_Handle::open ")
++                                ACE_LIB_TEXT ("(\'%s\') failed, errno=")
++                                ACE_LIB_TEXT ("%d: %s\n"),
+                                 name->c_str (),
+                                 errno,
+                                 this->error ()->c_str ()));
+@@ -198,9 +212,8 @@
+             {
+               if (ACE::debug ())
+                 ACE_ERROR ((LM_ERROR,
+-                            ACE_LIB_TEXT ("(%P|%t) DLL_Handle::open: ")
+-                            ACE_LIB_TEXT ("Invalid handle while ")
+-                            ACE_LIB_TEXT ("opening DLL \"%s\": %s\n"),
++                            ACE_LIB_TEXT ("ACE (%P|%t) DLL_Handle::open (\"%s\"): ")
++                            ACE_LIB_TEXT ("Invalid handle error: %s\n"),
+                             this->dll_name_,
+                             this->error ()->c_str ()));
+ 
+Index: ace/Parse_Node.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Parse_Node.cpp,v
+retrieving revision 4.85
+diff -b -u -r4.85 Parse_Node.cpp
+--- ace/Parse_Node.cpp	30 May 2006 11:38:44 -0000	4.85
++++ ace/Parse_Node.cpp	18 Jul 2006 19:14:31 -0000
+@@ -756,6 +756,77 @@
+   delete[] const_cast<ACE_TCHAR *> (this->function_name_);
+ }
+ 
++ACE_ALLOC_HOOK_DEFINE (ACE_Service_Type_Factory)
++
++ACE_Service_Type_Factory::ACE_Service_Type_Factory (ACE_TCHAR const *name,
++                                                    int type,
++                                                    ACE_Location_Node *location,
++                                                    int active)
++  : name_ (name)
++  , type_ (type)
++  , location_ (location)
++  , is_active_ (active)
++{
++}
++
++
++ACE_Service_Type_Factory::~ACE_Service_Type_Factory (void)
++{
++}
++
++
++ACE_Service_Type *
++ACE_Service_Type_Factory::make_service_type (ACE_Service_Gestalt *cfg) const
++{
++  ACE_TRACE ("ACE_Service_Type_Factory::make_service_type");
++
++  u_int flags = ACE_Service_Type::DELETE_THIS
++    | (this->location_->dispose () == 0 ? 0 : ACE_Service_Type::DELETE_OBJ);
++
++  ACE_Service_Object_Exterminator gobbler = 0;
++
++  int yyerrno = 0;
++  void *sym = this->location_->symbol (cfg, yyerrno, &gobbler);
++
++  if (sym != 0)
++    {
++      ACE_Service_Type_Impl *stp
++        = ACE_Service_Config::create_service_type_impl (this->name (),
++                                                        this->type_,
++                                                        sym,
++                                                        flags,
++                                                        gobbler);
++      if (stp == 0)
++        ++yyerrno;
++
++      ACE_Service_Type *tmp = 0;
++      ACE_NEW_RETURN (tmp,
++                      ACE_Service_Type (this->name (),
++                                        stp,
++                                        this->location_->dll (),
++                                        this->is_active_),
++                      0);
++      return tmp;
++    }
++  else
++    {
++#ifndef ACE_NLOGGING
++      ACE_ERROR ((LM_ERROR,
++                  ACE_LIB_TEXT ("(%P|%t) Unable to find service \'%s\'\n"),
++                  this->name ()));
++#endif
++      ++yyerrno;
++      return 0;
++    }
++}
++
++ACE_TCHAR const*
++ACE_Service_Type_Factory::name (void) const
++{
++  return name_.c_str ();
++}
++
++
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
+ #endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+Index: ace/Parse_Node.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Parse_Node.h,v
+retrieving revision 4.36
+diff -b -u -r4.36 Parse_Node.h
+--- ace/Parse_Node.h	28 Apr 2006 14:05:43 -0000	4.36
++++ ace/Parse_Node.h	18 Jul 2006 19:14:31 -0000
+@@ -476,6 +476,44 @@
+   ACE_UNIMPLEMENTED_FUNC (ACE_Static_Function_Node& operator= (const ACE_Static_Function_Node&))
+ };
+ 
++// A helper class used to safely register dynamic services, which may contains
++// subordinate static services. It is used to capture the necessary data during
++// the parsing, but perform the actuall instantiation later.
++class ACE_Service_Type_Factory
++{
++public:
++  ACE_Service_Type_Factory (ACE_TCHAR const *name,
++                            int type,
++                            ACE_Location_Node *location,
++                            int active);
++
++  ~ACE_Service_Type_Factory (void);
++
++  ACE_Service_Type *make_service_type (ACE_Service_Gestalt *pcfg) const;
++
++  ACE_TCHAR const* name (void) const;
++
++  /// Declare the dynamic allocation hooks.
++  ACE_ALLOC_HOOK_DECLARE;
++
++private:
++
++  /**
++   * Not implemented to enforce no copying
++   */
++  ACE_UNIMPLEMENTED_FUNC
++    (ACE_Service_Type_Factory(const ACE_Service_Type_Factory&))
++
++  ACE_UNIMPLEMENTED_FUNC
++    (ACE_Service_Type_Factory& operator=(const ACE_Service_Type_Factory&))
++
++private:
++  ACE_TString name_;
++  int type_;
++  ACE_Auto_Ptr<ACE_Location_Node> location_;
++  int is_active_;
++};
++
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
+ #endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+Index: ace/Service_Config.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Service_Config.h,v
+retrieving revision 4.110
+diff -b -u -r4.110 Service_Config.h
+--- ace/Service_Config.h	12 Jul 2006 10:23:21 -0000	4.110
++++ ace/Service_Config.h	18 Jul 2006 19:14:31 -0000
+@@ -127,7 +127,7 @@
+  * @class ACE_Service_Config
+  *
+  * @brief Supplies common server operations for dynamic and static
+- * configuration of services.
++ * configuration of service. 
+  *
+  * The ACE_Service_Config uses the Monostate pattern.  Therefore,
+  * you can only have one of these instantiated per-process. It
+@@ -521,10 +521,6 @@
+   /// and process_directive() both call.  Returns the number of errors
+   /// that occurred.
+   static int process_directives_i (ACE_Svc_Conf_Param *param);
+-#else
+-  /// Helper function to dynamically link in the XML Service Configurator
+-  /// parser.
+-  static ACE_XML_Svc_Conf *get_xml_svc_conf (ACE_DLL &d);
+ #endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+ 
+   /// Become a daemon.
+Index: ace/Service_Gestalt.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Service_Gestalt.cpp,v
+retrieving revision 4.18
+diff -b -u -r4.18 Service_Gestalt.cpp
+--- ace/Service_Gestalt.cpp	22 Jun 2006 05:34:51 -0000	4.18
++++ ace/Service_Gestalt.cpp	18 Jul 2006 19:14:31 -0000
+@@ -386,77 +386,6 @@
+ 
+ 
+ 
+-ACE_ALLOC_HOOK_DEFINE (ACE_Service_Type_Factory)
+-
+-ACE_Service_Type_Factory::ACE_Service_Type_Factory (ACE_TCHAR const *name,
+-                                                    int type,
+-                                                    ACE_Location_Node *location,
+-                                                    int active)
+-  : name_ (name)
+-  , type_ (type)
+-  , location_ (location)
+-  , is_active_ (active)
+-{
+-}
+-
+-
+-ACE_Service_Type_Factory::~ACE_Service_Type_Factory (void)
+-{
+-}
+-
+-
+-ACE_Service_Type *
+-ACE_Service_Type_Factory::make_service_type (ACE_Service_Gestalt *cfg) const
+-{
+-  ACE_TRACE ("ACE_Service_Type_Factory::make_service_type");
+-
+-  u_int flags = ACE_Service_Type::DELETE_THIS
+-    | (this->location_->dispose () == 0 ? 0 : ACE_Service_Type::DELETE_OBJ);
+-
+-  ACE_Service_Object_Exterminator gobbler = 0;
+-
+-  int yyerrno = 0;
+-  void *sym = this->location_->symbol (cfg, yyerrno, &gobbler);
+-
+-  if (sym != 0)
+-    {
+-      ACE_Service_Type_Impl *stp
+-        = ACE_Service_Config::create_service_type_impl (this->name (),
+-                                                        this->type_,
+-                                                        sym,
+-                                                        flags,
+-                                                        gobbler);
+-      if (stp == 0)
+-        ++yyerrno;
+-
+-      ACE_Service_Type *tmp = 0;
+-      ACE_NEW_RETURN (tmp,
+-                      ACE_Service_Type (this->name (),
+-                                        stp,
+-                                        this->location_->dll (),
+-                                        this->is_active_),
+-                      0);
+-      return tmp;
+-    }
+-  else
+-    {
+-#ifndef ACE_NLOGGING
+-      ACE_ERROR ((LM_ERROR,
+-                  ACE_LIB_TEXT ("(%P|%t) Unable to find service \'%s\'\n"),
+-                  this->name ()));
+-#endif
+-      ++yyerrno;
+-      return 0;
+-    }
+-}
+-
+-ACE_TCHAR const*
+-ACE_Service_Type_Factory::name (void) const
+-{
+-  return name_.c_str ();
+-}
+-
+-
+ ///
+ 
+ int
+@@ -523,6 +452,7 @@
+ }
+ 
+ 
++#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+ int
+ ACE_Service_Gestalt::initialize (const ACE_Service_Type_Factory *stf,
+                                  const ACE_TCHAR *parameters)
+@@ -610,6 +540,7 @@
+ 
+   return -1;
+ }
++#endif /* (ACE_USES_CLASSIC_SVC_CONF == 1) */
+ 
+ 
+ // Dynamically link the shared object file and retrieve a pointer to
+@@ -928,7 +859,7 @@
+   ACE_DLL dll;
+ 
+   auto_ptr<ACE_XML_Svc_Conf>
+-    xml_svc_conf (ACE_Service_Config::get_xml_svc_conf (dll));
++    xml_svc_conf (this->get_xml_svc_conf (dll));
+ 
+   if (xml_svc_conf.get () == 0)
+     return -1;
+Index: ace/Service_Gestalt.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Service_Gestalt.h,v
+retrieving revision 4.9
+diff -b -u -r4.9 Service_Gestalt.h
+--- ace/Service_Gestalt.h	6 Jun 2006 21:57:21 -0000	4.9
++++ ace/Service_Gestalt.h	18 Jul 2006 19:14:31 -0000
+@@ -32,10 +32,16 @@
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
++#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+ class ACE_Service_Type_Factory;
++class ACE_Location_Node;
++#else
++class ACE_XML_Svc_Conf;
++class ACE_DLL;
++#endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
++
+ class ACE_Static_Svc_Descriptor;
+ class ACE_Svc_Conf_Param;
+-
+ class ACE_Service_Gestalt;
+ 
+ /**
+@@ -43,6 +49,21 @@
+  *
+  * @brief Supplies common server operations for dynamic and static
+  * configuration of services.
++ *
++ * The Gestalt embodies the concept of configuration context. On one
++ * hand, it is a flat namespace, where names correspond to a Service
++ * Object instance. A Gestalt owns the Service Repository instance,
++ * which in turn owns the Service Object instances.
++ *
++ * Another aspect of a Gestalt is its responsibility for
++ * record-keeping and accounting for the meta-data, necessary for
++ * locating, removing or instantiating a service.
++ *
++ * A repository underlies an instance of a gestalt and its lifetime
++ * may or may not be bounded by the lifetime of the gestalt, that owns
++ * it. This feature is important for the derived classes and the
++ * Service Config in particular.
++
+  */
+ class ACE_Export ACE_Service_Gestalt
+ {
+@@ -194,10 +215,10 @@
+ 
+   /**
+    * Handle the command-line options intended for the
+-   * <ACE_Service_Config>.  Note that <argv[0]> is assumed to be the
++   * <ACE_Service_Gestalt>.  Note that <argv[0]> is assumed to be the
+    * program name.
++   *
+    * The arguments that are valid in a call to this method are
+-   * - '-b' Option to indicate that we should be a daemon
+    * - '-d' Turn on debugging mode
+    * - '-f' Option to read in the list of svc.conf file names
+    * - '-k' Option to read a wide string where in the logger output can
+@@ -227,6 +248,8 @@
+   int insert (ACE_Static_Svc_Descriptor *stsd);
+ 
+   // = Utility methods.
++
++#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+   /// Dynamically link the shared object file and retrieve a pointer to
+   /// the designated shared object in this file. Also account for the
+   /// possiblity to have static services registered when loading the DLL, by
+@@ -235,18 +258,20 @@
+   /// problems.
+   int initialize (const ACE_Service_Type_Factory *,
+                   const ACE_TCHAR *parameters);
++#endif /* (ACE_USES_CLASSIC_SVC_CONF == 1) */
+ 
+   // Dynamically link the shared object file and retrieve a pointer to
+   // the designated shared object in this file.
+   // @obsolete
+-  // @note This is error-prone in the presense of dynamic
+-  // services with their own static services. This method will allow those
+-  // static services to register *before* the dynamic service that owns them.
+-  // Upon finalization of the static services the process may crash, because
+-  // the dynamic service's DLL may have been already released, together with
+-  // the memory in which the static services reside.
+-  // It may not crash, for instance, when the first static service to register
+-  // is the same as the dynamic service being loaded. You should be so lucky!
++  // @note This is error-prone in the presense of dynamic services,
++  // which in turn initialize their own static services. This method
++  // will allow those static services to register *before* the dynamic
++  // service that owns them.  Upon finalization of the static services
++  // the process will typically crash, because the dynamic service's
++  // DLL may have been already released, together with the memory in
++  // which the static services reside.  It may not crash, for
++  // instance, when the first static service to register is the same
++  // as the dynamic service being loaded. You should be so lucky!
+   int initialize (const ACE_Service_Type *,
+                   const ACE_TCHAR *parameters);
+ 
+@@ -335,7 +360,7 @@
+ #else
+   /// Helper function to dynamically link in the XML Service Configurator
+   /// parser.
+-  ACE_XML_Svc_Conf *get_xml_svc_conf (ACE_DLL &d);
++  ACE_XML_Svc_Conf* get_xml_svc_conf (ACE_DLL &d);
+ #endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+ 
+   // Dynamically link the shared object file and retrieve a pointer to
+@@ -414,46 +439,6 @@
+ }; /* class ACE_Service_Gestalt */
+ 
+ 
+-class ACE_Location_Node;
+-
+-// A helper class used to safely register dynamic services, which may contains
+-// subordinate static services. It is used to capture the necessary data during
+-// the parsing, but perform the actuall instantiation later.
+-class ACE_Service_Type_Factory
+-{
+-public:
+-  ACE_Service_Type_Factory (ACE_TCHAR const *name,
+-                            int type,
+-                            ACE_Location_Node *location,
+-                            int active);
+-
+-  ~ACE_Service_Type_Factory (void);
+-
+-  ACE_Service_Type *make_service_type (ACE_Service_Gestalt *pcfg) const;
+-
+-  ACE_TCHAR const* name (void) const;
+-
+-  /// Declare the dynamic allocation hooks.
+-  ACE_ALLOC_HOOK_DECLARE;
+-
+-private:
+-
+-  /**
+-   * Not implemented to enforce no copying
+-   */
+-  ACE_UNIMPLEMENTED_FUNC
+-    (ACE_Service_Type_Factory(const ACE_Service_Type_Factory&))
+-
+-  ACE_UNIMPLEMENTED_FUNC
+-    (ACE_Service_Type_Factory& operator=(const ACE_Service_Type_Factory&))
+-
+-private:
+-  ACE_TString name_;
+-  int type_;
+-  ACE_Auto_Ptr<ACE_Location_Node> location_;
+-  int is_active_;
+-};
+-
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
