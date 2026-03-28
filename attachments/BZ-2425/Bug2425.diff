@@ -1,0 +1,37 @@
+Index: ProxyConsumer.cpp
+===================================================================
+--- ProxyConsumer.cpp	(.../svn://svn.dre.vanderbilt.edu/DOC/Middleware/tags/TAO-1_5_2/TAO/orbsvcs/orbsvcs/Notify/ProxyConsumer.cpp)	(revision 74459)
++++ ProxyConsumer.cpp	(.../ProxyConsumer.cpp)	(working copy)
+@@ -58,7 +58,12 @@
+   const CosNotification::QoSProperties &default_ps_qos =
+     TAO_Notify_PROPERTIES::instance ()->default_proxy_consumer_qos_properties ();
+ 
+-  this->set_qos (default_ps_qos ACE_ENV_ARG_PARAMETER);
++  {
++    ACE_GUARD_THROW_EX (TAO_SYNCH_MUTEX, ace_mon, this->lock_,
++                          CORBA::INTERNAL ());
++    this->TAO_Notify_Object::set_qos (default_ps_qos ACE_ENV_ARG_PARAMETER);
++    ACE_CHECK;
++  }
+ }
+ 
+ void
+Index: ProxySupplier.cpp
+===================================================================
+--- ProxySupplier.cpp	(.../svn://svn.dre.vanderbilt.edu/DOC/Middleware/tags/TAO-1_5_2/TAO/orbsvcs/orbsvcs/Notify/ProxySupplier.cpp)	(revision 74459)
++++ ProxySupplier.cpp	(.../ProxySupplier.cpp)	(working copy)
+@@ -41,8 +41,12 @@
+   const CosNotification::QoSProperties &default_ps_qos =
+     TAO_Notify_PROPERTIES::instance ()->default_proxy_supplier_qos_properties ();
+ 
+-  this->set_qos (default_ps_qos ACE_ENV_ARG_PARAMETER);
+-  ACE_CHECK;
++  {
++    ACE_GUARD_THROW_EX (TAO_SYNCH_MUTEX, ace_mon, this->lock_,
++                          CORBA::INTERNAL ());
++    this->TAO_Notify_Object::set_qos (default_ps_qos ACE_ENV_ARG_PARAMETER);
++    ACE_CHECK;
++  }
+ }
+ 
+ TAO_Notify_Peer*
