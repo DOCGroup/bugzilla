@@ -1,0 +1,61 @@
+diff -u -r ACE_wrappers_5.5.0/ace/config.h.in ACE_wrappers/ace/config.h.in
+--- ACE_wrappers_5.5.0/ace/config.h.in	1972-02-25 10:13:58.000000000 +0300
++++ ACE_wrappers/ace/config.h.in	2006-04-28 18:21:17.000000000 +0400
+@@ -6,8 +6,11 @@
+ 
+ // ACE configuration header file
+ 
++/* */
++#undef ACE_HAS_PTHREAD_SIGMASK_PROTO
+ 
+-
++/* */
++#undef ACE_HAS_ISASTREAM_PROTO
+ 
+ /* Compiler/platform standard C++ auto_ptr implementation lacks reset() method
+    */
+diff -u -r ACE_wrappers_5.5.0/ace/os_include/sys/os_time.h ACE_wrappers/ace/os_include/sys/os_time.h
+--- ACE_wrappers_5.5.0/ace/os_include/sys/os_time.h	1971-12-26 22:57:07.000000000 +0300
++++ ACE_wrappers/ace/os_include/sys/os_time.h	2006-04-28 18:24:40.000000000 +0400
+@@ -47,7 +47,7 @@
+   int gettimeofday (struct timeval *tp);
+ # endif  /*  !m88k && !SCO */
+ #elif defined (ACE_HAS_OSF1_GETTIMEOFDAY)
+-  int gettimeofday (struct timeval *tp, struct timezone * = 0);
++# define ACE_HAS_SVR4_GETTIMEOFDAY
+ #elif defined (ACE_HAS_VOIDPTR_GETTIMEOFDAY)
+ # define ACE_HAS_SVR4_GETTIMEOFDAY
+ #endif /* ACE_HAS_SVR4_GETTIMEOFDAY */
+diff -u -r ACE_wrappers_5.5.0/configure.ac ACE_wrappers/configure.ac
+--- ACE_wrappers_5.5.0/configure.ac	1972-02-07 09:30:27.000000000 +0300
++++ ACE_wrappers/configure.ac	2006-04-28 18:20:07.000000000 +0400
+@@ -7460,6 +7460,29 @@
+ fi dnl test "$ace_user_enable_threads" = yes
+ 
+ 
++dnl Check for pthread_sigmask proto
++ACE_CACHE_CHECK([ for pthread_sigmask proto ],
++  [ace_cv_lib_pthread_sigmask_proto],[
++    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
++#define _REENTRANT
++#include <pthread.h> 
++#include <signal.h>
++sigset_t new;
++      ]], [[
++sigemptyset(&new);
++sigaddset(&new, SIGHUP);
++pthread_sigmask(SIG_BLOCK, &new, NULL);
++      ]])],[
++       ace_cv_lib_pthread_sigmask_proto=yes
++      ],[
++       ace_cv_lib_pthread_sigmask_proto=no
++      ])
++  ], , [AC_DEFINE([ACE_HAS_PTHREAD_SIGMASK_PROTO],[],[ has pthread_sigmask proto ])])
++
++AC_CHECK_FUNC(isastream, [
++	AC_DEFINE([ACE_HAS_ISASTREAM_PROTO],[],[ has isastream proto ])
++],[])
++
+ AC_CHECK_HEADER(libc.h)
+ AC_CHECK_HEADER(osfcn.h)
+ if test "$ac_cv_header_libc_h" != yes ||
