@@ -1,0 +1,5 @@
+project(*Hello) : orbsvcsexe, taoidldefaults, portablegroup, portableserver {
+  Source_Files {
+    Hello.cpp
+  }
+}
