@@ -1,0 +1,108 @@
+Index: TSS_T.h
+===================================================================
+--- TSS_T.h	(revision 91021)
++++ TSS_T.h	(working copy)
+@@ -193,6 +193,21 @@
+ 
+   /// "Destructor" that deletes internal TYPE * when thread exits.
+   static void cleanup (void *ptr);
++
++  /// Obtains a plain value stored in the thread-specific storage.
++# if defined (ACE_HAS_THR_C_DEST)
++  ACE_TSS_Adapter *ts_value (void) const;
++# else
++  TYPE *ts_value (void) const;
++# endif /* ACE_HAS_THR_C_DEST */
++
++  /// Stores a new plain value in the thread-specific storage and
++  /// cleans up a new value if there is an error.
++# if defined (ACE_HAS_THR_C_DEST)
++  void ts_value (ACE_TSS_Adapter *&new_tss_adapter);
++# else
++  void ts_value (TYPE *&new_ts_obj);
++# endif /* ACE_HAS_THR_C_DEST */
+ #endif /* defined (ACE_HAS_THREADS) && (defined (ACE_HAS_THREAD_SPECIFIC_STORAGE) || defined (ACE_HAS_TSS_EMULATION)) */
+   // = Disallow copying...
+   ACE_UNIMPLEMENTED_FUNC (void operator= (const ACE_TSS<TYPE> &))
+Index: TSS_T.cpp
+===================================================================
+--- TSS_T.cpp	(revision 91021)
++++ TSS_T.cpp	(working copy)
+@@ -32,6 +32,16 @@
+ #if defined (ACE_HAS_THREADS) && (defined (ACE_HAS_THREAD_SPECIFIC_STORAGE) || defined (ACE_HAS_TSS_EMULATION))
+   if (this->once_)
+   {
++# if defined (ACE_HAS_THR_C_DEST)
++    ACE_TSS_Adapter *tss_adapter = this->ts_value (), *tmp = 0;
++    this->ts_value (tmp);
++    ACE_TSS_C_cleanup (tss_adapter);
++# else
++    TYPE *ts_obj = this->ts_value (), *tmp = 0;
++    this->ts_value (tmp);
++    ACE_TSS<TYPE>::cleanup (ts_obj);
++# endif /* ACE_HAS_THR_C_DEST */
++
+     ACE_OS::thr_key_detach (this->key_, this);
+     ACE_OS::thr_keyfree (this->key_);
+   }
+@@ -255,6 +265,60 @@
+ #endif /* ACE_HAS_THR_C_DEST */
+ }
+ 
++#if defined (ACE_HAS_THR_C_DEST)
++template <class TYPE> ACE_TSS_Adapter *
++ACE_TSS<TYPE>::ts_value (void) const
++{
++  // Get the tss adapter from thread-specific storage
++  void *temp = 0;
++  if (ACE_Thread::getspecific (this->key_, &temp) == -1)
++    {
++      return 0; // This should not happen!
++    }
++  return static_cast <ACE_TSS_Adapter *> (temp);
++}
++#else
++template <class TYPE> TYPE *
++ACE_TSS<TYPE>::ts_value (void) const
++{
++  void *temp = 0;
++  if (ACE_Thread::getspecific (this->key_, &temp) == -1)
++    {
++      return 0; // This should not happen!
++    }
++  return static_cast <TYPE *> (temp);
++}
++#endif /* ACE_HAS_THR_C_DEST */
++
++#if defined (ACE_HAS_THR_C_DEST)
++template <class TYPE> void
++ACE_TSS<TYPE>::ts_value (ACE_TSS_Adapter *&new_tss_adapter)
++{
++  if (ACE_Thread::setspecific (this->key_,
++                               (void *) new_tss_adapter) != 0)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  ACE_TEXT ("%p\n"),
++                  ACE_TEXT ("ACE_Thread::setspecific() failed!")));
++      ACE_TSS_C_cleanup (new_tss_adapter);
++      new_tss_adapter = 0;
++    }
++}
++#else
++template <class TYPE> void
++ACE_TSS<TYPE>::ts_value (TYPE *&new_ts_obj)
++{
++  if (ACE_Thread::setspecific (this->key_, (void *) new_ts_obj) != 0)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  ACE_TEXT ("%p\n"),
++                  ACE_TEXT ("ACE_Thread::setspecific() failed!")));
++      ACE_TSS<TYPE>::cleanup (new_ts_obj);
++      new_ts_obj = 0;
++    }
++}
++#endif /* ACE_HAS_THR_C_DEST */
++
+ // Get the thread-specific object for the key associated with this
+ // object.  Returns 0 if the ts_obj has never been initialized,
+ // otherwise returns a pointer to the ts_obj.
