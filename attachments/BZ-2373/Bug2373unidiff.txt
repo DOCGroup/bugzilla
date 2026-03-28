@@ -1,0 +1,348 @@
+cvs -z9 -q diff -u -wb default_resource.cpp (in directory C:\CheckOut\ACE_wrappers\TAO\tao\)
+Index: default_resource.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/default_resource.cpp,v
+retrieving revision 1.137
+diff -u -w -b -r1.137 default_resource.cpp
+--- default_resource.cpp	2 Nov 2005 07:13:04 -0000	1.137
++++ default_resource.cpp	20 Jan 2006 10:09:17 -0000
+@@ -46,6 +46,11 @@
+   , dynamically_allocated_reactor_ (0)
+   , options_processed_ (0)
+   , factory_disabled_ (0)
++#if TAO_USE_LOCAL_MEMORY_POOL == 1
++  , use_local_memory_pool_ (1)
++#else
++  , use_local_memory_pool_ (0)
++#endif
+   , cached_connection_lock_type_ (TAO_THREAD_LOCK)
+   , object_key_table_lock_type_ (TAO_THREAD_LOCK)
+   , corba_object_lock_type_ (TAO_THREAD_LOCK)
+@@ -766,20 +771,32 @@
+ }
+ 
+ 
+-#if TAO_USE_LOCAL_MEMORY_POOL == 1
+ typedef ACE_Malloc<ACE_LOCAL_MEMORY_POOL,TAO_SYNCH_MUTEX> LOCKED_MALLOC;
+-typedef ACE_Allocator_Adapter<LOCKED_MALLOC> LOCKED_ALLOCATOR;
+-#else
+-typedef ACE_New_Allocator LOCKED_ALLOCATOR;
+-#endif
++typedef ACE_Allocator_Adapter<LOCKED_MALLOC> LOCKED_ALLOCATOR_POOL;
++typedef ACE_New_Allocator LOCKED_ALLOCATOR_NO_POOL;
++
++void
++TAO_Default_Resource_Factory::use_local_memory_pool (int flag)
++{
++  use_local_memory_pool_ = flag;
++}
+ 
+ ACE_Allocator *
+ TAO_Default_Resource_Factory::input_cdr_dblock_allocator (void)
+ {
+   ACE_Allocator *allocator = 0;
++  if (use_local_memory_pool_)
++  {
+   ACE_NEW_RETURN (allocator,
+-                  LOCKED_ALLOCATOR,
++                    LOCKED_ALLOCATOR_POOL,
+                   0);
++  }
++  else
++  {
++    ACE_NEW_RETURN (allocator,
++                    LOCKED_ALLOCATOR_NO_POOL,
++                    0);
++  }
+ 
+   return allocator;
+ }
+@@ -788,9 +805,18 @@
+ TAO_Default_Resource_Factory::input_cdr_buffer_allocator (void)
+ {
+   ACE_Allocator *allocator = 0;
++  if (use_local_memory_pool_)
++  {
+   ACE_NEW_RETURN (allocator,
+-                  LOCKED_ALLOCATOR,
++                    LOCKED_ALLOCATOR_POOL,
+                   0);
++  }
++  else
++  {
++    ACE_NEW_RETURN (allocator,
++                    LOCKED_ALLOCATOR_NO_POOL,
++                    0);
++  }
+ 
+   return allocator;
+ }
+@@ -799,9 +825,18 @@
+ TAO_Default_Resource_Factory::input_cdr_msgblock_allocator (void)
+ {
+   ACE_Allocator *allocator = 0;
++  if (use_local_memory_pool_)
++  {
++    ACE_NEW_RETURN (allocator,
++                    LOCKED_ALLOCATOR_POOL,
++                    0);
++  }
++  else
++  {
+   ACE_NEW_RETURN (allocator,
+-                  LOCKED_ALLOCATOR,
++                    LOCKED_ALLOCATOR_NO_POOL,
+                   0);
++  }
+ 
+   return allocator;
+ }
+@@ -816,9 +851,19 @@
+ TAO_Default_Resource_Factory::output_cdr_dblock_allocator (void)
+ {
+   ACE_Allocator *allocator = 0;
++  if (use_local_memory_pool_)
++  {
+   ACE_NEW_RETURN (allocator,
+-                  LOCKED_ALLOCATOR,
++                    LOCKED_ALLOCATOR_POOL,
+                   0);
++  }
++  else
++  {
++    ACE_NEW_RETURN (allocator,
++                    LOCKED_ALLOCATOR_NO_POOL,
++                    0);
++  }
++
+   return allocator;
+ }
+ 
+@@ -826,9 +871,19 @@
+ TAO_Default_Resource_Factory::output_cdr_buffer_allocator (void)
+ {
+   ACE_Allocator *allocator = 0;
++  if (use_local_memory_pool_)
++  {
++    ACE_NEW_RETURN (allocator,
++                    LOCKED_ALLOCATOR_POOL,
++                    0);
++  }
++  else
++  {
+   ACE_NEW_RETURN (allocator,
+-                  LOCKED_ALLOCATOR,
++                    LOCKED_ALLOCATOR_NO_POOL,
+                   0);
++  }
++
+   return allocator;
+ }
+ 
+@@ -836,9 +891,19 @@
+ TAO_Default_Resource_Factory::output_cdr_msgblock_allocator (void)
+ {
+   ACE_Allocator *allocator = 0;
++  if (use_local_memory_pool_)
++  {
+   ACE_NEW_RETURN (allocator,
+-                  LOCKED_ALLOCATOR,
++                    LOCKED_ALLOCATOR_POOL,
+                   0);
++  }
++  else
++  {
++    ACE_NEW_RETURN (allocator,
++                    LOCKED_ALLOCATOR_NO_POOL,
++                    0);
++  }
++
+   return allocator;
+ }
+ 
+@@ -846,9 +911,19 @@
+ TAO_Default_Resource_Factory::amh_response_handler_allocator (void)
+ {
+   ACE_Allocator *allocator = 0;
++  if (use_local_memory_pool_)
++  {
+   ACE_NEW_RETURN (allocator,
+-                  LOCKED_ALLOCATOR,
++                    LOCKED_ALLOCATOR_POOL,
+                   0);
++  }
++  else
++  {
++    ACE_NEW_RETURN (allocator,
++                    LOCKED_ALLOCATOR_NO_POOL,
++                    0);
++  }
++
+   return allocator;
+ }
+ 
+@@ -856,9 +931,19 @@
+ TAO_Default_Resource_Factory::ami_response_handler_allocator (void)
+ {
+   ACE_Allocator *allocator = 0;
++  if (use_local_memory_pool_)
++  {
++    ACE_NEW_RETURN (allocator,
++                    LOCKED_ALLOCATOR_POOL,
++                    0);
++  }
++  else
++  {
+   ACE_NEW_RETURN (allocator,
+-                  LOCKED_ALLOCATOR,
++                    LOCKED_ALLOCATOR_NO_POOL,
+                   0);
++  }
++
+   return allocator;
+ }
+ 
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -q diff -u -wb default_resource.h (in directory C:\CheckOut\ACE_wrappers\TAO\tao\)
+Index: default_resource.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/default_resource.h,v
+retrieving revision 1.62
+diff -u -w -b -r1.62 default_resource.h
+--- default_resource.h	24 Nov 2005 11:05:46 -0000	1.62
++++ default_resource.h	20 Jan 2006 09:47:27 -0000
+@@ -108,6 +108,7 @@
+   virtual void reclaim_reactor (ACE_Reactor *);
+   virtual TAO_Acceptor_Registry  *get_acceptor_registry (void);
+   virtual TAO_Connector_Registry *get_connector_registry (void);
++  virtual void use_local_memory_pool (int);
+   virtual ACE_Allocator* input_cdr_dblock_allocator (void);
+   virtual ACE_Allocator* input_cdr_buffer_allocator (void);
+   virtual ACE_Allocator* input_cdr_msgblock_allocator (void);
+@@ -212,6 +213,10 @@
+   /// were processed before (or later).
+   int factory_disabled_;
+ 
++  /// This flag is used to determine whether the cdr allocators
++  /// should use the local memory pool or not.
++  int use_local_memory_pool_;
++
+ private:
+   void init_codeset_descriptors (void);
+ 
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -q diff -u -wb ORB_Core.cpp (in directory C:\CheckOut\ACE_wrappers\TAO\tao\)
+Index: ORB_Core.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.cpp,v
+retrieving revision 1.582
+diff -u -w -b -r1.582 ORB_Core.cpp
+--- ORB_Core.cpp	22 Dec 2005 14:54:50 -0000	1.582
++++ ORB_Core.cpp	20 Jan 2006 14:04:18 -0000
+@@ -140,6 +140,11 @@
+ 
+ TAO_ORB_Core::TAO_ORB_Core (const char *orbid)
+   : protocols_hooks_ (0),
++#if TAO_USE_LOCAL_MEMORY_POOL == 1
++    use_local_memory_pool_ (1),
++#else
++    use_local_memory_pool_ (0),
++#endif
+     lock_ (),
+     thread_lane_resources_manager_ (0),
+     collocation_resolver_ (0),
+@@ -915,6 +920,13 @@
+ 
+           arg_shifter.consume_arg ();
+         }
++      else if ((current_arg = arg_shifter.get_the_parameter
++                (ACE_LIB_TEXT("-ORBUseLocalMemoryPool"))))
++        {
++          this->use_local_memory_pool_ = ACE_OS::atoi (current_arg);
++
++          arg_shifter.consume_arg ();
++        }
+       ////////////////////////////////////////////////////////////////
+       // catch any unknown -ORB args                                //
+       ////////////////////////////////////////////////////////////////
+@@ -1010,6 +1022,10 @@
+                         -1);
+     }
+ 
++  // Set whether or not to use the local memory pool for the cdr allocators.
++
++  trf->use_local_memory_pool (this->use_local_memory_pool_);
++
+   // @@ ????
+   // Make sure the reactor is initialized...
+   ACE_Reactor *reactor = this->reactor ();
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -q diff -u -wb ORB_Core.h (in directory C:\CheckOut\ACE_wrappers\TAO\tao\)
+Index: ORB_Core.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.h,v
+retrieving revision 1.297
+diff -u -w -b -r1.297 ORB_Core.h
+--- ORB_Core.h	22 Dec 2005 14:54:50 -0000	1.297
++++ ORB_Core.h	19 Jan 2006 16:42:37 -0000
+@@ -983,6 +983,8 @@
+ 
+ #endif /* TAO_HAS_BUFFERING_CONSTRAINT_POLICY == 1 */
+ 
++  int use_local_memory_pool_;
++
+ protected:
+ 
+   /// Synchronize internal state...
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -q diff -u -wb Resource_Factory.cpp (in directory C:\CheckOut\ACE_wrappers\TAO\tao\)
+Index: Resource_Factory.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Resource_Factory.cpp,v
+retrieving revision 1.44
+diff -u -w -b -r1.44 Resource_Factory.cpp
+--- Resource_Factory.cpp	2 Nov 2005 07:13:04 -0000	1.44
++++ Resource_Factory.cpp	19 Jan 2006 16:24:16 -0000
+@@ -90,6 +90,11 @@
+   return 0;
+ }
+ 
++void
++TAO_Resource_Factory::use_local_memory_pool( int )
++{
++}
++
+ ACE_Allocator *
+ TAO_Resource_Factory::input_cdr_dblock_allocator (void)
+ {
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -q diff -u -wb Resource_Factory.h (in directory C:\CheckOut\ACE_wrappers\TAO\tao\)
+Index: Resource_Factory.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Resource_Factory.h,v
+retrieving revision 1.57
+diff -u -w -b -r1.57 Resource_Factory.h
+--- Resource_Factory.h	24 Nov 2005 11:05:45 -0000	1.57
++++ Resource_Factory.h	19 Jan 2006 16:19:02 -0000
+@@ -153,6 +153,9 @@
+   /// Return a connector to be utilized.
+   virtual TAO_Connector_Registry *get_connector_registry (void);
+ 
++  /// Return the Allocator's memory pool type
++  virtual void use_local_memory_pool (int);
++
+   /// @name Access the input CDR allocators.
+   //@{
+   virtual ACE_Allocator* input_cdr_dblock_allocator (void);
+
+***** CVS exited normally with code 1 *****
