@@ -1,0 +1,47 @@
+Index: tao/ORB_Core.cpp
+===================================================================
+--- tao/ORB_Core.cpp	(revision 78671)
++++ tao/ORB_Core.cpp	(working copy)
+@@ -112,12 +112,17 @@
+ // the race condition to initialize the lock.
+ TAO_ORB_Core_Static_Resources*
+ TAO_ORB_Core_Static_Resources::initialization_reference_ =
+-  TAO_ORB_Core_Static_Resources::instance ();
++  TAO_ORB_Core_Static_Resources::instance (ACE_Service_Config::current());
+ 
+ TAO_ORB_Core_Static_Resources*
+ TAO_ORB_Core_Static_Resources::instance (void)
+ {
+-  ACE_Service_Gestalt *current = ACE_Service_Config::current();
++  return instance (ACE_Service_Config::current());
++}
++
++TAO_ORB_Core_Static_Resources*
++TAO_ORB_Core_Static_Resources::instance (ACE_Service_Gestalt *current)
++{
+   TAO_ORB_Core_Static_Resources* tocsr =
+     ACE_Dynamic_Service<TAO_ORB_Core_Static_Resources>::instance
+     (current, "TAO_ORB_Core_Static_Resources", true);
+@@ -1684,7 +1689,7 @@
+ 
+   // If not, look in the service repository for an instance.
+   const ACE_CString &stub_factory_name =
+-    TAO_ORB_Core_Static_Resources::instance ()->stub_factory_name_;
++    TAO_ORB_Core_Static_Resources::instance (this->configuration ())->stub_factory_name_;
+ 
+   this->stub_factory_ =
+     ACE_Dynamic_Service<TAO_Stub_Factory>::instance
+Index: tao/ORB_Core.h
+===================================================================
+--- tao/ORB_Core.h	(revision 78671)
++++ tao/ORB_Core.h	(working copy)
+@@ -1268,7 +1268,8 @@
+ public:
+ 
+   /// Return the context-specific singleton instance.
+-  static TAO_ORB_Core_Static_Resources* instance (void);
++  static TAO_ORB_Core_Static_Resources* instance (); // Uses the global gestalt
++  static TAO_ORB_Core_Static_Resources* instance (ACE_Service_Gestalt* current);
+ 
+ public:
+   // The hook to be set for the SyncScopePolicy
