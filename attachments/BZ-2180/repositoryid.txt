@@ -1,0 +1,586 @@
+cvs -z9 -w -q diff -u -- Abstract_Servant_Base.h LocalObject.cpp LocalObject.h Object.cpp Object.h Object_Proxy_Broker.h Remote_Object_Proxy_Broker.cpp Remote_Object_Proxy_Broker.h (in directory C:\ACE\latest\ACE_wrappers\TAO\tao)
+Index: Abstract_Servant_Base.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Abstract_Servant_Base.h,v
+retrieving revision 1.19
+diff -u -u -r1.19 Abstract_Servant_Base.h
+--- Abstract_Servant_Base.h	26 May 2005 10:17:53 -0000	1.19
++++ Abstract_Servant_Base.h	21 Jul 2005 11:56:24 -0000
+@@ -95,6 +95,10 @@
+   virtual CORBA::Object_ptr _get_component (
+     ACE_ENV_SINGLE_ARG_DECL) = 0;
+ 
++  /// Default @c_repository_id
++  virtual char * _repository_id (
++    ACE_ENV_SINGLE_ARG_DECL) = 0;
++
+   //@{
+   /**
+    * @name Reference Counting Operations
+Index: LocalObject.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/LocalObject.cpp,v
+retrieving revision 1.38
+diff -u -u -r1.38 LocalObject.cpp
+--- LocalObject.cpp	18 Jul 2005 09:40:29 -0000	1.38
++++ LocalObject.cpp	21 Jul 2005 13:20:28 -0000
+@@ -138,6 +138,14 @@
+                     0);
+ }
+ 
++char *
++CORBA::LocalObject::_repository_id (ACE_ENV_SINGLE_ARG_DECL)
++{
++  ACE_THROW_RETURN (CORBA::NO_IMPLEMENT (CORBA::OMGVMCID | 8,
++                                         CORBA::COMPLETED_NO),
++                    0);
++}
++
+ CORBA::InterfaceDef_ptr
+ CORBA::LocalObject::_get_interface (ACE_ENV_SINGLE_ARG_DECL)
+ {
+Index: LocalObject.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/LocalObject.h,v
+retrieving revision 1.29
+diff -u -u -r1.29 LocalObject.h
+--- LocalObject.h	18 Jul 2005 09:40:29 -0000	1.29
++++ LocalObject.h	21 Jul 2005 13:12:55 -0000
+@@ -89,6 +89,11 @@
+         ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS
+       );
+ 
++    /// Get the repository id.
++    virtual char * _repository_id (
++        ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS
++    );
++
+     virtual void _create_request (CORBA::Context_ptr ctx,
+                                   const char * operation,
+                                   CORBA::NVList_ptr arg_list,
+Index: Object.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object.cpp,v
+retrieving revision 1.164
+diff -u -u -r1.164 Object.cpp
+--- Object.cpp	19 Jul 2005 09:06:18 -0000	1.164
++++ Object.cpp	21 Jul 2005 13:12:28 -0000
+@@ -508,6 +508,13 @@
+                                               ACE_ENV_ARG_PARAMETER);
+ }
+ 
++char*
++CORBA::Object::_repository_id (ACE_ENV_SINGLE_ARG_DECL)
++{
++  TAO_OBJECT_IOR_EVALUATE_RETURN;
++  return this->proxy_broker_->_repository_id (this
++                                              ACE_ENV_ARG_PARAMETER);
++}
+ 
+ #endif /* TAO_HAS_MINIMUM_CORBA */
+ 
+Index: Object.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object.h,v
+retrieving revision 1.104
+diff -u -u -r1.104 Object.h
+--- Object.h	4 Jul 2005 09:26:53 -0000	1.104
++++ Object.h	21 Jul 2005 13:12:24 -0000
+@@ -173,6 +173,11 @@
+         ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS
+       );
+ 
++    /// Get the repository id.
++    virtual char * _repository_id (
++        ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS
++    );
++
+     // DII operations to create a request.
+     //
+     // The mapping for create_request is split into two forms,
+Index: Object_Proxy_Broker.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object_Proxy_Broker.h,v
+retrieving revision 1.9
+diff -u -u -r1.9 Object_Proxy_Broker.h
+--- Object_Proxy_Broker.h	29 Oct 2003 16:29:50 -0000	1.9
++++ Object_Proxy_Broker.h	21 Jul 2005 11:53:24 -0000
+@@ -72,6 +72,9 @@
+   virtual CORBA::Object_ptr _get_component (CORBA::Object_ptr target
+                                             ACE_ENV_ARG_DECL) = 0;
+ 
++  virtual char * _repository_id (CORBA::Object_ptr target
++                                 ACE_ENV_ARG_DECL) = 0;
++
+ #endif /* TAO_HAS_MINIMUM_CORBA == 0 */
+   };
+ }
+Index: Remote_Object_Proxy_Broker.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Remote_Object_Proxy_Broker.cpp,v
+retrieving revision 1.8
+diff -u -u -r1.8 Remote_Object_Proxy_Broker.cpp
+--- Remote_Object_Proxy_Broker.cpp	3 Sep 2004 06:00:39 -0000	1.8
++++ Remote_Object_Proxy_Broker.cpp	21 Jul 2005 11:53:01 -0000
+@@ -14,6 +14,30 @@
+ 
+ namespace TAO
+ {
++  char *
++  Remote_Object_Proxy_Broker::_repository_id (CORBA::Object_ptr target
++                                              ACE_ENV_ARG_DECL)
++  {
++    TAO::Arg_Traits< ::CORBA::Char *>::ret_val _tao_retval;
++
++    TAO::Argument *_tao_signature [] =
++      {
++        &_tao_retval
++      };
++
++    TAO::Invocation_Adapter _tao_call (target,
++                                       _tao_signature,
++                                       1,
++                                       "_repository_id",
++                                       14,
++                                       0);
++
++    _tao_call.invoke (0, 0 ACE_ENV_ARG_PARAMETER);
++    ACE_CHECK_RETURN (_tao_retval.excp ());
++
++    return _tao_retval.retn ();
++  }
++
+   CORBA::Boolean
+   Remote_Object_Proxy_Broker::_is_a (CORBA::Object_ptr target,
+                                      const char *type_id
+@@ -89,7 +113,7 @@
+     ACE_CHECK_RETURN (_tao_retval.excp ());
+ 
+     return _tao_retval.retn ();
+-}
++  }
+ 
+   CORBA::InterfaceDef_ptr
+   Remote_Object_Proxy_Broker::_get_interface (CORBA::Object_ptr target
+Index: Remote_Object_Proxy_Broker.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Remote_Object_Proxy_Broker.h,v
+retrieving revision 1.8
+diff -u -u -r1.8 Remote_Object_Proxy_Broker.h
+--- Remote_Object_Proxy_Broker.h	29 Oct 2003 16:29:50 -0000	1.8
++++ Remote_Object_Proxy_Broker.h	21 Jul 2005 11:53:11 -0000
+@@ -59,6 +59,9 @@
+ 
+   virtual CORBA::Object_ptr _get_component (CORBA::Object_ptr target
+                                             ACE_ENV_ARG_DECL);
++
++  virtual char * _repository_id (CORBA::Object_ptr target
++                                 ACE_ENV_ARG_DECL);
+ #endif /* TAO_HAS_MINIMUM_CORBA == 0 */
+ 
+   };
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -w -q diff -u -- Collocated_Object_Proxy_Broker.cpp Collocated_Object_Proxy_Broker.h Servant_Base.cpp Servant_Base.h (in directory C:\ACE\latest\ACE_wrappers\TAO\tao\PortableServer\)
+Index: Collocated_Object_Proxy_Broker.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Collocated_Object_Proxy_Broker.cpp,v
+retrieving revision 1.6
+diff -u -u -r1.6 Collocated_Object_Proxy_Broker.cpp
+--- Collocated_Object_Proxy_Broker.cpp	19 Jul 2005 09:08:14 -0000	1.6
++++ Collocated_Object_Proxy_Broker.cpp	21 Jul 2005 11:53:43 -0000
+@@ -19,6 +19,64 @@
+ 
+ namespace TAO
+ {
++  char *
++  Collocated_Object_Proxy_Broker::_repository_id (CORBA::Object_ptr target
++                                                  ACE_ENV_ARG_DECL)
++  {
++    TAO_Stub *stub = target->_stubobj ();
++    char * _tao_retval = 0;
++
++    ACE_TRY
++      {
++        // Which collocation strategy should we use?
++        if (stub != 0 &&
++            stub->servant_orb_var ()->orb_core ()
++              ->get_collocation_strategy () == TAO_ORB_Core::THRU_POA)
++          {
++            TAO::Portable_Server::Servant_Upcall servant_upcall (
++                stub->servant_orb_var ()->orb_core ()
++                );
++
++            CORBA::Object_var forward_to;
++            servant_upcall.prepare_for_upcall (
++                stub->profile_in_use ()->object_key (),
++                "_repository_id",
++                forward_to.out ()
++                ACE_ENV_ARG_PARAMETER
++              );
++            ACE_TRY_CHECK;
++
++            _tao_retval =
++              servant_upcall.servant ()->_repository_id (
++                                             ACE_ENV_SINGLE_ARG_PARAMETER
++                                           );
++            ACE_TRY_CHECK;
++          }
++        // Direct collocation strategy is used.
++        else if (target->_servant () != 0)
++          {
++            _tao_retval =
++              target->_servant ()->_repository_id (
++                                       ACE_ENV_SINGLE_ARG_PARAMETER
++                                     );
++            ACE_TRY_CHECK;
++          }
++      }
++    ACE_CATCH (CORBA::OBJECT_NOT_EXIST, ex)
++      {
++        // Ignore this exception.
++      }
++    ACE_CATCHANY
++      {
++        ACE_RE_THROW;
++      }
++    ACE_ENDTRY;
++    ACE_CHECK_RETURN (_tao_retval);
++
++    return _tao_retval;
++  }
++
++
+   CORBA::Boolean
+   Collocated_Object_Proxy_Broker::_is_a (CORBA::Object_ptr target,
+                                          const char *type_id
+Index: Collocated_Object_Proxy_Broker.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Collocated_Object_Proxy_Broker.h,v
+retrieving revision 1.3
+diff -u -u -r1.3 Collocated_Object_Proxy_Broker.h
+--- Collocated_Object_Proxy_Broker.h	18 Feb 2005 09:07:11 -0000	1.3
++++ Collocated_Object_Proxy_Broker.h	21 Jul 2005 11:53:31 -0000
+@@ -58,6 +58,10 @@
+ 
+   virtual CORBA::Object_ptr _get_component (CORBA::Object_ptr target
+                                             ACE_ENV_ARG_DECL);
++
++  virtual char * _repository_id (CORBA::Object_ptr target
++                                 ACE_ENV_SINGLE_ARG_DECL);
++
+ #endif /* TAO_HAS_MINIMUM_CORBA == 0 */
+ 
+   };
+Index: Servant_Base.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Servant_Base.cpp,v
+retrieving revision 1.47
+diff -u -u -r1.47 Servant_Base.cpp
+--- Servant_Base.cpp	19 Jul 2005 09:07:24 -0000	1.47
++++ Servant_Base.cpp	21 Jul 2005 13:18:49 -0000
+@@ -121,6 +121,12 @@
+   return CORBA::Object::_nil ();
+ }
+ 
++char *
++TAO_ServantBase::_repository_id (ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS)
++{
++  return CORBA::string_dup (this->_interface_repository_id ());
++}
++
+ int
+ TAO_ServantBase::_find (const char *opname,
+                         TAO_Skeleton& skelfunc,
+Index: Servant_Base.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Servant_Base.h,v
+retrieving revision 1.29
+diff -u -u -r1.29 Servant_Base.h
+--- Servant_Base.h	26 May 2005 10:17:32 -0000	1.29
++++ Servant_Base.h	21 Jul 2005 11:55:19 -0000
+@@ -87,6 +87,11 @@
+       ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS
+     );
+ 
++  /// Get the repository id.
++  virtual char * _repository_id (
++      ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS
++    );
++
+   /// This is an auxiliary method for _this() and _narrow().
+   virtual TAO_Stub *_create_stub (ACE_ENV_SINGLE_ARG_DECL);
+ 
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -w -q diff -u (in directory C:\ACE\latest\ACE_wrappers\TAO\TAO_IDL\)
+? Makefile.bor
+? TAO_IDL.sln
+? TAO_IDL.suo
+? TAO_IDL_BE.bor
+? TAO_IDL_BE.vcproj
+? TAO_IDL_EXE.bor
+? TAO_IDL_EXE.vcproj
+? TAO_IDL_FE.bor
+? TAO_IDL_FE.vcproj
+Index: be/be_interface.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_interface.cpp,v
+retrieving revision 1.222
+diff -u -u -r1.222 be_interface.cpp
+--- be/be_interface.cpp	28 Apr 2005 22:50:01 -0000	1.222
++++ be/be_interface.cpp	21 Jul 2005 11:23:40 -0000
+@@ -807,6 +807,11 @@
+ 
+         this->skel_count_++;
+ 
++        *os << "{\"_repository_id\", &" << skeleton_class_name
++            << "::_repository_id_skel, 0}," << be_nl;
++
++        this->skel_count_++;
++
+         *os << "};" << be_nl << be_nl;
+         *os << "static const CORBA::Long _tao_" << flat_name
+             << "_optable_size = sizeof (ACE_Hash_Map_Entry<const char *,"
+@@ -962,6 +967,11 @@
+ 
+         this->skel_count_++;
+ 
++        *os << "_repository_id,&"
++            << skeleton_class_name
++            << "::_repository_id_skel, 0" << be_nl;
++        this->skel_count_++;
++
+         // Input to the gperf is ready. Run gperf and get things
+         // done. This method also unlinks the temp file that we used
+         // for the gperf.
+@@ -2452,7 +2462,7 @@
+ idl_bool
+ be_interface::is_event_consumer (void)
+ {
+-  return 
++  return
+     this->pd_n_inherits == 1
+     && ACE_OS::strcmp (this->pd_inherits[0]->full_name (),
+                        "Components::EventConsumerBase") == 0;
+Index: be/be_visitor_component/component_sh.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_visitor_component/component_sh.cpp,v
+retrieving revision 1.8
+diff -u -u -r1.8 component_sh.cpp
+--- be/be_visitor_component/component_sh.cpp	9 Mar 2005 06:13:00 -0000	1.8
++++ be/be_visitor_component/component_sh.cpp	21 Jul 2005 11:29:32 -0000
+@@ -202,6 +202,14 @@
+       << "ACE_ENV_ARG_DECL" << be_uidt_nl
+       << ");" << be_uidt_nl << be_nl;
+ 
++  // Add a skeleton for our _repository_id method.
++  *os << "static void _repository_id_skel (" << be_idt << be_idt_nl
++      << "TAO_ServerRequest &req," << be_nl
++      << "void *servant," << be_nl
++      << "void *servant_upcall" << be_nl
++      << "ACE_ENV_ARG_DECL" << be_uidt_nl
++      << ");" << be_uidt_nl << be_nl;
++
+   // Add the dispatch method.
+   *os << "virtual void _dispatch (" << be_idt << be_idt_nl
+       << "TAO_ServerRequest &req," << be_nl
+Index: be/be_visitor_interface/amh_sh.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_visitor_interface/amh_sh.cpp,v
+retrieving revision 1.22
+diff -u -u -r1.22 amh_sh.cpp
+--- be/be_visitor_interface/amh_sh.cpp	22 Feb 2005 10:09:23 -0000	1.22
++++ be/be_visitor_interface/amh_sh.cpp	21 Jul 2005 11:29:49 -0000
+@@ -89,7 +89,7 @@
+           base->compute_full_name ("AMH_", "", buf);
+           amh_name += buf;
+           // buf was allocated by ACE_OS::strdup, so we need to use free
+-          // instead of delete. 
++          // instead of delete.
+           ACE_OS::free (buf);
+ 
+           if (i != 0)
+@@ -161,6 +161,14 @@
+       << "ACE_ENV_ARG_DECL" << be_uidt_nl
+       << ");" << be_uidt_nl << be_nl;
+ 
++  // Add a skeleton for our _repository_id method.
++  *os << "static void _repository_id_skel (" << be_idt << be_idt_nl
++      << "TAO_ServerRequest &req," << be_nl
++      << "void *obj," << be_nl
++      << "void *servant_upcall" << be_nl
++      << "ACE_ENV_ARG_DECL" << be_uidt_nl
++      << ");" << be_uidt_nl << be_nl;
++
+   // Add the dispatch method.
+   *os << "virtual void _dispatch (" << be_idt << be_idt_nl
+       << "TAO_ServerRequest &req," << be_nl
+Index: be/be_visitor_interface/interface_sh.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_visitor_interface/interface_sh.cpp,v
+retrieving revision 1.59
+diff -u -u -r1.59 interface_sh.cpp
+--- be/be_visitor_interface/interface_sh.cpp	28 Apr 2005 22:50:01 -0000	1.59
++++ be/be_visitor_interface/interface_sh.cpp	21 Jul 2005 11:30:06 -0000
+@@ -161,7 +161,7 @@
+   *os << class_name.c_str () << " (const "
+       << class_name.c_str () << "& rhs);" << be_nl
+       << "virtual ~" << class_name.c_str () << " (void);" << be_nl << be_nl;
+-      
++
+   if (node->is_event_consumer ())
+     {
+       *os << "// Default implementation of CIAO-specific operation," << be_nl
+@@ -214,6 +214,15 @@
+       << "ACE_ENV_ARG_DECL" << be_uidt_nl
+       << ");" << be_uidt_nl << be_nl;
+ 
++  // Add a skeleton for our _repository_id method.
++  *os << "static void _repository_id_skel (" << be_idt << be_idt_nl
++      << "TAO_ServerRequest & req," << be_nl
++      << "void * servant_upcall," << be_nl
++      << "void * servant" << be_nl
++      << "ACE_ENV_ARG_DECL" << be_uidt_nl
++      << ");" << be_uidt_nl << be_nl;
++
++
+   // Add the dispatch method.
+   *os << "virtual void _dispatch (" << be_idt << be_idt_nl
+       << "TAO_ServerRequest & req," << be_nl
+Index: be/be_visitor_interface/interface_ss.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_visitor_interface/interface_ss.cpp,v
+retrieving revision 1.110
+diff -u -u -r1.110 interface_ss.cpp
+--- be/be_visitor_interface/interface_ss.cpp	28 Apr 2005 22:50:01 -0000	1.110
++++ be/be_visitor_interface/interface_ss.cpp	21 Jul 2005 12:51:55 -0000
+@@ -389,6 +389,114 @@
+ 
+   }
+ 
++  // Generate code for the _repository_id skeleton.
++  {
++    auto_ptr<AST_String> s (
++      idl_global->gen ()->create_string (
++        idl_global->gen ()->create_expr ((idl_uns_long) 0,
++                                         AST_Expression::EV_ulong)));
++
++    // @@ Cheat a little by placing a space before the operation name
++    //    to prevent the IDL compiler from interpreting the leading
++    //    underscore as an IDL escape.
++    Identifier op_name (ACE_OS::strdup (" _repository_id"));
++    UTL_ScopedName scoped_name (&op_name, 0);
++    be_operation repository_id (s.get (),
++                                AST_Operation::OP_noflags,
++                                &scoped_name,
++                                node->is_local (),
++                                node->is_abstract ());
++    repository_id.set_defined_in (node);
++
++    ACE_CString repository_id_upcall_command_name =
++      "_repository_id_" + ACE_CString (node_local_name) + "_Upcall_Command" ;
++
++    be_visitor_operation_upcall_command_ss upcall_command_visitor (this->ctx_);
++    upcall_command_visitor.visit (&repository_id,
++                                  full_skel_name,
++                                  repository_id_upcall_command_name.c_str ());
++
++    *os << "void " << full_skel_name
++        << "::_repository_id_skel (" << be_idt << be_idt_nl
++        << "TAO_ServerRequest & server_request, " << be_nl
++        << "void * TAO_INTERCEPTOR (servant_upcall)," << be_nl
++        << "void * servant" << be_nl
++        << "ACE_ENV_ARG_DECL" << be_uidt_nl
++        << ")" << be_uidt_nl;
++    *os << "{" << be_idt_nl;
++
++    // Generate exception list.
++    be_visitor_operation_exceptlist_ss exception_list (this->ctx_);
++    exception_list.visit_operation (&repository_id);
++
++    be_visitor_operation_ss op_visitor (this->ctx_);
++
++    *os << "TAO::SArg_Traits< ";
++
++    op_visitor.gen_arg_template_param_name (&repository_id,
++                                            s.get (),
++                                            os);
++
++    *os << ">::ret_val retval;";
++
++    op_visitor.gen_skel_body_arglist (&repository_id,
++                                      os);
++
++    *os << be_nl << be_nl
++        << "TAO::Argument * const args[] =" << be_idt_nl
++        << "{" << be_idt_nl
++        << "&retval"
++        << be_uidt_nl
++        << "};" << be_uidt_nl << be_nl;
++
++    *os << "static size_t const nargs = 1;" << be_nl << be_nl;
++
++    // Get the right object implementation.
++    *os << full_skel_name << " * const impl =" << be_idt_nl
++        << "static_cast<"
++        << full_skel_name << " *> (servant);"
++        << be_uidt_nl;
++
++    // Upcall_Command instantiation.
++    *os << be_nl
++        << repository_id_upcall_command_name.c_str() << " command ("
++        << be_idt_nl << "impl";
++
++    if (!repository_id.void_return_type ()
++        || repository_id.argument_count () > 0)
++      {
++        // server_request.operation_details () will be non-zero in the
++        // thru-POA collocation case.  Use them if available.
++        *os << "," << be_nl;
++
++        if (be_global->gen_thru_poa_collocation ())
++          *os << "server_request.operation_details ()," << be_nl;
++
++        *os << "args";
++      }
++
++    *os << ");" << be_uidt_nl << be_nl;
++
++    *os << "TAO::Upcall_Wrapper upcall_wrapper;" << be_nl
++        << "upcall_wrapper.upcall (server_request" << be_nl
++        << "                       , args" << be_nl
++        << "                       , nargs" << be_nl
++        << "                       , command"
++        << "\n#if TAO_HAS_INTERCEPTORS == 1" << be_nl
++        << "                       , servant_upcall" << be_nl
++        << "                       , exceptions" << be_nl
++        << "                       , nexceptions"
++        << "\n#endif  /* TAO_HAS_INTERCEPTORS == 1 */" << be_nl
++        << "                       ACE_ENV_ARG_PARAMETER);" << be_nl
++        << "ACE_CHECK;" << be_nl;
++
++    this->generate_send_reply (os);
++
++    *os << be_uidt_nl
++        << "}" << be_nl << be_nl;
++
++  }
++
+   *os << be_nl << be_nl << "// TAO_IDL - Generated from " << be_nl
+       << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
+ 
+@@ -590,7 +698,7 @@
+   *os << "{" << be_idt_nl;
+   *os << "return \"" << node->repoID () << "\";" << be_uidt_nl;
+   *os << "}";
+-  
++
+   if (node->is_event_consumer ())
+     {
+       *os << be_nl << be_nl
+
+***** CVS exited normally with code 1 *****
+
