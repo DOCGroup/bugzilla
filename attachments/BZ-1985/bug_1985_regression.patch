@@ -1,0 +1,115 @@
+Index: tests/IDL_Test/main.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tests/IDL_Test/main.cpp,v
+retrieving revision 1.16
+diff -u -r1.16 main.cpp
+--- tests/IDL_Test/main.cpp	9 Nov 2003 06:00:49 -0000	1.16
++++ tests/IDL_Test/main.cpp	19 Nov 2004 18:29:02 -0000
+@@ -18,10 +18,13 @@
+ //
+ // ============================================================================
+ 
+-#include "ace/Log_Msg.h"
+ #include "pragmaS.h"
+ #include "unionC.h"
+ #include "repo_id_modC.h"
++
++#include "nested_scopeS.h"
++
++#include "ace/Log_Msg.h"
+ #include "ace/OS_NS_string.h"
+ 
+ class hello_i : public virtual POA_hello
+@@ -76,6 +79,10 @@
+ {
+ };
+ 
++struct something_handler : POA_bug_1985_c::d::AMI_somethingHandler
++{
++};
++
+ int
+ main (int argc , char *argv[])
+ {
+@@ -247,6 +254,51 @@
+                       "pragma prefix error in object 'schmegegging'\n"));
+         }
+ 
++      {
++        something_handler x;
++        char const * base[] = {
++          "IDL:bug_1985_c/d/AMI_somethingHandler:1.0",
++          "IDL:bug_1985_a/b/AMI_somethingHandler:1.0",
++          "IDL:omg.org/Messaging/ReplyHandler:1.0",
++          "IDL:omg.org/CORBA/Object:1.0",
++        };
++        for(int i = 0; i != sizeof(base)/sizeof(base[0]); ++i)
++        {
++          if (!x._is_a(base[i]))
++          {
++            ++error_count;
++            ACE_DEBUG((LM_DEBUG,
++                       "something_handler::_is_a should return true for %s\n",
++                       base[i]));
++          }
++        }
++
++        if (x._downcast(base[0])
++            != static_cast<POA_bug_1985_a::b::AMI_somethingHandler*>(&x))
++        {
++          ++error_count;
++          ACE_DEBUG((LM_DEBUG,
++                     "mismatch in downcast for %s\n", 
++                     base[0]));
++        }
++        if (x._downcast(base[1])
++            != static_cast<POA_bug_1985_c::d::AMI_somethingHandler*>(&x))
++        {
++          ++error_count;
++          ACE_DEBUG((LM_DEBUG,
++                     "mismatch in downcast for %s\n", 
++                     base[0]));
++        }
++        if (x._downcast(base[2])
++            != static_cast<POA_Messaging::ReplyHandler*>(&x))
++        {
++          ++error_count;
++          ACE_DEBUG((LM_DEBUG,
++                     "mismatch in downcast for %s\n", 
++                     base[2]));
++        }
++      }
++
+       // Testing (de)marshaling of IDL union values 
+       // under duplicate and default case labels.
+ 
+Index: tests/IDL_Test/nested_scope.idl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tests/IDL_Test/nested_scope.idl,v
+retrieving revision 1.3
+diff -u -r1.3 nested_scope.idl
+--- tests/IDL_Test/nested_scope.idl	14 Aug 2001 16:58:54 -0000	1.3
++++ tests/IDL_Test/nested_scope.idl	19 Nov 2004 18:29:03 -0000
+@@ -123,6 +123,22 @@
+   };
+ };
+ 
++module bug_1985_a
++{
++  module b
++  {
++    interface something {};
++  };
++};
++
++module bug_1985_c
++{
++  module d
++  {
++    interface something : bug_1985_a::b::something {};
++  };
++};
++
+ // This one caused several problems - in the stub declaration of
+ // the operation, in the skeleton body's allocation of return type,
+ // and in the generated code for the ancestor in _tao_QueryInterface().
