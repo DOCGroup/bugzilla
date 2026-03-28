@@ -1,0 +1,7 @@
+
+interface ctest {
+	typedef sequence<char> UCSeq;
+
+	long ctestfn(in long size, out UCSeq data);
+};
+
