@@ -1,0 +1,20 @@
+--- orig/fullC.h	2005-03-23 11:40:28.201936000 -0800
++++ mod/fullC.h	2005-03-23 12:10:34.421190000 -0800
+@@ -638,7 +638,8 @@
+ 
+ // TAO_IDL - Generated from
+ // c:\projects\ace_win\ace_wrappers\tao\tao_idl\be\be_visitor_interface_fwd/any_op_ch.cpp:63
+-
++namespace mod2 
++{
+  void operator<<= (CORBA::Any &, mod2::full_ptr); // copying
+  void operator<<= (CORBA::Any &, mod2::full_ptr *); // non-copying
+  CORBA::Boolean operator>>= (const CORBA::Any &, mod2::full *&);
+@@ -680,6 +681,7 @@
+  void operator<<= (CORBA::Any &, mod2::full_ptr); // copying
+  void operator<<= (CORBA::Any &, mod2::full_ptr *); // non-copying
+  CORBA::Boolean operator>>= (const CORBA::Any &, mod2::full *&);
++}
+ 
+ // TAO_IDL - Generated from
+ // c:\projects\ace_win\ace_wrappers\tao\tao_idl\be\be_visitor_interface/cdr_op_ch.cpp:55
