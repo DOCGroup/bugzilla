@@ -1,0 +1,21 @@
+diff  C:/Users/Auge/Desktop/orig_CDR_Stream.h C:/Users/Auge/Desktop/CDR_Stream.h
+254a255,264
+>   ACE_CDR::Boolean write_wstring (const ACE_WString &x);
+> 
+> #ifdef ACE_USES_WCHAR
+>   ACE_INLINE ACE_CDR::Boolean write_tstring (const ACE_TString &x) /*!< ACE_TString is an ACE_WString because ACE_USES_WCHAR is set*/
+>   { return this->write_wstring(x); }
+> #else
+>   ACE_INLINE ACE_CDR::Boolean write_tstring (const ACE_TString &x) /*!< ACE_TString is an ACE_CString because ACE_USES_WCHAR is not set*/
+>   { return this->write_string(x); }
+> #endif // ACE_USES_WCHAR
+> 
+804a815,822
+>   ACE_CDR::Boolean read_wstring (ACE_WString & x);
+> #ifdef ACE_USES_WCHAR
+>   ACE_INLINE ACE_CDR::Boolean read_tstring (ACE_TString & x) /*!< ACE_TString is an ACE_WString because ACE_USES_WCHAR is set*/
+>   { return read_wstring(x);  }
+> #else
+>   ACE_INLINE ACE_CDR::Boolean read_tstring (ACE_TString & x) /*!< ACE_TString is an ACE_CString because ACE_USES_WCHAR is not set*/
+>   { return read_string(x);  }
+> #endif
