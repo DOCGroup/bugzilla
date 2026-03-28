@@ -1,0 +1,435 @@
+Index: ProjectCreator.pm
+===================================================================
+--- ProjectCreator.pm	(revision 1311)
++++ ProjectCreator.pm	(working copy)
+@@ -622,7 +622,7 @@
+             }
+ 
+             ## Begin reading the parent
+-            $status = $self->parse_file($file);
++            $status = $self->parse_file($file, 1);
+ 
+             ## Take the base project file off of the parent stack
+             pop(@{$self->{'reading_parent'}});
+@@ -1286,7 +1286,10 @@
+     $add = 1;
+   }
+ 
+-  while(<$fh>) {
++  ## $fh may be a CachedFileHandle, so we need to use the interface that
++  ## is common to both CachedFilehandle and FileHandle (instead of
++  ## <$fh>).
++  while($_ = $fh->getline()) {
+     my($line) = $self->preprocess_line($fh, $_);
+ 
+     if ($line eq '') {
+@@ -1324,6 +1327,7 @@
+   my($custom)  = defined $self->{'generated_exts'}->{$tag};
+   my($grtag)   = $grouped_key . $tag;
+   my($grname)  = undef;
++  my($count)   = 0;
+ 
+   if ($custom) {
+     ## For the custom scoped assignments, we want to put a copy of
+@@ -1351,8 +1355,10 @@
+     $$comps{$current} = [];
+   }
+ 
+-  my($count) = 0;
+-  while(<$fh>) {
++  ## $fh may be a CachedFileHandle, so we need to use the interface that
++  ## is common to both CachedFilehandle and FileHandle (instead of
++  ## <$fh>).
++  while($_ = $fh->getline()) {
+     my($line) = $self->preprocess_line($fh, $_);
+ 
+     if ($line eq '') {
+@@ -1496,7 +1502,10 @@
+   $self->{'verbatim'}->{$type}->{$loc} = [];
+   my($array) = $self->{'verbatim'}->{$type}->{$loc};
+ 
+-  while(<$fh>) {
++  ## $fh may be a CachedFileHandle, so we need to use the interface that
++  ## is common to both CachedFilehandle and FileHandle (instead of
++  ## <$fh>).
++  while($_ = $fh->getline()) {
+     my($line) = $self->preprocess_line($fh, $_);
+ 
+     if ($line =~ /^}$/) {
+@@ -1550,7 +1559,11 @@
+     ## closing brace for the feature and it appears to the parser
+     ## that nothing was defined.
+     my($curly) = 1;
+-    while(<$fh>) {
++
++    ## $fh may be a CachedFileHandle, so we need to use the interface
++    ## that is common to both CachedFilehandle and FileHandle (instead of
++    ## <$fh>).
++    while($_ = $fh->getline()) {
+       my($line) = $self->preprocess_line($fh, $_);
+ 
+       ## This is a very simplistic way of finding the end of
+@@ -1635,7 +1648,11 @@
+ 
+   my($optname) = undef;
+   my($inscope) = 0;
+-  while(<$fh>) {
++
++  ## $fh may be a CachedFileHandle, so we need to use the interface that
++  ## is common to both CachedFilehandle and FileHandle (instead of
++  ## <$fh>).
++  while($_ = $fh->getline()) {
+     my($line) = $self->preprocess_line($fh, $_);
+ 
+     if ($line eq '') {
+Index: TemplateParser.pm
+===================================================================
+--- TemplateParser.pm	(revision 1310)
++++ TemplateParser.pm	(working copy)
+@@ -2036,7 +2036,7 @@
+   my($input) = shift;
+ 
+   $self->collect_data();
+-  my($status, $errorString) = $self->cached_file_read($input);
++  my($status, $errorString) = $self->read_file($input, 1);
+ 
+   if ($status) {
+     if (defined $self->{'sstack'}->[0]) {
+Index: Creator.pm
+===================================================================
+--- Creator.pm	(revision 1310)
++++ Creator.pm	(working copy)
+@@ -141,13 +141,13 @@
+ 
+ 
+ sub parse_file {
+-  my($self, $input) = @_;
++  my($self, $input, $cache) = @_;
+ 
+   ## Save the last line number so we can put it back later
+   my($oline) = $self->get_line_number();
+ 
+   ## Read the input file
+-  my($status, $errorString) = $self->read_file($input);
++  my($status, $errorString) = $self->read_file($input, $cache);
+ 
+   if (!$status) {
+     $self->error($errorString,
+@@ -316,7 +316,10 @@
+     $flags = {};
+   }
+ 
+-  while(<$fh>) {
++  ## $fh may be a CachedFileHandle, so we need to use the interface that
++  ## is common to both CachedFilehandle and FileHandle (instead of
++  ## <$fh>).
++  while($_ = $fh->getline()) {
+     my($line) = $self->preprocess_line($fh, $_);
+ 
+     if ($line eq '') {
+Index: CachedFileHandle.pm
+===================================================================
+--- CachedFileHandle.pm	(revision 0)
++++ CachedFileHandle.pm	(revision 0)
+@@ -0,0 +1,120 @@
++package CachedFileHandle;
++
++# ************************************************************
++# Description   : Similar to a FileHandle only with file caching
++# Author        : Chad Elliott
++# Create Date   : 3/20/2008
++# ************************************************************
++
++# ************************************************************
++# Pragmas
++# ************************************************************
++
++use strict;
++use FileHandle;
++use File::Spec;
++
++# ************************************************************
++# Data Section
++# ************************************************************
++
++my %filecache = ();
++
++# ************************************************************
++# Subroutine Section
++# ************************************************************
++
++sub new {
++  my $class = shift;
++  my $self  = bless {'key'   => undef,
++                     'index' => 0,
++                    }, $class;
++  return $self;
++}
++
++
++sub open {
++  my($self, $file) = @_;
++
++  ## Create a unique key and save it
++  $file = File::Spec->rel2abs($file);
++  while($file =~ s/[^\/\\]+[\/\\]\.\.[\/\\]//) {
++  }
++  $self->{'key'} = $file;
++
++  ## If we have already read this file, reset the index and return true
++  if (defined $filecache{$file}) {
++    $self->{'index'} = 0;
++    return 1;
++  }
++
++  ## Otherwise, open the file and create the cache entry
++  my $fh = new FileHandle();
++  $filecache{$file} = [ [], $fh ];
++
++  ## Open the file and pass back the status
++  return open($fh, $file);
++}
++
++
++sub getline {
++  my $self = shift;
++
++  ## There will only be a key if the handle was opened in the first
++  ## place.
++  if (defined $self->{'key'}) {
++    ## There will only be a file handle if we haven't yet closed the
++    ## CachedFileHandle object.
++    my $array = $filecache{$self->{'key'}};
++    if (defined $$array[1]) {
++      ## Get the next line from the file handle
++      my $line = $$array[1]->getline();
++
++      ## Cache the line (if we read one) and return it.
++      push(@{$$array[0]}, $line) if (defined $line);
++      return $line;
++    }
++    else {
++      ## We're not reading from a file, return the next line in the cache
++      return $$array[0]->[$self->{'index'}++];
++    }
++  }
++
++  ## This file handle was not successfully opened, return nothing.
++  return undef;
++}
++
++
++sub close {
++  my $self = shift;
++
++  ## There will only be a key if the handle was opened in the first
++  ## place.
++  if (defined $self->{'key'}) {
++    my $array = $filecache{$self->{'key'}};
++    if (!defined $$array[0]->[0]) {
++      ## Nothing was read into the cache, so we want to delete this
++      ## entry.  It may be that the file was opened and then closed.  So,
++      ## subsequent openings and reads of this file may return nothing.
++      delete $filecache{$self->{'key'}};
++    }
++    elsif (defined $$array[1]) {
++      ## Close the file handle and remove it from the array.
++      close($$array[1]);
++      pop(@$array);
++
++      ## Set the index to the end of the cache so that if some one reads
++      ## from this file handle after it has been closed, they will get
++      ## nothing.
++      $self->{'index'} = scalar(@{$$array[0]});
++    }
++  }
++}
++
++
++sub END {
++  my @keys = keys %filecache;
++  print "DEBUG: @keys\n";
++}
++
++1;
+Index: Parser.pm
+===================================================================
+--- Parser.pm	(revision 1310)
++++ Parser.pm	(working copy)
+@@ -13,6 +13,7 @@
+ use strict;
+ use FileHandle;
+ 
++use CachedFileHandle;
+ use OutputMessage;
+ use StringProcessor;
+ use DirectoryManager;
+@@ -21,19 +22,12 @@
+ @ISA = qw(OutputMessage StringProcessor DirectoryManager);
+ 
+ # ************************************************************
+-# Data Section
+-# ************************************************************
+-
+-my(%filecache) = ();
+-
+-# ************************************************************
+ # Subroutine Section
+ # ************************************************************
+ 
+ sub new {
+-  my($class) = shift;
+-  my($inc)   = shift;
+-  my($self)  = $class->SUPER::new();
++  my($class, $inc) = @_;
++  my $self = $class->SUPER::new();
+ 
+   $self->{'line_number'} = 0;
+   $self->{'include'}     = $inc;
+@@ -43,8 +37,7 @@
+ 
+ 
+ sub strip_line {
+-  my($self) = shift;
+-  my($line) = shift;
++  my($self, $line) = @_;
+ 
+   ++$self->{'line_number'};
+   $line =~ s/\/\/.*//;
+@@ -64,47 +57,24 @@
+ 
+ 
+ sub read_file {
+-  my($self)        = shift;
+-  my($input)       = shift;
+-  my($cache)       = shift;
+-  my($ih)          = new FileHandle();
+-  my($status)      = 1;
+-  my($errorString) = undef;
++  my($self, $input, $cache) = @_;
++  my $ih          = ($cache ? new CachedFileHandle() : new FileHandle());
++  my $status      = 1;
++  my $errorString = undef;
+ 
+   $self->{'line_number'} = 0;
+-  if (open($ih, $input)) {
+-    $self->debug("Open $input");
+-    if ($cache) {
+-      ## If we don't have an array for this file, then start one
+-      if (!defined $filecache{$input}) {
+-        $filecache{$input} = [];
+-      }
++  if ($ih->open($input)) {
++    $self->debug("Open $input" . ($cache ? ' (cached)' : ''));
++    while($_ = $ih->getline()) {
++      ($status, $errorString) = $self->parse_line(
++                                  $ih, $self->preprocess_line($ih, $_));
+ 
+-      while(<$ih>) {
+-        my($line) = $self->preprocess_line($ih, $_);
+-
+-        ## Push the line onto the array for this file
+-        push(@{$filecache{$input}}, $line);
+-
+-        ($status, $errorString) = $self->parse_line($ih, $line);
+-
+-        if (!$status) {
+-          last;
+-        }
++      if (!$status) {
++        last;
+       }
+     }
+-    else {
+-      while(<$ih>) {
+-        ($status, $errorString) = $self->parse_line(
+-                                    $ih, $self->preprocess_line($ih, $_));
+-
+-        if (!$status) {
+-          last;
+-        }
+-      }
+-    }
+-    $self->debug("Close $input");
+-    close($ih);
++    $self->debug("Close $input" . ($cache ? ' (cached)' : ''));
++    $ih->close();
+   }
+   else {
+     $errorString = "Unable to open \"$input\" for reading";
+@@ -115,60 +85,31 @@
+ }
+ 
+ 
+-sub cached_file_read {
+-  my($self)  = shift;
+-  my($input) = shift;
+-  my($lines) = $filecache{$input};
+-
+-  if (defined $lines) {
+-    my($status) = 1;
+-    my($error)  = undef;
+-    $self->{'line_number'} = 0;
+-    foreach my $line (@$lines) {
+-      ++$self->{'line_number'};
+-      ($status, $error) = $self->parse_line(undef, $line);
+-
+-      if (!$status) {
+-        last;
+-      }
+-    }
+-    return $status, $error;
+-  }
+-
+-  return $self->read_file($input, 1);
+-}
+-
+-
+ sub get_line_number {
+-  my($self) = shift;
+-  return $self->{'line_number'};
++  return $_[0]->{'line_number'};
+ }
+ 
+ 
+ sub set_line_number {
+-  my($self)   = shift;
+-  my($number) = shift;
++  my($self, $number) = @_;
+   $self->{'line_number'} = $number;
+ }
+ 
+ 
+ sub slash_to_backslash {
+-  my($self) = shift;
+-  my($file) = shift;
++  my($self, $file) = @_;
+   $file =~ s/\//\\/g;
+   return $file;
+ }
+ 
+ 
+ sub get_include_path {
+-  my($self) = shift;
+-  return $self->{'include'};
++  return $_[0]->{'include'};
+ }
+ 
+ 
+ sub search_include_path {
+-  my($self)  = shift;
+-  my($file)  = shift;
++  my($self, $file) = @_;
+ 
+   foreach my $include ('.', @{$self->{'include'}}) {
+     if (-r "$include/$file") {
+@@ -181,8 +122,7 @@
+ 
+ 
+ sub escape_regex_special {
+-  my($self) = shift;
+-  my($name) = shift;
++  my($self, $name) = @_;
+ 
+   $name =~ s/([\+\-\\\$\[\]\(\)\.])/\\$1/g;
+   return $name;
