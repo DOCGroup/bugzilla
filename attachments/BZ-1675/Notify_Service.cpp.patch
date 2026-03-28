@@ -1,0 +1,13 @@
+--- ACE_wrappers-5.5.1+TAO-1.5.1+CIAO-0.5.1/TAO/orbsvcs/Notify_Service/Notify_Service.cpp	2006-03-24 02:03:55.000000000 +0000
++++ ACE_wrappers-new/TAO/orbsvcs/Notify_Service/Notify_Service.cpp	2006-05-25 15:08:22.000000000 +0000
+@@ -108,8 +108,8 @@
+       // Task activation flags.
+       long flags =
+         THR_NEW_LWP |
+-        THR_JOINABLE |
+-        this->orb_->orb_core ()->orb_params ()->thread_creation_flags ();
++        THR_JOINABLE ;
++      // this->orb_->orb_core ()->orb_params ()->thread_creation_flags ();
+ 
+       int priority =
+         ACE_Sched_Params::priority_min (this->orb_->orb_core ()->orb_params ()->sched_policy (),
