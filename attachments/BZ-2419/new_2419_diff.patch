@@ -1,0 +1,75 @@
+Index: TAO_IDL/be/be_argument.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_argument.cpp,v
+retrieving revision 1.23
+diff -u -r1.23 be_argument.cpp
+--- TAO_IDL/be/be_argument.cpp	27 Feb 2006 16:38:38 -0000	1.23
++++ TAO_IDL/be/be_argument.cpp	28 Feb 2006 10:10:19 -0000
+@@ -68,7 +68,7 @@
+       be_type *bt = be_type::narrow_from_decl (ft);
+       bt->seen_in_operation (true);
+       this->set_arg_seen_bit (bt);
+-      idl_global->non_local_iface_seen_ = true;
++      idl_global->need_skeleton_includes_ = true;
+     }
+ }
+ 
+Index: TAO_IDL/be/be_codegen.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_codegen.cpp,v
+retrieving revision 1.204
+diff -u -r1.204 be_codegen.cpp
+--- TAO_IDL/be/be_codegen.cpp	9 Feb 2006 16:44:12 -0000	1.204
++++ TAO_IDL/be/be_codegen.cpp	28 Feb 2006 10:10:19 -0000
+@@ -236,7 +236,7 @@
+                             -1);
+         }
+     }
+-    
++
+   // Generate the TAO_EXPORT_MACRO macro.
+   *this->client_header_ << "\n\n#if defined (TAO_EXPORT_MACRO)\n";
+   *this->client_header_ << "#undef TAO_EXPORT_MACRO\n";
+@@ -1880,7 +1880,8 @@
+ TAO_CodeGen::gen_skel_src_includes (void)
+ {
+   // Only non-local interfaces generate anything in the skeleton.
+-  if (!idl_global->non_local_iface_seen_)
++  if (!(idl_global->non_local_iface_seen_
++        || idl_global->need_skeleton_includes_))
+     {
+       return;
+     }
+Index: TAO_IDL/include/idl_global.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/include/idl_global.h,v
+retrieving revision 1.92
+diff -u -r1.92 idl_global.h
+--- TAO_IDL/include/idl_global.h	11 Feb 2006 00:30:21 -0000	1.92
++++ TAO_IDL/include/idl_global.h	28 Feb 2006 10:10:19 -0000
+@@ -323,6 +323,9 @@
+   bool wchar_seq_seen_;
+   bool wstring_seq_seen_;
+ 
++  // flag to force generation of skeleton includes (see bug #2419).
++  bool need_skeleton_includes_;
++
+   // Constructor
+   IDL_GlobalData (void);
+   // Destructor
+Index: TAO_IDL/util/utl_global.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/util/utl_global.cpp,v
+retrieving revision 1.140
+diff -u -r1.140 utl_global.cpp
+--- TAO_IDL/util/utl_global.cpp	9 Feb 2006 16:44:15 -0000	1.140
++++ TAO_IDL/util/utl_global.cpp	28 Feb 2006 10:10:19 -0000
+@@ -254,6 +254,8 @@
+   vt_seq_seen_ = false;
+   wchar_seq_seen_ = false;
+   wstring_seq_seen_ = false;
++
++  need_skeleton_includes_ = false;
+ }
+ 
+ // Get or set scopes stack
