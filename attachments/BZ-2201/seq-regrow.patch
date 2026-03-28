@@ -1,0 +1,71 @@
+diff -r -c tao.orig/Sequence_T.cpp tao/Sequence_T.cpp
+*** tao.orig/Sequence_T.cpp	Wed Jul 27 08:39:09 2005
+--- tao/Sequence_T.cpp	Wed Jul 27 08:57:59 2005
+***************
+*** 137,142 ****
+--- 137,154 ----
+    this->release_ = 0;
+  }
+  
++ template<typename T>
++ void
++ TAO_Unbounded_Sequence<T>::_shrink_buffer (CORBA::ULong nl,
++ 					   CORBA::ULong ol)
++ {
++   T * tmp = reinterpret_cast <T *> (this->buffer_);
++ 
++   for (CORBA::ULong i = nl; i < ol; ++i) {
++     tmp[i] = T();
++   }
++ }
++ 
+  template <typename T>
+  T *
+  TAO_Unbounded_Sequence<T>::get_buffer (CORBA::Boolean orphan)
+***************
+*** 321,326 ****
+--- 333,350 ----
+    this->release_ = 0;
+  }
+  
++ template<typename T, size_t MAX>
++ void
++ TAO_Bounded_Sequence<T, MAX>::_shrink_buffer (CORBA::ULong nl,
++ 					      CORBA::ULong ol)
++ {
++   T * tmp = reinterpret_cast <T *> (this->buffer_);
++ 
++   for (CORBA::ULong i = nl; i < ol; ++i) {
++     tmp[i] = T();
++   }
++ }
++ 
+  template <typename T, size_t MAX>
+  T *
+  TAO_Bounded_Sequence<T, MAX>::get_buffer (CORBA::Boolean orphan)
+diff -r -c tao.orig/Sequence_T.h tao/Sequence_T.h
+*** tao.orig/Sequence_T.h	Wed Jul 27 08:39:10 2005
+--- tao/Sequence_T.h	Wed Jul 27 08:55:06 2005
+***************
+*** 82,87 ****
+--- 82,89 ----
+    /// Implement the TAO_Base_Sequence methods (see Sequence.h)
+    virtual void _allocate_buffer (CORBA::ULong length);
+    virtual void _deallocate_buffer (void);
++   virtual void _shrink_buffer (CORBA::ULong new_length,
++ 			       CORBA::ULong old_length);
+  
+    // = orbos/98-01-11 proposed extensions.
+    /**
+***************
+*** 189,194 ****
+--- 191,199 ----
+    /// deallocate the buffer
+    virtual void _deallocate_buffer (void);
+  
++   virtual void _shrink_buffer (CORBA::ULong new_length,
++                                CORBA::ULong old_length);
++ 
+    // = orbos/98-01-11 proposed extensions.
+    /**
+     * Allows read-write access to the underlying buffer.  If <orphan>
