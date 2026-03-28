@@ -1,0 +1,112 @@
+--- /software/src/policy/ACE/ACE_wrappers/ace/ACE.cpp	2004-07-21 17:18:32.000000000 -0400
++++ ACE.cpp	2005-06-16 11:41:15.000000000 -0400
+@@ -2712,6 +2712,109 @@
+ #endif /* WIN32 */
+ }
+ 
++#if defined (TIMESTAMP_CHANGE)
++// Returns the current date and timestamp in a user defined format.
++
++ACE_TCHAR *
++ACE::formatted_timestamp (ACE_TCHAR date_and_time[],
++                          int date_and_timelen)
++{
++  //ACE_TRACE ("ACE::timestamp");
++
++  if (date_and_timelen < ACE_MAXLOGDATETIME)
++    {
++      errno = EINVAL;
++      return 0;
++    }
++
++#if defined (WIN32)
++   // Emulate Unix.  Win32 does NOT support all the UNIX versions
++   // below, so DO we need this ifdef.
++  static const ACE_TCHAR *day_of_week_name[] =
++  {
++    ACE_LIB_TEXT ("Sun"),
++    ACE_LIB_TEXT ("Mon"),
++    ACE_LIB_TEXT ("Tue"),
++    ACE_LIB_TEXT ("Wed"),
++    ACE_LIB_TEXT ("Thu"),
++    ACE_LIB_TEXT ("Fri"),
++    ACE_LIB_TEXT ("Sat")
++  };
++
++  static const ACE_TCHAR *month_name[] =
++  {
++    ACE_LIB_TEXT ("Jan"),
++    ACE_LIB_TEXT ("Feb"),
++    ACE_LIB_TEXT ("Mar"),
++    ACE_LIB_TEXT ("Apr"),
++    ACE_LIB_TEXT ("May"),
++    ACE_LIB_TEXT ("Jun"),
++    ACE_LIB_TEXT ("Jul"),
++    ACE_LIB_TEXT ("Aug"),
++    ACE_LIB_TEXT ("Sep"),
++    ACE_LIB_TEXT ("Oct"),
++    ACE_LIB_TEXT ("Nov"),
++    ACE_LIB_TEXT ("Dec")
++  };
++
++  SYSTEMTIME local;
++  ::GetLocalTime (&local);
++
++  ACE_OS::sprintf (date_and_time,
++                   ACE_LIB_TEXT ("%3s %3s %2d %04d %02d:%02d:%02d.%06d"),
++                   day_of_week_name[local.wDayOfWeek],
++                   month_name[local.wMonth - 1],
++                   (int) local.wDay,
++                   (int) local.wYear,
++                   (int) local.wHour,
++                   (int) local.wMinute,
++                   (int) local.wSecond,
++                   (int) (local.wMilliseconds * 1000));
++  return date_and_time;
++#else  /* UNIX */
++
++  ACE_TCHAR timebuf[ACE_MAXLOGDATETIME+1];
++  struct tm tmStruct;
++
++  // get the current time and convert into other formats
++  ACE_Time_Value cur_time = ACE_OS::gettimeofday ();
++  time_t secs = cur_time.sec ();
++  localtime_r(&secs,&tmStruct);
++
++  // convert to a string in the format we want
++  ACE_OS::strftime(timebuf,
++                   sizeof(timebuf),
++                   ACE_LOG_MSG->date_time_fmt (),
++                   &tmStruct);
++
++  // date_and_timelen > sizeof timebuf!
++  ACE_OS::memset(date_and_time,0,date_and_timelen);
++  ACE_OS::strsncpy (date_and_time,
++                    timebuf,
++                    date_and_timelen);
++
++  if( ACE_LOG_MSG->append_usecs () )
++    {
++      // add on the usecs and the time_t value
++      char usectmp[8];
++      ACE_OS::sprintf (usectmp,".%06ld",cur_time.usec());
++      ACE_OS::strcat (date_and_time,usectmp);
++    }
++
++  if( ACE_LOG_MSG->append_utc () )
++    {
++      // add on the UTC based time_t value
++      char utctmp[11];   // up to 10 digits
++      ACE_OS::sprintf (utctmp,"%c%ld",ACE_LOG_MSG->utc_separator(),secs);
++      ACE_OS::strcat (date_and_time,utctmp);
++    }
++
++  return date_and_time;
++
++#endif /* WIN32 */
++}
++#endif  /* TIMESTAMP_CHANGE */
++
+ // This function rounds the request to a multiple of the page size.
+ 
+ size_t
