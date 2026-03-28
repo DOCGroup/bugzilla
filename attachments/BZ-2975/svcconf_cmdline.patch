@@ -1,0 +1,27 @@
+diff -ru ACE_wrappers.orig/ace/Service_Config.cpp ACE_wrappers/ace/Service_Config.cpp
+--- ACE_wrappers.orig/ace/Service_Config.cpp	2007-07-25 15:12:25.000000000 +0300
++++ ACE_wrappers/ace/Service_Config.cpp	2007-07-25 15:11:29.000000000 +0300
+@@ -118,7 +118,7 @@
+   // Keep a list of all unknown arguments, begin with the
+   // executable's name
+   ACE_ARGV superargv;
+-  superargv.add (argv[0]);
++  superargv.add (argv[0], true);
+ 
+   for (int c; (c = getopt ()) != -1; )
+     switch (c)
+@@ -147,12 +147,12 @@
+           break;
+         }
+       default:
+-        superargv.add ( argv[getopt.opt_ind () - 1]);
++        superargv.add (argv[getopt.opt_ind () - 1], true);
+       }
+ 
+   // Collect any argumets that were left
+   for (int c = getopt.opt_ind (); c < argc; c++)
+-      superargv.add (argv[c-1]);
++      superargv.add (argv[c-1], true);
+ 
+   return ACE_Service_Gestalt::parse_args_i (superargv.argc (),
+                                             superargv.argv ());
