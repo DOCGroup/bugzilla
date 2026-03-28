@@ -1,0 +1,166 @@
+diff -U 5 -r -x config.h -x '*platform*' -x '*~' ACE_orig/ACE_wrappers/ace/OS_NS_unistd.h ACE_patched/ACE_wrappers/ace/OS_NS_unistd.h
+--- ACE_orig/ACE_wrappers/ace/OS_NS_unistd.h	2005-10-28 18:14:54.000000000 +0200
++++ ACE_patched/ACE_wrappers/ace/OS_NS_unistd.h	2006-01-07 14:22:11.000000000 +0100
+@@ -151,10 +151,13 @@
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   gid_t getgid (void);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
++  gid_t getegid (void);
++
++  ACE_NAMESPACE_INLINE_FUNCTION
+   int getopt (int argc,
+               char *const *argv,
+               const char *optstring);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+@@ -170,10 +173,13 @@
+   pid_t getppid (void);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   uid_t getuid (void);
+ 
++  ACE_NAMESPACE_INLINE_FUNCTION
++  uid_t geteuid (void);
++
+   // should call gethostname()
+   ACE_NAMESPACE_INLINE_FUNCTION
+   int hostname (char *name,
+                 size_t maxnamelen);
+ 
+@@ -259,10 +265,13 @@
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   int setgid (gid_t);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
++  int setegid (gid_t);
++
++  ACE_NAMESPACE_INLINE_FUNCTION
+   int setpgid (pid_t pid, pid_t pgid);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   int setregid (gid_t rgid, gid_t egid);
+ 
+@@ -274,10 +283,13 @@
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   int setuid (uid_t);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
++  int seteuid (uid_t);
++
++  ACE_NAMESPACE_INLINE_FUNCTION
+   int sleep (u_int seconds);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   int sleep (const ACE_Time_Value &tv);
+ 
+diff -U 5 -r -x config.h -x '*platform*' -x '*~' ACE_orig/ACE_wrappers/ace/OS_NS_unistd.inl ACE_patched/ACE_wrappers/ace/OS_NS_unistd.inl
+--- ACE_orig/ACE_wrappers/ace/OS_NS_unistd.inl	2005-11-04 12:45:58.000000000 +0100
++++ ACE_patched/ACE_wrappers/ace/OS_NS_unistd.inl	2006-01-07 14:27:06.000000000 +0100
+@@ -556,10 +556,24 @@
+ # else
+   ACE_OSCALL_RETURN (::getgid (), gid_t, (gid_t) -1);
+ # endif /* VXWORKS || ACE_PSOS */
+ }
+ 
++ACE_INLINE gid_t
++ACE_OS::getegid (void)
++{
++  ACE_OS_TRACE ("ACE_OS::getegid");
++#if defined (VXWORKS) || defined (ACE_PSOS) || defined (INTEGRITY)
++  // getegid() is not supported:  just one user anyways
++  return 0;
++# elif defined (ACE_WIN32) || defined (CHORUS)
++  ACE_NOTSUP_RETURN (static_cast<gid_t> (-1));
++# else
++  ACE_OSCALL_RETURN (::getegid (), gid_t, (gid_t) -1);
++# endif /* VXWORKS || ACE_PSOS */
++}
++
+ ACE_INLINE int
+ ACE_OS::getopt (int argc, char *const *argv, const char *optstring)
+ {
+   ACE_OS_TRACE ("ACE_OS::getopt");
+ #if defined (VXWORKS) || defined (ACE_PSOS) || defined (INTEGRITY) || defined (ACE_WIN32)
+@@ -636,10 +650,24 @@
+ # else
+   ACE_OSCALL_RETURN (::getuid (), uid_t, (uid_t) -1);
+ # endif /* VXWORKS || ACE_PSOS */
+ }
+ 
++ACE_INLINE uid_t
++ACE_OS::geteuid (void)
++{
++  ACE_OS_TRACE ("ACE_OS::geteuid");
++#if defined (VXWORKS) || defined (ACE_PSOS) || defined (INTEGRITY)
++  // geteuid() is not supported:  just one user anyways
++  return 0;
++# elif defined (ACE_WIN32) || defined (CHORUS)
++  ACE_NOTSUP_RETURN (static_cast<uid_t> (-1));
++# else
++  ACE_OSCALL_RETURN (::geteuid (), uid_t, (uid_t) -1);
++# endif /* VXWORKS || ACE_PSOS */
++}
++
+ ACE_INLINE int
+ ACE_OS::hostname (char name[], size_t maxnamelen)
+ {
+   ACE_OS_TRACE ("ACE_OS::hostname");
+ #if defined (ACE_HAS_PHARLAP)
+@@ -987,10 +1015,26 @@
+   ACE_OSCALL_RETURN (::setgid (gid), int,  -1);
+ # endif /* VXWORKS || ACE_PSOS */
+ }
+ 
+ ACE_INLINE int
++ACE_OS::setegid (gid_t gid)
++{
++  ACE_OS_TRACE ("ACE_OS::setegid");
++#if defined (VXWORKS) || defined (ACE_PSOS) || defined (INTEGRITY)
++  // setegid() is not supported:  just one user anyways
++  ACE_UNUSED_ARG (gid);
++  return 0;
++# elif defined (ACE_WIN32) || defined (CHORUS)
++  ACE_UNUSED_ARG (gid);
++  ACE_NOTSUP_RETURN (-1);
++# else
++  ACE_OSCALL_RETURN (::setegid (gid), int,  -1);
++# endif /* VXWORKS || ACE_PSOS */
++}
++
++ACE_INLINE int
+ ACE_OS::setpgid (pid_t pid, pid_t pgid)
+ {
+   ACE_OS_TRACE ("ACE_OS::setpgid");
+ #if defined (ACE_LACKS_SETPGID)
+   ACE_UNUSED_ARG (pid);
+@@ -1071,10 +1115,26 @@
+   ACE_OSCALL_RETURN (::setuid (uid), int,  -1);
+ # endif /* VXWORKS || ACE_PSOS */
+ }
+ 
+ ACE_INLINE int
++ACE_OS::seteuid (uid_t uid)
++{
++  ACE_OS_TRACE ("ACE_OS::seteuid");
++#if defined (VXWORKS) || defined (ACE_PSOS) || defined (INTEGRITY)
++  // seteuid() is not supported:  just one user anyways
++  ACE_UNUSED_ARG (uid);
++  return 0;
++# elif defined (ACE_WIN32) || defined(CHORUS)
++  ACE_UNUSED_ARG (uid);
++  ACE_NOTSUP_RETURN (-1);
++# else
++  ACE_OSCALL_RETURN (::seteuid (uid), int,  -1);
++# endif /* VXWORKS || ACE_PSOS */
++}
++
++ACE_INLINE int
+ ACE_OS::sleep (u_int seconds)
+ {
+   ACE_OS_TRACE ("ACE_OS::sleep");
+ #if defined (ACE_WIN32)
+   ::Sleep (seconds * ACE_ONE_SECOND_IN_MSECS);
