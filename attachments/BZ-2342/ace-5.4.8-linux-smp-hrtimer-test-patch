@@ -1,0 +1,223 @@
+diff -Nru ACE_wrappers/tests/High_Res_Timer_Test.cpp ACE_wrappers-patched-5.4.8/tests/High_Res_Timer_Test.cpp
+--- ACE_wrappers/tests/High_Res_Timer_Test.cpp	2005-04-09 02:43:26.000000000 +0300
++++ ACE_wrappers-patched-5.4.8/tests/High_Res_Timer_Test.cpp	2005-12-27 08:32:13.000000000 +0200
+@@ -12,6 +12,7 @@
+ //
+ // = AUTHOR
+ //    David L. Levine <levine@cs.wustl.edu>
++//    Robert Iakobashvili <coroberti@gmail.com>
+ //
+ //============================================================================
+ 
+@@ -21,6 +22,7 @@
+ #include "ace/Sched_Params.h"
+ #include "ace/Get_Opt.h"
+ #include "ace/OS_NS_unistd.h"
++#include "ace/Thread_Manager.h"
+ 
+ ACE_RCSID(tests, High_Res_Timer_Test, "High_Res_Timer_Test.cpp,v 4.6 2000/04/23 04:43:58 brunsch Exp")
+ 
+@@ -95,11 +97,122 @@
+   return measured;
+ }
+ 
++static
++u_int
++smp_safety = 1; // for linux with cpu-affinity
++
++#if defined (linux) && \
++((defined (ACE_HAS_SCHED_SETAFFINITY) && defined (ACE_HAS_SCHED_GETAFFINITY)) || \
++ (defined (ACE_HAS_PTHREAD_SETAFFINITY_NP) && defined (ACE_HAS_PTHREAD_GETAFFINITY_NP)))
++
++static const u_long smp_test_interval = 200000;
++static int smp_errors = 0;
++
++static
++ACE_Time_Value
++smp_time_interval (const ACE_Time_Value &interval,
++               ACE_hrtime_t& nanoseconds,
++		ACE_hrtime_t& microseconds,
++	        int smp_safe)
++{
++  ACE_High_Res_Timer timer;
++
++  if (smp_safe)
++  {
++	  cpu_set_t mask;
++	  CPU_ZERO (&mask);
++
++	  // binding to "CPU 0", works for UP system as well
++	  CPU_SET (0, &mask);
++
++	  if (timer.bind_thread_to_cpu (mask) == -1)
++	  {
++		  ACE_ERROR_RETURN ((LM_ERROR,
++				ACE_TEXT ("bind_thread_to_cpu () failed with errno %d\n"), 
++				errno),
++				1);
++	  }
++  }
++
++  timer.start ();
++
++  // This is to create some probability of a thread migration to
++  // another CPU, when the thread is not bound to a particular CPU
++  // (smp_safe not defined).
++  ACE_OS::thr_yield ();
++
++  ACE_OS::sleep (interval);
++
++  timer.stop ();
++
++  ACE_Time_Value measured;
++  timer.elapsed_time (measured);
++  timer.elapsed_time (nanoseconds);
++  timer.elapsed_microseconds (microseconds);
++  return measured;
++}
++
++static void *
++timer_func (void* data)
++{
++	u_int iterations = *(static_cast<int*> (data));
++
++	for (u_int j = 0; j < iterations; ++j)
++	{
++		const ACE_Time_Value interval (0, smp_test_interval); // 200 msec
++		ACE_hrtime_t nanoseconds;
++		ACE_hrtime_t microseconds;
++		const ACE_Time_Value measured = 
++			smp_time_interval (interval,
++							  nanoseconds,
++							  microseconds,
++							  smp_safety // if 1 smp-safe, if 0 - not-smp-safe 
++				                         );
++
++		ACE_DEBUG ((LM_DEBUG,
++						ACE_TEXT ("interval: %u usec, measured: %u usec%s\n"),
++						interval.sec () * 1000000 + interval.usec (),
++						measured.sec () * 1000000 + measured.usec ()));
++		
++		smp_errors += check (interval.sec () * 1000000 + interval.usec (),
++								  measured.sec () * 1000000 + measured.usec ());
++
++		// Check the ACE_Timer_Value-calculated microseconds against
++		// the ACE_High_Res_Timer-calculated nanoseconds.
++		ACE_DEBUG ((LM_DEBUG,
++						ACE_TEXT ("ACE_Time_Value usec: %u, ACE_HR nsec: %u\n"),
++						measured.sec () * 1000000 + measured.usec (),
++						ACE_HRTIME_CONVERSION (nanoseconds)));
++		
++		smp_errors += check_micro_nano (measured.sec () * 1000000 +
++											 measured.usec (),
++											 nanoseconds);
++		ACE_DEBUG ((LM_DEBUG,
++						ACE_TEXT ("ACE_High_Res_Timer usec: %u, nsec: %u\n"),
++						ACE_HRTIME_CONVERSION (microseconds),
++						ACE_HRTIME_CONVERSION (nanoseconds)));
++		// Now check the ACE_High_Res_Timer-calculated values against
++		// each other.
++		smp_errors += check_micro_nano (microseconds, nanoseconds);
++	}
++	
++	return 0;
++}
++
++#endif /* defined linux with CPU affinity support */
+ 
+ static
+ u_int
+ intervals [] = {0, 1, 10, 100, 1000, 10000, 100000, 1000000, 4000000}; /*usec*/
+ 
++static
++u_int 
++n_threads = 13; // 13 - is a really good number
++
++static
++const u_int 
++TIMER_RESOLUTION = 10000;
++
+ int
+ run_main (int argc, ACE_TCHAR *argv[])
+ {
+@@ -114,19 +227,21 @@
+ 
+   u_int iterations = 1;
+ 
+-  ACE_Get_Opt getopt (argc, argv, ACE_TEXT ("i:"));
++  ACE_Get_Opt getopt (argc, argv, ACE_TEXT ("i:nt:"));
+   for (int c; (c = getopt ()) != -1; )
+     switch (c)
+       {
+       case 'i':
+         iterations = ACE_OS::atoi (getopt.opt_arg ());
+         break;
++     case 't':
++	n_threads = ACE_OS::atoi (getopt.opt_arg ());
++	break;
++    case 'n': // non-safe for smp
++       smp_safety = 0; // HRT should failed on SMP machines
++	break;
+       }
+ 
+-  // We don't check for errors if the interval is shorter than this
+-  // value because the OS has a finite resolution anyway.
+-  const u_int TIMER_RESOLUTION = 10000;
+-
+   for (u_int i = 0; i < sizeof intervals / sizeof (u_int); ++i)
+     {
+       for (u_int j = 0; j < iterations; ++j)
+@@ -171,6 +286,30 @@
+         }
+     }
+ 
+-  ACE_END_TEST;
+-  return errors == 0  ?  0  :  1;
++  if (errors)
++  {
++      ACE_END_TEST;
++      return 1;
++  }
++
++#if defined (linux) && \
++((defined (ACE_HAS_SCHED_SETAFFINITY) && defined (ACE_HAS_SCHED_GETAFFINITY)) || \
++ (defined (ACE_HAS_PTHREAD_SETAFFINITY_NP) && defined (ACE_HAS_PTHREAD_GETAFFINITY_NP)))
++
++  ACE_Thread_Manager *thr_mgr = ACE_Thread_Manager::instance ();
++
++  int grp_id = thr_mgr->spawn_n (n_threads, 
++					 (ACE_THR_FUNC) timer_func,
++					 static_cast<void*>(&iterations));
++
++  ACE_ASSERT (grp_id != -1);
++
++  thr_mgr->wait ();
++
++   ACE_END_TEST;
++   return smp_errors == 0  ?  0  :  1;
++#else
++   ACE_END_TEST;
++   return 0;
++#endif  /* defined linux with CPU affinity support */
+ }
+diff -Nru ACE_wrappers/tests/testConfig.ini ACE_wrappers-patched-5.4.8/tests/testConfig.ini
+--- ACE_wrappers/tests/testConfig.ini	1970-01-01 02:00:00.000000000 +0200
++++ ACE_wrappers-patched-5.4.8/tests/testConfig.ini	2005-12-27 11:32:52.000000000 +0200
+@@ -0,0 +1,16 @@
++[binary]
++data="80,81,82,83,84,85,86,87,88,89,8a,8b,8c,8d,8e,8f,90,91,92,93,94,95,96,97,98,99,9a,9b,9c,9d,9e,9f,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,aa,ab,ac,ad,ae,af,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,ba,bb,bc,bd,be,bf,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,ca,cb,cc,cd,ce,cf"
++[logger]
++=some string
++Justification=left_justified
++TransactionFilePath=data/
++LogFilePath=log/
++SeekIndex=0000000e
++Heading=ACE - Adaptive Communication Environment
++TraceLevel=00000006
++[network]
++TimeToLive=00000064
++DestPort=0000317e
++Delay=FALSE
++DestIPAddress=localhost
++ReconnectInterval=00000003
+Binary files ACE_wrappers/tests/test.reg and ACE_wrappers-patched-5.4.8/tests/test.reg differ
