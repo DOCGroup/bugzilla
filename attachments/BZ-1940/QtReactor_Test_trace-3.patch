@@ -1,0 +1,59 @@
+--- ACE_wrappers/tests/QtReactor_Test.cpp.orig	2004-07-18 00:40:05.000000000 +0200
++++ ACE_wrappers/tests/QtReactor_Test.cpp	2004-09-21 14:52:13.000000000 +0200
+@@ -238,8 +238,7 @@
+ 
+ DgramHandler::~DgramHandler( )
+ {
+-	ACE_TRACE( ( LM_TRACE,
+-		ACE_TEXT( "virtual DgramHandler::~DgramHandler( )\n" ) ) );
++	ACE_TRACE("DgramHandler::~DgramHandler");
+ }
+ 
+ int  DgramHandler::open (const ACE_INET_Addr &local, 
+@@ -374,8 +373,7 @@
+ 
+ TCPConnectionHandler::~TCPConnectionHandler( )
+ {
+-	ACE_TRACE( (LM_TRACe, 
+-			ACE_TEXT( "TCPConnectionHandler::~TCPConnectionHandler( )\n" ) ) );
++	ACE_TRACE("TCPConnectionHandler::~TCPConnectionHandler");
+ }
+ 
+ int TCPConnectionHandler::handle_input( ACE_HANDLE handle)
+@@ -831,7 +829,7 @@
+ 		ACE_ERROR( ( LM_ERROR, 
+ 			ACE_TEXT( "TCPAcceptorHandler::make_svc_handler called to many times!\n" ) ) );
+ 	else
+-		ACE_TRACE( ( LM_TRACE, 
++		ACE_DEBUG( ( LM_DEBUG, 
+ 		ACE_TEXT( "TCPAcceptorHandler::make_svc_handler new TCP server created\n" ) ) );
+ 
+ 	return 0;
+@@ -863,8 +861,7 @@
+ 
+ TCPAcceptorHandler::~TCPAcceptorHandler( )
+ {
+-	ACE_TRACE( ( LM_TRACE,
+-		ACE_TEXT( "TCPAcceptorHandler::~TCPAcceptorHandler( )\n" ) ) );
++	ACE_TRACE("TCPAcceptorHandler::~TCPAcceptorHandler");
+ }
+ 
+ void testNativeReactor( int argc, ACE_TCHAR *argv[] )
+@@ -872,7 +869,7 @@
+ 	ACE_UNUSED_ARG (argc);
+ 	ACE_UNUSED_ARG (argv);
+ 
+-	ACE_DEBUG( ( LM_INFO, ACE_TEXT( "Testing autotest using native reactor\n" ) ) );
++	ACE_DEBUG( ( LM_DEBUG, ACE_TEXT( "Testing autotest using native reactor\n" ) ) );
+ 
+ 	ACE_Reactor      reactor;
+ 	HandlersRegister handlersRegister( &reactor );
+@@ -897,7 +894,7 @@
+ {
+ #if defined (ACE_HAS_QT)
+ 	// Qt specific code
+-	ACE_DEBUG( ( LM_INFO, ACE_TEXT( "Testing QtReactor\n" ) ) );
++	ACE_DEBUG( ( LM_DEBUG, ACE_TEXT( "Testing QtReactor\n" ) ) );
+ 	
+ 	QTestApplication app (argc, argv);
+ 	ACE_QtReactor    qtReactor ( &app );
