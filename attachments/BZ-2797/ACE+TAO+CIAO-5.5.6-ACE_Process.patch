@@ -1,0 +1,14 @@
+diff -ru 5.5.6/ACE_wrappers/ace/Process.cpp 5.5.6-patched/ACE_wrappers/ace/Process.cpp
+--- 5.5.6/ACE_wrappers/ace/Process.cpp	2007-01-05 22:55:24.000000000 +0100
++++ 5.5.6-patched/ACE_wrappers/ace/Process.cpp	2007-01-31 17:29:26.000000000 +0100
+@@ -1069,7 +1069,9 @@
+ #if !defined (ACE_LACKS_VSNPRINTF)
+   // sprintf the format and args into command_line_buf__.
+   ACE_OS::vsnprintf (command_line_buf_,
+-                     command_line_buf_len_ - 1,
++                     command_line_buf_len_, // ACE_OS::vsnprintf writes at
++                                            // most n-1 characters plus the
++                                            // trailing null.
+                      format,
+                      argp);
+ #else
