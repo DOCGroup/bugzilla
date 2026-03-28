@@ -1,0 +1,184 @@
+diff -Nauw Hello/client.cpp HelloBug/client.cpp
+--- Hello/client.cpp	2006-12-18 13:16:09.000000000 -0500
++++ HelloBug/client.cpp	2006-12-18 13:17:00.000000000 -0500
+@@ -1,9 +1,8 @@
+-// client.cpp,v 1.5 2002/01/29 20:21:07 okellogg Exp
+ 
+ #include "TestC.h"
+ #include "ace/Get_Opt.h"
+-
+-ACE_RCSID(Hello, client, "client.cpp,v 1.5 2002/01/29 20:21:07 okellogg Exp")
++#include "ace/OS_NS_unistd.h"
++#include <iostream>
+ 
+ const char *ior = "file://test.ior";
+ 
+@@ -38,13 +37,27 @@
+ {
+   ACE_TRY_NEW_ENV
+     {
++      char *orbArgv[] = {
++        "-ORBlistenEndpoints",
++        "iiop://localhost:51000"
++      };
++      int orbArgc (sizeof(orbArgv) / sizeof (char *));
++
+       CORBA::ORB_var orb =
+-        CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
++        CORBA::ORB_init (orbArgc, orbArgv, "" ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
+       if (parse_args (argc, argv) != 0)
+         return 1;
+ 
++      const int numRuns = 3;
++      int run = 1;
++      bool runAgain = true;
++
++      do
++      {
++        ACE_DEBUG ((LM_DEBUG, "(%P|%t) client - starting a run\n"));
++
+       CORBA::Object_var tmp =
+         orb->string_to_object(ior ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+@@ -61,6 +74,8 @@
+                             1);
+         }
+ 
++        ACE_DEBUG ((LM_DEBUG, "(%P|%t) client - getting string\n"));
++
+       CORBA::String_var the_string =
+         hello->get_string (ACE_ENV_SINGLE_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+@@ -71,6 +86,19 @@
+       hello->shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
++        if (run < numRuns)
++        {
++          ++run;
++          ACE_Time_Value sleepDuration;
++          sleepDuration.set( 1 );
++          ACE_OS::sleep( sleepDuration );
++        }
++        else
++        {
++          runAgain = false;
++        }
++      } while (runAgain);
++
+       orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+     }
+diff -Nauw Hello/server.cpp HelloBug/server.cpp
+--- Hello/server.cpp	2006-12-18 13:16:09.000000000 -0500
++++ HelloBug/server.cpp	2006-12-18 13:16:49.000000000 -0500
+@@ -1,19 +1,17 @@
+-// server.cpp,v 1.6 2003/11/01 11:15:11 dhinton Exp
+-
+ #include "Hello.h"
+ #include "ace/Get_Opt.h"
+ #include "ace/OS_NS_stdio.h"
++#include <tao/ORB_Core.h>
++#include <sstream>
+ 
+-ACE_RCSID (Hello,
+-           server,
+-           "server.cpp,v 1.6 2003/11/01 11:15:11 dhinton Exp")
+ 
+ const char *ior_output_file = "test.ior";
++bool increment_endpoint_port = false;
+ 
+ int
+ parse_args (int argc, char *argv[])
+ {
+-  ACE_Get_Opt get_opts (argc, argv, "o:");
++  ACE_Get_Opt get_opts (argc, argv, "io:");
+   int c;
+ 
+   while ((c = get_opts ()) != -1)
+@@ -23,11 +21,16 @@
+         ior_output_file = get_opts.opt_arg ();
+         break;
+ 
++      case 'i':
++        increment_endpoint_port = true;
++        break;
++
+       case '?':
+       default:
+         ACE_ERROR_RETURN ((LM_ERROR,
+                            "usage:  %s "
+                            "-o <iorfile>"
++                           "-i"
+                            "\n",
+                            argv [0]),
+                           -1);
+@@ -41,8 +44,30 @@
+ {
+   ACE_TRY_NEW_ENV
+     {
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      const int numRuns( 3 );
++      int run( 1 );
++      bool runAgain( true );
++      int port( 50000 );
++
++      do
++      {
++        ACE_DEBUG ((LM_DEBUG, "(%P|%t) server - starting a run\n"));
++
++        std::stringstream endpoint;
++        if (increment_endpoint_port)
++          port++;
++        endpoint << "iiop://localhost:" << port;
++        char *orbArgv[] = {
++          "-ORBlistenEndpoints",
++          CORBA::string_dup(endpoint.str().c_str())
++        };
++        int orbArgc (sizeof(orbArgv) / sizeof (char *));
++
+       CORBA::ORB_var orb =
+-        CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
++          CORBA::ORB_init (orbArgc, orbArgv, "" ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
+       CORBA::Object_var poa_object =
+@@ -62,9 +87,6 @@
+         root_poa->the_POAManager (ACE_ENV_SINGLE_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
+-      if (parse_args (argc, argv) != 0)
+-        return 1;
+-
+       Hello *hello_impl;
+       ACE_NEW_RETURN (hello_impl,
+                       Hello (orb.in ()),
+@@ -95,13 +117,24 @@
+       orb->run (ACE_ENV_SINGLE_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
++        if (run < numRuns)
++        {
++          ++run;
++          ACE_DEBUG ((LM_DEBUG, "(%P|%t) server - event loop restarting\n"));
++        }                      
++        else                   
++        {                     
+       ACE_DEBUG ((LM_DEBUG, "(%P|%t) server - event loop finished\n"));
++          runAgain = false;
++        } 
+ 
+       root_poa->destroy (1, 1 ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+ 
+       orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
+       ACE_TRY_CHECK;
++
++      } while (runAgain);
+     }
+   ACE_CATCHANY
+     {
