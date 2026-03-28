@@ -1,0 +1,247 @@
+Index: TAO/tests/AlternateIIOP/run_test.pl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tests/AlternateIIOP/run_test.pl,v
+retrieving revision 1.3
+diff -u -r1.3 run_test.pl
+--- TAO/tests/AlternateIIOP/run_test.pl	27 Dec 2005 17:48:54 -0000	1.3
++++ TAO/tests/AlternateIIOP/run_test.pl	5 Jul 2006 22:32:04 -0000
+@@ -15,7 +15,8 @@
+               "-orbendpoint iiop://localhost:10202/hostname_in_ior=bogus.com");
+ $valid_ep = "-orbendpoint iiop://localhost:10201";
+ 
+-$SV_ALT_IIOP = new PerlACE::Process ("../Hello/server", "-o $iorfile $bogus_eps[0] $valid_ep $bogus_eps[1]");
++$SV_ALT_IIOP = new PerlACE::Process ("../Hello/server", "-o $iorfile -ORBUseSharedProfile 1 ",
++                                     "$bogus_eps[0] $valid_ep $bogus_eps[1]");
+ $CL_ALT_IIOP = new PerlACE::Process ("../Hello/client", " -k file://$iorfile");
+ $SV_ALT_IIOP->Spawn ();
+ 
+Index: TAO/tests/AlternateIIOP/svc.conf
+===================================================================
+RCS file: TAO/tests/AlternateIIOP/svc.conf
+diff -N TAO/tests/AlternateIIOP/svc.conf
+--- TAO/tests/AlternateIIOP/svc.conf	27 Dec 2005 17:48:54 -0000	1.1
++++ /dev/null	1 Jan 1970 00:00:00 -0000
+@@ -1 +0,0 @@
+-dynamic OC_Endpoint_Selector_Factory Service_Object * TAO_Strategies:_make_TAO_OC_Endpoint_Selector_Factory () "-connect_timeout 1300"
+Index: TAO/tests/Optimized_Connection/Optimized_Connection.mpc
+===================================================================
+RCS file: TAO/tests/Optimized_Connection/Optimized_Connection.mpc
+diff -N TAO/tests/Optimized_Connection/Optimized_Connection.mpc
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ TAO/tests/Optimized_Connection/Optimized_Connection.mpc	5 Jul 2006 22:32:05 -0000
+@@ -0,0 +1,16 @@
++// -*- MPC -*-
++// $Id: $
++
++project(*Client): taoclient, strategies {
++  idlflags += -Sa -St -o ../Hello
++  includes += ../Hello
++
++  IDL_Files {
++    ../Hello/Test.idl
++  }
++
++  Source_Files {
++    ../Hello/TestC.cpp
++    oc_client.cpp
++  }
++}
+Index: TAO/tests/Optimized_Connection/README
+===================================================================
+RCS file: TAO/tests/Optimized_Connection/README
+diff -N TAO/tests/Optimized_Connection/README
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ TAO/tests/Optimized_Connection/README	5 Jul 2006 22:32:05 -0000
+@@ -0,0 +1,19 @@
++/**
++
++@page Optimized_Connection Test README File
++
++        This is a test of the Optimized Connection Endpoint Selector.
++The OC provides the means to set a connection timeout.
++
++        For this test we have an IOR which contains unresolvable endpoints.
++Normally this will result in the client waiting for a TCP timeout. However
++in this test we configure a 1300 milliseconds timeout.
++
++        If in future the IOR endpoint becomes a resolvable address, please
++regenerate a valid one using the ../Hello/server.
++
++	To run the test use the run_test.pl script:
++
++$ ./run_test.pl
++
++	the script returns 0 if the test was successful.
+Index: TAO/tests/Optimized_Connection/oc.ior
+===================================================================
+RCS file: TAO/tests/Optimized_Connection/oc.ior
+diff -N TAO/tests/Optimized_Connection/oc.ior
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ TAO/tests/Optimized_Connection/oc.ior	5 Jul 2006 22:32:05 -0000
+@@ -0,0 +1 @@
++IOR:010000001300000049444c3a546573742f48656c6c6f3a312e3000000100000000000000840000000101020009000000626f75732e636f6d0000d8271b00000014010f0052535423e0ab44040f03000000000001000000010000000003000000000000000800000001000000004f4154010000001800000001000000010001000100000001000105090101000000000003000000140000000100000009000000626f75732e636f6d0001da27
+\ No newline at end of file
+Index: TAO/tests/Optimized_Connection/oc_client.cpp
+===================================================================
+RCS file: TAO/tests/Optimized_Connection/oc_client.cpp
+diff -N TAO/tests/Optimized_Connection/oc_client.cpp
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ TAO/tests/Optimized_Connection/oc_client.cpp	5 Jul 2006 22:32:05 -0000
+@@ -0,0 +1,93 @@
++// $Id: $
++
++#include "TestC.h"
++#include "ace/Get_Opt.h"
++
++#include <tao/Strategies/advanced_resource.h>
++#include <tao/Strategies/OC_Endpoint_Selector_Loader.h>
++
++ACE_RCSID(Hello, client, "$Id: $")
++
++const char *ior = "file://test.ior";
++
++int
++parse_args (int argc, char *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, "k:");
++  int c;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'k':
++        ior = get_opts.opt_arg ();
++        break;
++
++      case '?':
++      default:
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "usage:  %s "
++                           "-k <ior> "
++                           "\n",
++                           argv [0]),
++                          -1);
++      }
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++int
++main (int argc, char *argv[])
++{
++  ACE_TRY_NEW_ENV
++    {
++      CORBA::ORB_var orb =
++        CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      CORBA::Object_var tmp =
++        orb->string_to_object(ior ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      Test::Hello_var hello =
++        Test::Hello::_narrow(tmp.in () ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      if (CORBA::is_nil (hello.in ()))
++        {
++          ACE_ERROR_RETURN ((LM_DEBUG,
++                             "Nil Test::Hello reference <%s>\n",
++                             ior),
++                            1);
++        }
++
++      CORBA::String_var the_string =
++        hello->get_string (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      ACE_DEBUG ((LM_DEBUG, "(%P|%t) - string returned <%s>\n",
++                  the_string.in ()));
++
++      hello->shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++
++      orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++    }
++  ACE_CATCH (CORBA::TRANSIENT, e)
++    {
++      ACE_DEBUG ((LM_DEBUG, "(%P|%t) Expected CORBA::TRANSIENT caught\n"));
++    }
++  ACE_CATCHANY
++    {
++      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
++                           "Exception caught:");
++      return 1;
++    }
++  ACE_ENDTRY;
++
++  return 0;
++}
+Index: TAO/tests/Optimized_Connection/oc_svc.conf
+===================================================================
+RCS file: TAO/tests/Optimized_Connection/oc_svc.conf
+diff -N TAO/tests/Optimized_Connection/oc_svc.conf
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ TAO/tests/Optimized_Connection/oc_svc.conf	5 Jul 2006 22:32:05 -0000
+@@ -0,0 +1 @@
++static OC_Endpoint_Selector_Factory "-connect_timeout 1300"
+Index: TAO/tests/Optimized_Connection/run_test.pl
+===================================================================
+RCS file: TAO/tests/Optimized_Connection/run_test.pl
+diff -N TAO/tests/Optimized_Connection/run_test.pl
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ TAO/tests/Optimized_Connection/run_test.pl	5 Jul 2006 22:32:05 -0000
+@@ -0,0 +1,32 @@
++eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
++     & eval 'exec perl -S $0 $argv:q'
++     if 0;
++
++# $Id: $
++# -*- perl -*-
++
++use lib '../../../bin';
++use PerlACE::Run_Test;
++
++$iorfile = PerlACE::LocalFile ("oc.ior");
++$status = 0;
++
++$CL_ALT_IIOP = new PerlACE::Process ("client", " -k file://$iorfile " .
++                                     "-orbsvcconf oc_svc.conf");
++#print STDOUT $CL_ALT_IIOP->CommandLine()."\n";
++
++
++if (PerlACE::waitforfile_timed ($iorfile,
++                        $PerlACE::wait_interval_for_process_creation) == -1) {
++    print STDERR "ERROR: cannot find file <$iorfile>\n";
++    exit 1;
++}
++
++$client = $CL_ALT_IIOP->SpawnWaitKill (30);
++
++if ($client != 0) {
++    print STDERR "ERROR: client returned $client\n";
++    $status = 1;
++}
++
++exit $status;
+Index: bin/tao_orb_tests.lst
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/bin/tao_orb_tests.lst,v
+retrieving revision 1.122
+diff -u -r1.122 tao_orb_tests.lst
+--- bin/tao_orb_tests.lst	4 Jul 2006 07:33:52 -0000	1.122
++++ bin/tao_orb_tests.lst	5 Jul 2006 22:32:05 -0000
+@@ -102,7 +102,8 @@
+ TAO/tests/OBV/Simple/run_test.pl:
+ TAO/tests/Hello/run_test.pl:
+ TAO/tests/IPV6/run_test.pl: IPV6
+-TAO/tests/AlternateIIOP/run_test.pl: !DISABLE_ToFix_LynxOS_x86 !STATIC !ACE_FOR_TAO
++TAO/tests/AlternateIIOP/run_test.pl:
++TAO/tests/Optimized_Connection/run_test.pl: !DISABLE_ToFix_LynxOS_x86 !ACE_FOR_TAO
+ TAO/tests/Cache_Growth_Test/run_test.pl:
+ TAO/tests/Muxing/run_test.pl: !ST
+ TAO/tests/Muxed_GIOP_Versions/run_test.pl: !VxWorks !ST !DISABLE_ToFix_LynxOS_PPC
