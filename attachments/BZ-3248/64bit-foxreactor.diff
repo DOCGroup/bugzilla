@@ -1,0 +1,23 @@
+--- ACE_wrappers.orig/ace/FoxReactor/FoxReactor.cpp
++++ ACE_wrappers/ace/FoxReactor/FoxReactor.cpp
+@@ -123,17 +123,17 @@
+   ACE_Select_Reactor_Handle_Set dispatch_set;
+   bool f=false;
+   if(sel==SEL_IO_READ){
+-    dispatch_set.rd_mask_.set_bit(ACE_HANDLE(handle));
++    dispatch_set.rd_mask_.set_bit(ACE_HANDLE((FXival)handle));
+     f=true;
+   }
+   else
+   if(sel==SEL_IO_WRITE){
+-    dispatch_set.wr_mask_.set_bit(ACE_HANDLE(handle));
++    dispatch_set.wr_mask_.set_bit(ACE_HANDLE((FXival)handle));
+     f=true;
+   }
+   else
+   if(sel==SEL_IO_EXCEPT){
+-    dispatch_set.ex_mask_.set_bit(ACE_HANDLE(handle));
++    dispatch_set.ex_mask_.set_bit(ACE_HANDLE((FXival)handle));
+     f=true;
+   };
+   if(f) dispatch (1, dispatch_set);
