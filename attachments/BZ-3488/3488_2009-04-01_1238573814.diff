@@ -1,0 +1,177 @@
+Index: Unbounded_Octet_Sequence_T.h
+===================================================================
+--- Unbounded_Octet_Sequence_T.h	(revision 84970)
++++ Unbounded_Octet_Sequence_T.h	(working copy)
+@@ -49,7 +49,7 @@
+     : maximum_ (allocation_traits::default_maximum())
+     , length_ (0)
+     , buffer_ (allocation_traits::default_buffer_allocation())
+-    , release_ (true)
++    , release_ (buffer_ != 0)
+     , mb_ (0)
+   {}
+   inline explicit unbounded_value_sequence<CORBA::Octet>(CORBA::ULong maximum)
+@@ -132,18 +132,6 @@
+       {
+         if (this->mb_ == 0)
+           {
+-            if (length_ < length)
+-            {
+-              // TODO This code does not provide the strong-exception
+-              //      guarantee, but it does provide the weak-exception
+-              //      guarantee.  The problem would appear when
+-              //      initialize_range() raises an exception after several
+-              //      elements have been modified.  One could argue that
+-              //      this problem is irrelevant, as the elements already
+-              //      modified are unreachable to conforming applications.
+-              element_traits::initialize_range(
+-                  buffer_ + length_, buffer_ + length);
+-            }
+             length_ = length;
+           }
+         else
+@@ -165,8 +153,6 @@
+       buffer_,
+       buffer_ + length_,
+       ACE_make_checked_array_iterator (tmp.buffer_, tmp.length_));
+-    element_traits::initialize_range(
+-        tmp.buffer_ + length_, tmp.buffer_ + length);
+     swap(tmp);
+   }
+   inline value_type const & operator[](CORBA::ULong i) const {
+@@ -189,6 +175,7 @@
+     if (buffer_ == 0)
+       {
+         buffer_ = allocbuf(maximum_);
++        release_ = true;
+       }
+     return buffer_;
+   }
+@@ -200,6 +187,10 @@
+     if (buffer_ == 0)
+     {
+       buffer_ = allocbuf(maximum_);
++      if (!orphan)
++        {
++          release_ = true;
++        }
+     }
+     if (!orphan)
+     {
+@@ -268,6 +259,12 @@
+     , release_(false)
+     , mb_ (0)
+   {
++    if (rhs.maximum_ == 0 || rhs.buffer_ == 0)
++    {
++      maximum_ = rhs.maximum_;
++      length_ = rhs.length_;
++      return;
++    }
+     unbounded_value_sequence<CORBA::Octet> tmp(rhs.maximum_);
+     tmp.length_ = rhs.length_;
+     if (rhs.mb_ == 0)
+@@ -312,7 +309,7 @@
+ 
+   /// If true then the sequence should release the buffer when it is
+   /// destroyed.
+-  CORBA::Boolean release_;
++  mutable CORBA::Boolean release_;
+   ACE_Message_Block* mb_;
+ };
+ 
+Index: Bounded_Array_Sequence_T.h
+===================================================================
+--- Bounded_Array_Sequence_T.h	(revision 84970)
++++ Bounded_Array_Sequence_T.h	(working copy)
+@@ -79,6 +79,9 @@
+   static value_type * allocbuf(CORBA::ULong maximum) {
+     return implementation_type::allocbuf(maximum);
+   }
++  static value_type * allocbuf() {
++    return implementation_type::allocbuf(MAX);
++  }
+   static void freebuf(value_type * buffer) {
+     implementation_type::freebuf(buffer);
+   }
+Index: Generic_Sequence_T.h
+===================================================================
+--- Generic_Sequence_T.h	(revision 84970)
++++ Generic_Sequence_T.h	(working copy)
+@@ -143,10 +143,17 @@
+     , buffer_(0)
+     , release_(false)
+   {
+-    if (rhs.maximum_ == 0) return;
++    if (rhs.maximum_ == 0 || rhs.buffer_ == 0)
++    {
++      maximum_ = rhs.maximum_;
++      length_ = rhs.length_;
++      return;
++    }
+     generic_sequence tmp(rhs.maximum_, rhs.length_,
+                          allocation_traits::allocbuf_noinit(rhs.maximum_),
+                          true);
++    element_traits::initialize_range(
++        tmp.buffer_ + tmp.length_, tmp.buffer_ + tmp.maximum_);
+     element_traits::copy_range(
+         rhs.buffer_,
+         rhs.buffer_ + rhs.length_,
+@@ -204,7 +211,9 @@
+           return;
+         }
+ 
+-    if (length < length_)
++      // When sequence doesn't own a buffer it's not allowed
++      // to change it in any way.
++      if (length < length_ && release_)
+       {
+         // TODO This code does not provide the strong-exception
+         //      guarantee, but it does provide the weak-exception
+@@ -225,12 +234,14 @@
+     generic_sequence tmp(length, length,
+                          allocation_traits::allocbuf_noinit(length),
+                          true);
++    // First do initialize_range. If it will throw then tmp will be
++    // destructed but *this will remain unchanged.
++    element_traits::initialize_range(
++        tmp.buffer_ + length_, tmp.buffer_ + length);
+     element_traits::copy_swap_range(
+       buffer_,
+       buffer_ + length_,
+       ACE_make_checked_array_iterator (tmp.buffer_, tmp.length_));
+-    element_traits::initialize_range(
+-        tmp.buffer_ + length_, tmp.buffer_ + length);
+ 
+     swap(tmp);
+   }
+Index: Valuetype/Bounded_Valuetype_Sequence_T.h
+===================================================================
+--- Valuetype/Bounded_Valuetype_Sequence_T.h	(revision 84970)
++++ Valuetype/Bounded_Valuetype_Sequence_T.h	(working copy)
+@@ -89,6 +89,10 @@
+   {
+     return implementation_type::allocbuf(maximum);
+   }
++  static value_type * allocbuf()
++  {
++    return implementation_type::allocbuf(MAX);
++  }
+   static void freebuf(value_type * buffer)
+   {
+     implementation_type::freebuf(buffer);
+Index: Bounded_Object_Reference_Sequence_T.h
+===================================================================
+--- Bounded_Object_Reference_Sequence_T.h	(revision 84970)
++++ Bounded_Object_Reference_Sequence_T.h	(working copy)
+@@ -101,6 +101,10 @@
+   {
+     return implementation_type::allocbuf(maximum);
+   }
++  static value_type * allocbuf()
++  {
++    return implementation_type::allocbuf(MAX);
++  }
+   static void freebuf(value_type * buffer)
+   {
+     implementation_type::freebuf(buffer);
