@@ -1,0 +1,39 @@
+diff -r -a -U 10 ace-5.6.9/ace/Process_Manager.cpp ace-5.6.9-mod/ace/Process_Manager.cpp
+--- ace-5.6.9/ace/Process_Manager.cpp	2009-02-10 21:18:21.000000000 +0100
++++ ace-5.6.9-mod/ace/Process_Manager.cpp	2009-04-18 11:48:09.000000000 +0200
+@@ -441,28 +441,35 @@
+ 
+ // Create a new process.
+ 
+ pid_t
+ ACE_Process_Manager::spawn (ACE_Process *process,
+                             ACE_Process_Options &options,
+                             ACE_Event_Handler *event_handler)
+ {
+   ACE_TRACE ("ACE_Process_Manager::spawn");
+ 
++#if !defined (ACE_WIN32)
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
++                            ace_mon, this->lock_, -1));
++#endif /* ACE_WIN32 */
++
+   pid_t const pid = process->spawn (options);
+ 
+   // Only include the pid in the parent's table.
+   if (pid == ACE_INVALID_PID || pid == 0)
+     return pid;
+ 
++#if defined (ACE_WIN32)
+   ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                             ace_mon, this->lock_, -1));
++#endif /* ACE_WIN32 */
+ 
+   if (this->append_proc (process, event_handler) == -1)
+     // bad news: spawned, but not registered in table.
+     return ACE_INVALID_PID;
+ 
+   return pid;
+ }
+ 
+ // Create N new processs.
+ 
