@@ -1,0 +1,12 @@
+185c185
+<                 ACE_TEXT("The local addr is <%s:%d> \n"),
+---
+>                 ACE_TEXT("The local addr is <%C:%d> \n"),
+406c406
+<                       ACE_TEXT("Listening port [%d] on [%s]\n"),
+---
+>                       ACE_TEXT("Listening port [%d] on [%C]\n"),
+408c408
+<                       ACE_TEXT_CHAR_TO_TCHAR(listen_point.host.in ())));
+---
+>                       listen_point.host.in ()));
