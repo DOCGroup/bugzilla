@@ -1,0 +1,1539 @@
+Common subdirectories: ACE_wrappers/tests/HTBP and ACE_wrappers.check/tests/HTBP
+diff -ru ACE_wrappers/tests/Makefile.am ACE_wrappers.check/tests/Makefile.am
+--- ACE_wrappers/tests/Makefile.am	Fri Oct 21 11:19:08 2005
++++ ACE_wrappers.check/tests/Makefile.am	Fri Oct 21 11:23:55 2005
+@@ -18,18 +18,18 @@
+ 
+ CLEANFILES =
+ BUILT_SOURCES =
+-noinst_PROGRAMS =
+-noinst_HEADERS =
++check_PROGRAMS =
++check_HEADERS =
+ 
+ dist_check_SCRIPTS = run_test.lst run_test.pl
+-TESTS = $(noinst_PROGRAMS)
+-TESTS_ENVIRONMENT = $(srcdir)/run_test.pl -t
++TESTS = $(check_PROGRAMS)
++TESTS_ENVIRONMENT = PERL5LIB=$(top_srcdir)/bin $(srcdir)/run_test.pl -t
+ 
+ ## Makefile.Test_Output.am 
+ 
+-noinst_SCRIPTS = run_test.lst run_test.pl
++check_SCRIPTS = run_test.lst run_test.pl
+ 
+-noinst_LTLIBRARIES = libTest_Output.la
++check_LTLIBRARIES = libTest_Output.la
+ 
+ libTest_Output_la_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -45,12 +45,12 @@
+ libTest_Output_la_LIBADD = \
+  $(top_builddir)/ace/libACE.la
+ 
+-noinst_HEADERS += \
++check_HEADERS += \
+   Test_Output_Export.h \
+   test_config.h
+ 
+ ## Makefile.ACE_Init_Test.am 
+-noinst_PROGRAMS += ACE_Init_Test
++check_PROGRAMS += ACE_Init_Test
+ 
+ ACE_Init_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -65,7 +65,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.ACE_Test.am 
+-noinst_PROGRAMS += ACE_Test
++check_PROGRAMS += ACE_Test
+ 
+ ACE_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -79,7 +79,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.ARGV_Test.am 
+-noinst_PROGRAMS += ARGV_Test
++check_PROGRAMS += ARGV_Test
+ 
+ ARGV_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -93,7 +93,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Aio_Platform_Test.am 
+-noinst_PROGRAMS += Aio_Platform_Test
++check_PROGRAMS += Aio_Platform_Test
+ 
+ Aio_Platform_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -107,7 +107,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Arg_Shifter_Test.am 
+-noinst_PROGRAMS += Arg_Shifter_Test
++check_PROGRAMS += Arg_Shifter_Test
+ 
+ Arg_Shifter_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -121,7 +121,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Array_Map_Test.am 
+-noinst_PROGRAMS += Array_Map_Test
++check_PROGRAMS += Array_Map_Test
+ 
+ Array_Map_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -135,7 +135,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Atomic_Op_Test.am 
+-noinst_PROGRAMS += Atomic_Op_Test
++check_PROGRAMS += Atomic_Op_Test
+ 
+ Atomic_Op_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -149,7 +149,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Auto_IncDec_Test.am 
+-noinst_PROGRAMS += Auto_IncDec_Test
++check_PROGRAMS += Auto_IncDec_Test
+ 
+ Auto_IncDec_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -163,7 +163,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Barrier_Test.am 
+-noinst_PROGRAMS += Barrier_Test
++check_PROGRAMS += Barrier_Test
+ 
+ Barrier_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -177,7 +177,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Based_Pointer_Test.am
+-noinst_PROGRAMS += Based_Pointer_Test
++check_PROGRAMS += Based_Pointer_Test
+ 
+ Based_Pointer_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -193,7 +193,7 @@
+ 
+ ## Makefile.Based_Pointer_Test_Lib.am
+ 
+-noinst_LTLIBRARIES += libBased_Pointer_Test.la
++check_LTLIBRARIES += libBased_Pointer_Test.la
+ 
+ libBased_Pointer_Test_la_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -203,8 +203,11 @@
+ libBased_Pointer_Test_la_SOURCES = \
+   Based_Pointer_Test_Lib.cpp
+ 
++libBased_Pointer_Test_la_LDFLAGS = \
++  -rpath $(libdir)
++
+ ## Makefile.Basic_Types_Test.am 
+-noinst_PROGRAMS += Basic_Types_Test
++check_PROGRAMS += Basic_Types_Test
+ 
+ Basic_Types_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -218,7 +221,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Bound_Ptr_Test.am 
+-noinst_PROGRAMS += Bound_Ptr_Test
++check_PROGRAMS += Bound_Ptr_Test
+ 
+ Bound_Ptr_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -233,7 +236,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Buffer_Stream_Test.am 
+-noinst_PROGRAMS += Buffer_Stream_Test
++check_PROGRAMS += Buffer_Stream_Test
+ 
+ Buffer_Stream_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -247,7 +250,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Bug_1576_Regression_Test.am 
+-noinst_PROGRAMS += Bug_1576_Regression_Test
++check_PROGRAMS += Bug_1576_Regression_Test
+ 
+ Bug_1576_Regression_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -261,7 +264,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.CDR_Array_Test.am 
+-noinst_PROGRAMS += CDR_Array_Test
++check_PROGRAMS += CDR_Array_Test
+ 
+ CDR_Array_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -275,7 +278,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.CDR_File_Test.am 
+-noinst_PROGRAMS += CDR_File_Test
++check_PROGRAMS += CDR_File_Test
+ 
+ CDR_File_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -291,7 +294,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.CDR_Test.am 
+-noinst_PROGRAMS += CDR_Test
++check_PROGRAMS += CDR_Test
+ 
+ CDR_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -305,7 +308,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Cache_Map_Manager_Test.am 
+-noinst_PROGRAMS += Cache_Map_Manager_Test
++check_PROGRAMS += Cache_Map_Manager_Test
+ 
+ Cache_Map_Manager_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -320,7 +323,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Cached_Accept_Conn_Test.am 
+-noinst_PROGRAMS += Cached_Accept_Conn_Test
++check_PROGRAMS += Cached_Accept_Conn_Test
+ 
+ Cached_Accept_Conn_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -335,7 +338,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Cached_Allocator_Test.am 
+-noinst_PROGRAMS += Cached_Allocator_Test
++check_PROGRAMS += Cached_Allocator_Test
+ 
+ Cached_Allocator_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -349,7 +352,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Cached_Conn_Test.am 
+-noinst_PROGRAMS += Cached_Conn_Test
++check_PROGRAMS += Cached_Conn_Test
+ 
+ Cached_Conn_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -364,7 +367,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Capabilities_Test.am 
+-noinst_PROGRAMS += Capabilities_Test
++check_PROGRAMS += Capabilities_Test
+ 
+ Capabilities_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -380,7 +383,7 @@
+ ## Makefile.Codecs_Test.am 
+ 
+ if BUILD_ACE_CODECS
+-noinst_PROGRAMS += Codecs_Test
++check_PROGRAMS += Codecs_Test
+ 
+ Codecs_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -396,7 +399,7 @@
+ endif BUILD_ACE_CODECS
+ 
+ ## Makefile.Collection_Test.am 
+-noinst_PROGRAMS += Collection_Test
++check_PROGRAMS += Collection_Test
+ 
+ Collection_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -411,7 +414,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Config_Test.am 
+-noinst_PROGRAMS += Config_Test
++check_PROGRAMS += Config_Test
+ 
+ Config_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -426,7 +429,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Conn_Test.am 
+-noinst_PROGRAMS += Conn_Test
++check_PROGRAMS += Conn_Test
+ 
+ Conn_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -441,7 +444,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.DLL_Test.am 
+-noinst_PROGRAMS += DLL_Test
++check_PROGRAMS += DLL_Test
+ 
+ DLL_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -457,7 +460,7 @@
+ 
+ ## Makefile.DLL_Test_Lib.am 
+ 
+-noinst_LTLIBRARIES += libDLL_Test.la
++check_LTLIBRARIES += libDLL_Test.la
+ 
+ libDLL_Test_la_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -468,17 +471,17 @@
+   DLL_Test_Impl.cpp
+ 
+ libDLL_Test_la_LDFLAGS = \
+- -version-number @ACE_MAJOR@:@ACE_MINOR@:@ACE_BETA@ 
++ -version-number @ACE_MAJOR@:@ACE_MINOR@:@ACE_BETA@ -rpath $(libdir)
+ 
+ libDLL_Test_la_LIBADD = \
+  $(top_builddir)/ace/libACE.la
+ 
+-noinst_HEADERS += \
++check_HEADERS += \
+   DLL_Test_Impl.h \
+   test_config.h
+ 
+ ## Makefile.DLList_Test.am 
+-noinst_PROGRAMS += DLList_Test
++check_PROGRAMS += DLList_Test
+ 
+ DLList_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -492,7 +495,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Date_Time_Test.am 
+-noinst_PROGRAMS += Date_Time_Test
++check_PROGRAMS += Date_Time_Test
+ 
+ Date_Time_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -506,7 +509,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Dev_Poll_Reactor_Test.am 
+-noinst_PROGRAMS += Dev_Poll_Reactor_Test
++check_PROGRAMS += Dev_Poll_Reactor_Test
+ 
+ Dev_Poll_Reactor_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -520,7 +523,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Dirent_Test.am 
+-noinst_PROGRAMS += Dirent_Test
++check_PROGRAMS += Dirent_Test
+ 
+ Dirent_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -534,7 +537,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Dynamic_Priority_Test.am 
+-noinst_PROGRAMS += Dynamic_Priority_Test
++check_PROGRAMS += Dynamic_Priority_Test
+ 
+ Dynamic_Priority_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -548,7 +551,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Enum_Interfaces_Test.am 
+-noinst_PROGRAMS += Enum_Interfaces_Test
++check_PROGRAMS += Enum_Interfaces_Test
+ 
+ Enum_Interfaces_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -562,7 +565,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Env_Value_Test.am 
+-noinst_PROGRAMS += Env_Value_Test
++check_PROGRAMS += Env_Value_Test
+ 
+ Env_Value_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -576,7 +579,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.FIFO_Test.am 
+-noinst_PROGRAMS += FIFO_Test
++check_PROGRAMS += FIFO_Test
+ 
+ FIFO_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -596,7 +599,7 @@
+ if BUILD_GL
+ if BUILD_X11
+ 
+-noinst_PROGRAMS += FlReactor_Test
++check_PROGRAMS += FlReactor_Test
+ 
+ FlReactor_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -616,7 +619,7 @@
+ 
+ ## Makefile.Framework_Component_DLL.am 
+ 
+-noinst_LTLIBRARIES += libFramework_Component_DLL.la
++check_LTLIBRARIES += libFramework_Component_DLL.la
+ 
+ libFramework_Component_DLL_la_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -632,12 +635,12 @@
+ libFramework_Component_DLL_la_LIBADD = \
+  $(top_builddir)/ace/libACE.la
+ 
+-noinst_HEADERS += \
++check_HEADERS += \
+   Framework_Component_DLL.h \
+   Framework_Component_DLL_Export.h
+ 
+ ## Makefile.Framework_Component_Test.am 
+-noinst_PROGRAMS += Framework_Component_Test
++check_PROGRAMS += Framework_Component_Test
+ 
+ Framework_Component_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -652,7 +655,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Future_Set_Test.am 
+-noinst_PROGRAMS += Future_Set_Test
++check_PROGRAMS += Future_Set_Test
+ 
+ Future_Set_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -666,7 +669,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Future_Test.am 
+-noinst_PROGRAMS += Future_Test
++check_PROGRAMS += Future_Test
+ 
+ Future_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -680,7 +683,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Get_Opt_Test.am 
+-noinst_PROGRAMS += Get_Opt_Test
++check_PROGRAMS += Get_Opt_Test
+ 
+ Get_Opt_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -694,7 +697,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Handle_Set_Test.am 
+-noinst_PROGRAMS += Handle_Set_Test
++check_PROGRAMS += Handle_Set_Test
+ 
+ Handle_Set_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -708,7 +711,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Hash_Map_Bucket_Iterator_Test.am 
+-noinst_PROGRAMS += Hash_Map_Bucket_Iterator_Test
++check_PROGRAMS += Hash_Map_Bucket_Iterator_Test
+ 
+ Hash_Map_Bucket_Iterator_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -722,7 +725,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Hash_Map_Manager_Test.am 
+-noinst_PROGRAMS += Hash_Map_Manager_Test
++check_PROGRAMS += Hash_Map_Manager_Test
+ 
+ Hash_Map_Manager_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -736,7 +739,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.High_Res_Timer_Test.am 
+-noinst_PROGRAMS += High_Res_Timer_Test
++check_PROGRAMS += High_Res_Timer_Test
+ 
+ High_Res_Timer_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -750,7 +753,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.INET_Addr_Test.am 
+-noinst_PROGRAMS += INET_Addr_Test
++check_PROGRAMS += INET_Addr_Test
+ 
+ INET_Addr_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -764,7 +767,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.INET_Addr_Test_IPV6.am 
+-noinst_PROGRAMS += INET_Addr_Test_IPV6
++check_PROGRAMS += INET_Addr_Test_IPV6
+ 
+ INET_Addr_Test_IPV6_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -778,7 +781,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.IOStream_Test.am 
+-noinst_PROGRAMS += IOStream_Test
++check_PROGRAMS += IOStream_Test
+ 
+ IOStream_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -792,7 +795,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Lazy_Map_Manager_Test.am 
+-noinst_PROGRAMS += Lazy_Map_Manager_Test
++check_PROGRAMS += Lazy_Map_Manager_Test
+ 
+ Lazy_Map_Manager_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -806,7 +809,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Log_Msg_Test.am 
+-noinst_PROGRAMS += Log_Msg_Test
++check_PROGRAMS += Log_Msg_Test
+ 
+ Log_Msg_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -820,7 +823,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Logging_Strategy_Test.am 
+-noinst_PROGRAMS += Logging_Strategy_Test
++check_PROGRAMS += Logging_Strategy_Test
+ 
+ Logging_Strategy_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -834,7 +837,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.MEM_Stream_Test.am 
+-noinst_PROGRAMS += MEM_Stream_Test
++check_PROGRAMS += MEM_Stream_Test
+ 
+ MEM_Stream_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -849,7 +852,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.MM_Shared_Memory_Test.am 
+-noinst_PROGRAMS += MM_Shared_Memory_Test
++check_PROGRAMS += MM_Shared_Memory_Test
+ 
+ MM_Shared_Memory_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -863,7 +866,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.MT_Reactor_Timer_Test.am 
+-noinst_PROGRAMS += MT_Reactor_Timer_Test
++check_PROGRAMS += MT_Reactor_Timer_Test
+ 
+ MT_Reactor_Timer_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -878,7 +881,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.MT_Reactor_Upcall_Test.am 
+-noinst_PROGRAMS += MT_Reactor_Upcall_Test
++check_PROGRAMS += MT_Reactor_Upcall_Test
+ 
+ MT_Reactor_Upcall_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -892,7 +895,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.MT_Ref_Counted_Event_Handler_Test.am 
+-noinst_PROGRAMS += MT_Reference_Counted_Event_Handler_Test
++check_PROGRAMS += MT_Reference_Counted_Event_Handler_Test
+ 
+ MT_Reference_Counted_Event_Handler_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -906,7 +909,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.MT_Reference_Counted_Notify_Test.am 
+-noinst_PROGRAMS += MT_Reference_Counted_Notify_Test
++check_PROGRAMS += MT_Reference_Counted_Notify_Test
+ 
+ MT_Reference_Counted_Notify_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -920,7 +923,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.MT_SOCK_Test.am 
+-noinst_PROGRAMS += MT_SOCK_Test
++check_PROGRAMS += MT_SOCK_Test
+ 
+ MT_SOCK_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -934,7 +937,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Malloc_Test.am 
+-noinst_PROGRAMS += Malloc_Test
++check_PROGRAMS += Malloc_Test
+ 
+ Malloc_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -949,7 +952,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Map_Manager_Test.am 
+-noinst_PROGRAMS += Map_Manager_Test
++check_PROGRAMS += Map_Manager_Test
+ 
+ Map_Manager_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -963,7 +966,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Map_Test.am 
+-noinst_PROGRAMS += Map_Test
++check_PROGRAMS += Map_Test
+ 
+ Map_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -978,7 +981,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Max_Default_Port_Test.am 
+-noinst_PROGRAMS += Max_Default_Port_Test
++check_PROGRAMS += Max_Default_Port_Test
+ 
+ Max_Default_Port_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -993,7 +996,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Max_Default_Port_Test_IPV6.am 
+-noinst_PROGRAMS += Max_Default_Port_Test_IPV6
++check_PROGRAMS += Max_Default_Port_Test_IPV6
+ 
+ Max_Default_Port_Test_IPV6_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1007,7 +1010,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Mem_Map_Test.am 
+-noinst_PROGRAMS += Mem_Map_Test
++check_PROGRAMS += Mem_Map_Test
+ 
+ Mem_Map_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1021,7 +1024,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Message_Block_Test.am 
+-noinst_PROGRAMS += Message_Block_Test
++check_PROGRAMS += Message_Block_Test
+ 
+ Message_Block_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1035,7 +1038,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Message_Queue_Notifications_Test.am 
+-noinst_PROGRAMS += Message_Queue_Notifications_Test
++check_PROGRAMS += Message_Queue_Notifications_Test
+ 
+ Message_Queue_Notifications_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1049,7 +1052,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Message_Queue_Test.am 
+-noinst_PROGRAMS += Message_Queue_Test
++check_PROGRAMS += Message_Queue_Test
+ 
+ Message_Queue_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1063,7 +1066,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Message_Queue_Test_Ex.am 
+-noinst_PROGRAMS += Message_Queue_Test_Ex
++check_PROGRAMS += Message_Queue_Test_Ex
+ 
+ Message_Queue_Test_Ex_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1078,7 +1081,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Multicast_Test.am 
+-noinst_PROGRAMS += Multicast_Test
++check_PROGRAMS += Multicast_Test
+ 
+ Multicast_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1092,7 +1095,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Multicast_Test_IPV6.am 
+-noinst_PROGRAMS += Multicast_Test_IPV6
++check_PROGRAMS += Multicast_Test_IPV6
+ 
+ Multicast_Test_IPV6_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1106,7 +1109,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Multihomed_INET_Addr_Test.am 
+-noinst_PROGRAMS += Multihomed_INET_Addr_Test
++check_PROGRAMS += Multihomed_INET_Addr_Test
+ 
+ Multihomed_INET_Addr_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1120,7 +1123,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Multihomed_INET_Addr_Test_IPV6.am 
+-noinst_PROGRAMS += Multihomed_INET_Addr_Test_IPV6
++check_PROGRAMS += Multihomed_INET_Addr_Test_IPV6
+ 
+ Multihomed_INET_Addr_Test_IPV6_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1136,7 +1139,7 @@
+ ## Makefile.Naming_Test.am 
+ 
+ if BUILD_ACE_OTHER
+-noinst_PROGRAMS += Naming_Test
++check_PROGRAMS += Naming_Test
+ 
+ Naming_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1152,7 +1155,7 @@
+ endif BUILD_ACE_OTHER
+ 
+ ## Makefile.Network_Adapters_Test.am 
+-noinst_PROGRAMS += Network_Adapters_Test
++check_PROGRAMS += Network_Adapters_Test
+ 
+ Network_Adapters_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1167,7 +1170,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.New_Fail_Test.am 
+-noinst_PROGRAMS += New_Fail_Test
++check_PROGRAMS += New_Fail_Test
+ 
+ New_Fail_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1181,7 +1184,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.NonBlocking_Conn_Test.am 
+-noinst_PROGRAMS += NonBlocking_Conn_Test
++check_PROGRAMS += NonBlocking_Conn_Test
+ 
+ NonBlocking_Conn_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1196,7 +1199,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Notify_Performance_Test.am 
+-noinst_PROGRAMS += Notify_Performance_Test
++check_PROGRAMS += Notify_Performance_Test
+ 
+ Notify_Performance_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1210,7 +1213,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.OS_Test.am 
+-noinst_PROGRAMS += OS_Test
++check_PROGRAMS += OS_Test
+ 
+ OS_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1224,7 +1227,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Object_Manager_Test.am 
+-noinst_PROGRAMS += Object_Manager_Test
++check_PROGRAMS += Object_Manager_Test
+ 
+ Object_Manager_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1238,7 +1241,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Obstack_Test.am 
+-noinst_PROGRAMS += Obstack_Test
++check_PROGRAMS += Obstack_Test
+ 
+ Obstack_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1252,7 +1255,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.OrdMultiSet_Test.am 
+-noinst_PROGRAMS += OrdMultiSet_Test
++check_PROGRAMS += OrdMultiSet_Test
+ 
+ OrdMultiSet_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1266,7 +1269,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Pipe_Test.am 
+-noinst_PROGRAMS += Pipe_Test
++check_PROGRAMS += Pipe_Test
+ 
+ Pipe_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1280,7 +1283,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Priority_Buffer_Test.am 
+-noinst_PROGRAMS += Priority_Buffer_Test
++check_PROGRAMS += Priority_Buffer_Test
+ 
+ Priority_Buffer_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1294,7 +1297,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Priority_Reactor_Test.am 
+-noinst_PROGRAMS += Priority_Reactor_Test
++check_PROGRAMS += Priority_Reactor_Test
+ 
+ Priority_Reactor_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1309,7 +1312,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Priority_Task_Test.am 
+-noinst_PROGRAMS += Priority_Task_Test
++check_PROGRAMS += Priority_Task_Test
+ 
+ Priority_Task_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1323,7 +1326,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Proactor_Scatter_Gather_Test.am 
+-noinst_PROGRAMS += Proactor_Scatter_Gather_Test
++check_PROGRAMS += Proactor_Scatter_Gather_Test
+ 
+ Proactor_Scatter_Gather_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1337,7 +1340,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Proactor_Test.am 
+-noinst_PROGRAMS += Proactor_Test
++check_PROGRAMS += Proactor_Test
+ 
+ Proactor_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1352,7 +1355,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Proactor_Test_IPV6.am 
+-noinst_PROGRAMS += Proactor_Test_IPV6
++check_PROGRAMS += Proactor_Test_IPV6
+ 
+ Proactor_Test_IPV6_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1366,7 +1369,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Proactor_Timer_Test.am 
+-noinst_PROGRAMS += Proactor_Timer_Test
++check_PROGRAMS += Proactor_Timer_Test
+ 
+ Proactor_Timer_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1380,7 +1383,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Process_Manager_Test.am 
+-noinst_PROGRAMS += Process_Manager_Test
++check_PROGRAMS += Process_Manager_Test
+ 
+ Process_Manager_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1394,7 +1397,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Process_Mutex_Test.am 
+-noinst_PROGRAMS += Process_Mutex_Test
++check_PROGRAMS += Process_Mutex_Test
+ 
+ Process_Mutex_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1408,7 +1411,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Process_Strategy_Test.am 
+-noinst_PROGRAMS += Process_Strategy_Test
++check_PROGRAMS += Process_Strategy_Test
+ 
+ Process_Strategy_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1436,7 +1439,7 @@
+ QtReactor_Test_moc.cpp: $(srcdir)/QtReactor_Test.h
+ 	$(QTDIR)/bin/moc  $(srcdir)/QtReactor_Test.h -o QtReactor_Test_moc.cpp
+ 
+-noinst_PROGRAMS += QtReactor_Test
++check_PROGRAMS += QtReactor_Test
+ 
+ QtReactor_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1457,7 +1460,7 @@
+ endif BUILD_ACE_QTREACTOR
+ 
+ ## Makefile.RB_Tree_Test.am 
+-noinst_PROGRAMS += RB_Tree_Test
++check_PROGRAMS += RB_Tree_Test
+ 
+ RB_Tree_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1472,7 +1475,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reactor_Dispatch_Order_Test.am 
+-noinst_PROGRAMS += Reactor_Dispatch_Order_Test
++check_PROGRAMS += Reactor_Dispatch_Order_Test
+ 
+ Reactor_Dispatch_Order_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1486,7 +1489,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reactor_Exceptions_Test.am 
+-noinst_PROGRAMS += Reactor_Exceptions_Test
++check_PROGRAMS += Reactor_Exceptions_Test
+ 
+ Reactor_Exceptions_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1500,7 +1503,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reactor_Notification_Queue_Test.am 
+-noinst_PROGRAMS += Reactor_Notification_Queue_Test
++check_PROGRAMS += Reactor_Notification_Queue_Test
+ 
+ Reactor_Notification_Queue_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1514,7 +1517,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reactor_Notify_Test.am 
+-noinst_PROGRAMS += Reactor_Notify_Test
++check_PROGRAMS += Reactor_Notify_Test
+ 
+ Reactor_Notify_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1528,7 +1531,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reactor_Performance_Test.am 
+-noinst_PROGRAMS += Reactor_Performance_Test
++check_PROGRAMS += Reactor_Performance_Test
+ 
+ Reactor_Performance_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1543,7 +1546,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reactor_Registration_Test.am 
+-noinst_PROGRAMS += Reactor_Registration_Test
++check_PROGRAMS += Reactor_Registration_Test
+ 
+ Reactor_Registration_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1557,7 +1560,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reactor_Timer_Test.am 
+-noinst_PROGRAMS += Reactor_Timer_Test
++check_PROGRAMS += Reactor_Timer_Test
+ 
+ Reactor_Timer_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1571,7 +1574,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reactors_Test.am 
+-noinst_PROGRAMS += Reactors_Test
++check_PROGRAMS += Reactors_Test
+ 
+ Reactors_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1585,7 +1588,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reader_Writer_Test.am 
+-noinst_PROGRAMS += Reader_Writer_Test
++check_PROGRAMS += Reader_Writer_Test
+ 
+ Reader_Writer_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1599,7 +1602,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Recursive_Condition_Bug_Test.am 
+-noinst_PROGRAMS += Recursive_Condition_Bug_Test
++check_PROGRAMS += Recursive_Condition_Bug_Test
+ 
+ Recursive_Condition_Bug_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1613,7 +1616,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Recursive_Condition_Test.am 
+-noinst_PROGRAMS += Recursive_Condition_Test
++check_PROGRAMS += Recursive_Condition_Test
+ 
+ Recursive_Condition_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1627,7 +1630,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Recursive_Mutex_Test.am 
+-noinst_PROGRAMS += Recursive_Mutex_Test
++check_PROGRAMS += Recursive_Mutex_Test
+ 
+ Recursive_Mutex_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1641,7 +1644,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Refcounted_Auto_Ptr_Test.am 
+-noinst_PROGRAMS += Refcounted_Auto_Ptr_Test
++check_PROGRAMS += Refcounted_Auto_Ptr_Test
+ 
+ Refcounted_Auto_Ptr_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1656,7 +1659,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reference_Counted_Event_Handler_Test.am 
+-noinst_PROGRAMS += Reference_Counted_Event_Handler_Test
++check_PROGRAMS += Reference_Counted_Event_Handler_Test
+ 
+ Reference_Counted_Event_Handler_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1670,7 +1673,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reverse_Lock_Test.am 
+-noinst_PROGRAMS += Reverse_Lock_Test
++check_PROGRAMS += Reverse_Lock_Test
+ 
+ Reverse_Lock_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1684,7 +1687,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SOCK_Connector_Test.am 
+-noinst_PROGRAMS += SOCK_Connector_Test
++check_PROGRAMS += SOCK_Connector_Test
+ 
+ SOCK_Connector_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1698,7 +1701,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SOCK_Dgram_Bcast_Test.am 
+-noinst_PROGRAMS += SOCK_Dgram_Bcast_Test
++check_PROGRAMS += SOCK_Dgram_Bcast_Test
+ 
+ SOCK_Dgram_Bcast_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1712,7 +1715,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SOCK_Dgram_Test.am 
+-noinst_PROGRAMS += SOCK_Dgram_Test
++check_PROGRAMS += SOCK_Dgram_Test
+ 
+ SOCK_Dgram_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1726,7 +1729,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SOCK_SEQPACK_SCTP_Test.am 
+-noinst_PROGRAMS += SOCK_SEQPACK_SCTP_Test
++check_PROGRAMS += SOCK_SEQPACK_SCTP_Test
+ 
+ SOCK_SEQPACK_SCTP_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1740,7 +1743,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SOCK_Send_Recv_Test.am 
+-noinst_PROGRAMS += SOCK_Send_Recv_Test
++check_PROGRAMS += SOCK_Send_Recv_Test
+ 
+ SOCK_Send_Recv_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1754,7 +1757,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SOCK_Send_Recv_Test_IPV6.am 
+-noinst_PROGRAMS += SOCK_Send_Recv_Test_IPV6
++check_PROGRAMS += SOCK_Send_Recv_Test_IPV6
+ 
+ SOCK_Send_Recv_Test_IPV6_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1768,7 +1771,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SOCK_Test.am 
+-noinst_PROGRAMS += SOCK_Test
++check_PROGRAMS += SOCK_Test
+ 
+ SOCK_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1782,7 +1785,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SOCK_Test_IPv6.am 
+-noinst_PROGRAMS += SOCK_Test_IPv6
++check_PROGRAMS += SOCK_Test_IPv6
+ 
+ SOCK_Test_IPv6_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1796,7 +1799,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SPIPE_Test.am 
+-noinst_PROGRAMS += SPIPE_Test
++check_PROGRAMS += SPIPE_Test
+ 
+ SPIPE_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1810,7 +1813,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SString_Test.am 
+-noinst_PROGRAMS += SString_Test
++check_PROGRAMS += SString_Test
+ 
+ SString_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1824,7 +1827,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.SV_Shared_Memory_Test.am 
+-noinst_PROGRAMS += SV_Shared_Memory_Test
++check_PROGRAMS += SV_Shared_Memory_Test
+ 
+ SV_Shared_Memory_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1838,7 +1841,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Semaphore_Test.am 
+-noinst_PROGRAMS += Semaphore_Test
++check_PROGRAMS += Semaphore_Test
+ 
+ Semaphore_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1853,7 +1856,7 @@
+ 
+ ## Makefile.Service_Config_DLL.am 
+ 
+-noinst_LTLIBRARIES += libService_Config_DLL.la
++check_LTLIBRARIES += libService_Config_DLL.la
+ 
+ libService_Config_DLL_la_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1869,12 +1872,12 @@
+ libService_Config_DLL_la_LIBADD = \
+  $(top_builddir)/ace/libACE.la
+ 
+-noinst_HEADERS += \
++check_HEADERS += \
+   Service_Config_DLL.h \
+   Service_Config_DLL_Export.h
+ 
+ ## Makefile.Service_Config_Test.am 
+-noinst_PROGRAMS += Service_Config_Test
++check_PROGRAMS += Service_Config_Test
+ 
+ Service_Config_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1888,7 +1891,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Signal_Test.am 
+-noinst_PROGRAMS += Signal_Test
++check_PROGRAMS += Signal_Test
+ 
+ Signal_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1902,7 +1905,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Sigset_Ops_Test.am 
+-noinst_PROGRAMS += Sigset_Ops_Test
++check_PROGRAMS += Sigset_Ops_Test
+ 
+ Sigset_Ops_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1916,7 +1919,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Simple_Message_Block_Test.am 
+-noinst_PROGRAMS += Simple_Message_Block_Test
++check_PROGRAMS += Simple_Message_Block_Test
+ 
+ Simple_Message_Block_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1930,7 +1933,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Svc_Handler_Test.am 
+-noinst_PROGRAMS += Svc_Handler_Test
++check_PROGRAMS += Svc_Handler_Test
+ 
+ Svc_Handler_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1944,7 +1947,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.TP_Reactor_Test.am 
+-noinst_PROGRAMS += TP_Reactor_Test
++check_PROGRAMS += TP_Reactor_Test
+ 
+ TP_Reactor_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1959,7 +1962,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.TSS_Static_Test.am 
+-noinst_PROGRAMS += TSS_Static_Test
++check_PROGRAMS += TSS_Static_Test
+ 
+ TSS_Static_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1973,7 +1976,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.TSS_Test.am 
+-noinst_PROGRAMS += TSS_Test
++check_PROGRAMS += TSS_Test
+ 
+ TSS_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -1987,7 +1990,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Task_Ex_Test.am 
+-noinst_PROGRAMS += Task_Ex_Test
++check_PROGRAMS += Task_Ex_Test
+ 
+ Task_Ex_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2002,7 +2005,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Task_Test.am 
+-noinst_PROGRAMS += Task_Test
++check_PROGRAMS += Task_Test
+ 
+ Task_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2016,7 +2019,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Thread_Manager_Test.am 
+-noinst_PROGRAMS += Thread_Manager_Test
++check_PROGRAMS += Thread_Manager_Test
+ 
+ Thread_Manager_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2030,7 +2033,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Thread_Mutex_Test.am 
+-noinst_PROGRAMS += Thread_Mutex_Test
++check_PROGRAMS += Thread_Mutex_Test
+ 
+ Thread_Mutex_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2046,7 +2049,7 @@
+ ## Makefile.Thread_Pool_Reactor_Resume_Test.am 
+ 
+ if BUILD_ACE_OTHER
+-noinst_PROGRAMS += Thread_Pool_Reactor_Resume_Test
++check_PROGRAMS += Thread_Pool_Reactor_Resume_Test
+ 
+ Thread_Pool_Reactor_Resume_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2065,7 +2068,7 @@
+ ## Makefile.Thread_Pool_Reactor_Test.am 
+ 
+ if BUILD_ACE_OTHER
+-noinst_PROGRAMS += Thread_Pool_Reactor_Test
++check_PROGRAMS += Thread_Pool_Reactor_Test
+ 
+ Thread_Pool_Reactor_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2082,7 +2085,7 @@
+ endif BUILD_ACE_OTHER
+ 
+ ## Makefile.Thread_Pool_Test.am 
+-noinst_PROGRAMS += Thread_Pool_Test
++check_PROGRAMS += Thread_Pool_Test
+ 
+ Thread_Pool_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2096,7 +2099,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Time_Service_Test.am 
+-noinst_PROGRAMS += Time_Service_Test
++check_PROGRAMS += Time_Service_Test
+ 
+ Time_Service_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2110,7 +2113,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Time_Value_Test.am 
+-noinst_PROGRAMS += Time_Value_Test
++check_PROGRAMS += Time_Value_Test
+ 
+ Time_Value_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2124,7 +2127,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Timeprobe_Test.am 
+-noinst_PROGRAMS += Timeprobe_Test
++check_PROGRAMS += Timeprobe_Test
+ 
+ Timeprobe_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2138,7 +2141,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Timer_Cancellation_Test.am 
+-noinst_PROGRAMS += Timer_Cancellation_Test
++check_PROGRAMS += Timer_Cancellation_Test
+ 
+ Timer_Cancellation_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2152,7 +2155,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Timer_Queue_Reference_Counting_Test.am 
+-noinst_PROGRAMS += Timer_Queue_Reference_Counting_Test
++check_PROGRAMS += Timer_Queue_Reference_Counting_Test
+ 
+ Timer_Queue_Reference_Counting_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2166,7 +2169,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Timer_Queue_Test.am 
+-noinst_PROGRAMS += Timer_Queue_Test
++check_PROGRAMS += Timer_Queue_Test
+ 
+ Timer_Queue_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2184,7 +2187,7 @@
+ if BUILD_ACE_TKREACTOR
+ if BUILD_TK
+ 
+-noinst_PROGRAMS += TkReactor_Test
++check_PROGRAMS += TkReactor_Test
+ 
+ TkReactor_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2201,7 +2204,7 @@
+ endif BUILD_ACE_TKREACTOR
+ 
+ ## Makefile.Token_Strategy_Test.am 
+-noinst_PROGRAMS += Token_Strategy_Test
++check_PROGRAMS += Token_Strategy_Test
+ 
+ Token_Strategy_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2217,7 +2220,7 @@
+ ## Makefile.Tokens_Test.am 
+ 
+ if BUILD_ACE_TOKEN
+-noinst_PROGRAMS += Tokens_Test
++check_PROGRAMS += Tokens_Test
+ 
+ Tokens_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2233,7 +2236,7 @@
+ endif BUILD_ACE_TOKEN
+ 
+ ## Makefile.UPIPE_SAP_Test.am 
+-noinst_PROGRAMS += UPIPE_SAP_Test
++check_PROGRAMS += UPIPE_SAP_Test
+ 
+ UPIPE_SAP_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2249,7 +2252,7 @@
+ ## Makefile.UUIDTest.am 
+ 
+ if BUILD_ACE_UUID
+-noinst_PROGRAMS += UUIDTest
++check_PROGRAMS += UUIDTest
+ 
+ UUIDTest_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2265,7 +2268,7 @@
+ endif BUILD_ACE_UUID
+ 
+ ## Makefile.Unbounded_Set_Test.am 
+-noinst_PROGRAMS += Unbounded_Set_Test
++check_PROGRAMS += Unbounded_Set_Test
+ 
+ Unbounded_Set_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2279,7 +2282,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Upgradable_RW_Test.am 
+-noinst_PROGRAMS += Upgradable_RW_Test
++check_PROGRAMS += Upgradable_RW_Test
+ 
+ Upgradable_RW_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2294,7 +2297,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Vector_Test.am 
+-noinst_PROGRAMS += Vector_Test
++check_PROGRAMS += Vector_Test
+ 
+ Vector_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -2308,7 +2311,7 @@
+  libTest_Output.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.WFMO_Reactor_Test.am 
+-noinst_PROGRAMS += WFMO_Reactor_Test
++check_PROGRAMS += WFMO_Reactor_Test
+ 
+ WFMO_Reactor_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+Only in ACE_wrappers.check/tests: Makefile.in
+Common subdirectories: ACE_wrappers/tests/RMCast and ACE_wrappers.check/tests/RMCast
+Common subdirectories: ACE_wrappers/tests/SSL and ACE_wrappers.check/tests/SSL
+Common subdirectories: ACE_wrappers/tests/log and ACE_wrappers.check/tests/log
+Common subdirectories: ACE_wrappers/tests/pharlap and ACE_wrappers.check/tests/pharlap
+Only in ACE_wrappers.check/tests/HTBP: Makefile.in
+Common subdirectories: ACE_wrappers/tests/HTBP/Reactor_Tests and ACE_wrappers.check/tests/HTBP/Reactor_Tests
+Common subdirectories: ACE_wrappers/tests/HTBP/Send_Large_Msg and ACE_wrappers.check/tests/HTBP/Send_Large_Msg
+Common subdirectories: ACE_wrappers/tests/HTBP/Send_Recv_Tests and ACE_wrappers.check/tests/HTBP/Send_Recv_Tests
+Common subdirectories: ACE_wrappers/tests/HTBP/ping and ACE_wrappers.check/tests/HTBP/ping
+diff -ru ACE_wrappers/tests/HTBP/Reactor_Tests/Makefile.am ACE_wrappers.check/tests/HTBP/Reactor_Tests/Makefile.am
+--- ACE_wrappers/tests/HTBP/Reactor_Tests/Makefile.am	Fri Nov 12 14:28:16 2004
++++ ACE_wrappers.check/tests/HTBP/Reactor_Tests/Makefile.am	Thu Oct 20 23:31:24 2005
+@@ -12,7 +12,7 @@
+ ACE_ROOT = $(top_srcdir)
+ 
+ ## Makefile.Reactor_Tests_Client.am 
+-noinst_PROGRAMS = client
++check_PROGRAMS = client
+ 
+ client_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -27,7 +27,7 @@
+  $(top_builddir)/protocols/ace/HTBP/libACE_HTBP.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Reactor_Tests_Server.am 
+-noinst_PROGRAMS += server
++check_PROGRAMS += server
+ 
+ server_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+Only in ACE_wrappers.check/tests/HTBP/Reactor_Tests: Makefile.in
+diff -ru ACE_wrappers/tests/HTBP/Send_Large_Msg/Makefile.am ACE_wrappers.check/tests/HTBP/Send_Large_Msg/Makefile.am
+--- ACE_wrappers/tests/HTBP/Send_Large_Msg/Makefile.am	Fri Nov 12 14:28:16 2004
++++ ACE_wrappers.check/tests/HTBP/Send_Large_Msg/Makefile.am	Thu Oct 20 23:31:24 2005
+@@ -12,7 +12,7 @@
+ ACE_ROOT = $(top_srcdir)
+ 
+ ## Makefile.Send_Large_Msg_Client.am 
+-noinst_PROGRAMS = client
++check_PROGRAMS = client
+ 
+ client_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -26,7 +26,7 @@
+  $(top_builddir)/tests/libTest_Output.la $(top_builddir)/protocols/ace/HTBP/libACE_HTBP.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Send_Large_Msg_Server.am 
+-noinst_PROGRAMS += server
++check_PROGRAMS += server
+ 
+ server_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+Only in ACE_wrappers.check/tests/HTBP/Send_Large_Msg: Makefile.in
+diff -ru ACE_wrappers/tests/HTBP/Send_Recv_Tests/Makefile.am ACE_wrappers.check/tests/HTBP/Send_Recv_Tests/Makefile.am
+--- ACE_wrappers/tests/HTBP/Send_Recv_Tests/Makefile.am	Fri Nov 12 14:28:16 2004
++++ ACE_wrappers.check/tests/HTBP/Send_Recv_Tests/Makefile.am	Thu Oct 20 23:31:24 2005
+@@ -12,7 +12,7 @@
+ ACE_ROOT = $(top_srcdir)
+ 
+ ## Makefile.SendRecv_Test.am 
+-noinst_PROGRAMS = SendRecv_Test
++check_PROGRAMS = SendRecv_Test
+ 
+ SendRecv_Test_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+Only in ACE_wrappers.check/tests/HTBP/Send_Recv_Tests: Makefile.in
+diff -ru ACE_wrappers/tests/HTBP/ping/Makefile.am ACE_wrappers.check/tests/HTBP/ping/Makefile.am
+--- ACE_wrappers/tests/HTBP/ping/Makefile.am	Fri Nov 12 14:28:16 2004
++++ ACE_wrappers.check/tests/HTBP/ping/Makefile.am	Thu Oct 20 23:31:24 2005
+@@ -12,7 +12,7 @@
+ ACE_ROOT = $(top_srcdir)
+ 
+ ## Makefile.Ping_Client.am 
+-noinst_PROGRAMS = client
++check_PROGRAMS = client
+ 
+ client_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+@@ -26,7 +26,7 @@
+  $(top_builddir)/protocols/ace/HTBP/libACE_HTBP.la $(top_builddir)/ace/libACE.la
+ 
+ ## Makefile.Ping_Server.am 
+-noinst_PROGRAMS += server
++check_PROGRAMS += server
+ 
+ server_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+Only in ACE_wrappers.check/tests/HTBP/ping: Makefile.in
+Only in ACE_wrappers.check/tests/SSL: Makefile.in
