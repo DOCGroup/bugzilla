@@ -1,0 +1,459 @@
+Index: tao/Buffering_Constraint_Policy.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/Buffering_Constraint_Policy.cpp,v
+retrieving revision 1.1.1.2
+diff -u -r1.1.1.2 Buffering_Constraint_Policy.cpp
+--- tao/Buffering_Constraint_Policy.cpp	18 Jul 2002 19:31:22 -0000	1.1.1.2
++++ tao/Buffering_Constraint_Policy.cpp	28 Aug 2003 00:18:16 -0000
+@@ -36,7 +36,7 @@
+ {
+   TAO::BufferingConstraint *buffering_constraint;
+   if ((val >>= buffering_constraint) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_Buffering_Constraint_Policy *servant = 0;
+Index: orbsvcs/orbsvcs/FaultTolerance/FT_Policy_i.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_Policy_i.cpp,v
+retrieving revision 1.1.1.2
+diff -u -r1.1.1.2 FT_Policy_i.cpp
+--- orbsvcs/orbsvcs/FaultTolerance/FT_Policy_i.cpp	18 Jul 2002 19:31:06 -0000	1.1.1.2
++++ orbsvcs/orbsvcs/FaultTolerance/FT_Policy_i.cpp	28 Aug 2003 00:18:16 -0000
+@@ -29,7 +29,7 @@
+ {
+   TimeBase::TimeT value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_FT_Request_Duration_Policy *tmp;
+@@ -112,7 +112,7 @@
+ {
+   FT::HeartbeatPolicyValue *value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_FT_Heart_Beat_Policy *tmp;
+@@ -203,7 +203,7 @@
+   CORBA::Boolean value;
+ 
+   if ((val >>= CORBA::Any::to_boolean (value)) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_FT_Heart_Beat_Enabled_Policy *tmp;
+Index: tao/BiDir_GIOP/BiDir_PolicyFactory.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/BiDir_GIOP/BiDir_PolicyFactory.cpp,v
+retrieving revision 1.1.1.2
+diff -u -r1.1.1.2 BiDir_PolicyFactory.cpp
+--- tao/BiDir_GIOP/BiDir_PolicyFactory.cpp	18 Jul 2002 19:31:25 -0000	1.1.1.2
++++ tao/BiDir_GIOP/BiDir_PolicyFactory.cpp	28 Aug 2003 00:18:16 -0000
+@@ -26,7 +26,11 @@
+       BiDirPolicy::BidirectionalPolicyValue val;
+ 
+       // Extract the value from the any
+-      value >>= val;
++      if ((value >>= val) == 0)
++      {
++        ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
++            CORBA::Policy::_nil ());
++      }
+ 
+       ACE_NEW_THROW_EX (policy,
+                         TAO_BidirectionalPolicy (val),
+Index: tao/Messaging/Connection_Timeout_Policy_i.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/Messaging/Connection_Timeout_Policy_i.cpp,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 Connection_Timeout_Policy_i.cpp
+--- tao/Messaging/Connection_Timeout_Policy_i.cpp	18 Jul 2002 19:31:33 -0000	1.1.1.1
++++ tao/Messaging/Connection_Timeout_Policy_i.cpp	28 Aug 2003 00:18:16 -0000
+@@ -98,7 +98,7 @@
+ 
+   TimeBase::TimeT value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_ConnectionTimeoutPolicy *tmp;
+Index: tao/Messaging/Messaging_Policy_i.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/Messaging/Messaging_Policy_i.cpp,v
+retrieving revision 1.1.1.2
+diff -u -r1.1.1.2 Messaging_Policy_i.cpp
+--- tao/Messaging/Messaging_Policy_i.cpp	10 Aug 2003 20:23:44 -0000	1.1.1.2
++++ tao/Messaging/Messaging_Policy_i.cpp	28 Aug 2003 00:18:16 -0000
+@@ -101,7 +101,7 @@
+ 
+   TimeBase::TimeT value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_RelativeRoundtripTimeoutPolicy *tmp;
+@@ -240,7 +240,7 @@
+ {
+   Messaging::SyncScope synchronization;
+   if ((val >>= synchronization) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_Sync_Scope_Policy *servant = 0;
+Index: tao/PortableServer/AMH_Response_Handler.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/PortableServer/AMH_Response_Handler.cpp,v
+retrieving revision 1.1.1.3
+retrieving revision 1.2
+diff -u -r1.1.1.3 -r1.2
+--- tao/PortableServer/AMH_Response_Handler.cpp	10 Aug 2003 20:23:44 -0000	1.1.1.3
++++ tao/PortableServer/AMH_Response_Handler.cpp	14 Aug 2003 22:30:34 -0000	1.2
+@@ -16,7 +16,7 @@
+   : mesg_base_ (server_request.mesg_base_)
+   , request_id_ (server_request.request_id_)
+   , response_expected_ (server_request.response_expected_)
+-  , transport_ (TAO_Transport::_duplicate (server_request.transport ()))
++  , transport_ (TAO_Transport::_duplicate(server_request.transport ()))
+   , orb_core_ (server_request.orb_core ())
+   , argument_flag_ (1)
+   , exception_type_ (TAO_GIOP_NO_EXCEPTION)
+@@ -26,6 +26,10 @@
+ 
+ TAO_AMH_Response_Handler::~TAO_AMH_Response_Handler (void)
+ {
++  TAO_Transport_Refcount_Guard transport_guard(transport_);
++  // The reference count was incremented, need to adjust the count:
++  TAO_Transport::release(transport_);
++
+   // Since we are destroying the object we put a huge lock around the
+   // whole destruction process (just paranoid).
+   {
+@@ -34,40 +38,38 @@
+     if (this->response_expected_ == 0) //oneway ?
+       {
+         // if client is not expecting anything, don't send anything
+-        TAO_Transport::release (this->transport_);
+         return;
+       }
+     
+     // If the ResponseHandler is being destroyed before a reply has
+     // been sent to the client, we send a system exception
+     // CORBA::NO_RESPONSE, with minor code to indicate the problem.
+-    if (this->reply_status_ != TAO_RS_SENT)
+-      {
+-        // Is sending the exception to the client fails, then we just
+-        // give up, release the transport and return.
+-        ACE_DECLARE_NEW_CORBA_ENV;
+-        ACE_TRY
+-          {
+-            CORBA::NO_RESPONSE ex (CORBA::SystemException::_tao_minor_code
+-                                                 (TAO_AMH_REPLY_LOCATION_CODE,
+-                                                  EFAULT),
+-                                            CORBA::COMPLETED_NO);
+-            this->_tao_rh_send_exception (ex ACE_ENV_ARG_PARAMETER);
+-            ACE_TRY_CHECK;
+-
+-            TAO_Transport::release (this->transport_);
+-          }
+-        ACE_CATCHALL
+-          {
+-            TAO_Transport::release (this->transport_);
+-          }
+-        ACE_ENDTRY;
+-      }
+-    else
++    if (this->reply_status_ == TAO_RS_SENT)
+       {
+-        TAO_Transport::release (this->transport_);
++        return;
+       }
++
++    // It would be slightly more efficient to *NOT* release the lock
++    // before calling _tao_rh_send_exception(), but this code is way
++    // out of the critical path.
+   }
++
++  // Is sending the exception to the client fails, then we just
++  // give up, release the transport and return.
++
++  ACE_TRY_NEW_ENV
++    {
++      CORBA::NO_RESPONSE ex (CORBA::SystemException::_tao_minor_code
++          (TAO_AMH_REPLY_LOCATION_CODE,
++              EFAULT),
++          CORBA::COMPLETED_NO);
++      this->_tao_rh_send_exception (ex ACE_ENV_ARG_PARAMETER);
++      ACE_TRY_CHECK;
++    }
++  ACE_CATCHALL
++    {
++    }
++  ACE_ENDTRY;
+ }
+ 
+ void
+Index: tao/PortableServer/Object_Adapter.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/PortableServer/Object_Adapter.cpp,v
+retrieving revision 1.1.1.4
+retrieving revision 1.3
+diff -u -r1.1.1.4 -r1.3
+--- tao/PortableServer/Object_Adapter.cpp	13 Dec 2002 14:35:15 -0000	1.1.1.4
++++ tao/PortableServer/Object_Adapter.cpp	12 Jun 2003 17:34:11 -0000	1.3
+@@ -629,6 +629,16 @@
+   // destroyed yet or not.
+   this->root_->_add_ref ();
+ 
++  // Lock access for the duration of this transaction.
++  TAO_POA_Guard poa_guard(*this->root_ ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK;
++
++  // Iterate over the registered IOR interceptors so that they may be
++  // given the opportunity to add tagged components to the profiles
++  // for this servant.
++  this->root_->establish_components (ACE_ENV_SINGLE_ARG_PARAMETER);
++  ACE_CHECK;
++
+   // Release the POA_Manager_var since we got here without error.  The
+   // TAO_POA object takes ownership of the POA_Manager object
+   // (actually it shares the ownership with its peers).
+@@ -857,7 +867,14 @@
+       ACE_ENDTRY;
+     }
+ 
+-  return 0;
++  stub->servant_orb(this->orb_core_.orb());
++  CORBA::Object_ptr x;
++  ACE_NEW_RETURN (x,
++      CORBA::Object (stub, 1, 0),
++      CORBA::Object::_nil ());
++  x->_proxy_broker(the_tao_strategized_object_proxy_broker());
++
++  return x;
+ }
+ 
+ // ****************************************************************
+Index: tao/PortableServer/POA.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/PortableServer/POA.cpp,v
+retrieving revision 1.1.1.4
+retrieving revision 1.3
+diff -u -r1.1.1.4 -r1.3
+--- tao/PortableServer/POA.cpp	13 Dec 2002 14:35:15 -0000	1.1.1.4
++++ tao/PortableServer/POA.cpp	8 Jan 2003 23:33:53 -0000	1.3
+@@ -340,12 +340,6 @@
+   // descrease it upon destruction.
+   CORBA::add_ref (this->ort_template_);
+   this->obj_ref_factory_ = this->ort_template_;
+-
+-  // Iterate over the registered IOR interceptors so that they may be
+-  // given the opportunity to add tagged components to the profiles
+-  // for this servant.
+-  this->establish_components (ACE_ENV_SINGLE_ARG_PARAMETER);
+-  ACE_CHECK;
+ }
+ 
+ TAO_POA::~TAO_POA (void)
+@@ -563,6 +557,12 @@
+                         0);
+     }
+ 
++  // Iterate over the registered IOR interceptors so that they may be
++  // given the opportunity to add tagged components to the profiles
++  // for this servant.
++  poa->establish_components (ACE_ENV_SINGLE_ARG_PARAMETER);
++  ACE_CHECK_RETURN (0);
++
+   // Note: Creating a POA using a POA manager that is in the active
+   // state can lead to race conditions if the POA supports preexisting
+   // objects, because the new POA may receive a request before its
+@@ -2428,16 +2428,13 @@
+                                                                            system_id.out (),
+                                                                            priority) == 0)
+     {
+-      // Create object key.
+-      TAO_ObjectKey_var key = this->create_object_key (system_id.in ());
+-
+-      // Ask the ORB to create you a reference
+-      return this->key_to_object (key.in (),
+-                                  servant->_interface_repository_id (),
+-                                  servant,
+-                                  1,
+-                                  priority
+-                                  ACE_ENV_ARG_PARAMETER);
++      // Ask the ORT to create a reference
++      PortableInterceptor::ObjectId oid(
++          id.length(), id.length(),
++          ACE_const_cast(CORBA::Octet*,id.get_buffer()), 0);
++      return this->obj_ref_factory_->make_object(
++          servant->_interface_repository_id (), oid
++          ACE_ENV_ARG_PARAMETER);
+     }
+   else
+     // If the Object Id value is not active in the POA, an
+@@ -3581,6 +3578,16 @@
+ void
+ TAO_POA::establish_components (ACE_ENV_SINGLE_ARG_DECL)
+ {
++  // Iterate over the registered IOR interceptors so that they may be
++  // given the opportunity to add tagged components to the profiles
++  // for this servant.
++  TAO_IORInterceptor_List::TYPE &interceptors =
++    this->orb_core_.ior_interceptors ();
++
++  size_t interceptor_count = interceptors.size ();
++  if (interceptor_count == 0)
++    return;
++
+   TAO_IORInfo * tao_info;
+   ACE_NEW_THROW_EX (tao_info,
+                     TAO_IORInfo (this),
+@@ -3593,15 +3600,8 @@
+ 
+   PortableInterceptor::IORInfo_var info = tao_info;
+ 
+-  // Iterate over the registered IOR interceptors so that they may be
+-  // given the opportunity to add tagged components to the profiles
+-  // for this servant.
+-  TAO_IORInterceptor_List::TYPE &interceptors =
+-    this->orb_core_.ior_interceptors ();
+-
+-  size_t interceptor_count = interceptors.size ();
+-  if (interceptor_count == 0)
+-    return;
++  TAO_Object_Adapter::Non_Servant_Upcall non_servant_upcall (*this);
++  ACE_UNUSED_ARG (non_servant_upcall);
+ 
+   for (size_t i = 0; i < interceptor_count; ++i)
+     {
+@@ -3664,8 +3664,6 @@
+     this->orb_core_.ior_interceptors ();
+ 
+   size_t interceptor_count = interceptors.size ();
+-  if (interceptor_count == 0)
+-    return;
+ 
+   // All the establish_components() interception points have been
+   // invoked. Now call the components_established() interception point
+Index: tao/PortableServer/POA_Policies.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/PortableServer/POA_Policies.cpp,v
+retrieving revision 1.1.1.3
+diff -u -r1.1.1.3 POA_Policies.cpp
+--- tao/PortableServer/POA_Policies.cpp	13 Dec 2002 14:35:15 -0000	1.1.1.3
++++ tao/PortableServer/POA_Policies.cpp	28 Aug 2003 00:18:16 -0000
+@@ -67,7 +67,7 @@
+ {
+   PortableServer::ThreadPolicyValue value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_Thread_Policy *tmp = 0;
+@@ -140,7 +140,7 @@
+ {
+   PortableServer::LifespanPolicyValue value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_Lifespan_Policy *tmp = 0;
+@@ -211,7 +211,7 @@
+ {
+   PortableServer::IdUniquenessPolicyValue value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_Id_Uniqueness_Policy *tmp = 0;
+@@ -282,7 +282,7 @@
+ {
+   PortableServer::IdAssignmentPolicyValue value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_Id_Assignment_Policy *tmp = 0;
+@@ -355,7 +355,7 @@
+ {
+   PortableServer::ImplicitActivationPolicyValue value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_Implicit_Activation_Policy *tmp = 0;
+@@ -426,7 +426,7 @@
+ {
+   PortableServer::ServantRetentionPolicyValue value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_Servant_Retention_Policy *tmp = 0;
+@@ -497,7 +497,7 @@
+ {
+   PortableServer::RequestProcessingPolicyValue value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_Request_Processing_Policy *tmp = 0;
+Index: tao/RTCORBA/RT_Policy_i.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/RTCORBA/RT_Policy_i.cpp,v
+retrieving revision 1.1.1.3
+diff -u -r1.1.1.3 RT_Policy_i.cpp
+--- tao/RTCORBA/RT_Policy_i.cpp	13 Dec 2002 14:35:17 -0000	1.1.1.3
++++ tao/RTCORBA/RT_Policy_i.cpp	28 Aug 2003 00:18:16 -0000
+@@ -160,7 +160,7 @@
+ {
+   RTCORBA::ThreadpoolId value;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_ThreadpoolPolicy *tmp = 0;
+@@ -321,7 +321,7 @@
+ {
+   RTCORBA::PriorityBands *value = 0;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_PriorityBandedConnectionPolicy *tmp = 0;
+@@ -431,7 +431,7 @@
+ {
+   RTCORBA::ProtocolList *value = 0;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_ServerProtocolPolicy *tmp = 0;
+@@ -710,7 +710,7 @@
+ {
+   RTCORBA::ProtocolList *value = 0;
+   if ((val >>= value) == 0)
+-    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_TYPE),
++    ACE_THROW_RETURN (CORBA::PolicyError (CORBA::BAD_POLICY_VALUE),
+                       CORBA::Policy::_nil ());
+ 
+   TAO_ClientProtocolPolicy *tmp = 0;
