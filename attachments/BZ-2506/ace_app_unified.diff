@@ -1,0 +1,278 @@
+diff -r -u ACE_wrappers/examples/APG/Logging/Callback-3.h ACE_wrappers_new/examples/APG/Logging/Callback-3.h
+--- ACE_wrappers/examples/APG/Logging/Callback-3.h	1972-02-15 12:46:35.000000000 +0300
++++ ACE_wrappers_new/examples/APG/Logging/Callback-3.h	2006-04-18 11:52:36.000000000 +0400
+@@ -53,13 +53,16 @@
+ 	}
+ 
+       size_t len = log_record.length();
+-      log_record.encode ();
+-
+-      if (this->logger_->send_n ((char *) &log_record, len) == -1)
+-	{
+-	  delete this->logger_;
+-	  this->logger_ = 0;
+-	}
++	  char* tmp_buf;
++	  ACE_NEW_NORETURN( tmp_buf, char[len] );
++	  if ( log_record.encode (tmp_buf, len) == 0 ){
++		  if (this->logger_->send_n ((char *) tmp_buf, len) == -1)
++		  {
++			  delete this->logger_;
++			  this->logger_ = 0;
++		  }
++	  }
++	  delete[] tmp_buf;
+     }
+ 
+ private:
+diff -r -u ACE_wrappers/examples/Logger/Acceptor-server/server_loggerd.cpp ACE_wrappers_new/examples/Logger/Acceptor-server/server_loggerd.cpp
+--- ACE_wrappers/examples/Logger/Acceptor-server/server_loggerd.cpp	1970-11-18 00:34:23.000000000 +0300
++++ ACE_wrappers_new/examples/Logger/Acceptor-server/server_loggerd.cpp	2006-04-18 11:52:36.000000000 +0400
+@@ -106,7 +106,7 @@
+   // receiver side.  To correctly handle this is painful, and we leave
+   // it as an exercise for the reader ;-).
+ 
+-  ssize_t len;
++  int32_t len;
+   ssize_t n = this->peer ().recv ((void *) &len, sizeof len);
+ 
+   switch (n)
+@@ -123,18 +123,20 @@
+     case sizeof (size_t):
+       {
+         ACE_Log_Record lp;
+-
++		char* tmp_buf;
++		ACE_NEW_NORETURN( tmp_buf, char[ntohl (len)] );
++		*((uint32_t*)tmp_buf) = len;
+         len = ntohl (len);
+-        n = this->peer ().recv_n ((void *) &lp, len);
++		
++        n = this->peer ().recv_n ( tmp_buf+sizeof(uint32_t), len);
+ 
+-        if (n != len)
++        if (n != (len-sizeof(uint32_t)) )
+           ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("(%P|%t) %p at host %C\n"),
+                              ACE_TEXT ("client logger"), this->peer_name_),-1);
+         /* NOTREACHED */
+ 
+-        lp.decode ();
+ 
+-        if (lp.length () == n)
++        if ( lp.decode (tmp_buf,len) == 0 )
+           {
+             ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ")));
+ #if !defined (ACE_LACKS_IOSTREAM_TOTALLY)
+@@ -147,6 +149,8 @@
+           ACE_ERROR ((LM_ERROR,
+                       ACE_TEXT ("(%P|%t) error, lp.length = %d, n = %d\n"),
+                       lp.length (), n));
++
++		delete[] tmp_buf;
+         break;
+       }
+     default:
+diff -r -u ACE_wrappers/examples/Logger/client/logging_app.cpp ACE_wrappers_new/examples/Logger/client/logging_app.cpp
+--- ACE_wrappers/examples/Logger/client/logging_app.cpp	1970-10-19 10:29:54.000000000 +0300
++++ ACE_wrappers_new/examples/Logger/client/logging_app.cpp	2006-04-18 11:52:36.000000000 +0400
+@@ -38,15 +38,14 @@
+                                  ACE_OS::getpid ());
+ 
+       ACE_TCHAR buf[BUFSIZ];
++      ACE_TCHAR log_buf[BUFSIZ+sizeof(log_record)];
+       ACE_OS::sprintf (buf, ACE_TEXT ("message = %d\n"), i + 1);
+       log_record.msg_data (buf);
+-      size_t len = log_record.length ();
+-      size_t encoded_len = htonl (len);
+ 
+-      log_record.encode ();
++      log_record.encode (log_buf, sizeof(log_buf) );
++      size_t len = log_record.length ();
+ 
+-      if (logger.send (4, &encoded_len, sizeof encoded_len,
+-		       (char *) &log_record, len) == -1)
++      if (logger.send (2, (char *) log_buf, len) == -1)
+ 	ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("%p\n"), ACE_TEXT ("send")),-1);
+       else
+ 	ACE_OS::sleep (1);
+diff -r -u ACE_wrappers/examples/Logger/simple-server/Logging_Handler.cpp ACE_wrappers_new/examples/Logger/simple-server/Logging_Handler.cpp
+--- ACE_wrappers/examples/Logger/simple-server/Logging_Handler.cpp	1970-10-19 10:29:54.000000000 +0300
++++ ACE_wrappers_new/examples/Logger/simple-server/Logging_Handler.cpp	2006-04-18 11:52:36.000000000 +0400
+@@ -52,7 +52,7 @@
+ Logging_Handler::handle_input (ACE_HANDLE)
+ {
+   ssize_t n;
+-  size_t len;
++  int32_t len;
+ 
+   // Perform two recv's to emulate record-oriented semantics.  Note
+   // that this code is not entirely portable since it relies on the
+@@ -71,20 +71,22 @@
+                          "(%P|%t) closing log daemon at host %s (fd = %d)\n",
+                          this->host_name_, this->get_handle ()), -1);
+       /* NOTREACHED */
+-    case sizeof (size_t):
++    case sizeof (len):
+       {
+         ACE_Log_Record lp;
+ 
++		char* tmp_buf;
++		ACE_NEW_NORETURN( tmp_buf, char[ ntohl (len) ] );
++		*((int32_t*)tmp_buf) = len;
++
+         len = ntohl (len);
+-        n = this->cli_stream_.recv_n ((void *) &lp, len);
+-        if (n != (ssize_t) len)
++        n = this->cli_stream_.recv_n ( tmp_buf+sizeof(len), len);
++        if (n != (ssize_t) (len-sizeof(len)))
+           ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("(%P|%t) %p at host %C\n"),
+                              ACE_TEXT ("client logger"), this->host_name_), -1);
+         /* NOTREACHED */
+ 
+-        lp.decode ();
+-
+-        if (lp.length () == n)
++        if (lp.decode (tmp_buf,len) == 0)
+           {
+             ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ")));
+             lp.print (ACE_TEXT_CHAR_TO_TCHAR (this->host_name_), 1);
+@@ -93,6 +95,8 @@
+           ACE_ERROR ((LM_ERROR,
+                       ACE_TEXT ("(%P|%t) error, lp.length = %d, n = %d\n"),
+                       lp.length (), n));
++
++		delete[] tmp_buf;
+         break;
+       }
+     default:
+diff -r -u ACE_wrappers/examples/Log_Msg/test_callback.cpp ACE_wrappers_new/examples/Log_Msg/test_callback.cpp
+--- ACE_wrappers/examples/Log_Msg/test_callback.cpp	2003-11-01 14:15:23.000000000 +0300
++++ ACE_wrappers_new/examples/Log_Msg/test_callback.cpp	2006-04-18 11:52:36.000000000 +0400
+@@ -82,7 +82,7 @@
+       ACE_TCHAR verbose_msg[ACE_Log_Record::MAXVERBOSELOGMSGLEN];
+       int result = log_record.format_msg (ACE_LOG_MSG->local_host (),
+                                           ACE_LOG_MSG->flags (),
+-                                          verbose_msg);
++                                          verbose_msg, sizeof(verbose_msg) );
+       if (result == 0)
+         {
+           if (use_log_msg)
+diff -r -u ACE_wrappers/tests/Log_Msg_Test.cpp ACE_wrappers_new/tests/Log_Msg_Test.cpp
+--- ACE_wrappers/tests/Log_Msg_Test.cpp	1971-04-15 04:44:29.000000000 +0300
++++ ACE_wrappers_new/tests/Log_Msg_Test.cpp	2006-04-18 11:52:36.000000000 +0400
+@@ -111,7 +111,7 @@
+       ACE_TCHAR verbose_msg[ACE_Log_Record::MAXVERBOSELOGMSGLEN];
+       int result = log_record.format_msg (ACE_LOG_MSG->local_host (),
+                                           ACE_LOG_MSG->flags (),
+-                                          verbose_msg);
++                                          verbose_msg, sizeof(verbose_msg) );
+       if (result == 0)
+         {
+           if (use_log_msg)
+diff -r -u ACE_wrappers/netsvcs/clients/Logger/direct_logging.cpp ACE_wrappers_new/netsvcs/clients/Logger/direct_logging.cpp
+--- ACE_wrappers/netsvcs/clients/Logger/direct_logging.cpp	1970-06-06 07:49:54.000000000 +0300
++++ ACE_wrappers_new/netsvcs/clients/Logger/direct_logging.cpp	2006-04-18 11:52:36.000000000 +0400
+@@ -34,11 +34,15 @@
+ 
+   log_record.msg_data (DATA);
+   size_t len = log_record.length ();
+-  log_record.encode ();
+-
+-  if (logger.send ((char *) &log_record, len) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "send"), -1);
+-  else if (logger.close () == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "close"), -1);
++  char* tmp_buf;
++  ACE_NEW_NORETURN(tmp_buf, char[len] );
++  if ( log_record.encode (tmp_buf, len) == 0 )
++  {
++	  if (logger.send (tmp_buf, len) == -1)
++		  ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "send"), -1);
++	  else if (logger.close () == -1)
++		  ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "close"), -1);
++  }
++  delete[] tmp_buf;
+   return 0;
+ }
+diff -r -u ACE_wrappers/netsvcs/lib/Client_Logging_Handler.cpp ACE_wrappers_new/netsvcs/lib/Client_Logging_Handler.cpp
+--- ACE_wrappers/netsvcs/lib/Client_Logging_Handler.cpp	1971-12-27 08:06:48.000000000 +0300
++++ ACE_wrappers_new/netsvcs/lib/Client_Logging_Handler.cpp	2006-04-18 11:52:36.000000000 +0400
+@@ -311,21 +311,26 @@
+   else
+     {
+       long len = log_record.length ();
+-      log_record.encode ();
+-
+-      if (ACE::send (this->logging_output_,
+-		     (char *) &log_record,
+-		     len) == -1)
+-        if (ACE_Log_Msg::instance ()->msg_ostream () == 0)
+-          // Switch over to logging to stderr for now.  At some point,
+-          // we'll improve the implementation to queue up the message,
+-          // try to reestablish a connection, and then send the queued
+-          // data once we've reconnect to the logging server.  If
+-          // you'd like to implement this functionality and contribute
+-          // it back to ACE that would be great!
+-          this->logging_output_ = ACE_STDERR;
++	  char* tmp_buf; 
++	  ACE_NEW_NORETURN (tmp_buf, char[len] );
++	  if (log_record.encode (tmp_buf,len) == 0){
++
++			  if (ACE::send (this->logging_output_,
++									  tmp_buf,
++									  len) == -1)
++					  if (ACE_Log_Msg::instance ()->msg_ostream () == 0)
++							  // Switch over to logging to stderr for now.  At some point,
++							  // we'll improve the implementation to queue up the message,
++							  // try to reestablish a connection, and then send the queued
++							  // data once we've reconnect to the logging server.  If
++							  // you'd like to implement this functionality and contribute
++							  // it back to ACE that would be great!
++							  this->logging_output_ = ACE_STDERR;
++	  }
++	  delete[] tmp_buf;
+     }
+ 
++
+   return 0;
+ }
+ 
+diff -r -u ACE_wrappers/netsvcs/lib/Server_Logging_Handler_T.cpp ACE_wrappers_new/netsvcs/lib/Server_Logging_Handler_T.cpp
+--- ACE_wrappers/netsvcs/lib/Server_Logging_Handler_T.cpp	1971-04-10 00:44:43.000000000 +0300
++++ ACE_wrappers_new/netsvcs/lib/Server_Logging_Handler_T.cpp	2006-04-18 11:52:36.000000000 +0400
+@@ -87,9 +87,12 @@
+       {
+         ACE_Log_Record lp;
+ 
+-        // Use ACE_NTOHL to get around bug in egcs 2.91.6x.
+         length = ACE_NTOHL (length);
+ 
++		char* tmp_buf;
++		ACE_NEW_NORETURN (tmp_buf, char[length] );
++        // Use ACE_NTOHL to get around bug in egcs 2.91.6x.
++
+ #if !defined (ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES)
+         ++this->request_count_;
+ #  if 0
+@@ -102,8 +105,8 @@
+ #endif /* ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES */
+ 
+         // Perform the actual <recv> this time.
+-        ssize_t n = this->peer ().recv_n ((void *) &lp,
+-                                          length);
++        ssize_t n = this->peer ().recv_n ((void *) tmp_buf,
++                                          length );
+         if (n != length)
+           ACE_ERROR_RETURN ((LM_ERROR,
+                              ACE_TEXT ("%d != %d, %p at host %C\n"),
+@@ -113,7 +116,9 @@
+                              this->host_name ()),
+                             -1);
+ 
+-        lp.decode ();
++        lp.decode (tmp_buf, length );
++		
++		delete[] tmp_buf;
+ 
+         if (lp.length () == n)
+           {
