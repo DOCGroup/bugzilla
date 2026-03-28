@@ -1,0 +1,256 @@
+diff -Nru ACE_wrappers/ace/High_Res_Timer.cpp ./ACE_wrappers-hrt-gtf-patched/ace/High_Res_Timer.cpp
+--- ACE_wrappers/ace/High_Res_Timer.cpp	2005-11-24 11:48:54.000000000 +0200
++++ ./ACE_wrappers-hrt-gtf-patched/ace/High_Res_Timer.cpp	2006-01-04 14:07:56.000000000 +0200
+@@ -27,6 +27,15 @@
+ 
+ ACE_ALLOC_HOOK_DEFINE(ACE_High_Res_Timer)
+ 
++/* static */
++int ACE_High_Res_Timer::gtf_adjust_ = ACE_High_Res_Timer::GTF_ADJUST_NOT_INITIALIZED;
++
++/*static */ 
++ACE_Time_Value ACE_High_Res_Timer::gtf_adjust_tv_;
++
++/* static */
++ACE_UINT32 ACE_High_Res_Timer::hrt_32hb_ = 0;
++
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
+ // For Intel platforms, a scale factor is required for
+@@ -251,6 +260,77 @@
+   return ACE_High_Res_Timer::global_scale_factor_;
+ }
+ 
++
++int
++ACE_High_Res_Timer::calibrate_gtf_adjustment (
++	ACE_UINT32 hrt32,
++	const ACE_Time_Value& hrt_tv,
++	bool from_gft)
++{
++	if (ACE_High_Res_Timer::gtf_adjust_ ==
++		 ACE_High_Res_Timer::GTF_ADJUST_NOT_INITIALIZED // first time initialization
++		 ||
++		 ACE_High_Res_Timer::hrt_32hb_ > hrt32 // re-calibration on overflow
++		)
++	{
++		// locking
++		//
++		ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon,
++                                *ACE_Static_Object_Lock::instance (), 0));
++
++		if (ACE_High_Res_Timer::gtf_adjust_ ==
++			 ACE_High_Res_Timer::GTF_ADJUST_NOT_INITIALIZED  // first time initialization
++			 ||
++			 ACE_High_Res_Timer::hrt_32hb_ > hrt32 // re-calibration on overflow
++			)
++		{
++			const ACE_Time_Value tv = ACE_OS::gettimeofday ();
++
++			// If coming from the gettimeofday_hr () (<from_gft> is true), 
++			// we are using <hrt_tv> in order not to enter into recursive 
++			// gettimeofday_hr () calls. 
++			// When coming from the constructor, calling gettimeofday_hr () locally.
++			//
++			const ACE_Time_Value tv_hr =  from_gft ? 
++				hrt_tv : ACE_High_Res_Timer::gettimeofday_hr ();
++
++			const ACE_Time_Value delta = (tv > tv_hr) ? (tv - tv_hr) : (tv_hr - tv);
++
++			if (delta.sec () == 0 && delta.usec () < 20000)
++			{
++				// less, than 20 msec timer resolution difference does not require 
++				// adjustment
++				ACE_High_Res_Timer::gtf_adjust_ = 
++					ACE_High_Res_Timer::GTF_ADJUST_NOT_REQUIRED;
++			}
++			else
++			{
++				if (tv > tv_hr)
++				{
++					ACE_hrtime_t hrt = ACE_OS::gethrtime ();
++					ACE_UINT32 hrt_32hb = 
++						static_cast<ACE_UINT32> ((hrt >> 32) & 0x00000000ffffffff);
++
++					ACE_High_Res_Timer::hrt_32hb_ = hrt_32hb;
++					
++					ACE_High_Res_Timer::gtf_adjust_ = 
++						ACE_High_Res_Timer::GTF_ADJUST_REQUIRED;
++
++					ACE_High_Res_Timer::gtf_adjust_tv_ = delta;
++				}
++				else
++				{
++					// error case, could it be?
++					ACE_High_Res_Timer::gtf_adjust_ = 
++						ACE_High_Res_Timer::GTF_ADJUST_NOT_REQUIRED;
++					return -1;
++				}
++			}
++		}
++	}
++	return 0;
++}
++
+ ACE_High_Res_Timer::ACE_High_Res_Timer (void)
+ {
+   ACE_TRACE ("ACE_High_Res_Timer::ACE_High_Res_Timer");
+@@ -259,6 +339,8 @@
+ 
+   // Make sure that the global scale factor is set.
+   (void) global_scale_factor ();
++
++  calibrate_gtf_adjustment ();
+ }
+ 
+ ACE_UINT32
+diff -Nru ACE_wrappers/ace/High_Res_Timer.h ./ACE_wrappers-hrt-gtf-patched/ace/High_Res_Timer.h
+--- ACE_wrappers/ace/High_Res_Timer.h	2005-10-28 18:14:52.000000000 +0200
++++ ./ACE_wrappers-hrt-gtf-patched/ace/High_Res_Timer.h	2006-01-04 14:01:34.000000000 +0200
+@@ -261,6 +261,12 @@
+   static void hrtime_to_tv (ACE_Time_Value &tv,
+                             const ACE_hrtime_t hrt);
+ 
++  /// Calibrates gettimeofday adjustment
++  static int calibrate_gtf_adjustment (
++	  ACE_UINT32 hrt32 = 0, 
++	  const ACE_Time_Value& htr_tv = ACE_Time_Value::zero,
++	  bool from_gft = false);
++
+ #if defined (linux)
+   /**
+    * This is used to find out the Mhz of the machine for the scale
+@@ -310,6 +316,37 @@
+    * -1 = HR timer not supported
+    */
+   static int global_scale_factor_status_;
++
++  enum
++  {
++	  GTF_ADJUST_NOT_INITIALIZED = -1,
++	  GTF_ADJUST_NOT_REQUIRED = 0,
++	  GTF_ADJUST_REQUIRED = 1,
++  };
++
++  /**
++  * Indicates, whether gettimeofday/gettimeofday_hr
++  * of the class require adjustment of their return value
++  * to time since epoch (Jan. 1, 1970), exactly as  
++  * ACE_OS::gettimeofday () does.
++  */
++  static int gtf_adjust_;
++
++  /**
++  * The value of gettimeofday/gettimeofday_hr
++  * adjustment till the time since epoch (Jan. 1, 1970).
++  */
++  static ACE_Time_Value gtf_adjust_tv_;
++
++  /**
++  * When gettimeofday/gettimeofday_hr require adjustment till
++  * epoch, it keeps the highest 32-bit of the 64-bit count, returned 
++  * by ACE_OS::gethrtime.
++  *
++  * Serves to monitor overflow of the 64-bit count to call for 
++  * ACE_High_Res_Timer::calibrate_gettimeofday_adjustment ().
++  */
++  static ACE_UINT32 hrt_32hb_;
+ };
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+diff -Nru ACE_wrappers/ace/High_Res_Timer.inl ./ACE_wrappers-hrt-gtf-patched/ace/High_Res_Timer.inl
+--- ACE_wrappers/ace/High_Res_Timer.inl	2005-10-28 18:14:52.000000000 +0200
++++ ./ACE_wrappers-hrt-gtf-patched/ace/High_Res_Timer.inl	2006-01-04 14:04:37.000000000 +0200
+@@ -68,8 +68,49 @@
+ #endif /* ACE_WIN32 */
+ 
+   ACE_Time_Value tv;
+-  ACE_High_Res_Timer::hrtime_to_tv (tv,
+-                                    ACE_OS::gethrtime (op));
++  ACE_hrtime_t hrt = ACE_OS::gethrtime (op);
++
++  ACE_High_Res_Timer::hrtime_to_tv (tv, hrt);
++
++  if (ACE_High_Res_Timer::gtf_adjust_) // either not initialized (-1), or adjustment_required (1)
++  {
++	  // Remembering the highest 32-bit of <hrt_tv> to create a 32-bit value,
++	  // and not to deal with with ACE_Time_Value structure, which may be
++	  // corrupted, when somebody writes to it without locking. 
++	  // Most CPUs ensure atomicity of write to a 32-bit value.
++	  //
++	  ACE_UINT32 hrt_32hb_curr = 
++		  static_cast<ACE_UINT32> ((hrt >> 32) & 0x00000000ffffffff);
++
++	  // First, treat the overflow case
++	  if ( ACE_High_Res_Timer::hrt_32hb_ > hrt_32hb_curr //on overflow
++			 ||
++			 ACE_High_Res_Timer::gtf_adjust_ == 
++			 ACE_High_Res_Timer::GTF_ADJUST_NOT_INITIALIZED // first time initialization
++		  )
++	  {
++		  ACE_High_Res_Timer::calibrate_gtf_adjustment (
++			  hrt_32hb_curr, 
++			  tv,
++			  true); // indicate, that we are calling it from gettimeofday ()
++	  }
++	  else
++	  {
++		  // Remember the current value of hrt_32hb_curr to ACE_High_Res_Timer::hrt_32hb_
++		  // Although operations with 32-bit int is atomic on most CPUs, and marginal chance for
++		  // memory corruption, ih veis?
++
++		  // We are avoiding locking, but taking chance to skip the exact moment of 
++		  // the overflow and correct ourselves on a next chance
++		  ACE_High_Res_Timer::hrt_32hb_ = hrt_32hb_curr;
++
++		  // Do we need locking like this?
++		  //__asm__ __volatile__("lock ; " "orl %0,%1" : : "r" (hrt_32hb_),"m" (hrt_32hb_curr) : "memory");
++		  //__asm__ __volatile__("xchg %0, %1;":"=r"(hrt_32hb_curr), "=m"(hrt_32hb_):"0"(hrt_32hb_curr),"m"(hrt_32hb_));	  
++	  }
++
++	  tv += ACE_High_Res_Timer::gtf_adjust_tv_;
++  }
+   return tv;
+ }
+ 
+diff -Nru ACE_wrappers/tests/High_Res_Timer_Test.cpp ./ACE_wrappers-hrt-gtf-patched/tests/High_Res_Timer_Test.cpp
+--- ACE_wrappers/tests/High_Res_Timer_Test.cpp	2005-04-09 02:43:26.000000000 +0300
++++ ./ACE_wrappers-hrt-gtf-patched/tests/High_Res_Timer_Test.cpp	2006-01-04 13:52:19.000000000 +0200
+@@ -123,10 +123,37 @@
+         break;
+       }
+ 
++  
++  (void) ACE_High_Res_Timer::global_scale_factor ();
++
+   // We don't check for errors if the interval is shorter than this
+   // value because the OS has a finite resolution anyway.
+   const u_int TIMER_RESOLUTION = 10000;
+ 
++  const ACE_Time_Value tv_hr = ACE_High_Res_Timer::gettimeofday_hr ();
++  const ACE_Time_Value tv = ACE_OS::gettimeofday ();
++  const ACE_Time_Value delta = (tv > tv_hr) ? (tv - tv_hr) : (tv_hr - tv);
++
++  if (!delta.sec () &&
++		delta.usec () < (long) (TIMER_RESOLUTION*2))
++  {
++	  ACE_DEBUG ((LM_DEBUG,
++                       ACE_TEXT ("The measured time of HRT is %u sec and %u usec and close to ")
++                       ACE_TEXT ("ACE_OS::gettimeofday, which is %u sec and %u usec\n"),
++			 tv_hr.sec (), tv_hr.usec (), tv.sec (), tv.usec ()));
++  }
++  else
++  {
++	  ACE_ERROR ((LM_ERROR,
++					  ACE_TEXT ("The measured time of HRT is %u sec and %u usec and differs from ")
++					  ACE_TEXT ("ACE_OS::gettimeofday, which is %u sec and %u usec\n"),
++					  tv_hr.sec (), tv_hr.usec (), tv.sec (), tv.usec ()));
++	  ACE_END_TEST;
++	  return 1;
++  }
++
++
++
+   for (u_int i = 0; i < sizeof intervals / sizeof (u_int); ++i)
+     {
+       for (u_int j = 0; j < iterations; ++j)
