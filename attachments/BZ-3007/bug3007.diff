@@ -1,0 +1,72 @@
+Index: ace/Service_Gestalt.cpp
+===================================================================
+--- ace/Service_Gestalt.cpp	(revision 78921)
++++ ace/Service_Gestalt.cpp	(working copy)
+@@ -528,24 +528,24 @@
+   int const retv = this->repo_->find (stf->name (),
+                                       (const ACE_Service_Type **) &srp);
+ 
+-  // If there is an active service already, it must first be removed,
+-  // before it could be re-installed.
+-  // IJ: This used to be the behavior, before allowing multiple
+-  // independent service repositories. Should that still be required?
+-  if (retv >= 0)
+-    {
+-#ifndef ACE_NLOGGING
+-      if (ACE::debug ())
+-        ACE_ERROR_RETURN ((LM_WARNING,
+-                           ACE_LIB_TEXT ("ACE (%P|%t) SG::initialize - repo=%@,")
+-                           ACE_LIB_TEXT (" %s is already initialized.")
+-                           ACE_LIB_TEXT (" Remove before re-initializing.\n"),
+-                           this->repo_,
+-                           stf->name ()),
+-                          0);
+-#endif
+-        return 0;
+-    }
++//  // If there is an active service already, it must first be removed,
++//  // before it could be re-installed.
++//  // IJ: This used to be the behavior, before allowing multiple
++//  // independent service repositories. Should that still be required?
++//  if (retv >= 0)
++//    {
++//#ifndef ACE_NLOGGING
++//      if (ACE::debug ())
++//        ACE_ERROR_RETURN ((LM_WARNING,
++//                           ACE_LIB_TEXT ("ACE (%P|%t) SG::initialize - repo=%@,")
++//                           ACE_LIB_TEXT (" %s is already initialized.")
++//                           ACE_LIB_TEXT (" Remove before re-initializing.\n"),
++//                           this->repo_,
++//                           stf->name ()),
++//                          0);
++//#endif
++//        return 0;
++//    }
+ 
+   // If there is an inactive service by that name it may have been
+   // either inactivated, or just a forward declaration for a service,
+@@ -620,15 +620,15 @@
+                 ACE_LIB_TEXT (" service %s to initialize, repo=%@\n"),
+                 sr->name (), this->repo_));
+ 
+-  ACE_Service_Type *srp = 0;
+-  if (this->repo_->find (sr->name (),
+-                         (const ACE_Service_Type **) &srp) >= 0)
+-    ACE_ERROR_RETURN ((LM_WARNING,
+-                       ACE_LIB_TEXT ("ACE (%P|%t) SG::initialize - \'%s\' ")
+-                       ACE_LIB_TEXT ("has already been installed. ")
+-                       ACE_LIB_TEXT ("Remove before reinstalling\n"),
+-                       sr->name ()),
+-                      0);
++  //ACE_Service_Type *srp = 0;
++  //if (this->repo_->find (sr->name (),
++  //                       (const ACE_Service_Type **) &srp) >= 0)
++  //  ACE_ERROR_RETURN ((LM_WARNING,
++  //                     ACE_LIB_TEXT ("ACE (%P|%t) SG::initialize - \'%s\' ")
++  //                     ACE_LIB_TEXT ("has already been installed. ")
++  //                     ACE_LIB_TEXT ("Remove before reinstalling\n"),
++  //                     sr->name ()),
++  //                    0);
+ 
+   return this->initialize_i (sr, parameters);
+ 
