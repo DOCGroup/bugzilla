@@ -1,0 +1,14 @@
+Index: Var_Size_SArgument_T.cpp
+===================================================================
+--- Var_Size_SArgument_T.cpp	(revision 75608)
++++ Var_Size_SArgument_T.cpp	(working copy)
+@@ -73,6 +73,9 @@
+ CORBA::Boolean
+ TAO::Out_Var_Size_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
++  if (NULL == this->x_.ptr())
++    ACE_THROW_RETURN (::CORBA::BAD_PARAM(0, CORBA::COMPLETED_MAYBE), false); 
++
+   return cdr << this->x_.in ();
+ }
+ 
