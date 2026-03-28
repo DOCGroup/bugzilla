@@ -1,0 +1,56 @@
+--- /ACE_wrappers/netsvcs/lib/Client_Logging_Handler.cpp	2007-05-29 05:21:34.000000000 -0700
++++ /ACE_wrappers/netsvcs/lib/Client_Logging_Handler.cpp	2007-08-12 16:01:58.843750000 -0700
+@@ -352,6 +352,11 @@
+       ACE_OutputCDR payload (max_payload_size);
+       payload << log_record;
+ 
++      // The message block chain (if it consists of more than one block) in payload
++      //  needs to be merged into one block before passing to the IPC.
++      int ret = payload.consolidate();
++      if (ret) return ret;
++
+       // Get the number of bytes used by the CDR stream.
+       ACE_CDR::ULong length = payload.total_length ();
+ 
+--- /ACE_wrappers/netsvcs/clients/Logger/direct_logging.cpp	2006-05-23 10:51:48.000000000 -0700
++++ /ACE_wrappers/netsvcs/clients/Logger/direct_logging.cpp	2007-08-12 16:01:48.093750000 -0700
+@@ -46,6 +46,11 @@
+   ACE_OutputCDR payload (max_payload_size);
+   payload << log_record;
+ 
++  // The message block chain (if it consists of more than one block) in payload
++  //  needs to be merged into one block before passing to the IPC.
++  int ret = payload.consolidate();
++  if (ret) return ret;
++
+   // Get the number of bytes used by the CDR stream.
+   ACE_CDR::ULong length = payload.total_length ();
+ 
+--- /ACE_wrappers/examples/Logger/client/logging_app.cpp	2007-02-08 16:12:20.000000000 -0800
++++ /ACE_wrappers/examples/Logger/client/logging_app.cpp	2007-08-12 16:03:16.218750000 -0700
+@@ -54,6 +54,11 @@
+       ACE_OutputCDR payload (max_payload_size);
+       payload << log_record;
+ 
++      // The message block chain (if it consists of more than one block) in payload
++      //  needs to be merged into one block before passing to the IPC.
++      int ret = payload.consolidate();
++      if (ret) return ret;
++
+       // Get the number of bytes used by the CDR stream.
+       ACE_CDR::ULong length = payload.total_length ();
+ 
+--- /ACE_wrappers/examples/C++NPv1/Logging_Client.cpp	2007-07-19 22:27:14.000000000 -0700
++++ /ACE_wrappers/examples/C++NPv1/Logging_Client.cpp	2007-08-12 16:02:37.468750000 -0700
+@@ -50,6 +50,11 @@
+     ACE_OutputCDR payload (max_payload_size);
+     payload << log_record;
+ 
++    // The message block chain (if it consists of more than one block) in payload
++    //  needs to be merged into one block before passing to the IPC.
++    int ret = payload.consolidate();
++    if (ret) return ret;
++
+     // Get the number of bytes used by the CDR stream.
+     ACE_CDR::ULong length = payload.total_length ();
+ 
