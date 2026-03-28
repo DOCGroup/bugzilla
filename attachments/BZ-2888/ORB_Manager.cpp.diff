@@ -1,0 +1,49 @@
+FILE COMPARISON
+Produced: 4/18/2007 10:06:01 AM
+
+C:\Documents and Settings\tv2745\Desktop\ORB_Manager.cpp is what is in SVN head.
+C:\ACE_wrappers\TAO\tao\Utils\ORB_Manager.cpp are my changes.
+
+--- C:\Documents and Settings\tv2745\Desktop\ORB_Manager.cpp	2007-04-18 09:41:06.000000000 -0400
++++ C:\ACE_wrappers\TAO\tao\Utils\ORB_Manager.cpp	2007-04-18 09:46:49.000000000 -0400
+@@ -13,0 +14 @@
++#include "tao/Utils/PolicyList_Destroyer.h"
+@@ -25 +27 @@
+-           "$Id$")
++           "$Id: ORB_Manager.cpp 77953 2007-04-08 15:51:14Z sowayaa $")
+@@ -38 +39,0 @@
+-}
+@@ -40,7 +39,0 @@
+-int
+-TAO_ORB_Manager::init (int &argc,
+-                       char **argv)
+-{
+-  return this->init (argc,
+-                     argv,
+-                     0);
+@@ -106 +99 @@
+-  CORBA::PolicyList policies (2);
++  TAO::Utils::PolicyList_Destroyer policies (2);
+@@ -129,7 +116,0 @@
+-  for (CORBA::ULong i = 0;
+-       i < policies.length ();
+-       ++i)
+-    {
+-      CORBA::Policy_ptr policy = policies[i];
+-      policy->destroy ();
+-    }
+@@ -200 +181 @@
+-  char * str =
++  CORBA::String_var str =
+@@ -204 +184 @@
+-  return str;
++  return str._retn();
+@@ -237 +217,3 @@
+-  this->poa_ = 0;
++  this->child_poa_   = PortableServer::POA::_nil();
++  this->poa_         = PortableServer::POA::_nil();
++  this->poa_manager_ = PortableServer::POAManager::_nil();
+@@ -240 +223,2 @@
+-  this->orb_ = 0;
++  this->orb_ = CORBA::ORB::_nil();
++
