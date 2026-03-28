@@ -1,0 +1,266 @@
+--- G:\Dev\C\t\ACE_wrappers\ace\Basic_Types.h	Mon Dec 13 14:23:30 2004
++++ G:\Dev\C\ACE_wrappers\ace\Basic_Types.h	Tue Mar 15 23:00:27 2005
+@@ -674,6 +674,11 @@
+ #define ACE_FLT_MAX 3.402823466e+38F
+ #define ACE_DBL_MAX 1.7976931348623158e+308
+ 
++#ifdef WIN32
++#define ACE_FILE_OFFSET_TYPE	ACE_UINT64
++#define ACE_FILE_LENGTH_TYPE	ACE_INT64
++#endif
++
+ # if defined (__ACE_INLINE__)
+ #   include "ace/Basic_Types.inl"
+ # endif /* __ACE_INLINE__ */
+--- G:\Dev\C\t\ACE_wrappers\ace\Mem_Map.cpp	Mon Dec 20 16:57:10 2004
++++ G:\Dev\C\ACE_wrappers\ace\Mem_Map.cpp	Thu Mar 17 21:54:16 2005
+@@ -97,7 +97,7 @@
+                      int prot,
+                      int share,
+                      void *addr,
+-                     off_t offset,
++                     ACE_LOFF_T offset,
+                      LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_Mem_Map::map_it");
+@@ -123,22 +123,22 @@
+   if (result == -1)
+     return -1;
+ #else
+-  long result = ACE_OS::filesize (this->handle_);
++  ACE_LOFF_T result = ACE_OS::filesize (this->handle_);
+ #endif /* CHORUS */
+ 
+   // At this point we know <result> is not negative...
+-  size_t current_file_length = static_cast<size_t> (result);
++  ACE_LOFF_T current_file_length = static_cast<ACE_LOFF_T> (result);
+ 
+   // Flag to indicate if we need to extend the back store
+   int extend_backing_store = 0;
+ 
+   // File length requested by user
+-  size_t requested_file_length = 0;
++  ACE_LOFF_T requested_file_length = 0;
+ 
+   // Check <length_request>
+   if (length_request == -1)
+     // Set length to file_request.
+-    this->length_ = current_file_length - offset;
++    this->length_ = static_cast<size_t>(current_file_length - offset);
+   else
+     {
+       // File length implicitly requested by user
+@@ -166,11 +166,11 @@
+     {
+ #if !defined (CHORUS)
+       // Remember than write increases the size by one.
+-      off_t null_byte_position;
++      ACE_LOFF_T null_byte_position;
+       if (requested_file_length > 0)
+         // This will make the file size <requested_file_length>
+         null_byte_position =
+-          static_cast<off_t> (requested_file_length - 1);
++          static_cast<ACE_LOFF_T> (requested_file_length - 1);
+       else
+         // This will make the file size 1
+         null_byte_position = 0;
+@@ -275,7 +275,7 @@
+                   int prot,
+                   int share,
+                   void *addr,
+-                  off_t offset,
++                  ACE_LOFF_T offset,
+                   LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_Mem_Map::map");
+@@ -316,7 +316,7 @@
+                           int prot,
+                           int share,
+                           void *addr,
+-                          off_t offset,
++                          ACE_LOFF_T offset,
+                           LPSECURITY_ATTRIBUTES sa)
+   : base_addr_ (MAP_FAILED),
+     length_ (0),
+@@ -347,7 +347,7 @@
+                           int prot,
+                           int share,
+                           void *addr,
+-                          off_t offset,
++                          ACE_LOFF_T offset,
+                           LPSECURITY_ATTRIBUTES sa)
+   : base_addr_ (MAP_FAILED),
+     length_ (0),
+--- G:\Dev\C\t\ACE_wrappers\ace\Mem_Map.h	Mon Dec 20 16:57:10 2004
++++ G:\Dev\C\ACE_wrappers\ace\Mem_Map.h	Tue Mar 15 23:57:34 2005
+@@ -46,11 +46,11 @@
+   /// Map a file from an open file descriptor <handle>.  This function
+   /// will lookup the length of the file if it is not given.
+   ACE_Mem_Map (ACE_HANDLE handle,
+-               int length = -1,
++               int  length = -1,
+                int prot = PROT_RDWR,
+                int share = ACE_MAP_PRIVATE,
+                void *addr = 0,
+-               off_t offset = 0,
++			   ACE_LOFF_T offset = 0,
+                LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Map a file specified by <file_name>.
+@@ -61,7 +61,7 @@
+                int prot = PROT_RDWR,
+                int share = ACE_MAP_PRIVATE,
+                void *addr = 0,
+-               off_t offset = 0,
++               ACE_LOFF_T offset = 0,
+                LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Map a file from an open file descriptor <handle>.  This function
+@@ -71,7 +71,7 @@
+            int prot = PROT_RDWR,
+            int share = ACE_MAP_PRIVATE,
+            void *addr = 0,
+-           off_t offset = 0,
++           ACE_LOFF_T offset = 0,
+            LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Remap the file associated with <handle_>.
+@@ -79,7 +79,7 @@
+            int prot = PROT_RDWR,
+            int share = ACE_MAP_PRIVATE,
+            void *addr = 0,
+-           off_t offset = 0,
++           ACE_LOFF_T offset = 0,
+            LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Map a file specified by <filename>.
+@@ -90,7 +90,7 @@
+            int prot = PROT_RDWR,
+            int share = ACE_MAP_PRIVATE,
+            void *addr = 0,
+-           off_t offset = 0,
++           ACE_LOFF_T offset = 0,
+            LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Destructor.
+@@ -204,7 +204,7 @@
+               int prot = PROT_RDWR,
+               int share = MAP_SHARED,
+               void *addr = 0,
+-              off_t offset = 0,
++              ACE_LOFF_T offset = 0,
+               LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   // = Disallow copying and assignment.
+--- G:\Dev\C\t\ACE_wrappers\ace\Mem_Map.inl	Mon Dec 20 16:57:10 2004
++++ G:\Dev\C\ACE_wrappers\ace\Mem_Map.inl	Tue Mar 15 23:57:34 2005
+@@ -25,7 +25,7 @@
+                   int prot,
+                   int share,
+                   void *addr,
+-                  off_t offset,
++                  ACE_LOFF_T offset,
+                   LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_Mem_Map::map");
+@@ -39,7 +39,7 @@
+                   int prot,
+                   int share,
+                   void *addr,
+-                  off_t offset,
++                  ACE_LOFF_T offset,
+                   LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_Mem_Map::map");
+--- G:\Dev\C\t\ACE_wrappers\ace\OS_NS_sys_mman.h	Thu Sep 16 10:18:32 2004
++++ G:\Dev\C\ACE_wrappers\ace\OS_NS_sys_mman.h	Tue Mar 15 23:57:34 2005
+@@ -49,7 +49,7 @@
+               int prot,
+               int flags,
+               ACE_HANDLE handle,
+-              off_t off = 0,
++              ACE_LOFF_T off = 0,
+               ACE_HANDLE *file_mapping = 0,
+               LPSECURITY_ATTRIBUTES sa = 0,
+               const ACE_TCHAR *file_mapping_name = 0);
+--- G:\Dev\C\t\ACE_wrappers\ace\OS_NS_sys_mman.inl	Mon Dec 20 16:57:10 2004
++++ G:\Dev\C\ACE_wrappers\ace\OS_NS_sys_mman.inl	Tue Mar 15 23:57:34 2005
+@@ -38,7 +38,7 @@
+               int prot,
+               int flags,
+               ACE_HANDLE file_handle,
+-              off_t off,
++              ACE_LOFF_T off,
+               ACE_HANDLE *file_mapping,
+               LPSECURITY_ATTRIBUTES sa,
+               const ACE_TCHAR *file_mapping_name)
+@@ -139,14 +139,14 @@
+ #  if !defined (ACE_HAS_WINCE)
+   void *addr_mapping = ::MapViewOfFileEx (*file_mapping,
+                                           nt_flags,
+-                                          0,
++                                          (DWORD)((off>>32)&0xFFFFFFFF),
+                                           off,
+                                           len,
+                                           addr);
+ #  else
+   void *addr_mapping = ::MapViewOfFile (*file_mapping,
+                                         nt_flags,
+-                                        0,
++                                        (DWORD)((off>>32)&0xFFFFFFFF),
+                                         off,
+                                         len);
+ #  endif /* ! ACE_HAS_WINCE */
+--- G:\Dev\C\t\ACE_wrappers\ace\OS_NS_sys_stat.h	Tue Aug 24 20:13:30 2004
++++ G:\Dev\C\ACE_wrappers\ace\OS_NS_sys_stat.h	Thu Mar 17 21:32:10 2005
+@@ -50,10 +50,10 @@
+ 
+   // non-standard
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  long filesize (ACE_HANDLE handle);
++  ACE_LOFF_T filesize (ACE_HANDLE handle);  
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  long filesize (const ACE_TCHAR *handle);
++  ACE_LOFF_T filesize (const ACE_TCHAR *handle);
+ 
+ 
+   //@}
+--- G:\Dev\C\t\ACE_wrappers\ace\OS_NS_sys_stat.inl	Tue Jan 04 06:30:02 2005
++++ G:\Dev\C\ACE_wrappers\ace\OS_NS_sys_stat.inl	Thu Mar 17 21:32:10 2005
+@@ -111,19 +111,21 @@
+   // This function returns the number of bytes in the file referenced by
+   // FD.
+ 
+-  ACE_INLINE long
++   ACE_INLINE ACE_LOFF_T
+   filesize (ACE_HANDLE handle)
+   {
+-    ACE_OS_TRACE ("ACE_OS::filesize");
++    ACE_OS_TRACE ("ACE_OS::filesize_ex");
+ #if defined (ACE_WIN32)
+-    ACE_WIN32CALL_RETURN (::GetFileSize (handle, 0), long, -1);
++   LARGE_INTEGER res;
++   ::GetFileSizeEx (handle, &res);
++   return static_cast<ACE_LOFF_T>(res.QuadPart);
+ #else /* !ACE_WIN32 */
+     ACE_stat sb;
+-    return ACE_OS::fstat (handle, &sb) == -1 ? -1 : (long) sb.st_size;
++    return ACE_OS::fstat (handle, &sb) == -1 ? -1 : (ACE_LOFF_T) sb.st_size;
+ #endif /* ACE_WIN32 */
+   }
+ 
+-  ACE_INLINE long
++  ACE_INLINE ACE_LOFF_T
+   filesize (const ACE_TCHAR *filename)
+   {
+     ACE_OS_TRACE ("ACE_OS::filesize");
+@@ -131,7 +133,7 @@
+     ACE_HANDLE h = ACE_OS::open (filename, O_RDONLY);
+     if (h != ACE_INVALID_HANDLE)
+       {
+-        long size = ACE_OS::filesize (h);
++        ACE_LOFF_T size = ACE_OS::filesize (h);
+         ACE_OS::close (h);
+         return size;
+       }
