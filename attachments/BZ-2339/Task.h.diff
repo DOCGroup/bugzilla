@@ -1,0 +1,11 @@
+--- Task.h@@/main/6	2004-04-12 11:23:34.000000000 -0400
++++ Task.h	2005-12-20 15:42:08.000000000 -0500
+@@ -267,7 +267,7 @@
+ #if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0)
+   /// Protect the state of a Task during concurrent operations, but
+   /// only if we're configured as MT safe...
+-  ACE_Thread_Mutex lock_;
++  ACE_Recursive_Thread_Mutex lock_;
+ #endif /* ACE_MT_SAFE */
+ 
+ private:
