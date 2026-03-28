@@ -1,0 +1,440 @@
+Index: UIPMC_Acceptor.cpp
+===================================================================
+--- UIPMC_Acceptor.cpp	(revision 78280)
++++ UIPMC_Acceptor.cpp	(working copy)
+@@ -118,7 +118,56 @@
+   const char *specified_hostname = 0;
+   char tmp_host[MAXHOSTNAMELEN + 1];
+ 
++#if defined (ACE_HAS_IPV6)
++  // IPv6 numeric address in host string?
++  bool ipv6_in_host = false;
++
++  // Check if this is a (possibly) IPv6 supporting profile containing a
++  // numeric IPv6 address representation.
++  if ((this->version_.major > TAO_MIN_IPV6_IIOP_MAJOR ||
++        this->version_.minor >= TAO_MIN_IPV6_IIOP_MINOR) &&
++      address[0] == '[')
++    {
++      // In this case we have to find the end of the numeric address and
++      // start looking for the port separator from there.
++      const char *cp_pos = ACE_OS::strchr(address, ']');
++      if (cp_pos == 0)
++        {
++          // No valid IPv6 address specified.
++          ACE_ERROR_RETURN ((LM_ERROR,
++                             ACE_TEXT ("TAO (%P|%t) - ")
++                             ACE_TEXT ("UIPMC_Acceptor::open, ")
++                             ACE_TEXT ("Invalid IPv6 decimal address specified\n\n")),
++                            -1);
++        }
++      else
++        {
++          if (cp_pos[1] == ':')    // Look for a port
++            port_separator_loc = cp_pos + 1;
++          else
++            port_separator_loc = 0;
++          // Extract out just the host part of the address.
++          const size_t len = cp_pos - (address + 1);
++          ACE_OS::memcpy (tmp_host, address + 1, len);
++          tmp_host[len] = '\0';
++          ipv6_in_host = true; // host string contains full IPv6 numeric address
++        }
++    }
++#endif /* ACE_HAS_IPV6 */
++
+   // Both host and port have to be specified.
++#if defined (ACE_HAS_IPV6)
++  if (ipv6_in_host)
++    {
++      u_short port =
++        static_cast<u_short> (ACE_OS::atoi (port_separator_loc + sizeof (':')));
++
++      if (addr.set (port, tmp_host) != 0)
++        return -1;
++    }
++  else
++    {
++#endif /* ACE_HAS_IPV6 */
+   if (addr.set (address) != 0)
+     return -1;
+ 
+@@ -126,9 +175,26 @@
+   size_t len = port_separator_loc - address;
+   ACE_OS::memcpy (tmp_host, address, len);
+   tmp_host[len] = '\0';
++#if defined (ACE_HAS_IPV6)
++    }
++#endif /* ACE_HAS_IPV6 */
+ 
+   specified_hostname = tmp_host;
+ 
++#if defined (ACE_HAS_IPV6)
++  // Check for violation of ORBConnectIPV6Only option
++  if (this->orb_core_->orb_params ()->connect_ipv6_only () &&
++      addr.is_ipv4_mapped_ipv6 ())
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("TAO (%P|%t) - ")
++                         ACE_TEXT ("UIPMC_Acceptor::open, ")
++                         ACE_TEXT ("non-IPv6 endpoints not allowed when ")
++                         ACE_TEXT ("connect_ipv6_only is set\n\n")),
++                        -1);
++    }
++#endif /* ACE_HAS_IPV6 */
++
+   this->endpoint_count_ = 1;  // Only one hostname to store
+ 
+   ACE_NEW_RETURN (this->addrs_,
+Index: UIPMC_Connection_Handler.h
+===================================================================
+--- UIPMC_Connection_Handler.h	(revision 78280)
++++ UIPMC_Connection_Handler.h	(working copy)
+@@ -93,6 +93,10 @@
+   /// Add ourselves to Cache.
+   int add_transport_to_cache (void);
+ 
++  /// Set Diff-Serv codepoint on outgoing packets.
++  int set_dscp_codepoint (CORBA::Boolean set_network_priority);
++  int set_dscp_codepoint (CORBA::Long dscp_codepoint);
++
+   // UIPMC Additions - Begin
+   ACE_HANDLE get_handle (void) const;
+ 
+@@ -141,6 +145,14 @@
+   virtual int release_os_resources (void);
+   //@}
+ 
++  // helper function used by the set_dscp_codepoint () methods to
++  // set the TOS field in the IP packets.
++  int set_tos (int tos);
++
++private:
++
++  /// Stores the type of service value.
++  int dscp_codepoint_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: UIPMC_Connector.cpp
+===================================================================
+--- UIPMC_Connector.cpp	(revision 78280)
++++ UIPMC_Connector.cpp	(working copy)
+@@ -64,7 +64,12 @@
+   // Verify that the remote ACE_INET_Addr was initialized properly.
+   // Failure can occur if hostname lookup failed when initializing the
+   // remote ACE_INET_Addr.
++#if defined (ACE_HAS_IPV6)
++  if (remote_address.get_type () != AF_INET &&
++      remote_address.get_type () != AF_INET6)
++#else /* ACE_HAS_IPV6 */
+   if (remote_address.get_type () != AF_INET)
++#endif /* !ACE_HAS_IPV6 */
+     {
+       if (TAO_debug_level > 0)
+         {
+@@ -95,6 +100,28 @@
+   const ACE_INET_Addr &remote_address =
+     uipmc_endpoint->object_addr ();
+ 
++#if defined (ACE_HAS_IPV6) && !defined (ACE_HAS_IPV6_V6ONLY)
++  // Check if we need to invalidate accepted connections
++  // from IPv4 mapped IPv6 addresses
++  if (this->orb_core ()->orb_params ()->connect_ipv6_only () &&
++      remote_address.is_ipv4_mapped_ipv6 ())
++    {
++      if (TAO_debug_level > 0)
++        {
++          ACE_TCHAR remote_as_string[MAXHOSTNAMELEN + 16];
++
++          (void) remote_address.addr_to_string (remote_as_string,
++                                                sizeof remote_as_string);
++
++          ACE_ERROR ((LM_ERROR,
++                      ACE_TEXT("TAO (%P|%t) - UIPMC_Connection_Handler::open, ")
++                      ACE_TEXT("invalid connection to IPv4 mapped IPv6 interface <%s>!\n"),
++                      remote_as_string));
++        }
++      return 0;
++    }
++#endif /* ACE_HAS_IPV6 && ACE_HAS_IPV6_V6ONLY */
++
+   TAO_UIPMC_Connection_Handler *svc_handler = 0;
+ 
+   ACE_NEW_RETURN (svc_handler,
+@@ -105,6 +132,12 @@
+   const ACE_UINT32 ia_any = INADDR_ANY;
+   ACE_INET_Addr local_addr(port, ia_any);
+ 
++#if defined (ACE_HAS_IPV6)
++  if (remote_address.get_type () == AF_INET6)
++    local_addr.set (port,
++                    ACE_IPV6_ANY);
++#endif /* ACE_HAS_IPV6 */
++
+   svc_handler->local_addr (local_addr);
+   svc_handler->addr (remote_address);
+ 
+Index: UIPMC_Connection_Handler.cpp
+===================================================================
+--- UIPMC_Connection_Handler.cpp	(revision 78280)
++++ UIPMC_Connection_Handler.cpp	(working copy)
+@@ -17,6 +17,7 @@
+ #include "tao/Thread_Lane_Resources.h"
+ #include "tao/Base_Transport_Property.h"
+ #include "tao/Resume_Handle.h"
++#include "tao/Protocols_Hooks.h"
+ 
+ 
+ ACE_RCSID(PortableGroup,
+@@ -30,7 +31,8 @@
+     TAO_Connection_Handler (0),
+     udp_socket_ (ACE_sap_any_cast (ACE_INET_Addr &)),
+     mcast_socket_ (),
+-    using_mcast_ (0)
++    using_mcast_ (0),
++    dscp_codepoint_ (IPDSFIELD_DSCP_DEFAULT << 2)
+ {
+   // This constructor should *never* get called, it is just here to
+   // make the compiler happy: the default implementation of the
+@@ -46,7 +48,8 @@
+     TAO_Connection_Handler (orb_core),
+     udp_socket_ (ACE_sap_any_cast (ACE_INET_Addr &)),
+     mcast_socket_ (),
+-    using_mcast_ (0)
++    using_mcast_ (0),
++    dscp_codepoint_ (IPDSFIELD_DSCP_DEFAULT << 2)
+ {
+   TAO_UIPMC_Transport* specific_transport = 0;
+   ACE_NEW(specific_transport,
+@@ -286,4 +289,98 @@
+                                                this->transport ());
+ }
+ 
++int
++TAO_UIPMC_Connection_Handler::set_tos (int tos)
++{
++  // Since only client can send data over MIOP
++  // then dscp is only applicable to client socket.
++  if (tos != this->dscp_codepoint_)
++    {
++      int result = 0;
++#if defined (ACE_HAS_IPV6)
++      ACE_INET_Addr local_addr;
++      if (!this->using_mcast_ && this->udp_socket_.get_local_addr (local_addr) == -1)
++        return -1;
++      else if (local_addr.get_type () == AF_INET6)
++# if !defined (IPV6_TCLASS)
++      // IPv6 defines option IPV6_TCLASS for specifying traffic class/priority
++      // but not many implementations yet (very new;-).
++        {
++          if (TAO_debug_level)
++            {
++              ACE_DEBUG ((LM_DEBUG,
++                          "TAO (%P|%t) - UIPMC_Connection_Handler::"
++                          "set_dscp_codepoint -> IPV6_TCLASS not supported yet\n"));
++            }
++          return 0;
++        }
++# else /* !IPV6_TCLASS */
++        result = this->udp_socket_.set_option (IPPROTO_IPV6,
++                                               IPV6_TCLASS,
++                                               (int *) &tos,
++                                               (int) sizeof (tos));
++      else
++# endif /* IPV6_TCLASS */
++#endif /* ACE_HAS_IPV6 */
++      result = this->udp_socket_.set_option (IPPROTO_IP,
++                                             IP_TOS,
++                                             (int *) &tos,
++                                             (int) sizeof (tos));
++
++      if (TAO_debug_level)
++        {
++          ACE_DEBUG ((LM_DEBUG,
++                      "TAO (%P|%t) - UIPMC_Connection_Handler::"
++                      "set_dscp_codepoint -> dscp: %x; result: %d; %s\n",
++                      tos,
++                      result,
++                      result == -1 ? "try running as superuser" : ""));
++        }
++
++      // On successful setting of TOS field.
++      if (result == 0)
++        this->dscp_codepoint_ = tos;
++
++    }
++
++  return 0;
++}
++
++int
++TAO_UIPMC_Connection_Handler::set_dscp_codepoint (CORBA::Long dscp_codepoint)
++{
++  int tos = IPDSFIELD_DSCP_DEFAULT << 2;
++
++  CORBA::Long codepoint = dscp_codepoint;
++
++  tos = static_cast<int> (codepoint) << 2;
++
++  this->set_tos (tos);
++
++  return 0;
++}
++
++int
++TAO_UIPMC_Connection_Handler::set_dscp_codepoint (CORBA::Boolean set_network_priority)
++{
++  int tos = IPDSFIELD_DSCP_DEFAULT << 2;
++
++  if (set_network_priority)
++    {
++      TAO_Protocols_Hooks *tph =
++        this->orb_core ()->get_protocols_hooks ();
++
++      if (tph != 0 )
++        {
++          CORBA::Long codepoint =
++            tph->get_dscp_codepoint ();
++
++          tos = static_cast<int> (codepoint) << 2;
++          this->set_tos (tos);
++        }
++    }
++
++  return 0;
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: UIPMC_Endpoint.cpp
+===================================================================
+--- UIPMC_Endpoint.cpp	(revision 78280)
++++ UIPMC_Endpoint.cpp	(working copy)
+@@ -80,9 +80,21 @@
+     + 5                          // max port
+     + sizeof ('\0');
+ 
++#if defined (ACE_HAS_IPV6)
++  if (this->object_addr_.get_type () == AF_INET6)
++    actual_len += 2; // '[' + ']'
++#endif /* ACE_HAS_IPV6 */
++
+   if (length < actual_len)
+     return -1;
+ 
++#if defined (ACE_HAS_IPV6)
++  if (this->object_addr_.get_type () == AF_INET6)
++    ACE_OS::sprintf (buffer, "[%s]:%d",
++                     this->object_addr_.get_host_addr (),
++                     this->port_);
++  else
++#endif /* ACE_HAS_IPV6 */
+   ACE_OS::sprintf (buffer, "%s:%d",
+                    this->object_addr_.get_host_addr (),
+                    this->port_);
+Index: UIPMC_Profile.cpp
+===================================================================
+--- UIPMC_Profile.cpp	(revision 78280)
++++ UIPMC_Profile.cpp	(working copy)
+@@ -376,11 +376,56 @@
+         CORBA::COMPLETED_NO);
+     }
+ 
+-  for (str_check = string; str_check < pos; str_check++)
++  ACE_CString mcast_addr;
++
++#if defined (ACE_HAS_IPV6)
++  // Check if this is a (possibly) IPv6 supporting profile containing a
++  // decimal IPv6 address representation.
++  if ((this->version ().major > TAO_MIN_IPV6_IIOP_MAJOR ||
++        this->version ().minor >= TAO_MIN_IPV6_IIOP_MINOR) &&
++      string[0] == '[')
+     {
+-      if (!isdigit (str_check[0]) && str_check[0] != '.')
++      // In this case we have to find the end of the numeric address and
++      // start looking for the port separator from there.
++      pos = ACE_OS::strchr (string, ']');
++      if (pos == 0)
+         {
+-          // Throw an exception if it's not a proper IPv4 address
++          // No valid IPv6 address specified.
++          if (TAO_debug_level > 0)
++            {
++              ACE_ERROR ((LM_ERROR,
++                          ACE_TEXT ("\nTAO (%P|%t) - UIPMC_Profile: ")
++                          ACE_TEXT ("Invalid IPv6 decimal address specified.\n")));
++            }
++
++          ACE_THROW (CORBA::INV_OBJREF (
++                       CORBA::SystemException::_tao_minor_code (
++                         0,
++                         EINVAL),
++                       CORBA::COMPLETED_NO));
++        }
++      else
++        {
++          ++string;
++          mcast_addr = ACE_CString (string, pos - string);
++          string = pos + 2;
++        }
++    }
++  else
++    {
++#endif /* ACE_HAS_IPV6 */
++  mcast_addr = ACE_CString (string, pos - string);
++  string = pos + 1;
++#if defined (ACE_HAS_IPV6)
++    }
++#endif /* ACE_HAS_IPV6 */
++
++  for (str_check = mcast_addr.c_str (); str_check[0] != '\0'; str_check++)
++    {
++      if (!isdigit (str_check[0]) && !isxdigit (str_check[0]) &&
++          str_check[0] != ':' && str_check[0] != '.')
++        {
++          // Throw an exception if it's not a proper IPv4/IPv6 address
+           throw CORBA::INV_OBJREF (
+             CORBA::SystemException::_tao_minor_code (
+               TAO::VMCID,
+@@ -389,9 +434,6 @@
+         }
+     }
+ 
+-  ACE_CString mcast_addr (string, pos - string);
+-  string = pos + 1;
+-
+   // Parse the multicast port number.
+ 
+   // First check that there's something left in the string.
+@@ -499,9 +541,13 @@
+                    1 /* `-' character */ +
+                    10 /* group reference version */ +
+                    1 /* `/' character */ +
+-                   15 /* IPv4 address */ +
++                   39 /* IPv4/IPv6 address */ +
+                    1 /* colon separator */ +
+                    5 /* port number */);
++#if defined (ACE_HAS_IPV6)
++  if (this->endpoint_.object_addr ().get_type () == AF_INET6)
++    buflen += 2; // room for '[' and ']'
++#endif /* ACE_HAS_IPV6 */
+ 
+   static const char digits [] = "0123456789";
+ 
+@@ -524,6 +570,16 @@
+                        this->ref_version_);
+     }
+ 
++#if defined (ACE_HAS_IPV6)
++  if (this->endpoint_.object_addr ().get_type () == AF_INET6)
++    {
++      ACE_OS::sprintf (&buf[ACE_OS::strlen (buf)],
++                       "/[%s]:%d",
++                       this->endpoint_.get_host_addr (),
++                       this->endpoint_.port ());
++    }
++  else
++#endif /* ACE_HAS_IPV6 */
+   ACE_OS::sprintf (&buf[ACE_OS::strlen (buf)],
+                    "/%s:%d",
+                    this->endpoint_.get_host_addr (),
