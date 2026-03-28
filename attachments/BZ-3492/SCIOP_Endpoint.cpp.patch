@@ -1,0 +1,10 @@
+--- ./TAO/tao/Strategies/SCIOP_Endpoint.cpp.orig	Tue Nov  4 10:37:14 2008
++++ ./TAO/tao/Strategies/SCIOP_Endpoint.cpp	Tue Nov  4 10:37:38 2008
+@@ -12,6 +12,7 @@
+ #include "ace/Synch.h"
+ #include "ace/OS_NS_stdio.h"
+ #include "tao/ORB_Core.h"
++#include <netdb.h>
+ 
+ ACE_RCSID (Strategies,
+            SCIOP_Endpoint,
