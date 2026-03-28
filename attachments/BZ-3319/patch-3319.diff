@@ -1,0 +1,211 @@
+Index: ace/Service_Gestalt.cpp
+===================================================================
+--- ace/Service_Gestalt.cpp	(revision 81637)
++++ ace/Service_Gestalt.cpp	(working copy)
+@@ -1022,7 +1022,7 @@
+ int
+ ACE_Service_Gestalt::open_i (const ACE_TCHAR /*program_name*/[],
+                              const ACE_TCHAR* /*logger_key*/,
+-                             bool /*ignore_static_svcs*/,
++                             bool ignore_static_svcs,
+                              bool ignore_default_svc_conf_file,
+                              bool ignore_debug_flag)
+ {
+@@ -1030,6 +1030,8 @@
+   int result = 0;
+   ACE_Log_Msg *log_msg = ACE_LOG_MSG;
+ 
++  no_static_svcs_ = ignore_static_svcs;
++
+   // Record the current log setting upon entering this thread.
+   u_long old_process_mask = log_msg->priority_mask
+     (ACE_Log_Msg::PROCESS);
+Index: ace/Service_Config.h
+===================================================================
+--- ace/Service_Config.h	(revision 81637)
++++ ace/Service_Config.h	(working copy)
+@@ -612,6 +612,9 @@
+   /// Handles the reconfiguration signals.
+   static ACE_Sig_Adapter *signal_handler_;
+ 
++  /// Have we called ACE_Service_Config::open() yet?
++  static bool is_opened_;
++
+   /// Pointer to the Singleton (ACE_Cleanup) Gestalt instance.
+   /// There is thread-specific global instance pointer, which is used to
+   /// temporarily change which Gestalt instance is used for static service
+Index: ace/Service_Config.cpp
+===================================================================
+--- ace/Service_Config.cpp	(revision 81637)
++++ ace/Service_Config.cpp	(working copy)
+@@ -153,10 +153,13 @@
+ /// Shall we become a daemon process?
+ bool ACE_Service_Config::be_a_daemon_ = false;
+ 
+-// Number of the signal used to trigger reconfiguration.
++/// Number of the signal used to trigger reconfiguration.
+ int ACE_Service_Config::signum_ = SIGHUP;
+ 
++/// Have we called ACE_Service_Config::open() yet?
++bool ACE_Service_Config::is_opened_ = false;
+ 
++
+ void
+ ACE_Service_Config::dump (void) const
+ {
+@@ -240,34 +243,23 @@
+                             bool ignore_default_svc_conf_file,
+                             bool ignore_debug_flag)
+ {
+-  int result = 0;
+   ACE_TRACE ("ACE_Service_Config::open_i");
+   ACE_Log_Msg *log_msg = ACE_LOG_MSG;
+ 
+   if (ACE::debug ())
+     ACE_DEBUG ((LM_DEBUG,
+-                ACE_TEXT ("ACE (%P|%t) SC::open_i - this=%@, opened=%d, ")
+-                ACE_TEXT ("loadstatics=%d\n"),
+-                this, instance_->is_opened_, instance_->no_static_svcs_));
++                ACE_TEXT ("ACE (%P|%t) SC::open_i - this=%@, opened=%d\n"),
++                this, is_opened_));
+ 
+-  // Guard against reentrant processing. For example,
+-  // if the singleton gestalt (ubergestalt) was already open,
+-  // do not open it again...
+-  // The base class open_i increments this and we are
+-  // forwarding to it, so we don't have to increment here.
+-  if (instance_->is_opened_ != 0)
+-    return instance_->open_i (program_name,
+-                              logger_key,
+-                              ignore_static_svcs,
+-                              ignore_default_svc_conf_file,
+-                              ignore_debug_flag);
++  // Guard against reentrant processing. 
++  if (ACE_Service_Config::is_opened_)
++    return 0;
+ 
++  ACE_Service_Config::is_opened_ = true;
++
+   // Check for things we need to do on a per-process basis and which
+   // may not be safe, or wise to do an a per instance basis
+ 
+-  // Override any defaults, if required
+-  instance_->no_static_svcs_ = ignore_static_svcs;
+-
+   // Become a daemon before doing anything else.
+   if (this->be_a_daemon_)
+     ACE::daemonize ();
+@@ -299,54 +291,45 @@
+     // Only use the static <logger_key_> if the caller doesn't
+     // override it in the parameter list or if the key supplied is
+     // equal to the default static logger key.
+-    key = instance_->logger_key_;
++    key = ACE_Service_Config::current()->logger_key_;
+   else
+     ACE_SET_BITS (flags, ACE_Log_Msg::LOGGER);
+ 
+   if (log_msg->open (program_name,
+                      flags,
+                      key) == -1)
+-    result = -1;
+-  else
+-    {
+-      if (ACE::debug ())
+-        ACE_DEBUG ((LM_STARTUP,
+-                    ACE_TEXT ("starting up daemon %n\n")));
++    return -1;
+ 
+-      // Initialize the Service Repository (this will still work if
+-      // user forgets to define an object of type ACE_Service_Config).
+-      ACE_Service_Repository::instance (ACE_Service_Gestalt::MAX_SERVICES);
++    if (ACE::debug ())
++      ACE_DEBUG ((LM_STARTUP,
++                  ACE_TEXT ("starting up daemon %n\n")));
+ 
+-      // Initialize the ACE_Reactor (the ACE_Reactor should be the
+-      // same size as the ACE_Service_Repository).
+-      ACE_Reactor::instance ();
++    // Initialize the Service Repository (this will still work if
++    // user forgets to define an object of type ACE_Service_Config).
++    ACE_Service_Repository::instance (ACE_Service_Gestalt::MAX_SERVICES);
+ 
+-      // There's no point in dealing with this on NT since it doesn't
+-      // really support signals very well...
++    // Initialize the ACE_Reactor (the ACE_Reactor should be the
++    // same size as the ACE_Service_Repository).
++    ACE_Reactor::instance ();
++
++    // There's no point in dealing with this on NT since it doesn't
++    // really support signals very well...
+ #if !defined (ACE_LACKS_UNIX_SIGNALS)
+-      // Only attempt to register a signal handler for positive
+-      // signal numbers.
+-      if (ACE_Service_Config::signum_ > 0)
+-        {
+-          ACE_Sig_Set ss;
+-          ss.sig_add (ACE_Service_Config::signum_);
+-          if ((ACE_Reactor::instance () != 0) &&
+-              (ACE_Reactor::instance ()->register_handler
+-               (ss, ACE_Service_Config::signal_handler_) == -1))
+-            ACE_ERROR ((LM_ERROR,
+-                        ACE_TEXT ("can't register signal handler\n")));
+-        }
++    // Only attempt to register a signal handler for positive
++    // signal numbers.
++    if (ACE_Service_Config::signum_ > 0)
++      {
++        ACE_Sig_Set ss;
++        ss.sig_add (ACE_Service_Config::signum_);
++        if ((ACE_Reactor::instance () != 0) &&
++            (ACE_Reactor::instance ()->register_handler
++             (ss, ACE_Service_Config::signal_handler_) == -1))
++          ACE_ERROR ((LM_ERROR,
++                      ACE_TEXT ("can't register signal handler\n")));
++      }
+ #endif /* ACE_LACKS_UNIX_SIGNALS */
+-    }
+ 
+-  if (result == -1)
+-    return -1;
+-
+-  return instance_->open_i (program_name,
+-                            logger_key,
+-                            ignore_static_svcs,
+-                            ignore_default_svc_conf_file,
+-                            ignore_debug_flag);
++    return 0;
+ }
+ 
+ /// Return the global configuration instance. Always returns the same
+Index: ace/Service_Config.inl
+===================================================================
+--- ace/Service_Config.inl	(revision 81637)
++++ ace/Service_Config.inl	(working copy)
+@@ -16,6 +16,13 @@
+                           bool ignore_debug_flag)
+ {
+   ACE_TRACE ("ACE_Service_Config::open");
++  if (singleton()->open_i (program_name, 
++                              logger_key, 
++                              ignore_static_svcs,
++                              ignore_default_svc_conf,
++                              ignore_debug_flag) == -1)
++      return -1;
++
+   return ACE_Service_Config::current()->open (program_name,
+                                               logger_key,
+                                               ignore_static_svcs,
+@@ -33,6 +40,13 @@
+                           bool ignore_debug_flag)
+ {
+   ACE_TRACE ("ACE_Service_Config::open");
++  if (singleton()->open_i (argv[0], 
++                           logger_key, 
++                           ignore_static_svcs,
++                           ignore_default_svc_conf,
++                           ignore_debug_flag) == -1)
++      return -1;
++
+   return ACE_Service_Config::current()->open (argc,
+                                               argv,
+                                               logger_key,
