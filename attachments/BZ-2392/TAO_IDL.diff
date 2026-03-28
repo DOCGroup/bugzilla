@@ -1,0 +1,610 @@
+Index: ChangeLog
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/ChangeLog,v
+retrieving revision 1.7507
+diff -u -r1.7507 ChangeLog
+--- ChangeLog	2 Feb 2006 21:14:42 -0000	1.7507
++++ ChangeLog	2 Feb 2006 22:59:59 -0000
+@@ -1,3 +1,20 @@
++Thu Feb  2 14:54:51 Pacific Standard Time 2006  Ossama Othman  <ossama_othman at symantec dot com>
++
++        * be/be_visitor_valuebox/valuebox_ci.cpp:
++        * be/be_visitor_valuebox/valuebox_cs.cpp:
++        * be_include/be_visitor_valuebox/valuebox_ci.h:
++        * be_include/be_visitor_valuebox/valuebox_cs.h:
++
++          Moved inlined virtual functions out of line.  The TAO_IDL
++          valuebox code previously generated inlined virtual functions,
++          including a virtual destructor, which can cause RTTI problems
++          when attempting to downcast a valuebox object found in a shared
++          library that was compiled with g++ 4.0's
++          "-fvisibility-inlines-hidden" command line option.  The virtual
++          functions marked as "inline" (as opposed to actually inlined)
++          end up being left out of the export table, which breaks RTTI for
++          valueboxes in the shared library.
++
+ Thu Feb  2 13:08:31 Pacific Standard Time 2006  Ossama Othman  <ossama_othman at symantec dot com>
+ 
+         * TAO_IDL/be/be_visitor_valuetype/any_op_ch.cpp:
+Index: TAO_IDL/be/be_visitor_valuebox/valuebox_ci.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_visitor_valuebox/valuebox_ci.cpp,v
+retrieving revision 1.9
+diff -u -r1.9 valuebox_ci.cpp
+--- TAO_IDL/be/be_visitor_valuebox/valuebox_ci.cpp	23 Nov 2005 14:07:15 -0000	1.9
++++ TAO_IDL/be/be_visitor_valuebox/valuebox_ci.cpp	2 Feb 2006 23:00:00 -0000
+@@ -1,5 +1,5 @@
+ //
+-// $Id: valuebox_ci.cpp,v 1.9 2005/11/23 14:07:15 jwillemsen Exp $
++// $Id: valuebox_ci.cpp,v 1.1.1.1 2005/12/06 23:30:25 othman Exp $
+ //
+ 
+ // ============================================================================
+@@ -65,16 +65,6 @@
+       << "return \"" << node->repoID () << "\";" << be_uidt_nl
+       << "}" << be_nl << be_nl;
+ 
+-  // _tao_unmarshal_v method.  Generated because ValueBase interface
+-  // requires it.  But there is nothing for it to do in the valuebox
+-  // case.
+-  *os << "ACE_INLINE ::CORBA::Boolean " << be_nl
+-      << node->name ()
+-      << "::_tao_unmarshal_v (TAO_InputCDR &)" << be_nl
+-      << "{" << be_idt_nl
+-      << "return true;" << be_uidt_nl
+-      << "}" << be_nl << be_nl;
+-
+   // Indicate that code is already generated for this node.
+   node->cli_inline_gen (I_TRUE);
+ 
+@@ -84,7 +74,6 @@
+ int
+ be_visitor_valuebox_ci::visit_array (be_array *node)
+ {
+-
+   TAO_OutStream *os = this->ctx_->stream ();
+ 
+   // Retrieve the node being visited by this be_visitor_valuebox_ch.
+@@ -191,30 +180,19 @@
+       << "return this->_pd_value.out ();" << be_uidt_nl
+       << "}" << be_nl << be_nl;
+ 
+-  // _tao_marshal_v method
+-  *os << "ACE_INLINE ::CORBA::Boolean " << be_nl
+-      << vb_node->name ()
+-      << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
+-      << "{" << be_idt_nl
+-      << node->name () << "_forany temp (this->_pd_value.ptr ());" << be_nl
+-      << "return (strm << temp);" << be_uidt_nl
+-      << "}" << be_nl << be_nl;
+-
+   return 0;
+ }
+ 
+ int
+ be_visitor_valuebox_ci::visit_enum (be_enum *node)
+ {
+-  return this->emit_for_predef_enum (node, "", false,
+-                                     "this->_pd_value");
++  return this->emit_for_predef_enum (node, "", false);
+ }
+ 
+ int
+ be_visitor_valuebox_ci::visit_interface (be_interface *node)
+ {
+-  return this->emit_for_predef_enum (node, "_ptr", false,
+-                                     "this->_pd_value");
++  return this->emit_for_predef_enum (node, "_ptr", false);
+ }
+ 
+ int
+@@ -248,8 +226,10 @@
+ 
+     default:
+       marshal_arg = "this->_pd_value";
++      break;
+     }
+-  return this->emit_for_predef_enum (node, "", is_any, marshal_arg);
++
++  return this->emit_for_predef_enum (node, "", is_any);
+ }
+ 
+ int
+@@ -264,7 +244,6 @@
+       << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
+ 
+   this->emit_default_constructor_alloc (node);
+-  this->emit_destructor ();
+   this->emit_constructor_one_arg_alloc (node);
+   this->emit_copy_constructor_alloc (node);
+   this->emit_assignment_alloc (node);
+@@ -292,14 +271,6 @@
+       << "this->_pd_value->length (length);" << be_uidt_nl
+       << "}" << be_nl << be_nl;
+ 
+-  // _tao_marshal_v method
+-  *os << "ACE_INLINE ::CORBA::Boolean " << be_nl
+-      << vb_node->name ()
+-      << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
+-      << "{" << be_idt_nl
+-      << "return (strm << this->_pd_value.in ());" << be_uidt_nl
+-      << "}" << be_nl << be_nl;
+-
+   return 0;
+ }
+ 
+@@ -335,7 +306,6 @@
+       << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
+ 
+   this->emit_default_constructor ();
+-  this->emit_destructor ();
+   this->emit_constructor_one_arg (node, "");
+   this->emit_copy_constructor ();
+   this->emit_assignment (node, "");
+@@ -440,15 +410,6 @@
+       << "return this->_pd_value[slot];" << be_uidt_nl
+       << "}" << be_nl << be_nl;
+ 
+-
+-  // _tao_marshal_v method
+-  *os << "ACE_INLINE ::CORBA::Boolean " << be_nl
+-      << vb_node->name ()
+-      << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
+-      << "{" << be_idt_nl
+-      << "return (strm << this->_pd_value);" << be_uidt_nl
+-      << "}" << be_nl << be_nl;
+-
+   return 0;
+ }
+ 
+@@ -464,7 +425,6 @@
+       << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
+ 
+   this->emit_default_constructor_alloc (node);
+-  this->emit_destructor ();
+   this->emit_constructor_one_arg_alloc (node);
+   this->emit_copy_constructor_alloc (node);
+   this->emit_assignment_alloc (node);
+@@ -513,14 +473,6 @@
+         }
+     }
+ 
+-  // _tao_marshal_v method
+-  *os << "ACE_INLINE ::CORBA::Boolean " << be_nl
+-      << vb_node->name ()
+-      << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
+-      << "{" << be_idt_nl
+-      << "return (strm << this->_pd_value.in ());" << be_uidt_nl
+-      << "}" << be_nl << be_nl;
+-
+   return 0;
+ }
+ 
+@@ -554,7 +506,6 @@
+       << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
+ 
+   this->emit_default_constructor_alloc (node);
+-  this->emit_destructor ();
+   this->emit_constructor_one_arg_alloc (node);
+   this->emit_copy_constructor_alloc (node);
+   this->emit_assignment_alloc (node);
+@@ -629,15 +580,6 @@
+       << "return this->_pd_value->_d ();" << be_uidt_nl
+       << "}" << be_nl << be_nl;
+ 
+-
+-  // _tao_marshal_v method
+-  *os << "ACE_INLINE ::CORBA::Boolean " << be_nl
+-      << vb_node->name ()
+-      << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
+-      << "{" << be_idt_nl
+-      << "return (strm << this->_pd_value.in ());" << be_uidt_nl
+-      << "}" << be_nl << be_nl;
+-
+   return 0;
+ }
+ 
+@@ -646,8 +588,7 @@
+ int
+ be_visitor_valuebox_ci::emit_for_predef_enum (be_type *node,
+                                               const char * type_suffix,
+-                                              bool is_any,
+-                                              const char * marshal_arg)
++                                              bool is_any)
+ {
+   TAO_OutStream *os = this->ctx_->stream ();
+ 
+@@ -657,8 +598,6 @@
+   *os << be_nl << be_nl << "// TAO_IDL - Generated from" << be_nl
+       << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
+ 
+-  this->emit_destructor ();
+-
+   if (is_any)
+     {
+       this->emit_default_constructor_alloc (node);
+@@ -712,14 +651,6 @@
+ 
+     }
+ 
+-  // _tao_marshal_v method
+-  *os << "ACE_INLINE ::CORBA::Boolean " << be_nl
+-      << vb_node->name ()
+-      << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
+-      << "{" << be_idt_nl
+-      << "return (strm << " << marshal_arg << ");" << be_uidt_nl
+-      << "}" << be_nl << be_nl;
+-
+   return 0;
+ }
+ 
+@@ -758,22 +689,6 @@
+       << "}" << be_nl << be_nl;
+ }
+ 
+-
+-void
+-be_visitor_valuebox_ci::emit_destructor (void)
+-{
+-  TAO_OutStream *os = this->ctx_->stream ();
+-
+-  // Retrieve the node being visited by this be_visitor_valuebox_ci.
+-  be_decl * vb_node = this->ctx_->node ();
+-
+-  // Protected destructor
+-  *os << "ACE_INLINE " << be_nl
+-      << vb_node->name () << "::~" << vb_node->local_name () << " (void)"
+-      << be_nl << "{}" << be_nl << be_nl;
+-}
+-
+-
+ void
+ be_visitor_valuebox_ci::emit_constructor_one_arg (be_decl *node,
+                                                   const char * type_suffix)
+Index: TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp,v
+retrieving revision 1.7
+diff -u -r1.7 valuebox_cs.cpp
+--- TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp	21 Nov 2005 22:26:29 -0000	1.7
++++ TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp	2 Feb 2006 23:00:00 -0000
+@@ -1,5 +1,5 @@
+ //
+-// $Id: valuebox_cs.cpp,v 1.7 2005/11/21 22:26:29 parsons Exp $
++// $Id: valuebox_cs.cpp,v 1.1.1.1 2005/12/06 23:30:25 othman Exp $
+ //
+ 
+ // ============================================================================
+@@ -192,6 +192,7 @@
+       << "vb_object," << be_nl
+       << node->local_name () << "," << be_nl
+       << "false);" << be_nl << be_uidt_nl;
++
+   if (is_array)
+     {
+       *os << at->full_name() << "_forany temp (vb_object->_boxed_inout ());"
+@@ -200,7 +201,15 @@
+   *os << "return (strm >> " << unmarshal_arg << ");" << be_uidt_nl
+       << "}" << be_nl << be_nl;
+ 
+-
++  // _tao_unmarshal_v method.  Generated because ValueBase interface
++  // requires it.  But there is nothing for it to do in the valuebox
++  // case.
++  *os << "::CORBA::Boolean " << be_nl
++      << node->name ()
++      << "::_tao_unmarshal_v (TAO_InputCDR &)" << be_nl
++      << "{" << be_idt_nl
++      << "return true;" << be_uidt_nl
++      << "}" << be_nl << be_nl;
+ 
+   // Emit the type specific elements.  The visit_* methods in this
+   // module do that work.
+@@ -219,14 +228,51 @@
+ }
+ 
+ int
+-be_visitor_valuebox_cs::visit_array (be_array *)
++be_visitor_valuebox_cs::visit_array (be_array * node)
+ {
++  TAO_OutStream & os = *this->ctx_->stream ();
++
++  // Retrieve the node being visited by this be_visitor_valuebox_cs.
++  be_decl * const vb_node = this->ctx_->node ();
++
++  os << be_nl << be_nl << "// TAO_IDL - Generated from" << be_nl
++     << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
++
++  // _tao_marshal_v method
++  os << "::CORBA::Boolean " << be_nl
++     << vb_node->name ()
++     << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
++     << "{" << be_idt_nl
++     << node->name () << "_forany temp (this->_pd_value.ptr ());" << be_nl
++     << "return (strm << temp);" << be_uidt_nl
++     << "}" << be_nl << be_nl;
++
+   return 0;
+ }
+ 
+ int
+ be_visitor_valuebox_cs::visit_enum (be_enum *)
+ {
++  TAO_OutStream & os = *this->ctx_->stream ();
++
++  // Retrieve the node being visited by this be_visitor_valuebox_cs.
++  be_decl * const vb_node = this->ctx_->node ();
++
++  os << be_nl << be_nl << "// TAO_IDL - Generated from" << be_nl
++     << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
++
++  this->emit_destructor ();
++
++  static char const marshal_arg[] = "this->_pd_value";
++
++  // _tao_marshal_v method
++  os << "::CORBA::Boolean " << be_nl
++     << vb_node->name ()
++     << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
++     << "{" << be_idt_nl
++     << "return (strm << " << marshal_arg << ");" << be_uidt_nl
++     << "}" << be_nl << be_nl;
++
+   return 0;
+ }
+ 
+@@ -234,13 +280,42 @@
+ int
+ be_visitor_valuebox_cs::visit_interface (be_interface *)
+ {
+-  return 0;
++  return this->emit_for_predef_enum ("this->_pd_value");
+ }
+ 
+ int
+-be_visitor_valuebox_cs::visit_predefined_type (be_predefined_type *)
++be_visitor_valuebox_cs::visit_predefined_type (be_predefined_type * node)
+ {
+-  return 0;
++  char const * marshal_arg;
++
++  switch (node->pt ())
++    {
++    case AST_PredefinedType::PT_boolean:
++      marshal_arg = "::ACE_OutputCDR::from_boolean (this->_pd_value)";
++      break;
++
++    case AST_PredefinedType::PT_char:
++      marshal_arg = "::ACE_OutputCDR::from_char (this->_pd_value)";
++      break;
++
++    case AST_PredefinedType::PT_wchar:
++      marshal_arg = "::ACE_OutputCDR::from_wchar (this->_pd_value)";
++      break;
++
++    case AST_PredefinedType::PT_octet:
++      marshal_arg = "::ACE_OutputCDR::from_octet (this->_pd_value)";
++      break;
++
++    case AST_PredefinedType::PT_any:
++      marshal_arg = "this->_pd_value.in ()";
++      break;
++
++    default:
++      marshal_arg = "this->_pd_value";
++      break;
++    }
++
++  return this->emit_for_predef_enum (marshal_arg);
+ }
+ 
+ int
+@@ -342,6 +417,8 @@
+ 
+   // end: Public constructor for sequence with supplied buffer
+ 
++  this->emit_destructor ();
++
+   // Accessor: non const
+   if (bt->accept (&bt_visitor) == -1)
+     {
+@@ -416,18 +493,62 @@
+ 
+   *os << "}" << be_nl << be_nl;
+ 
++  // _tao_marshal_v method
++  *os << "::CORBA::Boolean " << be_nl
++      << vb_node->name ()
++      << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
++      << "{" << be_idt_nl
++      << "return (strm << this->_pd_value.in ());" << be_uidt_nl
++      << "}" << be_nl << be_nl;
++
+   return 0;
+ }
+ 
+ int
+ be_visitor_valuebox_cs::visit_string (be_string *)
+ {
++  TAO_OutStream & os = *this->ctx_->stream ();
++
++  // Retrieve the node being visited by this be_visitor_valuebox_cs.
++  be_decl * const vb_node = this->ctx_->node ();
++
++  os << be_nl << be_nl << "// TAO_IDL - Generated from" << be_nl
++     << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
++
++  this->emit_destructor ();
++
++  // _tao_marshal_v method
++  os << "::CORBA::Boolean " << be_nl
++     << vb_node->name ()
++     << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
++     << "{" << be_idt_nl
++     << "return (strm << this->_pd_value);" << be_uidt_nl
++     << "}" << be_nl << be_nl;
++
+   return 0;
+ }
+ 
+ int
+ be_visitor_valuebox_cs::visit_structure (be_structure *)
+ {
++  TAO_OutStream & os = *this->ctx_->stream ();
++
++  // Retrieve the node being visited by this be_visitor_valuebox_cs.
++  be_decl * const vb_node = this->ctx_->node ();
++
++  os << be_nl << be_nl << "// TAO_IDL - Generated from" << be_nl
++      << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
++
++  this->emit_destructor ();
++
++  // _tao_marshal_v method
++  os << "::CORBA::Boolean " << be_nl
++     << vb_node->name ()
++     << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
++     << "{" << be_idt_nl
++     << "return (strm << this->_pd_value.in ());" << be_uidt_nl
++     << "}" << be_nl << be_nl;
++
+   return 0;
+ }
+ 
+@@ -452,5 +573,60 @@
+ int
+ be_visitor_valuebox_cs::visit_union (be_union *)
+ {
++  TAO_OutStream & os = *this->ctx_->stream ();
++
++  // Retrieve the node being visited by this be_visitor_valuebox_cs.
++  be_decl * const vb_node = this->ctx_->node ();
++
++  os << be_nl << be_nl << "// TAO_IDL - Generated from" << be_nl
++     << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
++
++  this->emit_destructor ();
++
++  // _tao_marshal_v method
++  os << "::CORBA::Boolean " << be_nl
++     << vb_node->name ()
++     << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
++     << "{" << be_idt_nl
++     << "return (strm << this->_pd_value.in ());" << be_uidt_nl
++     << "}" << be_nl << be_nl;
++
++  return 0;
++}
++
++void
++be_visitor_valuebox_cs::emit_destructor (void)
++{
++  TAO_OutStream & os = *this->ctx_->stream ();
++
++  // Retrieve the node being visited by this be_visitor_valuebox_cs.
++  be_decl * const vb_node = this->ctx_->node ();
++
++  // Protected destructor
++  os << vb_node->name () << "::~" << vb_node->local_name () << " (void)"
++     << be_nl << "{" << be_nl << "}" << be_nl << be_nl;
++}
++
++int
++be_visitor_valuebox_cs::emit_for_predef_enum (char const * marshal_arg)
++{
++  TAO_OutStream & os = *this->ctx_->stream ();
++
++  // Retrieve the node being visited by this be_visitor_valuebox_cs.
++  be_decl * const vb_node = this->ctx_->node ();
++
++  os << be_nl << be_nl << "// TAO_IDL - Generated from" << be_nl
++     << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
++
++  this->emit_destructor ();
++
++  // _tao_marshal_v method
++  os << "::CORBA::Boolean " << be_nl
++     << vb_node->name ()
++     << "::_tao_marshal_v (TAO_OutputCDR & strm) const" << be_nl
++     << "{" << be_idt_nl
++     << "return (strm << " << marshal_arg << ");" << be_uidt_nl
++     << "}" << be_nl << be_nl;
++
+   return 0;
+ }
+Index: TAO_IDL/be_include/be_visitor_valuebox/valuebox_ci.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be_include/be_visitor_valuebox/valuebox_ci.h,v
+retrieving revision 1.1
+diff -u -r1.1 valuebox_ci.h
+--- TAO_IDL/be_include/be_visitor_valuebox/valuebox_ci.h	20 Jun 2005 19:47:54 -0000	1.1
++++ TAO_IDL/be_include/be_visitor_valuebox/valuebox_ci.h	2 Feb 2006 23:00:01 -0000
+@@ -1,6 +1,6 @@
+ /* -*- c++ -*- */
+ //
+-// $Id: valuebox_ci.h,v 1.1 2005/06/20 19:47:54 gmaxey Exp $
++// $Id: valuebox_ci.h,v 1.1.1.1 2005/12/06 23:30:27 othman Exp $
+ //
+ 
+ // ============================================================================
+@@ -71,17 +71,14 @@
+   // visit union.
+ 
+ private:
+-  int emit_for_predef_enum(be_type *node,
+-                           const char * type_suffix,
+-                           bool is_any,
+-                           const char * marshal_arg);
++  int emit_for_predef_enum (be_type *node,
++                            const char * type_suffix,
++                            bool is_any);
+ 
+   void emit_default_constructor (void);
+ 
+   void emit_default_constructor_alloc (be_decl *node);
+ 
+-  void emit_destructor (void);
+-
+   void emit_constructor_one_arg (be_decl *node,
+                                 const char * type_suffix);
+ 
+@@ -91,8 +88,8 @@
+ 
+   void emit_copy_constructor_alloc (be_decl *node);
+ 
+-  void emit_assignment( be_decl *node,
+-                       const char * type_suffix);
++  void emit_assignment (be_decl *node,
++                        const char * type_suffix);
+ 
+   void emit_assignment_alloc (be_decl *node);
+ 
+Index: TAO_IDL/be_include/be_visitor_valuebox/valuebox_cs.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/TAO_IDL/be_include/be_visitor_valuebox/valuebox_cs.h,v
+retrieving revision 1.1
+diff -u -r1.1 valuebox_cs.h
+--- TAO_IDL/be_include/be_visitor_valuebox/valuebox_cs.h	20 Jun 2005 19:47:54 -0000	1.1
++++ TAO_IDL/be_include/be_visitor_valuebox/valuebox_cs.h	2 Feb 2006 23:00:01 -0000
+@@ -1,6 +1,6 @@
+ /* -*- c++ -*- */
+ //
+-// $Id: valuebox_cs.h,v 1.1 2005/06/20 19:47:54 gmaxey Exp $
++// $Id: valuebox_cs.h,v 1.1.1.1 2005/12/06 23:30:27 othman Exp $
+ //
+ 
+ // ============================================================================
+@@ -70,6 +70,13 @@
+   virtual int visit_union (be_union *node);
+   // visit union.
+ 
++private:
++
++  /// Generate virtual destructor.
++  void emit_destructor (void);
++
++  int emit_for_predef_enum (char const * marshal_arg);
++
+ };
+ 
+ #endif /* _BE_VISITOR_VALUEBOX_CS_H_ */
