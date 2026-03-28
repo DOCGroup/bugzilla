@@ -1,0 +1,11 @@
+--- ACE_wrappers.orig/apps/Makefile.am	(révision 80924)
++++ ACE_wrappers/apps/Makefile.am	(copie de travail)
+@@ -10,7 +10,7 @@
+ 
+ OPTDIRS =
+ 
+-if COMPILE_GPERF
++if BUILD_GPERF
+ OPTDIRS += gperf
+ endif
+ 
