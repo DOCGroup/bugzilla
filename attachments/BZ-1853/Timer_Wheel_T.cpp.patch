@@ -1,0 +1,6 @@
+655a656
+>   u_int es = 0;
+674a676
+>               es = spoke;
+679a682
+>   this->earliest_spoke_ = es;
