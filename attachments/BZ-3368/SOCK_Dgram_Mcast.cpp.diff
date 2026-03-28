@@ -1,0 +1,54 @@
+Index: SOCK_Dgram_Mcast.cpp
+===================================================================
+--- SOCK_Dgram_Mcast.cpp	(revision 82282)
++++ SOCK_Dgram_Mcast.cpp	(working copy)
+@@ -363,10 +363,11 @@
+                   // Convert to 0-based for indexing, next loop check.
+                   if (if_addrs[if_cnt].get_type () != AF_INET || if_addrs[if_cnt].is_loopback ())
+                     continue;
++                  char addr_buf[INET6_ADDRSTRLEN];
+                   if (this->join (mcast_addr,
+                                   reuse_addr,
+                                   ACE_TEXT_CHAR_TO_TCHAR
+-                                   (if_addrs[if_cnt].get_host_addr ())) == 0)
++                                   (if_addrs[if_cnt].get_host_addr (addr_buf, INET6_ADDRSTRLEN))) == 0)
+                     ++nr_subscribed;
+                 }
+             }
+@@ -414,10 +415,11 @@
+               // Convert to 0-based for indexing, next loop check.
+               if (if_addrs[if_cnt].is_loopback ())
+                 continue;
++              char addr_buf[INET6_ADDRSTRLEN];
+               if (this->join (mcast_addr,
+                               reuse_addr,
+                               ACE_TEXT_CHAR_TO_TCHAR
+-                                     (if_addrs[if_cnt].get_host_addr ())) == 0)
++                                     (if_addrs[if_cnt].get_host_addr (addr_buf, INET6_ADDRSTRLEN))) == 0)
+                 ++nr_subscribed;
+             }
+         }
+@@ -722,9 +724,10 @@
+                   // Convert to 0-based for indexing, next loop check
+                   if (if_addrs[if_cnt].get_type () != AF_INET || if_addrs[if_cnt].is_loopback ())
+                     continue;
++                  char addr_buf[INET6_ADDRSTRLEN];
+                   if (this->leave (mcast_addr,
+                                    ACE_TEXT_CHAR_TO_TCHAR
+-                                   (if_addrs[if_cnt].get_host_addr ())) == 0)
++                                   (if_addrs[if_cnt].get_host_addr (addr_buf, INET6_ADDRSTRLEN))) == 0)
+                     ++nr_unsubscribed;
+                 }
+             }
+@@ -771,9 +774,10 @@
+               // Convert to 0-based for indexing, next loop check
+               if (if_addrs[if_cnt].is_loopback ())
+                 continue;
++              char addr_buf[INET6_ADDRSTRLEN];
+               if (this->leave (mcast_addr,
+                                ACE_TEXT_CHAR_TO_TCHAR
+-                               (if_addrs[if_cnt].get_host_addr ())) == 0)
++                               (if_addrs[if_cnt].get_host_addr (addr_buf, INET6_ADDRSTRLEN))) == 0)
+                 ++nr_unsubscribed;
+             }
+         }
