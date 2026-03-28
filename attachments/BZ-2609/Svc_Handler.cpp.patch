@@ -1,0 +1,15 @@
+--- orig/Svc_Handler.cpp	2006-07-07 12:53:57.000000000 -0400
++++ Svc_Handler.cpp	2006-07-07 13:25:15.000000000 -0400
+@@ -304,7 +304,11 @@
+ {
+   ACE_TRACE ("ACE_Svc_Handler<PR_ST_2, ACE_SYNCH_USE>::handle_close");
+ 
+-  this->destroy ();
++    if (reference_counting_policy().value() !=
++        Reference_Counting_Policy::ENABLED)
++    {
++      this->destroy ();
++    }
+   return 0;
+ }
+ 
