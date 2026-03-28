@@ -1,0 +1,147 @@
+diff -aru ACE_wrappers.orig/TAO/tao/PortableServer/Servant_Upcall.cpp ACE_wrappers/TAO/tao/PortableServer/Servant_Upcall.cpp
+--- ACE_wrappers.orig/TAO/tao/PortableServer/Servant_Upcall.cpp	2005-12-07 08:52:56.000000000 -0800
++++ ACE_wrappers/TAO/tao/PortableServer/Servant_Upcall.cpp	2005-12-07 09:06:58.000000000 -0800
+@@ -41,6 +41,9 @@
+ #endif /* TAO_HAS_MINIMUM_POA == 0 */
+         active_object_map_entry_ (0)
+     {
++      this->collocatedCheck_ = false;
++      this->refCountIncrement_ = false;
++      this->servantCleanup_ = false;
+       TAO_Adapter *adapter = oc->poa_adapter ();
+       TAO_Object_Adapter *object_adapter =
+         dynamic_cast<TAO_Object_Adapter *>(adapter);
+@@ -234,7 +237,7 @@
+     }
+ 
+     ::TAO_Root_POA *
+-    Servant_Upcall::lookup_POA (const TAO::ObjectKey &key
++    Servant_Upcall::lookup_POA (const TAO::ObjectKey &key, bool collocatedCheck 
+                                 ACE_ENV_ARG_DECL)
+     {
+       // Acquire the object adapter lock first.
+@@ -247,6 +250,7 @@
+       // We have acquired the object adapater lock.  Record this for later
+       // use.
+       this->state_ = OBJECT_ADAPTER_LOCK_ACQUIRED;
++      this->collocatedCheck_ = collocatedCheck;
+ 
+       // Check if a non-servant upcall is in progress.  If a non-servant
+       // upcall is in progress, wait for it to complete.  Unless of
+@@ -275,12 +279,13 @@
+     {
+       this->post_invoke ();
+ 
++      int caseUpcallCleanup = 0;
+       switch (this->state_)
+         {
+         case SERVANT_LOCK_ACQUIRED:
+           // Unlock servant (if appropriate).
+           this->single_threaded_poa_cleanup ();
+-
++          caseUpcallCleanup += 1;
+           /* FALLTHRU */
+ 
+         case OBJECT_ADAPTER_LOCK_RELEASED:
+@@ -304,7 +309,7 @@
+ 
+           // Cleanup servant related state.
+           this->servant_cleanup ();
+-
++          caseUpcallCleanup += 2;
+           /* FALLTHRU */
+ 
+         case POA_CURRENT_SETUP:
+@@ -313,14 +318,25 @@
+ 
+           // Teardown current for this request.
+           this->current_context_.teardown ();
+-
++          caseUpcallCleanup += 4;
+           /* FALLTHRU */
+ 
+         case OBJECT_ADAPTER_LOCK_ACQUIRED:
+           // Finally, since the object adapter lock was acquired, we must
+           // release it.
+-          this->object_adapter_->lock ().release ();
+ 
++          if (caseUpcallCleanup == 0 && this->collocatedCheck_  && this->refCountIncrement_ )
++            {
++              if (this->active_object_map_entry_ != 0)
++                {
++                  // Decrement the reference count.
++                  --this->active_object_map_entry_->reference_count_;
++                  this->refCountIncrement_ = false;
++                }
++
++            }
++
++          this->object_adapter_->lock ().release ();
+           /* FALLTHRU */
+ 
+         case INITIAL_STAGE:
+@@ -378,19 +394,23 @@
+     {
+       // Cleanup servant related stuff.
+       if (this->active_object_map_entry_ != 0)
+-        ++this->active_object_map_entry_->reference_count_;
++        {
++          ++this->active_object_map_entry_->reference_count_;
++          this->refCountIncrement_ = true;
++        }
+     }
+ 
+     void
+     Servant_Upcall::servant_cleanup (void)
+     {
++      this->servantCleanup_ = true;
+       // Cleanup servant related stuff.
+       if (this->active_object_map_entry_ != 0)
+         {
+           // Decrement the reference count.
+           CORBA::UShort new_count =
+             --this->active_object_map_entry_->reference_count_;
+-
++          this->refCountIncrement_ = false;
+           if (new_count == 0)
+             {
+               ACE_DECLARE_NEW_CORBA_ENV;
+diff -aru ACE_wrappers.orig/TAO/tao/PortableServer/Servant_Upcall.h ACE_wrappers/TAO/tao/PortableServer/Servant_Upcall.h
+--- ACE_wrappers.orig/TAO/tao/PortableServer/Servant_Upcall.h	2005-12-07 08:52:56.000000000 -0800
++++ ACE_wrappers/TAO/tao/PortableServer/Servant_Upcall.h	2005-12-07 09:03:03.000000000 -0800
+@@ -118,7 +118,7 @@
+       void post_invoke (void);
+ 
+       /// Locate POA.
+-      ::TAO_Root_POA *lookup_POA (const TAO::ObjectKey &key
++      ::TAO_Root_POA *lookup_POA (const TAO::ObjectKey &key, bool collocatedCheck = false
+                                   ACE_ENV_ARG_DECL);
+ 
+       /// POA accessor.
+@@ -182,6 +182,10 @@
+       void increment_servant_refcount (void);
+ 
+     protected:
++      
++      bool refCountIncrement_;
++      bool servantCleanup_;
++      bool collocatedCheck_;
+ 
+       void post_invoke_servant_cleanup (void);
+       void single_threaded_poa_setup (ACE_ENV_SINGLE_ARG_DECL);
+diff -aru ACE_wrappers.orig/TAO/tao/RTPortableServer/RT_Collocation_Resolver.cpp ACE_wrappers/TAO/tao/RTPortableServer/RT_Collocation_Resolver.cpp
+--- ACE_wrappers.orig/TAO/tao/RTPortableServer/RT_Collocation_Resolver.cpp	2005-12-07 08:52:56.000000000 -0800
++++ ACE_wrappers/TAO/tao/RTPortableServer/RT_Collocation_Resolver.cpp	2005-12-07 09:08:31.000000000 -0800
+@@ -33,8 +33,11 @@
+   // Lookup the target POA.  Note that Object Adapter lock is held
+   // until <servant_upcall> dies.
+   TAO::Portable_Server::Servant_Upcall servant_upcall (orb_core);
++
++  // Pass an additional flag to the lookup_POA to identify that we
++  // are performing a collocation check, and not making an upcall
+   TAO_Root_POA *poa =
+-    servant_upcall.lookup_POA (object->_stubobj ()->object_key ()
++    servant_upcall.lookup_POA (object->_stubobj ()->object_key (), true
+                                ACE_ENV_ARG_PARAMETER);
+   ACE_CHECK_RETURN (0);
+ 
