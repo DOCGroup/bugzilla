@@ -1,0 +1,974 @@
+Index: ace/ACE.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/ACE.cpp,v
+retrieving revision 4.390
+diff -u -r4.390 ACE.cpp
+--- ace/ACE.cpp	10 Feb 2006 09:20:36 -0000	4.390
++++ ace/ACE.cpp	10 Mar 2006 21:33:37 -0000
+@@ -2810,7 +2810,6 @@
+           /* NOTREACHED */
+         }
+     }
+-  ACE_NOTREACHED (return 0);
+ }
+ 
+ // Make the current process a UNIX daemon.  This is based on Stevens
+Index: ace/Capabilities.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Capabilities.cpp,v
+retrieving revision 4.22
+diff -u -r4.22 Capabilities.cpp
+--- ace/Capabilities.cpp	4 Nov 2005 10:51:47 -0000	4.22
++++ ace/Capabilities.cpp	10 Mar 2006 18:20:04 -0000
+@@ -319,19 +319,19 @@
+                        fname),
+                       -1);
+ 
+-  int done;
++  int done = 0;
+   ACE_TString line;
+ 
+-  while (!(done = (this->getline (fp, line) == -1))
+-         && is_empty (line.c_str ()))
+-    continue;
++  while (!done && is_empty (line.c_str ()))
++    done = (this->getline (fp, line) == -1);
+ 
+   while (!done)
+     {
+       ACE_TString newline;
+       ACE_TString description;
+ 
+-      while (!(done = (this->getline (fp, newline) == -1)))
++      done = this->getline (fp, newline) == -1;
++      while (!done)
+         if (is_line (newline.c_str ()))
+           description += newline;
+         else
+Index: ace/Codecs.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Codecs.cpp,v
+retrieving revision 4.8
+diff -u -r4.8 Codecs.cpp
+--- ace/Codecs.cpp	28 Oct 2005 16:14:51 -0000	4.8
++++ ace/Codecs.cpp	10 Mar 2006 20:06:28 -0000
+@@ -157,9 +157,9 @@
+ 
+       if (char_count == 4)
+         {
+-          result[pos++] = bits >> 16;
+-          result[pos++] = (bits >> 8) & 0xff;
+-          result[pos++] = bits & 0xff;
++          result[pos++] = static_cast<ACE_Byte> (bits) >> 16;
++          result[pos++] = (static_cast<ACE_Byte> (bits) >> 8) & 0xff;
++          result[pos++] = static_cast<ACE_Byte> (bits) & 0xff;
+           bits = 0;
+           char_count = 0;
+         }
+@@ -190,11 +190,11 @@
+           errors++;
+           break;
+         case 2:
+-          result[pos++] = bits >> 10;
++          result[pos++] = static_cast<ACE_Byte> (bits) >> 10;
+           break;
+         case 3:
+-          result[pos++] = bits >> 16;
+-          result[pos++] = (bits >> 8) & 0xff;
++          result[pos++] = static_cast<ACE_Byte> (bits) >> 16;
++          result[pos++] = (static_cast<ACE_Byte> (bits) >> 8) & 0xff;
+           break;
+         }
+     }
+Index: ace/FIFO.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO.cpp,v
+retrieving revision 4.15
+diff -u -r4.15 FIFO.cpp
+--- ace/FIFO.cpp	28 Oct 2005 16:14:52 -0000	4.15
++++ ace/FIFO.cpp	10 Mar 2006 00:21:23 -0000
+@@ -31,7 +31,7 @@
+ }
+ 
+ int
+-ACE_FIFO::open (const ACE_TCHAR *r, int flags, int perms,
++ACE_FIFO::open (const ACE_TCHAR *r, int flags, mode_t perms,
+                 LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_FIFO::open");
+@@ -54,7 +54,7 @@
+ 
+ ACE_FIFO::ACE_FIFO (const ACE_TCHAR *fifo_name,
+                     int flags,
+-                    int perms,
++                    mode_t perms,
+                     LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_FIFO::ACE_FIFO");
+Index: ace/FIFO.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO.h,v
+retrieving revision 4.17
+diff -u -r4.17 FIFO.h
+--- ace/FIFO.h	28 Oct 2005 16:14:52 -0000	4.17
++++ ace/FIFO.h	10 Mar 2006 00:21:24 -0000
+@@ -41,7 +41,7 @@
+ public:
+   /// Open up the named pipe on the <rendezvous> in accordance with the
+   /// flags.
+-  int open (const ACE_TCHAR *rendezvous, int flags, int perms,
++  int open (const ACE_TCHAR *rendezvous, int flags, mode_t perms,
+             LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Close down the ACE_FIFO without removing the rendezvous point.
+@@ -67,7 +67,7 @@
+ 
+   /// Open up the named pipe on the <rendezvous> in accordance with the
+   /// flags.
+-  ACE_FIFO (const ACE_TCHAR *rendezvous, int flags, int perms,
++  ACE_FIFO (const ACE_TCHAR *rendezvous, int flags, mode_t perms,
+             LPSECURITY_ATTRIBUTES sa = 0);
+ 
+ private:
+Index: ace/FIFO_Recv.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO_Recv.cpp,v
+retrieving revision 4.16
+diff -u -r4.16 FIFO_Recv.cpp
+--- ace/FIFO_Recv.cpp	28 Oct 2005 16:14:52 -0000	4.16
++++ ace/FIFO_Recv.cpp	10 Mar 2006 00:21:23 -0000
+@@ -45,7 +45,7 @@
+ int
+ ACE_FIFO_Recv::open (const ACE_TCHAR *fifo_name,
+                      int flags,
+-                     int perms,
++                     mode_t perms,
+                      int persistent,
+                      LPSECURITY_ATTRIBUTES sa)
+ {
+@@ -70,7 +70,7 @@
+ 
+ ACE_FIFO_Recv::ACE_FIFO_Recv (const ACE_TCHAR *fifo_name,
+                               int flags,
+-                              int perms,
++                              mode_t perms,
+                               int persistent,
+                               LPSECURITY_ATTRIBUTES sa)
+   : aux_handle_ (ACE_INVALID_HANDLE)
+Index: ace/FIFO_Recv.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO_Recv.h,v
+retrieving revision 4.19
+diff -u -r4.19 FIFO_Recv.h
+--- ace/FIFO_Recv.h	28 Oct 2005 16:14:52 -0000	4.19
++++ ace/FIFO_Recv.h	10 Mar 2006 00:21:24 -0000
+@@ -43,14 +43,14 @@
+   /// Open up a bytestream named pipe for reading.
+   ACE_FIFO_Recv (const ACE_TCHAR *rendezvous,
+                  int flags = O_CREAT | O_RDONLY,
+-                 int perms = ACE_DEFAULT_FILE_PERMS,
++                 mode_t perms = ACE_DEFAULT_FILE_PERMS,
+                  int persistent = 1,
+                  LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Open up a bytestream named pipe for reading.
+   int open (const ACE_TCHAR *rendezvous,
+             int flags = O_CREAT | O_RDONLY,
+-            int perms = ACE_DEFAULT_FILE_PERMS,
++            mode_t perms = ACE_DEFAULT_FILE_PERMS,
+             int persistent = 1,
+             LPSECURITY_ATTRIBUTES sa = 0);
+ 
+Index: ace/FIFO_Recv_Msg.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO_Recv_Msg.cpp,v
+retrieving revision 4.16
+diff -u -r4.16 FIFO_Recv_Msg.cpp
+--- ace/FIFO_Recv_Msg.cpp	28 Oct 2005 16:14:52 -0000	4.16
++++ ace/FIFO_Recv_Msg.cpp	10 Mar 2006 00:21:23 -0000
+@@ -30,7 +30,7 @@
+ int
+ ACE_FIFO_Recv_Msg::open (const ACE_TCHAR *fifo_name,
+                          int flags,
+-                         int perms,
++                         mode_t perms,
+                          int persistent,
+                          LPSECURITY_ATTRIBUTES sa)
+ {
+@@ -50,7 +50,7 @@
+ 
+ ACE_FIFO_Recv_Msg::ACE_FIFO_Recv_Msg (const ACE_TCHAR *fifo_name,
+                                       int flags,
+-                                      int perms,
++                                      mode_t perms,
+                                       int persistent,
+                                       LPSECURITY_ATTRIBUTES sa)
+ {
+Index: ace/FIFO_Recv_Msg.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO_Recv_Msg.h,v
+retrieving revision 4.19
+diff -u -r4.19 FIFO_Recv_Msg.h
+--- ace/FIFO_Recv_Msg.h	28 Oct 2005 16:14:52 -0000	4.19
++++ ace/FIFO_Recv_Msg.h	10 Mar 2006 00:21:24 -0000
+@@ -52,14 +52,14 @@
+   /// Open up a record-oriented named pipe for reading.
+   ACE_FIFO_Recv_Msg (const ACE_TCHAR *rendezvous,
+                      int flags = O_CREAT | O_RDONLY,
+-                     int perms = ACE_DEFAULT_FILE_PERMS,
++                     mode_t perms = ACE_DEFAULT_FILE_PERMS,
+                      int persistent = 1,
+                      LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Open up a record-oriented named pipe for reading.
+   int open (const ACE_TCHAR *rendezvous,
+             int flags = O_CREAT | O_RDONLY,
+-            int perms = ACE_DEFAULT_FILE_PERMS,
++            mode_t perms = ACE_DEFAULT_FILE_PERMS,
+             int persistent = 1,
+             LPSECURITY_ATTRIBUTES sa = 0);
+ 
+Index: ace/FIFO_Send.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO_Send.cpp,v
+retrieving revision 4.14
+diff -u -r4.14 FIFO_Send.cpp
+--- ace/FIFO_Send.cpp	28 Oct 2005 16:14:52 -0000	4.14
++++ ace/FIFO_Send.cpp	10 Mar 2006 00:21:23 -0000
+@@ -30,7 +30,7 @@
+ int
+ ACE_FIFO_Send::open (const ACE_TCHAR *rendezvous_name,
+                      int flags,
+-                     int perms,
++                     mode_t perms,
+                      LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_FIFO_Send::open");
+@@ -42,7 +42,7 @@
+ 
+ ACE_FIFO_Send::ACE_FIFO_Send (const ACE_TCHAR *fifo_name,
+                               int flags,
+-                              int perms,
++                              mode_t perms,
+                               LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_FIFO_Send::ACE_FIFO_Send");
+Index: ace/FIFO_Send.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO_Send.h,v
+retrieving revision 4.18
+diff -u -r4.18 FIFO_Send.h
+--- ace/FIFO_Send.h	28 Oct 2005 16:14:52 -0000	4.18
++++ ace/FIFO_Send.h	10 Mar 2006 00:21:24 -0000
+@@ -42,13 +42,13 @@
+   /// Open up a bytestream named pipe for writing.
+   ACE_FIFO_Send (const ACE_TCHAR *rendezvous,
+                  int flags = O_WRONLY,
+-                 int perms = ACE_DEFAULT_FILE_PERMS,
++                 mode_t perms = ACE_DEFAULT_FILE_PERMS,
+                  LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Open up a bytestream named pipe for writing.
+   int open (const ACE_TCHAR *rendezvous,
+             int flags = O_WRONLY,
+-            int perms = ACE_DEFAULT_FILE_PERMS,
++            mode_t perms = ACE_DEFAULT_FILE_PERMS,
+             LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Send <buf> of up to <len> bytes.
+Index: ace/FIFO_Send_Msg.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO_Send_Msg.cpp,v
+retrieving revision 4.23
+diff -u -r4.23 FIFO_Send_Msg.cpp
+--- ace/FIFO_Send_Msg.cpp	28 Oct 2005 16:14:52 -0000	4.23
++++ ace/FIFO_Send_Msg.cpp	10 Mar 2006 00:21:24 -0000
+@@ -60,7 +60,7 @@
+ int
+ ACE_FIFO_Send_Msg::open (const ACE_TCHAR *fifo_name,
+                          int flags,
+-                         int perms,
++                         mode_t perms,
+                          LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_FIFO_Send_Msg::open");
+@@ -69,7 +69,7 @@
+ 
+ ACE_FIFO_Send_Msg::ACE_FIFO_Send_Msg (const ACE_TCHAR *fifo_name,
+                                       int flags,
+-                                      int perms,
++                                      mode_t perms,
+                                       LPSECURITY_ATTRIBUTES sa)
+ {
+   ACE_TRACE ("ACE_FIFO_Send_Msg::ACE_FIFO_Send_Msg");
+Index: ace/FIFO_Send_Msg.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/FIFO_Send_Msg.h,v
+retrieving revision 4.20
+diff -u -r4.20 FIFO_Send_Msg.h
+--- ace/FIFO_Send_Msg.h	28 Oct 2005 16:14:52 -0000	4.20
++++ ace/FIFO_Send_Msg.h	10 Mar 2006 00:21:24 -0000
+@@ -46,13 +46,13 @@
+   /// Open up a record-oriented named pipe for writing.
+   ACE_FIFO_Send_Msg (const ACE_TCHAR *rendezvous,
+                      int flags = O_WRONLY,
+-                     int perms = ACE_DEFAULT_FILE_PERMS,
++                     mode_t perms = ACE_DEFAULT_FILE_PERMS,
+                      LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Open up a record-oriented named pipe for writing.
+   int open (const ACE_TCHAR *rendezvous,
+             int flags = O_WRONLY,
+-            int perms = ACE_DEFAULT_FILE_PERMS,
++            mode_t perms = ACE_DEFAULT_FILE_PERMS,
+             LPSECURITY_ATTRIBUTES sa = 0);
+ 
+   /// Send <buf> of up to <len> bytes.
+Index: ace/Get_Opt.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Get_Opt.cpp,v
+retrieving revision 4.50
+diff -u -r4.50 Get_Opt.cpp
+--- ace/Get_Opt.cpp	28 Oct 2005 16:14:52 -0000	4.50
++++ ace/Get_Opt.cpp	10 Mar 2006 21:33:37 -0000
+@@ -494,7 +494,7 @@
+   // isalnum, otherwise, it will crash the program.
+   if (short_option > 0 &&
+       short_option < 256 &&
+-      ACE_OS::ace_isalnum (short_option) != 0)
++      ACE_OS::ace_isalnum (static_cast<char> (short_option)) != 0)
+ #else
+   if (ACE_OS::ace_isalnum (short_option) != 0)
+ #endif /* _MSC_VER && _MSC_VER >= 1300 */
+Index: ace/MEM_Acceptor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/MEM_Acceptor.cpp,v
+retrieving revision 4.29
+diff -u -r4.29 MEM_Acceptor.cpp
+--- ace/MEM_Acceptor.cpp	28 Oct 2005 16:14:53 -0000	4.29
++++ ace/MEM_Acceptor.cpp	10 Mar 2006 00:38:34 -0000
+@@ -176,7 +176,7 @@
+   // Protocol negociation:
+   //   Tell the client side what level of signaling strategy
+   //   we support.
+-  ACE_INT16 client_signaling =
++  ACE_MEM_IO::Signal_Strategy client_signaling =
+ #if defined (ACE_WIN32) || !defined (_ACE_USE_SV_SEM)
+     this->preferred_strategy_;
+ #else
+Index: ace/MEM_IO.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/MEM_IO.cpp,v
+retrieving revision 4.23
+diff -u -r4.23 MEM_IO.cpp
+--- ace/MEM_IO.cpp	9 Feb 2006 17:03:20 -0000	4.23
++++ ace/MEM_IO.cpp	10 Mar 2006 21:33:37 -0000
+@@ -273,8 +273,6 @@
+       return buf->size ();
+     return -1;
+   }
+-
+-  ACE_NOTREACHED (return 0;)
+ }
+ 
+ ssize_t
+Index: ace/RB_Tree.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/RB_Tree.cpp,v
+retrieving revision 1.44
+diff -u -r1.44 RB_Tree.cpp
+--- ace/RB_Tree.cpp	28 Oct 2005 16:14:54 -0000	1.44
++++ ace/RB_Tree.cpp	10 Mar 2006 21:25:36 -0000
+@@ -710,8 +710,7 @@
+       this->root_->color (ACE_RB_Tree_Node_Base::BLACK);
+       ++current_size_;
+       return &this->root_->item ();
+-    }
+-  return 0;
++    }  
+ }
+ 
+ // Inserts a *copy* of the key and the item into the tree: both the
+Index: ace/Reactor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Reactor.cpp,v
+retrieving revision 4.128
+diff -u -r4.128 Reactor.cpp
+--- ace/Reactor.cpp	28 Oct 2005 16:14:55 -0000	4.128
++++ ace/Reactor.cpp	10 Mar 2006 21:33:37 -0000
+@@ -328,8 +328,6 @@
+       else if (result <= 0)
+         return result;
+     }
+-
+-  ACE_NOTREACHED (return 0;)
+ }
+ 
+ int
+Index: ace/SOCK_Dgram_Mcast.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/SOCK_Dgram_Mcast.cpp,v
+retrieving revision 4.85
+diff -u -r4.85 SOCK_Dgram_Mcast.cpp
+--- ace/SOCK_Dgram_Mcast.cpp	24 Nov 2005 09:48:54 -0000	4.85
++++ ace/SOCK_Dgram_Mcast.cpp	10 Mar 2006 00:02:58 -0000
+@@ -49,9 +49,8 @@
+         ACE_OS::strcpy (ret_string, ACE_LIB_TEXT ("<?>"));
+       else
+         {
+-          ACE_TCHAR *pc;
+-          if (clip_portnum
+-              && (pc = ACE_OS::strrchr (ret_string, ACE_LIB_TEXT (':'))))
++          ACE_TCHAR *pc = ACE_OS::strrchr (ret_string, ACE_LIB_TEXT (':'));
++          if (clip_portnum && pc)
+             *pc = ACE_LIB_TEXT ('\0'); // clip port# info.
+         }
+     }
+Index: ace/SV_Semaphore_Complex.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/SV_Semaphore_Complex.cpp,v
+retrieving revision 4.22
+diff -u -r4.22 SV_Semaphore_Complex.cpp
+--- ace/SV_Semaphore_Complex.cpp	28 Oct 2005 16:14:55 -0000	4.22
++++ ace/SV_Semaphore_Complex.cpp	10 Mar 2006 00:29:38 -0000
+@@ -65,10 +65,10 @@
+ 
+ int
+ ACE_SV_Semaphore_Complex::open (key_t k,
+-                                int create,
++                                short create,
+                                 int initial_value,
+                                 u_short nsems,
+-                                int perms)
++                                mode_t perms)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::open");
+   if (k == IPC_PRIVATE)
+@@ -160,10 +160,10 @@
+ 
+ int
+ ACE_SV_Semaphore_Complex::open (const char *name,
+-                                int flags,
++                                short flags,
+                                 int initial_value,
+                                 u_short nsems,
+-                                int perms)
++                                mode_t perms)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::open");
+   return this->open (ACE_SV_Semaphore_Simple::name_2_key (name),
+@@ -214,10 +214,10 @@
+ }
+ 
+ ACE_SV_Semaphore_Complex::ACE_SV_Semaphore_Complex (key_t k,
+-                                                    int flags,
++                                                    short flags,
+                                                     int initial_value,
+                                                     u_short nsems,
+-                                                    int perms)
++                                                    mode_t perms)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::ACE_SV_Semaphore_Complex");
+   if (this->open (k, flags, initial_value, nsems, perms) == -1)
+@@ -225,10 +225,10 @@
+ }
+ 
+ ACE_SV_Semaphore_Complex::ACE_SV_Semaphore_Complex (const char *name,
+-                                                    int flags,
++                                                    short flags,
+                                                     int initial_value,
+                                                     u_short nsems,
+-                                                    int perms)
++                                                    mode_t perms)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::ACE_SV_Semaphore_Complex");
+ 
+Index: ace/SV_Semaphore_Complex.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/SV_Semaphore_Complex.h,v
+retrieving revision 4.21
+diff -u -r4.21 SV_Semaphore_Complex.h
+--- ace/SV_Semaphore_Complex.h	16 Jan 2006 19:38:12 -0000	4.21
++++ ace/SV_Semaphore_Complex.h	10 Mar 2006 00:29:18 -0000
+@@ -63,32 +63,32 @@
+   // = Initialization and termination methods.
+   ACE_SV_Semaphore_Complex (void);
+   ACE_SV_Semaphore_Complex (key_t key,
+-                            int create = ACE_SV_Semaphore_Complex::ACE_CREATE,
++                            short create = ACE_SV_Semaphore_Complex::ACE_CREATE,
+                             int initial_value = 1,
+                             u_short nsems = 1,
+-                            int perms = ACE_DEFAULT_FILE_PERMS);
++                            mode_t perms = ACE_DEFAULT_FILE_PERMS);
+   ACE_SV_Semaphore_Complex (const char *name,
+-                            int create = ACE_SV_Semaphore_Complex::ACE_CREATE,
++                            short create = ACE_SV_Semaphore_Complex::ACE_CREATE,
+                             int initial_value = 1,
+                             u_short nsems = 1,
+-                            int perms = ACE_DEFAULT_FILE_PERMS);
++                            mode_t perms = ACE_DEFAULT_FILE_PERMS);
+   ~ACE_SV_Semaphore_Complex (void);
+ 
+   /// Open or create an array of SV_Semaphores.  We return 0 if all is
+   /// OK, else -1.
+   int open (const char *name,
+-            int flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
++            short flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
+             int initial_value = 1,
+             u_short nsems = 1,
+-            int perms = ACE_DEFAULT_FILE_PERMS);
++            mode_t perms = ACE_DEFAULT_FILE_PERMS);
+ 
+   /// Open or create an array of SV_Semaphores.  We return 0 if all is
+   /// OK, else -1.
+   int open (key_t key,
+-            int flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
++            short flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
+             int initial_value = 1,
+             u_short nsems = 1,
+-            int perms = ACE_DEFAULT_FILE_PERMS);
++            mode_t perms = ACE_DEFAULT_FILE_PERMS);
+ 
+   /**
+    * Close an ACE_SV_Semaphore. Unlike the <remove> method, this
+@@ -102,28 +102,28 @@
+   // = Semaphore acquire and release methods.
+ 
+   /// Acquire the semaphore.
+-  int acquire (u_short n = 0, int flags = 0) const;
++  int acquire (u_short n = 0, short flags = 0) const;
+ 
+   /// Acquire a semaphore for reading.
+-  int acquire_read (u_short n = 0, int flags = 0) const;
++  int acquire_read (u_short n = 0, short flags = 0) const;
+ 
+   /// Acquire a semaphore for writing
+-  int acquire_write (u_short n = 0, int flags = 0) const;
++  int acquire_write (u_short n = 0, short flags = 0) const;
+ 
+   /// Try to acquire the semaphore.
+-  int tryacquire (u_short n = 0, int flags = 0) const;
++  int tryacquire (u_short n = 0, short flags = 0) const;
+ 
+   /// Try to acquire the semaphore for reading.
+-  int tryacquire_read (u_short n = 0, int flags = 0) const;
++  int tryacquire_read (u_short n = 0, short flags = 0) const;
+ 
+   /// Try to acquire the semaphore for writing.
+-  int tryacquire_write (u_short n = 0, int flags = 0) const;
++  int tryacquire_write (u_short n = 0, short flags = 0) const;
+ 
+   /// Release the semaphore.
+-  int release (u_short n = 0, int flags = 0) const;
++  int release (u_short n = 0, short flags = 0) const;
+ 
+   // = Semaphore operation methods.
+-  int op (int val, u_short n = 0, int flags = 0) const;
++  int op (short val, u_short n = 0, short flags = 0) const;
+   int op (sembuf op_vec[], u_short n) const;
+ 
+   // = Semaphore control methods.
+Index: ace/SV_Semaphore_Complex.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/SV_Semaphore_Complex.inl,v
+retrieving revision 4.2
+diff -u -r4.2 SV_Semaphore_Complex.inl
+--- ace/SV_Semaphore_Complex.inl	28 Oct 2005 16:14:55 -0000	4.2
++++ ace/SV_Semaphore_Complex.inl	10 Mar 2006 00:27:03 -0000
+@@ -5,56 +5,56 @@
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Complex::acquire (u_short n, int flags) const
++ACE_SV_Semaphore_Complex::acquire (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::acquire");
+   return ACE_SV_Semaphore_Simple::acquire ((u_short) n + 2, flags);
+ }
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Complex::acquire_read (u_short n, int flags) const
++ACE_SV_Semaphore_Complex::acquire_read (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::acquire_read");
+   return this->acquire (n, flags);
+ }
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Complex::acquire_write (u_short n, int flags) const
++ACE_SV_Semaphore_Complex::acquire_write (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::acquire_write");
+   return this->acquire (n, flags);
+ }
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Complex::tryacquire (u_short n, int flags) const
++ACE_SV_Semaphore_Complex::tryacquire (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::tryacquire");
+   return ACE_SV_Semaphore_Simple::tryacquire ((u_short) n + 2, flags);
+ }
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Complex::tryacquire_read (u_short n, int flags) const
++ACE_SV_Semaphore_Complex::tryacquire_read (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::tryacquire_read");
+   return this->tryacquire (n, flags);
+ }
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Complex::tryacquire_write (u_short n, int flags) const
++ACE_SV_Semaphore_Complex::tryacquire_write (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::tryacquire_write");
+   return this->tryacquire (n, flags);
+ }
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Complex::release (u_short n, int flags) const
++ACE_SV_Semaphore_Complex::release (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::release");
+   return ACE_SV_Semaphore_Simple::release ((u_short) n + 2, flags);
+ }
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Complex::op (int val, u_short n, int flags) const
++ACE_SV_Semaphore_Complex::op (short val, u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Complex::op");
+   return ACE_SV_Semaphore_Simple::op (val, (u_short) n + 2, flags);
+Index: ace/SV_Semaphore_Simple.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/SV_Semaphore_Simple.cpp,v
+retrieving revision 4.28
+diff -u -r4.28 SV_Semaphore_Simple.cpp
+--- ace/SV_Semaphore_Simple.cpp	28 Oct 2005 16:14:55 -0000	4.28
++++ ace/SV_Semaphore_Simple.cpp	10 Mar 2006 00:27:03 -0000
+@@ -56,7 +56,7 @@
+ // specific amount (positive or negative; amount can`t be zero).
+ 
+ int
+-ACE_SV_Semaphore_Simple::op (int val, u_short n, int flags) const
++ACE_SV_Semaphore_Simple::op (short val, u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::op");
+   sembuf op_op;
+@@ -77,10 +77,10 @@
+ 
+ int
+ ACE_SV_Semaphore_Simple::open (key_t k,
+-                               int flags,
++                               short flags,
+                                int initial_value,
+                                u_short n,
+-                               int perms)
++                               mode_t perms)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::open");
+   union semun ivalue;
+@@ -106,10 +106,10 @@
+ }
+ 
+ ACE_SV_Semaphore_Simple::ACE_SV_Semaphore_Simple (key_t k,
+-                                                  int flags,
++                                                  short flags,
+                                                   int initial_value,
+                                                   u_short n,
+-                                                  int perms)
++                                                  mode_t perms)
+   : key_ (k)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::ACE_SV_Semaphore_Simple");
+@@ -154,10 +154,10 @@
+ 
+ int
+ ACE_SV_Semaphore_Simple::open (const char *name,
+-                               int flags,
++                               short flags,
+                                int initial_value,
+                                u_short n,
+-                               int perms)
++                               mode_t perms)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::open");
+ 
+@@ -172,10 +172,10 @@
+ }
+ 
+ ACE_SV_Semaphore_Simple::ACE_SV_Semaphore_Simple (const char *name,
+-                                                  int flags,
++                                                  short flags,
+                                                   int initial_value,
+                                                   u_short n,
+-                                                  int perms)
++                                                  mode_t perms)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::ACE_SV_Semaphore_Simple");
+   if (this->open (name,
+@@ -190,10 +190,10 @@
+ 
+ #if defined (ACE_HAS_WCHAR)
+ ACE_SV_Semaphore_Simple::ACE_SV_Semaphore_Simple (const wchar_t *name,
+-                                                  int flags,
++                                                  short flags,
+                                                   int initial_value,
+                                                   u_short nsems,
+-                                                  int perms)
++                                                  mode_t perms)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::ACE_SV_Semaphore_Simple(wchar_t)");
+   if (this->open (ACE_Wide_To_Ascii (name).char_rep (),
+Index: ace/SV_Semaphore_Simple.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/SV_Semaphore_Simple.h,v
+retrieving revision 4.33
+diff -u -r4.33 SV_Semaphore_Simple.h
+--- ace/SV_Semaphore_Simple.h	28 Oct 2005 16:14:55 -0000	4.33
++++ ace/SV_Semaphore_Simple.h	10 Mar 2006 00:27:03 -0000
+@@ -60,46 +60,46 @@
+   // = Initialization and termination methods.
+   ACE_SV_Semaphore_Simple (void);
+   ACE_SV_Semaphore_Simple (key_t key,
+-                           int flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
++                           short flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
+                            int initial_value = 1,
+                            u_short nsems = 1,
+-                           int perms = ACE_DEFAULT_FILE_PERMS);
++                           mode_t perms = ACE_DEFAULT_FILE_PERMS);
+   ACE_SV_Semaphore_Simple (const char *name,
+-                           int flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
++                           short flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
+                            int initial_value = 1,
+                            u_short nsems = 1,
+-                           int perms = ACE_DEFAULT_FILE_PERMS);
++                           mode_t perms = ACE_DEFAULT_FILE_PERMS);
+ #if defined (ACE_HAS_WCHAR)
+   ACE_SV_Semaphore_Simple (const wchar_t *name,
+-                           int flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
++                           short flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
+                            int initial_value = 1,
+                            u_short nsems = 1,
+-                           int perms = ACE_DEFAULT_FILE_PERMS);
++                           mode_t perms = ACE_DEFAULT_FILE_PERMS);
+ #endif /* ACE_HAS_WCHAR */
+ 
+   ~ACE_SV_Semaphore_Simple (void);
+ 
+   int open (const char *name,
+-            int flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
++            short flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
+             int initial_value = 1,
+             u_short nsems = 1,
+-            int perms = ACE_DEFAULT_FILE_PERMS);
++            mode_t perms = ACE_DEFAULT_FILE_PERMS);
+ 
+ #if defined (ACE_HAS_WCHAR)
+   int open (const wchar_t *name,
+-            int flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
++            short flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
+             int initial_value = 1,
+             u_short nsems = 1,
+-            int perms = ACE_DEFAULT_FILE_PERMS);
++            mode_t perms = ACE_DEFAULT_FILE_PERMS);
+ #endif /* ACE_HAS_WCHAR */
+ 
+   /// Open or create one or more SV_Semaphores.  We return 0 if all is
+   /// OK, else -1.
+   int open (key_t key,
+-            int flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
++            short flags = ACE_SV_Semaphore_Simple::ACE_CREATE,
+             int initial_value = 1,
+             u_short nsems = 1,
+-            int perms = ACE_DEFAULT_FILE_PERMS);
++            mode_t perms = ACE_DEFAULT_FILE_PERMS);
+ 
+   /// Close a ACE_SV_Semaphore, marking it as invalid for subsequent
+   /// operations...
+@@ -120,31 +120,31 @@
+    * decrement it by 1 and return. Dijkstra's P operation, Tannenbaums
+    * DOWN operation.
+    */
+-  int acquire (u_short n = 0, int flags = 0) const;
++  int acquire (u_short n = 0, short flags = 0) const;
+ 
+   /// Acquire a semaphore for reading.
+-  int acquire_read (u_short n = 0, int flags = 0) const;
++  int acquire_read (u_short n = 0, short flags = 0) const;
+ 
+   /// Acquire a semaphore for writing
+-  int acquire_write (u_short n = 0, int flags = 0) const;
++  int acquire_write (u_short n = 0, short flags = 0) const;
+ 
+   /// Non-blocking version of <acquire>.
+-  int tryacquire (u_short n = 0, int flags = 0) const;
++  int tryacquire (u_short n = 0, short flags = 0) const;
+ 
+   /// Try to acquire the semaphore for reading.
+-  int tryacquire_read (u_short n = 0, int flags = 0) const;
++  int tryacquire_read (u_short n = 0, short flags = 0) const;
+ 
+   /// Try to acquire the semaphore for writing.
+-  int tryacquire_write (u_short n = 0, int flags = 0) const;
++  int tryacquire_write (u_short n = 0, short flags = 0) const;
+ 
+   /// Increment ACE_SV_Semaphore by one. Dijkstra's V operation,
+   /// Tannenbaums UP operation.
+-  int release (u_short n = 0, int flags = 0) const;
++  int release (u_short n = 0, short flags = 0) const;
+ 
+   // = Semaphore operation methods.
+   /// General ACE_SV_Semaphore operation. Increment or decrement by a
+   /// specific amount (positive or negative; amount can`t be zero).
+-  int op (int val, u_short semnum = 0, int flags = SEM_UNDO) const;
++  int op (short val, u_short semnum = 0, short flags = SEM_UNDO) const;
+ 
+   /// General ACE_SV_Semaphore operation on an array of SV_Semaphores.
+   int op (sembuf op_vec[], u_short nsems) const;
+Index: ace/SV_Semaphore_Simple.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/SV_Semaphore_Simple.inl,v
+retrieving revision 4.3
+diff -u -r4.3 SV_Semaphore_Simple.inl
+--- ace/SV_Semaphore_Simple.inl	28 Oct 2005 16:14:55 -0000	4.3
++++ ace/SV_Semaphore_Simple.inl	10 Mar 2006 00:27:03 -0000
+@@ -12,10 +12,10 @@
+ // to the narrow-char open().
+ ACE_INLINE int
+ ACE_SV_Semaphore_Simple::open (const wchar_t *name,
+-                               int flags,
++                               short flags,
+                                int initial_value,
+                                u_short nsems,
+-                               int perms)
++                               mode_t perms)
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::open (wchar_t)");
+   return this->open (ACE_Wide_To_Ascii (name).char_rep (),
+@@ -61,21 +61,21 @@
+ // DOWN operation.
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Simple::acquire (u_short n, int flags) const
++ACE_SV_Semaphore_Simple::acquire (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::acquire");
+   return this->op (-1, n, flags);
+ }
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Simple::acquire_read (u_short n, int flags) const
++ACE_SV_Semaphore_Simple::acquire_read (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::acquire_read");
+   return this->acquire (n, flags);
+ }
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Simple::acquire_write (u_short n, int flags) const
++ACE_SV_Semaphore_Simple::acquire_write (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::acquire_write");
+   return this->acquire (n, flags);
+@@ -84,7 +84,7 @@
+ // Non-blocking version of acquire().
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Simple::tryacquire (u_short n, int flags) const
++ACE_SV_Semaphore_Simple::tryacquire (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::tryacquire");
+   return this->op (-1, n, flags | IPC_NOWAIT);
+@@ -93,7 +93,7 @@
+ // Non-blocking version of acquire().
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Simple::tryacquire_read (u_short n, int flags) const
++ACE_SV_Semaphore_Simple::tryacquire_read (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::tryacquire_read");
+   return this->tryacquire (n, flags);
+@@ -102,7 +102,7 @@
+ // Non-blocking version of acquire().
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Simple::tryacquire_write (u_short n, int flags) const
++ACE_SV_Semaphore_Simple::tryacquire_write (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::tryacquire_write");
+   return this->tryacquire (n, flags);
+@@ -112,7 +112,7 @@
+ // Tannenbaums UP operation.
+ 
+ ACE_INLINE int
+-ACE_SV_Semaphore_Simple::release (u_short n, int flags) const
++ACE_SV_Semaphore_Simple::release (u_short n, short flags) const
+ {
+   ACE_TRACE ("ACE_SV_Semaphore_Simple::release");
+   return this->op (1, n, flags);
+Index: ace/TTY_IO.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/TTY_IO.cpp,v
+retrieving revision 4.54
+diff -u -r4.54 TTY_IO.cpp
+--- ace/TTY_IO.cpp	4 Jan 2006 09:11:47 -0000	4.54
++++ ace/TTY_IO.cpp	10 Mar 2006 00:40:31 -0000
+@@ -462,9 +462,9 @@
+ 
+       // Always set limits unless set to negative to use default.
+       if (arg->xonlim >= 0)
+-        dcb.XonLim  = arg->xonlim;
++        dcb.XonLim  = (WORD)arg->xonlim;
+       if (arg->xofflim >= 0)
+-        dcb.XoffLim = arg->xofflim;
++        dcb.XoffLim = (WORD)arg->xofflim;
+ 
+       dcb.fAbortOnError = FALSE;
+       dcb.fErrorChar = FALSE;
+Index: ace/UUID.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/UUID.cpp,v
+retrieving revision 1.28
+diff -u -r1.28 UUID.cpp
+--- ace/UUID.cpp	21 Dec 2005 18:11:29 -0000	1.28
++++ ace/UUID.cpp	10 Mar 2006 20:03:26 -0000
+@@ -371,8 +371,8 @@
+     u_char cseqHAV;
+     {
+       ACE_GUARD (ACE_SYNCH_MUTEX, mon, *lock_);
+-      uuid.clockSeqLow (uuid_state_.clockSequence & 0xFF);
+-      cseqHAV = (uuid_state_.clockSequence & 0x3f00) >> 8;
++      uuid.clockSeqLow (static_cast<u_char> (uuid_state_.clockSequence) & 0xFF);
++      cseqHAV = (static_cast<u_char> (uuid_state_.clockSequence) & 0x3f00) >> 8;
+       uuid_state_.timestamp = timestamp;
+     }
+ 
+@@ -418,7 +418,7 @@
+     // Account for the clock being set back. Increment the clock /
+     // sequence.
+     if (timestamp <= timeLast_)
+-      uuid_state_.clockSequence = (uuid_state_.clockSequence + 1) & ACE_UUID_CLOCK_SEQ_MASK;
++      uuid_state_.clockSequence = static_cast<u_char> ((uuid_state_.clockSequence + 1) & ACE_UUID_CLOCK_SEQ_MASK);
+ 
+     // If the system time ticked since the last UUID was
+     // generated. Set / the clock sequence back.
+Index: ace/WIN32_Asynch_IO.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/WIN32_Asynch_IO.cpp,v
+retrieving revision 4.58
+diff -u -r4.58 WIN32_Asynch_IO.cpp
+--- ace/WIN32_Asynch_IO.cpp	21 Feb 2006 23:53:19 -0000	4.58
++++ ace/WIN32_Asynch_IO.cpp	10 Mar 2006 21:25:36 -0000
+@@ -2578,9 +2578,7 @@
+           result->set_error (errno);
+         }
+       return 1 ;  // connect finished
+-    }
+-
+-  ACE_NOTREACHED (return 0);
++    }  
+ }
+ 
+ 
