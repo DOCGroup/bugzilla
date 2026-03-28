@@ -1,0 +1,380 @@
+make[3]: Entering directory `/usr/src/ACE/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /usr/src/ACE/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.CosEvent MAKEFLAGS=w --jobserver-fds=4,5 -j -- static_libs=1 ssl=1 rapi=1 cidl=1 exc
+eptions=1
+
+../../../bin/tao_idl -Ge 1 -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h -I../.. -I../../orbsvcs -Wb,stub_export_macro=TAO_Event_Export -Wb,stub_ex
+port_include=orbsvcs/CosEvent/event_export.h -Wb,skel_export_macro=TAO_Event_Skel_Export -Wb,skel_export_include=orbsvcs/CosEvent/event_skel_export.h CosTy
+pedEventComm.idl
+g++ -O3 -mcpu=i686 -pipe -W -Wall -Wpointer-arith -O3 -mcpu=i686 -pipe -g -pipe    -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/usr/src/ACE/ACE_wrap
+pers -I/usr/src/ACE/ACE_wrappers/TAO -DACE_HAS_RAPI  -I/usr/kerberos/include -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I../.. -I../../orbsvcs -D
+TAO_HAS_TYPED_EVENT_CHANNEL -DTAO_EVENT_BUILD_DLL -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS  -c -o .obj/CosTypedEventCommC.o CosTypedEventCommC.cpp
+In file included from CosTypedEventCommC.cpp:32:
+CosTypedEventCommC.h:50:27: CosEventCommC.h: No such file or directory
+In file included from CosTypedEventCommC.cpp:32:
+CosTypedEventCommC.h:111: error: `CosEventComm' is not a class or namespace
+CosTypedEventCommC.h:112: error: `PushConsumer' is not a class or namespace
+CosTypedEventCommC.h:112: error: invalid base-class specification
+CosTypedEventCommC.h:231: error: `CosEventComm' is not a class or namespace
+CosTypedEventCommC.h:232: error: `PullSupplier' is not a class or namespace
+CosTypedEventCommC.h:232: error: invalid base-class specification
+In file included from CosTypedEventCommC.h:423,
+                 from CosTypedEventCommC.cpp:32:
+CosTypedEventCommC.inl: In constructor `
+   CosTypedEventComm::TypedPushConsumer::TypedPushConsumer(TAO_Stub*, bool,
+   TAO_Abstract_ServantBase*, TAO_ORB_Core*)':
+CosTypedEventCommC.inl:42: error: type `class CORBA::Object' is not a direct
+   base of `CosTypedEventComm::TypedPushConsumer'
+CosTypedEventCommC.inl: In constructor `
+   CosTypedEventComm::TypedPushConsumer::TypedPushConsumer(IOP::IOR*,
+   TAO_ORB_Core*)':
+CosTypedEventCommC.inl:58: error: type `class CORBA::Object' is not a direct
+   base of `CosTypedEventComm::TypedPushConsumer'
+CosTypedEventCommC.inl: In constructor `
+   CosTypedEventComm::TypedPullSupplier::TypedPullSupplier(TAO_Stub*, bool,
+   TAO_Abstract_ServantBase*, TAO_ORB_Core*)':
+CosTypedEventCommC.inl:78: error: type `class CORBA::Object' is not a direct
+   base of `CosTypedEventComm::TypedPullSupplier'
+CosTypedEventCommC.inl: In constructor `
+   CosTypedEventComm::TypedPullSupplier::TypedPullSupplier(IOP::IOR*,
+   TAO_ORB_Core*)':
+CosTypedEventCommC.inl:94: error: type `class CORBA::Object' is not a direct
+   base of `CosTypedEventComm::TypedPullSupplier'
+CosTypedEventCommC.cpp: In static member function `static void
+   TAO::Objref_Traits<CosTypedEventComm::TypedPushConsumer>::release(CosTypedEventComm::TypedPushConsumer*)
+   ':
+CosTypedEventCommC.cpp:80: error: no matching function for call to `release(
+   CosTypedEventComm::TypedPushConsumer*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:15: error: candidates are: void
+   CORBA::release(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:80: error:
+   void CORBA::release(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:83: error:
+   void CORBA::release(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:86: error:                 void
+   CORBA::release(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:39: error:                 void
+   CORBA::release(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:92: error:
+   void CORBA::release(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:18: error:                 void
+   CORBA::release(CORBA::TypeCode*)
+CosTypedEventCommC.cpp: In static member function `static Boolean
+   TAO::Objref_Traits<CosTypedEventComm::TypedPushConsumer>::marshal(CosTypedEventComm::TypedPushConsumer*,
+   TAO_OutputCDR&)':
+CosTypedEventCommC.cpp:95: error: no matching function for call to `
+   CORBA::Object::marshal(CosTypedEventComm::TypedPushConsumer*&,
+   TAO_OutputCDR&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.h:266: error: candidates are: static
+   Boolean CORBA::Object::marshal(CORBA::Object*, TAO_OutputCDR&)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:87: error:                 virtual
+   Boolean CORBA::Object::marshal(TAO_OutputCDR&)
+CosTypedEventCommC.cpp: In member function `virtual CORBA::Object*
+   CosTypedEventComm::TypedPushConsumer::get_typed_consumer()':
+CosTypedEventCommC.cpp:114: error: `is_evaluated' undeclared (first use this
+   function)
+CosTypedEventCommC.cpp:114: error: (Each undeclared identifier is reported only
+   once for each function it appears in.)
+CosTypedEventCommC.cpp:116: error: no matching function for call to `
+   CORBA::Object::tao_object_initialize(CosTypedEventComm::TypedPushConsumer*
+   const)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.h:283: error: candidates are: static
+   void CORBA::Object::tao_object_initialize(CORBA::Object*)
+CosTypedEventCommC.cpp:138: error: no matching function for call to `
+   TAO::Invocation_Adapter::Invocation_Adapter(
+   CosTypedEventComm::TypedPushConsumer* const, TAO::Argument*[1], int, const
+   char[19], int, TAO::Collocation_Proxy_Broker*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Invocation_Adapter.h:248: error: candidates
+   are: TAO::Invocation_Adapter::Invocation_Adapter(const
+   TAO::Invocation_Adapter&)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Invocation_Adapter.h:245: error:
+      TAO::Invocation_Adapter::Invocation_Adapter()
+/usr/src/ACE/ACE_wrappers/TAO/tao/Invocation_Adapter.inl:16: error:
+       TAO::Invocation_Adapter::Invocation_Adapter(CORBA::Object*,
+   TAO::Argument**, int, const char*, int, TAO::Collocation_Proxy_Broker*,
+   TAO::Invocation_Type, TAO::Invocation_Mode)
+CosTypedEventCommC.cpp: In member function `virtual void
+   CosTypedEventComm::TypedPushConsumer::CosTypedEventComm_TypedPushConsumer_setup_collocation()
+   ':
+CosTypedEventCommC.cpp:158: error: cannot convert `
+   CosTypedEventComm::TypedPushConsumer* const' to `CORBA::Object*' in argument
+   passing
+CosTypedEventCommC.cpp:161: error: `CosEventComm_PushConsumer_setup_collocation
+   ' undeclared (first use this function)
+CosTypedEventCommC.cpp: In static member function `static void
+   CosTypedEventComm::TypedPushConsumer::_tao_any_destructor(void*)':
+CosTypedEventCommC.cpp:172: error: no matching function for call to `release(
+   CosTypedEventComm::TypedPushConsumer*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:15: error: candidates are: void
+   CORBA::release(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:80: error:
+   void CORBA::release(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:83: error:
+   void CORBA::release(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:86: error:                 void
+   CORBA::release(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:39: error:                 void
+   CORBA::release(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:92: error:
+   void CORBA::release(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:18: error:                 void
+   CORBA::release(CORBA::TypeCode*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object_T.cpp: In static member function `
+   static T* TAO::Narrow_Utils<T>::unchecked_narrow(CORBA::Object*, const
+   char*, TAO::Collocation_Proxy_Broker*(*)(CORBA::Object*)) [with T =
+   CosTypedEventComm::TypedPushConsumer]':
+CosTypedEventCommC.cpp:202:   instantiated from here
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object_T.cpp:87: error: no matching function
+   for call to `is_nil(CosTypedEventComm::TypedPushConsumer*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:8: error: candidates are:
+   Boolean CORBA::is_nil(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:79: error:
+   Boolean CORBA::is_nil(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:82: error:
+   Boolean CORBA::is_nil(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:80: error:                 Boolean
+   CORBA::is_nil(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:49: error:                 Boolean
+   CORBA::is_nil(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:91: error:
+   Boolean CORBA::is_nil(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:12: error:
+   Boolean CORBA::is_nil(CORBA::TypeCode*)
+CosTypedEventCommC.cpp: In static member function `static
+   CosTypedEventComm::TypedPushConsumer*
+   CosTypedEventComm::TypedPushConsumer::_duplicate(CosTypedEventComm::TypedPushConsumer*)
+   ':
+CosTypedEventCommC.cpp:208: error: no matching function for call to `is_nil(
+   CosTypedEventComm::TypedPushConsumer*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:8: error: candidates are:
+   Boolean CORBA::is_nil(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:79: error:
+   Boolean CORBA::is_nil(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:82: error:
+   Boolean CORBA::is_nil(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:80: error:                 Boolean
+   CORBA::is_nil(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:49: error:                 Boolean
+   CORBA::is_nil(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:91: error:
+   Boolean CORBA::is_nil(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:12: error:
+   Boolean CORBA::is_nil(CORBA::TypeCode*)
+CosTypedEventCommC.cpp:210: error: `_add_ref' undeclared (first use this
+   function)
+CosTypedEventCommC.cpp: In static member function `static void
+   CosTypedEventComm::TypedPushConsumer::_tao_release(CosTypedEventComm::TypedPushConsumer*)
+   ':
+CosTypedEventCommC.cpp:219: error: no matching function for call to `release(
+   CosTypedEventComm::TypedPushConsumer*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:15: error: candidates are: void
+   CORBA::release(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:80: error:
+   void CORBA::release(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:83: error:
+   void CORBA::release(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:86: error:                 void
+   CORBA::release(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:39: error:                 void
+   CORBA::release(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:92: error:
+   void CORBA::release(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:18: error:                 void
+   CORBA::release(CORBA::TypeCode*)
+CosTypedEventCommC.cpp: In member function `virtual Boolean
+   CosTypedEventComm::TypedPushConsumer::_is_a(const char*)':
+CosTypedEventCommC.cpp:250: error: type `CORBA::Object' is not a base type for
+   type `CosTypedEventComm::TypedPushConsumer'
+CosTypedEventCommC.cpp: In static member function `static void
+   TAO::Objref_Traits<CosTypedEventComm::TypedPullSupplier>::release(CosTypedEventComm::TypedPullSupplier*)
+   ':
+CosTypedEventCommC.cpp:301: error: no matching function for call to `release(
+   CosTypedEventComm::TypedPullSupplier*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:15: error: candidates are: void
+   CORBA::release(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:80: error:
+   void CORBA::release(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:83: error:
+   void CORBA::release(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:86: error:                 void
+   CORBA::release(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:39: error:                 void
+   CORBA::release(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:92: error:
+   void CORBA::release(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:18: error:                 void
+   CORBA::release(CORBA::TypeCode*)
+CosTypedEventCommC.cpp: In static member function `static Boolean
+   TAO::Objref_Traits<CosTypedEventComm::TypedPullSupplier>::marshal(CosTypedEventComm::TypedPullSupplier*,
+   TAO_OutputCDR&)':
+CosTypedEventCommC.cpp:316: error: no matching function for call to `
+   CORBA::Object::marshal(CosTypedEventComm::TypedPullSupplier*&,
+   TAO_OutputCDR&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.h:266: error: candidates are: static
+   Boolean CORBA::Object::marshal(CORBA::Object*, TAO_OutputCDR&)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:87: error:                 virtual
+   Boolean CORBA::Object::marshal(TAO_OutputCDR&)
+CosTypedEventCommC.cpp: In member function `virtual CORBA::Object*
+   CosTypedEventComm::TypedPullSupplier::get_typed_supplier()':
+CosTypedEventCommC.cpp:335: error: `is_evaluated' undeclared (first use this
+   function)
+CosTypedEventCommC.cpp:337: error: no matching function for call to `
+   CORBA::Object::tao_object_initialize(CosTypedEventComm::TypedPullSupplier*
+   const)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.h:283: error: candidates are: static
+   void CORBA::Object::tao_object_initialize(CORBA::Object*)
+CosTypedEventCommC.cpp:359: error: no matching function for call to `
+   TAO::Invocation_Adapter::Invocation_Adapter(
+   CosTypedEventComm::TypedPullSupplier* const, TAO::Argument*[1], int, const
+   char[19], int, TAO::Collocation_Proxy_Broker*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Invocation_Adapter.h:248: error: candidates
+   are: TAO::Invocation_Adapter::Invocation_Adapter(const
+   TAO::Invocation_Adapter&)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Invocation_Adapter.h:245: error:
+      TAO::Invocation_Adapter::Invocation_Adapter()
+/usr/src/ACE/ACE_wrappers/TAO/tao/Invocation_Adapter.inl:16: error:
+       TAO::Invocation_Adapter::Invocation_Adapter(CORBA::Object*,
+   TAO::Argument**, int, const char*, int, TAO::Collocation_Proxy_Broker*,
+   TAO::Invocation_Type, TAO::Invocation_Mode)
+CosTypedEventCommC.cpp: In member function `virtual void
+   CosTypedEventComm::TypedPullSupplier::CosTypedEventComm_TypedPullSupplier_setup_collocation()
+   ':
+CosTypedEventCommC.cpp:379: error: cannot convert `
+   CosTypedEventComm::TypedPullSupplier* const' to `CORBA::Object*' in argument
+   passing
+CosTypedEventCommC.cpp:382: error: `CosEventComm_PullSupplier_setup_collocation
+   ' undeclared (first use this function)
+CosTypedEventCommC.cpp: In static member function `static void
+   CosTypedEventComm::TypedPullSupplier::_tao_any_destructor(void*)':
+CosTypedEventCommC.cpp:393: error: no matching function for call to `release(
+   CosTypedEventComm::TypedPullSupplier*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:15: error: candidates are: void
+   CORBA::release(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:80: error:
+   void CORBA::release(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:83: error:
+   void CORBA::release(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:86: error:                 void
+   CORBA::release(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:39: error:                 void
+   CORBA::release(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:92: error:
+   void CORBA::release(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:18: error:                 void
+   CORBA::release(CORBA::TypeCode*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object_T.cpp: In static member function `
+   static T* TAO::Narrow_Utils<T>::unchecked_narrow(CORBA::Object*, const
+   char*, TAO::Collocation_Proxy_Broker*(*)(CORBA::Object*)) [with T =
+   CosTypedEventComm::TypedPullSupplier]':
+CosTypedEventCommC.cpp:423:   instantiated from here
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object_T.cpp:87: error: no matching function
+   for call to `is_nil(CosTypedEventComm::TypedPullSupplier*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:8: error: candidaes are:
+   Boolean CORBA::is_nil(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:79: error:
+   Boolean CORBA::is_nil(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:82: error:
+   Boolean CORBA::is_nil(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:80: error:                 Boolean
+   CORBA::is_nil(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:49: error:                 Boolean
+   CORBA::is_nil(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:91: error:
+   Boolean CORBA::is_nil(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:12: error:
+   Boolean CORBA::is_nil(CORBA::TypeCode*)
+CosTypedEventCommC.cpp: In static member function `static
+   CosTypedEventComm::TypedPullSupplier*
+   CosTypedEventComm::TypedPullSupplier::_duplicate(CosTypedEventComm::TypedPullSupplier*)
+   ':
+CosTypedEventCommC.cpp:429: error: no matching function for call to `is_nil(
+   CosTypedEventComm::TypedPullSupplier*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:8: error: candidates are:
+   Boolean CORBA::is_nil(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:79: error:
+   Boolean CORBA::is_nil(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:82: error:
+   Boolean CORBA::is_nil(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:80: error:                 Boolean
+   CORBA::is_nil(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:49: error:                 Boolean
+   CORBA::is_nil(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:91: error:
+   Boolean CORBA::is_nil(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:12: error:
+   Boolean CORBA::is_nil(CORBA::TypeCode*)
+CosTypedEventCommC.cpp:431: error: `_add_ref' undeclared (first use this
+   function)
+CosTypedEventCommC.cpp: In static member function `static void
+   CosTypedEventComm::TypedPullSupplier::_tao_release(CosTypedEventComm::TypedPullSupplier*)
+   ':
+CosTypedEventCommC.cpp:440: error: no matching function for call to `release(
+   CosTypedEventComm::TypedPullSupplier*&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Environment.i:15: error: candidates are: void
+   CORBA::release(CORBA::Environment*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:80: error:
+   void CORBA::release(CORBA::NamedValue*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:83: error:
+   void CORBA::release(CORBA::NVList*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/ORB.i:86: error:                 void
+   CORBA::release(CORBA::ORB*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:39: error:                 void
+   CORBA::release(CORBA::Object*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/CORBA_methods.h:92: error:
+   void CORBA::release(CORBA::Principal*)
+/usr/src/ACE/ACE_wrappers/TAO/tao/TypeCode.inl:18: error:                 void
+   CORBA::release(CORBA::TypeCode*)
+CosTypedEventCommC.cpp: In member function `virtual Boolean
+   CosTypedEventComm::TypedPullSupplier::_is_a(const char*)':
+CosTypedEventCommC.cpp:471: error: type `CORBA::Object' is not a base type for
+   type `CosTypedEventComm::TypedPullSupplier'
+CosTypedEventCommC.cpp: In member function `Boolean
+   TAO::Any_Impl_T<T>::to_object(CORBA::Object*&) const [with T =
+   CosTypedEventComm::TypedPushConsumer]':
+CosTypedEventCommC.cpp:515: error: no matching function for call to `
+   CORBA::Object::_duplicate(CosTypedEventComm::TypedPushConsumer* const&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:24: error: candidates are: static
+   CORBA::Object* CORBA::Object::_duplicate(CORBA::Object*)
+CosTypedEventCommC.cpp: In member function `Boolean
+   TAO::Any_Impl_T<T>::to_object(CORBA::Object*&) const [with T =
+   CosTypedEventComm::TypedPullSupplier]':
+CosTypedEventCommC.cpp:573: error: no matching function for call to `
+   CORBA::Object::_duplicate(CosTypedEventComm::TypedPullSupplier* const&)'
+/usr/src/ACE/ACE_wrappers/TAO/tao/Object.i:24: error: candidates are: static
+   CORBA::Object* CORBA::Object::_duplicate(CORBA::Object*)
+CosTypedEventCommC.cpp: In function `Boolean operator<<(TAO_OutputCDR&,
+   CosTypedEventComm::TypedPushConsumer*)':
+CosTypedEventCommC.cpp:628: error: cannot convert `
+   CosTypedEventComm::TypedPushConsumer* const' to `CORBA::Object*' in
+   initialization
+CosTypedEventCommC.cpp: In function `Boolean operator<<(TAO_OutputCDR&,
+   CosTypedEventComm::TypedPullSupplier*)':
+CosTypedEventCommC.cpp:664: error: cannot convert `
+   CosTypedEventComm::TypedPullSupplier* const' to `CORBA::Object*' in
+   initialization
+make[3]: *** [.obj/CosTypedEventCommC.o] Error 1
+make[3]: Leaving directory `/usr/src/ACE/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[2]: *** [CosEvent] Error 2
+make[2]: *** Waiting for unfinished jobs....
+g++ -O3 -mcpu=i686 -pipe -W -Wall -Wpointer-arith -O3 -mcpu=i686 -pipe -g -pipe    -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/usr/src/ACE/ACE_wrappers -I/usr/src/ACE/ACE_wrappers/TAO -DACE_HAS_RAPI  -I/usr/kerberos/include -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I../.. -I../../orbsvcs -DTAO_CONCURRENCY_BUILD_DLL -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS  -c -fPIC -o .shobj/Concurrency/Concurrency_Utils.o Concurrency/Concurrency_Utils.cpp
+make[3]: *** No rule to make target `CosPropertyServiceC.h', needed by `idl_stubs'.  Stop.
+make[3]: Leaving directory `/usr/src/ACE/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[2]: *** [CosProperty] Error 2
+g++ -O3 -mcpu=i686 -pipe -W -Wall -Wpointer-arith -O3 -mcpu=i686 -pipe -g -pipe    -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/usr/src/ACE/ACE_wrappers -I/usr/src/ACE/ACE_wrappers/TAO -DACE_HAS_RAPI  -I/usr/kerberos/include -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I../.. -I../../orbsvcs -DTAO_CONCURRENCY_BUILD_DLL -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS  -c -fPIC -o .shobj/Concurrency/CC_LockSet.o Concurrency/CC_LockSet.cpp
+g++ -O3 -mcpu=i686 -pipe -W -Wall -Wpointer-arith -O3 -mcpu=i686 -pipe -g -pipe    -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/usr/src/ACE/ACE_wrappers -I/usr/src/ACE/ACE_wrappers/TAO -DACE_HAS_RAPI  -I/usr/kerberos/include -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I../.. -I../../orbsvcs -DTAO_CONCURRENCY_BUILD_DLL -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS  -c -fPIC -o .shobj/Concurrency/CC_Lock.o Concurrency/CC_Lock.cpp
+g++ -O3 -mcpu=i686 -pipe -W -Wall -Wpointer-arith -O3 -mcpu=i686 -pipe -g -pipe    -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/usr/src/ACE/ACE_wrappers -I/usr/src/ACE/ACE_wrappers/TAO -DACE_HAS_RAPI  -I/usr/kerberos/include -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I../.. -I../../orbsvcs -DTAO_CONCURRENCY_BUILD_DLL -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS  -c -fPIC -o .shobj/Concurrency/CC_LockSetFactory.o Concurrency/CC_LockSetFactory.cpp
+g++ -O3 -mcpu=i686 -pipe -W -Wall -Wpointer-arith -O3 -mcpu=i686 -pipe -g -pipe    -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/usr/src/ACE/ACE_wrappers -I/usr/src/ACE/ACE_wrappers/TAO -DACE_HAS_RAPI  -I/usr/kerberos/include -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I../.. -I../../orbsvcs -DTAO_CONCURRENCY_BUILD_DLL -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS  -c -fPIC -o .shobj/Concurrency/Concurrency_Loader.o Concurrency/Concurrency_Loader.cpp
+g++ -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/usr/src/ACE/ACE_wrappers -I/usr/src/ACE/ACE_wrappers/TAO -DACE_HAS_RAPI  -I/usr/kerberos/include -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I../.. -I../../orbsvcs -DTAO_CONCURRENCY_BUILD_DLL -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS -shared -Wl,-h -Wl,libTAO_CosConcurrency.so.1.4.4 -o libTAO_CosConcurrency.so.1.4.4 .shobj/CosConcurrencyControlC.o .shobj/CosConcurrencyControlS.o .shobj/Concurrency/Concurrency_Utils.o .shobj/Concurrency/CC_LockSet.o .shobj/Concurrency/CC_Lock.o .shobj/Concurrency/CC_LockSetFactory.o .shobj/Concurrency/Concurrency_Loader.o -Wl,-E -L/usr/src/ACE/ACE_wrappers/ace -L./   -L/usr/src/ACE/ACE_wrappers/TAO/tao -L../../../lib -lTAO_PortableServer -lTAO -lACE -ldl -lpthread -lrt
+
+rm -f libTAO_CosConcurrency.so
+ln -s libTAO_CosConcurrency.so.1.4.4 libTAO_CosConcurrency.so
+chmod a+rx libTAO_CosConcurrency.so.1.4.4
+Installing libTAO_CosConcurrency.a -> ../../../lib
+Installing libTAO_CosConcurrency.a -> ../../../lib
+Installing libTAO_CosConcurrency.so -> ../../../lib
+Installing libTAO_CosConcurrency.so.1.4.4 -> ../../../lib
+make[3]: Leaving directory `/usr/src/ACE/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[2]: Leaving directory `/usr/src/ACE/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/usr/src/ACE/ACE_wrappers/TAO/orbsvcs'
+make: *** [all] Error 2
