@@ -1,0 +1,29 @@
+Index: ORB_Core.cpp
+===================================================================
+--- ORB_Core.cpp	(revision 80257)
++++ ORB_Core.cpp	(working copy)
+@@ -1357,8 +1357,6 @@
+   // Wait for any server threads, ignoring any failures.
+   (void) this->thr_mgr ()->wait ();
+ 
+-  ::CORBA::release (this->implrepo_service_);
+-
+   ::CORBA::release (this->typecode_factory_);
+ 
+   ::CORBA::release (this->codec_factory_);
+@@ -2237,6 +2235,15 @@
+   // reference to this ORB.
+   this->object_ref_table_.destroy ();
+ 
++  // Release implrepo_service_ if one existed. If everything went
++  // fine then this must release reference from implrepo_service_
++  // object to this orb core.
++  if (!CORBA::is_nil (this->implrepo_service_))
++    {
++      CORBA::release (this->implrepo_service_);
++      this->implrepo_service_ = CORBA::Object::_nil ();
++    }
++
+ #if (TAO_HAS_INTERCEPTORS == 1)
+   CORBA::release (this->pi_current_);
+   this->pi_current_ = CORBA::Object::_nil ();
