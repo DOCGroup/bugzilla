@@ -1,0 +1,23 @@
+Index: G:/Dev/C/ACE_wrappers/ace/OS_NS_sys_stat.inl
+===================================================================
+--- G:/Dev/C/ACE_wrappers/ace/OS_NS_sys_stat.inl	(revision 75135)
++++ G:/Dev/C/ACE_wrappers/ace/OS_NS_sys_stat.inl	(working copy)
+@@ -59,14 +59,11 @@
+         ACE_OS::set_errno_to_last_error ();
+         return -1;
+       }
+-    else if (fdata.nFileSizeHigh != 0)
++	else  
+       {
+-        errno = EINVAL;
+-        return -1;
+-      }
+-    else
+-      {
+-        stp->st_size = fdata.nFileSizeLow;
++		stp->st_size = fdata.nFileSizeHigh;
++		stp->st_size <<= 32;
++		stp->st_size += fdata.nFileSizeLow;
+         stp->st_atime = ACE_Time_Value (fdata.ftLastAccessTime).sec ();
+         stp->st_mtime = ACE_Time_Value (fdata.ftLastWriteTime).sec ();
+         stp->st_ctime = ACE_Time_Value (fdata.ftCreationTime).sec ();
