@@ -1,0 +1,727 @@
+Python 2.4 (#60, Nov 30 2004, 11:49:19) [MSC v.1310 32 bit (Intel)] on win32
+Tk is available, Tk-macros are enabled
+cvs -z9 -w -q diff -u -wb -- Any_Array_Impl_T.cpp Any_Basic_Impl.cpp Any_Basic_Impl_T.cpp Any_Dual_Impl_T.cpp Any_Impl_T.cpp Any_Special_Impl_T.cpp Any_SystemException.cpp TypeCode.cpp TypeCode_Case_T.cpp TypeCode_CDR_Extraction.cpp Union_TypeCode.cpp Union_TypeCode_Static.cpp (in directory C:\ACE\latest\ACE_wrappers\TAO\tao\AnyTypeCode\)
+Index: Any_Array_Impl_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Any_Array_Impl_T.cpp,v
+retrieving revision 1.4
+diff -u -u -w -b -r1.4 Any_Array_Impl_T.cpp
+--- Any_Array_Impl_T.cpp        3 Nov 2005 17:38:44 -0000       1.4
++++ Any_Array_Impl_T.cpp        2 Mar 2006 15:57:08 -0000
+@@ -65,14 +65,14 @@
+   ACE_TRY_NEW_ENV
+     {
+       CORBA::TypeCode_ptr any_tc = any._tao_get_typecode ();
+-      const CORBA::Boolean _tao_equiv =
++      CORBA::Boolean const _tao_equiv =
+         any_tc->equivalent (tc
+                             ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+
+-      if (_tao_equiv == 0)
++      if (_tao_equiv == false)
+         {
+-          return 0;
++          return false;
+         }
+
+       TAO::Any_Impl *impl = any.impl ();
+@@ -84,11 +84,11 @@
+
+           if (narrow_impl == 0)
+             {
+-              return 0;
++              return false;
+             }
+
+           _tao_elem = reinterpret_cast <T_slice*> (narrow_impl->value_);
+-          return 1;
++          return true;
+         }
+
+       TAO::Any_Array_Impl_T<T_slice, T_forany> *replacement = 0;
+@@ -97,7 +97,7 @@
+                       ARRAY_ANY_IMPL (destructor,
+                                       any_tc,
+                                       T_forany::tao_alloc ()),
+-                      0);
++                      false);
+
+       auto_ptr<TAO::Any_Array_Impl_T<T_slice, T_forany> > replacement_safety (
+           replacement
+@@ -111,7 +111,7 @@
+       // shared by another Any. This copies the state, not the buffer.
+       TAO_InputCDR for_reading (unk->_tao_get_cdr ());
+
+-      CORBA::Boolean good_decode =
++      CORBA::Boolean const good_decode =
+         replacement->demarshal_value (for_reading);
+
+       if (good_decode)
+@@ -119,7 +119,7 @@
+           _tao_elem = reinterpret_cast <T_slice*> (replacement->value_);
+           const_cast<CORBA::Any &> (any).replace (replacement);
+           replacement_safety.release ();
+-          return 1;
++          return true;
+         }
+
+       // Duplicated by Any_Impl base class constructor.
+Index: Any_Basic_Impl.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Any_Basic_Impl.cpp,v
+retrieving revision 1.3
+diff -u -u -w -b -r1.3 Any_Basic_Impl.cpp
+--- Any_Basic_Impl.cpp  3 Nov 2005 17:38:44 -0000       1.3
++++ Any_Basic_Impl.cpp  2 Mar 2006 15:52:44 -0000
+@@ -150,7 +150,7 @@
+         // shared by another Any. This copies the state, not the buffer.
+         TAO_InputCDR for_reading (unk->_tao_get_cdr ());
+
+-        CORBA::Boolean good_decode =
++        CORBA::Boolean const good_decode =
+           replacement->demarshal_value (for_reading,
+                                         static_cast<CORBA::Long> (tck));
+
+Index: Any_Basic_Impl_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Any_Basic_Impl_T.cpp,v
+retrieving revision 1.4
+diff -u -u -w -b -r1.4 Any_Basic_Impl_T.cpp
+--- Any_Basic_Impl_T.cpp        3 Nov 2005 17:38:44 -0000       1.4
++++ Any_Basic_Impl_T.cpp        2 Mar 2006 15:53:27 -0000
+@@ -56,13 +56,13 @@
+   ACE_TRY_NEW_ENV
+     {
+       CORBA::TypeCode_ptr any_tc = any._tao_get_typecode ();
+-      CORBA::Boolean _tao_equiv = any_tc->equivalent (tc
++      CORBA::Boolean const _tao_equiv = any_tc->equivalent (tc
+                                                       ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+
+-      if (_tao_equiv == 0)
++      if (_tao_equiv == false)
+         {
+-          return 0;
++          return false;
+         }
+
+       TAO::Any_Impl *impl = any.impl ();
+@@ -74,11 +74,11 @@
+
+           if (narrow_impl == 0)
+             {
+-              return 0;
++              return false;
+             }
+
+           _tao_elem = narrow_impl->value_;
+-          return 1;
++          return true;
+         }
+
+       TAO::Any_Basic_Impl_T<T> *replacement =
+@@ -94,7 +94,7 @@
+       // shared by another Any. This copies the state, not the buffer.
+       TAO_InputCDR for_reading (unk->_tao_get_cdr ());
+
+-      CORBA::Boolean good_decode =
++      CORBA::Boolean const good_decode =
+         replacement->demarshal_value (for_reading);
+
+       if (good_decode)
+@@ -102,7 +102,7 @@
+           _tao_elem = replacement->value_;
+           const_cast<CORBA::Any &> (any).replace (replacement);
+           replacement_safety.release ();
+-          return 1;
++          return true;
+         }
+
+       // Duplicated by Any_Impl base class constructor.
+@@ -113,7 +113,7 @@
+     }
+   ACE_ENDTRY;
+
+-  return 0;
++  return false;
+ }
+
+ template<typename T>
+Index: Any_Dual_Impl_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Any_Dual_Impl_T.cpp,v
+retrieving revision 1.3
+diff -u -u -w -b -r1.3 Any_Dual_Impl_T.cpp
+--- Any_Dual_Impl_T.cpp 3 Nov 2005 17:38:44 -0000       1.3
++++ Any_Dual_Impl_T.cpp 2 Mar 2006 15:54:00 -0000
+@@ -110,7 +110,7 @@
+
+       if (_tao_equiv == 0)
+         {
+-          return 0;
++          return false;
+         }
+
+       TAO::Any_Impl *impl = any.impl ();
+@@ -122,11 +122,11 @@
+
+           if (narrow_impl == 0)
+             {
+-              return 0;
++              return false;
+             }
+
+           _tao_elem = narrow_impl->value_;
+-          return 1;
++          return true;
+         }
+
+       T *empty_value = 0;
+@@ -150,7 +150,7 @@
+       // shared by another Any. This copies the state, not the buffer.
+       TAO_InputCDR for_reading (unk->_tao_get_cdr ());
+
+-      CORBA::Boolean good_decode =
++      CORBA::Boolean const good_decode =
+         replacement->demarshal_value (for_reading);
+
+       if (good_decode)
+@@ -158,7 +158,7 @@
+           _tao_elem = replacement->value_;
+           const_cast<CORBA::Any &> (any).replace (replacement);
+           replacement_safety.release ();
+-          return 1;
++          return true;
+         }
+
+       // Duplicated by Any_Impl base class constructor.
+Index: Any_Impl_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Any_Impl_T.cpp,v
+retrieving revision 1.3
+diff -u -u -w -b -r1.3 Any_Impl_T.cpp
+--- Any_Impl_T.cpp      3 Nov 2005 17:38:44 -0000       1.3
++++ Any_Impl_T.cpp      2 Mar 2006 15:54:50 -0000
+@@ -69,7 +69,7 @@
+
+       if (_tao_equiv == 0)
+         {
+-          return 0;
++          return false;
+         }
+
+       TAO::Any_Impl *impl = any.impl ();
+@@ -81,11 +81,11 @@
+
+           if (narrow_impl == 0)
+             {
+-              return 0;
++              return false;
+             }
+
+           _tao_elem = (T *) narrow_impl->value_;
+-          return 1;
++          return true;
+         }
+
+       TAO::Any_Impl_T<T> *replacement = 0;
+@@ -93,7 +93,7 @@
+                       TAO::Any_Impl_T<T> (destructor,
+                                           any_tc,
+                                           0),
+-                      0);
++                      false);
+
+       auto_ptr<TAO::Any_Impl_T<T> > replacement_safety (replacement);
+
+@@ -105,7 +105,7 @@
+       // shared by another Any. This copies the state, not the buffer.
+       TAO_InputCDR for_reading (unk->_tao_get_cdr ());
+
+-      CORBA::Boolean good_decode =
++      CORBA::Boolean const good_decode =
+         replacement->demarshal_value (for_reading);
+
+       if (good_decode)
+@@ -113,7 +113,7 @@
+           _tao_elem = const_cast<T *> (replacement->value_);
+           const_cast<CORBA::Any &> (any).replace (replacement);
+           replacement_safety.release ();
+-          return 1;
++          return true;
+         }
+
+       // Duplicated by Any_Impl base class constructor.
+Index: Any_Special_Impl_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Any_Special_Impl_T.cpp,v
+retrieving revision 1.4
+diff -u -u -w -b -r1.4 Any_Special_Impl_T.cpp
+--- Any_Special_Impl_T.cpp      16 Jan 2006 14:19:53 -0000      1.4
++++ Any_Special_Impl_T.cpp      2 Mar 2006 15:57:05 -0000
+@@ -103,7 +103,7 @@
+
+       if (any_kind != try_kind)
+         {
+-          return 0;
++          return false;
+         }
+
+       CORBA::ULong length =
+@@ -112,7 +112,7 @@
+
+       if (length != bound)
+         {
+-          return 0;
++          return false;
+         }
+
+       TAO::Any_Impl *impl = any.impl ();
+@@ -127,7 +127,7 @@
+
+           if (narrow_impl == 0)
+             {
+-              return 0;
++              return false;
+             }
+
+           _tao_elem = (T *) narrow_impl->value_;
+@@ -140,7 +140,7 @@
+                                                 tc,
+                                                 0,
+                                                 bound),
+-                      0);
++                      false);
+
+       auto_ptr<TAO::Any_Special_Impl_T<T, from_T, to_T> > replacement_safety (
+           replacement
+@@ -154,7 +154,7 @@
+       // shared by another Any. This copies the state, not the buffer.
+       TAO_InputCDR for_reading (unk->_tao_get_cdr ());
+
+-      CORBA::Boolean good_decode =
++      CORBA::Boolean const good_decode =
+         replacement->demarshal_value (for_reading);
+
+       if (good_decode)
+@@ -162,7 +162,7 @@
+           _tao_elem = replacement->value_;
+           const_cast<CORBA::Any &> (any).replace (replacement);
+           replacement_safety.release ();
+-          return 1;
++          return true;
+         }
+
+       // Duplicated by Any_Impl base class constructor.
+Index: Any_SystemException.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Any_SystemException.cpp,v
+retrieving revision 1.3
+diff -u -u -w -b -r1.3 Any_SystemException.cpp
+--- Any_SystemException.cpp     3 Nov 2005 17:38:44 -0000       1.3
++++ Any_SystemException.cpp     2 Mar 2006 15:56:37 -0000
+@@ -92,13 +92,13 @@
+   ACE_TRY_NEW_ENV
+     {
+       CORBA::TypeCode_ptr any_tc = any._tao_get_typecode ();
+-      CORBA::Boolean _tao_equiv = any_tc->equivalent (tc
++      CORBA::Boolean const _tao_equiv = any_tc->equivalent (tc
+                                                       ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+
+-      if (_tao_equiv == 0)
++      if (_tao_equiv == false)
+         {
+-          return 0;
++          return false;
+         }
+
+       TAO::Any_Impl *impl = any.impl ();
+@@ -110,11 +110,11 @@
+
+           if (narrow_impl == 0)
+             {
+-              return 0;
++              return false;
+             }
+
+           _tao_elem = narrow_impl->value_;
+-          return 1;
++          return true;
+         }
+
+       CORBA::SystemException *empty_value =  (*f) ();
+@@ -124,7 +124,7 @@
+                       TAO::Any_SystemException (destructor,
+                                                 any_tc,
+                                                 empty_value),
+-                      0);
++                      false);
+
+       auto_ptr<TAO::Any_SystemException > replacement_safety (replacement);
+
+@@ -136,7 +136,7 @@
+       // shared by another Any. This copies the state, not the buffer.
+       TAO_InputCDR for_reading (unk->_tao_get_cdr ());
+
+-      CORBA::Boolean good_decode =
++      CORBA::Boolean const good_decode =
+         replacement->demarshal_value (for_reading);
+
+       if (good_decode)
+@@ -144,7 +144,7 @@
+           _tao_elem = replacement->value_;
+           const_cast<CORBA::Any &> (any).replace (replacement);
+           replacement_safety.release ();
+-          return 1;
++          return true;
+         }
+     }
+   ACE_CATCHANY
+Index: TypeCode.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/TypeCode.cpp,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 TypeCode.cpp
+--- TypeCode.cpp        3 Nov 2005 17:38:44 -0000       1.6
++++ TypeCode.cpp        2 Mar 2006 11:54:46 -0000
+@@ -333,7 +333,7 @@
+ CORBA::Exception *
+ CORBA::TypeCode::BadKind::_tao_duplicate (void) const
+ {
+-  CORBA::Exception *result;
++  CORBA::Exception *result = 0;
+   ACE_NEW_RETURN (result,
+                   CORBA::TypeCode::BadKind (*this),
+                   0);
+Index: TypeCode_Case_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/TypeCode_Case_T.cpp,v
+retrieving revision 1.3
+diff -u -u -w -b -r1.3 TypeCode_Case_T.cpp
+--- TypeCode_Case_T.cpp 3 Nov 2005 17:38:44 -0000       1.3
++++ TypeCode_Case_T.cpp 2 Mar 2006 15:59:09 -0000
+@@ -144,7 +144,7 @@
+                       StringType,
+                       TypeCodeType>::label (ACE_ENV_SINGLE_ARG_DECL) const
+ {
+-  CORBA::Any * value;
++  CORBA::Any * value = 0;
+
+   ACE_NEW_THROW_EX (value,
+                     CORBA::Any,
+Index: TypeCode_CDR_Extraction.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/TypeCode_CDR_Extraction.cpp,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 TypeCode_CDR_Extraction.cpp
+--- TypeCode_CDR_Extraction.cpp 12 Jan 2006 00:45:13 -0000      1.6
++++ TypeCode_CDR_Extraction.cpp 3 Mar 2006 13:12:45 -0000
+@@ -105,7 +105,7 @@
+                                  TAO::TypeCodeFactory::TC_Info_List & infos);
+
+   bool find_recursive_tc (char const * id,
+-                          CORBA::TypeCode_ptr & tc,
++                          TAO::TypeCodeFactory::TC_Info_List & tcs,
+                           TAO::TypeCodeFactory::TC_Info_List & infos)
+   {
+     // See comments above for rationale behind using an array instead
+@@ -119,12 +119,18 @@
+
+         if (ACE_OS::strcmp (info.id, id) == 0)
+           {
+-            tc = info.type;
+-            return true;
++            // We have a mathing id, so store the typecode in the out array
++            // and then compare the others.
++            size_t const old_size = tcs.size ();
++            if (tcs.size (old_size + 1) == -1)  // Incremental growth -- *sigh*
++              return false;
++
++            TAO::TypeCodeFactory::TC_Info & new_info = tcs[old_size];
++            new_info.type = info.type;
+           }
+       }
+
+-    return false;
++    return (tcs.size () > 0) ;
+   }
+ }
+
+@@ -409,7 +415,8 @@
+
+
+   // Check if struct TypeCode is recursive.
+-  if (kind == CORBA::tk_struct && find_recursive_tc (id.in (), tc, infos))
++  TAO::TypeCodeFactory::TC_Info_List recursive_tc;
++  if (kind == CORBA::tk_struct && find_recursive_tc (id.in (), recursive_tc, infos))
+     {
+       // Set remaining parameters.
+
+@@ -418,8 +425,14 @@
+                                             member_array_type>
+         recursive_typecode_type;
+
++      size_t const len = recursive_tc.size ();
++
++      for (size_t i = 0; i < len; ++i)
++        {
++          TAO::TypeCodeFactory::TC_Info & info = recursive_tc[i];
++
+       recursive_typecode_type * const rtc =
+-        dynamic_cast<recursive_typecode_type *> (tc);
++            dynamic_cast<recursive_typecode_type *> (info.type);
+
+       ACE_ASSERT (rtc);
+
+@@ -427,6 +440,9 @@
+                               fields,
+                               nfields);
+     }
++
++      tc = recursive_tc[0].type;
++    }
+   else
+     {
+       ACE_NEW_RETURN (tc,
+@@ -496,7 +512,7 @@
+     {
+       elem_type & member = cases[i];
+
+-      TAO::TypeCode::Case<CORBA::String_var, CORBA::TypeCode_var> * the_case;
++      TAO::TypeCode::Case<CORBA::String_var, CORBA::TypeCode_var> * the_case = 0;
+
+       // Ugly.  *sigh*
+       switch (discriminant_kind)
+@@ -647,8 +663,9 @@
+                                case_array_type,
+                                TAO::True_RefCount_Policy> typecode_type;
+
+-  // Check if union TypeCode is recursive.
+-  if (find_recursive_tc (id.in (), tc, infos))
++  // Check if we have recursive members, this could be multiple
++  TAO::TypeCodeFactory::TC_Info_List recursive_tc;
++  if (find_recursive_tc (id.in (), recursive_tc, infos))
+     {
+       // Set remaining parameters.
+
+@@ -657,8 +674,14 @@
+                                             case_array_type>
+         recursive_typecode_type;
+
++      size_t const len = recursive_tc.size ();
++
++      for (size_t i = 0; i < len; ++i)
++        {
++          TAO::TypeCodeFactory::TC_Info & info = recursive_tc[i];
++
+       recursive_typecode_type * const rtc =
+-        dynamic_cast<recursive_typecode_type *> (tc);
++            dynamic_cast<recursive_typecode_type *> (info.type);
+
+       ACE_ASSERT (rtc);
+
+@@ -668,6 +691,9 @@
+                              ncases,
+                              default_index);
+     }
++
++      tc = recursive_tc[0].type;
++    }
+   else
+     {
+       ACE_NEW_RETURN (tc,
+@@ -993,7 +1019,8 @@
+     TAO::True_RefCount_Policy> typecode_type;
+
+   // Check if valuetype/eventtype TypeCode is recursive.
+-  if (find_recursive_tc (id.in (), tc, infos))
++  TAO::TypeCodeFactory::TC_Info_List recursive_tc;
++  if (find_recursive_tc (id.in (), recursive_tc, infos))
+     {
+       // Set remaining parameters.
+
+@@ -1002,8 +1029,14 @@
+                                             member_array_type>
+         recursive_typecode_type;
+
++      size_t const len = recursive_tc.size ();
++
++      for (size_t i = 0; i < len; ++i)
++        {
++          TAO::TypeCodeFactory::TC_Info & info = recursive_tc[i];
++
+       recursive_typecode_type * const rtc =
+-        dynamic_cast<recursive_typecode_type *> (tc);
++            dynamic_cast<recursive_typecode_type *> (info.type);
+
+       ACE_ASSERT (rtc);
+
+@@ -1013,6 +1046,8 @@
+                                  fields,     // Will be copied.
+                                  nfields);
+     }
++      tc = recursive_tc[0].type;
++    }
+   else
+     {
+       ACE_NEW_RETURN (tc,
+@@ -1223,11 +1258,22 @@
+
+     // Don't bother demarshaling the rest of the parameters.  They will
+     // be handled by the top-level TypeCode demarshaling call.
++    bool new_tc = false;
+
+     switch (kind)
+       {
+       case CORBA::tk_struct:
+         {
++          // Check if we already have a tc for this type, if yes, use that
++          TAO::TypeCodeFactory::TC_Info_List recursive_tc;
++          if (find_recursive_tc (id.in (), recursive_tc, infos))
++            {
++              tc = recursive_tc[0].type;
++            }
++          else
++            {
++              new_tc = true;
++
+           typedef ACE_Array_Base<
+             TAO::TypeCode::Struct_Field<
+               CORBA::String_var,
+@@ -1249,9 +1295,20 @@
+                                                    id.in ()),
+                           false);
+         }
++        }
+         break;
+       case CORBA::tk_union:
+         {
++          // Check if we already have a tc for this type, if yes, use that
++          TAO::TypeCodeFactory::TC_Info_List recursive_tc;
++          if (find_recursive_tc (id.in (), recursive_tc, infos))
++            {
++              tc = recursive_tc[0].type;
++            }
++          else
++            {
++              new_tc = true;
++
+           typedef union_case_array_type member_array_type;
+
+           typedef TAO::TypeCode::Union<
+@@ -1270,10 +1327,21 @@
+                                                    id.in ()),
+                           false);
+         }
++        }
+         break;
+       case CORBA::tk_value:
+       case CORBA::tk_event:
+         {
++          // Check if we already have a tc for this type, if yes, use that
++          TAO::TypeCodeFactory::TC_Info_List recursive_tc;
++          if (find_recursive_tc (id.in (), recursive_tc, infos))
++            {
++              tc = recursive_tc[0].type;
++            }
++          else
++            {
++              new_tc = true;
++
+           typedef ACE_Array_Base<
+             TAO::TypeCode::Value_Field<
+               CORBA::String_var,
+@@ -1295,11 +1363,15 @@
+                                                    id.in ()),
+                           false);
+         }
++        }
+         break;
+       default:
+         return false;  // We should never get here.
+       };
+
++     // Only when we created a new tc add it to the list.
++     if (new_tc)
++       {
+     size_t const old_size = infos.size ();
+     if (infos.size (old_size + 1) == -1)  // Incremental growth -- *sigh*
+       return false;
+@@ -1311,6 +1383,7 @@
+     ACE_CHECK_RETURN (false);  // Should never throw!
+
+     info.type = tc;
++       }
+
+     return true;
+   }
+Index: Union_TypeCode.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Union_TypeCode.cpp,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 Union_TypeCode.cpp
+--- Union_TypeCode.cpp  3 Nov 2005 17:38:44 -0000       1.5
++++ Union_TypeCode.cpp  2 Mar 2006 19:09:35 -0000
+@@ -58,11 +58,22 @@
+   if (!success)
+     return false;
+
++  offset += enc.total_length ();
++
+   for (CORBA::ULong i = 0; i < this->ncases_; ++i)
+     {
++      TAO_OutputCDR case_enc;
++      offset = ACE_align_binary (offset,
++                                 ACE_CDR::LONG_ALIGN);
++
+       case_type const & c = *this->cases_[i];
+
+-      if (!c.marshal (enc, offset + enc.total_length ()))
++      if (!c.marshal (case_enc, offset))
++        return false;
++
++      offset += case_enc.total_length ();
++
++      if (!enc.write_octet_array_mb (case_enc.begin ()))
+         return false;
+     }
+
+Index: Union_TypeCode_Static.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Union_TypeCode_Static.cpp,v
+retrieving revision 1.4
+diff -u -u -w -b -r1.4 Union_TypeCode_Static.cpp
+--- Union_TypeCode_Static.cpp   3 Nov 2005 17:38:44 -0000       1.4
++++ Union_TypeCode_Static.cpp   2 Mar 2006 19:39:46 -0000
+@@ -58,13 +58,23 @@
+   if (!success)
+     return false;
+
++  offset += enc.total_length ();
++
+   // Note that we handle the default case below, too.
+
+-  for (unsigned int i = 0; i < this->ncases_; ++i)
++  for (CORBA::ULong i = 0; i < this->ncases_; ++i)
+     {
++      TAO_OutputCDR case_enc;
++      offset = ACE_align_binary (offset,
++                                 ACE_CDR::LONG_ALIGN);
+       case_type const & c = *this->cases_[i];
+
+-      if (!c.marshal (enc, offset + enc.total_length ()))
++      if (!c.marshal (case_enc, offset))
++        return false;
++
++      offset += case_enc.total_length ();
++
++      if (!enc.write_octet_array_mb (case_enc.begin ()))
+         return false;
+     }
+
+
+***** CVS exited normally with code 1 *****
+
+
