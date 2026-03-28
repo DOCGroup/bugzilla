@@ -1,0 +1,272 @@
+Index: orbsvcs/orbsvcs/FaultTolerance/FT_Service_Callbacks.h
+===================================================================
+--- orbsvcs/orbsvcs/FaultTolerance/FT_Service_Callbacks.h	(revision 75400)
++++ orbsvcs/orbsvcs/FaultTolerance/FT_Service_Callbacks.h	(working copy)
+@@ -49,6 +49,11 @@
+   /// Dtor
+   virtual ~TAO_FT_Service_Callbacks (void);
+ 
++  /// Select the profile from MProfile as the needs of the services
++  /// may be. Return the profile in <pfile>
++  virtual CORBA::Boolean select_profile (const TAO_MProfile &mprofile,
++                                         TAO_Profile *&pfile);
++
+   /// Check whether <obj> is nil or not. FT spec suggests some
+   /// extensions for a CORBA::is_nil () operation.
+   virtual CORBA::Boolean object_is_nil (CORBA::Object_ptr obj);
+Index: orbsvcs/orbsvcs/FaultTolerance/FT_Service_Callbacks.cpp
+===================================================================
+--- orbsvcs/orbsvcs/FaultTolerance/FT_Service_Callbacks.cpp	(revision 75400)
++++ orbsvcs/orbsvcs/FaultTolerance/FT_Service_Callbacks.cpp	(working copy)
+@@ -37,6 +37,40 @@
+   delete this->profile_lock_;
+ }
+ 
++CORBA::Boolean 
++TAO_FT_Service_Callbacks::select_profile (const TAO_MProfile &mprofile,
++    TAO_Profile *&pfile)
++{  
++  CORBA::ULong sz =
++    mprofile.size ();
++
++  // Iterate through the list in a circular fashion. Stop one before
++  // the list instead of trying the same thing again.
++  for (CORBA::ULong i = 0;
++       i != sz;
++       ++i)
++    {
++      const TAO_Profile *curr_pfile = mprofile.get_profile (i);
++
++      IOP::TaggedComponent tagged_component;
++      tagged_component.tag = IOP::TAG_FT_PRIMARY;
++
++      // Get the tagged component from the  profile
++      const TAO_Tagged_Components &pfile_tagged =
++        curr_pfile->tagged_components ();
++
++      // Search for the TaggedComponent that we want
++      if (pfile_tagged.get_component (tagged_component) == 1)
++      {
++        // We have found a primary IOR
++        pfile = const_cast<TAO_Profile *>(curr_pfile);
++        return true;
++      }
++    }
++
++  return false;
++}
++
+ CORBA::Boolean
+ TAO_FT_Service_Callbacks::object_is_nil (CORBA::Object_ptr obj)
+ {
+Index: tao/ORB_Core.cpp
+===================================================================
+--- tao/ORB_Core.cpp	(revision 75400)
++++ tao/ORB_Core.cpp	(working copy)
+@@ -1945,6 +1945,14 @@
+           profile = mprofile.get_profile (i);
+           profile->policies (policy_list ACE_ENV_ARG_PARAMETER);
+           ACE_CHECK_RETURN (0);
++  TAO_MProfile mp_temp;
++
++  TAO_Profile* profile = 0;
++  if (this->service_profile_selection(mp, profile) && profile)
++    {
++      mp_temp.add_profile(profile);
++    }
++
+         }
+     }
+ 
+@@ -2108,7 +2116,7 @@
+   if (!orb_core->use_global_collocation () && orb_core != this)
+     return 0;
+ 
+-  if (!orb_core->is_collocated (mp))
++  if (!orb_core->is_collocated (profile ? mp_temp : mp))
+     return 0;
+ 
+   return 1;
+Index: tao/Stub.cpp
+===================================================================
+--- tao/Stub.cpp	(revision 75400)
++++ tao/Stub.cpp	(working copy)
+@@ -152,10 +152,6 @@
+   // Since we have been forwarded, we must set profile_success_ to false
+   // since we are starting a new with a new set of profiles!
+   this->profile_success_ = false;
+-
+-  // Reset any flags that may be appropriate in the services that
+-  // selects profiles for invocation
+-  this->orb_core_->reset_service_profile_flags ();
+ }
+ 
+ int
+Index: tao/Service_Callbacks.cpp
+===================================================================
+--- tao/Service_Callbacks.cpp	(revision 75400)
++++ tao/Service_Callbacks.cpp	(working copy)
+@@ -16,7 +16,7 @@
+ }
+ 
+ CORBA::Boolean
+-TAO_Service_Callbacks::select_profile (TAO_MProfile * /*mprofile*/,
++TAO_Service_Callbacks::select_profile (const TAO_MProfile & /*mprofile*/,
+                                        TAO_Profile *& /*pfile*/)
+ {
+   return false;
+@@ -38,13 +38,7 @@
+   return true;
+ }
+ 
+-void
+-TAO_Service_Callbacks::reset_profile_flags (void)
+-{
+-  return;
+-}
+ 
+-
+ TAO_Service_Callbacks::Profile_Equivalence
+ TAO_Service_Callbacks::is_profile_equivalent (const TAO_Profile *,
+                                               const TAO_Profile *)
+Index: tao/ORB_Core.inl
+===================================================================
+--- tao/ORB_Core.inl	(revision 75400)
++++ tao/ORB_Core.inl	(working copy)
+@@ -76,7 +76,7 @@
+ }
+ 
+ ACE_INLINE CORBA::Boolean
+-TAO_ORB_Core::service_profile_selection (TAO_MProfile &mprofile,
++TAO_ORB_Core::service_profile_selection (const TAO_MProfile &mprofile,
+                                          TAO_Profile  *&profile)
+ {
+   CORBA::Boolean retval = 0;
+@@ -86,45 +86,13 @@
+   if (this->ft_service_.service_callback ())
+     {
+       retval =
+-        this->ft_service_.service_callback ()->select_profile (&mprofile,
++        this->ft_service_.service_callback ()->select_profile (mprofile,
+                                                                 profile);
+     }
+   return retval;
+ }
+ 
+ ACE_INLINE CORBA::Boolean
+-TAO_ORB_Core::service_profile_reselection (TAO_Stub *stub,
+-                                           TAO_Profile *&profile)
+-{
+-  CORBA::Boolean retval = 0;
+-  // @@ If different services have the same feature we may want to
+-  // prioritise them here. We need to decide here whose selection of
+-  // profile is more important.
+-  if (this->ft_service_.service_callback ())
+-    {
+-      retval =
+-        this->ft_service_.service_callback ()->reselect_profile (stub,
+-                                                                 profile);
+-    }
+-  return retval;
+-}
+-
+-ACE_INLINE void
+-TAO_ORB_Core::reset_service_profile_flags (void)
+-{
+-  // @@ If different services have the same feature we may want to
+-  // prioritise them here. We need to decide here whose selection of
+-  // profile is more important.
+-
+-  if (this->ft_service_.service_callback ())
+-    {
+-      this->ft_service_.service_callback ()->reset_profile_flags ();
+-    }
+-  return;
+-}
+-
+-
+-ACE_INLINE CORBA::Boolean
+ TAO_ORB_Core::object_is_nil (CORBA::Object_ptr obj)
+ {
+   CORBA::Boolean retval = 0;
+Index: tao/Stub.inl
+===================================================================
+--- tao/Stub.inl	(revision 75400)
++++ tao/Stub.inl	(working copy)
+@@ -212,24 +212,6 @@
+     }
+ 
+   return false;
+-#if 0
+-  else
+-    {
+-      // Check whether the loaded services have something to say about
+-      // this condition
+-      TAO_Profile *prof = 0;
+-      this->orb_core_->service_profile_reselection (this,
+-                                                    prof);
+-
+-      // If the service is loaded and has a profile then try it.
+-      if (prof)
+-        {
+-          return true;
+-        }
+-      this->reset_profiles_i ();
+-      return false;
+-    }
+-#endif /*If 0 */
+ }
+ 
+ ACE_INLINE const TAO_MProfile&
+Index: tao/Service_Callbacks.h
+===================================================================
+--- tao/Service_Callbacks.h	(revision 75400)
++++ tao/Service_Callbacks.h	(working copy)
+@@ -77,17 +77,9 @@
+ 
+   /// Select the profile from MProfile as the needs of the services
+   /// may be. Return the profile in <pfile>
+-  virtual CORBA::Boolean select_profile (TAO_MProfile *mprofile,
++  virtual CORBA::Boolean select_profile (const TAO_MProfile &mprofile,
+                                          TAO_Profile *&pfile);
+ 
+-  /// Select the profile from MProfile as the needs of the services
+-  /// may be. Return the profile in <pfile>
+-  virtual CORBA::Boolean reselect_profile (TAO_Stub *stub,
+-                                           TAO_Profile *&pfile);
+-
+-  /// Reset the profile flags that the services could have
+-  virtual void reset_profile_flags (void);
+-
+   /// Check whether <obj> is nil or not.
+   virtual CORBA::Boolean object_is_nil (CORBA::Object_ptr obj);
+ 
+Index: tao/ORB_Core.h
+===================================================================
+--- tao/ORB_Core.h	(revision 75400)
++++ tao/ORB_Core.h	(working copy)
+@@ -727,23 +727,10 @@
+    * services do make the selection they would return the selected
+    * profile through <profile>.
+    */
+-  CORBA::Boolean service_profile_selection (TAO_MProfile &mprofile,
++  CORBA::Boolean service_profile_selection (const TAO_MProfile &mprofile,
+                                             TAO_Profile  *&profile);
+ 
+   /**
+-   * The loaded service in the ORB_Core would determine if the profile
+-   * reselection is going to be made by the services or not. If the
+-   * services do make the reselection they would return the selected
+-   * profile through <profile>. The reselction is for the
+-   * multi-profile IORS.
+-   */
+-  CORBA::Boolean service_profile_reselection (TAO_Stub *stub,
+-                                              TAO_Profile *&profile);
+-
+-  /// Reset the flags in the loaded services.
+-  void reset_service_profile_flags (void);
+-
+-  /**
+    * The loaded service would determine if the CORBA::Object_ptr is
+    * actually nil or not. This would be useful to accomodate new
+    * enhanced definitions as defined by the service specification.
