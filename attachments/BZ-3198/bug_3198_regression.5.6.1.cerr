@@ -1,0 +1,25 @@
+TAO (19423|3086833360) Initializing the process-wide services
+TAO (19423|3086833360) Default ORB - global initialization completed.
+TAO (19423|3086833360) Initializing the orb-specific services
+TAO (19423|3086833360) Default_Resource_Factory - codeset manager=0x9068a50
+TAO (19423|3086833360) - Codeset_Manager_i::init_ccs, Loaded Codeset translator <UTF8_Latin1_Factory>, ncs = 00010001 tcs = 05010001
+TAO (19423|3086833360) - UTF16_BOM_Translator: forceBE 0
+TAO (19423|3086833360) Loaded default protocol <IIOP_Factory>
+TAO (19423|3086833360) created new ORB <>
+TAO (19423|3086833360) - Transport_Cache_Manager::find_i, no idle transport is available
+TAO (19423|3086833360) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (19423|3086833360) - IIOP_Connector::begin_connection, to <localhost:12345> which should block
+TAO (19423|3086833360) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[151439000]
+TAO (19423|3086833360) - Leader_Follower[151439000]::wait_for_event, (leader) enter reactor event loop
+TAO (19423|3086833360) - Leader_Follower[151439000]::wait_for_event, (leader) exit reactor event loop
+TAO (19423|3086833360) - Transport_Connector::wait_for_connection_completion, transport [151439000], wait done result = -1
+TAO (19423|3086833360) - Transport_Connector::wait_for_connection_completion, transport [151439000], wait for completion failed (107) : Transport endpoint is not connected
+TAO (19423|3086833360) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (19423|3086833360) - IIOP_Connector::complete_connection, connection to <localhost:12345> failed (errno: Transport endpoint is not connected)
+TAO (19423|3086833360) - Transport[151439000]::cleanup_queue_i, cleaning up complete queue
+TAO (19423|3086833360) - Transport[151439000]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+(19423|3086833360) EXCEPTION, Exception caught:
+system exception, ID 'IDL:omg.org/CORBA/TRANSIENT:1.0'
+OMG minor code (2), described as '*unknown description*', completed = NO
+
+Destroying ORB <>
