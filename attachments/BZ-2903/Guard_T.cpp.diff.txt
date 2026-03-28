@@ -1,0 +1,49 @@
+FILE COMPARISON
+Produced: 4/20/2007 12:32:10 PM
+
+--- C:\ACE_wrappers_Pharlap\ace\Guard_T.inl	2005-10-28 11:14:56.000000000 -0400
++++ C:\ACE_wrappers\ace\Guard_T.inl	2007-04-20 12:29:04.000000000 -0400
+@@ -12 +12 @@
+-  return this->owner_ = this->lock_->acquire ();
++  return this->locked_ = this->lock_->acquire ();
+@@ -18 +18 @@
+-  return this->owner_ = this->lock_->tryacquire ();
++  return this->locked_ = this->lock_->tryacquire ();
+@@ -24 +24 @@
+-  if (this->owner_ == -1)
++  if (this->locked_ == -1)
+@@ -27,0 +28 @@
++      int status = this->lock_->release ();
+@@ -27 +30,5 @@
+-      this->owner_ = -1;
++      // check the the release call above
++      // succeeded before indicating that
++      // we don't own the lock anymore
++      if( status == 0 )
++        this->locked_ = -1;
+@@ -29 +36 @@
+-      return this->lock_->release ();
++      return status;
+@@ -38 +45 @@
+-  this->acquire ();
++  this->locked_ = this->acquire ();
+@@ -47 +54 @@
+-    this->acquire ();
++    this->locked_ = this->acquire ();
+@@ -49 +56 @@
+-    this->tryacquire ();
++    this->locked_ = this->tryacquire ();
+@@ -55 +62,2 @@
+-    owner_ (become_owner == 0 ? -1 : 0)
++    owner_ (become_owner == 0 ? -1 : 0),
++    locked_(-1)
+@@ -65 +74,5 @@
+-  this->release ();
++  // If we're the owner attempt to release
++  // the lock, release() will check if the
++  // lock is held before releasing it.
++  if (this->owner_ != -1)
++    this->release ();
+@@ -72 +84 @@
+-  return this->owner_ != -1;
++  return this->locked_ != -1;
