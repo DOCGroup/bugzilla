@@ -1,0 +1,93 @@
+diff -uN ACE_wrappers/TAO/tao/TransportCurrent/IIOP_Current_Impl.cpp ACE_wrappers-patched/TAO/tao/TransportCurrent/IIOP_Current_Impl.cpp
+--- ACE_wrappers/TAO/tao/TransportCurrent/IIOP_Current_Impl.cpp	2007-11-13 23:29:21.000000000 +0100
++++ ACE_wrappers-patched/TAO/tao/TransportCurrent/IIOP_Current_Impl.cpp	2008-04-04 11:28:06.000000000 +0200
+@@ -5,6 +5,7 @@
+ #include "tao/IIOP_Transport.h"
+ #include "tao/Transport_Selection_Guard.h"
+ #include "tao/SystemException.h"
++#include "orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h"
+ 
+ #if TAO_HAS_TRANSPORT_CURRENT == 1
+ 
+@@ -23,8 +24,8 @@
+     /// Transport. Will throw NoContext if the (selected) transport
+     /// () == 0, or if transport->connection_handler () == 0. Will
+     /// throw NoContext, if no transport has been selected yet.
+-
+-    TAO_IIOP_Connection_Handler*
++          
++    TAO::SSLIOP::Connection_Handler*
+     IIOP_Current_Impl::handler (void)
+     {
+ #if defined (TAO_HAS_IIOP) && (TAO_HAS_IIOP != 0)
+@@ -36,7 +37,8 @@
+       if (ch == 0)
+         throw NoContext ();
+ 
+-      return dynamic_cast <TAO_IIOP_Connection_Handler*> (ch);
++
++      return dynamic_cast <TAO::SSLIOP::Connection_Handler*> (ch);
+ #else
+       throw ::CORBA::NO_IMPLEMENT ();
+ #endif
+@@ -80,7 +82,7 @@
+     IIOP_Current_Impl::remote_port (void)
+     {
+ #if defined (TAO_HAS_IIOP) && (TAO_HAS_IIOP != 0)
+-      TAO_IIOP_Connection_Handler *iiopch =
++      TAO::SSLIOP::Connection_Handler *iiopch =
+         this->handler ();
+ 
+       ACE_INET_Addr a;
+@@ -96,7 +98,7 @@
+     IIOP_Current_Impl::remote_host (void)
+     {
+ #if defined (TAO_HAS_IIOP) && (TAO_HAS_IIOP != 0)
+-      TAO_IIOP_Connection_Handler *iiopch =
++      TAO::SSLIOP::Connection_Handler *iiopch =
+         this->handler ();
+ 
+       ACE_INET_Addr a;
+@@ -112,7 +114,7 @@
+     IIOP_Current_Impl::local_port (void)
+     {
+ #if defined (TAO_HAS_IIOP) && (TAO_HAS_IIOP != 0)
+-      TAO_IIOP_Connection_Handler *iiopch =
++      TAO::SSLIOP::Connection_Handler *iiopch =
+         this->handler ();
+ 
+       ACE_INET_Addr a;
+@@ -128,7 +130,7 @@
+     IIOP_Current_Impl::local_host (void)
+     {
+ #if defined (TAO_HAS_IIOP) && (TAO_HAS_IIOP != 0)
+-      TAO_IIOP_Connection_Handler *iiopch =
++      TAO::SSLIOP::Connection_Handler *iiopch =
+         this->handler ();
+ 
+       ACE_INET_Addr a;
+diff -uN ACE_wrappers/TAO/tao/TransportCurrent/IIOP_Current_Impl.h ACE_wrappers-patched/TAO/tao/TransportCurrent/IIOP_Current_Impl.h
+--- ACE_wrappers/TAO/tao/TransportCurrent/IIOP_Current_Impl.h	2007-11-13 23:29:21.000000000 +0100
++++ ACE_wrappers-patched/TAO/tao/TransportCurrent/IIOP_Current_Impl.h	2008-04-04 11:10:33.000000000 +0200
+@@ -21,11 +21,12 @@
+ 
+ #include "tao/TransportCurrent/TC_IIOPC.h"
+ #include "tao/TransportCurrent/Current_Impl.h"
++#include "orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h"
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ class TAO_Transport;
+-class TAO_IIOP_Connection_Handler;
++class TAO::SSLIOP::Connection_Handler;
+ 
+ namespace TAO
+ {
+@@ -81,6 +82,6 @@
+         /// Transport. Will throw NoContext if the (selected) transport
+         /// () == 0, or if transport->connection_handler () == 0. Will
+         /// throw NoContext, if no transport has been selected yet.
+-        TAO_IIOP_Connection_Handler* handler (void);
++        TAO::SSLIOP::Connection_Handler* handler (void);
+ 
+       private:
