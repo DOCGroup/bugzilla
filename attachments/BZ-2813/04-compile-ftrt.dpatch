@@ -1,0 +1,40 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 04-compile-ftrt.dpatch by Thomas Girard <thomas.g.girard@free.fr>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: compile FTRT.
+
+@DPATCH@
+--- ACE_wrappers.orig/TAO/orbsvcs/FTRT_Event_Service/Event_Service/Makefile.am
++++ ACE_wrappers/TAO/orbsvcs/FTRT_Event_Service/Event_Service/Makefile.am
+@@ -20,7 +20,7 @@
+ if BUILD_EXCEPTIONS
+ if !BUILD_ACE_FOR_TAO
+ 
+-noinst_PROGRAMS = ftrt_eventservice
++bin_PROGRAMS = ftrt_eventservice
+ 
+ ftrt_eventservice_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+--- ACE_wrappers.orig/TAO/orbsvcs/FTRT_Event_Service/Factory_Service/Makefile.am
++++ ACE_wrappers/TAO/orbsvcs/FTRT_Event_Service/Factory_Service/Makefile.am
+@@ -22,7 +22,7 @@
+ if BUILD_INTERCEPTORS
+ if !BUILD_ACE_FOR_TAO
+ 
+-noinst_PROGRAMS = ftrtec_factory_service
++bin_PROGRAMS = ftrtec_factory_service
+ 
+ ftrtec_factory_service_CPPFLAGS = \
+   -I$(ACE_ROOT) \
+--- ACE_wrappers.orig/TAO/orbsvcs/FTRT_Event_Service/Gateway_Service/Makefile.am
++++ ACE_wrappers/TAO/orbsvcs/FTRT_Event_Service/Gateway_Service/Makefile.am
+@@ -22,7 +22,7 @@
+ if BUILD_INTERCEPTORS
+ if !BUILD_ACE_FOR_TAO
+ 
+-noinst_PROGRAMS = ftrtec_gateway_service
++bin_PROGRAMS = ftrtec_gateway_service
+ 
+ ftrtec_gateway_service_CPPFLAGS = \
+   -I$(ACE_ROOT) \
