@@ -1,0 +1,59 @@
+--- Acceptor_Impl.cpp.orig	2009-10-26 06:54:32.000000000 -0400
++++ Acceptor_Impl.cpp	2010-03-12 15:40:34.000000000 -0500
+@@ -82,10 +82,6 @@
+                                                                          arg) == -1)
+     {
+       // Activation fails, decrease reference.
+-      sh->transport ()->remove_reference ();
+-
+-      // #REFCOUNT# is zero at this point.
+-
+       return -1;
+     }
+ 
+@@ -96,10 +92,6 @@
+       sh->close ();
+ 
+       // close() doesn't really decrease reference.
+-      sh->transport ()->remove_reference ();
+-
+-      // #REFCOUNT# is zero at this point.
+-
+       if (TAO_debug_level > 0)
+         {
+           ACE_ERROR ((LM_ERROR,
+@@ -147,9 +139,6 @@
+       // registered with either the Reactor or the
+       // Thread-per-Connection_Handler, and the Transport Cache.
+       // #REFCOUNT# is three at this point.
+-
+-      // We can let go of our reference.
+-      sh->transport ()->remove_reference ();
+     }
+   else
+     {
+@@ -164,11 +153,6 @@
+       // Close handler.
+       sh->close ();
+ 
+-      // close() doesn't really decrease reference.
+-      sh->transport ()->remove_reference ();
+-
+-      // #REFCOUNT# is zero at this point.
+-
+       if (TAO_debug_level > 0)
+          {
+            const ACE_TCHAR *error = 0;
+@@ -208,12 +192,6 @@
+ TAO_Accept_Strategy<SVC_HANDLER, ACE_PEER_ACCEPTOR_2>::accept_svc_handler (SVC_HANDLER *svc_handler)
+ {
+   int const result = ACCEPT_STRATEGY_BASE::accept_svc_handler (svc_handler);
+-  if (result == -1)
+-    {
+-      svc_handler->transport ()->remove_reference ();
+-
+-      // #REFCOUNT# is zero at this point.
+-    }
+ 
+   return result;
+ }
