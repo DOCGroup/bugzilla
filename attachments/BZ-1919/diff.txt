@@ -1,0 +1,586 @@
+diff -u -r tao/Adapter.h ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/Adapter.h
+--- tao/Adapter.h	1970-04-20 20:47:33.000000000 +0300
++++ ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/Adapter.h	2004-10-06 16:10:25.255853000 +0300
+@@ -109,6 +109,9 @@
+    */
+   virtual CORBA::Object_ptr root (void) = 0;
+ 
++  // Check for collocation
++  virtual int is_collocated(const TAO::ObjectKey &key) = 0;
++
+   /// Create a collocated object using the given profile and stub.
+   virtual CORBA::Object_ptr create_collocated_object (TAO_Stub *,
+                                                       const TAO_MProfile &) = 0;
+diff -u -r tao/Collocated_Invocation.cpp ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/Collocated_Invocation.cpp
+--- tao/Collocated_Invocation.cpp	1970-04-13 20:00:51.000000000 +0300
++++ ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/Collocated_Invocation.cpp	2004-10-15 09:17:12.271958000 +0300
+@@ -31,12 +31,15 @@
+ 
+     /// Start the interception point
+ #if TAO_HAS_INTERCEPTORS == 1
+-    s =
+-      this->send_request_interception (ACE_ENV_SINGLE_ARG_PARAMETER);
+-    ACE_CHECK_RETURN (TAO_INVOKE_FAILURE);
++    if (strat != TAO_CS_DIRECT_STRATEGY)
++      {
++        s =
++          this->send_request_interception (ACE_ENV_SINGLE_ARG_PARAMETER);
++        ACE_CHECK_RETURN (TAO_INVOKE_FAILURE);
+ 
+-    if (s != TAO_INVOKE_SUCCESS)
+-      return s;
++        if (s != TAO_INVOKE_SUCCESS)
++          return s;
++      }
+ #endif /*TAO_HAS_INTERCEPTORS */
+ 
+     ACE_TRY
+@@ -61,18 +64,24 @@
+             if (this->forwarded_to_.in ())
+               this->reply_received (TAO_INVOKE_RESTART);
+ 
+-            s =
+-              this->receive_other_interception (ACE_ENV_SINGLE_ARG_PARAMETER);
+-            ACE_TRY_CHECK;
++            if (strat != TAO_CS_DIRECT_STRATEGY)
++              {
++                s =
++                  this->receive_other_interception (ACE_ENV_SINGLE_ARG_PARAMETER);
++                ACE_TRY_CHECK;
++              }
+           }
+         // NOTE: Any other condition that needs handling?
+         else if (this->response_expected ())
+           {
+             this->reply_received (TAO_INVOKE_SUCCESS);
+ 
+-            s =
+-              this->receive_reply_interception (ACE_ENV_SINGLE_ARG_PARAMETER);
+-            ACE_TRY_CHECK;
++            if (strat != TAO_CS_DIRECT_STRATEGY)
++              {
++                s =
++                  this->receive_reply_interception (ACE_ENV_SINGLE_ARG_PARAMETER);
++                ACE_TRY_CHECK;
++              }
+           }
+         if (s != TAO_INVOKE_SUCCESS)
+           return s;
+@@ -85,14 +94,19 @@
+           return TAO_INVOKE_SUCCESS;
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+-        PortableInterceptor::ReplyStatus status =
+-          this->handle_any_exception (&ACE_ANY_EXCEPTION
+-                                      ACE_ENV_ARG_PARAMETER);
+-        ACE_TRY_CHECK;
++        if (strat != TAO_CS_DIRECT_STRATEGY)
++          {
++            PortableInterceptor::ReplyStatus status =
++              this->handle_any_exception (&ACE_ANY_EXCEPTION
++                                          ACE_ENV_ARG_PARAMETER);
++            ACE_TRY_CHECK;
+ 
+-        if (status == PortableInterceptor::LOCATION_FORWARD ||
+-            status == PortableInterceptor::TRANSPORT_RETRY)
+-          s = TAO_INVOKE_RESTART;
++            if (status == PortableInterceptor::LOCATION_FORWARD ||
++                status == PortableInterceptor::TRANSPORT_RETRY)
++              s = TAO_INVOKE_RESTART;
++            else
++              ACE_RE_THROW;
++          }
+         else
+ #endif /*TAO_HAS_INTERCEPTORS*/
+           ACE_RE_THROW;
+@@ -104,13 +118,18 @@
+         if (this->response_expected () == false)
+           return TAO_INVOKE_SUCCESS;
+ #if TAO_HAS_INTERCEPTORS == 1
+-        PortableInterceptor::ReplyStatus st =
+-          this->handle_all_exception (ACE_ENV_SINGLE_ARG_PARAMETER);
+-        ACE_TRY_CHECK;
++        if (strat != TAO_CS_DIRECT_STRATEGY)
++          {
++            PortableInterceptor::ReplyStatus st =
++              this->handle_all_exception (ACE_ENV_SINGLE_ARG_PARAMETER);
++            ACE_TRY_CHECK;
+ 
+-        if (st == PortableInterceptor::LOCATION_FORWARD ||
+-            st == PortableInterceptor::TRANSPORT_RETRY)
+-          s = TAO_INVOKE_RESTART;
++            if (st == PortableInterceptor::LOCATION_FORWARD ||
++                st == PortableInterceptor::TRANSPORT_RETRY)
++              s = TAO_INVOKE_RESTART;
++            else
++              ACE_RE_THROW;
++          }
+         else
+ #endif /*TAO_HAS_INTERCEPTORS == 1*/
+           ACE_RE_THROW;
+diff -u -r tao/IORTable/Table_Adapter.cpp ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/IORTable/Table_Adapter.cpp
+--- tao/IORTable/Table_Adapter.cpp	2003-10-28 20:29:28.000000000 +0200
++++ ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/IORTable/Table_Adapter.cpp	2004-10-06 17:23:37.696161000 +0300
+@@ -96,6 +96,11 @@
+   return CORBA::Object::_duplicate (this->root_);
+ }
+ 
++int TAO_Table_Adapter::is_collocated(const TAO::ObjectKey &key)
++{
++  return 0;
++}
++
+ CORBA::Object_ptr
+ TAO_Table_Adapter::create_collocated_object (TAO_Stub *stub,
+                                              const TAO_MProfile &)
+diff -u -r tao/IORTable/Table_Adapter.h ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/IORTable/Table_Adapter.h
+--- tao/IORTable/Table_Adapter.h	2003-07-22 02:51:38.000000000 +0300
++++ ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/IORTable/Table_Adapter.h	2004-10-06 17:22:42.665941000 +0300
+@@ -50,6 +50,7 @@
+     ACE_THROW_SPEC ((CORBA::SystemException));
+   virtual const char *name (void) const;
+   virtual CORBA::Object_ptr root (void);
++  virtual int is_collocated(const TAO::ObjectKey &key);
+   virtual CORBA::Object_ptr create_collocated_object (TAO_Stub *,
+                                                       const TAO_MProfile &);
+ 
+diff -u -r tao/ORB_Core.cpp ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/ORB_Core.cpp
+--- tao/ORB_Core.cpp	1970-06-14 14:16:58.000000000 +0300
++++ ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/ORB_Core.cpp	2004-10-15 09:05:01.598296000 +0300
+@@ -28,6 +28,7 @@
+ #include "TAOC.h"
+ #include "Endpoint_Selector_Factory.h"
+ #include "Client_Strategy_Factory.h"
++#include "Endpoint.h"
+ 
+ #if (TAO_HAS_INTERCEPTORS == 1)
+ # include "ClientRequestInfo.h"
+@@ -1715,6 +1716,7 @@
+ 
+     TAO_ORB_Table *table = TAO_ORB_Table::instance ();
+     const TAO_ORB_Table::Iterator end = table->end ();
++
+     for (TAO_ORB_Table::Iterator i = table->begin (); i != end; ++i)
+       {
+         TAO_ORB_Core *other_core = (*i).int_id_;
+@@ -1733,6 +1735,7 @@
+ 
+   // The constructor sets the proxy broker as the
+   // Remote one.
++
+   ACE_NEW_RETURN (x,
+                   CORBA::Object (stub, 0),
+                   0);
+@@ -1806,7 +1809,38 @@
+   //    address (ORB Host) but not the object_key.  This should be checked
+   //    also.
+ 
+-  return this->thread_lane_resources_manager ().is_collocated (mprofile);
++  if(this->thread_lane_resources_manager ().is_collocated (mprofile))
++      return 1;
++
++  if(!use_implrepo_)
++      return 0;
++
++  if(CORBA::is_nil(implrepo_service_))
++      return 0;
++
++  TAO_Stub *imr_stub = implrepo_service_->_stubobj();
++
++  TAO_MProfile &imr_mprofile = imr_stub->base_profiles();
++
++  CORBA::ULong imr_profile_count = imr_mprofile.profile_count();
++  CORBA::ULong profile_count = mprofile.profile_count();
++
++  for(CORBA::ULong i=0; i<imr_profile_count; ++i)
++  {
++      TAO_Profile *imr_profile = const_cast<TAO_Profile*>(imr_mprofile.get_profile(i));
++      TAO_Endpoint *imr_endpoint = imr_profile->endpoint();
++      for(CORBA::ULong j=0; j<profile_count; ++j)
++      {
++          TAO_Profile *profile = const_cast<TAO_Profile*>(mprofile.get_profile(j));
++          TAO_Endpoint *endPoint = profile->endpoint();
++          if(imr_endpoint->is_equivalent(endPoint))
++          {
++              TAO::ObjectKey_var key = profile->_key();
++              return this->poa_adapter()->is_collocated(key.in());
++          }
++      }
++  }
++  return 0;
+ }
+ 
+ // ****************************************************************
+diff -u -r tao/PortableServer/Object_Adapter.cpp ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/PortableServer/Object_Adapter.cpp
+--- tao/PortableServer/Object_Adapter.cpp	1970-06-14 14:16:58.000000000 +0300
++++ ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/PortableServer/Object_Adapter.cpp	2004-10-15 09:08:49.529366000 +0300
+@@ -33,7 +33,6 @@
+ 
+ #include "ace/OS_NS_string.h"
+ 
+-
+ ACE_RCSID (PortableServer,
+            Object_Adapter,
+            "Object_Adapter.cpp,v 1.66 2004/06/23 00:54:02 bala Exp")
+@@ -831,6 +830,55 @@
+   return CORBA::Object::_duplicate (this->root_);
+ }
+ 
++int TAO_Object_Adapter::is_collocated(const TAO::ObjectKey &key)
++{
++  TAO_Object_Adapter::poa_name poa_system_name;
++  CORBA::Boolean is_root = 0;
++  CORBA::Boolean is_persistent = 0;
++  CORBA::Boolean is_system_id = 0;
++  TAO_Temporary_Creation_Time poa_creation_time;
++  TAO_POA *poa = 0;
++
++  int result = 0;
++
++  {
++    ACE_FUNCTION_TIMEPROBE (TAO_POA_PARSE_KEY_START);
++
++    PortableServer::ObjectId system_id;
++    result = TAO_POA::parse_key (key,
++                                 poa_system_name,
++                                 system_id,
++                                 is_root,
++                                 is_persistent,
++                                 is_system_id,
++                                 poa_creation_time);
++  }
++
++  if (result != 0)
++    return 0;
++
++  if (is_persistent)
++    result = this->hint_strategy_->persistent_poa_exists (poa_system_name,
++                                                          poa
++                                                          ACE_ENV_ARG_PARAMETER);
++  else
++    result = this->find_transient_poa (poa_system_name,
++                                       is_root,
++                                       poa_creation_time,
++                                       poa
++                                       ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK_RETURN(0);
++
++  if (result != 0)
++    return 0;
++
++  if ((poa->cached_policies().lifespan () == PortableServer::PERSISTENT) == is_persistent)
++    return 1;
++
++  return 0;
++}
++
++
+ CORBA::Object_ptr
+ TAO_Object_Adapter::create_collocated_object (TAO_Stub *stub,
+                                               const TAO_MProfile &mp)
+@@ -1060,6 +1108,32 @@
+ }
+ 
+ int
++TAO_Object_Adapter::Active_Hint_Strategy::persistent_poa_exists (
++  const poa_name &system_name,
++  TAO_POA *&poa
++  ACE_ENV_ARG_DECL)
++{
++ poa_name folded_name;
++  int result = this->persistent_poa_system_map_.recover_key (system_name,
++                                                             folded_name);
++
++  if (result == 0)
++    {
++      result = this->persistent_poa_system_map_.find (system_name,
++                                                      poa);
++      if (result != 0
++          || folded_name != poa->folded_name ())
++        {
++          result =
++            this->object_adapter_->persistent_poa_name_map_->find (folded_name,
++                                                                   poa);
++        }
++    }
++
++  return result;
++}
++
++int
+ TAO_Object_Adapter::Active_Hint_Strategy::bind_persistent_poa (
+   const poa_name &folded_name,
+   TAO_POA *poa,
+@@ -1126,6 +1200,18 @@
+ }
+ 
+ int
++TAO_Object_Adapter::No_Hint_Strategy::persistent_poa_exists (
++  const poa_name &system_name,
++  TAO_POA *&poa
++  ACE_ENV_ARG_DECL)
++{
++  int result =
++    this->object_adapter_->persistent_poa_name_map_->find (system_name,
++                                                           poa);
++  return result;
++}
++
++int
+ TAO_Object_Adapter::No_Hint_Strategy::bind_persistent_poa (
+   const poa_name &folded_name,
+   TAO_POA *poa,
+Only in ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/PortableServer: Object_Adapter.cpp.old
+diff -u -r tao/PortableServer/Object_Adapter.h ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/PortableServer/Object_Adapter.h
+--- tao/PortableServer/Object_Adapter.h	1970-04-14 19:42:06.000000000 +0300
++++ ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/PortableServer/Object_Adapter.h	2004-10-14 15:25:29.233646000 +0300
+@@ -330,6 +330,7 @@
+     ACE_THROW_SPEC ((CORBA::SystemException));
+   virtual const char *name (void) const;
+   virtual CORBA::Object_ptr root (void);
++  virtual int is_collocated(const TAO::ObjectKey &key);
+   virtual CORBA::Object_ptr create_collocated_object (TAO_Stub *,
+                                                       const TAO_MProfile &);
+ 
+@@ -402,6 +403,10 @@
+                                      TAO_POA *&poa
+                                      ACE_ENV_ARG_DECL) = 0;
+ 
++    virtual int persistent_poa_exists (const poa_name &system_name,
++                                       TAO_POA *&poa
++                                       ACE_ENV_ARG_DECL) = 0;
++
+     virtual int bind_persistent_poa (const poa_name &folded_name,
+                                      TAO_POA *poa,
+                                      poa_name_out system_name) = 0;
+@@ -437,6 +442,10 @@
+                                      TAO_POA *&poa
+                                      ACE_ENV_ARG_DECL);
+ 
++    virtual int persistent_poa_exists (const poa_name &system_name,
++                                       TAO_POA *&poa
++                                       ACE_ENV_ARG_DECL);
++
+     virtual int bind_persistent_poa (const poa_name &folded_name,
+                                      TAO_POA *poa,
+                                      poa_name_out system_name);
+@@ -473,6 +482,10 @@
+                                      TAO_POA *&poa
+                                      ACE_ENV_ARG_DECL);
+ 
++    virtual int persistent_poa_exists (const poa_name &system_name,
++                                       TAO_POA *&poa
++                                       ACE_ENV_ARG_DECL);
++
+     virtual int bind_persistent_poa (const poa_name &folded_name,
+                                      TAO_POA *poa,
+                                      poa_name_out system_name);
+diff -u -r tao/PortableServer/POA.cpp ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/PortableServer/POA.cpp
+--- tao/PortableServer/POA.cpp	1970-05-04 01:23:54.000000000 +0300
++++ ../../../tao1.4.2-gtsal/ACE_wrappers/TAO/tao/PortableServer/POA.cpp	2004-10-15 10:15:46.881082000 +0300
+@@ -30,6 +30,7 @@
+ #include "tao/TSS_Resources.h"
+ #include "tao/debug.h"
+ #include "tao/IORInterceptor/IORInterceptor_List.h"
++#include "tao/Connector_Registry.h"
+ #include "Default_Acceptor_Filter.h"
+ #include "ace/OS_NS_wchar.h"
+ #include "ace/OS_NS_sys_time.h"
+@@ -3582,16 +3583,70 @@
+   this->orb_core_.check_shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
+   ACE_CHECK_RETURN (0);
+ 
++  TAO_Stub *data =
++    this->key_to_stub_i (key, type_id, priority ACE_ENV_ARG_PARAMETER);
++  ACE_CHECK_RETURN (CORBA::Object::_nil ());
++
++  TAO_Stub_Auto_Ptr safe_data (data);
++
++  CORBA::Object_ptr tmp;
++
++  if (this->orb_core_.optimize_collocation_objects ())
++    {
++      ACE_NEW_THROW_EX (tmp, CORBA::Object (data,
++                                            collocated,
++                                            servant),
++                        CORBA::INTERNAL ());
++
++      ACE_CHECK_RETURN (CORBA::Object::_nil ());
++    }
++  else
++    {
++      ACE_NEW_THROW_EX (tmp,
++                        CORBA::Object (data,
++                                       collocated),
++                        CORBA::INTERNAL ());
++      ACE_CHECK_RETURN (CORBA::Object::_nil ());
++    }
++
++  data->servant_orb (this->orb_core_.orb ());
++
++  // Transfer ownership to the Object.
++  (void) safe_data.release ();
++
++  return tmp;
++}
++
++TAO_Stub *
++TAO_POA::key_to_stub (const TAO::ObjectKey &key,
++                      const char *type_id,
++                      CORBA::Short priority
++                      ACE_ENV_ARG_DECL)
++{
++  // Check if the ORB is still running, otherwise throw an exception.
++  // @@ What if the ORB was destroyed?  In that case we shouldn't even
++  //    get here!
++  this->orb_core_.check_shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
++  ACE_CHECK_RETURN (0);
++
++  return this->key_to_stub_i (key, type_id, priority ACE_ENV_ARG_PARAMETER);
++}
++
++TAO_Stub *
++TAO_POA::key_to_stub_i (const TAO::ObjectKey &key,
++                        const char *type_id,
++                        CORBA::Short priority
++                        ACE_ENV_ARG_DECL)
++{
+   //
+   // ImplRepo related.
+   //
+ #if (TAO_HAS_MINIMUM_CORBA == 0)
+ 
+-  CORBA::Object_ptr obj = CORBA::Object::_nil ();
+-
+   if (this->use_imr_
+       && this->cached_policies_.lifespan () == PortableServer::PERSISTENT)
+     {
++
+       // Check to see if we alter the IOR.
+       CORBA::Object_var imr =
+         this->orb_core ().implrepo_service ();
+@@ -3610,7 +3665,6 @@
+ 
+       CORBA::String_var imr_str =
+         imr->_stubobj ()->profile_in_use ()->to_string (ACE_ENV_SINGLE_ARG_PARAMETER);
+-      ACE_CHECK_RETURN (obj);
+ 
+       if (TAO_debug_level > 0)
+         ACE_DEBUG ((LM_DEBUG,
+@@ -3636,7 +3690,17 @@
+           goto orbkey;
+         }
+ 
+-      ACE_CString ior (imr_str.in ());
++      ACE_CString ior;
++      pos = ACE_OS::strchr (imr_str.inout() + sizeof (corbaloc) -1, ':');
++      if(!ACE_OS::strcmp(pos, "://"))
++         ior.set(imr_str.in() + sizeof (corbaloc) -1);
++      else
++      {
++         ssize_t protocol_length = pos - imr_str.in() - sizeof (corbaloc) + 1;
++         ior.set(imr_str.in() + sizeof (corbaloc) - 1,  protocol_length, 1);
++         ior += "://";
++         ior += (imr_str.in() + sizeof (corbaloc) + protocol_length);
++      }
+ 
+       // Add the key.
+ 
+@@ -3650,74 +3714,36 @@
+                     "ImR-ified IOR = \n%s\n",
+                     ACE_TEXT_CHAR_TO_TCHAR (ior.c_str ())));
+ 
+-      obj =
+-        this->orb_core_.orb ()->string_to_object (ior.c_str ()
+-                                                  ACE_ENV_ARG_PARAMETER);
+-      ACE_CHECK_RETURN (obj);
++      TAO_MProfile mprofile;
++      TAO_Connector_Registry *conn_reg =
++        orb_core_.connector_registry (ACE_ENV_SINGLE_ARG_PARAMETER);
++
++      ACE_CHECK_RETURN(0);
++
++      int retv =
++        conn_reg->make_mprofile (ior.c_str(),
++                             mprofile
++                             ACE_ENV_ARG_PARAMETER);
+ 
+-      return obj;
++      if (retv != 0)
++        {
++          ACE_THROW (CORBA::INV_OBJREF (
++                   CORBA::SystemException::_tao_minor_code (
++                      TAO_DEFAULT_MINOR_CODE,
++                      EINVAL),
++                   CORBA::COMPLETED_NO));
++        }
++
++      TAO_Stub *data = orb_core_.create_stub ((const char *) 0,
++                                               mprofile
++                                               ACE_ENV_ARG_PARAMETER);
++      return data;
+     }
+ 
+ orbkey:
+ 
+ #endif /* TAO_HAS_MINIMUM_CORBA */
+ 
+-  TAO_Stub *data =
+-    this->key_to_stub_i (key, type_id, priority ACE_ENV_ARG_PARAMETER);
+-  ACE_CHECK_RETURN (CORBA::Object::_nil ());
+-
+-
+-  TAO_Stub_Auto_Ptr safe_data (data);
+-
+-  CORBA::Object_ptr tmp;
+-
+-  if (this->orb_core_.optimize_collocation_objects ())
+-    {
+-      ACE_NEW_THROW_EX (tmp, CORBA::Object (data,
+-                                            collocated,
+-                                            servant),
+-                        CORBA::INTERNAL ());
+-
+-      ACE_CHECK_RETURN (CORBA::Object::_nil ());
+-    }
+-  else
+-    {
+-      ACE_NEW_THROW_EX (tmp,
+-                        CORBA::Object (data,
+-                                       collocated),
+-                        CORBA::INTERNAL ());
+-      ACE_CHECK_RETURN (CORBA::Object::_nil ());
+-    }
+-
+-  data->servant_orb (this->orb_core_.orb ());
+-
+-  // Transfer ownership to the Object.
+-  (void) safe_data.release ();
+-
+-  return tmp;
+-}
+-
+-TAO_Stub *
+-TAO_POA::key_to_stub (const TAO::ObjectKey &key,
+-                      const char *type_id,
+-                      CORBA::Short priority
+-                      ACE_ENV_ARG_DECL)
+-{
+-  // Check if the ORB is still running, otherwise throw an exception.
+-  // @@ What if the ORB was destroyed?  In that case we shouldn't even
+-  //    get here!
+-  this->orb_core_.check_shutdown (ACE_ENV_SINGLE_ARG_PARAMETER);
+-  ACE_CHECK_RETURN (0);
+-
+-  return this->key_to_stub_i (key, type_id, priority ACE_ENV_ARG_PARAMETER);
+-}
+-
+-TAO_Stub *
+-TAO_POA::key_to_stub_i (const TAO::ObjectKey &key,
+-                        const char *type_id,
+-                        CORBA::Short priority
+-                        ACE_ENV_ARG_DECL)
+-{
+   CORBA::PolicyList_var client_exposed_policies =
+     this->client_exposed_policies (priority
+                                    ACE_ENV_ARG_PARAMETER);
