@@ -1,0 +1,77 @@
+FIRST RUN:
+
+test_timeouts 1 testing...
+Transient exception during test () invocation 0
+caught transient exception
+Error: Timeout expected in 200 ms, but took 431 ms
+
+SECOND AND THIRD RUNS:
+
+test_timeouts 1 testing...
+Transient exception during test () invocation 0
+caught transient exception
+test_timeouts 1 passed...
+test_timeouts 2 testing...
+Timeout exception during test () invocation 0
+caught timeout exception
+test_timeouts 2 passed...
+test_timeouts 3 testing...
+Transient exception during test () invocation 0
+caught transient exception
+test_timeouts 3 passed...
+test_timeouts 4 testing...
+Timeout exception during test () invocation 0
+caught timeout exception
+test_timeouts 4 passed...
+test_timeouts 5 testing...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+Sending synch request to shutdown server
+caught timeout exception
+test_timeouts 5 passed...
+test_timeouts 6 testing...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+Sending synch request to shutdown server
+caught timeout exception
+test_timeouts 6 passed...
+test_timeouts 7 testing...
+c0
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+request loop complete
+Sending synch request to shutdown server
+caught timeout exception
+test_timeouts 7 passed...
+test_buffering 1 testing...
+Servants registered and activated.
+POAManager activated.
+Running orb...
+Error: IOR not found.
+ERROR: <server> still running upon object destruction
+
