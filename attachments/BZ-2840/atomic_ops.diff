@@ -1,0 +1,302 @@
+Index: src/ACE_wrappers/ace/Atomic_Op_Sunpro.c
+===================================================================
+--- src/ACE_wrappers/ace/Atomic_Op_Sunpro.c	(revision 0)
++++ src/ACE_wrappers/ace/Atomic_Op_Sunpro.c	(revision 3143)
+@@ -0,0 +1,87 @@
++/* $Id$
++ *
++ * This is a C file for a reason.  The Sun C++ compiler does not accept
++ * inline assembler.
++ *
++ * Portions of this code are based on atomic operations found in the
++ * linux kernel source code.
++ */
++
++#if defined(__i386) && defined(__SUNPRO_C)
++static void
++__sunpro_asm_code() {
++	__asm("\n\
++			.globl  ace_atomic_add_long			\n\
++			.type   ace_atomic_add_long,@function		\n\
++			.align	4					\n\
++ace_atomic_add_long:							\n\
++			movl		0x00000004(%esp), %edx		\n\
++			movl		0x00000008(%esp), %eax		\n\
++			lock; xadd	%eax, (%edx)			\n\
++			addl		0x00000008(%esp), %eax		\n\
++			ret						\n\
++			");
++
++	__asm("\n\
++			.globl  ace_atomic_swap_long			\n\
++			.type   ace_atomic_swap_long,@function		\n\
++			.align	4					\n\
++ace_atomic_swap_long:							\n\
++			movl		0x00000004(%esp), %edx		\n\
++			movl		0x00000008(%esp), %eax		\n\
++			xchg		%eax, (%edx)			\n\
++			ret						\n\
++			");
++
++	__asm("\n\
++			.globl  ace_atomic_swap_add_long		\n\
++			.type   ace_atomic_swap_add_long,@function	\n\
++			.align	4					\n\
++ace_atomic_swap_add_long:						\n\
++			movl		0x00000004(%esp), %edx		\n\
++			movl		0x00000008(%esp), %eax		\n\
++			lock; xadd	%eax, (%edx)			\n\
++			ret						\n\
++			");
++}
++
++#elif defined(__x86_64) && defined(__SUNPRO_C)
++
++static void
++__sunpro_asm_code() {
++	__asm("\n\
++			.globl  ace_atomic_add_long			\n\
++			.type   ace_atomic_add_long,@function		\n\
++			.align	16					\n\
++ace_atomic_add_long:							\n\
++			movq		%rsi, %rax			\n\
++			lock; xaddq	%rax, (%rdi)			\n\
++			addq		%rsi, %rax			\n\
++			ret						\n\
++			");
++
++	__asm("\n\
++			.globl  ace_atomic_swap_long			\n\
++			.type   ace_atomic_swap_long,@function		\n\
++			.align	16					\n\
++ace_atomic_swap_long:							\n\
++			xchgq	%rsi, (%rdi)				\n\
++			movq	%rsi, %rax				\n\
++			ret						\n\
++			");
++
++	__asm("\n\
++			.globl  ace_atomic_swap_add_long		\n\
++			.type   ace_atomic_swap_add_long,@function	\n\
++			.align	16					\n\
++ace_atomic_swap_add_long:						\n\
++			lock; xaddq	%rsi, (%rdi)			\n\
++			movq		%rsi, %rax			\n\
++			ret						\n\
++			");
++}
++
++#elif !defined (__GNUC__)
++/* Make compilers stop complaining about an empty translation unit */
++static int shut_up_compiler = 0;
++#endif /* ACE_INCLUDE_ATOMIC_OP_SPARC */
+
+Index: src/ACE_wrappers/ace/Atomic_Op_Sunpro.h
+===================================================================
+--- src/ACE_wrappers/ace/Atomic_Op_Sunpro.h	(revision 0)
++++ src/ACE_wrappers/ace/Atomic_Op_Sunpro.h	(revision 3143)
+@@ -0,0 +1,14 @@
++/* -*- C++ -*- */
++// $Id$
++
++#ifndef ACE_ATOMIC_OP_SUNPRO_H
++#define ACE_ATOMIC_OP_SUNPRO_H
++
++extern "C"
++{
++  unsigned long ace_atomic_add_long (volatile unsigned long *dest, long rhs);
++  unsigned long ace_atomic_swap_long (volatile unsigned long *dest, unsigned long rhs);
++  unsigned long ace_atomic_swap_add_long (volatile unsigned long *dest, long rhs);
++}
++
++#endif /* ACE_ATOMIC_OP_SUNPRO_H */
+
+Index: src/ACE_wrappers/ace/Atomic_Op.h
+===================================================================
+--- src/ACE_wrappers/ace/Atomic_Op.h	(revision 74)
++++ src/ACE_wrappers/ace/Atomic_Op.h	(working copy)
+@@ -40,6 +40,9 @@
+ #  endif /* ACE_HAS_INTERLOCKED_EXCHANGEADD */
+ # elif defined (__GNUC__) && (defined (ACE_HAS_PENTIUM) || defined (__amd64__))
+ #  define ACE_HAS_BUILTIN_ATOMIC_OP
++# elif defined (__SUNPRO_CC) && (defined (__i386) || defined (__x86_64))
++#  define ACE_HAS_BUILTIN_ATOMIC_OP
++#include "ace/Atomic_Op_Sunpro.h"
+ # endif /* WIN32 */
+ #endif /* ACE_HAS_THREADS */
+ 
+Index: src/ACE_wrappers/ace/Makefile.am
+===================================================================
+--- src/ACE_wrappers/ace/Makefile.am	(revision 74)
++++ src/ACE_wrappers/ace/Makefile.am	(working copy)
+@@ -59,6 +59,7 @@
+   Asynch_IO_Impl.cpp \
+   Asynch_Pseudo_Task.cpp \
+   Atomic_Op.cpp \
++  Atomic_Op_Sunpro.c \
+   Auto_Event.cpp \
+   Barrier.cpp \
+   Base_Thread_Adapter.cpp \
+Index: src/ACE_wrappers/ace/Makefile.in
+===================================================================
+--- src/ACE_wrappers/ace/Makefile.in	(revision 74)
++++ src/ACE_wrappers/ace/Makefile.in	(working copy)
+@@ -93,6 +93,8 @@
+ @BUILD_ACE_FOR_TAO_FALSE@  Atomic_Op_T.cpp \
+ @BUILD_ACE_FOR_TAO_FALSE@  Atomic_Op_T.h \
+ @BUILD_ACE_FOR_TAO_FALSE@  Atomic_Op_T.inl \
++@BUILD_ACE_FOR_TAO_FALSE@  Atomic_Op_Sunpro.h \
++@BUILD_ACE_FOR_TAO_FALSE@  Atomic_Op_Sunpro.c \
+ @BUILD_ACE_FOR_TAO_FALSE@  Auto_Event.h \
+ @BUILD_ACE_FOR_TAO_FALSE@  Auto_Event.inl \
+ @BUILD_ACE_FOR_TAO_FALSE@  Auto_Functor.cpp \
+@@ -975,6 +977,7 @@
+ 	Active_Map_Manager.cpp Addr.cpp Arg_Shifter.cpp \
+ 	Argv_Type_Converter.cpp Assert.cpp Asynch_IO.cpp \
+ 	Asynch_IO_Impl.cpp Asynch_Pseudo_Task.cpp Atomic_Op.cpp \
++	Atomic_Op_Sunpro.c \
+ 	Auto_Event.cpp Barrier.cpp Base_Thread_Adapter.cpp \
+ 	Based_Pointer_Repository.cpp Basic_Stats.cpp Basic_Types.cpp \
+ 	CDR_Base.cpp CDR_Size.cpp CDR_Stream.cpp Capabilities.cpp \
+@@ -1085,6 +1088,7 @@
+ @BUILD_ACE_FOR_TAO_FALSE@	libACE_la-Asynch_IO_Impl.lo \
+ @BUILD_ACE_FOR_TAO_FALSE@	libACE_la-Asynch_Pseudo_Task.lo \
+ @BUILD_ACE_FOR_TAO_FALSE@	libACE_la-Atomic_Op.lo \
++@BUILD_ACE_FOR_TAO_FALSE@	libACE_la-Atomic_Op_Sunpro.lo \
+ @BUILD_ACE_FOR_TAO_FALSE@	libACE_la-Auto_Event.lo \
+ @BUILD_ACE_FOR_TAO_FALSE@	libACE_la-Barrier.lo \
+ @BUILD_ACE_FOR_TAO_FALSE@	libACE_la-Base_Thread_Adapter.lo \
+@@ -1431,6 +1435,7 @@
+ 	Asynch_Connector.cpp Asynch_Connector.h Asynch_IO.h \
+ 	Asynch_IO_Impl.h Asynch_IO_Impl.inl Asynch_Pseudo_Task.h \
+ 	Atomic_Op.h Atomic_Op.inl Atomic_Op_T.cpp Atomic_Op_T.h \
++	Atomic_Op_Sunpro.h Atomic_Op_Sunpro.c \
+ 	Atomic_Op_T.inl Auto_Event.h Auto_Event.inl Auto_Functor.cpp \
+ 	Auto_Functor.h Auto_Functor.inl Auto_IncDec_T.cpp \
+ 	Auto_IncDec_T.h Auto_IncDec_T.inl Auto_Ptr.cpp Auto_Ptr.h \
+@@ -1991,6 +1996,7 @@
+ @BUILD_ACE_FOR_TAO_FALSE@  Asynch_IO_Impl.cpp \
+ @BUILD_ACE_FOR_TAO_FALSE@  Asynch_Pseudo_Task.cpp \
+ @BUILD_ACE_FOR_TAO_FALSE@  Atomic_Op.cpp \
++@BUILD_ACE_FOR_TAO_FALSE@  Atomic_Op_Sunpro.c \
+ @BUILD_ACE_FOR_TAO_FALSE@  Auto_Event.cpp \
+ @BUILD_ACE_FOR_TAO_FALSE@  Barrier.cpp \
+ @BUILD_ACE_FOR_TAO_FALSE@  Base_Thread_Adapter.cpp \
+@@ -2462,6 +2468,7 @@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libACE_la-Asynch_IO_Impl.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libACE_la-Asynch_Pseudo_Task.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libACE_la-Atomic_Op.Plo@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libACE_la-Atomic_Op_Sunpro.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libACE_la-Auto_Event.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libACE_la-Barrier.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libACE_la-Base_Thread_Adapter.Plo@am__quote@
+@@ -2895,6 +2902,13 @@
+ @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+ @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libACE_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libACE_la-Asynch_Pseudo_Task.lo `test -f 'Asynch_Pseudo_Task.cpp' || echo '$(srcdir)/'`Asynch_Pseudo_Task.cpp
+ 
++libACE_la-Atomic_Op_Sunpro.lo: Atomic_Op_Sunpro.c
++@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libACE_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libACE_la-Atomic_Op_Sunpro.lo -MD -MP -MF "$(DEPDIR)/libACE_la-Atomic_Op_Sunpro.Tpo" -c -o libACE_la-Atomic_Op_Sunpro.lo `test -f 'Atomic_Op_Sunpro.c' || echo '$(srcdir)/'`Atomic_Op_Sunpro.c; \
++@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libACE_la-Atomic_Op_Sunpro.Tpo" "$(DEPDIR)/libACE_la-Atomic_Op_Sunpro.Plo"; else rm -f "$(DEPDIR)/libACE_la-Atomic_Op_Sunpro.Tpo"; exit 1; fi
++@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='Atomic_Op_Sunpro.c' object='libACE_la-Atomic_Op_Sunpro.lo' libtool=yes @AMDEPBACKSLASH@
++@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
++@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libACE_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libACE_la-Atomic_Op_Sunpro.lo `test -f 'Atomic_Op_Sunpro.c' || echo '$(srcdir)/'`Atomic_Op_Sunpro.c
++
+ libACE_la-Atomic_Op.lo: Atomic_Op.cpp
+ @am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libACE_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libACE_la-Atomic_Op.lo -MD -MP -MF "$(DEPDIR)/libACE_la-Atomic_Op.Tpo" -c -o libACE_la-Atomic_Op.lo `test -f 'Atomic_Op.cpp' || echo '$(srcdir)/'`Atomic_Op.cpp; \
+ @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libACE_la-Atomic_Op.Tpo" "$(DEPDIR)/libACE_la-Atomic_Op.Plo"; else rm -f "$(DEPDIR)/libACE_la-Atomic_Op.Tpo"; exit 1; fi
+Index: src/ACE_wrappers/ace/Atomic_Op.cpp
+===================================================================
+--- src/ACE_wrappers/ace/Atomic_Op.cpp	(revision 74)
++++ src/ACE_wrappers/ace/Atomic_Op.cpp	(working copy)
+@@ -30,6 +30,9 @@
+   unsigned long addr = reinterpret_cast<unsigned long> (value);
+   asm( "xadd %0, (%1)" : "+r"(tmp) : "r"(addr) );
+   return tmp + 1;
++#elif defined (__SUNPRO_CC) && (defined (__i386) || defined (__x86_64))
++  return ace_atomic_add_long (
++           reinterpret_cast<volatile unsigned long*> (value), 1);
+ #else /* __GNUC__ && ACE_HAS_PENTIUM */
+   ACE_UNUSED_ARG (value);
+   ACE_NOTSUP_RETURN (-1);
+@@ -44,6 +47,9 @@
+   unsigned long addr = reinterpret_cast<unsigned long> (value);
+   asm( "xadd %0, (%1)" : "+r"(tmp) : "r"(addr) );
+   return tmp - 1;
++#elif defined (__SUNPRO_CC) && (defined (__i386) || defined (__x86_64))
++  return ace_atomic_add_long (
++            reinterpret_cast<volatile unsigned long*> (value), -1);
+ #else /* __GNUC__ && ACE_HAS_PENTIUM */
+   ACE_UNUSED_ARG (value);
+   ACE_NOTSUP_RETURN (-1);
+@@ -57,6 +63,9 @@
+   unsigned long addr = reinterpret_cast<unsigned long> (value);
+   asm( "xchg %0, (%1)" : "+r"(rhs) : "r"(addr) );
+   return rhs;
++#elif defined (__SUNPRO_CC) && (defined (__i386) || defined (__x86_64))
++  return ace_atomic_swap_long (
++           reinterpret_cast<volatile unsigned long*> (value), rhs);
+ #else /* __GNUC__ && ACE_HAS_PENTIUM */
+   ACE_UNUSED_ARG (value);
+   ACE_UNUSED_ARG (rhs);
+@@ -71,6 +80,9 @@
+   unsigned long addr = reinterpret_cast<unsigned long> (value);
+   asm( "xadd %0, (%1)" : "+r"(rhs) : "r"(addr) );
+   return rhs;
++#elif defined (__SUNPRO_CC) && (defined (__i386) || defined (__x86_64))
++  return ace_atomic_swap_add_long (
++           reinterpret_cast<volatile unsigned long*> (value), rhs);
+ #elif defined (WIN32) && !defined (ACE_HAS_INTERLOCKED_EXCHANGEADD)
+ # if defined (_MSC_VER)
+   __asm
+@@ -105,6 +117,9 @@
+   unsigned long addr = reinterpret_cast<unsigned long> (value);
+   asm( "lock ; xadd %0, (%1)" : "+r"(tmp) : "r"(addr) );
+   return tmp + 1;
++#elif defined (__SUNPRO_CC) && (defined (__i386) || defined (__x86_64))
++  return ace_atomic_add_long (
++           reinterpret_cast<volatile unsigned long*> (value), 1);
+ #else /* __GNUC__ && ACE_HAS_PENTIUM */
+   ACE_UNUSED_ARG (value);
+   ACE_NOTSUP_RETURN (-1);
+@@ -119,6 +134,9 @@
+   unsigned long addr = reinterpret_cast<unsigned long> (value);
+   asm( "lock ; xadd %0, (%1)" : "+r"(tmp) : "r"(addr) );
+   return tmp - 1;
++#elif defined (__SUNPRO_CC) && (defined (__i386) || defined (__x86_64))
++  return ace_atomic_add_long (
++           reinterpret_cast<volatile unsigned long*> (value), -1);
+ #else /* __GNUC__ && ACE_HAS_PENTIUM */
+   ACE_UNUSED_ARG (value);
+   ACE_NOTSUP_RETURN (-1);
+@@ -133,6 +151,9 @@
+   // The XCHG instruction automatically follows LOCK semantics
+   asm( "xchg %0, (%1)" : "+r"(rhs) : "r"(addr) );
+   return rhs;
++#elif defined (__SUNPRO_CC) && (defined (__i386) || defined (__x86_64))
++  return ace_atomic_swap_long (
++           reinterpret_cast<volatile unsigned long*> (value), rhs);
+ #else /* __GNUC__ && ACE_HAS_PENTIUM */
+   ACE_UNUSED_ARG (value);
+   ACE_UNUSED_ARG (rhs);
+@@ -147,6 +168,9 @@
+   unsigned long addr = reinterpret_cast<unsigned long> (value);
+   asm( "lock ; xadd %0, (%1)" : "+r"(rhs) : "r"(addr) );
+   return rhs;
++#elif defined (__SUNPRO_CC) && (defined (__i386) || defined (__x86_64))
++  return ace_atomic_swap_add_long (
++           reinterpret_cast<volatile unsigned long*> (value), rhs);
+ #elif defined (WIN32) && !defined (ACE_HAS_INTERLOCKED_EXCHANGEADD)
+ # if defined (_MSC_VER)
+   __asm
+Index: src/ACE_wrappers/ace/GNUmakefile.ACE
+===================================================================
+--- src/ACE_wrappers/ace/GNUmakefile.ACE	(revision 74)
++++ src/ACE_wrappers/ace/GNUmakefile.ACE	(working copy)
+@@ -79,6 +79,7 @@
+   ATM_QoS.cpp \
+   ATM_Stream.cpp \
+   Atomic_Op.cpp \
++  Atomic_Op_Sunpro.c \
+   Auto_Event.cpp \
+   Barrier.cpp \
+   Base_Thread_Adapter.cpp \
