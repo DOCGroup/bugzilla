@@ -1,0 +1,86 @@
+Index: tao/Block_Flushing_Strategy.cpp
+===================================================================
+--- tao/Block_Flushing_Strategy.cpp	(revision 82116)
++++ tao/Block_Flushing_Strategy.cpp	(working copy)
+@@ -25,8 +25,22 @@
+                                             TAO_Queued_Message *msg,
+                                             ACE_Time_Value *max_wait_time)
+ {
+-  while (!msg->all_data_sent ())
++  bool done = false;
++  msg->notify_on_destruction (&done);
++  struct notify_guard
++  {
++    bool &done_;
++    TAO_Queued_Message *msg_;
++    notify_guard(bool &done, TAO_Queued_Message *msg)
++      : done_(done), msg_(msg) {}
++    ~notify_guard()
+     {
++      if (!done_) msg_->notify_on_destruction (0);
++    }
++  } ng (done, msg);
++
++  while (!done && !msg->all_data_sent ())
++    {
+       if (transport->handle_output (max_wait_time) == -1)
+         return -1;
+     }
+Index: tao/Queued_Message.cpp
+===================================================================
+--- tao/Queued_Message.cpp	(revision 82116)
++++ tao/Queued_Message.cpp	(working copy)
+@@ -20,11 +20,13 @@
+   , orb_core_ (oc)
+   , next_ (0)
+   , prev_ (0)
++  , destruction_observer_ (0)
+ {
+ }
+ 
+ TAO_Queued_Message::~TAO_Queued_Message (void)
+ {
++  if (destruction_observer_) *destruction_observer_ = true;
+ }
+ 
+ void
+Index: tao/Queued_Message.inl
+===================================================================
+--- tao/Queued_Message.inl	(revision 82116)
++++ tao/Queued_Message.inl	(working copy)
+@@ -14,4 +14,10 @@
+   return this->prev_;
+ }
+ 
++ACE_INLINE void
++TAO_Queued_Message::notify_on_destruction (bool *b)
++{
++  destruction_observer_ = b;
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/Queued_Message.h
+===================================================================
+--- tao/Queued_Message.h	(revision 82116)
++++ tao/Queued_Message.h	(working copy)
+@@ -141,6 +141,11 @@
+   /// Return 1 if all the data has been sent
+   virtual int all_data_sent (void) const = 0;
+ 
++  /// This object will set *b to true when it gets destroyed, so b must point
++  /// to valid memory until this object is destroyed or notify_on_destruction
++  /// is called again.
++  void notify_on_destruction (bool *b);
++
+   /// Fill up an io vector using the connects of the message
+   /**
+    * Different versions of this class represent the message using
+@@ -234,6 +239,8 @@
+   /// Implement an intrusive double-linked list for the message queue
+   TAO_Queued_Message *next_;
+   TAO_Queued_Message *prev_;
++
++  bool *destruction_observer_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
