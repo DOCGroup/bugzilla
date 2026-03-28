@@ -1,0 +1,145 @@
+cvs -z9 -q diff -u -wb PICurrent_Guard.cpp (in directory C:\CheckOut\DOC_Thales\TAO\tao\PI_Server\)
+Index: PICurrent_Guard.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PI_Server/PICurrent_Guard.cpp,v
+retrieving revision 1.3
+diff -u -w -b -r1.3 PICurrent_Guard.cpp
+--- PICurrent_Guard.cpp	4 Nov 2005 09:26:55 -0000	1.3
++++ PICurrent_Guard.cpp	21 Feb 2006 13:56:40 -0000
+@@ -67,8 +67,8 @@
+       && this->src_ != this->dest_)
+     {
+       // This copy better be exception-safe!
+-      this->dest_->lc_slot_table (this->src_);
+-
++      if (this->dest_->lc_slot_table (this->src_))
++        {
+       // PICurrent will potentially have to call back on the request
+       // scope current so that it can deep copy the contents of the
+       // thread scope current if the contents of the thread scope
+@@ -82,6 +82,7 @@
+       this->src_->copy_callback (this->copy_callback_);
+     }
+ }
++}
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+
+***** CVS exited normally with code 1 *****
+
+cvs -z9 -q diff -u -wb PICurrent_Copy_Callback.cpp PICurrent_Impl.cpp PICurrent_Impl.h PICurrent_Impl.inl (in directory C:\CheckOut\DOC_Thales\TAO\tao\PI\)
+Index: PICurrent_Copy_Callback.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PI/PICurrent_Copy_Callback.cpp,v
+retrieving revision 1.5
+diff -u -w -b -r1.5 PICurrent_Copy_Callback.cpp
+--- PICurrent_Copy_Callback.cpp	15 Feb 2006 11:42:16 -0000	1.5
++++ PICurrent_Copy_Callback.cpp	21 Feb 2006 11:42:12 -0000
+@@ -50,6 +50,7 @@
+       // Prevent subsequent deep copies, effectively disabling this
+       // callback.
+       this->src_->copy_callback (0);
++      this->src_->destruction_callback (0);
+     }
+ }
+ 
+Index: PICurrent_Impl.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PI/PICurrent_Impl.cpp,v
+retrieving revision 1.6
+diff -u -w -b -r1.6 PICurrent_Impl.cpp
+--- PICurrent_Impl.cpp	15 Feb 2006 11:40:41 -0000	1.6
++++ PICurrent_Impl.cpp	21 Feb 2006 14:49:17 -0000
+@@ -50,7 +50,12 @@
+   // Get the slot table that is currently active
+   PICurrent_Impl::Table & table = this->current_slot_table ();
+ 
+-  ACE_ASSERT (this->lc_slot_table_ != &this->slot_table_);
++  // The active slot table should never be a lazy copy of itself!
++  if (this->lc_slot_table_ == &this->slot_table_)
++  {
++    ACE_DEBUG ((LM_DEBUG, "(lc_slot_table_ == &slot_table_) at " __FILE__ ":%d", __LINE__));
++    ACE_THROW (CORBA::INTERNAL ());
++  }
+ 
+   CORBA::Any * any = 0;
+ 
+@@ -123,6 +128,12 @@
+ TAO::PICurrent_Impl::execute_destruction_callback (
+   TAO::PICurrent_Impl::Table * old_lc_slot_table)
+ {
++  // we are being asked to lc another table, if this
++  // is null, make sure we take a physical copy of the
++  // existing table we had lc before it disappears.
++  if ((0 == old_lc_slot_table) && (0 != this->lc_slot_table_))
++    this->slot_table_ = *this->lc_slot_table_;
++
+   this->lc_slot_table_ = old_lc_slot_table;
+ }
+ 
+Index: PICurrent_Impl.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PI/PICurrent_Impl.h,v
+retrieving revision 1.6
+diff -u -w -b -r1.6 PICurrent_Impl.h
+--- PICurrent_Impl.h	15 Feb 2006 11:11:44 -0000	1.6
++++ PICurrent_Impl.h	21 Feb 2006 13:48:59 -0000
+@@ -100,7 +100,8 @@
+     Table & current_slot_table (void);
+ 
+     /// Logically (shallow) copy the given slot table.
+-    void lc_slot_table (PICurrent_Impl *p);
++    // returns true if copied, false if it would be self-referencing.
++    bool lc_slot_table (PICurrent_Impl *p);
+ 
+     /// Return pointer to the logically copied slot table.
+     /**
+Index: PICurrent_Impl.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PI/PICurrent_Impl.inl,v
+retrieving revision 1.3
+diff -u -w -b -r1.3 PICurrent_Impl.inl
+--- PICurrent_Impl.inl	4 Nov 2005 09:26:55 -0000	1.3
++++ PICurrent_Impl.inl	21 Feb 2006 13:48:59 -0000
+@@ -29,25 +29,36 @@
+     this->lc_slot_table_ == 0 ? this->slot_table_ : *this->lc_slot_table_;
+ }
+ 
+-ACE_INLINE void
++ACE_INLINE bool
+ TAO::PICurrent_Impl::lc_slot_table (TAO::PICurrent_Impl *p)
+ {
++  // Being told to lazy copy some other table?
+   if (p != 0)
+     {
++      // Which actual table are we supposed to lazy copy?
+       Table * t = &p->current_slot_table ();
+ 
++      // Only if we have not already lazy copied this table
+       if (t != this->lc_slot_table_)
+         {
++          // Whould this be a lazy copy of ourselves?
++          if (t == &this->slot_table_)
+
++            this->lc_slot_table_ = 0; // Already ourself!
++          else
++            {
+           this->lc_slot_table_ = t;
+ 
++              // Ensure remote table will tell us if it is
++              // going to change or destroy itself.
+           if (this != p)
+             p->destruction_callback (this);
+         }
+-      else
+-        this->lc_slot_table_ = 0;
++        }
+     }
+   else
+     this->lc_slot_table_ = 0;
++
++  return (0 != this->lc_slot_table_);
+ }
+ 
+ ACE_INLINE TAO::PICurrent_Impl::Table *
