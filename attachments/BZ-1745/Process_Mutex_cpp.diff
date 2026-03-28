@@ -1,0 +1,78 @@
+--- Process_Mutex.cpp	2003-12-18 20:28:02.000000000 -0500
++++ /cygdrive/c/welchj/c/apps/ACE_wrappers/ace/Process_Mutex.cpp	2004-02-17 12:42:01.846725500 -0500
+@@ -1,17 +1,16 @@
+-// Process_Mutex.cpp,v 4.15 2003/12/19 01:28:02 dhinton Exp
++// Process_Mutex.cpp,v 4.13 2003/08/09 06:13:53 dhinton Exp
+ 
+ #include "ace/Process_Mutex.h"
+ #include "ace/Log_Msg.h"
+ #include "ace/ACE.h"
+ #include "ace/Guard_T.h"
+ #include "ace/Process_Mutex.h"
+-#include "ace/Malloc_T.h"
+ 
+ #if !defined (__ACE_INLINE__)
+ #include "ace/Process_Mutex.inl"
+ #endif /* __ACE_INLINE__ */
+ 
+-ACE_RCSID(ace, Process_Mutex, "Process_Mutex.cpp,v 4.15 2003/12/19 01:28:02 dhinton Exp")
++ACE_RCSID(ace, Process_Mutex, "Process_Mutex.cpp,v 4.13 2003/08/09 06:13:53 dhinton Exp")
+ 
+ ACE_ALLOC_HOOK_DEFINE(ACE_Process_Mutex)
+ 
+@@ -36,7 +35,7 @@
+   return this->name_;
+ }
+ 
+-ACE_Process_Mutex::ACE_Process_Mutex (const char *name, void *arg, mode_t mode)
++ACE_Process_Mutex::ACE_Process_Mutex (const char *name, void *arg, mode_t mode,LPSECURITY_ATTRIBUTES sa)
+ #if defined (_ACE_USE_SV_SEM)
+   : lock_ (name ?
+              ACE_TEXT_CHAR_TO_TCHAR (name) : this->unique_name (),
+@@ -49,7 +48,8 @@
+            name ?
+              ACE_TEXT_CHAR_TO_TCHAR (name) : this->unique_name (),
+            (ACE_mutexattr_t *) arg,
+-           mode)
++           mode,
++		   sa)
+ #endif /* _ACE_USE_SV_SEM */
+ {
+ #if defined (_ACE_USE_SV_SEM)
+@@ -57,10 +57,13 @@
+ #endif /* !_ACE_USE_SV_SEM */
+ }
+ 
++
++
+ #if defined (ACE_HAS_WCHAR)
+ ACE_Process_Mutex::ACE_Process_Mutex (const wchar_t *name,
+                                       void *arg,
+-                                      mode_t mode)
++                                      mode_t mode,
++									  LPSECURITY_ATTRIBUTES sa)
+ #if defined (_ACE_USE_SV_SEM)
+   : lock_ (name ?
+              ACE_TEXT_WCHAR_TO_TCHAR (name) : this->unique_name (),
+@@ -73,7 +76,8 @@
+            name ?
+              ACE_TEXT_WCHAR_TO_TCHAR (name) : this->unique_name (),
+            (ACE_mutexattr_t *) arg,
+-           mode)
++           mode,
++		   sa)
+ #endif /* _ACE_USE_SV_SEM */
+ {
+ #if defined (_ACE_USE_SV_SEM)
+@@ -91,11 +95,9 @@
+ #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+ 
+ template class ACE_Guard<ACE_Process_Mutex>;
+-template class ACE_Malloc_Lock_Adapter_T<ACE_Process_Mutex>;
+ 
+ #elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+ 
+ #pragma instantiate ACE_Guard<ACE_Process_Mutex>
+-#pragma instantiate ACE_Malloc_Lock_Adapter_T<ACE_Process_Mutex>
+ 
+ #endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
