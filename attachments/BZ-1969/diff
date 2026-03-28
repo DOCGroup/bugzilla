@@ -1,0 +1,48 @@
+Index: HTIOP_Completion_Handler.h
+===================================================================
+RCS file: /cvs/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/HTIOP/HTIOP_Completion_Handler.h,v
+retrieving revision 1.1
+diff -u -r1.1 HTIOP_Completion_Handler.h
+--- HTIOP_Completion_Handler.h	26 Oct 2004 04:18:21 -0000	1.1
++++ HTIOP_Completion_Handler.h	27 Oct 2004 08:08:51 -0000
+@@ -94,7 +94,7 @@
+ };
+ 
+ #if defined (__ACE_INLINE__)
+-#include "HTIOP/HTIOP_Completion_Handler.i"
++#include "HTIOP_Completion_Handler.i"
+ #endif /* __ACE_INLINE__ */
+ 
+ #include "ace/post.h"
+Index: HTIOP_Profile.h
+===================================================================
+RCS file: /cvs/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/HTIOP/HTIOP_Profile.h,v
+retrieving revision 1.1
+diff -u -r1.1 HTIOP_Profile.h
+--- HTIOP_Profile.h	26 Oct 2004 04:18:22 -0000	1.1
++++ HTIOP_Profile.h	27 Oct 2004 08:08:51 -0000
+@@ -144,7 +144,7 @@
+ };
+ 
+ #if defined (__ACE_INLINE__)
+-# include "HTIOP/HTIOP_Profile.i"
++# include "HTIOP_Profile.i"
+ #endif /* __ACE_INLINE__ */
+ 
+ #include "ace/post.h"
+Index: HTIOP_Transport.h
+===================================================================
+RCS file: /cvs/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/HTIOP/HTIOP_Transport.h,v
+retrieving revision 1.1
+diff -u -r1.1 HTIOP_Transport.h
+--- HTIOP_Transport.h	26 Oct 2004 04:18:22 -0000	1.1
++++ HTIOP_Transport.h	27 Oct 2004 08:08:51 -0000
+@@ -162,7 +162,7 @@
+ };
+ 
+ #if defined (__ACE_INLINE__)
+-#include "HTIOP/HTIOP_Transport.i"
++#include "HTIOP_Transport.i"
+ #endif /* __ACE_INLINE__ */
+ 
+ #include "ace/post.h"
