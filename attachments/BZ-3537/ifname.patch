@@ -1,0 +1,265 @@
+Index: ace/INET_Addr.cpp
+===================================================================
+--- ace/INET_Addr.cpp	(revision 84073)
++++ ace/INET_Addr.cpp	(working copy)
+@@ -99,6 +99,13 @@
+ ACE_INET_Addr::operator != (const ACE_INET_Addr &sap) const
+ {
+   ACE_TRACE ("ACE_INET_Addr::operator !=");
++  if (1 == !!addr_name_ + !!sap.addr_name_) // one is NULL, the other is not
++	  return true;
++
++  if ((2 == !!addr_name_ + !!sap.addr_name_)
++      && ACE_OS::strcmp(addr_name_, sap.addr_name_)) // both are non-NULL but they are different
++	  return true;
++
+   return !((*this) == sap);
+ }
+ 
+@@ -113,6 +120,13 @@
+       || this->get_size () != sap.get_size ())
+     return false;
+ 
++  if (1 == !!addr_name_ + !!sap.addr_name_) // one is NULL, the other is not
++	  return false;
++
++  if ((2 == !!addr_name_ + !!sap.addr_name_)
++      && ACE_OS::strcmp(addr_name_, sap.addr_name_)) // both are non-NULL but they are different
++	  return false;
++
+   return (ACE_OS::memcmp (&this->inet_addr_,
+                           &sap.inet_addr_,
+                           this->get_size ()) == 0);
+@@ -294,6 +308,7 @@
+   ACE_TRACE ("ACE_INET_Addr::ACE_INET_Addr");
+   this->reset ();
+   this->set (sa);
++  this->set_interface_name(sa.addr_name_);
+ }
+ 
+ // Initializes a ACE_INET_Addr from a PORT_NUMBER and a 32 bit Internet
+@@ -1157,4 +1172,45 @@
+   return ACE_NTOHL (ACE_UINT32 (this->inet_addr_.in4_.sin_addr.s_addr));
+ }
+ 
++size_t
++ACE_INET_Addr::get_interface_name (char *ifname, size_t ifname_len) const
++{
++	if (!addr_name_)
++		return 0;
++
++	size_t retv = ACE_OS::strlen(addr_name_) + 1;
++	if (retv <= ifname_len)
++		strncpy(ifname, addr_name_, ifname_len);
++
++	return retv;
++}
++
++const char*
++ACE_INET_Addr::get_interface_name (void) const
++{
++#if defined (ACE_WIN32)
++	static char ifname[64] = { '\0' }; // RFC2863
++#else
++	static char ifname[IFNAMSIZ] = { '\0' }; // unknown if this will work on all non-Windows platforms
++#endif
++	if (ifname[0])
++		return ifname;
++
++	size_t size = this->get_interface_name(ifname, sizeof(ifname));
++	if (!size || (size > sizeof(ifname)))
++		ACE_OS::strcpy(ifname, "<unknown>");
++
++	return ifname;
++}
++
++void 
++ACE_INET_Addr::set_interface_name (const char * const ifname)
++{
++	if (ifname && ACE_OS::strlen(ifname)) {
++		if (addr_name_)
++			free(addr_name_);
++		addr_name_ = ACE_OS::strdup(ifname);
++	}
++}
++
+ ACE_END_VERSIONED_NAMESPACE_DECL
+Index: ace/Sock_Connect.cpp
+===================================================================
+--- ace/Sock_Connect.cpp	(revision 84073)
++++ ace/Sock_Connect.cpp	(working copy)
+@@ -566,6 +566,7 @@
+               {
+                 sockaddr_in *sin = (sockaddr_in*)sa_addr->lpSockaddr;
+                 addrs[count].set(sin,sa_addr->iSockaddrLength);
++		addrs[count].set_interface_name(AdapterList->FriendlyName);
+                 ++count;
+                 break;
+               }
+@@ -581,6 +582,7 @@
+                 {
+                   sockaddr_in *sin = (sockaddr_in*)sa_addr->lpSockaddr;
+                   addrs[count].set(sin,sa_addr->iSockaddrLength);
++		  addrs[count].set_interface_name(AdapterList->FriendlyName);
+                   ++count;
+                   break;
+                 }
+@@ -839,6 +841,7 @@
+               addrs[count].set ((u_short) 0,
+                                 addr->sin_addr.s_addr,
+                                 0);
++	      addrs[count].set_interface_name(p_if->ifa_name);
+               ++count;
+             }
+         }
+@@ -854,6 +857,7 @@
+             {
+               addrs[count].set(reinterpret_cast<struct sockaddr_in *> (addr),
+                                sizeof(sockaddr_in6));
++	      addrs[count].set_interface_name(p_if->ifa_name);
+               ++count;
+             }
+         }
+@@ -970,6 +974,7 @@
+             addrs[count].set ((u_short) 0,
+                               addr->sin_addr.s_addr,
+                               0);
++	    addrs[count].set_interface_name(pcur->ifr_name);
+             ++count;
+         }
+         ++pcur;
+@@ -1027,6 +1032,7 @@
+             if (!IN6_IS_ADDR_UNSPECIFIED(&reinterpret_cast<sockaddr_in6 *>(addr)->sin6_addr))
+             {
+                 addrs[count].set(addr, sizeof(struct sockaddr_in6));
++		addrs[count].set_interface_name(plcur->iflr_name);
+                 ++count;
+             }
+             ++plcur;
+@@ -1107,7 +1113,9 @@
+         )
+       {
+         sockaddr_in *addr = (sockaddr_in*)&req->ifr_addr;
+-        addrs[count++].set(addr, addr->sin_len);
++        addrs[count].set(addr, addr->sin_len);
++	addrs[count].set_interface_name(req->ifa_name);
++	count++;
+       }
+     ptr += req->ifr_addr.sa_len;
+   }
+@@ -1159,6 +1167,7 @@
+               // a ":" to get with the general case.
+               ACE_OS::strcat (address, ":");
+               addrs[count].set (address);
++	      addrs[count].set_interface_name(interface);
+             }
+           else
+             {
+@@ -1307,6 +1316,7 @@
+                 addrlen = static_cast<int> (sizeof (struct sockaddr_in6));
+ #  endif
+               addrs[count].set (addr, addrlen);
++	      addrs[count].set_interface_name(pcur->IFR_NAME);
+               ++count;
+             }
+ # else /* ! _UNICOS */
+@@ -1323,6 +1333,7 @@
+           if (inAddr.sin_addr.s_addr != 0)
+             {
+               addrs[count].set(&inAddr, sizeof(struct sockaddr_in));
++	      addrs[count].set_interface_name(pcur->IFR_NAME);
+               ++count;
+             }
+ # endif /* ! _UNICOS */
+Index: ace/Addr.h
+===================================================================
+--- ace/Addr.h	(revision 84073)
++++ ace/Addr.h	(working copy)
+@@ -90,6 +90,10 @@
+ 
+   /// Number of bytes in the address.
+   int addr_size_;
++
++  /// Human readable name. Only used by sub classes if appropriate,
++  /// allthough it will be freed by this destructor.
++  char *addr_name_;
+ };
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+Index: ace/Addr.cpp
+===================================================================
+--- ace/Addr.cpp	(revision 84073)
++++ ace/Addr.cpp	(working copy)
+@@ -28,13 +28,16 @@
+ // protocol family type...
+ 
+ ACE_Addr::ACE_Addr (int type, int size) :
+-  addr_type_ (type),
+-  addr_size_ (size)
++        addr_type_ (type),
++	addr_size_ (size),
++	addr_name_ (0)
+ {
+ }
+ 
+ ACE_Addr::~ACE_Addr (void)
+ {
++	if (addr_name_)
++		free (addr_name_);
+ }
+ 
+ void *
+@@ -66,6 +69,8 @@
+   ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("addr_type_ = %d"), this->addr_type_));
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\naddr_size_ = %d"), this->addr_size_));
++  if (addr_name_)
++	  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\naddr_name_ = %s"), this->addr_name_));
+   ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+ #endif /* ACE_HAS_DUMP */
+ }
+Index: ace/INET_Addr.h
+===================================================================
+--- ace/INET_Addr.h	(revision 84073)
++++ ace/INET_Addr.h	(working copy)
+@@ -303,6 +303,40 @@
+    */
+   const char *get_host_addr (void) const;
+ 
++  /// Return the  number of bytes required to store the name of the 
++  /// interface, e.g. eth0, including the terminating null character.
++  /// The interface name will be stored in @a ifname if @a ifname_len 
++  /// is big enough to hold the entire null terminated interface name.
++  /// 
++  /// The interface name will only be returned if the ACE_INET_Addr
++  /// object has been initialized by ACE::get_ip_interfaces(). This 
++  /// method is reentrant.
++  ///
++  /// Supported for:
++  ///  
++  ///  * if defined (ACE_HAS_WINCE) && defined (ACE_HAS_WINSOCK2) && (ACE_HAS_WINSOCK2 != 0)
++  ///  * if defined (ACE_HAS_GETIFADDRS)
++  ///  * if defined (__hpux)
++  ///  * if defined (_AIX)
++  ///  * if defined (ACE_VXWORKS) && (ACE_VXWORKS < 0x600) && !defined (ACE_HAS_VXWORKS551_MEDUSA)
++  ///  * if !defined(_UNICOS)
++  //
++  size_t get_interface_name (char *ifname, size_t ifname_len) const;
++
++  /// This is the non-reentrant version of get_interface_name() since
++  /// the retun value points to a static data area.
++  const char *get_interface_name (void) const;
++
++  /// Used internally in ACE::get_ip_interfaces() to set the 
++  /// interface name. See get_interface_name() above.
++  //
++  // This would be much better as a default parameter in one of 
++  // the set() methods above, but they allready have "protocol"
++  // a default parameter so I'm afraid of breaking the API. This
++  // way, on the other hand, is ,albeit clumsy, a safe way to 
++  // achieve the same end. 
++  void set_interface_name (const char * const ifname);
++
+   /// Return the 4-byte IP address, converting it into host byte
+   /// order.
+   ACE_UINT32 get_ip_address (void) const;
