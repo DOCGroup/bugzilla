@@ -1,0 +1,12 @@
+--- ACE_wrappers.orig/include/makeinclude/platform_g++_common.GNU	2005-06-12 08:49:40.000000000 -0400
++++ ACE_wrappers/include/makeinclude/platform_g++_common.GNU	2005-09-01 22:26:21.000000000 -0400
+@@ -129,7 +129,9 @@
+     # Take advantage of G++ (>= 4.x) visibility attributes to generate
+     # improved shared library binaries.
+     ifeq ($(GXX_4_OR_BETTER), 1)
++      ifneq ($(no_hidden_visibility),1)
+       CCFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden
++      endif # no_hidden_visibility
+     endif # GXX_4_OR_BETTER == 1
+   endif # static_libs_only
+ endif # shared_libs
