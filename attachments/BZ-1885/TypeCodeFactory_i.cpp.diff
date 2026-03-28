@@ -1,0 +1,92 @@
+--- TypeCodeFactory_i.cpp.orig	2004-04-03 08:25:50.000000000 -0500
++++ TypeCodeFactory_i.cpp	2004-06-29 10:09:56.411709600 -0400
+@@ -60,14 +60,14 @@
+   )
+   ACE_THROW_SPEC ((CORBA::SystemException))
+ {
+-  if (name != 0 && !this->valid_name (name))
++  if (name != 0 && *name != 0 && !this->valid_name (name))
+     {
+       ACE_THROW_RETURN (CORBA::BAD_PARAM (CORBA::OMGVMCID | 15,
+                                           CORBA::COMPLETED_NO),
+                         CORBA::TypeCode::_nil ());
+     }
+ 
+-  if (id != 0 && !this->valid_id (id))
++  if (id != 0 && *id != 0 && !this->valid_id (id))
+     {
+       ACE_THROW_RETURN (CORBA::BAD_PARAM (CORBA::OMGVMCID | 16,
+                                           CORBA::COMPLETED_NO),
+@@ -300,14 +300,14 @@
+   )
+   ACE_THROW_SPEC ((CORBA::SystemException))
+ {
+-  if (name != 0 && !this->valid_name (name))
++  if (name != 0 && *name != 0 && !this->valid_name (name))
+     {
+       ACE_THROW_RETURN (CORBA::BAD_PARAM (CORBA::OMGVMCID | 15,
+                                           CORBA::COMPLETED_NO),
+                         CORBA::TypeCode::_nil ());
+     }
+ 
+-  if (id != 0 && !this->valid_id (id))
++  if (id != 0 && *id != 0 && !this->valid_id (id))
+     {
+       ACE_THROW_RETURN (CORBA::BAD_PARAM (CORBA::OMGVMCID | 16,
+                                           CORBA::COMPLETED_NO),
+@@ -875,7 +875,7 @@
+   )
+     ACE_THROW_SPEC ((CORBA::SystemException))
+ {
+-  if (name != 0 && !this->valid_name (name))
++  if (name != 0 && *name != 0 && !this->valid_name (name))
+     {
+       ACE_THROW_RETURN (CORBA::BAD_PARAM (CORBA::OMGVMCID | 15,
+                                           CORBA::COMPLETED_NO),
+@@ -985,7 +985,7 @@
+   )
+     ACE_THROW_SPEC ((CORBA::SystemException))
+ {
+-  if (name != 0 && !this->valid_name (name))
++  if (name != 0 && *name != 0 && !this->valid_name (name))
+     {
+       ACE_THROW_RETURN (CORBA::BAD_PARAM (CORBA::OMGVMCID | 15,
+                                           CORBA::COMPLETED_NO),
+@@ -993,8 +993,8 @@
+     }
+ 
+   // Repo id may not be null for an exception.
+-  if ((id == 0 && kind == CORBA::tk_except)
+-      || (id != 0 && !this->valid_id (id)))
++  if (((id == 0 || *id == 0) && kind == CORBA::tk_except)
++      || (id != 0 && *id != 0 && !this->valid_id (id)))
+     {
+       ACE_THROW_RETURN (CORBA::BAD_PARAM (CORBA::OMGVMCID | 16,
+                                           CORBA::COMPLETED_NO),
+@@ -1092,7 +1092,7 @@
+   )
+   ACE_THROW_SPEC ((CORBA::SystemException))
+ {
+-  if (name != 0 && !this->valid_name (name))
++  if (name != 0 && *name != 0 && !this->valid_name (name))
+     {
+       ACE_THROW_RETURN (CORBA::BAD_PARAM (CORBA::OMGVMCID | 15,
+                                           CORBA::COMPLETED_NO),
+@@ -1163,7 +1163,7 @@
+   )
+   ACE_THROW_SPEC ((CORBA::SystemException))
+ {
+-  if (name != 0 && !this->valid_name (name))
++  if (name != 0 && *name != 0 && !this->valid_name (name))
+     {
+       ACE_THROW_RETURN (CORBA::BAD_PARAM (CORBA::OMGVMCID | 15,
+                                           CORBA::COMPLETED_NO),
+@@ -1576,7 +1576,7 @@
+           no_matching_id = offset_map->find (member_id, offset_list);
+         }
+ 
+-      if (no_matching_id && id != 0)
++      if (no_matching_id && id != 0 && *id != 0)
+         {
+           propagating_recursion = ACE_OS::strcmp (member_id, id);
+         }
