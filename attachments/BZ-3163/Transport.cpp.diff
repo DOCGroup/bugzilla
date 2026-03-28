@@ -1,0 +1,26 @@
+--- Transport.cpp	4 Oct 2007 18:44:18 -0000	1.1.1.1
++++ Transport.cpp	5 Dec 2007 16:36:28 -0000
+@@ -749,6 +749,23 @@
+   return (this->head_ == 0);
+ }
+ 
++bool
++TAO_Transport::queue_contains (TAO_Queued_Message * msg)
++{
++  TAO_Queued_Message * current = this->head_;
++
++  while (current != NULL)
++  {
++    if (current == msg)
++    {
++      return true;
++    }
++
++    current = current->next();
++  }
++
++  return false;
++}
+ 
+ int
+ TAO_Transport::schedule_output_i (void)
