@@ -1,0 +1,40 @@
+--- Task.cpp@@/main/6	2004-04-12 11:23:34.000000000 -0400
++++ Task.cpp	2005-12-20 16:18:27.000000000 -0500
+@@ -41,7 +41,7 @@
+ ACE_Task_Base::suspend (void)
+ {
+   ACE_TRACE ("ACE_Task_Base::suspend");
+-  ACE_MT (ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, this->lock_, -1));
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon, this->lock_, -1));
+   if (this->thr_count_ > 0)
+     return this->thr_mgr_->suspend_task (this);
+ 
+@@ -53,7 +53,7 @@
+ ACE_Task_Base::resume (void)
+ {
+   ACE_TRACE ("ACE_Task_Base::resume");
+-  ACE_MT (ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, this->lock_, -1));
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon, this->lock_, -1));
+   if (this->thr_count_ > 0)
+     return this->thr_mgr_->resume_task (this);
+ 
+@@ -75,7 +75,7 @@
+   ACE_TRACE ("ACE_Task_Base::activate");
+ 
+ #if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0)
+-  ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, this->lock_, -1);
++  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon, this->lock_, -1);
+ 
+   // If the task passed in is zero, we will use <this>
+   if (task == 0)
+@@ -165,6 +165,10 @@
+ {
+   ACE_Task_Base *t = (ACE_Task_Base *) object;
+ 
++  // The thread count decrement and close must be done atomically
++  // so that thr_count checks from within close are correct.
++  ACE_MT (ACE_GUARD (ACE_Recursive_Thread_Mutex, ace_mon, t->lock_));
++
+   // The thread count must be decremented first in case the <close>
+   // hook does something crazy like "delete this".
+   t->thr_count_dec ();
