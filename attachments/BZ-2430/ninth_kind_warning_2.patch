@@ -1,0 +1,19 @@
+Index: ace/TTY_IO.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/TTY_IO.cpp,v
+retrieving revision 4.54
+diff -u -r4.54 TTY_IO.cpp
+--- ace/TTY_IO.cpp	4 Jan 2006 09:11:47 -0000	4.54
++++ ace/TTY_IO.cpp	10 Mar 2006 00:40:31 -0000
+@@ -462,9 +462,9 @@
+ 
+       // Always set limits unless set to negative to use default.
+       if (arg->xonlim >= 0)
+-        dcb.XonLim  = arg->xonlim;
++        dcb.XonLim  = (WORD)arg->xonlim;
+       if (arg->xofflim >= 0)
+-        dcb.XoffLim = arg->xofflim;
++        dcb.XoffLim = (WORD)arg->xofflim;
+ 
+       dcb.fAbortOnError = FALSE;
+       dcb.fErrorChar = FALSE;
