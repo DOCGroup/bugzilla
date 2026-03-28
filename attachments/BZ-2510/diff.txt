@@ -1,0 +1,126 @@
+Index: PICurrent.cpp
+===================================================================
+RCS file: /home/cvs_repository/common_repository/ACE_wrappers/TAO/tao/PI/PICurrent.cpp,v
+retrieving revision 1.1.1.1
+retrieving revision 1.1.1.1.2.2
+diff -u -r1.1.1.1 -r1.1.1.1.2.2
+--- PICurrent.cpp	2006/04/27 10:34:55	1.1.1.1
++++ PICurrent.cpp	2006/05/10 15:04:03	1.1.1.1.2.2
+@@ -22,6 +22,7 @@
+ 
+ TAO::PICurrent::PICurrent (TAO_ORB_Core &orb_core)
+   : orb_core_ (orb_core),
++    have_tss_slot(false),
+     tss_slot_ (0),
+     slot_count_ (0)
+ {
+@@ -42,11 +43,6 @@
+ 
+   PICurrent_Impl *impl = this->tsc ();
+ 
+-  if (impl == 0)
+-    ACE_THROW_RETURN (CORBA::BAD_INV_ORDER (CORBA::OMGVMCID | 14,
+-                                            CORBA::COMPLETED_NO),
+-                      0);
+-
+   return impl->get_slot (identifier ACE_ENV_ARG_PARAMETER);
+ }
+ 
+@@ -62,10 +58,6 @@
+ 
+   PICurrent_Impl *impl = this->tsc ();
+ 
+-  if (impl == 0)
+-    ACE_THROW (CORBA::BAD_INV_ORDER (CORBA::OMGVMCID | 14,
+-                                     CORBA::COMPLETED_NO));
+-
+   impl->set_slot (identifier, data ACE_ENV_ARG_PARAMETER);
+   ACE_CHECK;
+ }
+@@ -73,10 +65,28 @@
+ TAO::PICurrent_Impl *
+ TAO::PICurrent::tsc (void)
+ {
++  if (!have_tss_slot)
++  {
++    orb_core_.add_tss_cleanup_func (0,tss_slot_);
++    have_tss_slot = true;
++  }
++  
+   TAO::PICurrent_Impl *impl =
+     static_cast<TAO::PICurrent_Impl *> (
+       this->orb_core_.get_tss_resource (this->tss_slot_));
+ 
++  if (!impl)
++  {
++      ACE_NEW_THROW_EX (impl,
++                        TAO::PICurrent_Impl,
++                        CORBA::NO_MEMORY (
++                          CORBA::SystemException::_tao_minor_code (
++                            TAO::VMCID,
++                            ENOMEM),
++                          CORBA::COMPLETED_NO));
++
++    this->orb_core_.set_tss_resource (tss_slot_, impl);
++  }
+   return impl;
+ }
+ 
+@@ -96,30 +106,13 @@
+   return CORBA::ORB::_duplicate (this->orb_core_.orb ());
+ }
+ 
+-int
++void
+ TAO::PICurrent::initialize (PortableInterceptor::SlotId sc
+                             ACE_ENV_ARG_DECL_NOT_USED)
+ {
+   this->slot_count_ = sc;
+-
+-  if (this->tsc () == 0 && tss_slot_ == 0)
+-    {
+-      TAO::PICurrent_Impl *impl = 0;
+-      ACE_NEW_RETURN (impl,
+-                      TAO::PICurrent_Impl,
+-                      0);
+-
+-      const int result = this->orb_core_.add_tss_cleanup_func (0,
+-                                                               tss_slot_);
+-
+-      if (result != 0)
+-        return result;
+-
+-      this->orb_core_.set_tss_resource (tss_slot_, impl);
+-    }
+-
+-  return 0;
+ }
++
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+Index: PICurrent.h
+===================================================================
+RCS file: /home/cvs_repository/common_repository/ACE_wrappers/TAO/tao/PI/PICurrent.h,v
+retrieving revision 1.1.1.1
+retrieving revision 1.1.1.1.2.2
+diff -u -r1.1.1.1 -r1.1.1.1.2.2
+--- PICurrent.h	2006/04/27 10:34:55	1.1.1.1
++++ PICurrent.h	2006/05/10 15:04:03	1.1.1.1.2.2
+@@ -102,7 +102,7 @@
+                          ACE_ENV_ARG_DECL);
+ 
+     /// Initialize the PICurrent object.
+-    int initialize (PortableInterceptor::SlotId sc ACE_ENV_ARG_DECL);
++    void initialize (PortableInterceptor::SlotId sc ACE_ENV_ARG_DECL);
+ 
+   protected:
+ 
+@@ -128,6 +128,7 @@
+     TAO_ORB_Core &orb_core_;
+ 
+     /// TSS slot assigned to this object.
++    bool have_tss_slot;
+     size_t tss_slot_;
+ 
+     /// The number of allocated slots.
