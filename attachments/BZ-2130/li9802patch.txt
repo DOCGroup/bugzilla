@@ -1,0 +1,127 @@
+diff -ru ACE_wrappers-5.4.5/TAO/tao/ORB_Core.cpp ACE_wrappers-5.4.5a/TAO/tao/ORB_Core.cpp
+--- ACE_wrappers-5.4.5/TAO/tao/ORB_Core.cpp     2005-04-12 14:31:31.000000000 +0000
++++ ACE_wrappers-5.4.5a/TAO/tao/ORB_Core.cpp    2006-01-19 23:11:42.000000000 +0000
+@@ -1698,11 +1698,13 @@
+ 
+   // @@ We should thow CORBA::NO_MEMORY in platforms with exceptions,
+   // but we are stuck in platforms without exceptions!
+-  CORBA::Object_ptr x;
++  TAO_ORB_Core* collocation_core = NULL;
+   {
++    // Lock the ORB_Table against concurrent modification while we
++    // iterate through the ORBs.
+     ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+                       guard,
+-                      this->lock_,
++                      TAO::ORB_Table::instance()->lock_,
+                       CORBA::Object::_nil ());
+ 
+     TAO::ORB_Table * const table = TAO::ORB_Table::instance ();
+@@ -1714,15 +1716,33 @@
+         if (this->is_collocation_enabled (other_core,
+                                           mprofile))
+           {
+-            TAO_Adapter_Registry *ar =
+-              other_core->adapter_registry ();
+-
+-            return ar->create_collocated_object (stub,
+-                                                 mprofile);
++            collocation_core = other_core;
++            // If the found core is not this one, increment reference count
++            // to stop the core being deleted from under us.
++            if( collocation_core != this )
++            {
++              collocation_core->_incr_refcnt();
++            }
++            break;
+           }
+       }
+   }
+ 
++  if( collocation_core )
++  {
++    TAO_Adapter_Registry *ar =
++      collocation_core->adapter_registry ();
++
++    CORBA::Object_ptr retval = ar->create_collocated_object (stub,
++                                                             mprofile);
++    if( collocation_core != this )
++    {
++      collocation_core->_decr_refcnt();
++    }
++    return retval;
++  }
++  
++  CORBA::Object_ptr x;
+   // The constructor sets the proxy broker as the
+   // Remote one.
+   ACE_NEW_RETURN (x,
+@@ -1739,13 +1759,13 @@
+   //    when we use collocation!
+   const TAO_MProfile &mprofile =
+     stub->base_profiles ();
++  TAO_ORB_Core* collocation_core = NULL;
+   {
+-    // @@ Ossama: maybe we need another lock for the table, to
+-    //    reduce contention on the Static_Object_Lock below, if so
+-    //    then we need to use that lock in the ORB_init() function.
++    // Lock the ORB_Table against concurrent modification while we
++    // iterate through the ORBs.
+     ACE_MT (ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+                               guard,
+-                              this->lock_,
++                              TAO::ORB_Table::instance()->lock_,
+                               0));
+ 
+     TAO::ORB_Table * const table = TAO::ORB_Table::instance ();
+@@ -1757,15 +1777,32 @@
+         if (this->is_collocation_enabled (other_core,
+                                           mprofile))
+           {
+-            TAO_Adapter_Registry * const ar =
+-              other_core->adapter_registry ();
+-
+-            return ar->initialize_collocated_object (stub,
+-                                                     obj);
++            collocation_core = other_core;
++            // If the found core is not this one, increment reference count
++            // to stop the core being deleted from under us.
++            if( collocation_core != this )
++            {
++              collocation_core->_incr_refcnt();
++            }
++            break;
+           }
+       }
+   }
+ 
++  if( collocation_core )
++  {
++    TAO_Adapter_Registry * const ar =
++      collocation_core->adapter_registry ();
++
++    CORBA::Long retval = ar->initialize_collocated_object (stub,
++                                                           obj);
++    if( collocation_core != this )
++    {
++      collocation_core->_decr_refcnt();
++    }
++    return retval;
++  }
++
+   return 0;
+ }
+ 
+diff -ru ACE_wrappers-5.4.5/TAO/tao/ORB_Table.h ACE_wrappers-5.4.5a/TAO/tao/ORB_Table.h
+--- ACE_wrappers-5.4.5/TAO/tao/ORB_Table.h      2005-01-19 16:53:12.000000000 +0000
++++ ACE_wrappers-5.4.5a/TAO/tao/ORB_Table.h     2006-01-19 23:02:29.000000000 +0000
+@@ -58,6 +58,9 @@
+    */
+   class TAO_Export ORB_Table
+   {
++
++  friend class TAO_ORB_Core;
++
+   public:
+ 
+     /// Constructor
