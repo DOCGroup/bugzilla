@@ -1,0 +1,825 @@
+diff -aur ace_ref/ACE/ACE_wrappers/ace/Log_Msg.cpp ace_fixed/ACE/ACE_wrappers/ace/Log_Msg.cpp
+--- ace_ref/ACE/ACE_wrappers/ace/Log_Msg.cpp	2007-12-02 18:16:03.000000000 +0200
++++ ace_fixed/ACE/ACE_wrappers/ace/Log_Msg.cpp	2007-12-02 19:28:38.000000000 +0200
+@@ -36,7 +36,6 @@
+ #include "ace/Log_Msg_IPC.h"
+ #include "ace/Log_Msg_NT_Event_Log.h"
+ #include "ace/Log_Msg_UNIX_Syslog.h"
+-#include "ace/Log_Record.h"
+ #include "ace/Recursive_Thread_Mutex.h"
+ 
+ #if !defined (__ACE_INLINE__)
+@@ -452,9 +451,6 @@
+ /// Process id of the current process.
+ pid_t ACE_Log_Msg::pid_ = -2;
+ 
+-/// Current offset of msg_[].
+-ptrdiff_t ACE_Log_Msg::msg_off_ = 0;
+-
+ /// Default per-thread priority mask
+ /// By default, no priorities are enabled.
+ u_long ACE_Log_Msg::default_priority_mask_ = 0;
+@@ -571,7 +567,6 @@
+     }
+ 
+   ACE_Log_Msg::pid_ = ACE_OS::getpid ();
+-  ACE_Log_Msg::msg_off_ = 0;
+ }
+ 
+ u_long
+@@ -652,7 +647,7 @@
+   : status_ (0),
+     errnum_ (0),
+     linenum_ (0),
+-    msg_ (0),
++    log_record_ (0),
+     restart_ (1),  // Restart by default...
+     ostream_ (0),
+     msg_callback_ (0),
+@@ -693,7 +688,7 @@
+         }
+     }
+ 
+-  ACE_NEW_NORETURN (this->msg_, ACE_TCHAR[ACE_MAXLOGMSGLEN+1]);
++  ACE_NEW_NORETURN (this->log_record_, ACE_Log_Record (ACE_MAXLOGMSGLEN + 1));
+ }
+ 
+ ACE_Log_Msg::~ACE_Log_Msg (void)
+@@ -763,7 +758,7 @@
+     }
+ #endif
+ 
+-  delete[] this->msg_;
++  delete this->log_record_;
+ }
+ 
+ // Open the sender-side of the message queue.
+@@ -1014,16 +1009,17 @@
+   // errno!
+   ACE_Errno_Guard guard (errno);
+ 
+-  ACE_Log_Record log_record (log_priority,
+-                             ACE_OS::gettimeofday (),
+-                             this->getpid ());
+-
++  this->log_record_->priority (log_priority);
++  this->log_record_->time_stamp (ACE_OS::gettimeofday ());
++  this->log_record_->pid (this->getpid());
++    
+   // bp is pointer to where to put next part of logged message.
+-  // bspace is the number of characters remaining in msg_.
++  // bspace is the number of characters remaining in log_record_->msg_data () 
++  // not counting the Nul term
+   ACE_TCHAR *bp = const_cast<ACE_TCHAR *> (this->msg ());
+-  size_t bspace = ACE_Log_Record::MAXLOGMSGLEN;  // Leave room for Nul term.
+-  if (this->msg_off_ <= ACE_Log_Record::MAXLOGMSGLEN)
+-    bspace -= static_cast<size_t> (this->msg_off_);
++  
++  // Bug 3156 
++  size_t bspace = this->log_record_->msg_space();  // Leave room for Nul term.
+ 
+   // If this platform has snprintf() capability to prevent overrunning the
+   // output buffer, use it. To avoid adding a maintenance-hassle compile-
+@@ -1491,8 +1487,6 @@
+ 
+                 case 'r': // Run (invoke) this subroutine.
+                   {
+-                    ptrdiff_t const osave = ACE_Log_Msg::msg_off_;
+-
+                     if (ACE_BIT_ENABLED (ACE_Log_Msg::flags_,
+                                          ACE_Log_Msg::SILENT) &&
+                         bspace > 1)
+@@ -1500,10 +1494,14 @@
+                         *bp++ = '{';
+                         --bspace;
+                       }
+-                    ACE_Log_Msg::msg_off_ =  bp - this->msg_;
+-
++                    
++                    // Bug 3156 
++                    // Update msg_off_ of log_record_ but save previous value in order 
++                    // to restore it at the end
++                    ptrdiff_t const osave = this->log_record_->msg_off (bp);                  
++                    
+                     (*va_arg (argp, PTF))();
+-
++                    
+                     if (ACE_BIT_ENABLED (ACE_Log_Msg::flags_,
+                                          ACE_Log_Msg::SILENT) &&
+                         bspace > (1 + ACE_OS::strlen (bp)))
+@@ -1512,9 +1510,10 @@
+                         bp += ACE_OS::strlen (bp);
+                         *bp++ =  '}';
+                       }
++                                        
+                     *bp = '\0';
+                     skip_nul_locate = 1;
+-                    ACE_Log_Msg::msg_off_ = osave;
++                    this->log_record_->msg_off (osave);                    
+                     break;
+                   }
+ 
+@@ -2016,9 +2015,9 @@
+ 
+   ssize_t result = 0;
+ 
+-  // Check that memory was not corrupted, if it corrupted we can't log anything
++  // Check that memory was not corrupted, if it is corrupted we can't log anything
+   // anymore because all our members could be corrupted.
+-  if (bp >= (this->msg_ + ACE_MAXLOGMSGLEN+1))
++  if (bp > (this->log_record_->msg_data_last ()))
+     {
+       abort_prog = true;
+       ACE_OS::fprintf (stderr,
+@@ -2026,12 +2025,11 @@
+     }
+   else
+     {
+-      // Copy the message from thread-specific storage into the transfer
+-      // buffer (this can be optimized away by changing other code...).
+-      log_record.msg_data (this->msg ());
++      // Bug 3156: 
++      // No need to copy the message to an 'auto' log_record anymore 
+ 
+       // Write the <log_record> to the appropriate location.
+-      result = this->log (log_record,
++      result = this->log (*this->log_record_,
+                           abort_prog);
+     }
+ 
+@@ -2044,7 +2042,7 @@
+       // *Always* print a message to stderr if we're aborting.  We
+       // don't use verbose, however, to avoid recursive aborts if
+       // something is hosed.
+-      log_record.print (ACE_Log_Msg::local_host_, 0, stderr);
++      this->log_record_->print (ACE_Log_Msg::local_host_, 0, stderr);
+       ACE_OS::abort ();
+     }
+ 
+@@ -2294,7 +2292,7 @@
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nerrnum_ = %d\n"), this->errnum_));
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nlinenum_ = %d\n"), this->linenum_));
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nfile_ = %C\n"), this->file_));
+-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmsg_ = %s\n"), this->msg_));
++  this->log_record_->dump ();
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nrestart_ = %d\n"), this->restart_));
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nostream_ = %@\n"), this->ostream_));
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmsg_callback_ = %@\n"),
+@@ -2318,7 +2316,6 @@
+   if (this->thr_desc_ != 0 && this->thr_desc_->state () != 0)
+     ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nthr_state_ = %d\n"),
+                 this->thr_desc_->state ()));
+-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmsg_off_ = %d\n"), this->msg_off_));
+ 
+   // Be sure that there is a message_queue_, with multiple threads.
+   ACE_MT (ACE_Log_Msg_Manager::init_backend ());
+diff -aur ace_ref/ACE/ACE_wrappers/ace/Log_Msg.h ace_fixed/ACE/ACE_wrappers/ace/Log_Msg.h
+--- ace_ref/ACE/ACE_wrappers/ace/Log_Msg.h	2007-12-02 18:16:03.000000000 +0200
++++ ace_fixed/ACE/ACE_wrappers/ace/Log_Msg.h	2007-12-02 19:28:38.000000000 +0200
+@@ -23,6 +23,7 @@
+ #include "ace/Global_Macros.h"
+ #include "ace/Default_Constants.h"
+ #include "ace/Log_Priority.h"
++#include "ace/Log_Record.h"
+ #include "ace/os_include/os_limits.h"
+ 
+ // The ACE_ASSERT macro used to be defined here, include ace/Assert.h
+@@ -113,7 +114,6 @@
+ 
+ // Forward declaration
+ class ACE_Thread_Descriptor;
+-class ACE_Log_Record;
+ 
+ /**
+  * @class ACE_Log_Msg
+@@ -580,10 +580,12 @@
+   /// File where the error occurred.
+   char file_[MAXPATHLEN + 1];
+ 
+-  /// The log message, which resides in thread-specific storage.  Note
+-  /// that only the current log message is stored here -- it will be
++  /// The log record, which resides in thread-specific storage.  Note
++  /// that only the current log record is stored here -- it will be
+   /// overwritten by the subsequent call to log().
+-  ACE_TCHAR* msg_; // Add one for NUL-terminator.
++  /// Bug 3156: replaced ACE_TCHAR* msg_ with ACE_Log_Record* log_record_
++  /// The whole logic for msg_ and msg_off_ members is contained now in ACE_Log_Record
++  ACE_Log_Record* log_record_;
+ 
+   /// Indicates whether we should restart system calls that are
+   /// interrupted.
+@@ -649,9 +651,6 @@
+   /// STDERR, LOGGER, OSTREAM, MSG_CALLBACK, etc.
+   static u_long flags_;
+ 
+-  /// Offset of msg_[].
+-  static ptrdiff_t msg_off_;
+-
+   /**
+    * Number of existing ACE_Log_Msg instances; when 0, delete program/host
+    * names
+diff -aur ace_ref/ACE/ACE_wrappers/ace/Log_Msg.inl ace_fixed/ACE/ACE_wrappers/ace/Log_Msg.inl
+--- ace_ref/ACE/ACE_wrappers/ace/Log_Msg.inl	2007-12-02 18:16:03.000000000 +0200
++++ ace_fixed/ACE/ACE_wrappers/ace/Log_Msg.inl	2007-12-02 19:28:38.000000000 +0200
+@@ -171,15 +171,16 @@
+ const ACE_TCHAR *
+ ACE_Log_Msg::msg (void)
+ {
+-  return this->msg_ + ACE_Log_Msg::msg_off_;
++  /// Delegate this to log_record_ member
++  return this->log_record_->msg_data ();
+ }
+ 
+ ACE_INLINE
+ void
+ ACE_Log_Msg::msg (const ACE_TCHAR *m)
+ {
+-  ACE_OS::strsncpy (this->msg_, m,
+-                    ((ACE_MAXLOGMSGLEN+1) / sizeof (ACE_TCHAR)));
++  /// Delegate this to log_record_ member
++  this->log_record_->msg_data (m);
+ }
+ 
+ ACE_INLINE
+@@ -229,7 +230,5 @@
+   return ACE_Log_Msg::pid_;
+ }
+ 
+-
+-
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
+diff -aur ace_ref/ACE/ACE_wrappers/ace/Log_Record.cpp ace_fixed/ACE/ACE_wrappers/ace/Log_Record.cpp
+--- ace_ref/ACE/ACE_wrappers/ace/Log_Record.cpp	2007-12-02 18:16:03.000000000 +0200
++++ ace_fixed/ACE/ACE_wrappers/ace/Log_Record.cpp	2007-12-02 19:28:38.000000000 +0200
+@@ -114,10 +114,11 @@
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\ntime_stamp_ = (%:, %d)\n"),
+               this->secs_, this->usecs_));
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\npid_ = %u\n"), this->pid_));
+-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmsg_data_ (0x%@) = %s\n"),
++  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmsg_data_ (%@) = %s\n"),
+               this->msg_data_, this->msg_data_));
+-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmsg_data_size_ = %B\n"),
++  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmsg_base_size_ = %B\n"),
+               this->msg_data_size_));
++  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmsg_off_ = %B\n"), this->msg_off_));
+   ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+ #endif /* ACE_HAS_DUMP */
+ }
+@@ -126,20 +127,57 @@
+ ACE_Log_Record::msg_data (const ACE_TCHAR *data)
+ {
+   // ACE_TRACE ("ACE_Log_Record::msg_data");
+-  size_t const newlen = ACE_OS::strlen (data) + 1;  // Will need room for '\0'
++  // 
++  size_t const newlen = ACE_OS::strlen (data) + 1;  
+   if (newlen > this->msg_data_size_)
+     {
+-      ACE_TCHAR *new_msg_data = 0;
+-      ACE_NEW_RETURN (new_msg_data, ACE_TCHAR[newlen], -1);
+-      delete [] this->msg_data_;
+-      this->msg_data_ = new_msg_data;
+-      this->msg_data_size_ = newlen;
++      // Bug 3156: if we have to increase the capacity of msg_data_ we also
++      // have to increase the capacity for verbose_msg_ buffer
++      if (-1 == this->resize (newlen))
++        return -1;
+     }
+-  ACE_OS::strcpy (this->msg_data_, data);
++  
++  ACE_TCHAR* msg = const_cast<ACE_TCHAR*> (this->msg_data_);
++  ACE_OS::strcpy ( msg, data);  
++  this->msg_off_ = 0;
++  
+   this->round_up ();
+   return 0;
+ }
+ 
++int 
++ACE_Log_Record::resize (size_t new_len)
++{
++  // ACE_TRACE ("ACE_Log_Record::msg_data");
++  if (new_len > this->msg_data_size ())
++    {
++      ACE_TCHAR *new_msg_data = 0;
++      ACE_TCHAR *new_verbose_msg = 0;
++      ACE_NEW_NORETURN (new_msg_data, ACE_TCHAR[new_len]);
++      ACE_NEW_NORETURN (new_verbose_msg, ACE_TCHAR[new_len + VERBOSE_LEN]);
++      if ((0 != new_msg_data) && (0 != new_verbose_msg))
++        {
++          /// resize but keep old data, msg_off_ remains valid
++          ACE_OS::strsncpy( new_msg_data, this->msg_data_, this->msg_data_size ());
++          
++          delete [] this->msg_data_;
++          delete [] this->verbose_msg_;
++
++          this->msg_data_ = new_msg_data;
++          this->verbose_msg_ = new_verbose_msg;
++          this->msg_data_size_ = new_len;          
++        }
++      else
++        {
++          delete [] new_msg_data;
++          delete [] new_verbose_msg;
++          
++          return -1;
++        }
++    }
++  return 0;
++}
++
+ ACE_Log_Record::ACE_Log_Record (ACE_Log_Priority lp,
+                                 time_t ts_sec,
+                                 long p)
+@@ -149,14 +187,24 @@
+     usecs_ (0),
+     pid_ (ACE_UINT32 (p)),
+     msg_data_ (0),
+-    msg_data_size_ (0)
++    msg_data_size_ (0),
++    msg_off_ (0),
++    verbose_msg_ (0)
+ {
+   // ACE_TRACE ("ACE_Log_Record::ACE_Log_Record");
+   ACE_NEW_NORETURN (this->msg_data_, ACE_TCHAR[MAXLOGMSGLEN]);
+-  if (0 != this->msg_data_)
++  ACE_NEW_NORETURN (this->verbose_msg_, ACE_TCHAR[MAXVERBOSELOGMSGLEN]);
++  if ((0 != this->msg_data_) && (0 != this->verbose_msg_))
+     {
+       this->msg_data_size_ = MAXLOGMSGLEN;
+       this->msg_data_[0] = '\0';
++      this->verbose_msg_[0] = '\0';
++    }
++  else 
++    {
++      /// Failed to acquire ressources for this object
++      delete [] this->msg_data_;
++      delete [] this->verbose_msg_;
+     }
+ }
+ 
+@@ -169,15 +217,53 @@
+     usecs_ ((ACE_UINT32) ts.usec ()),
+     pid_ (ACE_UINT32 (p)),
+     msg_data_ (0),
+-    msg_data_size_ (0)
++    msg_data_size_ (0),
++    msg_off_ (0),
++    verbose_msg_ (0)
+ {
+   // ACE_TRACE ("ACE_Log_Record::ACE_Log_Record");
+   ACE_NEW_NORETURN (this->msg_data_, ACE_TCHAR[MAXLOGMSGLEN]);
+-  if (0 != this->msg_data_)
++  ACE_NEW_NORETURN (this->verbose_msg_, ACE_TCHAR[MAXVERBOSELOGMSGLEN]);
++  if ((0 != this->msg_data_) && (0 != this->verbose_msg_))
+     {
+       this->msg_data_size_ = MAXLOGMSGLEN;
+       this->msg_data_[0] = '\0';
++      this->verbose_msg_[0] = '\0';
+     }
++  else 
++    {
++      /// Failed to acquire ressources for this object
++      delete [] this->msg_data_;
++      delete [] this->verbose_msg_;
++    }  
++}
++
++ACE_Log_Record::ACE_Log_Record (size_t msg_base_size)
++  : length_ (0),
++    type_ (0),
++    secs_ (0),
++    usecs_ (0),
++    pid_ (0),
++    msg_data_ (0),
++    msg_data_size_ (0),
++    msg_off_ (0),
++    verbose_msg_ (0)   
++{
++  // ACE_TRACE ("ACE_Log_Record::ACE_Log_Record");
++  ACE_NEW_NORETURN (this->msg_data_, ACE_TCHAR[msg_base_size]);
++  ACE_NEW_NORETURN (this->verbose_msg_, ACE_TCHAR[msg_base_size + VERBOSE_LEN]);
++  if ((0 != this->msg_data_) && (0 != this->verbose_msg_))
++    {
++      this->msg_data_size_ = msg_base_size;
++      this->msg_data_[0] = '\0';
++      this->verbose_msg_[0] = '\0';
++    }
++  else 
++    {
++      /// Failed to acquire ressources for this object
++      delete [] this->msg_data_;
++      delete [] this->verbose_msg_;
++    }  
+ }
+ 
+ void
+@@ -185,7 +271,7 @@
+ {
+   // ACE_TRACE ("ACE_Log_Record::round_up");
+   // Determine the length of the payload.
+-  size_t len = sizeof (*this) + (sizeof (ACE_TCHAR) * ((ACE_OS::strlen (this->msg_data_) + 1)));
++  size_t len = sizeof (*this) + (sizeof (ACE_TCHAR) * ((ACE_OS::strlen (this->msg_data ()) + 1)));
+ 
+   // Round up to the alignment.
+   len = ((len + ACE_Log_Record::ALIGN_WORDB - 1)
+@@ -200,15 +286,25 @@
+     usecs_ (0),
+     pid_ (0),
+     msg_data_ (0),
+-    msg_data_size_ (0)
++    msg_data_size_ (0),
++    msg_off_ (0),
++    verbose_msg_ (0)
+ {
+   // ACE_TRACE ("ACE_Log_Record::ACE_Log_Record");
+   ACE_NEW_NORETURN (this->msg_data_, ACE_TCHAR[MAXLOGMSGLEN]);
+-  if (0 != this->msg_data_)
++  ACE_NEW_NORETURN (this->verbose_msg_, ACE_TCHAR[MAXVERBOSELOGMSGLEN]);
++  if ((0 != this->msg_data_) && (0 != this->verbose_msg_))
+     {
+       this->msg_data_size_ = MAXLOGMSGLEN;
+       this->msg_data_[0] = '\0';
++      this->verbose_msg_[0] = '\0';
+     }
++  else 
++    {
++      /// Failed to acquire ressources for this object
++      delete [] this->msg_data_;
++      delete [] this->verbose_msg_;
++    }    
+ }
+ 
+ int
+@@ -268,16 +364,16 @@
+                        lhost_name,
+                        this->pid_,
+                        ACE_Log_Record::priority_name (ACE_Log_Priority (this->type_)),
+-                       this->msg_data_);
++                       this->msg_data ());
+     }
+   else if (ACE_BIT_ENABLED (verbose_flag, ACE_Log_Msg::VERBOSE_LITE))
+     ACE_OS::sprintf (verbose_msg,
+                      verbose_lite_fmt,
+                      timestamp,
+                      ACE_Log_Record::priority_name (ACE_Log_Priority (this->type_)),
+-                     this->msg_data_);
++                     this->msg_data ());
+   else
+-    ACE_OS::strcpy (verbose_msg, this->msg_data_);
++    ACE_OS::strcpy (verbose_msg, this->msg_data ());
+   return 0;
+ }
+ 
+@@ -288,25 +384,22 @@
+ {
+   if (ACE_LOG_MSG->log_priority_enabled (ACE_Log_Priority (this->type_)))
+     {
+-      ACE_TCHAR *verbose_msg = 0;
+-      ACE_NEW_RETURN (verbose_msg, ACE_TCHAR[MAXVERBOSELOGMSGLEN], -1);
+-
+-      int result = this->format_msg (host_name, verbose_flag, verbose_msg);
++      int result = this->format_msg (host_name, verbose_flag, verbose_msg_);
+ 
+       if (result == 0)
+         {
+           if (fp != 0)
+             {
+               int const verbose_msg_len =
+-                static_cast<int> (ACE_OS::strlen (verbose_msg));
++                static_cast<int> (ACE_OS::strlen (this->verbose_msg_));
+ #if !defined (ACE_WIN32) && defined (ACE_USES_WCHAR)
+               int const fwrite_result = ACE_OS::fprintf (fp,
+                                                          ACE_TEXT ("%ls"),
+-                                                         verbose_msg);
++                                                         this->verbose_msg_);
+ #else
+               int const fwrite_result = ACE_OS::fprintf (fp,
+                                                          ACE_TEXT ("%s"),
+-                                                         verbose_msg);
++                                                         this->verbose_msg_);
+ #endif
+               // We should have written everything
+               if (fwrite_result != verbose_msg_len)
+@@ -316,8 +409,6 @@
+             }
+         }
+ 
+-      delete [] verbose_msg;
+-
+       return result;
+     }
+   else
+@@ -334,10 +425,13 @@
+     ACE_Utils::truncate_cast<ACE_CDR::ULong> (log_record.msg_data_len ());
+ 
+   // Insert each field from <log_record> into the output CDR stream.
++  // Bug 3156: only data from starting from msg_off_ is serialized
++  // the resulting log_record will have implicitly msg_off_ == 0
+   cdr << ACE_CDR::Long (log_record.type ());
+   cdr << ACE_CDR::Long (log_record.pid ());
+   cdr << ACE_CDR::LongLong (log_record.time_stamp ().sec ());
+-  cdr << ACE_CDR::Long (log_record.time_stamp ().usec ());
++  cdr << ACE_CDR::Long (log_record.time_stamp ().usec ());  
++  
+   cdr << u_msglen;
+ #if defined (ACE_USES_WCHAR)
+   cdr.write_wchar_array (log_record.msg_data (), u_msglen);
+@@ -356,26 +450,33 @@
+   ACE_CDR::LongLong sec;
+   ACE_CDR::Long usec;
+   ACE_CDR::ULong buffer_len;
+-
++  
+   // Extract each field from input CDR stream into <log_record>.
+   if ((cdr >> type) && (cdr >> pid) && (cdr >> sec) && (cdr >> usec)
+-      && (cdr >> buffer_len)) {
+-    ACE_TCHAR *log_msg;
+-    ACE_NEW_RETURN (log_msg, ACE_TCHAR[buffer_len + 1], -1);
+-    auto_ptr<ACE_TCHAR> log_msg_p (log_msg);
+-    log_record.type (type);
+-    log_record.pid (pid);
+-    log_record.time_stamp (ACE_Time_Value (ACE_Utils::truncate_cast<time_t> (sec),
+-                                           usec));
++      && (cdr >> buffer_len)) 
++    {    
++      // the resulted <log_record> implicitly has msg_off_ == 0 
++      log_record.msg_off (0);
++      log_record.type (type);
++      log_record.pid (pid);
++      log_record.time_stamp (ACE_Time_Value (ACE_Utils::truncate_cast<time_t> (sec),
++                                             usec));
++      // Bug 3156: remove allocation of a new buffer each time this operator
++      // is called. Resize internal data of <log_record> if necessary
++      if (buffer_len + 1 > log_record.msg_data_size ())
++        {
++          // resize inner log_record buffer
++          if (-1 == log_record.resize (buffer_len+1))
++            return -1;
++        }
++      ACE_TCHAR* log_msg = const_cast<ACE_TCHAR*>(log_record.msg_data ());
+ #if defined (ACE_USES_WCHAR)
+-    cdr.read_wchar_array (log_msg, buffer_len);
++      cdr.read_wchar_array (log_msg, buffer_len);
+ #else
+-    cdr.read_char_array (log_msg, buffer_len);
++      cdr.read_char_array (log_msg, buffer_len);
+ #endif /* ACE_USES_WCHAR */
+-    log_msg[buffer_len] = '\0';
+-    if (-1 == log_record.msg_data (log_msg))
+-      return -1;
+-  }
++      log_msg[buffer_len] = '\0';
++    }
+   return cdr.good_bit ();
+ }
+ 
+@@ -388,20 +489,15 @@
+ {
+   if (ACE_LOG_MSG->log_priority_enabled (ACE_Log_Priority (this->type_)))
+     {
+-      ACE_TCHAR* verbose_msg = 0;
+-      ACE_NEW_RETURN (verbose_msg, ACE_TCHAR[MAXVERBOSELOGMSGLEN], -1);
+-
+-      int const result = this->format_msg (host_name, verbose_flag, verbose_msg);
++      int const result = this->format_msg (host_name, verbose_flag, this->verbose_msg_);
+ 
+       if (result == 0)
+         {
+           // Since ostream expects only chars, we cannot pass wchar_t's
+-          s << ACE_TEXT_ALWAYS_CHAR (verbose_msg);
++          s << ACE_TEXT_ALWAYS_CHAR (this->verbose_msg_);
+           s.flush ();
+         }
+ 
+-      delete [] verbose_msg;
+-
+       return result;
+     }
+   return 0;
+diff -aur ace_ref/ACE/ACE_wrappers/ace/Log_Record.h ace_fixed/ACE/ACE_wrappers/ace/Log_Record.h
+--- ace_ref/ACE/ACE_wrappers/ace/Log_Record.h	2007-12-02 18:16:03.000000000 +0200
++++ ace_fixed/ACE/ACE_wrappers/ace/Log_Record.h	2007-12-02 19:28:38.000000000 +0200
+@@ -33,6 +33,13 @@
+ 
+ class ACE_Time_Value;
+ 
++/**
++ * Major update for bug 3156:
++ * - added member: msg_off_ that is used as a stack pointer
++ * - ACE_TCHAR* msg_data (void) returns the address msg_data_ + msg_off_
++ * 
++ */
++
+ /// Defines the structure of an ACE logging record.
+ class ACE_Export ACE_Log_Record
+ {
+@@ -66,6 +73,10 @@
+   ACE_Log_Record (ACE_Log_Priority lp,
+                   const ACE_Time_Value &time_stamp,
+                   long pid);
++  /**
++   * Bug 3156: added constructor which allows to specify size of internal buffers
++   */
++  ACE_Log_Record (size_t msg_data_size);
+ 
+   /// Default dtor.
+   ~ACE_Log_Record (void);
+@@ -138,7 +149,7 @@
+ 
+   /// Get the total length of the <Log_Record>, which includes the
+   /// size of the various data member fields.
+-  long length (void) const;
++  long length (void);
+ 
+   /// Set the total length of the <Log_Record>, which needs to account for
+   /// the size of the various data member fields.
+@@ -155,21 +166,50 @@
+ 
+   /// Set the process id of the <Log_Record>.
+   void pid (long);
+-
+-  /// Get the message data of the <Log_Record>.
++  
++  /// Get the message data of the <Log_Record> starting from msg_off_
++  /// Bug 3156: this no longer simply returns msg_data_ !!!
++  /// It returns the location starting with msg_off_
+   const ACE_TCHAR *msg_data (void) const;
+ 
+   /// Set the message data of the record. If @a data is longer than the
+   /// current msg_data_ buffer, a new msg_data_ buffer is allocated to
+-  /// fit. If such a reallocation faisl, this method returns -1, else 0.
++  /// fit. If such a reallocation fails, this method returns -1, else 0.
+   int msg_data (const ACE_TCHAR *data);
+ 
+-  /// Get the size of the message data of the <Log_Record>, including
+-  /// a byte for the NUL.
++  /// Get the number of characters in the message data of the <Log_Record>, 
++  /// starting with msg_off_ including a byte for the NUL.
+   size_t msg_data_len (void) const;
+-
++  
+   /// Dump the state of an object.
+   void dump (void) const;
++  
++  /// Set the msg_off_ as the difference betwee @ bp and msg_data_
++  /// returns previous value of msg_off_
++  ptrdiff_t msg_off (const ACE_TCHAR* bp);
++  
++  /// Set the msg_off_ to the given @ offset
++  /// returns previous value of msg_off_
++  ptrdiff_t msg_off (const ptrdiff_t offset);
++  
++  /// Returns current value of msg_off_
++  ptrdiff_t msg_off (void) const;
++
++  /// Returns the number of alloc'ed bytes for msg_data_
++  size_t msg_data_size (void) const;
++
++  /// Returns a pointer to the last valid element in msg_data_
++  const ACE_TCHAR* msg_data_last () const;
++  
++  /// Added to solve bug 3156:
++  /// If current capacity of msg_data_ buffer is less than @ new_len
++  /// resize the internal buffers to the requested capacity.
++  /// If such a reallocation fails, this method returns -1, else 0.  
++  int resize (size_t new_len);
++    
++  /// Returns remaining space in msg_data_ (msg_data_size_ - msg_off_)
++  /// This leaves room for NUL.
++  size_t msg_space() const;  
+ 
+   /// Declare the dynamic allocation hooks.
+   ACE_ALLOC_HOOK_DECLARE;
+@@ -195,11 +235,20 @@
+ 
+   /// Id of process that generated the logging record.
+   ACE_UINT32 pid_;
+-
++  
+   /// Logging record data
+   ACE_TCHAR *msg_data_;   // Heap-allocated text message area
+   size_t msg_data_size_;  // Allocated size of msg_data_ in ACE_TCHARs
+-
++  
++  /// Bug 3156
++  /// Moved msg_off_ from ACE_Log_Msg to ACE_Log_Record
++  /// this member is closely tied with buffer holding the logging message
++  ptrdiff_t msg_off_;
++  
++  /// Bug 3156
++  /// Verbose buffer data
++  ACE_TCHAR* verbose_msg_;
++  
+   /// disallow copying...
+   ACE_Log_Record (const ACE_Log_Record& rhs);
+   ACE_Log_Record& operator= (const ACE_Log_Record& rhs);
+diff -aur ace_ref/ACE/ACE_wrappers/ace/Log_Record.inl ace_fixed/ACE/ACE_wrappers/ace/Log_Record.inl
+--- ace_ref/ACE/ACE_wrappers/ace/Log_Record.inl	2007-12-02 18:16:03.000000000 +0200
++++ ace_fixed/ACE/ACE_wrappers/ace/Log_Record.inl	2007-12-02 19:28:38.000000000 +0200
+@@ -14,6 +14,10 @@
+ {
+   if (this->msg_data_)
+     delete [] this->msg_data_;
++  
++  /// Bug 3156
++  if (this->verbose_msg_)
++  	delete [] this->verbose_msg_;
+ }
+ 
+ ACE_INLINE void
+@@ -64,9 +68,11 @@
+ }
+ 
+ ACE_INLINE long
+-ACE_Log_Record::length (void) const
++ACE_Log_Record::length (void)
+ {
+   ACE_TRACE ("ACE_Log_Record::length");
++  /// Update length before returning it
++  this->round_up();
+   return (long) this->length_;
+ }
+ 
+@@ -110,14 +116,63 @@
+ ACE_Log_Record::msg_data (void) const
+ {
+   ACE_TRACE ("ACE_Log_Record::msg_data");
+-  return this->msg_data_;
++  return this->msg_data_ + this->msg_off_;
+ }
+ 
+ ACE_INLINE size_t
+ ACE_Log_Record::msg_data_len (void) const
+ {
+   ACE_TRACE ("ACE_Log_Record::msg_data_len");
+-  return ACE_OS::strlen (this->msg_data_) + 1;
++  return ACE_OS::strlen (this->msg_data ()) + 1;
++}
++
++ACE_INLINE size_t
++ACE_Log_Record::msg_data_size () const
++{
++  ACE_TRACE ("ACE_Log_Record::msg_base_size");
++  return msg_data_size_;
++}
++
++ACE_INLINE ptrdiff_t 
++ACE_Log_Record::msg_off (const ACE_TCHAR* bp)
++{
++  ACE_TRACE ("ACE_Log_Record::msg_off");
++  ptrdiff_t old_off = this->msg_off_;
++  this->msg_off_ = bp - msg_data_;
++  return old_off;
++}
++
++ACE_INLINE ptrdiff_t 
++ACE_Log_Record::msg_off (const ptrdiff_t offset)
++{
++  ACE_TRACE ("ACE_Log_Record::msg_off");
++  ptrdiff_t old_off = this->msg_off_;
++  this->msg_off_ = offset;
++  return old_off;
++}
++
++ACE_INLINE ptrdiff_t 
++ACE_Log_Record::msg_off (void) const
++{
++  ACE_TRACE ("ACE_Log_Record::msg_off");
++  return this->msg_off_;
++}
++
++ACE_INLINE const ACE_TCHAR* 
++ACE_Log_Record::msg_data_last () const
++{
++  ACE_TRACE ("ACE_Log_Record::msg_base_last");
++  return this->msg_data_ + this->msg_data_size_ - 1;
++}
++
++ACE_INLINE  size_t
++ACE_Log_Record::msg_space() const
++{
++  ACE_TRACE ("ACE_Log_Record::msg_space");
++  if (this->msg_data_size_ > static_cast<size_t>(this->msg_off_))
++  	return this->msg_data_size_ - static_cast<size_t>(this->msg_off_);
++  else
++  	return 0;
+ }
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+Only in ace_fixed/ACE/ACE_wrappers/tests: Bug_3156_Regression_Test.cpp
+diff -aur ace_ref/ACE/ACE_wrappers/tests/tests.mpc ace_fixed/ACE/ACE_wrappers/tests/tests.mpc
+--- ace_ref/ACE/ACE_wrappers/tests/tests.mpc	2007-12-02 18:16:12.000000000 +0200
++++ ace_fixed/ACE/ACE_wrappers/tests/tests.mpc	2007-12-02 19:34:51.000000000 +0200
+@@ -1476,3 +1476,11 @@
+     Bug_2610_Regression_Test.cpp
+   }
+ }
++
++project(Bug_3156_Regression_Test) : acetest {
++  avoids      += ace_for_tao
++  exename = Bug_3156_Regression_Test
++  Source_Files {
++    Bug_3156_Regression_Test.cpp
++  }
++}
