@@ -1,0 +1,1102 @@
+==13733== Memcheck, a memory error detector.
+==13733== Copyright (C) 2002-2007, and GNU GPL'd, by Julian Seward et al.
+==13733== Using LibVEX rev 1732, a library for dynamic binary translation.
+==13733== Copyright (C) 2004-2007, and GNU GPL'd, by OpenWorks LLP.
+==13733== Using valgrind-3.2.3, a dynamic binary instrumentation framework.
+==13733== Copyright (C) 2000-2007, and GNU GPL'd, by Julian Seward et al.
+==13733== 
+--13733-- Command line
+--13733--    ././server
+--13733--    -ORBdebuglevel
+--13733--    0
+--13733--    -o
+--13733--    /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tests/Bug_3108_Regression/server.ior
+--13733-- Startup, with flags:
+--13733--    --leak-check=full
+--13733--    -v
+--13733-- Contents of /proc/version:
+--13733--   Linux version 2.6.22-suspend2-r2 (root@thinkpad) (gcc version 4.1.2 (Gentoo 4.1.2 p1.0.2)) #9 SMP PREEMPT Tue Oct 30 04:45:15 CDT 2007
+--13733-- Arch and hwcaps: X86, x86-sse1-sse2
+--13733-- Page sizes: currently 4096, max supported 4096
+--13733-- Valgrind library directory: /usr/lib/valgrind
+--13733-- Reading syms from /lib/ld-2.6.1.so (0x4000000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tests/Bug_3108_Regression/server (0x8048000)
+--13733-- Reading syms from /usr/lib/valgrind/x86-linux/memcheck (0x38000000)
+--13733--    object doesn't have a symbol table
+--13733--    object doesn't have a dynamic symbol table
+--13733-- Reading suppressions file: /usr/lib/valgrind/default.supp
+--13733-- Reading syms from /usr/lib/valgrind/x86-linux/vgpreload_core.so (0x401D000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so (0x4020000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_PortableServer.so.1.6.1 (0x4027000)
+--13733-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_AnyTypeCode.so.1.6.1 (0x4123000)
+--13733-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO.so.1.6.1 (0x41DD000)
+--13733-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/ace/libACE.so.5.6.1 (0x436B000)
+--13733-- Reading syms from /lib/libdl-2.6.1.so (0x4569000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /lib/libpthread-2.6.1.so (0x456D000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /lib/librt-2.6.1.so (0x4584000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /usr/lib/gcc/i686-pc-linux-gnu/4.1.2/libstdc++.so.6.0.8 (0x458D000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /lib/libm-2.6.1.so (0x466F000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /usr/lib/gcc/i686-pc-linux-gnu/4.1.2/libgcc_s.so.1 (0x4695000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /lib/libc-2.6.1.so (0x46A0000)
+--13733--    object doesn't have a symbol table
+--13733-- REDIR: 0x470C810 (memset) redirected to 0x4023888 (memset)
+--13733-- REDIR: 0x470CCD0 (memcpy) redirected to 0x4024236 (memcpy)
+--13733-- REDIR: 0x470B960 (rindex) redirected to 0x4023417 (rindex)
+--13733-- REDIR: 0x463C910 (operator new(unsigned, std::nothrow_t const&)) redirected to 0x40226E5 (operator new(unsigned, std::nothrow_t const&))
+--13733-- REDIR: 0x47084CD (malloc) redirected to 0x40227A5 (malloc)
+--13733-- REDIR: 0x470C310 (memchr) redirected to 0x4023732 (memchr)
+--13733-- REDIR: 0x47069DE (free) redirected to 0x402237A (free)
+--13733-- REDIR: 0x463C9D4 (operator new[](unsigned, std::nothrow_t const&)) redirected to 0x4022565 (operator new[](unsigned, std::nothrow_t const&))
+--13733-- REDIR: 0x470B7D4 (strncmp) redirected to 0x40235C5 (strncmp)
+--13733-- REDIR: 0x463C870 (operator new(unsigned)) redirected to 0x4022F59 (operator new(unsigned))
+--13733-- REDIR: 0x470B118 (strcpy) redirected to 0x4024480 (strcpy)
+--13733-- REDIR: 0x470B0B0 (strcmp) redirected to 0x4023630 (strcmp)
+--13733-- REDIR: 0x47081D0 (calloc) redirected to 0x4021A70 (calloc)
+--13733-- REDIR: 0x463B548 (operator delete[](void*)) redirected to 0x4021CFD (operator delete[](void*))
+--13733-- REDIR: 0x463C99C (operator new[](unsigned)) redirected to 0x4022BED (operator new[](unsigned))
+--13733-- REDIR: 0x470AF40 (index) redirected to 0x40234D6 (index)
+--13733-- REDIR: 0x470B8B8 (strncpy) redirected to 0x4023B1C (strncpy)
+--13733-- REDIR: 0x470C7A0 (memmove) redirected to 0x40238AB (memmove)
+--13733-- REDIR: 0x463B4F8 (operator delete(void*)) redirected to 0x4022087 (operator delete(void*))
+==13733== Invalid read of size 4
+==13733==    at 0x4014E37: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==  Address 0x47E724C is 12 bytes inside a block of size 15 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== Invalid read of size 4
+==13733==    at 0x4014E37: (within /lib/ld-2.6.1.so)
+==13733==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==  Address 0x47E724C is 12 bytes inside a block of size 15 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== Invalid read of size 4
+==13733==    at 0x4014D93: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==  Address 0x47E7350 is 16 bytes inside a block of size 18 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== Invalid read of size 4
+==13733==    at 0x4014D93: (within /lib/ld-2.6.1.so)
+==13733==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==  Address 0x47E7350 is 16 bytes inside a block of size 18 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+--13733-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_Codeset.so.1.6.1 (0x4553000)
+==13733== 
+==13733== Invalid read of size 4
+==13733==    at 0x4014E08: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==  Address 0x47F4880 is 8 bytes inside a block of size 10 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== Invalid read of size 4
+==13733==    at 0x4014E08: (within /lib/ld-2.6.1.so)
+==13733==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==  Address 0x47F4880 is 8 bytes inside a block of size 10 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+--13733-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_PI.so.1.6.1 (0x48CD000)
+--13733-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_CodecFactory.so.1.6.1 (0x4912000)
+--13733-- REDIR: 0x470C870 (mempcpy) redirected to 0x4023D50 (mempcpy)
+--13733-- REDIR: 0x470D5C0 (strchrnul) redirected to 0x4023906 (strchrnul)
+--13733-- REDIR: 0x470C9D0 (stpcpy) redirected to 0x4023A41 (stpcpy)
+--13733-- Reading syms from /lib/libnss_files-2.6.1.so (0x4940000)
+--13733--    object doesn't have a symbol table
+--13733-- REDIR: 0x470D4F0 (rawmemchr) redirected to 0x402392E (rawmemchr)
+--13733-- Reading syms from /lib/libnss_dns-2.6.1.so (0x494A000)
+--13733--    object doesn't have a symbol table
+--13733-- Reading syms from /lib/libresolv-2.6.1.so (0x4950000)
+--13733--    object doesn't have a symbol table
+==13733== 
+==13733== Use of uninitialised value of size 4
+==13733==    at 0x4427238: ACE::nibble2hex(unsigned) (ACE.inl:321)
+==13733==    by 0x42BA225: CORBA::ORB::object_to_string(CORBA::Object*) (ORB.cpp:1466)
+==13733==    by 0x804D491: main (server.cpp:75)
+==13733== 
+==13733== Use of uninitialised value of size 4
+==13733==    at 0x4427238: ACE::nibble2hex(unsigned) (ACE.inl:321)
+==13733==    by 0x42BA240: CORBA::ORB::object_to_string(CORBA::Object*) (ORB.cpp:1467)
+==13733==    by 0x804D491: main (server.cpp:75)
+==13734== Memcheck, a memory error detector.
+==13734== Copyright (C) 2002-2007, and GNU GPL'd, by Julian Seward et al.
+==13734== Using LibVEX rev 1732, a library for dynamic binary translation.
+==13734== Copyright (C) 2004-2007, and GNU GPL'd, by OpenWorks LLP.
+==13734== Using valgrind-3.2.3, a dynamic binary instrumentation framework.
+==13734== Copyright (C) 2000-2007, and GNU GPL'd, by Julian Seward et al.
+==13734== 
+--13734-- Command line
+--13734--    ././client
+--13734--    -k
+--13734--    file:///home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tests/Bug_3108_Regression/server.ior
+--13734-- Startup, with flags:
+--13734--    --leak-check=full
+--13734--    -v
+--13734-- Contents of /proc/version:
+--13734--   Linux version 2.6.22-suspend2-r2 (root@thinkpad) (gcc version 4.1.2 (Gentoo 4.1.2 p1.0.2)) #9 SMP PREEMPT Tue Oct 30 04:45:15 CDT 2007
+--13734-- Arch and hwcaps: X86, x86-sse1-sse2
+--13734-- Page sizes: currently 4096, max supported 4096
+--13734-- Valgrind library directory: /usr/lib/valgrind
+--13734-- Reading syms from /lib/ld-2.6.1.so (0x4000000)
+--13734--    object doesn't have a symbol table
+--13734-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tests/Bug_3108_Regression/client (0x8048000)
+--13734-- Reading syms from /usr/lib/valgrind/x86-linux/memcheck (0x38000000)
+--13734--    object doesn't have a symbol table
+--13734--    object doesn't have a dynamic symbol table
+--13734-- Reading suppressions file: /usr/lib/valgrind/default.supp
+--13734-- Reading syms from /usr/lib/valgrind/x86-linux/vgpreload_core.so (0x401D000)
+--13734--    object doesn't have a symbol table
+--13734-- Reading syms from /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so (0x4020000)
+--13734--    object doesn't have a symbol table
+--13734-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO.so.1.6.1 (0x4027000)
+--13734-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/ace/libACE.so.5.6.1 (0x41B4000)
+--13734-- Reading syms from /lib/libdl-2.6.1.so (0x43B2000)
+--13734--    object doesn't have a symbol table
+--13734-- Reading syms from /lib/libpthread-2.6.1.so (0x43B6000)
+--13734--    object doesn't have a symbol table
+--13734-- Reading syms from /lib/librt-2.6.1.so (0x43CE000)
+--13734--    object doesn't have a symbol table
+--13734-- Reading syms from /usr/lib/gcc/i686-pc-linux-gnu/4.1.2/libstdc++.so.6.0.8 (0x43D7000)
+--13734--    object doesn't have a symbol table
+--13734-- Reading syms from /lib/libm-2.6.1.so (0x44B9000)
+--13734--    object doesn't have a symbol table
+--13734-- Reading syms from /usr/lib/gcc/i686-pc-linux-gnu/4.1.2/libgcc_s.so.1 (0x44DE000)
+--13734--    object doesn't have a symbol table
+--13734-- Reading syms from /lib/libc-2.6.1.so (0x44E9000)
+--13734--    object doesn't have a symbol table
+--13734-- REDIR: 0x4555810 (memset) redirected to 0x4023888 (memset)
+--13734-- REDIR: 0x4555CD0 (memcpy) redirected to 0x4024236 (memcpy)
+--13734-- REDIR: 0x4554960 (rindex) redirected to 0x4023417 (rindex)
+--13734-- REDIR: 0x4486910 (operator new(unsigned, std::nothrow_t const&)) redirected to 0x40226E5 (operator new(unsigned, std::nothrow_t const&))
+--13734-- REDIR: 0x45514CD (malloc) redirected to 0x40227A5 (malloc)
+--13734-- REDIR: 0x4555310 (memchr) redirected to 0x4023732 (memchr)
+--13734-- REDIR: 0x454F9DE (free) redirected to 0x402237A (free)
+--13734-- REDIR: 0x44869D4 (operator new[](unsigned, std::nothrow_t const&)) redirected to 0x4022565 (operator new[](unsigned, std::nothrow_t const&))
+--13734-- REDIR: 0x45547D4 (strncmp) redirected to 0x40235C5 (strncmp)
+--13734-- REDIR: 0x4486870 (operator new(unsigned)) redirected to 0x4022F59 (operator new(unsigned))
+--13734-- REDIR: 0x4554118 (strcpy) redirected to 0x4024480 (strcpy)
+--13734-- REDIR: 0x45540B0 (strcmp) redirected to 0x4023630 (strcmp)
+--13734-- REDIR: 0x4485548 (operator delete[](void*)) redirected to 0x4021CFD (operator delete[](void*))
+--13734-- REDIR: 0x448699C (operator new[](unsigned)) redirected to 0x4022BED (operator new[](unsigned))
+--13734-- REDIR: 0x4553F40 (index) redirected to 0x40234D6 (index)
+--13734-- REDIR: 0x45548B8 (strncpy) redirected to 0x4023B1C (strncpy)
+--13734-- REDIR: 0x45557A0 (memmove) redirected to 0x40238AB (memmove)
+--13734-- REDIR: 0x44854F8 (operator delete(void*)) redirected to 0x4022087 (operator delete(void*))
+--13734-- REDIR: 0x45511D0 (calloc) redirected to 0x4021A70 (calloc)
+==13734== Invalid read of size 4
+==13734==    at 0x4014E37: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==  Address 0x462B234 is 12 bytes inside a block of size 15 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== Invalid read of size 4
+==13734==    at 0x4014E37: (within /lib/ld-2.6.1.so)
+==13734==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==  Address 0x462B234 is 12 bytes inside a block of size 15 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== Invalid read of size 4
+==13734==    at 0x4014D93: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==  Address 0x462B338 is 16 bytes inside a block of size 18 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== Invalid read of size 4
+==13734==    at 0x4014D93: (within /lib/ld-2.6.1.so)
+==13734==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==  Address 0x462B338 is 16 bytes inside a block of size 18 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+--13734-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_Codeset.so.1.6.1 (0x439C000)
+==13734== 
+==13734== Invalid read of size 4
+==13734==    at 0x4014E08: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==  Address 0x4638860 is 8 bytes inside a block of size 10 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== Invalid read of size 4
+==13734==    at 0x4014E08: (within /lib/ld-2.6.1.so)
+==13734==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==  Address 0x4638860 is 8 bytes inside a block of size 10 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+--13734-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_PI.so.1.6.1 (0x4717000)
+--13734-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_CodecFactory.so.1.6.1 (0x475C000)
+--13734-- Reading syms from /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_AnyTypeCode.so.1.6.1 (0x4774000)
+--13734-- REDIR: 0x4555870 (mempcpy) redirected to 0x4023D50 (mempcpy)
+--13734-- REDIR: 0x4554734 (strncat) redirected to 0x4023E46 (strncat)
+--13734-- REDIR: 0x45564F0 (rawmemchr) redirected to 0x402392E (rawmemchr)
+==13734== 
+==13734== Thread 3:
+==13734== Syscall param writev(vector[...]) points to uninitialised byte(s)
+==13734==    at 0x4000882: (within /lib/ld-2.6.1.so)
+==13734==    by 0x45A16C9: writev (in /lib/libc-2.6.1.so)
+==13734==    by 0x42DA256: ACE_OS::writev(int, iovec const*, int) (OS_NS_sys_uio.inl:48)
+==13734==    by 0x42D9996: ACE_OS::sendv(int, iovec const*, int) (OS_NS_sys_socket.inl:821)
+==13734==    by 0x42722F4: ACE::sendv(int, iovec const*, int, ACE_Time_Value const*) (ACE.cpp:1741)
+==13734==    by 0x4315B45: ACE_SOCK_IO::sendv(iovec const*, int, ACE_Time_Value const*) const (SOCK_IO.inl:108)
+==13734==    by 0x40E33A2: TAO_IIOP_Transport::send(iovec*, int, unsigned&, ACE_Time_Value const*) (IIOP_Transport.cpp:68)
+==13734==    by 0x414A6EA: TAO_Transport::drain_queue_helper(int&, iovec*) (Transport.cpp:901)
+==13734==    by 0x414AC02: TAO_Transport::drain_queue_i() (Transport.cpp:1041)
+==13734==    by 0x414AF52: TAO_Transport::send_synch_message_helper_i(TAO_Synch_Queued_Message&, ACE_Time_Value*) (Transport.cpp:738)
+==13734==    by 0x414BD7A: TAO_Transport::send_synchronous_message_i(ACE_Message_Block const*, ACE_Time_Value*) (Transport.cpp:578)
+==13734==    by 0x414ED57: TAO_Transport::send_message_shared_i(TAO_Stub*, int, ACE_Message_Block const*, ACE_Time_Value*) (Transport.cpp:1258)
+==13734==  Address 0x464CB06 is 3,078 bytes inside a block of size 4,096 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42B8A9A: ACE_Local_Memory_Pool::acquire(unsigned, unsigned&) (Local_Memory_Pool.cpp:58)
+==13734==    by 0x42B8930: ACE_Local_Memory_Pool::init_acquire(unsigned, unsigned&, int&) (Local_Memory_Pool.cpp:47)
+==13734==    by 0x40B8E9D: ACE_Malloc_T<ACE_Local_Memory_Pool, ACE_Thread_Mutex, ACE_Control_Block>::open() (Malloc_T.cpp:409)
+==13734==    by 0x40B90D2: ACE_Malloc_T<ACE_Local_Memory_Pool, ACE_Thread_Mutex, ACE_Control_Block>::ACE_Malloc_T(char const*) (Malloc_T.cpp:488)
+==13734==    by 0x40B919B: ACE_Malloc<ACE_Local_Memory_Pool, ACE_Thread_Mutex>::ACE_Malloc(char const*) (Malloc_T.inl:135)
+==13734==    by 0x40B91E2: ACE_Allocator_Adapter<ACE_Malloc<ACE_Local_Memory_Pool, ACE_Thread_Mutex> >::ACE_Allocator_Adapter(char const*) (Malloc_T.cpp:297)
+==13734==    by 0x40B47A1: TAO_Default_Resource_Factory::output_cdr_buffer_allocator() (default_resource.cpp:943)
+==13734==    by 0x4146EA2: TAO_Thread_Lane_Resources::output_cdr_buffer_allocator() (Thread_Lane_Resources.cpp:282)
+==13734==    by 0x410C6C2: TAO_ORB_Core::output_cdr_buffer_allocator() (ORB_Core.cpp:2739)
+==13734==    by 0x414F434: TAO_Transport::TAO_Transport(unsigned, TAO_ORB_Core*, unsigned) (Transport.cpp:163)
+==13734==    by 0x40E3549: TAO_IIOP_Transport::TAO_IIOP_Transport(TAO_IIOP_Connection_Handler*, TAO_ORB_Core*) (IIOP_Transport.cpp:30)
+--13733-- REDIR: 0x470B734 (strncat) redirected to 0x4023E46 (strncat)
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+client called us.
+(13733|75287280) server - event loop finished
+--13734-- Discarding syms at 0x4717000-0x475C000 in /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_PI.so.1.6.1 due to munmap()
+--13734-- Discarding syms at 0x475C000-0x4774000 in /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_CodecFactory.so.1.6.1 due to munmap()
+--13734-- Discarding syms at 0x4774000-0x482E000 in /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_AnyTypeCode.so.1.6.1 due to munmap()
+--13734-- Discarding syms at 0x439C000-0x43AD000 in /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_Codeset.so.1.6.1 due to munmap()
+==13734== 
+==13734== ERROR SUMMARY: 54 errors from 7 contexts (suppressed: 7 from 1)
+==13734== 
+==13734== 1 errors in context 1 of 7:
+==13734== Thread 1:
+==13734== Invalid read of size 4
+==13734==    at 0x4014E08: (within /lib/ld-2.6.1.so)
+==13734==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==  Address 0x4638860 is 8 bytes inside a block of size 10 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== 1 errors in context 2 of 7:
+==13734== Invalid read of size 4
+==13734==    at 0x4014E08: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==  Address 0x4638860 is 8 bytes inside a block of size 10 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== 1 errors in context 3 of 7:
+==13734== Invalid read of size 4
+==13734==    at 0x4014D93: (within /lib/ld-2.6.1.so)
+==13734==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==  Address 0x462B338 is 16 bytes inside a block of size 18 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== 1 errors in context 4 of 7:
+==13734== Invalid read of size 4
+==13734==    at 0x4014D93: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==  Address 0x462B338 is 16 bytes inside a block of size 18 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== 2 errors in context 5 of 7:
+==13734== Invalid read of size 4
+==13734==    at 0x4014E37: (within /lib/ld-2.6.1.so)
+==13734==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==  Address 0x462B234 is 12 bytes inside a block of size 15 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== 2 errors in context 6 of 7:
+==13734== Invalid read of size 4
+==13734==    at 0x4014E37: (within /lib/ld-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B2C26: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13734==    by 0x43B304A: (within /lib/libdl-2.6.1.so)
+==13734==    by 0x43B2B68: dlopen (in /lib/libdl-2.6.1.so)
+==13734==    by 0x42D532D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13734==    by 0x42A9740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==  Address 0x462B234 is 12 bytes inside a block of size 15 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42C2C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13734==    by 0x425AF52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13734==    by 0x425E0F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13734==    by 0x42AA5A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13734==    by 0x42A860B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13734==    by 0x42A9706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13734==    by 0x42A9D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13734==    by 0x4257037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13734==    by 0x4257119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13734==    by 0x42596B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13734==    by 0x42597A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13734== 
+==13734== 46 errors in context 7 of 7:
+==13734== Thread 3:
+==13734== Syscall param writev(vector[...]) points to uninitialised byte(s)
+==13734==    at 0x4000882: (within /lib/ld-2.6.1.so)
+==13734==    by 0x45A16C9: writev (in /lib/libc-2.6.1.so)
+==13734==    by 0x42DA256: ACE_OS::writev(int, iovec const*, int) (OS_NS_sys_uio.inl:48)
+==13734==    by 0x42D9996: ACE_OS::sendv(int, iovec const*, int) (OS_NS_sys_socket.inl:821)
+==13734==    by 0x42722F4: ACE::sendv(int, iovec const*, int, ACE_Time_Value const*) (ACE.cpp:1741)
+==13734==    by 0x4315B45: ACE_SOCK_IO::sendv(iovec const*, int, ACE_Time_Value const*) const (SOCK_IO.inl:108)
+==13734==    by 0x40E33A2: TAO_IIOP_Transport::send(iovec*, int, unsigned&, ACE_Time_Value const*) (IIOP_Transport.cpp:68)
+==13734==    by 0x414A6EA: TAO_Transport::drain_queue_helper(int&, iovec*) (Transport.cpp:901)
+==13734==    by 0x414AC02: TAO_Transport::drain_queue_i() (Transport.cpp:1041)
+==13734==    by 0x414AF52: TAO_Transport::send_synch_message_helper_i(TAO_Synch_Queued_Message&, ACE_Time_Value*) (Transport.cpp:738)
+==13734==    by 0x414BD7A: TAO_Transport::send_synchronous_message_i(ACE_Message_Block const*, ACE_Time_Value*) (Transport.cpp:578)
+==13734==    by 0x414ED57: TAO_Transport::send_message_shared_i(TAO_Stub*, int, ACE_Message_Block const*, ACE_Time_Value*) (Transport.cpp:1258)
+==13734==  Address 0x464CB06 is 3,078 bytes inside a block of size 4,096 alloc'd
+==13734==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x42B8A9A: ACE_Local_Memory_Pool::acquire(unsigned, unsigned&) (Local_Memory_Pool.cpp:58)
+==13734==    by 0x42B8930: ACE_Local_Memory_Pool::init_acquire(unsigned, unsigned&, int&) (Local_Memory_Pool.cpp:47)
+==13734==    by 0x40B8E9D: ACE_Malloc_T<ACE_Local_Memory_Pool, ACE_Thread_Mutex, ACE_Control_Block>::open() (Malloc_T.cpp:409)
+==13734==    by 0x40B90D2: ACE_Malloc_T<ACE_Local_Memory_Pool, ACE_Thread_Mutex, ACE_Control_Block>::ACE_Malloc_T(char const*) (Malloc_T.cpp:488)
+==13734==    by 0x40B919B: ACE_Malloc<ACE_Local_Memory_Pool, ACE_Thread_Mutex>::ACE_Malloc(char const*) (Malloc_T.inl:135)
+==13734==    by 0x40B91E2: ACE_Allocator_Adapter<ACE_Malloc<ACE_Local_Memory_Pool, ACE_Thread_Mutex> >::ACE_Allocator_Adapter(char const*) (Malloc_T.cpp:297)
+==13734==    by 0x40B47A1: TAO_Default_Resource_Factory::output_cdr_buffer_allocator() (default_resource.cpp:943)
+==13734==    by 0x4146EA2: TAO_Thread_Lane_Resources::output_cdr_buffer_allocator() (Thread_Lane_Resources.cpp:282)
+==13734==    by 0x410C6C2: TAO_ORB_Core::output_cdr_buffer_allocator() (ORB_Core.cpp:2739)
+==13734==    by 0x414F434: TAO_Transport::TAO_Transport(unsigned, TAO_ORB_Core*, unsigned) (Transport.cpp:163)
+==13734==    by 0x40E3549: TAO_IIOP_Transport::TAO_IIOP_Transport(TAO_IIOP_Connection_Handler*, TAO_ORB_Core*) (IIOP_Transport.cpp:30)
+--13734-- 
+--13734-- supp:    7 dl-hack3
+==13734== 
+==13734== IN SUMMARY: 54 errors from 7 contexts (suppressed: 7 from 1)
+==13734== 
+==13734== malloc/free: in use at exit: 484 bytes in 7 blocks.
+==13734== malloc/free: 2,007 allocs, 2,000 frees, 817,395 bytes allocated.
+==13734== 
+==13734== searching for pointers to 7 not-freed blocks.
+==13734== checked 148,312 bytes.
+==13734== 
+==13734== Thread 1:
+==13734== 
+==13734== 148 bytes in 1 blocks are definitely lost in loss record 7 of 7
+==13734==    at 0x402274D: operator new(unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13734==    by 0x4156A75: ACE_TSS<TAO_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==13734==    by 0x415677A: ACE_TSS<TAO_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==13734==    by 0x4156802: ACE_TSS<TAO_TSS_Resources>::operator TAO_TSS_Resources*() const (TSS_T.cpp:53)
+==13734==    by 0x4156A38: TAO_TSS_Singleton<TAO_TSS_Resources, ACE_Thread_Mutex>::instance() (TAO_Singleton.cpp:197)
+==13734==    by 0x4155F16: TAO_TSS_Resources::instance() (TSS_Resources.cpp:44)
+==13734==    by 0x4109A86: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==13734==    by 0x40E9C06: TAO_Leader_Follower::reactor() (Leader_Follower.cpp:135)
+==13734==    by 0x410C7CA: TAO_ORB_Core::reactor() (ORB_Core.cpp:2826)
+==13734==    by 0x411266A: TAO_ORB_Core::init(int&, char**) (ORB_Core.cpp:1144)
+==13734==    by 0x4107BEB: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1350)
+==13734==    by 0x804B584: main (client.cpp:79)
+==13734== 
+==13734== LEAK SUMMARY:
+==13734==    definitely lost: 148 bytes in 1 blocks.
+==13734==      possibly lost: 0 bytes in 0 blocks.
+==13734==    still reachable: 336 bytes in 6 blocks.
+==13734==         suppressed: 0 bytes in 0 blocks.
+==13734== Reachable blocks (those to which a pointer was found) are not shown.
+==13734== To see them, rerun with: --leak-check=full --show-reachable=yes
+--13734--  memcheck: sanity checks: 21 cheap, 1 expensive
+--13734--  memcheck: auxmaps: 0 auxmap entries (0k, 0M) in use
+--13734--  memcheck: auxmaps: 0 searches, 0 comparisons
+--13734--  memcheck: SMs: n_issued      = 92 (1472k, 1M)
+--13734--  memcheck: SMs: n_deissued    = 16 (256k, 0M)
+--13734--  memcheck: SMs: max_noaccess  = 65535 (1048560k, 1023M)
+--13734--  memcheck: SMs: max_undefined = 0 (0k, 0M)
+--13734--  memcheck: SMs: max_defined   = 5809 (92944k, 90M)
+--13734--  memcheck: SMs: max_non_DSM   = 91 (1456k, 1M)
+--13734--  memcheck: max sec V bit nodes:    0 (0k, 0M)
+--13734--  memcheck: set_sec_vbits8 calls: 0 (new: 0, updates: 0)
+--13734--  memcheck: max shadow mem size:   1760k, 1M
+--13734-- translate:            fast SP updates identified: 47,005 ( 90.7%)
+--13734-- translate:   generic_known SP updates identified: 4,094 (  7.9%)
+--13734-- translate: generic_unknown SP updates identified: 672 (  1.2%)
+--13734--     tt/tc: 76,422 tt lookups requiring 105,658 probes
+--13734--     tt/tc: 76,422 fast-cache updates, 6 flushes
+--13734--  transtab: new        25,873 (554,646 -> 9,412,635; ratio 169:10) [0 scs]
+--13734--  transtab: dumped     0 (0 -> ??)
+--13734--  transtab: discarded  3,603 (82,960 -> ??)
+--13734-- scheduler: 2,529,209 jumps (bb entries).
+--13734-- scheduler: 21/56,410 major/minor sched events.
+--13734--    sanity: 22 cheap, 1 expensive checks.
+--13734--    exectx: 30,011 lists, 1,165 contexts (avg 0 per list)
+--13734--    exectx: 4,068 searches, 2,916 full compares (716 per 1000)
+--13734--    exectx: 15 cmp2, 93 cmp4, 0 cmpAll
+--13733-- Discarding syms at 0x48CD000-0x4912000 in /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_PI.so.1.6.1 due to munmap()
+--13733-- Discarding syms at 0x4912000-0x492A000 in /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_CodecFactory.so.1.6.1 due to munmap()
+--13733-- Discarding syms at 0x4553000-0x4564000 in /home/iliyan/tao/ACE+TAO/ACE_wrappers/build/gcc4.1.2_d1o0i0/TAO/tao/libTAO_Codeset.so.1.6.1 due to munmap()
+--13733-- Discarding syms at 0x4940000-0x494A000 in /lib/libnss_files-2.6.1.so due to munmap()
+--13733-- Discarding syms at 0x494A000-0x4950000 in /lib/libnss_dns-2.6.1.so due to munmap()
+--13733-- Discarding syms at 0x4950000-0x4962000 in /lib/libresolv-2.6.1.so due to munmap()
+==13733== 
+==13733== ERROR SUMMARY: 24 errors from 8 contexts (suppressed: 7 from 1)
+==13733== 
+==13733== 1 errors in context 1 of 8:
+==13733== Invalid read of size 4
+==13733==    at 0x4014E08: (within /lib/ld-2.6.1.so)
+==13733==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==  Address 0x47F4880 is 8 bytes inside a block of size 10 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== 1 errors in context 2 of 8:
+==13733== Invalid read of size 4
+==13733==    at 0x4014E08: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==  Address 0x47F4880 is 8 bytes inside a block of size 10 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== 1 errors in context 3 of 8:
+==13733== Invalid read of size 4
+==13733==    at 0x4014D93: (within /lib/ld-2.6.1.so)
+==13733==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==  Address 0x47E7350 is 16 bytes inside a block of size 18 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== 1 errors in context 4 of 8:
+==13733== Invalid read of size 4
+==13733==    at 0x4014D93: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==  Address 0x47E7350 is 16 bytes inside a block of size 18 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== 2 errors in context 5 of 8:
+==13733== Invalid read of size 4
+==13733==    at 0x4014E37: (within /lib/ld-2.6.1.so)
+==13733==    by 0x40114F9: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==  Address 0x47E724C is 12 bytes inside a block of size 15 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== 2 errors in context 6 of 8:
+==13733== Invalid read of size 4
+==13733==    at 0x4014E37: (within /lib/ld-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4010F0F: (within /lib/ld-2.6.1.so)
+==13733==    by 0x4569C26: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x400D5DC: (within /lib/ld-2.6.1.so)
+==13733==    by 0x456A04A: (within /lib/libdl-2.6.1.so)
+==13733==    by 0x4569B68: dlopen (in /lib/libdl-2.6.1.so)
+==13733==    by 0x448C32D: ACE_OS::dlopen(char const*, int) (OS_NS_dlfcn.inl:135)
+==13733==    by 0x4460740: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:126)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==  Address 0x47E724C is 12 bytes inside a block of size 15 alloc'd
+==13733==    at 0x40225CD: operator new[](unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x4479C93: ACE_New_Allocator::malloc(unsigned) (Malloc_Allocator.cpp:118)
+==13733==    by 0x4411F52: ACE_String_Base<char>::set(char const*, unsigned, bool) (String_Base.cpp:138)
+==13733==    by 0x44150F8: ACE_String_Base<char>::operator=(ACE_String_Base<char> const&) (String_Base.cpp:334)
+==13733==    by 0x44615A6: ACE_Array_Base<ACE_String_Base<char> >::set(ACE_String_Base<char> const&, unsigned) (Array_Base.cpp:139)
+==13733==    by 0x445F60B: ACE_DLL_Handle::get_dll_names(char const*, ACE_Array<ACE_String_Base<char> >&) (DLL_Manager.cpp:485)
+==13733==    by 0x4460706: ACE_DLL_Handle::open(char const*, int, void*) (DLL_Manager.cpp:117)
+==13733==    by 0x4460D09: ACE_DLL_Manager::open_dll(char const*, int, void*) (DLL_Manager.cpp:581)
+==13733==    by 0x440E037: ACE_DLL::open_i(char const*, int, int, void*) (DLL.cpp:167)
+==13733==    by 0x440E119: ACE_DLL::open(char const*, int, int) (DLL.cpp:127)
+==13733==    by 0x44106B5: ACE_Location_Node::open_dll(int&) (Parse_Node.cpp:416)
+==13733==    by 0x44107A5: ACE_Function_Node::symbol(ACE_Service_Gestalt*, int&, void (**)(void*)) (Parse_Node.cpp:588)
+==13733== 
+==13733== 8 errors in context 7 of 8:
+==13733== Use of uninitialised value of size 4
+==13733==    at 0x4427238: ACE::nibble2hex(unsigned) (ACE.inl:321)
+==13733==    by 0x42BA240: CORBA::ORB::object_to_string(CORBA::Object*) (ORB.cpp:1467)
+==13733==    by 0x804D491: main (server.cpp:75)
+==13733== 
+==13733== 8 errors in context 8 of 8:
+==13733== Use of uninitialised value of size 4
+==13733==    at 0x4427238: ACE::nibble2hex(unsigned) (ACE.inl:321)
+==13733==    by 0x42BA225: CORBA::ORB::object_to_string(CORBA::Object*) (ORB.cpp:1466)
+==13733==    by 0x804D491: main (server.cpp:75)
+--13733-- 
+--13733-- supp:    7 dl-hack3
+==13733== 
+==13733== IN SUMMARY: 24 errors from 8 contexts (suppressed: 7 from 1)
+==13733== 
+==13733== malloc/free: in use at exit: 416 bytes in 10 blocks.
+==13733== malloc/free: 1,654 allocs, 1,644 frees, 664,645 bytes allocated.
+==13733== 
+==13733== searching for pointers to 10 not-freed blocks.
+==13733== checked 164,604 bytes.
+==13733== 
+==13733== 
+==13733== 1 bytes in 1 blocks are definitely lost in loss record 1 of 9
+==13733==    at 0x402274D: operator new(unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x44621A5: ACE_TSS<ACE_Dynamic>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==13733==    by 0x44627F8: ACE_TSS<ACE_Dynamic>::ts_get() const (TSS_T.cpp:219)
+==13733==    by 0x4462880: ACE_TSS<ACE_Dynamic>::operator ACE_Dynamic*() const (TSS_T.cpp:53)
+==13733==    by 0x4462A78: ACE_TSS_Singleton<ACE_Dynamic, ACE_Null_Mutex>::instance() (Singleton.cpp:292)
+==13733==    by 0x446211C: ACE_Dynamic::instance() (Dynamic.cpp:26)
+==13733==    by 0x4280324: ACE_Svc_Handler<ACE_SOCK_Stream, ACE_NULL_SYNCH>::operator new(unsigned, std::nothrow_t const&) (Svc_Handler.cpp:72)
+==13733==    by 0x4289543: TAO_Creation_Strategy<TAO_IIOP_Connection_Handler>::make_svc_handler(TAO_IIOP_Connection_Handler*&) (Acceptor_Impl.cpp:50)
+==13733==    by 0x428918E: ACE_Strategy_Acceptor<TAO_IIOP_Connection_Handler, ACE_SOCK_Acceptor>::make_svc_handler(TAO_IIOP_Connection_Handler*&) (Acceptor.cpp:749)
+==13733==    by 0x428B1A8: ACE_Acceptor<TAO_IIOP_Connection_Handler, ACE_SOCK_Acceptor>::handle_input(int) (Acceptor.cpp:383)
+==13733==    by 0x44E545C: ACE_TP_Reactor::dispatch_socket_event(ACE_EH_Dispatch_Info&) (TP_Reactor.cpp:591)
+==13733==    by 0x44E5583: ACE_TP_Reactor::handle_socket_events(int&, ACE_TP_Token_Guard&) (TP_Reactor.cpp:460)
+==13733== 
+==13733== 
+==13733== 36 bytes in 1 blocks are definitely lost in loss record 5 of 9
+==13733==    at 0x402274D: operator new(unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x42CB4EF: ACE_TSS<TAO_ORB_Core_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==13733==    by 0x42CBC40: ACE_TSS<TAO_ORB_Core_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==13733==    by 0x42CBCC8: ACE_TSS<TAO_ORB_Core_TSS_Resources>::operator TAO_ORB_Core_TSS_Resources*() const (TSS_T.cpp:53)
+==13733==    by 0x42C907B: TAO_ORB_Core::get_tss_resources() (ORB_Core.inl:259)
+==13733==    by 0x42A03E6: TAO_Leader_Follower::get_tss_resources() const (Leader_Follower.inl:30)
+==13733==    by 0x42A142A: TAO_Leader_Follower::set_event_loop_thread(ACE_Time_Value*) (Leader_Follower.inl:70)
+==13733==    by 0x42A355F: TAO_LF_Strategy_Complete::set_event_loop_thread(ACE_Time_Value*, TAO_Leader_Follower&) (LF_Strategy_Complete.cpp:31)
+==13733==    by 0x42A2859: TAO_LF_Event_Loop_Thread_Helper::TAO_LF_Event_Loop_Thread_Helper(TAO_Leader_Follower&, TAO_LF_Strategy&, ACE_Time_Value*) (LF_Event_Loop_Thread_Helper.inl:16)
+==13733==    by 0x42C2B23: TAO_ORB_Core::run(ACE_Time_Value*, int) (ORB_Core.cpp:2115)
+==13733==    by 0x42BC068: CORBA::ORB::run(ACE_Time_Value*) (ORB.cpp:202)
+==13733==    by 0x42BC0BE: CORBA::ORB::run() (ORB.cpp:188)
+==13733== 
+==13733== 
+==13733== 148 bytes in 1 blocks are definitely lost in loss record 9 of 9
+==13733==    at 0x402274D: operator new(unsigned, std::nothrow_t const&) (in /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so)
+==13733==    by 0x430CA75: ACE_TSS<TAO_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==13733==    by 0x430C77A: ACE_TSS<TAO_TSS_Resources>::ts_get() const (TSS_T.cpp:219)
+==13733==    by 0x430C802: ACE_TSS<TAO_TSS_Resources>::operator TAO_TSS_Resources*() const (TSS_T.cpp:53)
+==13733==    by 0x430CA38: TAO_TSS_Singleton<TAO_TSS_Resources, ACE_Thread_Mutex>::instance() (TAO_Singleton.cpp:197)
+==13733==    by 0x430BF16: TAO_TSS_Resources::instance() (TSS_Resources.cpp:44)
+==13733==    by 0x42BFA86: TAO_ORB_Core::gui_resource_factory() (ORB_Core.cpp:1508)
+==13733==    by 0x429FC06: TAO_Leader_Follower::reactor() (Leader_Follower.cpp:135)
+==13733==    by 0x42C27CA: TAO_ORB_Core::reactor() (ORB_Core.cpp:2826)
+==13733==    by 0x42C866A: TAO_ORB_Core::init(int&, char**) (ORB_Core.cpp:1144)
+==13733==    by 0x42BDBEB: CORBA::ORB_init(int&, char**, char const*) (ORB.cpp:1350)
+==13733==    by 0x804D08E: main (server.cpp:41)
+==13733== 
+==13733== LEAK SUMMARY:
+==13733==    definitely lost: 185 bytes in 3 blocks.
+==13733==      possibly lost: 0 bytes in 0 blocks.
+==13733==    still reachable: 231 bytes in 7 blocks.
+==13733==         suppressed: 0 bytes in 0 blocks.
+==13733== Reachable blocks (those to which a pointer was found) are not shown.
+==13733== To see them, rerun with: --leak-check=full --show-reachable=yes
+--13733--  memcheck: sanity checks: 40 cheap, 2 expensive
+--13733--  memcheck: auxmaps: 0 auxmap entries (0k, 0M) in use
+--13733--  memcheck: auxmaps: 0 searches, 0 comparisons
+--13733--  memcheck: SMs: n_issued      = 34 (544k, 0M)
+--13733--  memcheck: SMs: n_deissued    = 2 (32k, 0M)
+--13733--  memcheck: SMs: max_noaccess  = 65535 (1048560k, 1023M)
+--13733--  memcheck: SMs: max_undefined = 0 (0k, 0M)
+--13733--  memcheck: SMs: max_defined   = 120 (1920k, 1M)
+--13733--  memcheck: SMs: max_non_DSM   = 33 (528k, 0M)
+--13733--  memcheck: max sec V bit nodes:    4 (0k, 0M)
+--13733--  memcheck: set_sec_vbits8 calls: 33 (new: 4, updates: 29)
+--13733--  memcheck: max shadow mem size:   832k, 0M
+--13733-- translate:            fast SP updates identified: 57,520 ( 90.8%)
+--13733-- translate:   generic_known SP updates identified: 4,915 (  7.7%)
+--13733-- translate: generic_unknown SP updates identified: 851 (  1.3%)
+--13733--     tt/tc: 85,983 tt lookups requiring 151,086 probes
+--13733--     tt/tc: 85,983 fast-cache updates, 8 flushes
+--13733--  transtab: new        30,976 (674,319 -> 11,451,202; ratio 169:10) [0 scs]
+--13733--  transtab: dumped     0 (0 -> ??)
+--13733--  transtab: discarded  2,209 (46,133 -> ??)
+--13733-- scheduler: 4,098,569 jumps (bb entries).
+--13733-- scheduler: 40/59,853 major/minor sched events.
+--13733--    sanity: 41 cheap, 2 expensive checks.
+--13733--    exectx: 30,011 lists, 1,600 contexts (avg 0 per list)
+--13733--    exectx: 3,329 searches, 1,765 full compares (530 per 1000)
+--13733--    exectx: 19 cmp2, 91 cmp4, 0 cmpAll
