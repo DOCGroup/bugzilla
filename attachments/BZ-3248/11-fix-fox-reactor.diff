@@ -1,0 +1,78 @@
+--- ACE_wrappers.orig/ace/FoxReactor/FoxReactor.h
++++ ACE_wrappers/ace/FoxReactor/FoxReactor.h
+@@ -25,8 +25,6 @@
+ # pragma once
+ #endif /* ACE_LACKS_PRAGMA_ONCE */
+ 
+-#if defined (ACE_HAS_FOX)
+-
+ #include "ace/Select_Reactor.h"
+ 
+ #include <fox/fx.h>
+@@ -108,8 +106,6 @@
+   ACE_FoxReactor &operator = (const ACE_FoxReactor &);
+ };
+ 
+-#endif /* ACE_HAS_FL */
+-
+ #include /**/ "ace/post.h"
+ #endif /* ACE_FOXREACTOR_H */
+ 
+--- ACE_wrappers.orig/ace/FoxReactor/FoxReactor.cpp
++++ ACE_wrappers/ace/FoxReactor/FoxReactor.cpp
+@@ -4,8 +4,6 @@
+ 
+ ACE_RCSID(ace, FoxReactor, "$Id: FoxReactor.cpp 79825 2007-10-22 19:04:34Z johnnyw $")
+ 
+-#if defined (ACE_HAS_FOX)
+-
+ #include "ace/Synch_T.h"
+ 
+ FXDEFMAP(ACE_FoxReactor) ACE_FoxReactorMap[]={
+@@ -333,5 +331,3 @@
+     }
+ }
+ 
+-#endif /* ACE_HAS_FOX */
+-
+--- ACE_wrappers.orig/include/makeinclude/wrapper_macros.GNU
++++ ACE_wrappers/include/makeinclude/wrapper_macros.GNU
+@@ -63,6 +63,7 @@
+ #                   trio, see http://sourceforge.net/projects/ctrio/
+ #  xt               Build with Xt (X11 Toolkit) support.
+ #  fl               Build with FlTk (Fast Light Toolkit) support.
++#  fox              Build with FOX Toolkit support.
+ #  tk               Build with Tk (Tcl/Tk) support.
+ #  qt               Build with Qt (Trolltech Qt) support.
+ #  ssl              Build with OpenSSL support.
+@@ -550,18 +551,18 @@
+   ACE_MAKE_OPTIONS += gtk_reactor
+ endif # gtk_reactor
+ 
+-ifeq ($(fox_reactor),0)
+-  override fox_reactor =
+-endif # fox_reactor
+-
+-ifneq ($(fox_reactor),)
+-  override ace_with_x11=1
+-  override ace_with_gl=1
+-  CPPFLAGS += -DACE_HAS_FOX $(PLATFORM_FOX_CPPFLAGS)
+-  LIBS += $(PLATFORM_FOX_LIBS)
+-  LDFLAGS += $(PLATFORM_FOX_LDFLAGS)
+-  ACE_MAKE_OPTIONS += fox_reactor
+-endif # fox_reactor
++fox ?=
++ifeq ($(fox),0)
++  override fox =
++endif #fox
++
++ifneq ($(fox),)
++  override x11=1
++  override gl=1
++  override ace_foxreactor=1
++  override tao_foxresource=1
++  ACE_MAKE_OPTIONS += fox
++endif #fox
+ 
+ QTDIR ?=
+ ifneq ($(QTDIR),)
