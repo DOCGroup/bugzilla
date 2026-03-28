@@ -1,0 +1,12 @@
+--- ACE-bleeding/ace/UUID.cpp	2005-08-19 12:23:11.000000000 -0400
++++ ACE-current/ace/UUID.cpp	2005-10-11 16:51:08.000000000 -0400
+@@ -453,7 +453,8 @@
+ 
+     /// Get the time of day, convert to 100ns ticks then add the offset.
+     ACE_Time_Value now = ACE_OS::gettimeofday();
+-    UUID_time time = now.sec() * 10000000 + now.usec() * 10;
++    UUID_time time = static_cast<UUID_time> (now.sec()) * 10000000 +
++		     static_cast<UUID_time> (now.usec()) * 10;
+     timestamp = time + timeOffset;
+ }
+ 
