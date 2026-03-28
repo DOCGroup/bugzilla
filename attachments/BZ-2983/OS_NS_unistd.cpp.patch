@@ -1,0 +1,10 @@
+--- old/ace/OS_NS_unistd.cpp	2007-05-28 21:36:42.000000000 +0200
++++ new/ace/OS_NS_unistd.cpp	2007-07-06 16:22:17.000000000 +0200
+@@ -269,6 +269,7 @@
+           delete [] buf;
+           return process_info.dwProcessId;
+         }
++      delete [] buf;
+     }
+ 
+   // CreateProcess failed.
