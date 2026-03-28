@@ -1,0 +1,100 @@
+cvs diff: Diffing .
+Index: UIPMC_Connector.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp,v
+retrieving revision 1.24
+diff -u -r1.24 UIPMC_Connector.cpp
+--- UIPMC_Connector.cpp	24 Nov 2005 19:14:38 -0000	1.24
++++ UIPMC_Connector.cpp	24 Jan 2006 10:45:24 -0000
+@@ -1,6 +1,7 @@
+ // $Id: UIPMC_Connector.cpp,v 1.24 2005/11/24 19:14:38 smcqueen Exp $
+ 
+ #include "UIPMC_Profile.h"
++#include "UIPMC_Transport.h"
+ #include "UIPMC_Connector.h"
+ 
+ #include "tao/debug.h"
+@@ -131,7 +132,10 @@
+   // @@ Michael: We do not use traditional connection management.
+   svc_handler->add_reference ();
+ 
+-  return svc_handler->transport ();
++  TAO_UIPMC_Transport *transport =
++    dynamic_cast<TAO_UIPMC_Transport *> (svc_handler->transport ());
++  transport->lock_transport();
++  return transport;
+ }
+ 
+ 
+Index: UIPMC_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp,v
+retrieving revision 1.31
+diff -u -r1.31 UIPMC_Transport.cpp
+--- UIPMC_Transport.cpp	14 Nov 2005 22:03:50 -0000	1.31
++++ UIPMC_Transport.cpp	24 Jan 2006 10:45:24 -0000
+@@ -560,6 +560,8 @@
+                                    int message_semantics,
+                                    ACE_Time_Value *max_wait_time)
+ {
++  int r;
++
+   // Format the message in the stream first
+   if (this->messaging_object_->format_message (stream) != 0)
+     return -1;
+@@ -574,6 +576,8 @@
+                                          stream.begin (),
+                                          max_wait_time);
+ 
++  r = this->UIPMC_lock_.release ();
++
+   if (n == -1)
+     {
+       if (TAO_debug_level)
+@@ -597,4 +601,18 @@
+   return 1;
+ }
+ 
++int
++TAO_UIPMC_Transport::lock_transport (void)
++{
++  return this->UIPMC_lock_.acquire();
++}
++
++
++
++int
++TAO_UIPMC_Transport::release_transport (void)
++{
++  return this->UIPMC_lock_.release();
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: UIPMC_Transport.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h,v
+retrieving revision 1.16
+diff -u -r1.16 UIPMC_Transport.h
+--- UIPMC_Transport.h	14 Nov 2005 22:03:50 -0000	1.16
++++ UIPMC_Transport.h	24 Jan 2006 10:45:24 -0000
+@@ -106,6 +106,10 @@
+   virtual int messaging_init (CORBA::Octet major,
+                               CORBA::Octet minor);
+ 
++  /// lock accessors
++  virtual int lock_transport (void);
++  virtual int release_transport (void);
++
+   //@}
+ 
+ private:
+@@ -123,6 +127,9 @@
+ 
+   /// Our messaging object.
+   TAO_Pluggable_Messaging *messaging_object_;
++
++  /// Lock used to synchronize access to map_.
++  TAO_SYNCH_MUTEX UIPMC_lock_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
