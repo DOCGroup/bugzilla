@@ -1,0 +1,40 @@
+278,279c278
+<       this->reactor (0);
+<     }
+---
+>       ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon, this->lock_, -1));
+281c280,283
+<   ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, ace_mon, this->lock_, -1));
+---
+>       if (this->process_table_ != 0)
+>         {
+>           while (this->current_count_ > 0)
+>             this->remove_proc (0);
+283,286c285,289
+<   if (this->process_table_ != 0)
+<     {
+<       while (this->current_count_ > 0)
+<         this->remove_proc (0);
+---
+>           delete [] this->process_table_;
+>           this->process_table_ = 0;
+>           this->max_process_table_size_ = 0;
+>           this->current_count_ = 0;
+>         }
+288,292c291,293
+<       delete [] this->process_table_;
+<       this->process_table_ = 0;
+<       this->max_process_table_size_ = 0;
+<       this->current_count_ = 0;
+<     }
+---
+>       if (this->default_exit_handler_ != 0)
+>           this->default_exit_handler_->handle_close (ACE_INVALID_HANDLE,0);
+>       this->default_exit_handler_ = 0;
+294,296c295,296
+<   if (this->default_exit_handler_ != 0)
+<       this->default_exit_handler_->handle_close (ACE_INVALID_HANDLE,0);
+<   this->default_exit_handler_ = 0;
+---
+>       this->reactor (0);
+>     }
