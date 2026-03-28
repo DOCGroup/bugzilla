@@ -1,0 +1,16 @@
+diff  C:/Users/Auge/Desktop/orig_CDR_Stream.cpp C:/Users/Auge/Desktop/CDR_Stream.cpp
+1442a1443,1456
+> ACE_CDR::Boolean 
+> ACE_InputCDR::read_wstring( ACE_WString & x )
+> {
+> 	ACE_CDR::WChar * data = 0;
+> 	if (this->read_wstring (data))
+> 	{
+> 		ACE_Auto_Basic_Array_Ptr<ACE_CDR::WChar> safe_data (data);
+> 		x.set(data);
+> 		return true;
+> 	}
+> 	x.clear();
+> 	return (this->good_bit_ = false);
+> }
+> 
