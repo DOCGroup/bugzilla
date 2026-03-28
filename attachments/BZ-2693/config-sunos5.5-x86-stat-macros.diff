@@ -1,0 +1,11 @@
+--- ace/config-sunos5.5.h.orig	2006-11-06 14:10:07.000000000 +0100
++++ ace/config-sunos5.5.h	2006-11-27 09:22:23.027171000 +0100
+@@ -384,7 +384,7 @@
+ # endif /* __GNUC_MINOR__ */
+ #endif /* __GNUG__ */
+ 
+-#if defined (i386)
++#if defined (i386) && (_FILE_OFFSET_BITS==32)
+ # define ACE_HAS_X86_STAT_MACROS
+ #endif /* i386 */
+ 
