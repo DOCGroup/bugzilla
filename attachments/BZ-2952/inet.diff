@@ -1,0 +1,141 @@
+Index: INET_Addr.cpp
+===================================================================
+--- INET_Addr.cpp	(revision 78573)
++++ INET_Addr.cpp	(working copy)
+@@ -189,7 +189,7 @@
+ // Transform the string into the current addressing format.
+ 
+ int
+-ACE_INET_Addr::string_to_addr (const char s[])
++ACE_INET_Addr::string_to_addr (const char s[], int address_family)
+ {
+   ACE_TRACE ("ACE_INET_Addr::string_to_addr");
+   int result;
+@@ -240,7 +240,7 @@
+       char *endp = 0;
+       u_short port = static_cast<u_short> (ACE_OS::strtol (port_p, &endp, 10));
+       if (*endp == '\0')    // strtol scanned the entire string - all digits
+-        result = this->set (port, ip_addr);
++        result = this->set (port, ip_addr, 1, address_family);
+       else
+         result = this->set (port_p, ip_addr);
+     }
+@@ -250,27 +250,27 @@
+ }
+ 
+ int
+-ACE_INET_Addr::set (const char address[])
++ACE_INET_Addr::set (const char address[], int address_family)
+ {
+   ACE_TRACE ("ACE_INET_Addr::set");
+-  return this->string_to_addr (address);
++  return this->string_to_addr (address, address_family);
+ }
+ 
+-ACE_INET_Addr::ACE_INET_Addr (const char address[])
++ACE_INET_Addr::ACE_INET_Addr (const char address[], int address_family)
+   : ACE_Addr (determine_type (), sizeof (inet_addr_))
+ {
+   ACE_TRACE ("ACE_INET_Addr::ACE_INET_Addr");
+   this->reset ();
+-  this->set (address);
++  this->set (address, address_family);
+ }
+ 
+ #if defined (ACE_HAS_WCHAR)
+-ACE_INET_Addr::ACE_INET_Addr (const wchar_t address[])
++ACE_INET_Addr::ACE_INET_Addr (const wchar_t address[], int address_family)
+   : ACE_Addr (determine_type (), sizeof (inet_addr_))
+ {
+   ACE_TRACE ("ACE_INET_Addr::ACE_INET_Addr");
+   this->reset ();
+-  this->set (address);
++  this->set (address, address_family);
+ }
+ 
+ #endif /* ACE_HAS_WCHAR */
+@@ -340,13 +340,14 @@
+   int ret = -1;
+   for (res = res0; res != 0; res = res->ai_next)
+     {
+-      if (res->ai_family == AF_INET || res->ai_family == AF_INET6)
++      if (address_family == AF_UNSPEC || res->ai_family == address_family)
+         {
+           this->set_type (res->ai_family);
+           this->set_addr (res->ai_addr, res->ai_addrlen);
+           this->set_port_number (port_number, encode);
+           ret = 0;
+-          break;
++          if (address_family == AF_UNSPEC && res->ai_family == AF_INET6)
++            break;
+         }
+     }
+   freeaddrinfo (res0);
+Index: INET_Addr.inl
+===================================================================
+--- INET_Addr.inl	(revision 78573)
++++ INET_Addr.inl	(working copy)
+@@ -177,9 +177,9 @@
+ }
+ 
+ ACE_INLINE int
+-ACE_INET_Addr::set (const wchar_t addr[])
++ACE_INET_Addr::set (const wchar_t addr[], int address_family)
+ {
+-  return this->set (ACE_Wide_To_Ascii (addr).char_rep ());
++  return this->set (ACE_Wide_To_Ascii (addr).char_rep (), address_family);
+ }
+ 
+ #endif /* ACE_HAS_WCHAR */
+Index: INET_Addr.h
+===================================================================
+--- INET_Addr.h	(revision 78573)
++++ INET_Addr.h	(working copy)
+@@ -64,7 +64,8 @@
+    * is assumed to be a port number, with the IP address being
+    * INADDR_ANY.
+    */
+-  explicit ACE_INET_Addr (const char address[]);
++  explicit ACE_INET_Addr (const char address[],
++                          int address_family = AF_UNSPEC);
+ 
+   /**
+    * Creates an ACE_INET_Addr from a <port_number> and an Internet
+@@ -95,7 +96,8 @@
+                  const wchar_t host_name[],
+                  int address_family = AF_UNSPEC);
+ 
+-  explicit ACE_INET_Addr (const wchar_t address[]);
++  explicit ACE_INET_Addr (const wchar_t address[],
++                          int address_family = AF_UNSPEC);
+ 
+   ACE_INET_Addr (const wchar_t port_name[],
+                  const wchar_t host_name[],
+@@ -166,7 +168,7 @@
+    * is assumed to be a port number, with the IP address being
+    * INADDR_ANY.
+    */
+-  int set (const char addr[]);
++  int set (const char addr[], int address_family = AF_UNSPEC);
+ 
+   /// Creates an ACE_INET_Addr from a sockaddr_in structure.
+   int set (const sockaddr_in *,
+@@ -186,7 +188,7 @@
+            ACE_UINT32 ip_addr,
+            const wchar_t protocol[] = ACE_TEXT_WIDE ("tcp"));
+ 
+-  int set (const wchar_t addr[]);
++  int set (const wchar_t addr[], int address_family = AF_UNSPEC);
+ #endif /* ACE_HAS_WCHAR */
+ 
+   /// Return a pointer to the underlying network address.
+@@ -220,7 +222,8 @@
+    * is no ':' in the <address> it is assumed to be a port number,
+    * with the IP address being INADDR_ANY.
+    */
+-  virtual int string_to_addr (const char address[]);
++  virtual int string_to_addr (const char address[],
++                              int address_family = AF_UNSPEC);
+ 
+ #if defined (ACE_HAS_WCHAR)
+   /*
