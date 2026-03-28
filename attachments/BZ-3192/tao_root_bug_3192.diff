@@ -1,0 +1,3708 @@
+Index: MPC/config/orbsvcslib.mpb
+===================================================================
+--- MPC/config/orbsvcslib.mpb	(revision 80604)
++++ MPC/config/orbsvcslib.mpb	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project : taolib_with_idl, orbsvcs_output, anytypecode {
++project : taolib_with_idl, anytypecode {
+   tagname     = TAO_ORBSVCS
+   includes += $(TAO_ROOT)/orbsvcs
+   idlflags += -I$(TAO_ROOT)/orbsvcs
+Index: MPC/config/notifytest.mpb
+===================================================================
+--- MPC/config/notifytest.mpb	(revision 80604)
++++ MPC/config/notifytest.mpb	(working copy)
+@@ -5,6 +5,7 @@
+   after    += NotifyTests_Lib
+   libs     += TAO_NotifyTests
+   includes += $(TAO_ROOT)/orbsvcs/tests/Notify/lib
++  libpaths += $(TAO_ROOT)/orbsvcs/tests/Notify/lib
+
+   specific(automake) {
+    includes += $(TAO_BUILDDIR)/orbsvcs/tests/Notify/lib
+Index: MPC/config/kokyu_dsrt_schedulers.mpb
+===================================================================
+--- MPC/config/kokyu_dsrt_schedulers.mpb	(revision 80604)
++++ MPC/config/kokyu_dsrt_schedulers.mpb	(working copy)
+@@ -5,6 +5,7 @@
+   after   += Kokyu_DSRT_Schedulers
+   libs    += Kokyu_DSRT_Schedulers
+   includes += $(TAO_ROOT)/examples/Kokyu_dsrt_schedulers
++  libpaths += $(TAO_ROOT)/examples/Kokyu_dsrt_schedulers
+
+   specific(automake) {
+    includes += $(TAO_BUILDDIR)/examples/Kokyu_dsrt_schedulers
+Index: MPC/config/csd_pt_testservant_lib.mpb
+===================================================================
+--- MPC/config/csd_pt_testservant_lib.mpb	(revision 80604)
++++ MPC/config/csd_pt_testservant_lib.mpb	(working copy)
+@@ -4,4 +4,5 @@
+ project : csd_pt_testinf_lib {
+   after += csd_pt_testservant
+   libs += CSD_PT_TestServant
++  libpaths += $(TAO_ROOT)/performance-tests/CSD_Strategy/TestServant
+ }
+Index: MPC/config/rtcorbacommon.mpb
+===================================================================
+--- MPC/config/rtcorbacommon.mpb	(revision 80604)
++++ MPC/config/rtcorbacommon.mpb	(working copy)
+@@ -4,6 +4,7 @@
+ project : portableserver, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTCORBA_Common
+   libs     += RTCORBA_Common
++  libpaths += ../Common
+
+   specific (automake) {
+     includes += $(srcdir)/../Common
+Index: MPC/config/taolib.mpb
+===================================================================
+--- MPC/config/taolib.mpb	(revision 80604)
++++ MPC/config/taolib.mpb	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project : acelib, ace_for_tao, tao_output, taodefaults, pidl, corba_e_micro, corba_e_compact, core_minimum_corba, link_codecfactory {
++project : acelib, ace_for_tao, taodefaults, pidl, corba_e_micro, corba_e_compact, core_minimum_corba, link_codecfactory {
+   after += TAO Codeset
+   libs  += TAO
+ }
+Index: MPC/config/csd_pt_testinf_lib.mpb
+===================================================================
+--- MPC/config/csd_pt_testinf_lib.mpb	(revision 80604)
++++ MPC/config/csd_pt_testinf_lib.mpb	(working copy)
+@@ -5,6 +5,7 @@
+   after += csd_pt_testinf
+   includes += $(TAO_ROOT)/performance-tests/CSD_Strategy
+   libs += CSD_PT_TestInf
++  libpaths += $(TAO_ROOT)/performance-tests/CSD_Strategy/TestInf
+   idlflags += -I$(TAO_ROOT)/performance-tests/CSD_Strategy
+
+   specific(automake) {
+Index: orbsvcs/orbsvcs/HTIOP.mpc
+===================================================================
+--- orbsvcs/orbsvcs/HTIOP.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/HTIOP.mpc	(working copy)
+@@ -2,7 +2,7 @@
+ //
+ // $Id$
+
+-project : htbp, orbsvcslib, install, tao_versioning_idl_defaults {
++project : htbp, orbsvcslib, orbsvcs_output, install, tao_versioning_idl_defaults {
+   sharedname   = TAO_HTIOP
+   idlflags    += -Wb,export_macro=HTIOP_Export -Wb,export_include=orbsvcs/HTIOP/HTIOP_Export.h -SS
+   dynamicflags = HTIOP_BUILD_DLL
+Index: orbsvcs/orbsvcs/CosEvent.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosEvent.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosEvent.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ // $Id$
+
+-project (CosEvent_IDL) : orbsvcslib, install, avoids_minimum_corba, ec_typed_events_idl, tao_versioning_idl_defaults {
++project (CosEvent_IDL) : orbsvcslib, orbsvcs_output, install, avoids_minimum_corba, ec_typed_events_idl, tao_versioning_idl_defaults {
+   custom_only = 1
+   idlflags   += -GT -Wb,stub_export_macro=TAO_Event_Export -Wb,stub_export_include=orbsvcs/CosEvent/event_export.h -Wb,skel_export_macro=TAO_Event_Skel_Export -Wb,skel_export_include=orbsvcs/CosEvent/event_skel_export.h
+
+@@ -10,7 +10,7 @@
+   }
+ }
+
+-project (CosEvent) : orbsvcslib, install, avoids_minimum_corba, ec_typed_events {
++project (CosEvent) : orbsvcslib, orbsvcs_output, install, avoids_minimum_corba, ec_typed_events {
+   sharedname   = TAO_CosEvent
+   dynamicflags = TAO_EVENT_BUILD_DLL
+   tagchecks   += CosEvent
+@@ -49,7 +49,7 @@
+ }
+
+
+-project (CosEvent_Skel) : orbsvcslib, install, avoids_minimum_corba, event, portableserver, ec_typed_events_skel {
++project (CosEvent_Skel) : orbsvcslib, orbsvcs_output, install, avoids_minimum_corba, event, portableserver, ec_typed_events_skel {
+   sharedname   = TAO_CosEvent_Skel
+   dynamicflags = TAO_EVENT_SKEL_BUILD_DLL
+   tagchecks   += CosEvent
+@@ -86,7 +86,7 @@
+ }
+
+
+-project (CosEvent_Serv) : orbsvcslib, install, avoids_minimum_corba, event_skel, ec_typed_events_serv, messaging_optional, naming, svc_utils {
++project (CosEvent_Serv) : orbsvcslib, orbsvcs_output, install, avoids_minimum_corba, event_skel, ec_typed_events_serv, messaging_optional, naming, svc_utils {
+   sharedname   = TAO_CosEvent_Serv
+   dynamicflags = TAO_EVENT_SERV_BUILD_DLL
+   tagchecks   += CosEvent
+Index: orbsvcs/orbsvcs/CosTrading.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosTrading.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosTrading.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(CosTrading_IDL) : orbsvcslib, install, tao_versioning_idl_defaults {
++project(CosTrading_IDL) : orbsvcslib, orbsvcs_output, install, tao_versioning_idl_defaults {
+   custom_only = 1
+   idlflags   += -Wb,stub_export_macro=TAO_Trading_Export -Wb,stub_export_include=orbsvcs/Trader/trading_export.h -Wb,skel_export_macro=TAO_Trading_Skel_Export -Wb,skel_export_include=orbsvcs/Trader/trading_skel_export.h
+
+@@ -13,7 +13,7 @@
+ }
+
+
+-project(CosTrading) : orbsvcslib, install {
++project(CosTrading) : orbsvcslib, orbsvcs_output, install {
+   sharedname   = TAO_CosTrading
+   dynamicflags = TAO_TRADING_BUILD_DLL
+   tagchecks   += Trader
+@@ -55,7 +55,7 @@
+ }
+
+
+-project(CosTrading_Skel) : orbsvcslib, install, trading, portableserver {
++project(CosTrading_Skel) : orbsvcslib, orbsvcs_output, install, trading, portableserver {
+   sharedname   = TAO_CosTrading_Skel
+   dynamicflags = TAO_TRADING_SKEL_BUILD_DLL
+   tagchecks   += Trader
+@@ -91,7 +91,7 @@
+ }
+
+
+-project(CosTrading_Serv) : orbsvcslib, install, trading_skel, dynamicany, svc_utils, utils, iortable {
++project(CosTrading_Serv) : orbsvcslib, orbsvcs_output, install, trading_skel, dynamicany, svc_utils, utils, iortable {
+   sharedname   = TAO_CosTrading_Serv
+   dynamicflags = TAO_TRADING_SERV_BUILD_DLL
+   tagchecks   += Trader
+@@ -123,7 +123,7 @@
+     Trader/Constraint_l.cpp: Trader/constraint.l
+     "	@echo 'INFORMATION: Potentially outdated $@'"
+     "	@echo '             either touch(1) the file or explicitly'"
+-    "	@echo '             generate it using:'"
++    "	@echo '             generate it using:'"
+     "	@echo '    make -f GNUmakefile.CosTrading_Serv Constraint_l'"
+
+     .PHONY: Constraint_l
+@@ -138,14 +138,14 @@
+     "	    -e 's/\\$$Hea''der.*\\$$/$$I''d$$/' \\"
+     "	    -e 's@#include <stdio\.h>@#include \"ace/os_include/os_stdio.h\"@' \\"
+     "	    -e 's@#include <unistd\.h>@#include \"ace/OS_NS_unistd.h\"@' \\"
+-    "	    -e '/#include </d' \\"
++    "	    -e '/#include </d' \\"
+     "	>> Trader/Constraint_l.cpp"
+     "	(cd Trader; patch < Constraint_l.cpp.diff)"
+
+     Trader/Constraint_y.cpp: Trader/constraint.y
+     "	@echo 'INFORMATION: Potentially outdated $@'"
+     "	@echo '             either touch(1) the file or explicitly'"
+-    "	@echo '             generate it using:'"
++    "	@echo '             generate it using:'"
+     "	@echo '    make -f GNUmakefile.CosTrading_Serv Constraint_y'"
+
+     .PHONY: Constraint_y
+Index: orbsvcs/orbsvcs/RTSchedEvent.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RTSchedEvent.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RTSchedEvent.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RTSchedEvent) : orbsvcslib, install, rtevent_serv, rtsched {
++project(RTSchedEvent) : orbsvcslib, orbsvcs_output, install, rtevent_serv, rtsched {
+   sharedname   = TAO_RTSchedEvent
+   dynamicflags = TAO_RTSCHEDEVENT_BUILD_DLL
+   tagchecks   += RTSchedEvent
+Index: orbsvcs/orbsvcs/CosConcurrency.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosConcurrency.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosConcurrency.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(CosConcurrency_IDL): orbsvcslib, install, tao_versioning_idl_defaults {
++project(CosConcurrency_IDL): orbsvcslib, orbsvcs_output, install, tao_versioning_idl_defaults {
+   custom_only = 1
+   idlflags   += -Wb,stub_export_macro=TAO_Concurrency_Export -Wb,stub_export_include=orbsvcs/Concurrency/concurrency_export.h -Wb,skel_export_macro=TAO_Concurrency_Skel_Export -Wb,skel_export_include=orbsvcs/Concurrency/concurrency_skel_export.h
+
+@@ -10,7 +10,7 @@
+   }
+ }
+
+-project(CosConcurrency) : orbsvcslib, install {
++project(CosConcurrency) : orbsvcslib, orbsvcs_output, install {
+   sharedname   = TAO_CosConcurrency
+   dynamicflags = TAO_CONCURRENCY_BUILD_DLL
+   tagchecks   += Concurrency
+@@ -44,7 +44,7 @@
+   }
+ }
+
+-project(CosConcurrency_Skel): orbsvcslib, install, concurrency, portableserver {
++project(CosConcurrency_Skel): orbsvcslib, orbsvcs_output, install, concurrency, portableserver {
+   sharedname   = TAO_CosConcurrency_Skel
+   dynamicflags = TAO_CONCURRENCY_SKEL_BUILD_DLL
+   tagchecks   += Concurrency
+@@ -74,7 +74,7 @@
+   }
+ }
+
+-project(CosConcurrency_Serv) : orbsvcslib, install, concurrency_skel, avoids_corba_e_micro {
++project(CosConcurrency_Serv) : orbsvcslib, orbsvcs_output, install, concurrency_skel, avoids_corba_e_micro {
+   sharedname   = TAO_CosConcurrency_Serv
+   dynamicflags = TAO_CONCURRENCY_SERV_BUILD_DLL
+   tagchecks   += Concurrency
+Index: orbsvcs/orbsvcs/CosTime.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosTime.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosTime.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(CosTime) : orbsvcslib, svc_utils, install, portableserver, tao_versioning_idl_defaults {
++project(CosTime) : orbsvcslib, orbsvcs_output, svc_utils, install, portableserver, tao_versioning_idl_defaults {
+   sharedname   = TAO_CosTime
+   idlflags    += -Wb,export_macro=TAO_Time_Export -Wb,export_include=orbsvcs/Time/time_export.h
+   dynamicflags = TAO_TIME_BUILD_DLL
+Index: orbsvcs/orbsvcs/AV.mpc
+===================================================================
+--- orbsvcs/orbsvcs/AV.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/AV.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(AV) : orbsvcslib, install, property_serv, naming, qos, tao_versioning_idl_defaults {
++project(AV) : orbsvcslib, orbsvcs_output, install, property_serv, naming, qos, tao_versioning_idl_defaults {
+   avoids       += ace_for_tao
+   sharedname    = TAO_AV
+   idlflags     += -Wb,export_macro=TAO_AV_Export -Wb,export_include=orbsvcs/AV/AV_export.h
+Index: orbsvcs/orbsvcs/FaultTolerance.mpc
+===================================================================
+--- orbsvcs/orbsvcs/FaultTolerance.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/FaultTolerance.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(FaultTolerance): orbsvcslib, install, pi, pi_server, notification, ftorb, portablegroup, avoids_minimum_corba, tao_versioning_idl_defaults {
++project(FaultTolerance): orbsvcslib, orbsvcs_output, install, pi, pi_server, notification, ftorb, portablegroup, avoids_minimum_corba, tao_versioning_idl_defaults {
+   sharedname   = TAO_FaultTolerance
+   idlflags    += -Wb,export_macro=TAO_FT_Export -Wb,export_include=orbsvcs/FaultTolerance/fault_tol_export.h -Wb,skel_export_include=tao/PortableServer/PolicyS.h
+   dynamicflags = TAO_FT_BUILD_DLL
+Index: orbsvcs/orbsvcs/Svc_Utils.mpc
+===================================================================
+--- orbsvcs/orbsvcs/Svc_Utils.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/Svc_Utils.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(Svc_Utils) : orbsvcslib, install, portableserver, tao_versioning_idl_defaults {
++project(Svc_Utils) : orbsvcslib, orbsvcs_output, install, portableserver, tao_versioning_idl_defaults {
+   sharedname   = TAO_Svc_Utils
+   idlflags    += -Wb,export_macro=TAO_Svc_Utils_Export -Wb,export_include=orbsvcs/svc_utils_export.h
+   dynamicflags = TAO_SVC_UTILS_BUILD_DLL
+Index: orbsvcs/orbsvcs/RTSched.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RTSched.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RTSched.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RTSched) : orbsvcslib, install, naming, portableserver, svc_utils, tao_versioning_idl_defaults {
++project(RTSched) : orbsvcslib, orbsvcs_output, install, naming, portableserver, svc_utils, tao_versioning_idl_defaults {
+   sharedname   = TAO_RTSched
+   idlflags    += -Wb,export_macro=TAO_RTSched_Export -Wb,export_include=orbsvcs/Sched/sched_export.h
+   dynamicflags = TAO_RTSCHED_BUILD_DLL
+Index: orbsvcs/orbsvcs/RTCORBAEvent.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RTCORBAEvent.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RTCORBAEvent.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RTCORBAEvent) : orbsvcslib, install, rtevent_serv, rtportableserver {
++project(RTCORBAEvent) : orbsvcslib, orbsvcs_output, install, rtevent_serv, rtportableserver {
+   sharedname   = TAO_RTCORBAEvent
+   dynamicflags = TAO_RTCORBAEVENT_BUILD_DLL
+   tagchecks   += RTCORBAEvent
+Index: orbsvcs/orbsvcs/RTEvent_Skel.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RTEvent_Skel.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RTEvent_Skel.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RTEvent_Skel) : orbsvcslib, install, rtevent, portableserver {
++project(RTEvent_Skel) : orbsvcslib, orbsvcs_output, install, rtevent, portableserver {
+   sharedname   = TAO_RTEvent_Skel
+   dynamicflags = TAO_RTEVENT_SKEL_BUILD_DLL
+   tagchecks   += RTEvent
+Index: orbsvcs/orbsvcs/PortableGroup.mpc
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/PortableGroup.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(PortableGroup) : orbsvcslib, install, naming, iormanip, messaging, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro, tao_versioning_idl_defaults {
++project(PortableGroup) : orbsvcslib, orbsvcs_output, install, naming, iormanip, messaging, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro, tao_versioning_idl_defaults {
+   sharedname   = TAO_PortableGroup
+   idlflags    += -Wb,export_macro=TAO_PortableGroup_Export \
+                  -Wb,export_include=orbsvcs/PortableGroup/portablegroup_export.h
+Index: orbsvcs/orbsvcs/ETCL.mpc
+===================================================================
+--- orbsvcs/orbsvcs/ETCL.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/ETCL.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(ETCL) : orbsvcslib, install {
++project(ETCL) : orbsvcslib, orbsvcs_output, install {
+   sharedname   = TAO_ETCL
+   dynamicflags = TAO_ETCL_BUILD_DLL
+   tagchecks   += Notify
+Index: orbsvcs/orbsvcs/RTEvent.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RTEvent.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RTEvent.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RTEvent) : orbsvcslib, install, svc_utils, tao_versioning_idl_defaults {
++project(RTEvent) : orbsvcslib, orbsvcs_output, install, svc_utils, tao_versioning_idl_defaults {
+   sharedname   = TAO_RTEvent
+   idlflags    += -GT -Wb,stub_export_macro=TAO_RTEvent_Export -Wb,stub_export_include=orbsvcs/Event/event_export.h -Wb,skel_export_macro=TAO_RTEvent_Skel_Export -Wb,skel_export_include=orbsvcs/Event/event_skel_export.h
+   dynamicflags = TAO_RTEVENT_BUILD_DLL
+Index: orbsvcs/orbsvcs/RTEventLogAdmin.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RTEventLogAdmin.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RTEventLogAdmin.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RTEventLogAdmin_IDL) : orbsvcslib, install, dslogadmin, rtevent, tao_versioning_idl_defaults {
++project(RTEventLogAdmin_IDL) : orbsvcslib, orbsvcs_output, install, dslogadmin, rtevent, tao_versioning_idl_defaults {
+   custom_only = 1
+   idlflags   += -Wb,stub_export_macro=TAO_RTEventLog_Export -Wb,stub_export_include=orbsvcs/Log/rteventlog_export.h -Wb,skel_export_macro=TAO_RTEventLog_Skel_Export -Wb,skel_export_include=orbsvcs/Log/rteventlog_skel_export.h
+
+@@ -10,7 +10,7 @@
+   }
+ }
+
+-project(RTEventLogAdmin) : orbsvcslib, install, dslogadmin, rtevent {
++project(RTEventLogAdmin) : orbsvcslib, orbsvcs_output, install, dslogadmin, rtevent {
+   sharedname   = TAO_RTEventLogAdmin
+   dynamicflags = TAO_RTEVENTLOG_BUILD_DLL
+   tagchecks   += RTEventLog
+@@ -44,7 +44,7 @@
+   }
+ }
+
+-project(RTEventLogAdmin_Skel) : orbsvcslib, install, rteventlogadmin, dslogadmin_skel, rtevent_skel, portableserver {
++project(RTEventLogAdmin_Skel) : orbsvcslib, orbsvcs_output, install, rteventlogadmin, dslogadmin_skel, rtevent_skel, portableserver {
+   sharedname   = TAO_RTEventLogAdmin_Skel
+   dynamicflags = TAO_RTEVENTLOG_SKEL_BUILD_DLL
+   tagchecks   += RTEventLog
+@@ -73,7 +73,7 @@
+   }
+ }
+
+-project(RTEventLogAdmin_Serv) : orbsvcslib, install, rteventlogadmin_skel, dslogadmin_serv, rtevent_serv, rtsched {
++project(RTEventLogAdmin_Serv) : orbsvcslib, orbsvcs_output, install, rteventlogadmin_skel, dslogadmin_serv, rtevent_serv, rtsched {
+   sharedname   = TAO_RTEventLogAdmin_Serv
+   dynamicflags = TAO_RTEVENTLOG_SERV_BUILD_DLL
+   tagchecks   += RTEventLog
+Index: orbsvcs/orbsvcs/FTORB.mpc
+===================================================================
+--- orbsvcs/orbsvcs/FTORB.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/FTORB.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(FTORB_Utils) : orbsvcslib, install, iormanip, portableserver, portablegroup, avoids_minimum_corba, tao_versioning_idl_defaults {
++project(FTORB_Utils) : orbsvcslib, orbsvcs_output, install, iormanip, portableserver, portablegroup, avoids_minimum_corba, tao_versioning_idl_defaults {
+   sharedname   = TAO_FTORB_Utils
+   idlflags    += -Wb,skel_export_include=tao/PortableServer/PolicyS.h
+   dynamicflags = TAO_FT_ORB_UTILS_BUILD_DLL
+@@ -29,7 +29,7 @@
+   }
+ }
+
+-project(FT_ClientORB) : orbsvcslib, ftorbutils, install, messaging, portablegroup, interceptors {
++project(FT_ClientORB) : orbsvcslib, orbsvcs_output, ftorbutils, install, messaging, portablegroup, interceptors {
+   avoids      += ace_for_tao      // Requires ace/UUID
+   sharedname   = TAO_FT_ClientORB
+   dynamicflags = TAO_FT_CLIENTORB_BUILD_DLL
+@@ -61,7 +61,7 @@
+   }
+ }
+
+-project(FT_ServerORB) : orbsvcslib, ftorbutils, install, messaging, portablegroup, pi_server, pi, interceptors {
++project(FT_ServerORB) : orbsvcslib, orbsvcs_output, ftorbutils, install, messaging, portablegroup, pi_server, pi, interceptors {
+   sharedname   = TAO_FT_ServerORB
+   dynamicflags = TAO_FT_SERVERORB_BUILD_DLL
+   tagchecks   += FT_ServerORB
+Index: orbsvcs/orbsvcs/CosNaming_Serv.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosNaming_Serv.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosNaming_Serv.mpc	(working copy)
+@@ -2,7 +2,7 @@
+ //
+ // $Id$
+
+-project(CosNaming_Serv) : orbsvcslib, install, naming_skel, messaging_optional, svc_utils, iortable {
++project(CosNaming_Serv) : orbsvcslib, orbsvcs_output, install, naming_skel, messaging_optional, svc_utils, iortable {
+   sharedname   = TAO_CosNaming_Serv
+   dynamicflags = TAO_NAMING_SERV_BUILD_DLL
+   tagchecks   += Naming
+Index: orbsvcs/orbsvcs/CosNaming.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosNaming.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosNaming.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(CosNaming_IDL) : orbsvcslib, install, tao_versioning_idl_defaults {
++project(CosNaming_IDL) : orbsvcslib, orbsvcs_output, install, tao_versioning_idl_defaults {
+   custom_only =	1
+   idlflags   += -Wb,stub_export_macro=TAO_Naming_Export -Wb,stub_export_include=orbsvcs/Naming/naming_export.h -Wb,skel_export_macro=TAO_Naming_Skel_Export -Wb,skel_export_include=orbsvcs/Naming/naming_skel_export.h
+
+@@ -10,7 +10,7 @@
+   }
+ }
+
+-project(CosNaming) : orbsvcslib, install {
++project(CosNaming) : orbsvcslib, orbsvcs_output, install {
+   sharedname   = TAO_CosNaming
+   dynamicflags = TAO_NAMING_BUILD_DLL
+   tagchecks   += Naming
+Index: orbsvcs/orbsvcs/Security.mpc
+===================================================================
+--- orbsvcs/orbsvcs/Security.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/Security.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(Security) : orbsvcslib, corba_messaging, install, portableserver, pi, interceptors, valuetype, tao_versioning_idl_defaults {
++project(Security) : orbsvcslib, orbsvcs_output, corba_messaging, install, portableserver, pi, interceptors, valuetype, tao_versioning_idl_defaults {
+   sharedname   = TAO_Security
+   idlflags    += -Wb,export_macro=TAO_Security_Export -Wb,export_include=orbsvcs/Security/security_export.h
+   dynamicflags = TAO_SECURITY_BUILD_DLL
+Index: orbsvcs/orbsvcs/RTKokyuEvent.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RTKokyuEvent.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RTKokyuEvent.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RTKokyuEvent) : orbsvcslib, install, rtevent_serv, rtsched, kokyu {
++project(RTKokyuEvent) : orbsvcslib, orbsvcs_output, install, rtevent_serv, rtsched, kokyu {
+   sharedname   = TAO_RTKokyuEvent
+   dynamicflags = TAO_RTKOKYUEVENT_BUILD_DLL
+   tagchecks   += RTKokyuEvent
+Index: orbsvcs/orbsvcs/CosNotification.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosNotification.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosNotification.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(CosNotification_IDL) : orbsvcslib, install, event, tao_versioning_idl_defaults {
++project(CosNotification_IDL) : orbsvcslib, orbsvcs_output, install, event, tao_versioning_idl_defaults {
+   custom_only = 1
+   idlflags   += -Wb,stub_export_macro=TAO_Notify_Export -Wb,stub_export_include=orbsvcs/Notify/notify_export.h -Wb,skel_export_macro=TAO_Notify_Skel_Export -Wb,skel_export_include=orbsvcs/Notify/notify_skel_export.h
+
+@@ -15,7 +15,7 @@
+   }
+ }
+
+-project(CosNotification) : orbsvcslib, install, event {
++project(CosNotification) : orbsvcslib, orbsvcs_output, install, event {
+   sharedname   = TAO_CosNotification
+   dynamicflags = TAO_NOTIFY_BUILD_DLL
+   tagchecks   += Notify
+@@ -67,7 +67,7 @@
+ }
+
+
+-project(CosNotification_Skel) : orbsvcslib, install, notification, event_skel, portableserver {
++project(CosNotification_Skel) : orbsvcslib, orbsvcs_output, install, notification, event_skel, portableserver {
+   sharedname   = TAO_CosNotification_Skel
+   dynamicflags = TAO_NOTIFY_SKEL_BUILD_DLL
+   tagchecks   += Notify
+@@ -111,7 +111,7 @@
+   }
+ }
+
+-project(CosNotification_Serv) : orbsvcslib, svc_utils, install, notification_skel, dynamicany, etcl{
++project(CosNotification_Serv) : orbsvcslib, orbsvcs_output, svc_utils, install, notification_skel, dynamicany, etcl{
+   sharedname   = TAO_CosNotification_Serv
+   dynamicflags = TAO_NOTIFY_SERV_BUILD_DLL
+   tagchecks   += Notify
+@@ -223,7 +223,7 @@
+
+ }
+
+-project(CosNotification_Persist) : notification_serv, install, acexml {
++project(CosNotification_Persist) : notification_serv, orbsvcs_output, install, acexml {
+   sharedname   = TAO_CosNotification_Persist
+   dynamicflags = TAO_NOTIFY_PERSIST_BUILD_DLL
+   tagchecks   += Notify
+@@ -246,7 +246,7 @@
+   }
+ }
+
+-project(CosNotification_MC): tao_versioning_idl_defaults, naming, portableserver, iortable, install {
++project(CosNotification_MC): tao_versioning_idl_defaults, orbsvcs_output, naming, portableserver, iortable, install {
+   sharedname   = TAO_CosNotification_MC
+   dynamicflags = TAO_NOTIFY_MC_BUILD_DLL
+   tagchecks   += Notify
+@@ -274,7 +274,7 @@
+   }
+ }
+
+-project(CosNotification_MC_Ext): notification_serv, notification_mc, install {
++project(CosNotification_MC_Ext): notification_serv, orbsvcs_output, notification_mc, install {
+   sharedname   = TAO_CosNotification_MC_Ext
+   dynamicflags = TAO_NOTIFY_MC_EXT_BUILD_DLL
+   tagchecks   += Notify
+Index: orbsvcs/orbsvcs/DsNotifyLogAdmin.mpc
+===================================================================
+--- orbsvcs/orbsvcs/DsNotifyLogAdmin.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/DsNotifyLogAdmin.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(DsNotifyLogAdmin_IDL) : orbsvcslib, install, dslogadmin, dseventlogadmin, event, notification, tao_versioning_idl_defaults {
++project(DsNotifyLogAdmin_IDL) : orbsvcslib, orbsvcs_output, install, dslogadmin, dseventlogadmin, event, notification, tao_versioning_idl_defaults {
+   custom_only = 1
+   idlflags   += -Wb,stub_export_macro=TAO_NotifyLog_Export -Wb,stub_export_include=orbsvcs/Log/notifylog_export.h -Wb,skel_export_macro=TAO_NotifyLog_Skel_Export -Wb,skel_export_include=orbsvcs/Log/notifylog_skel_export.h
+
+@@ -10,7 +10,7 @@
+   }
+ }
+
+-project(DsNotifyLogAdmin) : orbsvcslib, install, dslogadmin, dseventlogadmin, event, notification {
++project(DsNotifyLogAdmin) : orbsvcslib, orbsvcs_output, install, dslogadmin, dseventlogadmin, event, notification {
+   sharedname   = TAO_DsNotifyLogAdmin
+   dynamicflags = TAO_NOTIFYLOG_BUILD_DLL
+   tagchecks   += Log
+@@ -46,7 +46,7 @@
+ }
+
+
+-project(DsNotifyLogAdmin_Skel) : orbsvcslib, install, dsnotifylogadmin, dseventlogadmin_skel, dslogadmin_skel, event_skel, notification_skel, portableserver {
++project(DsNotifyLogAdmin_Skel) : orbsvcslib, orbsvcs_output, install, dsnotifylogadmin, dseventlogadmin_skel, dslogadmin_skel, event_skel, notification_skel, portableserver {
+   sharedname   = TAO_DsNotifyLogAdmin_Skel
+   dynamicflags = TAO_NOTIFYLOG_SKEL_BUILD_DLL
+   tagchecks   += Log
+@@ -65,7 +65,7 @@
+
+   Inline_Files {
+     DsNotifyLogAdminS.inl
+-  }
++  }
+
+   Template_Files {
+   }
+@@ -76,7 +76,7 @@
+ }
+
+
+-project(DsNotifyLogAdmin_Serv) : orbsvcslib, install, dsnotifylogadmin_skel, dslogadmin_serv {
++project(DsNotifyLogAdmin_Serv) : orbsvcslib, orbsvcs_output, install, dsnotifylogadmin_skel, dslogadmin_serv {
+   sharedname   = TAO_DsNotifyLogAdmin_Serv
+   dynamicflags = TAO_NOTIFYLOG_SERV_BUILD_DLL
+   tagchecks   += Log
+Index: orbsvcs/orbsvcs/FtRtEvent.mpc
+===================================================================
+--- orbsvcs/orbsvcs/FtRtEvent.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/FtRtEvent.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project (FtRtEvent) : orbsvcslib, install, ftorbutils, rtevent_serv, naming, avoids_minimum_corba, pi_server, tao_versioning_idl_defaults {
++project (FtRtEvent) : orbsvcslib, orbsvcs_output, install, ftorbutils, rtevent_serv, naming, avoids_minimum_corba, pi_server, tao_versioning_idl_defaults {
+   sharedname   = TAO_FtRtEvent
+   idlflags    += -Wb,export_macro=TAO_FtRtEvent_Export -Wb,export_include=orbsvcs/FtRtEvent/Utils/ftrtevent_export.h
+   dynamicflags = TAO_FTRTEVENT_BUILD_DLL
+@@ -36,7 +36,7 @@
+   }
+ }
+
+-project (FTRT_ClientORB) :  messaging, orbsvcslib, pi, install {
++project (FTRT_ClientORB) :  messaging, orbsvcslib, orbsvcs_output, pi, install {
+   sharedname   = TAO_FTRT_ClientORB
+   dynamicflags = TAO_FTRT_BUILD_DLL
+   tagchecks   += FTRT_ClientORB
+@@ -57,7 +57,7 @@
+   }
+ }
+
+-project (FTRT_EventChannel) :  orbsvcslib, install, ftrtevent, rtevent_serv, utils, pi_server, corba_messaging {
++project (FTRT_EventChannel) :  orbsvcslib, orbsvcs_output, install, ftrtevent, rtevent_serv, utils, pi_server, corba_messaging {
+   sharedname   = TAO_FTRT_EventChannel
+   dynamicflags = TAO_FTRTEC_BUILD_DLL
+   tagchecks   += FTRT_EventChannel
+Index: orbsvcs/orbsvcs/DsLogAdmin.mpc
+===================================================================
+--- orbsvcs/orbsvcs/DsLogAdmin.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/DsLogAdmin.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(DsLogAdmin_IDL) : orbsvcslib, install, tao_versioning_idl_defaults {
++project(DsLogAdmin_IDL) : orbsvcslib, orbsvcs_output, install, tao_versioning_idl_defaults {
+   custom_only = 1
+   idlflags   += -Wb,stub_export_macro=TAO_Log_Export -Wb,stub_export_include=orbsvcs/Log/log_export.h -Wb,skel_export_macro=TAO_Log_Skel_Export -Wb,skel_export_include=orbsvcs/Log/log_skel_export.h
+
+@@ -11,7 +11,7 @@
+   }
+ }
+
+-project(DsLogAdmin) : orbsvcslib, install {
++project(DsLogAdmin) : orbsvcslib, orbsvcs_output, install {
+   sharedname   = TAO_DsLogAdmin
+   dynamicflags = TAO_LOG_BUILD_DLL
+   tagchecks   += Log
+@@ -38,7 +38,7 @@
+
+   Template_Files {
+   }
+-
++
+   // explicit Resource_Files to avoid including _Skel & _Serv rc files.
+   Resource_Files {
+     DsLogAdmin.rc
+@@ -50,13 +50,13 @@
+ }
+
+
+-project(DsLogAdmin_Skel) : orbsvcslib, install, dslogadmin, portableserver {
++project(DsLogAdmin_Skel) : orbsvcslib, orbsvcs_output, install, dslogadmin, portableserver {
+   sharedname   = TAO_DsLogAdmin_Skel
+   dynamicflags = TAO_LOG_SKEL_BUILD_DLL
+   tagchecks   += Log
+
+   IDL_Files {
+-  }
++  }
+
+   Source_Files {
+     DsLogAdminS.cpp
+@@ -83,7 +83,7 @@
+ }
+
+
+-project(DsLogAdmin_Serv) : orbsvcslib, install, dslogadmin_skel, dynamicany, etcl, utils, svc_utils {
++project(DsLogAdmin_Serv) : orbsvcslib, orbsvcs_output, install, dslogadmin_skel, dynamicany, etcl, utils, svc_utils {
+   sharedname   = TAO_DsLogAdmin_Serv
+   dynamicflags = TAO_LOG_SERV_BUILD_DLL
+   tagchecks   += Log
+Index: orbsvcs/orbsvcs/CosNaming_Skel.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosNaming_Skel.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosNaming_Skel.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(CosNaming_Skel) : orbsvcslib, install, naming, portableserver {
++project(CosNaming_Skel) : orbsvcslib, orbsvcs_output, install, naming, portableserver {
+   sharedname   = TAO_CosNaming_Skel
+   dynamicflags = TAO_NAMING_SKEL_BUILD_DLL
+   tagchecks   += Naming
+Index: orbsvcs/orbsvcs/RTCosScheduling.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RTCosScheduling.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RTCosScheduling.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RTCosScheduling) : orbsvcslib, install, rtportableserver, interceptors, codecfactory, tao_versioning_idl_defaults {
++project(RTCosScheduling) : orbsvcslib, orbsvcs_output, install, rtportableserver, interceptors, codecfactory, tao_versioning_idl_defaults {
+   sharedname    = TAO_RTCosScheduling
+   idlflags     += -Gd -Wb,export_macro=TAO_RTCosScheduling_Export -Wb,export_include=orbsvcs/RTCosScheduling/RTCosScheduling_export.h
+   dynamicflags += TAO_RTCOSSCHEDULING_BUILD_DLL
+Index: orbsvcs/orbsvcs/IFRService.mpc
+===================================================================
+--- orbsvcs/orbsvcs/IFRService.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/IFRService.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(IFRService) : orbsvcslib, install, typecodefactory, svc_utils, iortable {
++project(IFRService) : orbsvcslib, orbsvcs_output, install, typecodefactory, svc_utils, iortable {
+   avoids      += ace_for_tao    // Requires ace/Configuration
+   sharedname   = TAO_IFRService
+   dynamicflags = TAO_IFRSERVICE_BUILD_DLL
+Index: orbsvcs/orbsvcs/SSLIOP.mpc
+===================================================================
+--- orbsvcs/orbsvcs/SSLIOP.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/SSLIOP.mpc	(working copy)
+@@ -2,7 +2,7 @@
+ //
+ // $Id$
+
+-project(SSLIOP) : orbsvcslib, install, security, ssl, pi_server, interceptors, tao_versioning_idl_defaults, ssliop_params_dup {
++project(SSLIOP) : orbsvcslib, orbsvcs_output, install, security, ssl, pi_server, interceptors, tao_versioning_idl_defaults, ssliop_params_dup {
+   sharedname   = TAO_SSLIOP
+   idlflags    += -Wb,export_macro=TAO_SSLIOP_Export -Wb,export_include=orbsvcs/SSLIOP/SSLIOP_Export.h -SS
+   dynamicflags = TAO_SSLIOP_BUILD_DLL
+Index: orbsvcs/orbsvcs/CosLoadBalancing.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosLoadBalancing.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosLoadBalancing.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project : orbsvcslib, install, naming, iormanip, portablegroup, ami, avoids_minimum_corba, pi, pi_server, iorinterceptor, tao_versioning_idl_defaults {
++project : orbsvcslib, orbsvcs_output, install, naming, iormanip, portablegroup, ami, avoids_minimum_corba, pi, pi_server, iorinterceptor, tao_versioning_idl_defaults {
+   sharedname   = TAO_CosLoadBalancing
+   idlflags    += -Wb,export_macro=TAO_LoadBalancing_Export -Wb,export_include=orbsvcs/LoadBalancing/LoadBalancing_export.h
+   dynamicflags = TAO_LOADBALANCING_BUILD_DLL
+Index: orbsvcs/orbsvcs/DsEventLogAdmin.mpc
+===================================================================
+--- orbsvcs/orbsvcs/DsEventLogAdmin.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/DsEventLogAdmin.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(DsEventLogAdmin_IDL) : orbsvcslib, install, dslogadmin, event, tao_versioning_idl_defaults {
++project(DsEventLogAdmin_IDL) : orbsvcslib, orbsvcs_output, install, dslogadmin, event, tao_versioning_idl_defaults {
+   custom_only = 1
+   idlflags   += -Wb,stub_export_macro=TAO_EventLog_Export -Wb,stub_export_include=orbsvcs/Log/eventlog_export.h -Wb,skel_export_macro=TAO_EventLog_Skel_Export -Wb,skel_export_include=orbsvcs/Log/eventlog_skel_export.h
+
+@@ -10,7 +10,7 @@
+   }
+ }
+
+-project(DsEventLogAdmin) : orbsvcslib, install, dslogadmin, event {
++project(DsEventLogAdmin) : orbsvcslib, orbsvcs_output, install, dslogadmin, event {
+   sharedname   = TAO_DsEventLogAdmin
+   dynamicflags = TAO_EVENTLOG_BUILD_DLL
+   tagchecks   += EventLog
+@@ -45,7 +45,7 @@
+   }
+ }
+
+-project(DsEventLogAdmin_Skel) : orbsvcslib, install, dseventlogadmin, dslogadmin_skel, event_skel, portableserver {
++project(DsEventLogAdmin_Skel) : orbsvcslib, orbsvcs_output, install, dseventlogadmin, dslogadmin_skel, event_skel, portableserver {
+   sharedname   = TAO_DsEventLogAdmin_Skel
+   dynamicflags = TAO_EVENTLOG_SKEL_BUILD_DLL
+   tagchecks   += EventLog
+@@ -74,7 +74,7 @@
+   }
+ }
+
+-project(DsEventLogAdmin_Serv) : orbsvcslib, install, dseventlogadmin_skel, dslogadmin_serv, event_serv {
++project(DsEventLogAdmin_Serv) : orbsvcslib, orbsvcs_output, install, dseventlogadmin_skel, dslogadmin_serv, event_serv {
+   sharedname   = TAO_DsEventLogAdmin_Serv
+   dynamicflags = TAO_EVENTLOG_SERV_BUILD_DLL
+   tagchecks   += EventLog
+Index: orbsvcs/orbsvcs/CosProperty.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosProperty.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosProperty.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(CosProperty_IDL) : orbsvcslib, install, tao_versioning_idl_defaults {
++project(CosProperty_IDL) : orbsvcslib, orbsvcs_output, install, tao_versioning_idl_defaults {
+   custom_only = 1
+   idlflags   += -Wb,stub_export_macro=TAO_Property_Export -Wb,stub_export_include=orbsvcs/Property/property_export.h -Wb,skel_export_macro=TAO_Property_Skel_Export -Wb,skel_export_include=orbsvcs/Property/property_skel_export.h
+
+@@ -10,7 +10,7 @@
+   }
+ }
+
+-project(CosProperty) : orbsvcslib, install {
++project(CosProperty) : orbsvcslib, orbsvcs_output, install {
+   sharedname   = TAO_CosProperty
+   dynamicflags = TAO_PROPERTY_BUILD_DLL
+   tagchecks   += Property
+@@ -44,7 +44,7 @@
+   }
+ }
+
+-project(CosProperty_Skel) : orbsvcslib, install, property, portableserver {
++project(CosProperty_Skel) : orbsvcslib, orbsvcs_output, install, property, portableserver {
+   sharedname   = TAO_CosProperty_Skel
+   dynamicflags = TAO_PROPERTY_SKEL_BUILD_DLL
+   tagchecks   += Property
+@@ -73,7 +73,7 @@
+   }
+ }
+
+-project(CosProperty_Serv) : orbsvcslib, install, property_skel {
++project(CosProperty_Serv) : orbsvcslib, orbsvcs_output, install, property_skel {
+   sharedname   = TAO_CosProperty_Serv
+   dynamicflags = TAO_PROPERTY_SERV_BUILD_DLL
+   tagchecks   += Property
+Index: orbsvcs/orbsvcs/RT_Notification.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RT_Notification.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RT_Notification.mpc	(working copy)
+@@ -1,17 +1,17 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RT_Notification) : orbsvcslib, install, rtcorba, notification_serv, tao_versioning_idl_defaults {
++project(RT_Notification) : orbsvcslib, orbsvcs_output, install, rtcorba, notification_serv, tao_versioning_idl_defaults {
+   sharedname   = TAO_RT_Notification
+   idlflags    += -Wb,export_macro=TAO_RT_Notify_Export -Wb,export_include=orbsvcs/Notify/rt_notify_export.h
+   dynamicflags = TAO_RT_NOTIFY_BUILD_DLL
+   tagchecks   += RT_Notify
+
+-  // The using in the TAO_MC_Default_Factory class is apparently ignored by
+-  // the Borland compiler.  I am disabling the virtual function hiding
++  // The using in the TAO_MC_Default_Factory class is apparently ignored by
++  // the Borland compiler.  I am disabling the virtual function hiding
+   // warning for this project only.
+   specific(borland, bmake) {
+-    compile_flags += -w-hid
++    compile_flags += -w-hid
+   }
+
+   IDL_Files {
+Index: orbsvcs/orbsvcs/CosLifeCycle.mpc
+===================================================================
+--- orbsvcs/orbsvcs/CosLifeCycle.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/CosLifeCycle.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(CosLifeCycle) : orbsvcslib, install, naming, portableserver, tao_versioning_idl_defaults {
++project(CosLifeCycle) : orbsvcslib, orbsvcs_output, install, naming, portableserver, tao_versioning_idl_defaults {
+   sharedname   = TAO_CosLifeCycle
+   idlflags    += -Wb,export_macro=TAO_LifeCycle_Export -Wb,export_include=orbsvcs/LifeCycle/lifecycle_export.h
+   dynamicflags = TAO_LIFECYCLE_BUILD_DLL
+Index: orbsvcs/orbsvcs/RTEvent_Serv.mpc
+===================================================================
+--- orbsvcs/orbsvcs/RTEvent_Serv.mpc	(revision 80604)
++++ orbsvcs/orbsvcs/RTEvent_Serv.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project(RTEvent_Serv) : orbsvcslib, install, rtevent_skel, svc_utils, messaging {
++project(RTEvent_Serv) : orbsvcslib, orbsvcs_output, install, rtevent_skel, svc_utils, messaging {
+   avoids      += ace_for_tao  // Requires ACE_crc32
+   sharedname   = TAO_RTEvent_Serv
+   dynamicflags = TAO_RTEVENT_SERV_BUILD_DLL
+Index: orbsvcs/FT_ReplicationManager/FT_ReplicationManager.mpc
+===================================================================
+--- orbsvcs/FT_ReplicationManager/FT_ReplicationManager.mpc	(revision 80604)
++++ orbsvcs/FT_ReplicationManager/FT_ReplicationManager.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ // $Id$
+-project(*Lib): orbsvcslib, conv_lib, fault_tolerance, notification_skel, ftorb, portablegroup, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
++project(*Lib): orbsvcslib, orbsvcs_output, conv_lib, fault_tolerance, notification_skel, ftorb, portablegroup, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   sharedname   = TAO_ReplicationManagerLib
+   dynamicflags = TAO_REPLICATIONMANAGERLIB_BUILD_DLL
+
+Index: orbsvcs/IFR_Service/IFR_Service.mpc
+===================================================================
+--- orbsvcs/IFR_Service/IFR_Service.mpc	(revision 80604)
++++ orbsvcs/IFR_Service/IFR_Service.mpc	(working copy)
+@@ -16,7 +16,7 @@
+ }
+
+
+-project(TAO_IFR_BE) : taolib, conv_lib, ifr_client, crosscompile, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
++project(TAO_IFR_BE) : taolib, tao_output, conv_lib, ifr_client, crosscompile, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after       += TAO_IDL_FE IFR_Service
+   sharedname   = TAO_IFR_BE
+   libs        += TAO_IDL_FE
+Index: orbsvcs/performance-tests/RTEvent/Colocated_Roundtrip/Colocated_Roundtrip.mpc
+===================================================================
+--- orbsvcs/performance-tests/RTEvent/Colocated_Roundtrip/Colocated_Roundtrip.mpc	(revision 80604)
++++ orbsvcs/performance-tests/RTEvent/Colocated_Roundtrip/Colocated_Roundtrip.mpc	(working copy)
+@@ -2,6 +2,7 @@
+ project: orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+Index: orbsvcs/performance-tests/RTEvent/Roundtrip/Roundtrip.mpc
+===================================================================
+--- orbsvcs/performance-tests/RTEvent/Roundtrip/Roundtrip.mpc	(revision 80604)
++++ orbsvcs/performance-tests/RTEvent/Roundtrip/Roundtrip.mpc	(working copy)
+@@ -2,6 +2,7 @@
+ project(*RTEvent_Server): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+@@ -17,6 +18,7 @@
+ project(*RTEvent_Client): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+Index: orbsvcs/performance-tests/RTEvent/RTCORBA_Callback/RTCORBA_Callback.mpc
+===================================================================
+--- orbsvcs/performance-tests/RTEvent/RTCORBA_Callback/RTCORBA_Callback.mpc	(revision 80604)
++++ orbsvcs/performance-tests/RTEvent/RTCORBA_Callback/RTCORBA_Callback.mpc	(working copy)
+@@ -11,6 +11,7 @@
+ project(*server): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+@@ -34,6 +35,7 @@
+ project(*client): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+Index: orbsvcs/performance-tests/RTEvent/TCP_Baseline/TCP_Baseline.mpc
+===================================================================
+--- orbsvcs/performance-tests/RTEvent/TCP_Baseline/TCP_Baseline.mpc	(revision 80604)
++++ orbsvcs/performance-tests/RTEvent/TCP_Baseline/TCP_Baseline.mpc	(working copy)
+@@ -2,6 +2,7 @@
+ project(*server): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+@@ -17,6 +18,7 @@
+ project(*client): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+Index: orbsvcs/performance-tests/RTEvent/Federated_Roundtrip/Federated_Roundtrip.mpc
+===================================================================
+--- orbsvcs/performance-tests/RTEvent/Federated_Roundtrip/Federated_Roundtrip.mpc	(revision 80604)
++++ orbsvcs/performance-tests/RTEvent/Federated_Roundtrip/Federated_Roundtrip.mpc	(working copy)
+@@ -2,6 +2,7 @@
+ project(*server): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+@@ -16,6 +17,7 @@
+ project(*client): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+Index: orbsvcs/performance-tests/RTEvent/RTCORBA_Baseline/RTCORBA_Baseline.mpc
+===================================================================
+--- orbsvcs/performance-tests/RTEvent/RTCORBA_Baseline/RTCORBA_Baseline.mpc	(revision 80604)
++++ orbsvcs/performance-tests/RTEvent/RTCORBA_Baseline/RTCORBA_Baseline.mpc	(working copy)
+@@ -12,6 +12,7 @@
+ project(*server): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+@@ -34,6 +35,7 @@
+ project(*client): orbsvcsexe, rtcorbaevent, strategies, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   after    += RTEC_Perf
+   libs     += TAO_RTEC_Perf
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+Index: orbsvcs/tests/Event/Basic/rteventtestexe.mpb
+===================================================================
+--- orbsvcs/tests/Event/Basic/rteventtestexe.mpb	(revision 80604)
++++ orbsvcs/tests/Event/Basic/rteventtestexe.mpb	(working copy)
+@@ -4,6 +4,7 @@
+ project : messaging, rteventexe, rtevent_serv, naming, iortable {
+   after    += Event_Test_Lib
+   libs     += ECTests
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+Index: orbsvcs/tests/Event/Basic/run_test.pl
+===================================================================
+--- orbsvcs/tests/Event/Basic/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Event/Basic/run_test.pl	(working copy)
+@@ -11,6 +11,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ $status = 0;
+
+ $svc_conf = PerlACE::LocalFile ("svc$PerlACE::svcconf_ext");
+@@ -29,7 +31,7 @@
+     my $TEST = new PerlACE::Process ($program, $arguments);
+
+     print STDERR "\n\n$message\n";
+-
++
+     my $test = $TEST->SpawnWaitKill (240);
+
+     if ($test != 0) {
+Index: orbsvcs/tests/Event/Performance/eventperftestexe.mpb
+===================================================================
+--- orbsvcs/tests/Event/Performance/eventperftestexe.mpb	(revision 80604)
++++ orbsvcs/tests/Event/Performance/eventperftestexe.mpb	(working copy)
+@@ -4,6 +4,7 @@
+ project: messaging, rteventexe, rtevent_serv, naming, iortable {
+   after    += Event_Test_Lib
+   libs     += ECTests
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+Index: orbsvcs/tests/Event/Performance/run_test.pl
+===================================================================
+--- orbsvcs/tests/Event/Performance/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Event/Performance/run_test.pl	(working copy)
+@@ -11,6 +11,8 @@
+ use lib  "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ $status = 0;
+
+ $ec_st_conf = PerlACE::LocalFile ("ec.st$PerlACE::svcconf_ext");
+@@ -24,7 +26,7 @@
+     my $TEST = new PerlACE::Process ($program, $arguments);
+
+     print STDERR "\n\n$message\n";
+-
++
+     my $test = $TEST->SpawnWaitKill (60);
+
+     if ($test != 0) {
+Index: orbsvcs/tests/Event/Mcast/Complex/Complex.mpc
+===================================================================
+--- orbsvcs/tests/Event/Mcast/Complex/Complex.mpc	(revision 80604)
++++ orbsvcs/tests/Event/Mcast/Complex/Complex.mpc	(working copy)
+@@ -4,6 +4,7 @@
+ project(*supplier): messaging, rteventexe, rtevent_serv, naming {
+   after  += ECMcastTests_lib
+   libs     += ECMcastTests
++  libpaths += ../Common
+
+   specific (automake) {
+     includes += $(srcdir)/../Common
+@@ -21,6 +22,7 @@
+ project(*consumer): messaging, rteventexe, rtevent_serv, naming {
+   after  += ECMcastTests_lib
+   libs     += ECMcastTests
++  libpaths += ../Common
+
+   specific (automake) {
+     includes += $(srcdir)/../Common
+@@ -38,6 +40,7 @@
+ project(*gateway-ec): messaging, rteventexe, rtevent_serv, naming {
+   after  += ECMcastTests_lib
+   libs     += ECMcastTests
++  libpaths += ../Common
+
+   specific (automake) {
+     includes += $(srcdir)/../Common
+Index: orbsvcs/tests/Event/Mcast/Simple/Simple.mpc
+===================================================================
+--- orbsvcs/tests/Event/Mcast/Simple/Simple.mpc	(revision 80604)
++++ orbsvcs/tests/Event/Mcast/Simple/Simple.mpc	(working copy)
+@@ -4,6 +4,7 @@
+ project(*supplier): messaging, rteventexe, rtevent_serv, naming {
+   after  += ECMcastTests_lib
+   libs     += ECMcastTests
++  libpaths += ../Common
+
+   specific (automake) {
+     includes += $(srcdir)/../Common
+@@ -21,6 +22,7 @@
+ project(*consumer): messaging, rteventexe, rtevent_serv, naming {
+   after  += ECMcastTests_lib
+   libs     += ECMcastTests
++  libpaths += ../Common
+
+   specific (automake) {
+     includes += $(srcdir)/../Common
+@@ -38,6 +40,7 @@
+ project(*gateway-ec): messaging, rteventexe, rtevent_serv, naming {
+   after  += ECMcastTests_lib
+   libs     += ECMcastTests
++  libpaths += ../Common
+
+   specific (automake) {
+     includes += $(srcdir)/../Common
+Index: orbsvcs/tests/Event/Mcast/Two_Way/Two_Way.mpc
+===================================================================
+--- orbsvcs/tests/Event/Mcast/Two_Way/Two_Way.mpc	(revision 80604)
++++ orbsvcs/tests/Event/Mcast/Two_Way/Two_Way.mpc	(working copy)
+@@ -4,6 +4,7 @@
+ project(*application): messaging, rteventexe, rtevent_serv, naming {
+   after  += ECMcastTests_lib
+   libs     += ECMcastTests
++  libpaths += ../Common
+
+   specific (automake) {
+     includes += $(srcdir)/../Common
+@@ -21,6 +22,7 @@
+ project(*gateway-ec): messaging, rteventexe, rtevent_serv, naming {
+   after  += ECMcastTests_lib
+   libs     += ECMcastTests
++  libpaths += ../Common
+
+   specific (automake) {
+     includes += $(srcdir)/../Common
+Index: orbsvcs/tests/CosEvent/Basic/basiceventtestexe.mpb
+===================================================================
+--- orbsvcs/tests/CosEvent/Basic/basiceventtestexe.mpb	(revision 80604)
++++ orbsvcs/tests/CosEvent/Basic/basiceventtestexe.mpb	(working copy)
+@@ -4,6 +4,7 @@
+ project : orbsvcsexe, messaging, taoserver, event_serv, naming, svc_utils, iortable {
+   after    += CosEvent_Test_Lib
+   libs     += CECTests
++  libpaths += ../lib
+
+   specific (automake) {
+     includes += $(srcdir)/../lib
+Index: orbsvcs/tests/CosEvent/Basic/run_test.pl
+===================================================================
+--- orbsvcs/tests/CosEvent/Basic/run_test.pl	(revision 80604)
++++ orbsvcs/tests/CosEvent/Basic/run_test.pl	(working copy)
+@@ -11,6 +11,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ $status = 0;
+
+ $svc_pull_conf = PerlACE::LocalFile ("svc.pull$PerlACE::svcconf_ext");
+@@ -24,7 +26,7 @@
+     my $TEST = new PerlACE::Process ($program, $arguments);
+
+     print STDERR "\n\n$message\n";
+-
++
+     my $test = $TEST->SpawnWaitKill (240);
+
+     if ($test != 0) {
+@@ -40,7 +42,7 @@
+ RunTest ("\n\nDisconnect callbacks test\n",
+          "Disconnect",
+          "");
+-
++
+ RunTest ("\n\nMT Disconnects test\n",
+          "MT_Disconnect",
+          "");
+Index: orbsvcs/tests/Notify/Basic/run_test_ipv6.pl
+===================================================================
+--- orbsvcs/tests/Notify/Basic/run_test_ipv6.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Basic/run_test_ipv6.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ $experiment_timeout = 60;
+Index: orbsvcs/tests/Notify/Basic/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Basic/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Basic/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ $experiment_timeout = 60;
+@@ -82,7 +84,7 @@
+ unlink $namingior;
+
+ $naming_spawn = $Naming->Spawn ();
+-if ($naming_spawn != 0)
++if ($naming_spawn != 0)
+   {
+     exit 1;
+   }
+@@ -127,7 +129,7 @@
+         ## The MaxQueueLength and MaxEventsPerConsumer are not supported in the Reactive
+         ## configuration, so we skip this test for now.
+         ## The Notification should actually throw an exception for the property not supported.
+-        if ($name->{name} eq "AdminProperties"
++        if ($name->{name} eq "AdminProperties"
+             && ($config eq "notify.reactive.conf" || $config eq "notify.rt.conf"))
+           {
+             next;
+@@ -138,7 +140,7 @@
+                                       "-ORBInitRef NameService=file://$namingior " .
+                                       "$name->{args} ");
+         $test_spawn = $test->Spawn ();
+-        if ($test_spawn != 0)
++        if ($test_spawn != 0)
+           {
+             break;
+           }
+@@ -147,7 +149,7 @@
+                                    (defined $name->{extra} ?
+                                             $name->{extra} : 0));
+
+-        if ($status != 0)
++        if ($status != 0)
+           {
+             print STDERR "ERROR: $name->{name} returned $status\n";
+             break;
+Index: orbsvcs/tests/Notify/Structured_Multi_Filter/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Structured_Multi_Filter/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Structured_Multi_Filter/run_test.pl	(working copy)
+@@ -10,6 +10,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ my $ior = PerlACE::LocalFile ("supplier.ior");
+@@ -73,7 +75,7 @@
+     }
+
+     print "\n**** Testing with $consumer_args ****\n";
+-
++
+     $STS->Arguments($supplier_args . $args);
+     $STS->Spawn ();
+     if (PerlACE::waitforfile_timed ($ior, $PerlACE::wait_interval_for_process_creation) == -1) {
+@@ -82,7 +84,7 @@
+       $status = 1;
+       last;
+     }
+-
++
+     $STC->Arguments($consumer_args . $args);
+     my $client = $STC->SpawnWaitKill(20);
+     if ($client != 0) {
+@@ -103,7 +105,7 @@
+     last;
+   }
+ }
+-
++
+ $TS->Kill ();
+ $NS->Kill ();
+
+Index: orbsvcs/tests/Notify/Sequence_Multi_Filter/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Sequence_Multi_Filter/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Sequence_Multi_Filter/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ $ior = PerlACE::LocalFile ("supplier.ior");
+Index: orbsvcs/tests/Notify/Blocking/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Blocking/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Blocking/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ $ior = PerlACE::LocalFile ("supplier.ior");
+Index: orbsvcs/tests/Notify/Bug_2561_Regression/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Bug_2561_Regression/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Bug_2561_Regression/run_test.pl	(working copy)
+@@ -7,6 +7,9 @@
+
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
++
++PerlACE::add_lib_path ('../lib');
++
+ use strict;
+
+ PerlACE::check_privilege_group();
+Index: orbsvcs/tests/Notify/MT_Dispatching/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/MT_Dispatching/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/MT_Dispatching/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ $experiment_timeout = 60;
+@@ -18,33 +20,33 @@
+ $supplier_ior = PerlACE::LocalFile ("supplier.ior");
+ $status = 0;
+
+-@tests =
++@tests =
+   (
+    {
+     description => "no threads",
+-    config => "notify_nothreads$PerlACE::svcconf_ext",
++    config => "notify_nothreads$PerlACE::svcconf_ext",
+     supplier => " -c 10 -e 10 ",
+     consumer => " -c 2 -e 100 ",
+    },
+    {
+     description => "multi-threaded dispatching",
+-    config => "notify_mtdispatching$PerlACE::svcconf_ext",
++    config => "notify_mtdispatching$PerlACE::svcconf_ext",
+     supplier => " -c 10 -e 10 ",
+     consumer => " -c 2 -e 100 ",
+    },
+    {
+     description => "multi-threaded supplier-side",
+-    config => "notify_mtsource$PerlACE::svcconf_ext",
++    config => "notify_mtsource$PerlACE::svcconf_ext",
+     supplier => " -c 10 -e 10 ",
+     consumer => " -c 2 -e 100 ",
+    },
+   );
+
+-@tests2 =
++@tests2 =
+   (
+    {
+     description => "multi-threaded dispatching",
+-    config => "notify_mtdispatching$PerlACE::svcconf_ext",
++    config => "notify_mtdispatching$PerlACE::svcconf_ext",
+     supplier => " ",
+     consumer => " ",
+    }
+@@ -81,20 +83,20 @@
+     $args = $Notification->Arguments ();
+     print STDERR "Running Notification with arguments: $args\n";
+     $Notification->Spawn ();
+-
++
+     if (PerlACE::waitforfile_timed ($notify_ior, $startup_timeout) == -1) {
+       print STDERR "ERROR: waiting for the notify service to start\n";
+       $Notification->Kill ();
+       $Naming->Kill ();
+       exit 1;
+     }
+-
++
+     unlink $supplier_ior;
+     $Supplier->Arguments ($Supplier->Arguments () . $test->{supplier});
+     $args = $Supplier->Arguments ();
+     print STDERR "Running Supplier with arguments: $args\n";
+     $Supplier->Spawn ();
+-
++
+     if (PerlACE::waitforfile_timed ($supplier_ior, $startup_timeout) == -1) {
+       print STDERR "ERROR: waiting for the supplier to start\n";
+       $Supplier->Kill ();
+@@ -102,12 +104,12 @@
+       $Naming->Kill ();
+       exit 1;
+     }
+-
++
+     $Consumer->Arguments ($Consumer->Arguments () . $test->{consumer});
+     $args = $Consumer->Arguments ();
+     print STDERR "Running Consumer with arguments: $args\n";
+     $status = $Consumer->SpawnWaitKill ($experiment_timeout);
+-    if ($status != 0)
++    if ($status != 0)
+       {
+         print STDERR "ERROR: Consumer returned $status\n";
+         $Supplier->Kill ();
+@@ -127,7 +129,7 @@
+     $Notification->Kill ();
+     unlink $notify_ior;
+   }
+-
++
+ $Naming->Kill ();
+ unlink $naming_ior;
+
+Index: orbsvcs/tests/Notify/Bug_1385_Regression/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Bug_1385_Regression/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Bug_1385_Regression/run_test.pl	(working copy)
+@@ -7,6 +7,9 @@
+
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
++
++PerlACE::add_lib_path ('../lib');
++
+ use strict;
+
+ PerlACE::check_privilege_group();
+Index: orbsvcs/tests/Notify/Sequence_Multi_ETCL_Filter/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Sequence_Multi_ETCL_Filter/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Sequence_Multi_ETCL_Filter/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ $ior = PerlACE::LocalFile ("supplier.ior");
+Index: orbsvcs/tests/Notify/MC/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/MC/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/MC/run_test.pl	(working copy)
+@@ -7,8 +7,11 @@
+
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
++
+ use strict;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ my $ior = PerlACE::LocalFile('test_monitor.ior');
+Index: orbsvcs/tests/Notify/performance-tests/Filter/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/performance-tests/Filter/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/performance-tests/Filter/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../../lib');
++
+ PerlACE::check_privilege_group();
+
+ $ior = PerlACE::LocalFile ("supplier.ior");
+@@ -41,7 +43,7 @@
+
+ $client_args = "-ORBInitRef NameService=iioploc://localhost:" .
+                "$port/NameService";
+-
++
+ $NS->Spawn ();
+ if (PerlACE::waitforfile_timed ($namingior, $PerlACE::wait_interval_for_process_creation) == -1) {
+       print STDERR "ERROR: waiting for the naming service to start\n";
+Index: orbsvcs/tests/Notify/performance-tests/RedGreen/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/performance-tests/RedGreen/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/performance-tests/RedGreen/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../../lib');
++
+ PerlACE::check_privilege_group();
+
+ $experiment_timeout = 60;
+@@ -34,7 +36,7 @@
+
+ $Naming->Spawn ();
+
+-if (PerlACE::waitforfile_timed ($namingior, $startup_timeout) == -1)
++if (PerlACE::waitforfile_timed ($namingior, $startup_timeout) == -1)
+   {
+     print STDERR "ERROR: waiting for the naming service to start\n";
+     $Naming->Kill ();
+@@ -45,7 +47,7 @@
+   {
+     print STDERR "\nTesting Notification Service with config file = $config ....\n\n";
+
+-    $Notification =
++    $Notification =
+       new PerlACE::Process ("../../../../Notify_Service/Notify_Service",
+                             "-ORBInitRef NameService=file://$namingior " .
+                             "-IORoutput $notifyior " .
+Index: orbsvcs/tests/Notify/Discarding/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Discarding/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Discarding/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ $ior = PerlACE::LocalFile ("supplier.ior");
+Index: orbsvcs/tests/Notify/Structured_Filter/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Structured_Filter/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Structured_Filter/run_test.pl	(working copy)
+@@ -10,6 +10,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ my $ior = PerlACE::LocalFile ("supplier.ior");
+@@ -64,7 +66,7 @@
+   $NS->Kill ();
+   exit 1;
+ }
+-
++
+ $STC->Arguments($args);
+ my $client = $STC->SpawnWaitKill(20);
+ if ($client != 0) {
+@@ -93,7 +95,7 @@
+   $NS->Kill ();
+   exit 1;
+ }
+-
++
+ $STC->Arguments("-f $args");
+ my $client = $STC->SpawnWaitKill(20);
+ if ($client != 0) {
+Index: orbsvcs/tests/Notify/Ordering/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Ordering/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Ordering/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ PerlACE::check_privilege_group();
+
+ $ior = PerlACE::LocalFile ("supplier.ior");
+@@ -48,10 +50,10 @@
+
+ $client_args = "-ORBInitRef NameService=iioploc://localhost:" .
+                "$port/NameService";
+-
++
+ unlink $notifyior;
+ unlink $naming_ior;
+-
++
+ $NS->Spawn ();
+ if (PerlACE::waitforfile_timed ($naming_ior, $PerlACE::wait_interval_for_process_creation) == -1) {
+   print STDERR "ERROR: waiting for the naming service to start\n";
+Index: orbsvcs/tests/Notify/Reconnecting/run_test.pl
+===================================================================
+--- orbsvcs/tests/Notify/Reconnecting/run_test.pl	(revision 80604)
++++ orbsvcs/tests/Notify/Reconnecting/run_test.pl	(working copy)
+@@ -14,6 +14,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ # ******************************************************************
+ # Data Section
+ # ******************************************************************
+Index: orbsvcs/PSS/PSDL.mpc
+===================================================================
+--- orbsvcs/PSS/PSDL.mpc	(revision 80604)
++++ orbsvcs/PSS/PSDL.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+
+-project : taolib {
++project : taolib, tao_output {
+   requires += dummy_label
+   sharedname    = TAO_PSDL
+   dynamicflags += TAO_PSDL_BUILD_DLL
+@@ -33,7 +33,7 @@
+   }
+ }
+
+-project(*Datastore) : taolib {
++project(*Datastore) : taolib, tao_output {
+   requires += dummy_label
+   sharedname = TAO_PSDL_Datastore
+   dynamicflags += TAO_PSDL_BUILD_DLL
+Index: orbsvcs/ImplRepo_Service/ImplRepo_Service.mpc
+===================================================================
+--- orbsvcs/ImplRepo_Service/ImplRepo_Service.mpc	(revision 80604)
++++ orbsvcs/ImplRepo_Service/ImplRepo_Service.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ // $Id$
+
+-project(ImR_Activator_IDL) : orbsvcslib, conv_lib, portableserver, imr_client, tao_versioning_idl_defaults {
++project(ImR_Activator_IDL) : orbsvcslib, orbsvcs_output, conv_lib, portableserver, imr_client, tao_versioning_idl_defaults {
+   sharedname = TAO_ImR_Activator_IDL
+   dynamicflags = ACTIVATOR_IDL_BUILD_DLL
+   idlflags += -Wb,export_macro=ActivatorIDL_Export -Wb,export_include=activator_idl_export.h
+@@ -16,7 +16,7 @@
+   }
+ }
+
+-project(ImR_Locator_IDL) : orbsvcslib, conv_lib, valuetype, portableserver, imr_client, messaging, tao_versioning_idl_defaults {
++project(ImR_Locator_IDL) : orbsvcslib, orbsvcs_output, conv_lib, valuetype, portableserver, imr_client, messaging, tao_versioning_idl_defaults {
+   sharedname   = TAO_ImR_Locator_IDL
+   after       += ImR_Activator_IDL
+   libs        += TAO_ImR_Activator_IDL
+@@ -45,7 +45,7 @@
+   }
+ }
+
+-project(ImR_Activator) : orbsvcslib, conv_lib, acexml, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro, valuetype, portableserver, imr_client, messaging, pi, codecfactory {
++project(ImR_Activator) : orbsvcslib, orbsvcs_output, conv_lib, acexml, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro, valuetype, portableserver, imr_client, messaging, pi, codecfactory {
+   sharedname   = TAO_ImR_Activator
+   dynamicflags = ACTIVATOR_BUILD_DLL
+   after       += ImR_Activator_IDL ImR_Locator_IDL
+@@ -65,7 +65,7 @@
+   }
+ }
+
+-project(ImR_Locator) : orbsvcslib, conv_lib, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro, iortable, portableserver, messaging, svc_utils, acexml, imr_client {
++project(ImR_Locator) : orbsvcslib, orbsvcs_output, conv_lib, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro, iortable, portableserver, messaging, svc_utils, acexml, imr_client {
+   sharedname   = TAO_ImR_Locator
+   dynamicflags = LOCATOR_BUILD_DLL
+   after       += ImR_Locator_IDL ImR_Activator_IDL
+Index: orbsvcs/examples/ImR/Combined_Service/ImR_Combined_Service.mpc
+===================================================================
+--- orbsvcs/examples/ImR/Combined_Service/ImR_Combined_Service.mpc	(revision 80604)
++++ orbsvcs/examples/ImR/Combined_Service/ImR_Combined_Service.mpc	(working copy)
+@@ -60,7 +60,7 @@
+
+ // Another simple server that can be loaded dynamically into the
+ // combined_service.
+-project(*DynamicServer) : taolib, portableserver, iortable, avoids_corba_e_micro {
++project(*DynamicServer) : taolib, tao_output, portableserver, iortable, avoids_corba_e_micro {
+   dynamicflags = DYNSERVER_BUILD_DLL
+   sharedname   = DynServer
+   after += *IDL
+Index: orbsvcs/examples/Notify/Federation/SpaceCraft/SpaceCraft.mpc
+===================================================================
+--- orbsvcs/examples/Notify/Federation/SpaceCraft/SpaceCraft.mpc	(revision 80604)
++++ orbsvcs/examples/Notify/Federation/SpaceCraft/SpaceCraft.mpc	(working copy)
+@@ -5,6 +5,7 @@
+   exename = craft
+   after += Gate
+   libs += Gate
++  libpaths += ../Gate/.
+
+   specific (automake) {
+     includes += $(srcdir)/..
+Index: orbsvcs/examples/Notify/Federation/Agent/Agent.mpc
+===================================================================
+--- orbsvcs/examples/Notify/Federation/Agent/Agent.mpc	(revision 80604)
++++ orbsvcs/examples/Notify/Federation/Agent/Agent.mpc	(working copy)
+@@ -5,6 +5,7 @@
+   exename = agent
+   after += Gate
+   libs += Gate
++  libpaths += ../Gate/.
+
+   specific (automake) {
+     includes += $(srcdir)/..
+Index: tao/TypeCodeFactory.mpc
+===================================================================
+--- tao/TypeCodeFactory.mpc	(revision 80604)
++++ tao/TypeCodeFactory.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, ifr_client, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, ifr_client, tao_versioning_idl_defaults {
+   sharedname   = TAO_TypeCodeFactory
+   dynamicflags = TAO_TYPECODEFACTORY_BUILD_DLL
+
+Index: tao/Utils.mpc
+===================================================================
+--- tao/Utils.mpc	(revision 80604)
++++ tao/Utils.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ // $Id$
+-project (TAO_Utils) : taolib, install, portableserver, pi {
++project (TAO_Utils) : taolib, tao_output, install, portableserver, pi {
+   sharedname    = TAO_Utils
+   dynamicflags  = TAO_UTILS_BUILD_DLL
+
+Index: tao/IFR_Client.mpc
+===================================================================
+--- tao/IFR_Client.mpc	(revision 80604)
++++ tao/IFR_Client.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, core_anytypecode, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, core_anytypecode, tao_versioning_idl_defaults {
+   sharedname   = TAO_IFR_Client
+   dynamicflags = TAO_IFR_CLIENT_BUILD_DLL
+
+Index: tao/CSD_ThreadPool.mpc
+===================================================================
+--- tao/CSD_ThreadPool.mpc	(revision 80604)
++++ tao/CSD_ThreadPool.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : csd_framework, install, threads {
++project : csd_framework, tao_output, install, threads {
+   sharedname   = TAO_CSD_ThreadPool
+   dynamicflags = TAO_CSD_TP_BUILD_DLL
+   includes    += $(TAO_ROOT)/tao
+Index: tao/PortableServer.mpc
+===================================================================
+--- tao/PortableServer.mpc	(revision 80604)
++++ tao/PortableServer.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, core_anytypecode, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, core_anytypecode, tao_versioning_idl_defaults {
+   sharedname   = TAO_PortableServer
+   dynamicflags = TAO_PORTABLESERVER_BUILD_DLL
+
+Index: tao/DynamicInterface.mpc
+===================================================================
+--- tao/DynamicInterface.mpc	(revision 80604)
++++ tao/DynamicInterface.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, messaging, core_minimum_corba {
++project : taolib, tao_output, install, messaging, core_minimum_corba {
+   sharedname   = TAO_DynamicInterface
+   dynamicflags = TAO_DYNAMICINTERFACE_BUILD_DLL
+
+Index: tao/DynamicAny.mpc
+===================================================================
+--- tao/DynamicAny.mpc	(revision 80604)
++++ tao/DynamicAny.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ //$Id$
+
+-project : install, valuetype, tao_versioning_idl_defaults {
++project : install, tao_output, valuetype, tao_versioning_idl_defaults {
+   sharedname    = TAO_DynamicAny
+   dynamicflags  = TAO_DYNAMICANY_BUILD_DLL
+
+Index: tao/RTPortableServer.mpc
+===================================================================
+--- tao/RTPortableServer.mpc	(revision 80604)
++++ tao/RTPortableServer.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, rtcorba, portableserver, avoids_corba_e_micro {
++project : taolib, tao_output, install, rtcorba, portableserver, avoids_corba_e_micro {
+   sharedname   = TAO_RTPortableServer
+   dynamicflags = TAO_RTPORTABLESERVER_BUILD_DLL
+
+Index: tao/DiffServPolicy.mpc
+===================================================================
+--- tao/DiffServPolicy.mpc	(revision 80604)
++++ tao/DiffServPolicy.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, portableserver, pi, tao_versioning_idl_defaults, tao_no_iiop, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
++project : taolib, tao_output, install, portableserver, pi, tao_versioning_idl_defaults, tao_no_iiop, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   sharedname   = TAO_DiffServPolicy
+   dynamicflags = TAO_DIFFSERVPOLICY_BUILD_DLL
+
+Index: tao/ZlibCompressor.mpc
+===================================================================
+--- tao/ZlibCompressor.mpc	(revision 80604)
++++ tao/ZlibCompressor.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, compression, tao_versioning_idl_defaults, zlib {
++project : taolib, tao_output, install, compression, tao_versioning_idl_defaults, zlib {
+   requires += zlib
+   sharedname   = TAO_ZlibCompressor
+   dynamicflags = TAO_ZLIBCOMPRESSOR_BUILD_DLL
+Index: tao/Messaging.mpc
+===================================================================
+--- tao/Messaging.mpc	(revision 80604)
++++ tao/Messaging.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, portableserver, pi, valuetype, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, portableserver, pi, valuetype, tao_versioning_idl_defaults {
+   sharedname   = TAO_Messaging
+   dynamicflags = TAO_MESSAGING_BUILD_DLL
+
+Index: tao/PI_Server.mpc
+===================================================================
+--- tao/PI_Server.mpc	(revision 80604)
++++ tao/PI_Server.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, pi, portableserver, install, tao_versioning_idl_defaults {
++project : taolib, tao_output, pi, portableserver, install, tao_versioning_idl_defaults {
+   sharedname   = TAO_PI_Server
+   dynamicflags = TAO_PI_SERVER_BUILD_DLL
+
+Index: tao/TC_IIOP.mpc
+===================================================================
+--- tao/TC_IIOP.mpc	(revision 80604)
++++ tao/TC_IIOP.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ //$Id$
+
+-project(*) : taolib_with_idl, tao_versioning_idl_defaults, install, tc, interceptors, pi {
++project(*) : taolib_with_idl, tao_output, tao_versioning_idl_defaults, install, tc, interceptors, pi {
+
+   requires    += transport_current
+   sharedname   = TAO_TC_IIOP
+Index: tao/IORInterceptor.mpc
+===================================================================
+--- tao/IORInterceptor.mpc	(revision 80604)
++++ tao/IORInterceptor.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, portableserver, objreftemplate, pi, install, tao_versioning_idl_defaults {
++project : taolib, tao_output, portableserver, objreftemplate, pi, install, tao_versioning_idl_defaults {
+   sharedname    = TAO_IORInterceptor
+   dynamicflags  = TAO_IORINTERCEPTOR_BUILD_DLL
+
+Index: tao/BiDir_GIOP.mpc
+===================================================================
+--- tao/BiDir_GIOP.mpc	(revision 80604)
++++ tao/BiDir_GIOP.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, pi, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, pi, tao_versioning_idl_defaults {
+   sharedname   = TAO_BiDirGIOP
+   dynamicflags = TAO_BIDIRGIOP_BUILD_DLL
+
+Index: tao/BiDir_GIOP/BiDirGIOP.cpp
+===================================================================
+--- tao/BiDir_GIOP/BiDirGIOP.cpp	(revision 80604)
++++ tao/BiDir_GIOP/BiDirGIOP.cpp	(working copy)
+@@ -28,6 +28,7 @@
+ {
+   if (TAO_BiDirGIOP_Loader::is_activated_ == false && TAO_DEF_GIOP_MINOR >= 2)
+     {
++      ACE_DEBUG ((LM_DEBUG, "Activating BiDirectional GIOP\n"));
+       PortableInterceptor::ORBInitializer_ptr tmp_orb_initializer =
+         PortableInterceptor::ORBInitializer::_nil ();
+       PortableInterceptor::ORBInitializer_var bidir_orb_initializer;
+Index: tao/RTCORBA.mpc
+===================================================================
+--- tao/RTCORBA.mpc	(revision 80604)
++++ tao/RTCORBA.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, pi, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, pi, tao_versioning_idl_defaults {
+   sharedname   = TAO_RTCORBA
+   dynamicflags = TAO_RTCORBA_BUILD_DLL
+   requires    += rt_corba
+Index: tao/Valuetype.mpc
+===================================================================
+--- tao/Valuetype.mpc	(revision 80604)
++++ tao/Valuetype.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, core_anytypecode, avoids_corba_e_micro, tao_versioning_idl_defaults, gen_ostream {
++project : taolib, tao_output, install, core_anytypecode, avoids_corba_e_micro, tao_versioning_idl_defaults, gen_ostream {
+   sharedname    = TAO_Valuetype
+   dynamicflags  = TAO_VALUETYPE_BUILD_DLL
+
+Index: tao/EndpointPolicy.mpc
+===================================================================
+--- tao/EndpointPolicy.mpc	(revision 80604)
++++ tao/EndpointPolicy.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, portableserver, pi, tao_versioning_idl_defaults, tao_no_iiop, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
++project : taolib, tao_output, install, portableserver, pi, tao_versioning_idl_defaults, tao_no_iiop, avoids_minimum_corba, avoids_corba_e_compact, avoids_corba_e_micro {
+   sharedname   = TAO_EndpointPolicy
+   dynamicflags = TAO_ENDPOINTPOLICY_BUILD_DLL
+
+Index: tao/IORTable.mpc
+===================================================================
+--- tao/IORTable.mpc	(revision 80604)
++++ tao/IORTable.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ //$Id$
+
+-project : taolib, install, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, tao_versioning_idl_defaults {
+   sharedname   = TAO_IORTable
+   dynamicflags = TAO_IORTABLE_BUILD_DLL
+
+Index: tao/Compression.mpc
+===================================================================
+--- tao/Compression.mpc	(revision 80604)
++++ tao/Compression.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, tao_versioning_idl_defaults {
+   sharedname   = TAO_Compression
+   dynamicflags = TAO_COMPRESSION_BUILD_DLL
+
+Index: tao/TC.mpc
+===================================================================
+--- tao/TC.mpc	(revision 80604)
++++ tao/TC.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ //$Id$
+
+-project(*) : taolib_with_idl, tao_versioning_idl_defaults, install, interceptors, pi {
++project(*) : taolib_with_idl, tao_output, tao_versioning_idl_defaults, install, interceptors, pi {
+
+   requires    += transport_current
+   sharedname   = TAO_TC
+Index: tao/CSD_Framework.mpc
+===================================================================
+--- tao/CSD_Framework.mpc	(revision 80604)
++++ tao/CSD_Framework.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, portableserver, install, pi, avoids_corba_e_micro, tao_versioning_idl_defaults {
++project : taolib, tao_output, portableserver, install, pi, avoids_corba_e_micro, tao_versioning_idl_defaults {
+   sharedname   = TAO_CSD_Framework
+   dynamicflags = TAO_CSD_FW_BUILD_DLL
+   includes    += $(TAO_ROOT)/tao
+Index: tao/CodecFactory.mpc
+===================================================================
+--- tao/CodecFactory.mpc	(revision 80604)
++++ tao/CodecFactory.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, core_anytypecode, tao_versioning_idl_defaults, nolink_codecfactory {
++project : taolib, tao_output, install, core_anytypecode, tao_versioning_idl_defaults, nolink_codecfactory {
+   sharedname    = TAO_CodecFactory
+   dynamicflags  = TAO_CODECFACTORY_BUILD_DLL
+
+Index: tao/AnyTypeCode.mpc
+===================================================================
+--- tao/AnyTypeCode.mpc	(revision 80604)
++++ tao/AnyTypeCode.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, extra_anytypecode, tao_versioning_idl_defaults, nolink_codecfactory, gen_ostream {
++project : taolib, tao_output, install, extra_anytypecode, tao_versioning_idl_defaults, nolink_codecfactory, gen_ostream {
+   sharedname   = TAO_AnyTypeCode
+   dynamicflags = TAO_ANYTYPECODE_BUILD_DLL
+
+Index: tao/SmartProxies.mpc
+===================================================================
+--- tao/SmartProxies.mpc	(revision 80604)
++++ tao/SmartProxies.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, tao_versioning_idl_defaults {
+   sharedname   = TAO_SmartProxies
+   dynamicflags = TAO_SMARTPROXIES_BUILD_DLL
+
+Index: tao/PI.mpc
+===================================================================
+--- tao/PI.mpc	(revision 80604)
++++ tao/PI.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, codecfactory, install, tao_versioning_idl_defaults {
++project : taolib, tao_output, codecfactory, install, tao_versioning_idl_defaults {
+   sharedname   = TAO_PI
+   dynamicflags = TAO_PI_BUILD_DLL
+   idlflags += -SS -Sci -Gp -Gd \
+Index: tao/ImR_Client.mpc
+===================================================================
+--- tao/ImR_Client.mpc	(revision 80604)
++++ tao/ImR_Client.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, install, portableserver, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, portableserver, tao_versioning_idl_defaults {
+   sharedname   = TAO_ImR_Client
+   dynamicflags = TAO_IMR_CLIENT_BUILD_DLL
+
+Index: tao/Codeset.mpc
+===================================================================
+--- tao/Codeset.mpc	(revision 80604)
++++ tao/Codeset.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ //$Id$
+
+-project : taolib, install, tao_versioning_idl_defaults, nolink_codecfactory {
++project : taolib, tao_output, install, tao_versioning_idl_defaults, nolink_codecfactory {
+   sharedname   = TAO_Codeset
+   dynamicflags = TAO_CODESET_BUILD_DLL
+   pch_header   =
+Index: tao/ObjRefTemplate.mpc
+===================================================================
+--- tao/ObjRefTemplate.mpc	(revision 80604)
++++ tao/ObjRefTemplate.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : valuetype, portableserver, install, tao_versioning_idl_defaults {
++project : valuetype, portableserver, install, tao_output, tao_versioning_idl_defaults {
+   sharedname   = TAO_ObjRefTemplate
+   dynamicflags = TAO_ORT_BUILD_DLL
+
+Index: tao/IORManipulation.mpc
+===================================================================
+--- tao/IORManipulation.mpc	(revision 80604)
++++ tao/IORManipulation.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ //$Id$
+
+-project : taolib, install, core_anytypecode, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, core_anytypecode, tao_versioning_idl_defaults {
+   sharedname   = TAO_IORManip
+   dynamicflags = TAO_IORMANIP_BUILD_DLL
+
+Index: tao/Strategies.mpc
+===================================================================
+--- tao/Strategies.mpc	(revision 80604)
++++ tao/Strategies.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ //$Id$
+
+-project : taolib, install, pi, core_anytypecode, core_strategies, tao_versioning_idl_defaults {
++project : taolib, tao_output, install, pi, core_anytypecode, core_strategies, tao_versioning_idl_defaults {
+   sharedname   = TAO_Strategies
+   dynamicflags = TAO_STRATEGIES_BUILD_DLL
+
+Index: tao/RTScheduler.mpc
+===================================================================
+--- tao/RTScheduler.mpc	(revision 80604)
++++ tao/RTScheduler.mpc	(working copy)
+@@ -1,5 +1,5 @@
+ //$Id$
+-project : taolib, rtcorba, pi, pi_server, portableserver, install, corba_messaging, tao_versioning_idl_defaults, avoids_corba_e_micro {
++project : taolib, tao_output, rtcorba, pi, pi_server, portableserver, install, corba_messaging, tao_versioning_idl_defaults, avoids_corba_e_micro {
+   sharedname   = TAO_RTScheduler
+   dynamicflags = TAO_RTSCHEDULER_BUILD_DLL
+
+Index: docs/tutorials/Quoter/Naming_Service/Quoter_Naming_Service.mpc
+===================================================================
+--- docs/tutorials/Quoter/Naming_Service/Quoter_Naming_Service.mpc	(revision 80604)
++++ docs/tutorials/Quoter/Naming_Service/Quoter_Naming_Service.mpc	(working copy)
+@@ -9,6 +9,7 @@
+     includes += $(srcdir)/../idl
+   }
+   includes += ../idl
++  libpaths += ../idl
+
+   source_files {
+     client.cpp
+@@ -23,6 +24,7 @@
+     includes += $(srcdir)/../idl
+   }
+   includes += ../idl
++  libpaths += ../idl
+
+   source_files {
+     server.cpp
+Index: docs/tutorials/Quoter/Simple/Persistent/Quoter_Simple_Persistent.mpc
+===================================================================
+--- docs/tutorials/Quoter/Simple/Persistent/Quoter_Simple_Persistent.mpc	(revision 80604)
++++ docs/tutorials/Quoter/Simple/Persistent/Quoter_Simple_Persistent.mpc	(working copy)
+@@ -9,6 +9,7 @@
+     includes += $(srcdir)/../../idl
+   }
+   includes += ../../idl
++  libpaths += ../../idl
+
+   source_files {
+     client.cpp
+@@ -23,6 +24,7 @@
+     includes += $(srcdir)/../../idl
+   }
+   includes += ../../idl
++  libpaths += ../../idl
+
+   source_files {
+     server.cpp
+Index: docs/tutorials/Quoter/Simple/Impl-Repo/Quoter_Simple_Impl_Repo.mpc
+===================================================================
+--- docs/tutorials/Quoter/Simple/Impl-Repo/Quoter_Simple_Impl_Repo.mpc	(revision 80604)
++++ docs/tutorials/Quoter/Simple/Impl-Repo/Quoter_Simple_Impl_Repo.mpc	(working copy)
+@@ -9,6 +9,7 @@
+     includes += $(srcdir)/../../idl
+   }
+   includes += ../../idl
++  libpaths += ../../idl
+
+   source_files {
+     client.cpp
+@@ -23,6 +24,7 @@
+     includes += $(srcdir)/../../idl
+   }
+   includes += ../../idl
++  libpaths += ../../idl
+
+   source_files {
+     server.cpp
+Index: docs/tutorials/Quoter/Simple/Server/Quoter_Simple_Server.mpc
+===================================================================
+--- docs/tutorials/Quoter/Simple/Server/Quoter_Simple_Server.mpc	(revision 80604)
++++ docs/tutorials/Quoter/Simple/Server/Quoter_Simple_Server.mpc	(working copy)
+@@ -9,4 +9,5 @@
+     includes += $(srcdir)/../../idl
+   }
+   includes += ../../idl
++  libpaths += ../../idl
+ }
+Index: docs/tutorials/Quoter/Simple/ImprovedServer/Quoter_Simple_ImprovedServer.mpc
+===================================================================
+--- docs/tutorials/Quoter/Simple/ImprovedServer/Quoter_Simple_ImprovedServer.mpc	(revision 80604)
++++ docs/tutorials/Quoter/Simple/ImprovedServer/Quoter_Simple_ImprovedServer.mpc	(working copy)
+@@ -7,4 +7,5 @@
+     includes += $(srcdir)/../../idl
+   }
+   includes += ../../idl
++  libpaths += ../../idl
+ }
+Index: docs/tutorials/Quoter/Simple/Client/Quoter_Simple_Client.mpc
+===================================================================
+--- docs/tutorials/Quoter/Simple/Client/Quoter_Simple_Client.mpc	(revision 80604)
++++ docs/tutorials/Quoter/Simple/Client/Quoter_Simple_Client.mpc	(working copy)
+@@ -9,4 +9,5 @@
+     includes += $(srcdir)/../../idl
+   }
+   includes += ../../idl
++  libpaths += ../../idl
+ }
+Index: performance-tests/CSD_Strategy/TestApps/run_test.pl
+===================================================================
+--- performance-tests/CSD_Strategy/TestApps/run_test.pl	(revision 80604)
++++ performance-tests/CSD_Strategy/TestApps/run_test.pl	(working copy)
+@@ -8,6 +8,9 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ( '../TestInf');
++PerlACE::add_lib_path ( '../TestServant');
++
+ # 5 Minute server timeout.
+ my $server_timeout_secs = 300;
+
+Index: tests/Server_Connection_Purging/client.cpp
+===================================================================
+--- tests/Server_Connection_Purging/client.cpp	(revision 80604)
++++ tests/Server_Connection_Purging/client.cpp	(working copy)
+@@ -114,11 +114,17 @@
+                            "Registration failed \n"),
+                           -1);
+
+-      ACE_Time_Value tv (1);
++      // ACE_Time_Value tv (1);
+
+-      while (singleton->handle_events (&tv) >= 1);
++      // while (singleton->handle_events (&tv) >= 1);
++
+     }
+
++  // Handle events moved to here to prevent this test taking best part
++  // of a minute
++  ACE_Time_Value tv (3);
++  while (singleton->handle_events (&tv) >= 1);
++
+   // Remove the handlers to avoid the possibility of the reactor
+   // using any of them after they leave the scope (those that haven't
+   // been closed and removed already, that is).
+Index: tests/Server_Connection_Purging/client2.cpp
+===================================================================
+--- tests/Server_Connection_Purging/client2.cpp	(revision 0)
++++ tests/Server_Connection_Purging/client2.cpp	(revision 0)
+@@ -0,0 +1,78 @@
++// $Id$
++
++
++#include "ace/Get_Opt.h"
++#include "TestC.h"
++
++// Name of file contains ior.
++static const char *IOR = "file://ior";
++
++static int
++parse_args (int argc, char **argv)
++{
++  ACE_Get_Opt get_opts (argc, argv, "k:i:d:x");
++  int c;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'k':
++        IOR = get_opts.opt_arg ();
++        break;
++      case '?':
++      default:
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "usage:  %s "
++                           "-k IOR "
++                           "\n",
++                           argv [0]),
++                          -1);
++      }
++
++  if (IOR == 0)
++    ACE_ERROR_RETURN ((LM_ERROR,
++                       "Please specify the IOR for the servant\n"), -1);
++
++  // Indicates successful parsing of command line.
++  return 0;
++}
++
++
++int
++ACE_TMAIN(int argc, ACE_TCHAR *argv[])
++{
++
++  try
++    {
++      // Initialize the ORB.
++      CORBA::ORB_var orb =
++        CORBA::ORB_init (argc,
++                         argv,
++                         0);
++
++      // Initialize options based on command-line arguments.
++      int parse_args_result = parse_args (argc, argv);
++      if (parse_args_result != 0)
++        return parse_args_result;
++
++      // Get an object reference from the argument string.
++      CORBA::Object_var object =
++        orb->string_to_object (IOR);
++
++      // Try to narrow the object reference to a <test> reference.
++      test_var test_object = test::_narrow (object.in ());
++
++      ACE_DEBUG ((LM_DEBUG,
++                  "(%P|%t) Sending a shutdown call..\n"));
++      test_object->shutdown ();
++
++      orb->destroy ();
++    }
++  catch (const CORBA::Exception& ex)
++    {
++      ex._tao_print_exception ("Exception caught:");
++      return -1;
++    }
++
++  return 0;
++}
+
+Property changes on: tests/Server_Connection_Purging/client2.cpp
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: tests/Server_Connection_Purging/Test.idl
+===================================================================
+--- tests/Server_Connection_Purging/Test.idl	(revision 80604)
++++ tests/Server_Connection_Purging/Test.idl	(working copy)
+@@ -7,4 +7,5 @@
+    */
+   void send_stuff(in string foo);
+
++  oneway void shutdown ();
+ };
+Index: tests/Server_Connection_Purging/server.cpp
+===================================================================
+--- tests/Server_Connection_Purging/server.cpp	(revision 80604)
++++ tests/Server_Connection_Purging/server.cpp	(working copy)
+@@ -55,7 +55,7 @@
+
+       test_i *test_impl;
+       ACE_NEW_RETURN (test_impl,
+-                      test_i (),
++                      test_i (orb),
+                       1);
+       PortableServer::ServantBase_var owner_transfer(test_impl);
+
+Index: tests/Server_Connection_Purging/Test_i.cpp
+===================================================================
+--- tests/Server_Connection_Purging/Test_i.cpp	(revision 80604)
++++ tests/Server_Connection_Purging/Test_i.cpp	(working copy)
+@@ -3,8 +3,21 @@
+ //
+ #include "Test_i.h"
+
++test_i::test_i (CORBA::ORB_ptr orb)
++  : orb_ (CORBA::ORB::_duplicate (orb))
++{
++}
++
+ void
+ test_i::send_stuff (const char* string)
+ {
+   ACE_DEBUG ((LM_DEBUG, "TAO (%P|%t) - %s\n", string));
+ }
++
++void
++test_i::shutdown (void)
++{
++  ACE_DEBUG ((LM_DEBUG,
++              "(%P|%t) About to invoke shudown... \n"));
++  this->orb_->shutdown (0);
++}
+Index: tests/Server_Connection_Purging/Test_i.h
+===================================================================
+--- tests/Server_Connection_Purging/Test_i.h	(revision 80604)
++++ tests/Server_Connection_Purging/Test_i.h	(working copy)
+@@ -12,10 +12,15 @@
+   : public virtual POA_test
+ {
+ public:
++  test_i (CORBA::ORB_ptr orb);
++
+   // = The skeleton methods
+   virtual void send_stuff (const char* string);
+
++  virtual void shutdown (void);
++
+ private:
++  CORBA::ORB_var orb_;
+ };
+
+ #include /**/ "ace/post.h"
+Index: tests/Server_Connection_Purging/run_test.pl
+===================================================================
+--- tests/Server_Connection_Purging/run_test.pl	(revision 80604)
++++ tests/Server_Connection_Purging/run_test.pl	(working copy)
+@@ -43,6 +43,17 @@
+     $status = 1;
+ }
+
++print "Calling shutdown client\n";
++
++$SHUTDOWN = new PerlACE::Process ("shutdown_client", "-k file://$iorfile");
++
++$client = $SHUTDOWN->SpawnWaitKill (300);
++
++if ($client != 0) {
++    print STDERR "ERROR: shutdown_client returned $client\n";
++    $status = 1;
++}
++
+ $server = $SV->WaitKill (120);
+
+ if ($server != 0) {
+Index: tests/Server_Connection_Purging/Server_Connection_Purging.mpc
+===================================================================
+--- tests/Server_Connection_Purging/Server_Connection_Purging.mpc	(revision 80604)
++++ tests/Server_Connection_Purging/Server_Connection_Purging.mpc	(working copy)
+@@ -33,3 +33,16 @@
+   IDL_Files {
+   }
+ }
++
++project(*ShutdownClient): taoclient, anytypecode {
++  after += *idl
++  exename = shutdown_client
++  Source_Files {
++    client2.cpp
++  }
++  Source_Files {
++    TestC.cpp
++  }
++  IDL_Files {
++  }
++}
+Index: tests/Bug_1270_Regression/run_test.pl
+===================================================================
+--- tests/Bug_1270_Regression/run_test.pl	(revision 80604)
++++ tests/Bug_1270_Regression/run_test.pl	(working copy)
+@@ -23,7 +23,7 @@
+
+ $SV->Spawn ();
+
+-if (PerlACE::waitforfile_timed ($iorfile,
++if (PerlACE::waitforfile_timed ($iorfile,
+                         $PerlACE::wait_interval_for_process_creation) == -1) {
+     print STDERR "ERROR: cannot find file <$iorfile>\n";
+     $SV->Kill (); $SV->TimedWait (1);
+@@ -34,6 +34,11 @@
+ local $max_running_time = 240; # 4 minutes
+ local $elapsed = time() - $start_time;
+
++if ($ARGV[0] eq '-quick')  {
++    $elapsed = 0;
++    $max_running_time = 1;
++}
++
+ while($elapsed < $max_running_time) {
+   # Start all clients in parallel
+   $client1 = $CL1->Spawn ();
+Index: tests/Parallel_Connect_Strategy/client.cpp
+===================================================================
+--- tests/Parallel_Connect_Strategy/client.cpp	(revision 80604)
++++ tests/Parallel_Connect_Strategy/client.cpp	(working copy)
+@@ -3,16 +3,29 @@
+ #include "TestC.h"
+ #include "ace/Get_Opt.h"
+ #include "ace/High_Res_Timer.h"
++#include "tao/ORB_Core.h"
+
+ ACE_RCSID(Hello, client, "$Id$")
+
+ const char *ior = "file://test.ior";
+ int kill_server = 0;
++bool sanity_timeout = false;
+
++void hook (TAO_ORB_Core *,
++           TAO_Stub *,
++           bool &has_timeout,
++           ACE_Time_Value &tv)
++{
++  ACE_DEBUG ((LM_DEBUG, "Timeout hook called\n"));
++  ACE_Time_Value ten_secs (10, 0);
++  tv.set (10, 0);
++  has_timeout = true;
++}
++
+ int
+ parse_args (int argc, char *argv[])
+ {
+-  ACE_Get_Opt get_opts (argc, argv, "k:x");
++  ACE_Get_Opt get_opts (argc, argv, "k:xt");
+   int c;
+
+   while ((c = get_opts ()) != -1)
+@@ -24,6 +37,9 @@
+       case 'x':
+         kill_server = 1;
+         break;
++      case 't':
++        sanity_timeout = true;
++        break;
+       case '?':
+       default:
+         ACE_ERROR_RETURN ((LM_ERROR,
+@@ -49,6 +65,12 @@
+       if (parse_args (argc, argv) != 0)
+         return 1;
+
++      if (sanity_timeout)
++        {
++          ACE_DEBUG ((LM_DEBUG, "Installing sanity timeout\n"));
++          orb->orb_core ()->connection_timeout_hook (hook);
++        }
++
+       CORBA::Object_var tmp =
+         orb->string_to_object(ior);
+
+Index: tests/Parallel_Connect_Strategy/run_test.pl
+===================================================================
+--- tests/Parallel_Connect_Strategy/run_test.pl	(revision 80604)
++++ tests/Parallel_Connect_Strategy/run_test.pl	(working copy)
+@@ -33,6 +33,10 @@
+ $CL_Reactive = new PerlACE::Process ("client", "-ORBSvcConf reactive.conf -ORBuseParallelConnects 1 -k file://$iorfile");
+ $CL_Blocked = new PerlACE::Process ("client", "-ORBSvcConf blocked.conf -ORBuseParallelConnects 1 -k file://$iorfile");
+ $CL_None = new PerlACE::Process ("client", "-ORBuseParallelConnects 0 -k file://$iorfile");
++if ($ARGV[0] eq '-quick')  {
++  $CL_Blocked = new PerlACE::Process ("client", "-ORBSvcConf blocked.conf -ORBuseParallelConnects 1 -k file://$iorfile -t");
++  $CL_None = new PerlACE::Process ("client", "-ORBuseParallelConnects 0 -k file://$iorfile -t");
++}
+ $CL_Shutdown =  new PerlACE::Process ("client", "-ORBuseParallelConnects 1 -k file://$iorfile -x");
+
+ $SV_ALT_IIOP->Spawn ();
+Index: tests/RTScheduling/Thread_Cancel/test.cpp
+===================================================================
+--- tests/RTScheduling/Thread_Cancel/test.cpp	(revision 80604)
++++ tests/RTScheduling/Thread_Cancel/test.cpp	(working copy)
+@@ -30,7 +30,7 @@
+
+       ACE_DEBUG ((LM_DEBUG,
+ 		  "Waiting for Threads to Activate...\n"));
+-      ACE_OS::sleep (10);
++      ACE_OS::sleep (5);
+       ACE_DEBUG ((LM_DEBUG,
+ 		  "Threads Activated\n"));
+
+Index: tests/RTScheduling/Thread_Cancel/Thread_Task.cpp
+===================================================================
+--- tests/RTScheduling/Thread_Cancel/Thread_Task.cpp	(revision 80604)
++++ tests/RTScheduling/Thread_Cancel/Thread_Task.cpp	(working copy)
+@@ -104,7 +104,7 @@
+           }
+       }
+
+-      ACE_OS::sleep (50);
++      ACE_OS::sleep (10);
+
+       this->current_->end_scheduling_segment (name);
+       //  End - Nested Scheduling Segment
+Index: tests/Stack_Recursion/client.cpp
+===================================================================
+--- tests/Stack_Recursion/client.cpp	(revision 80604)
++++ tests/Stack_Recursion/client.cpp	(working copy)
+@@ -8,16 +8,20 @@
+           "$Id$")
+
+ const char *ior = "file://test.ior";
++static int iterations = 1000;
+
+ int
+ parse_args (int argc, char *argv[])
+ {
+-  ACE_Get_Opt get_opts (argc, argv, "k:");
++  ACE_Get_Opt get_opts (argc, argv, "i:k:");
+   int c;
+
+   while ((c = get_opts ()) != -1)
+     switch (c)
+       {
++      case 'i':
++        iterations = ACE_OS::atoi (get_opts.opt_arg ());
++        break;
+       case 'k':
+         ior = get_opts.opt_arg ();
+         break;
+@@ -61,7 +65,7 @@
+
+
+       Client_Task client_task (sender.in (),
+-                               1000,
++                               iterations,
+                                1048576,
+                                ACE_Thread_Manager::instance ());
+
+Index: tests/Stack_Recursion/run_test.pl
+===================================================================
+--- tests/Stack_Recursion/run_test.pl	(revision 80604)
++++ tests/Stack_Recursion/run_test.pl	(working copy)
+@@ -20,8 +20,15 @@
+ else {
+     $SV = new PerlACE::Process ("server", "-o $iorfile");
+ }
+-$CL = new PerlACE::Process ("client", " -k file://$iorfile");
+
++$iterations = 1000;
++
++if ($ARGV[0] eq '-quick')  {
++    $iterations = 100;
++}
++
++$CL = new PerlACE::Process ("client", " -k file://$iorfile -i $iterations");
++
+ $SV->Spawn ();
+
+ if (PerlACE::waitforfile_timed ($iorfile, $PerlACE::wait_interval_for_process_creation) == -1) {
+Index: tests/Bug_1020_Regression/run_test.pl
+===================================================================
+--- tests/Bug_1020_Regression/run_test.pl	(revision 80604)
++++ tests/Bug_1020_Regression/run_test.pl	(working copy)
+@@ -23,7 +23,7 @@
+
+ $SV->Spawn ();
+
+-if (PerlACE::waitforfile_timed ($iorfile,
++if (PerlACE::waitforfile_timed ($iorfile,
+                         $PerlACE::wait_interval_for_process_creation) == -1) {
+     print STDERR "ERROR: cannot find file <$iorfile>\n";
+     $SV->Kill (); $SV->TimedWait (1);
+@@ -34,6 +34,11 @@
+ local $max_running_time = 300; # 5 minutes
+ local $elapsed = time() - $start_time;
+
++if ($ARGV[0] eq '-quick')  {
++    $elapsed = 0;
++    $max_running_time = 1;
++}
++
+ while($elapsed < $max_running_time) {
+   # Start all clients in parallel
+   $client1 = $CL1->Spawn ();
+Index: tests/Bug_1551_Regression/run_test.pl
+===================================================================
+--- tests/Bug_1551_Regression/run_test.pl	(revision 80604)
++++ tests/Bug_1551_Regression/run_test.pl	(working copy)
+@@ -27,6 +27,11 @@
+ local $elapsed = time() - $start_time;
+
+ local $ntimes = 50 ; # run test for 50 times
++
++if ($ARGV[0] eq '-quick')  {
++    $ntimes = 1;
++}
++
+ local $n = 0;
+
+ while($n < $ntimes) {
+Index: tests/Crashed_Callback/Service.cpp
+===================================================================
+--- tests/Crashed_Callback/Service.cpp	(revision 80604)
++++ tests/Crashed_Callback/Service.cpp	(working copy)
+@@ -6,7 +6,8 @@
+ ACE_RCSID(Crashed_Callback, Service, "$Id$")
+
+ Service::Service (void)
+-  : test_count_ (0)
++  : orb_ (CORBA::ORB::_nil ()),
++    test_count_ (0)
+ {
+ }
+
+@@ -56,6 +57,7 @@
+       ACE_DEBUG ((LM_DEBUG,
+                   "Good!! %d exceptions raised after crash\n",
+                   pos_crash_exceptions));
++      orb_->shutdown (false);
+     }
+
+   /// Increment the number of tests completed
+Index: tests/Crashed_Callback/Service.h
+===================================================================
+--- tests/Crashed_Callback/Service.h	(revision 80604)
++++ tests/Crashed_Callback/Service.h	(working copy)
+@@ -25,6 +25,8 @@
+   // = The skeleton methods
+   virtual void run_test (Test::Crashed_Callback_ptr callback);
+
++  CORBA::ORB_var orb_;
++
+ private:
+   /// Call the are_you_there callback multiple times.
+   /**
+@@ -41,6 +43,7 @@
+ private:
+   /// Count the number of tests executed
+   int test_count_;
++
+ };
+
+ #include /**/ "ace/post.h"
+Index: tests/Crashed_Callback/server.cpp
+===================================================================
+--- tests/Crashed_Callback/server.cpp	(revision 80604)
++++ tests/Crashed_Callback/server.cpp	(working copy)
+@@ -91,6 +91,8 @@
+                       1);
+       PortableServer::ServantBase_var owner_transfer(service_impl);
+
++      service_impl->orb_ = CORBA::ORB::_duplicate (orb);
++
+       PortableServer::ObjectId_var id =
+         root_poa->activate_object (service_impl);
+
+Index: tests/Crash_On_Write/client.cpp
+===================================================================
+--- tests/Crash_On_Write/client.cpp	(revision 80604)
++++ tests/Crash_On_Write/client.cpp	(working copy)
+@@ -93,6 +93,10 @@
+
+           if (i % 100 == 0)
+             ACE_DEBUG ((LM_DEBUG, "Finished iteration %d\n", i));
++
++          // Lets not waste any more time than we have to
++          if (exception_count > 10 && normal_count > 0)
++            break;
+         }
+
+       if (exception_count == 0)
+Index: tests/Crash_On_Write/server.cpp
+===================================================================
+--- tests/Crash_On_Write/server.cpp	(revision 80604)
++++ tests/Crash_On_Write/server.cpp	(working copy)
+@@ -89,7 +89,7 @@
+       poa_manager->activate ();
+
+       // Create a separate thread to crash the server.
+-      Crash_Task crash_task (ACE_Thread_Manager::instance (), ACE_Time_Value(20));
++      Crash_Task crash_task (ACE_Thread_Manager::instance (), ACE_Time_Value(10));
+
+       if (crash_task.activate () == -1)
+         {
+Index: tests/BiDirectional/run_test.pl
+===================================================================
+--- tests/BiDirectional/run_test.pl	(revision 80604)
++++ tests/BiDirectional/run_test.pl	(working copy)
+@@ -18,7 +18,7 @@
+     $SV = new PerlACE::ProcessVX ("server", "-o $iorbase -i 100");
+ }
+ else {
+-    $SV = new PerlACE::Process ("server", "-o $iorfile -i 100");
++    $SV = new PerlACE::Process ("server", "-o $iorfile -i 100 -ORBDebugLevel 10");
+ }
+ $CL = new PerlACE::Process ("client", "-k file://$iorfile");
+
+Index: tests/Bug_1020_Basic_Regression/run_test.pl
+===================================================================
+--- tests/Bug_1020_Basic_Regression/run_test.pl	(revision 80604)
++++ tests/Bug_1020_Basic_Regression/run_test.pl	(working copy)
+@@ -32,6 +32,11 @@
+ local $max_running_time = 300; # 5 minutes
+ local $elapsed = time() - $start_time;
+
++if ($ARGV[0] eq '-quick')  {
++    $elapsed = 0;
++    $max_running_time = 1;
++}
++
+     print STDERR "elaped is $elapsed\n";
+ while($elapsed < $max_running_time) {
+     print STDERR "**************************** \n";
+Index: tests/Bug_1361_Regression/run_test.pl
+===================================================================
+--- tests/Bug_1361_Regression/run_test.pl	(revision 80604)
++++ tests/Bug_1361_Regression/run_test.pl	(working copy)
+@@ -36,6 +36,11 @@
+ local $elapsed = time() - $start_time;
+ my $p = $SV->{'PROCESS'};
+
++if ($ARGV[0] eq '-quick')  {
++    $elapsed = 0;
++    $max_running_time = 1;
++}
++
+ while (($elapsed < $max_running_time) )
+ {
+  # Start all clients in parallel
+Index: tests/Bug_1482_Regression/run_test.pl
+===================================================================
+--- tests/Bug_1482_Regression/run_test.pl	(revision 80604)
++++ tests/Bug_1482_Regression/run_test.pl	(working copy)
+@@ -25,6 +25,11 @@
+ local $max_running_time = 600; # 5 minutes
+ local $elapsed = time() - $start_time;
+
++if ($ARGV[0] eq '-quick')  {
++    $elapsed = 0;
++    $max_running_time = 1;
++}
++
+ while($elapsed < $max_running_time) {
+
+ print STDERR " Going .. \n";
+Index: tests/POA/Adapter_Activator/POA_Adapter_Activator.mpc
+===================================================================
+--- tests/POA/Adapter_Activator/POA_Adapter_Activator.mpc	(revision 80604)
++++ tests/POA/Adapter_Activator/POA_Adapter_Activator.mpc	(working copy)
+@@ -9,6 +9,7 @@
+      includes += $(srcdir)/../Generic_Servant
+    }
+    includes += ../Generic_Servant
++   libpaths += ../Generic_Servant
+
+    Source_Files {
+     server.cpp
+Index: tests/POA/Adapter_Activator/run_test.pl
+===================================================================
+--- tests/POA/Adapter_Activator/run_test.pl	(revision 80604)
++++ tests/POA/Adapter_Activator/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../Generic_Servant/.');
++
+ $iorbase = "ior";
+ $iorfile = PerlACE::LocalFile ("$iorbase");
+
+Index: tests/POA/Explicit_Activation/POA_Explicit_Activation.mpc
+===================================================================
+--- tests/POA/Explicit_Activation/POA_Explicit_Activation.mpc	(revision 80604)
++++ tests/POA/Explicit_Activation/POA_Explicit_Activation.mpc	(working copy)
+@@ -9,6 +9,7 @@
+      includes += $(srcdir)/../Generic_Servant
+    }
+    includes += ../Generic_Servant
++   libpaths += ../Generic_Servant
+
+    Source_Files {
+     server.cpp
+Index: tests/POA/Explicit_Activation/run_test.pl
+===================================================================
+--- tests/POA/Explicit_Activation/run_test.pl	(revision 80604)
++++ tests/POA/Explicit_Activation/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../Generic_Servant/.');
++
+ $iorbase = "ior";
+ $iorfile = PerlACE::LocalFile ("$iorbase");
+
+@@ -76,13 +78,13 @@
+
+ if (PerlACE::waitforfile_timed ($iorfile_2, $PerlACE::wait_interval_for_process_creation) == -1) {
+     print STDERR "ERROR: cannot find file <$iorfile_2>\n";
+-    $SV->Kill ();
++    $SV->Kill ();
+     exit 1;
+ }
+
+ if (PerlACE::waitforfile_timed ($iorfile_3, $PerlACE::wait_interval_for_process_creation) == -1) {
+     print STDERR "ERROR: cannot find file <$iorfile_3>\n";
+-    $SV->Kill ();
++    $SV->Kill ();
+     exit 1;
+ }
+
+Index: tests/POA/On_Demand_Activation/POA_On_Demand_Activation.mpc
+===================================================================
+--- tests/POA/On_Demand_Activation/POA_On_Demand_Activation.mpc	(revision 80604)
++++ tests/POA/On_Demand_Activation/POA_On_Demand_Activation.mpc	(working copy)
+@@ -9,6 +9,7 @@
+      includes += $(srcdir)/../Generic_Servant
+    }
+    includes += ../Generic_Servant
++   libpaths += ../Generic_Servant
+
+    Source_Files {
+     server.cpp
+Index: tests/POA/On_Demand_Activation/run_test.pl
+===================================================================
+--- tests/POA/On_Demand_Activation/run_test.pl	(revision 80604)
++++ tests/POA/On_Demand_Activation/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../Generic_Servant/.');
++
+ $iorbase = "ior";
+ $iorfile = PerlACE::LocalFile ("$iorbase");
+
+@@ -68,7 +70,7 @@
+
+ if (PerlACE::waitforfile_timed ($iorfile_1, $PerlACE::wait_interval_for_process_creation) == -1) {
+     print STDERR "ERROR: cannot find file <$iorfile_1>\n";
+-    $SV->Kill ();
++    $SV->Kill ();
+     exit 1;
+ }
+
+Index: tests/POA/Loader/run_test.pl
+===================================================================
+--- tests/POA/Loader/run_test.pl	(revision 80604)
++++ tests/POA/Loader/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../Generic_Servant/.');
++
+ $iorbase = "ior";
+ $iorfile = PerlACE::LocalFile ("$iorbase");
+
+@@ -73,7 +75,7 @@
+
+ if (PerlACE::waitforfile_timed ($iorfile_2, $PerlACE::wait_interval_for_process_creation) == -1) {
+     print STDERR "ERROR: cannot find file <$iorfile_2>\n";
+-    $SV->Kill ();
++    $SV->Kill ();
+     exit 1;
+ }
+
+Index: tests/POA/Reference_Counted_Servant/Reference_Counted_Servant.mpc
+===================================================================
+--- tests/POA/Reference_Counted_Servant/Reference_Counted_Servant.mpc	(revision 80604)
++++ tests/POA/Reference_Counted_Servant/Reference_Counted_Servant.mpc	(working copy)
+@@ -9,6 +9,7 @@
+      includes += $(srcdir)/../Generic_Servant
+    }
+    includes += ../Generic_Servant
++   libpaths += ../Generic_Servant
+
+    Source_Files {
+     server.cpp
+Index: tests/POA/Reference_Counted_Servant/run_test.pl
+===================================================================
+--- tests/POA/Reference_Counted_Servant/run_test.pl	(revision 80604)
++++ tests/POA/Reference_Counted_Servant/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../Generic_Servant/.');
++
+ $iorbase = "poa.ior";
+ $iorfile = PerlACE::LocalFile ("$iorbase");
+
+@@ -64,7 +66,7 @@
+
+ if (PerlACE::waitforfile_timed ($iorfile, $PerlACE::wait_interval_for_process_creation) == -1) {
+     print STDERR "ERROR: cannot find file <$iorfile>\n";
+-    $SV->Kill ();
++    $SV->Kill ();
+     exit 1;
+ }
+
+Index: tests/POA/On_Demand_Loading/run_test.pl
+===================================================================
+--- tests/POA/On_Demand_Loading/run_test.pl	(revision 80604)
++++ tests/POA/On_Demand_Loading/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../Generic_Servant/.');
++
+ $iorfile = "ior";
+
+ $oneway = "";
+@@ -55,10 +57,10 @@
+ else {
+   $SV  = new PerlACE::Process ("server", "-f $iorfile $extra_args");
+ }
+-$CL1 = new PerlACE::Process ("../Generic_Servant/client",
++$CL1 = new PerlACE::Process ("../Generic_Servant/client",
+                              "$extra_args $oneway -i $iterations -k file://$iorfile1");
+ $CL2 = new PerlACE::Process ("../Generic_Servant/client",
+-                             "$extra_args $oneway -i $iterations -k file://$iorfile2 -x");
++                             "$extra_args $oneway -i $iterations -k file://$iorfile2 -x");
+
+ $server = $SV->Spawn ();
+
+@@ -97,7 +99,7 @@
+
+ if ($server != 0) {
+     print STDERR "ERROR: server returned $server\n";
+-    $SV->Kill ();
++    $SV->Kill ();
+     $status = 1;
+ }
+
+Index: tests/Nested_Upcall_Crash/run_test.pl
+===================================================================
+--- tests/Nested_Upcall_Crash/run_test.pl	(revision 80604)
++++ tests/Nested_Upcall_Crash/run_test.pl	(working copy)
+@@ -39,6 +39,11 @@
+ local $max_running_time = 600; # 10 minutes
+ local $elapsed = time() - $start_time;
+
++if ($ARGV[0] eq '-quick')  {
++    $elapsed = 0;
++    $max_running_time = 1;
++}
++
+ while($elapsed < $max_running_time) {
+   # Start all clients in parallel
+   $client1 = $CL1->Spawn ();
+Index: tests/Collocation/run_test.pl
+===================================================================
+--- tests/Collocation/run_test.pl	(revision 80604)
++++ tests/Collocation/run_test.pl	(working copy)
+@@ -9,6 +9,8 @@
+ use PerlACE::Run_Test;
+ use PerlACE::TestTarget;
+
++PerlACE::add_lib_path ('.');
++
+ my $target = PerlACE::TestTarget::create_target ($PerlACE::TestConfig);
+
+ $status = 0;
+Index: tests/CSD_Strategy_Tests/Broken/run_test.pl
+===================================================================
+--- tests/CSD_Strategy_Tests/Broken/run_test.pl	(revision 80604)
++++ tests/CSD_Strategy_Tests/Broken/run_test.pl	(working copy)
+@@ -8,6 +8,11 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../TP_Foo_A/.');
++PerlACE::add_lib_path ('../TP_Foo_B/.');
++PerlACE::add_lib_path ('../TP_Foo_C/.');
++PerlACE::add_lib_path ('../TP_Common/.');
++
+ my $status = 0;
+
+ my $iorfname_prefix        = "servant";
+@@ -106,7 +111,7 @@
+ }
+
+ if (PerlACE::is_vxworks_test()) {
+-    $SV = new PerlACE::ProcessVX ("server_main",
++    $SV = new PerlACE::ProcessVX ("server_main",
+ #                           "-ORBNegotiateCodesets 0 "    .
+                            "-p $iorfname_prefix "        .
+                            "-s $num_servants "           .
+@@ -117,7 +122,7 @@
+                            "-k $collocated_client_kind");
+ }
+ else {
+-    $SV = new PerlACE::Process("server_main",
++    $SV = new PerlACE::Process("server_main",
+ #                           "-ORBNegotiateCodesets 0 "    .
+                            "-p $iorfname_prefix "        .
+                            "-s $num_servants "           .
+Index: tests/CSD_Strategy_Tests/TP_Test_1/run_test.pl
+===================================================================
+--- tests/CSD_Strategy_Tests/TP_Test_1/run_test.pl	(revision 80604)
++++ tests/CSD_Strategy_Tests/TP_Test_1/run_test.pl	(working copy)
+@@ -8,6 +8,9 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../TP_Foo_A/.');
++PerlACE::add_lib_path ('../TP_Common/.');
++
+ $baseior = "server.ior";
+ $iorfile = PerlACE::LocalFile ("$baseior");
+ unlink $iorfile;
+Index: tests/CSD_Strategy_Tests/TP_Test_2/run_test.pl
+===================================================================
+--- tests/CSD_Strategy_Tests/TP_Test_2/run_test.pl	(revision 80604)
++++ tests/CSD_Strategy_Tests/TP_Test_2/run_test.pl	(working copy)
+@@ -8,6 +8,11 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../TP_Foo_A/.');
++PerlACE::add_lib_path ('../TP_Foo_B/.');
++PerlACE::add_lib_path ('../TP_Foo_C/.');
++PerlACE::add_lib_path ('../TP_Common/.');
++
+ my $status = 0;
+
+ my $iorfname_prefix        = "servant";
+@@ -105,7 +110,7 @@
+ }
+
+ if (PerlACE::is_vxworks_test()) {
+-    $SV = new PerlACE::ProcessVX ("server_main",
++    $SV = new PerlACE::ProcessVX ("server_main",
+                            "-p $iorfname_prefix "        .
+                            "-s $num_servants "           .
+                            "-n $num_csd_threads "        .
+@@ -115,7 +120,7 @@
+                            "-k $collocated_client_kind");
+ }
+ else {
+-    $SV = new PerlACE::Process("server_main",
++    $SV = new PerlACE::Process("server_main",
+                            "-p $iorfname_prefix "        .
+                            "-s $num_servants "           .
+                            "-n $num_csd_threads "        .
+@@ -146,11 +151,11 @@
+
+ for ($i = 0; $i < $num_remote_clients; $i++)
+ {
+-
++
+   $client_id = $i+1;
+
+   $j = $i % $num_servants;
+-
++
+   $CLS[$i] = new PerlACE::Process("client_main",
+                                   "-i file://$iorfile[$j] ".
+                                   "-k $client_kind ".
+Index: tests/CSD_Strategy_Tests/TP_Test_3/run_test.pl
+===================================================================
+--- tests/CSD_Strategy_Tests/TP_Test_3/run_test.pl	(revision 80604)
++++ tests/CSD_Strategy_Tests/TP_Test_3/run_test.pl	(working copy)
+@@ -8,6 +8,11 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../TP_Foo_A/.');
++PerlACE::add_lib_path ('../TP_Foo_B/.');
++PerlACE::add_lib_path ('../TP_Foo_C/.');
++PerlACE::add_lib_path ('../TP_Common/.');
++
+ my $status = 0;
+
+ my $iorfname_prefix        = "servant";
+@@ -106,7 +111,7 @@
+ }
+
+ if (PerlACE::is_vxworks_test()) {
+-    $SV = new PerlACE::ProcessVX ("server_main",
++    $SV = new PerlACE::ProcessVX ("server_main",
+                            "-p $iorfname_prefix "        .
+                            "-s $num_servants "           .
+                            "-n $num_csd_threads "        .
+@@ -116,7 +121,7 @@
+                            "-k $collocated_client_kind");
+ }
+ else {
+-    $SV = new PerlACE::Process("server_main",
++    $SV = new PerlACE::Process("server_main",
+                            "-p $iorfname_prefix "        .
+                            "-s $num_servants "           .
+                            "-n $num_csd_threads "        .
+@@ -155,7 +160,7 @@
+                                   "-k $client_kind ".
+                                   "-n $client_id");
+ # print STDERR $CLS[$i]->CommandLine() . "\n";
+-
++
+   $CLS[$i]->Spawn();
+ }
+
+Index: tests/CSD_Strategy_Tests/TP_Test_4/run_test.pl
+===================================================================
+--- tests/CSD_Strategy_Tests/TP_Test_4/run_test.pl	(revision 80604)
++++ tests/CSD_Strategy_Tests/TP_Test_4/run_test.pl	(working copy)
+@@ -8,6 +8,11 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../TP_Foo_A/.');
++PerlACE::add_lib_path ('../TP_Foo_B/.');
++PerlACE::add_lib_path ('../TP_Foo_C/.');
++PerlACE::add_lib_path ('../TP_Common/.');
++
+ my $status = 0;
+
+ my $iorfname_prefix        = "servant";
+@@ -111,7 +116,7 @@
+ }
+
+ if (PerlACE::is_vxworks_test()) {
+-    $SV = new PerlACE::ProcessVX ("server_main",
++    $SV = new PerlACE::ProcessVX ("server_main",
+                            "-p $iorfname_prefix "        .
+                            "-s $num_servants "           .
+                            "-n $num_csd_threads "        .
+@@ -122,7 +127,7 @@
+
+ }
+ else {
+-    $SV = new PerlACE::Process("server_main",
++    $SV = new PerlACE::Process("server_main",
+                            "-p $iorfname_prefix "        .
+                            "-s $num_servants "           .
+                            "-n $num_csd_threads "        .
+@@ -151,11 +156,11 @@
+
+ for ($i = 0; $i < $num_remote_clients; $i++)
+ {
+-
++
+   $client_id = $i+1;
+
+   $j = $i % $num_servants;
+-
++
+   $CLS[$i] = new PerlACE::Process("client_main",
+                                   "-i file://$iorfile[$j] ".
+                                   "-k $client_kind ".
+Index: tests/CSD_Strategy_Tests/TP_Test_Dynamic/run_test.pl
+===================================================================
+--- tests/CSD_Strategy_Tests/TP_Test_Dynamic/run_test.pl	(revision 80604)
++++ tests/CSD_Strategy_Tests/TP_Test_Dynamic/run_test.pl	(working copy)
+@@ -8,6 +8,11 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../TP_Foo_A/.');
++PerlACE::add_lib_path ('../TP_Foo_B/.');
++PerlACE::add_lib_path ('../TP_Foo_C/.');
++PerlACE::add_lib_path ('../TP_Common/.');
++
+ $status = 0;
+
+ $iorfile = PerlACE::LocalFile ("server.ior");
+@@ -20,7 +25,7 @@
+     $SV = new PerlACE::Process ("server", "-o $iorfile");
+ }
+ $CL = new PerlACE::Process ("client", " -k file://$iorfile");
+-
++
+ $SV->Spawn ();
+
+ if (PerlACE::waitforfile_timed ($iorfile,
+@@ -28,7 +33,7 @@
+     print STDERR "ERROR: cannot find file <$iorfile>\n";
+     $SV->Kill (); $SV->TimedWait (1);
+     exit 1;
+-}
++}
+
+ $client = $CL->SpawnWaitKill (300);
+
+Index: tests/CSD_Strategy_Tests/TP_Test_Static/run_test.pl
+===================================================================
+--- tests/CSD_Strategy_Tests/TP_Test_Static/run_test.pl	(revision 80604)
++++ tests/CSD_Strategy_Tests/TP_Test_Static/run_test.pl	(working copy)
+@@ -8,6 +8,11 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../TP_Foo_A/.');
++PerlACE::add_lib_path ('../TP_Foo_B/.');
++PerlACE::add_lib_path ('../TP_Foo_C/.');
++PerlACE::add_lib_path ('../TP_Common/.');
++
+ $iorfilebase = "server.ior";
+ $iorfile = PerlACE::LocalFile ("$iorfilebase");
+ unlink $iorfile;
+Index: tests/Oneways_Invoking_Twoways/Client_Task.cpp
+===================================================================
+--- tests/Oneways_Invoking_Twoways/Client_Task.cpp	(revision 80604)
++++ tests/Oneways_Invoking_Twoways/Client_Task.cpp	(working copy)
+@@ -3,15 +3,18 @@
+ //
+
+ #include "Client_Task.h"
++#include "ace/OS_NS_unistd.h"
+
+ ACE_RCSID(Muxing, Client_Task, "$Id$")
+
+ Client_Task::Client_Task (Test::Sender_ptr reply_gen,
+                           Test::Receiver_ptr us,
+-                          ACE_Thread_Manager *thr_mgr)
++                          ACE_Thread_Manager *thr_mgr,
++                           Receiver_i * receiver_impl)
+   : ACE_Task_Base (thr_mgr)
+   , sender_(Test::Sender::_duplicate (reply_gen))
+   , us_ (Test::Receiver::_duplicate (us))
++  , receiver_impl_ (receiver_impl)
+
+ {
+ }
+@@ -30,6 +33,14 @@
+
+           this->sender_->send_ready_message (this->us_.in ());
+         }
++
++      // sleeps are evil but 1 sec or so is an improvement on the minute plus
++      // this poorly implemented test used to take
++      while (this->receiver_impl_->no_calls_ < 10)
++        ACE_OS::sleep (1);
++      this->sender_->shutdown ();
++
++      this->us_->shutdown ();
+     }
+   catch (const CORBA::Exception& ex)
+     {
+Index: tests/Oneways_Invoking_Twoways/Client_Task.h
+===================================================================
+--- tests/Oneways_Invoking_Twoways/Client_Task.h	(revision 80604)
++++ tests/Oneways_Invoking_Twoways/Client_Task.h	(working copy)
+@@ -7,6 +7,7 @@
+ #include /**/ "ace/pre.h"
+
+ #include "TestC.h"
++#include "Receiver_i.h"
+ #include "ace/Task.h"
+
+ #if !defined (ACE_LACKS_PRAGMA_ONCE)
+@@ -20,7 +21,8 @@
+   /// Constructor
+   Client_Task (Test::Sender_ptr sender,
+                Test::Receiver_ptr us,
+-               ACE_Thread_Manager *thr_mgr);
++               ACE_Thread_Manager *thr_mgr,
++               Receiver_i * receiver_impl);
+
+   /// Thread entry point
+   int svc (void);
+@@ -32,6 +34,8 @@
+
+   /// Reference to the test interface
+   Test::Receiver_var us_;
++
++  Receiver_i* receiver_impl_;
+ };
+
+ #include /**/ "ace/post.h"
+Index: tests/Oneways_Invoking_Twoways/Test.idl
+===================================================================
+--- tests/Oneways_Invoking_Twoways/Test.idl	(revision 80604)
++++ tests/Oneways_Invoking_Twoways/Test.idl	(working copy)
+@@ -12,6 +12,7 @@
+     /// Get the number of calls that every thread would make...
+     long get_call_count ();
+
++    oneway void shutdown ();
+   };
+
+   interface Sender {
+@@ -24,5 +25,7 @@
+
+     /// Send a ready message
+     oneway void send_ready_message (in Receiver callback);
++
++    oneway void shutdown ();
+     };
+ };
+Index: tests/Oneways_Invoking_Twoways/Receiver_i.cpp
+===================================================================
+--- tests/Oneways_Invoking_Twoways/Receiver_i.cpp	(revision 80604)
++++ tests/Oneways_Invoking_Twoways/Receiver_i.cpp	(working copy)
+@@ -5,10 +5,10 @@
+ Receiver_i::Receiver_i (CORBA::ORB_ptr orb,
+                         Test::Sender_ptr sender,
+                         CORBA::ULong iter)
+-  : orb_ (CORBA::ORB::_duplicate (orb)),
++  : no_calls_ (0),
++    orb_ (CORBA::ORB::_duplicate (orb)),
+     sender_ (Test::Sender::_duplicate (sender)),
+-    iteration_ (iter),
+-    no_calls_ (0)
++    iteration_ (iter)
+ {
+ }
+
+@@ -34,3 +34,11 @@
+ {
+   return this->iteration_;
+ }
++
++void
++Receiver_i::shutdown (void)
++{
++  ACE_DEBUG ((LM_DEBUG,
++              "(%P|%t) About to invoke shudown... \n"));
++  this->orb_->shutdown (0);
++}
+Index: tests/Oneways_Invoking_Twoways/client.cpp
+===================================================================
+--- tests/Oneways_Invoking_Twoways/client.cpp	(revision 80604)
++++ tests/Oneways_Invoking_Twoways/client.cpp	(working copy)
+@@ -96,7 +96,8 @@
+
+       Client_Task client_task (sender.in (),
+                                receiver.in (),
+-                               ACE_Thread_Manager::instance ());
++                               ACE_Thread_Manager::instance (),
++                               receiver_impl);
+
+       Server_Task server_task (orb.in (),
+                                ACE_Thread_Manager::instance ());
+Index: tests/Oneways_Invoking_Twoways/Receiver_i.h
+===================================================================
+--- tests/Oneways_Invoking_Twoways/Receiver_i.h	(revision 80604)
++++ tests/Oneways_Invoking_Twoways/Receiver_i.h	(working copy)
+@@ -38,6 +38,11 @@
+   /// Retun the number of calls that every thread would make...
+   virtual CORBA::Long get_call_count (void);
+
++  virtual void shutdown (void);
++
++  /// Number of calls processed so far..
++  CORBA::ULong no_calls_;
++
+ private:
+   /// Our Orb...
+   CORBA::ORB_var orb_;
+@@ -47,9 +52,6 @@
+
+   /// Number of invocations to be made on the sender..
+   CORBA::ULong iteration_;
+-
+-  /// Number of calls processed so far..
+-  CORBA::ULong no_calls_;
+ };
+
+ #include /**/ "ace/post.h"
+Index: tests/Oneways_Invoking_Twoways/Sender_i.cpp
+===================================================================
+--- tests/Oneways_Invoking_Twoways/Sender_i.cpp	(revision 80604)
++++ tests/Oneways_Invoking_Twoways/Sender_i.cpp	(working copy)
+@@ -45,3 +45,11 @@
+ {
+   return;
+ }
++
++void
++Sender_i::shutdown (void)
++{
++  ACE_DEBUG ((LM_DEBUG,
++              "(%P|%t) About to invoke shudown... \n"));
++  this->orb_->shutdown (0);
++}
+Index: tests/Oneways_Invoking_Twoways/Sender_i.h
+===================================================================
+--- tests/Oneways_Invoking_Twoways/Sender_i.h	(revision 80604)
++++ tests/Oneways_Invoking_Twoways/Sender_i.h	(working copy)
+@@ -39,6 +39,8 @@
+
+   virtual void ping (void);
+
++  virtual void shutdown (void);
++
+ private:
+   /// Our local ORB ptr
+   CORBA::ORB_ptr orb_;
+Index: tests/RTCORBA/Persistent_IOR/run_test.pl
+===================================================================
+--- tests/RTCORBA/Persistent_IOR/run_test.pl	(revision 80604)
++++ tests/RTCORBA/Persistent_IOR/run_test.pl	(working copy)
+@@ -79,15 +79,15 @@
+
+     $SV->Spawn ();
+
+-    $server = $SV->Wait (10);
+-    if ($server == 0)
+-    {
+-       return 0;
+-    }
++    # $server = $SV->Wait (10);
++    # if ($server == 0)
++    # {
++    #    return 0;
++    # }
+
+     for $file (@$iorfiles)
+     {
+-        if (PerlACE::waitforfile_timed ($file, 1) == -1)
++        if (PerlACE::waitforfile_timed ($file, 5) == -1)
+         {
+             print STDERR "ERROR: cannot find ior file: $file\n";
+             $status = 1;
+Index: tests/Bug_1269_Regression/run_test.pl
+===================================================================
+--- tests/Bug_1269_Regression/run_test.pl	(revision 80604)
++++ tests/Bug_1269_Regression/run_test.pl	(working copy)
+@@ -23,7 +23,7 @@
+
+ $SV->Spawn ();
+
+-if (PerlACE::waitforfile_timed ($iorfile,
++if (PerlACE::waitforfile_timed ($iorfile,
+                         $PerlACE::wait_interval_for_process_creation) == -1) {
+     print STDERR "ERROR: cannot find file <$iorfile>\n";
+     $SV->Kill (); $SV->TimedWait (1);
+@@ -34,6 +34,11 @@
+ local $max_running_time = 240; # 4 minutes
+ local $elapsed = time() - $start_time;
+
++if ($ARGV[0] eq '-quick')  {
++    $elapsed = 0;
++    $max_running_time = 1;
++}
++
+ while($elapsed < $max_running_time) {
+   # Start all clients in parallel
+   $client1 = $CL1->Spawn ();
+Index: tests/TransportCurrent/IIOP/run_test.pl
+===================================================================
+--- tests/TransportCurrent/IIOP/run_test.pl	(revision 80604)
++++ tests/TransportCurrent/IIOP/run_test.pl	(working copy)
+@@ -9,6 +9,8 @@
+ use Config;
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ sub add_path {
+     my($name)  = shift;
+     my($value) = shift;
+Index: tests/TransportCurrent/Framework/run_test.pl
+===================================================================
+--- tests/TransportCurrent/Framework/run_test.pl	(revision 80604)
++++ tests/TransportCurrent/Framework/run_test.pl	(working copy)
+@@ -9,6 +9,8 @@
+ use Config;
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('../lib');
++
+ sub add_path {
+     my($name)  = shift;
+     my($value) = shift;
+Index: tests/Single_Read/test_i.cpp
+===================================================================
+--- tests/Single_Read/test_i.cpp	(revision 80604)
++++ tests/Single_Read/test_i.cpp	(working copy)
+@@ -6,7 +6,8 @@
+ ACE_RCSID(Single_Read, test_i, "$Id$")
+
+ test_i::test_i (CORBA::ORB_ptr orb)
+-  : orb_ (CORBA::ORB::_duplicate (orb))
++  : orb_ (CORBA::ORB::_duplicate (orb)),
++    client_done_ (false)
+ {
+ }
+
+@@ -18,11 +19,26 @@
+               ACE_TEXT ("server: Iteration %d @ %T\n"),
+               request_number));
+
+-  // Time required to process this request.
+-  ACE_Time_Value work_time (0,
+-                            3000 * 1000);
++  if (!client_done_)
++    {
++      FILE *input_file = ACE_OS::fopen ("client_done", "r");
++      if (input_file == 0)
++        {
++          // Time required to process this request.
++          ACE_Time_Value work_time (0,
++                                    3000 * 1000);
+
+-  ACE_OS::sleep (work_time);
++          ACE_OS::sleep (work_time);
++        }
++      else
++        {
++          // The client is long gone because the run_test.pl has created
++          // the file to let us know. There's no need to keep on with
++          // these pointless sleeps
++          client_done_ = true;
++          ACE_OS::fclose (input_file);
++        }
++    }
+ }
+
+ void
+Index: tests/Single_Read/run_test.pl
+===================================================================
+--- tests/Single_Read/run_test.pl	(revision 80604)
++++ tests/Single_Read/run_test.pl	(working copy)
+@@ -9,8 +9,10 @@
+ use PerlACE::Run_Test;
+
+ $iorfile = PerlACE::LocalFile ("server.ior");
++$client_done_file = PerlACE::LocalFile ("client_done");
+
+ unlink $iorfile;
++unlink $client_done_file;
+ $status = 0;
+
+ if (PerlACE::is_vxworks_test()) {
+@@ -39,6 +41,10 @@
+     $status = 1;
+ }
+
++open (FILE , ">$client_done_file");
++print FILE "Client Done !\n";
++close (FILE);
++
+ $server = $SV->WaitKill (400);
+
+ if ($server != 0) {
+@@ -48,5 +54,6 @@
+ }
+
+ unlink $iorfile;
++unlink $client_done_file;
+
+ exit $status;
+Index: tests/Single_Read/test_i.h
+===================================================================
+--- tests/Single_Read/test_i.h	(revision 80604)
++++ tests/Single_Read/test_i.h	(working copy)
+@@ -37,6 +37,8 @@
+   /// The ORB.
+   CORBA::ORB_var orb_;
+
++  CORBA::Boolean client_done_;
++
+ };
+
+ #endif /* TAO_SINGLE_READ_TEST_I_H*/
+Index: examples/RTScheduling/Fixed_Priority_Scheduler/Fixed_Priority_Scheduler.mpc
+===================================================================
+--- examples/RTScheduling/Fixed_Priority_Scheduler/Fixed_Priority_Scheduler.mpc	(revision 80604)
++++ examples/RTScheduling/Fixed_Priority_Scheduler/Fixed_Priority_Scheduler.mpc	(working copy)
+@@ -4,6 +4,7 @@
+ project(*Starter): portableserver, namingexe {
+   after += MIF_Scheduler_Starter
+   libs += RTSchedSynch
++  libpaths += ..
+
+   specific (automake) {
+     includes += $(TAO_ROOT)/examples/RTScheduling
+@@ -20,6 +21,7 @@
+ project(*test) : namingexe, rtscheduling_server {
+   after += *Starter RTSchedTestLib
+   libs += RTSchedTestLib Job RTSchedSynch
++  libpaths += ..
+
+   specific (automake) {
+     includes += $(TAO_ROOT)/examples/RTScheduling
+Index: examples/RTScheduling/Fixed_Priority_Scheduler/run_test.pl
+===================================================================
+--- examples/RTScheduling/Fixed_Priority_Scheduler/run_test.pl	(revision 80604)
++++ examples/RTScheduling/Fixed_Priority_Scheduler/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('..');
++
+ # amount of delay between running the servers
+
+ $sleeptime = 2;
+Index: examples/RTScheduling/MIF_Scheduler/MIF_Scheduler.mpc
+===================================================================
+--- examples/RTScheduling/MIF_Scheduler/MIF_Scheduler.mpc	(revision 80604)
++++ examples/RTScheduling/MIF_Scheduler/MIF_Scheduler.mpc	(working copy)
+@@ -4,6 +4,7 @@
+ project(*Starter): portableserver, namingexe {
+   after += RTSchedSynch
+   libs += RTSchedSynch
++  libpaths += ..
+
+   specific (automake) {
+     includes += $(TAO_ROOT)/examples/RTScheduling
+@@ -20,6 +21,7 @@
+ project(*test) : namingexe, rtscheduling_server {
+   after += *Starter RTSchedTestLib
+   libs += RTSchedTestLib Job RTSchedSynch
++  libpaths += ..
+   idlflags += -SS -St -o ..
+
+   specific (automake) {
+Index: examples/RTScheduling/MIF_Scheduler/run_test.pl
+===================================================================
+--- examples/RTScheduling/MIF_Scheduler/run_test.pl	(revision 80604)
++++ examples/RTScheduling/MIF_Scheduler/run_test.pl	(working copy)
+@@ -8,6 +8,8 @@
+ use lib "$ENV{ACE_ROOT}/bin";
+ use PerlACE::Run_Test;
+
++PerlACE::add_lib_path ('..');
++
+ # amount of delay between running the servers
+
+ $sleeptime = 2;
