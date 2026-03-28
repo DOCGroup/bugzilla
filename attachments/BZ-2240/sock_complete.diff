@@ -1,0 +1,140 @@
+--- ace/Default_Constants.h.orig	2005-09-22 16:27:23.902335000 -0500
++++ ace/Default_Constants.h	2005-09-22 16:46:06.208911300 -0500
+@@ -339,15 +339,6 @@
+ // A simple free list which doen't allocate/deallocate elements.
+ # define ACE_PURE_FREE_LIST 2
+ 
+-# if defined (ACE_WIN32)
+-
+-// This is necessary to work around bugs with Win32 non-blocking
+-// connects...
+-#   if !defined (ACE_NON_BLOCKING_BUG_DELAY)
+-#     define ACE_NON_BLOCKING_BUG_DELAY 35000
+-#   endif /* ACE_NON_BLOCKING_BUG_DELAY */
+-# endif /*ACE_WIN32*/
+-
+ // Max size of an ACE Log Record data buffer.  This can be reset in
+ // the config.h file if you'd like to increase or decrease the size.
+ # if !defined (ACE_MAXLOGMSGLEN)
+--- ace/SOCK_Connector.cpp.orig	2005-09-22 16:49:08.564785000 -0500
++++ ace/SOCK_Connector.cpp	2005-09-22 16:46:33.270891700 -0500
+@@ -227,25 +227,7 @@ ACE_SOCK_Connector::complete (ACE_SOCK_S
+   // We failed to get connected.
+   if (h == ACE_INVALID_HANDLE)
+     {
+-#if defined (ACE_WIN32)
+-      // Win32 has a timing problem - if you check to see if the
+-      // connection has completed too fast, it will fail - so wait
+-      // <ACE_NON_BLOCKING_BUG_DELAY> microseconds to let it catch up
+-      // then retry to see if it's a real failure.
+-      ACE_Time_Value time (0, ACE_NON_BLOCKING_BUG_DELAY);
+-      ACE_OS::sleep (time);
+-      h = ACE::handle_timed_complete (new_stream.get_handle (),
+-                                      tv);
+-      if (h == ACE_INVALID_HANDLE)
+-        {
+-#endif /* ACE_WIN32 */
+-      // Save/restore errno.
+-      ACE_Errno_Guard error (errno);
+-      new_stream.close ();
+       return -1;
+-#if defined (ACE_WIN32)
+-        }
+-#endif /* ACE_WIN32 */
+     }
+ 
+   if (remote_sap != 0)
+@@ -256,9 +238,6 @@ ACE_SOCK_Connector::complete (ACE_SOCK_S
+                                addr,
+                                &len) == -1)
+         {
+-          // Save/restore errno.
+-          ACE_Errno_Guard error (errno);
+-          new_stream.close ();
+           return -1;
+         }
+     }
+--- ace/SOCK_Connector.h.orig	2005-09-22 16:48:26.706213700 -0500
++++ ace/SOCK_Connector.h	2005-09-22 17:03:05.345593500 -0500
+@@ -262,14 +262,22 @@ public:
+   /**
+    * Try to complete a nonblocking connection that was begun by a
+    * previous call to connect with a {0, 0} ACE_Time_Value timeout.
+-   * @see connect().
++   * @see connect().  
+    *
+    * @param new_stream  The @c ACE_SOCK_Stream object that will be connected
+    *                    to the peer.
+    * @param remote_sap  If non-0, it points to the @c ACE_INET_Addr object
+    *                    that will contain the address of the connected peer.
+    * @param timeout     Same values and return value possibilites as for
+-   *                    connect(). @see connect().
++   *                    connect() except if *timeout == {0, 0} and the
++   *                    connection has yet to complete or fail errno will
++   *                    be set to ETIME not EWOULDBLOCK. @see connect().
++   *
++   * @return            Returns 0 if the connection has completed.  If it
++   *                    fails -1 is returned and errno contains a specific
++   *                    error code.  If errno is ETIME try complete again
++   *                    later to see if the connection has been established
++   *                    or  has failed.
+    */
+   int complete (ACE_SOCK_Stream &new_stream,
+                 ACE_Addr *remote_sap = 0,
+--- ace/SOCK_SEQPACK_Connector.cpp.orig	2005-09-22 16:27:47.714377800 -0500
++++ ace/SOCK_SEQPACK_Connector.cpp	2005-09-22 16:47:30.551041900 -0500
+@@ -344,25 +344,7 @@ ACE_SOCK_SEQPACK_Connector::complete (AC
+   // We failed to get connected.
+   if (h == ACE_INVALID_HANDLE)
+     {
+-#if defined (ACE_WIN32)
+-      // Win32 has a timing problem - if you check to see if the
+-      // connection has completed too fast, it will fail - so wait
+-      // <ACE_NON_BLOCKING_BUG_DELAY> microseconds to let it catch up
+-      // then retry to see if it's a real failure.
+-      ACE_Time_Value time (0, ACE_NON_BLOCKING_BUG_DELAY);
+-      ACE_OS::sleep (time);
+-      h = ACE::handle_timed_complete (new_association.get_handle (),
+-                                      tv);
+-      if (h == ACE_INVALID_HANDLE)
+-        {
+-#endif /* ACE_WIN32 */
+-      // Save/restore errno.
+-      ACE_Errno_Guard error (errno);
+-      new_association.close ();
+       return -1;
+-#if defined (ACE_WIN32)
+-        }
+-#endif /* ACE_WIN32 */
+     }
+ 
+   if (remote_sap != 0)
+@@ -373,9 +355,6 @@ ACE_SOCK_SEQPACK_Connector::complete (AC
+                                addr,
+                                &len) == -1)
+         {
+-          // Save/restore errno.
+-          ACE_Errno_Guard error (errno);
+-          new_association.close ();
+           return -1;
+         }
+     }
+--- ace/SOCK_SEQPACK_Connector.h.orig	2005-09-22 16:48:02.409805200 -0500
++++ ace/SOCK_SEQPACK_Connector.h	2005-09-22 17:03:46.844796700 -0500
+@@ -266,7 +266,15 @@ public:
+    * @param remote_sap  If non-0, it points to the @c ACE_INET_Addr object
+    *                    that will contain the address of the connected peer.
+    * @param timeout     Same values and return value possibilites as for
+-   *                    connect(). @see connect().
++   *                    connect() except if *timeout == {0, 0} and the
++   *                    connection has yet to complete or fail errno will
++   *                    be set to ETIME not EWOULDBLOCK. @see connect().
++   *
++   * @return            Returns 0 if the connection has completed.  If it
++   *                    fails -1 is returned and errno contains a specific
++   *                    error code.  If errno is ETIME try complete again
++   *                    later to see if the connection has been established
++   *                    or  has failed.
+    */
+   int complete (ACE_SOCK_SEQPACK_Association &new_association,
+                 ACE_Addr *remote_sap = 0,
