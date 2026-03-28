@@ -1,0 +1,31 @@
+// $Id: test.mpc,v 1.5 2006/04/21 11:13:26 sma Exp $
+
+// anytypecode required so as to generate the typecodes
+// (as if anys were being used to hold our new types).
+// This causes the problem to manefest.
+
+project (*) : taolib_with_idl,anytypecode {
+   sharedname    = theLibrary
+
+   idlflags   += -Ge 0 -Sc -Gd
+   libout = .
+
+   // All of the IDL generated files are supposed to
+   // go into the library for later use.
+
+   Source_Files {
+      FirstC.cpp
+      FirstS.cpp
+      SecondC.cpp
+      SecondS.cpp
+   }
+
+   // The source idl files unfortunatly have an unintensional
+   // collision with a fixed string type.
+
+   IDL_Files {
+      First.idl
+      Second.idl
+   }
+
+}
