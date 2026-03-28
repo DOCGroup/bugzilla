@@ -1,0 +1,11 @@
+ExecImplHeaderGenerator.diff
+Produced: 6/1/2007 6:15:28 PM
+
+--- C:\ACE_wrappers_Pharlap\TAO\CIAO\CIDLC\ExecImplHeaderGenerator.cpp	2007-03-06 14:32:14.000000000 -0400
++++ C:\ACE_wrappers\TAO\CIAO\CIDLC\ExecImplHeaderGenerator.cpp	2007-06-01 17:58:27.000000000 -0400
+@@ -137 +137 @@
+-         << "get_" << p.name () << " (" << endl
++         << "get_" << p.name () << " ("
+@@ -149 +149 @@
+-      os << " *ev" << endl
++      os << " *ev"
