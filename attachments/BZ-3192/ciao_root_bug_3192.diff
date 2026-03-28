@@ -1,0 +1,221 @@
+Index: tools/Config_Handlers/Package_Handlers/Package_Handlers.mpc
+===================================================================
+--- tools/Config_Handlers/Package_Handlers/Package_Handlers.mpc	(revision 80604)
++++ tools/Config_Handlers/Package_Handlers/Package_Handlers.mpc	(working copy)
+@@ -1,19 +1,19 @@
+ // $Id$
+ 
+-project (Package_Config_Handlers) : acelib, ciao_deployment_stub, ciao_config_handlers_base {
++project (Package_Config_Handlers) : acelib, ace_output, ciao_deployment_stub, ciao_config_handlers_base {
+   sharedname = Package_Config_Handlers
+   dynamicflags = PACKAGING_HANDLERS_BUILD_DLL
+   avoids   += ace_for_tao
+-    
++
+   includes += $(CIAO_ROOT)/ciao
+-  
++
+   after    += XSC_Config_Handlers_Common \
+               XSC_Config_Handlers \
+               XSC_DynAny_Handler \
+               XSC_XML_Handlers \
+               CIAO_XML_Utils \
+               CIAO_Events_Handlers
+-              
++
+   libs     += XSC_Config_Handlers_Common \
+               XSC_Config_Handlers \
+               XSC_DynAny_Handler \
+@@ -47,7 +47,7 @@
+   exename = test
+   macros   += XML_USE_PTHREADS
+   avoids   += ace_for_tao
+-  
++
+   Source_Files {
+     test.cpp
+   }
+Index: tools/Config_Handlers/CIAO_Events/CIAO_Events_Handlers.mpc
+===================================================================
+--- tools/Config_Handlers/CIAO_Events/CIAO_Events_Handlers.mpc	(revision 80604)
++++ tools/Config_Handlers/CIAO_Events/CIAO_Events_Handlers.mpc	(working copy)
+@@ -9,7 +9,7 @@
+    xscflags += --cxx-namespace-regex  <%quote%>%.*vanderbilt.*%CIAO/Config_Handlers%<%quote%>
+    xscflags += --cxx-export-header CIAO_Events_Handlers_Export.h
+    xscflags += --search-path "$(CIAO_ROOT)/docs/schema"
+-   
++
+    custom_only = 1
+ 
+    XSC_Files {
+@@ -18,13 +18,13 @@
+    }
+ }
+ 
+-project (CIAO_Events_Handlers) : acelib, ciao_config_handlers_base, ciao_events_dnc, ciao_deployment_stub {
++project (CIAO_Events_Handlers) : acelib, ace_output, ciao_config_handlers_base, ciao_events_dnc, ciao_deployment_stub {
+   sharedname = CIAO_Events_Handlers
+   dynamicflags   = CIAO_EVENTS_HANDLERS_BUILD_DLL
+   macros   += XML_USE_PTHREADS
+   includes += $(CIAO_ROOT)/tools/Config_Handlers
+ 
+-  after += CIAO_Events_XML_Generation 
++  after += CIAO_Events_XML_Generation
+   Source_Files {
+     CIAOEvents.cpp
+     CIAOEvents_Handler.cpp
+Index: tools/Config_Handlers/Utils/Utils.mpc
+===================================================================
+--- tools/Config_Handlers/Utils/Utils.mpc	(revision 80604)
++++ tools/Config_Handlers/Utils/Utils.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ // $Id$
+ 
+-project (CIAO_XML_Utils) : acelib, xerces {
++project (CIAO_XML_Utils) : acelib, ace_output, xerces {
+   includes += $(CIAO_ROOT)/tools/Config_Handlers
+   sharedname   += CIAO_XML_Utils
+   dynamicflags  = CIAO_XML_UTILS_BUILD_DLL
+Index: tools/Config_Handlers/Config_Handlers.mpc
+===================================================================
+--- tools/Config_Handlers/Config_Handlers.mpc	(revision 80604)
++++ tools/Config_Handlers/Config_Handlers.mpc	(working copy)
+@@ -9,7 +9,7 @@
+    xscflags += --cxx-namespace-regex  <%quote%>%.*Deployment.*%CIAO/Config_Handlers%<%quote%>
+    xscflags += --cxx-export-header XSC_XML_Handlers_Export.h
+    xscflags += --search-path "$(CIAO_ROOT)/docs/schema"
+-   
++
+    custom_only = 1
+ 
+    XSC_Files {
+@@ -30,7 +30,7 @@
+    }
+ }
+ 
+-project (XSC_XML_Handlers) : acelib, xerces {
++project (XSC_XML_Handlers) : acelib, ace_output, xerces {
+   sharedname    += XSC_XML_Handlers
+   dynamicflags  = XSC_XML_HANDLERS_BUILD_DLL
+   macros       += XML_USE_PTHREADS
+Index: tools/Config_Handlers/RT-CCM/RT-CCM-Handlers.mpc
+===================================================================
+--- tools/Config_Handlers/RT-CCM/RT-CCM-Handlers.mpc	(revision 80604)
++++ tools/Config_Handlers/RT-CCM/RT-CCM-Handlers.mpc	(working copy)
+@@ -9,7 +9,7 @@
+    xscflags += --cxx-namespace-regex  <%quote%>%.*vanderbilt.*%CIAO/Config_Handlers%<%quote%>
+    xscflags += --cxx-export-header RT_CCM_Handlers_Export.h
+    xscflags += --search-path "$(CIAO_ROOT)/docs/schema"
+-   
++
+    custom_only = 1
+ 
+    XSC_Files {
+@@ -18,7 +18,7 @@
+    }
+ }
+ 
+-project (RT_CCM_Config_Handlers) : acelib, ciao_deployment_stub, ciao_config_handlers_base {
++project (RT_CCM_Config_Handlers) : acelib, ace_output, ciao_deployment_stub, ciao_config_handlers_base {
+   sharedname = RT_CCM_Config_Handlers
+   dynamicflags   = RT_CCM_HANDLERS_BUILD_DLL
+   macros   += XML_USE_PTHREADS
+Index: ciaosvcs/Events/CIAO_Events_Base/CIAO_Events_Base.mpc
+===================================================================
+--- ciaosvcs/Events/CIAO_Events_Base/CIAO_Events_Base.mpc	(revision 80604)
++++ ciaosvcs/Events/CIAO_Events_Base/CIAO_Events_Base.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+ 
+-project (CIAO_Events_Base) : orbsvcslib, ciao_client_dnc, ciao_container_dnc {
++project (CIAO_Events_Base) : orbsvcslib, orbsvcs_output, ciao_client_dnc, ciao_container_dnc {
+   sharedname  = CIAO_Events_Base
+   idlflags  += -Wb,export_include=CIAO_Events_Export.h \
+                -Wb,export_macro=CIAO_EVENTS_Export
+Index: ciaosvcs/Events/CIAO_Events.mpc
+===================================================================
+--- ciaosvcs/Events/CIAO_Events.mpc	(revision 80604)
++++ ciaosvcs/Events/CIAO_Events.mpc	(working copy)
+@@ -1,7 +1,7 @@
+ // -*- MPC -*-
+ // $Id$
+ 
+-project (CIAO_Events) : orbsvcslib, ciao_rtevent_dnc {
++project (CIAO_Events) : orbsvcslib, orbsvcs_output, ciao_rtevent_dnc {
+ 
+   sharedname  = CIAO_Events
+   idlflags  += -Wb,export_include=CIAO_Events_Export.h \
+Index: DAnCE/Deployment/DAnCE_Core.mpc
+===================================================================
+--- DAnCE/Deployment/DAnCE_Core.mpc	(revision 80604)
++++ DAnCE/Deployment/DAnCE_Core.mpc	(working copy)
+@@ -4,7 +4,7 @@
+ 
+ // Valuetype library must be linked for this project.
+ // Please don't remove.
+-project(Deployment_stub) : taolib_with_idl, valuetype, ifr_client, ciao_events_base_dnc, ciao_client_dnc, messaging {
++project(Deployment_stub) : taolib_with_idl, tao_output, valuetype, ifr_client, ciao_events_base_dnc, ciao_client_dnc, messaging {
+   sharedname   =  CIAO_Deployment_stub
+ 
+   // This is necessary for MPC to pull in rules.ciao.GNU
+@@ -33,17 +33,17 @@
+     Deployment_Events.idl
+     CIAO_ServerResources.idl
+   }
+-  
++
+   IDL_Files {
+     idlflags += -GC
+     Deployment_ApplicationManager.idl
+     Deployment_NodeApplicationManager.idl
+   }
+-  
++
+   IDL_Files {
+     idlflags += -GH
+     Deployment_DomainApplicationManager.idl
+-  }  
++  }
+ 
+   IDL_Files {
+     Deployment_ResourceCommitmentManager.idl
+@@ -91,7 +91,7 @@
+ 
+ // CIAO_DnC_Client library must be linked for this project.
+ // Please don't remove.
+-project(Deployment_svnt) : taolib_with_idl, portableserver, valuetype, ifr_client, ciao_deployment_stub, ciao_events_dnc, ciao_client_dnc, naming {
++project(Deployment_svnt) : taolib_with_idl, tao_output, portableserver, valuetype, ifr_client, ciao_deployment_stub, ciao_events_dnc, ciao_client_dnc, naming {
+   sharedname   =  CIAO_Deployment_svnt
+   dynamicflags =  DEPLOYMENT_SVNT_BUILD_DLL
+   idlflags     += -Wb,stub_export_macro=Deployment_stub_Export
+Index: ciao/CCM_Core.mpc
+===================================================================
+--- ciao/CCM_Core.mpc	(revision 80604)
++++ ciao/CCM_Core.mpc	(working copy)
+@@ -1,6 +1,6 @@
+ // $Id$
+ 
+-project (CIAO_Client) : taolib_with_idl, valuetype, ifr_client {
++project (CIAO_Client) : taolib_with_idl, tao_output, valuetype, ifr_client {
+   sharedname  = CIAO_Client
+   idlflags  += -Wb,stub_export_include=CIAO_Client_Export.h
+   idlflags  += -Wb,stub_export_macro=CIAO_CLIENT_Export
+@@ -80,7 +80,7 @@
+   }
+ }
+ 
+-project (CIAO_Container) : orbsvcslib \
++project (CIAO_Container) : orbsvcslib, orbsvcs_output \
+                            , portableserver \
+                            , valuetype \
+                            , ifr_client \
+@@ -183,7 +183,7 @@
+   }
+ }
+ 
+-project (CIAO_Server) : orbsvcslib \
++project (CIAO_Server) : orbsvcslib, orbsvcs_output \
+                         , portableserver \
+                         , valuetype \
+                         , naming \
