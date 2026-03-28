@@ -1,0 +1,37 @@
+--- OS_NS_Thread.cpp	2009-01-09 13:56:45.221000000 -0800
++++ /cygdrive/c/temp/ACE/ACE_wrappers/ace/OS_NS_Thread.cpp	2007-08-13 16:30:44.000000000 -0700
+@@ -1923,7 +1923,7 @@
+         ACE_FAIL_RETURN (-1);
+       else
+       {
+-        // Make sure to set errno to ERROR_ALREADY_EXISTS if necessary.
++          // Make sure to set errno to ERROR_ALREADY_EXISTS if necessary.
+         ACE_OS::set_errno_to_last_error ();
+         return 0;
+       }
+@@ -2020,11 +2020,7 @@
+       if (m->proc_mutex_ == 0)
+         ACE_FAIL_RETURN (-1);
+       else
+-        {
+-          // Make sure to set errno to ERROR_ALREADY_EXISTS if necessary.
+-          ACE_OS::set_errno_to_last_error ();
+-          return 0;
+-        }
++        return 0;
+     case USYNC_THREAD:
+       return ACE_OS::thread_mutex_init (&m->thr_mutex_,
+                                          lock_type,
+@@ -2556,11 +2552,7 @@
+   if (*event == 0)
+     ACE_FAIL_RETURN (-1);
+   else
+-    {
+-      // Make sure to set errno to ERROR_ALREADY_EXISTS if necessary.
+-      ACE_OS::set_errno_to_last_error ();
+-      return 0;
+-    }
++    return 0;
+ #elif defined (ACE_HAS_THREADS)
+   ACE_UNUSED_ARG (sa);
+   event->eventdata_ = 0;
