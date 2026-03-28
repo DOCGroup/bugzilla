@@ -1,0 +1,158 @@
+Statement of Work and Schedule for Symantec 
+
+ACE-based Monitoring Facility
+
+The following is a 7 month project focused on developing a flexible and
+generic monitoring facility consisting of monitoring points, which
+represent:
+
+* An underlying OS resource usage that can go up and down, e.g., CPU
+  load, number of threads, memory usage, etc.
+
+* Counters that store the usage of certain resources since the start
+  of the application, e.g., number of bytes sent.
+
+To minimize the chance of overflow, counters can be represented as 64
+bit values.  The type of the counters will be a template parameter,
+however, to make it easy to select large/small data sizes for the
+counters.
+
+The monitoring facility is designed to be general purpose, so it will
+reside in ACE and can be used by applications, as well as other
+middleware, such as TAO, TAO's ORB Services, CIAO, RACE, etc.  The
+following tasks will be associated with this effort.
+
+Task 1: Design the architecture and interface of the monitoring
+facility.
+
+The monitoring points and counters will be selectively enabled/disabled
+at various levels of binding time (i.e., early or
+late) and granularity (monitor points should be assigned to groups where
+a full group can be enabled or disabled, for example OS resource points,
+network points) to give admins/operators a high degree of control needed
+to trade off logging completeness vs. runtime overhead. The earliest
+binding time is enabling/disabling monitoring points during compilation.
+When disabled, the monitoring facility will not incur any time/space
+overhead.  The later binding times occur when monitoring points are
+enabled during compilation, after which they will be controlled via
+runtime mechanisms described in Task 2.
+
+Schedule of Activities and Deliverables for Task 1: (1 month)
+
+* Designing monitoring facility architecture: 2 weeks.
+
+* Designing interfaces for monitoring facility: 1 week.
+
+* Documenting the architecture and interfaces: 1 week.
+
+Deliverables are the documented architecture and interfaces.
+
+Task 2: Develop the run-time mechanisms of the monitoring facility.
+
+Develop run-time mechanisms that will support:
+
+* Reading and resetting the counters - The monitoring facility will be
+  designed to read the current values of monitoring points at the
+  requested of user code.
+
+* Reporting the counters - The values of the counters can be reported
+  via the ACE logging facility so that monitored information can be
+  selectively logged to a wide range of output devices, including text
+  files, displays, and databases.  As a result, the party that
+  monitors the counters could run in the same process but could also
+  run in another process or on another host.
+
+* Running arbitrary code - It will be possible to associate arbitrary
+  application code with a counter, which is run whenever the counter
+  is incremented.  This code can be written in C++ and installed as
+  callback.
+
+* Trigger rules and constraint language - We will define trigger rules
+  that can be specified when registering for certain conditions.
+  These trigger rules will have the ability to push the counter when
+  the rule validates to true. A flexible constraint language will be
+  developed to indicate when a push will be done, which will provide
+  as quasi "notification service" for monitoring points. This has to
+  include timer functionality so that a rule can be define to check a
+  value for example each 15 minutes and report it to another system
+  and reset it automatically.
+
+* Optional loading - An optional TAO library will be developed so that
+  from a remote application the counters can be retrieved and
+  modified, the library will also make it possible that when the
+  trigger rules and constraint language is used the trigger will be
+  send to the remote application.
+
+Schedule of Activities and Deliverables for Task 2: (3 months)
+
+* Develop mechanisms for reading, resetting, and reporting the
+  counters: 3 weeks.
+
+* Develop mechanisms for running arbitrary code: 3 weeks.
+
+* Develop mechanisms for trigger rules and constraint language: 3
+  weeks.
+
+* Develop automated regression tests and running these tests: 3
+  weeks
+
+* Develop TAO library: 2 weeks
+
+* Document the runtime mechanisms: 1 week.
+
+Deliverables are code, test cases, and test results for run-time
+monitoring facility mechanisms.
+
+Task 3: Using the monitoring facility to instrument and evaluate TAO.
+
+The monitoring facility will be used to instrument TAO, including the
+ORB itself, as well as the TAO Notification Service.  Some instrumented
+monitoring points will be:
+
+* Threads and thread pool size
+* (De)marshaling memory cache size
+* Connection cache size
+* Active object map size
+
+These monitors could be used to observe objects/servants/services, POAs,
+ORB core, etc. for signs of resource exhaustion.  Moreover, we will
+rework the CosNotify from OCI to use the new ACE-based monitoring
+facility (assuming it is merged into the DOC Group open-source TAO SVN
+repository by then).  We will conduct extensive experiments to determine
+how to optimize the performance and flexibility of the monitoring
+facility based on its use in TAO.
+
+Schedule of Activities and Deliverables for Task 3 (2 months)
+
+* Instrument ORB and selected services based on input and use cases
+  from Symantec: 3 weeks.
+
+* Rework the OCI CosNotify service implementation to use the generic
+  ACE-based monitoring facility: 1 week.
+
+* Conduct experiments and feedback results to optimize monitoring
+  facility: 2 weeks.
+
+* Documenting the results of the instrumentation and experimentations:
+  2 weeks.
+
+Deliverables are code, test cases, and test results for integrating
+monitoring facilities for TAO.
+
+Schedule of Key Milestones
+
+1. Contract Signing [Sept 15, 2007]:  30%
+
+2. Identify Use Cases / Select Services for Monitoring (from Task3)
+   Task 1 complete: documentation available [Oct 30, 2007]: 20%
+
+3. Task 2 complete: code / test cases / tests results available
+   and delivered to Symantec
+   [Dec 30, 2007]: 15%
+
+4. Notification Service instrumentation of Task 3 complete: code /
+   test cases / test results available [Jan 30, 2008]: 15%
+
+5. Task 3 complete: code / test cases / test results available.
+   Code from all merged and available in DOC group release [March
+   [March 15, 2008]: 20%
