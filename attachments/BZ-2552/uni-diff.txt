@@ -1,0 +1,790 @@
+===================================================================
+RCS file: TAO/tao/ServerRequestInterceptor_Adapter.h
+diff -u -w -b -r1.8 ServerRequestInterceptor_Adapter.h
+--- ServerRequestInterceptor_Adapter.h	10 Feb 2006 14:59:57 -0000	1.8
++++ ServerRequestInterceptor_Adapter.h	5 Jun 2006 12:06:34 -0000
+@@ -53,7 +53,6 @@
+   class ServerRequestInfo;
+   class Argument;
+   class PICurrent_Impl;
+-  class PICurrent_Copy_Callback;
+   class Upcall_Command;
+ 
+   /**
+@@ -162,15 +161,9 @@
+ 
+     virtual TAO::PICurrent_Impl *allocate_pi_current (void) = 0;
+ 
+-    virtual TAO::PICurrent_Copy_Callback *
+-        allocate_pi_current_callback (void) = 0;
+-
+     virtual void deallocate_pi_current (
+         TAO::PICurrent_Impl *picurrent) = 0;
+ 
+-    virtual void deallocate_pi_current_callback (
+-        TAO::PICurrent_Copy_Callback *callback) = 0;
+-
+     virtual void execute_command (
+         TAO_ServerRequest &server_request,
+         TAO::Upcall_Command &command
+
+
+
+===================================================================
+RCS file: TAO/tao/TAO_Server_Request.cpp
+diff -u -w -b -r1.52 TAO_Server_Request.cpp
+--- TAO_Server_Request.cpp	20 Apr 2006 12:37:17 -0000	1.52
++++ TAO_Server_Request.cpp	5 Jun 2006 12:12:50 -0000
+@@ -76,7 +76,6 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+     , interceptor_count_ (0)
+     , rs_pi_current_ (0)
+-    , pi_current_copy_callback_ (0)
+     , result_seq_ (0)
+     , caught_exception_ (0)
+     , reply_status_ (-1)
+@@ -119,7 +118,6 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+   , interceptor_count_ (0)
+   , rs_pi_current_ (0)
+-  , pi_current_copy_callback_ (0)
+   , result_seq_ (0)
+   , caught_exception_ (0)
+   , reply_status_ (-1)
+@@ -155,7 +153,6 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+   , interceptor_count_ (0)
+   , rs_pi_current_ (0)
+-  , pi_current_copy_callback_ (0)
+   , result_seq_ (0)
+   , caught_exception_ (0)
+   , reply_status_ (-1)
+@@ -186,18 +183,6 @@
+ TAO_ServerRequest::~TAO_ServerRequest (void)
+ {
+ #if TAO_HAS_INTERCEPTORS == 1
+-  if (this->pi_current_copy_callback_)
+-    {
+-      TAO::ServerRequestInterceptor_Adapter *interceptor_adapter =
+-        this->orb_core_->serverrequestinterceptor_adapter ();
+-
+-      if (interceptor_adapter)
+-        {
+-          interceptor_adapter->deallocate_pi_current_callback (
+-            this->pi_current_copy_callback_);
+-        }
+-    }
+-
+   if (this->rs_pi_current_)
+     {
+       TAO::ServerRequestInterceptor_Adapter *interceptor_adapter =
+@@ -581,24 +566,6 @@
+   return this->rs_pi_current_;
+ }
+ 
+-TAO::PICurrent_Copy_Callback *
+-TAO_ServerRequest::pi_current_copy_callback (void)
+-{
+-  if (!this->pi_current_copy_callback_)
+-    {
+-      TAO::ServerRequestInterceptor_Adapter *interceptor_adapter =
+-        this->orb_core_->serverrequestinterceptor_adapter ();
+-
+-      if (interceptor_adapter)
+-        {
+-          this->pi_current_copy_callback_ =
+-            interceptor_adapter->allocate_pi_current_callback ();
+-        }
+-    }
+-
+-  return this->pi_current_copy_callback_;
+-}
+-
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+ #endif /* TAO_HAS_INTERCEPTORS */
+
+
+
+===================================================================
+RCS file: TAO/tao/TAO_Server_Request.h
+diff -u -w -b -r1.39 TAO_Server_Request.h
+--- TAO_Server_Request.h	10 Mar 2006 07:19:06 -0000	1.39
++++ TAO_Server_Request.h	5 Jun 2006 12:10:27 -0000
+@@ -38,7 +38,6 @@
+ {
+   class PICurrent;
+   class PICurrent_Impl;
+-  class PICurrent_Copy_Callback;
+ }
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+@@ -267,9 +266,6 @@
+   /// Return a reference to the "request scope" PICurrent object.
+   TAO::PICurrent_Impl *rs_pi_current (void);
+ 
+-  /// Return a reference to the PICurrent copy callback object.
+-  TAO::PICurrent_Copy_Callback *pi_current_copy_callback (void);
+-
+
+   CORBA::Exception *caught_exception (void);
+ 
+   void caught_exception (CORBA::Exception *exception);
+@@ -360,10 +356,6 @@
+   /// Portable Interceptors.
+   TAO::PICurrent_Impl *rs_pi_current_;
+ 
+-  /// PICurrent callback object responsible for copying slot table
+-  /// between PICurrents in different scopes (i.e. thread or request).
+-  TAO::PICurrent_Copy_Callback *pi_current_copy_callback_;
+-
+   /// Used by the FTORB
+   CORBA::OctetSeq_var result_seq_;
+
+
+===================================================================
+RCS file: TAO/tao/CSD_Framework/CSD_FW_Server_Request_Wrapper.cpp
+diff -u -w -b -r1.7 CSD_FW_Server_Request_Wrapper.cpp
+--- CSD_FW_Server_Request_Wrapper.cpp	17 May 2006 19:12:46 -0000	1.7
++++ CSD_FW_Server_Request_Wrapper.cpp	5 Jun 2006 12:17:06 -0000
+@@ -265,12 +265,6 @@
+   //
+   // clone_obj->rs_pi_current_
+ 
+-  // TYPE: TAO::PICurrent_Copy_Callback
+-  // ACTION: No copy/assignment operator.
+-  //         Just leave this alone for a clone.
+-  //
+-  // clone_obj->pi_current_copy_callback_
+-
+   // TYPE: CORBA::OctetSeq_var
+   // ACTION: Assignment performs reference-counted copy of sequence.
+   //         Assuming that this is ok.
+
+
+
+===================================================================
+RCS file: TAO/tao/PI/ClientRequestInfo.cpp,v
+diff -u -w -b -r1.13 ClientRequestInfo.cpp
+--- ClientRequestInfo.cpp	4 May 2006 08:51:15 -0000	1.13
++++ ClientRequestInfo.cpp	5 Jun 2006 12:46:06 -0000
+@@ -29,8 +29,7 @@
+ 
+ TAO_ClientRequestInfo::TAO_ClientRequestInfo (TAO::Invocation_Base *inv)
+   : invocation_ (inv),
+-    rs_pi_current_ (),
+-    copy_callback_ ()
++    rs_pi_current_ ()
+ {
+   this->setup_picurrent ();
+ }
+@@ -55,19 +54,7 @@
+       if (tsc != 0)
+         {
+           // Logically copy the TSC's slot table to the RSC.
+-          this->rs_pi_current_.lc_slot_table (tsc);
+-
+-          // PICurrent will potentially have to call back on the request
+-          // scope current so that it can deep copy the contents of the
+-          // thread scope current if the contents of the thread scope
+-          // current are about to be modified.  It is necessary to do this
+-          // deep copy once in order to completely isolate the request
+-          // scope current from the thread scope current.  This is only
+-          // necessary, if the thread scope current is modified after its
+-          // contents have been *logically* copied to the request scope
+-          // current.
+-          this->copy_callback_.src_and_dst (tsc, &this->rs_pi_current_);
+-          tsc->copy_callback (&this->copy_callback_);
++          this->rs_pi_current_.take_lazy_copy (tsc);
+        }
+     }
+ }
+
+
+
+===================================================================
+RCS file: TAO/tao/PI/ClientRequestInfo.h,v
+diff -u -w -b -r1.10 ClientRequestInfo.h
+--- ClientRequestInfo.h	19 Apr 2006 09:27:33 -0000	1.10
++++ ClientRequestInfo.h	5 Jun 2006 12:39:16 -0000
+@@ -35,7 +35,6 @@
+ #include "tao/PI/ClientRequestInfoC.h"
+ #include "tao/PI/PIForwardRequestC.h"
+ #include "tao/PI/PICurrent_Impl.h"
+-#include "tao/PI/PICurrent_Copy_Callback.h"
+ #include "tao/CORBA_methods.h"
+ #include "tao/ORB_Constants.h"
+ #include "tao/LocalObject.h"
+@@ -274,22 +273,6 @@
+   /// The "Request Scope Current" (RSC) object, as required by
+   /// Portable Interceptors.
+   TAO::PICurrent_Impl rs_pi_current_;
+-
+-  /// Callback object to be executed when shallow copied slot table
+-  /// must be deep copied.
+-  /**
+-   * This callback object deep copies the slot table from the TSC to
+-   * the RSC.
+-   * @par
+-   * As an optimization, the TSC's slot table is initially only
+-   * shallowed copied to the RSC.  If the TSC's slot table will be
+-   * modified, e.g. via PICurrent::set_slot(), it's slot table must be
+-   * deep copied to the RSC before actually modifying that slot
+-   * table.  This is necessary since the RSC is read-only on the
+-   * client side, meaning that changes in the TSC that occur after
+-   * instantiation of the RSC must not be reflected in the RSC.
+-   */
+-  TAO::PICurrent_Copy_Callback copy_callback_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+
+
+
+===================================================================
+RCS file: TAO/tao/PI/PICurrent.h,v
+diff -u -w -b -r1.5 PICurrent.h
+--- PICurrent.h	10 Mar 2006 07:19:12 -0000	1.5
++++ PICurrent.h	5 Jun 2006 12:52:29 -0000
+@@ -42,7 +42,6 @@
+ 
+ namespace TAO
+ {
+-  class PICurrent_Copy_Callback;
+   class PICurrent_Impl;
+ 
+   /**
+
+
+
+===================================================================
+RCS file: TAO/tao/PI/PICurrent_Impl.cpp,v
+diff -u -w -b -r1.9 PICurrent_Impl.cpp
+--- PICurrent_Impl.cpp	10 Mar 2006 07:19:12 -0000	1.9
++++ PICurrent_Impl.cpp	5 Jun 2006 13:26:31 -0000
+@@ -11,8 +11,6 @@
+ # include "tao/PI/PICurrent_Impl.inl"
+ #endif /* __ACE_INLINE__ */
+ 
+-#include "tao/PI/PICurrent_Copy_Callback.h"
+-
+ #include "tao/TAO_Server_Request.h"
+ #include "tao/SystemException.h"
+ #include "ace/Log_Msg.h"
+@@ -20,24 +18,6 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-TAO::PICurrent_Impl::PICurrent_Impl (void)
+-  : slot_table_ (),
+-    lc_slot_table_ (0),
+-    copy_callback_ (0),
+-    destruction_callback_ (0)
+-{
+-}
+-
+-TAO::PICurrent_Impl::~PICurrent_Impl (void)
+-{
+-  // Break any existing ties with PICurrent to which our table was
+-  // logically copied since our table no longer exists once this
+-  // destructor completes.
+-  if (this->destruction_callback_ != 0)
+-    this->destruction_callback_->execute_destruction_callback (0);
+-}
+-
+-
+ CORBA::Any *
+ TAO::PICurrent_Impl::get_slot (PortableInterceptor::SlotId identifier
+                                ACE_ENV_ARG_DECL)
+@@ -47,17 +27,17 @@
+   // No need to check validity of SlotId.  It is validated before this
+   // method is invoked.
+ 
+-  // Get the slot table that is currently active
+-  PICurrent_Impl::Table & table = this->current_slot_table ();
+-
+   // The active slot table should never be a lazy copy of itself!
+-  if (this->lc_slot_table_ == &this->slot_table_)
++  if ( (0 != this->lazy_copy_)
++       && (&this->lazy_copy_->current_slot_table () == &this->slot_table_))
+   {
+     if (TAO_debug_level > 0)
+-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("TAO (%P|%t) Lazy copy of self detected at %N,%l")));
++      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("TAO (%P|%t) Lazy copy of self detected at %N,%l\n")));
+     ACE_THROW (CORBA::INTERNAL ());
+   }
+ 
++  // Get the slot table that is currently active
++  PICurrent_Impl::Table & table = this->current_slot_table ();
+   CORBA::Any * any = 0;
+ 
+   if (identifier < table.size ())
+@@ -99,21 +79,14 @@
+   // No need to check validity of SlotId.  It is validated before this
+   // method is invoked.
+ 
+-  // Perform deep copy of the logically copied slot table, if
+-  // necessary, before modifying our own slot table. This is a setup
+-  // where another PICurrent refers to our slot table, so we force the
+-  // the other PICurrent does copy our table before making changes to
+-  // our table.
+-  if (this->copy_callback_ != 0)
+-    this->copy_callback_->execute ();
+-
+-  // If we have a logical copied slot table we refer to, just make a
+-  // copy of that table first before making changes to our table.
+-  if (this->lc_slot_table_ != 0)
+-    {
+-      this->slot_table_ = *this->lc_slot_table_;
+-      this->lc_slot_table_ = 0;
+-    }
++  // Break any existing ties that another PICurrent has with our table
++  // since our table is changing.
++  if (0 != this->impeding_change_callback_)
++    this->impending_change_callback_->convert_from_lazy_to_real_copy ();
++
++  // Ensure that we have a real physical copy of the table before
++  // making any changes to it.
++  this->convert_from_lazy_to_real_copy ();
+ 
+   // If the slot table array isn't large enough, then increase its
+   // size.  We're guaranteed not to exceed the number of allocated
+@@ -126,16 +99,40 @@
+ }
+ 
+ void
+-TAO::PICurrent_Impl::execute_destruction_callback (
+-  TAO::PICurrent_Impl::Table * old_lc_slot_table)
++TAO::PICurrent_Impl::take_lazy_copy (TAO::PICurrent_Impl * p)
+ {
+-  // we are being asked to lc another table, if this
+-  // is null, make sure we take a physical copy of the
+-  // existing table we had lc before it disappears.
+-  if ((0 == old_lc_slot_table) && (0 != this->lc_slot_table_))
+-    this->slot_table_ = *this->lc_slot_table_;
++  // Check that we are being told to actually change which table we are
++  // copying from. (If it is the same as before OR it would ultimately be
++  // the same table, we are already correctly setup and we do nothing.)
++  if ( (p != this->lazy_copy_)
++      && ((0 == p) || (&p->current_slot_table () != &this->current_slot_table ()))
++      )
++    {
++      // Break any existing ties that another PICurrent has with our table
++      // since our table is changing.
++      if (0 != this->impending_change_callback_)
++        this->impending_change_callback_->convert_from_lazy_to_real_copy ();
++
++      // If we have previously logically copied another table, ensure it is
++      // told that we are no longer interested in it so that it will not
++      // call our conver_from_lazy_to_real_copy() when it changes/destructs.
++      if (0 != this->lazy_copy_)
++        this->lazy_copy_->set_callback_for_impending_change (0);
+ 
+-  this->lc_slot_table_ = old_lc_slot_table;
++      // Are we being asked to copy ourself (or nothing)
++      if ((0 == p) || (this == p))
++        {
++          this->lazy_copy_ = 0; // Use our own physical slot_table_
++        }
++      else
++        {
++          this->lazy_copy_ = p;
++
++          // Must tell the newly copied PICurrent_Impl that we want to
++          // be told when/if it is going to be changed or destroyed.
++          this->lazy_copy_->set_callback_for_impending_change (this);
++        }
++    }
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+
+
+
+===================================================================
+RCS file: TAO/tao/PI/PICurrent_Impl.h,v
+diff -u -w -b -r1.8 PICurrent_Impl.h
+--- PICurrent_Impl.h	10 Mar 2006 07:19:12 -0000	1.8
++++ PICurrent_Impl.h	5 Jun 2006 13:47:27 -0000
+@@ -37,9 +37,6 @@
+ 
+ namespace TAO
+ {
+-  class PICurrent_Copy_Callback;
+-  class PICurrent_Impl;
+-
+   /**
+    * @class PICurrent_Impl
+    *
+@@ -54,9 +51,6 @@
+   {
+   public:
+ 
+-    /// Typedef for the underyling "slot table."
+-    typedef ACE_Array_Base<CORBA::Any> Table;
+-
+     /// Constructor.
+     PICurrent_Impl (void);
+ 
+@@ -77,19 +71,23 @@
+       ACE_THROW_SPEC ((CORBA::SystemException,
+                        PortableInterceptor::InvalidSlot));
+ 
+-    /// Set the PICurrent copy callback object responsible for deep
+-    /// copying the source PICurrent's slot table.
+-    void copy_callback (PICurrent_Copy_Callback *cb);
+-
+-    /// Set the PICurrent destruction callback object that will be
+-    /// notified of this object's destruction.
+-    void destruction_callback (PICurrent_Impl *p);
++    /// Logically/Lazy (shallow) copy the given object's slot table.
++    void take_lazy_copy (PICurrent_Impl *P);
+ 
+-    /// Execute the destruction callback object
+-    void execute_destruction_callback (Table *old_lc_slot_table);
++  private:
++    /// Force this object to convert from a logical (referenced)
++    /// copy, to a physical (or deep, actual) copy.
++    void convert_from_lazy_to_real_copy ();
++
++    /// Set the callback PICurrent_Impl object that will be notified
++    /// of this object's impending destruction or change.
++    /// Set to 0 to clear. (NOTE Only handles a SINGLE object at
++    /// at time, does NOT warn previous callback that this has
++    /// been changed.)
++    void set_callback_for_impending_change (PICurrent_Impl *p);
+ 
+-    /// Return a reference to the underlying slot table.
+-    Table & slot_table (void);
++    /// Typedef for the underyling "slot table."
++    typedef ACE_Array_Base<CORBA::Any> Table;
+ 
+     /// Return a reference to the slot table currently associated
+     /// with this PICurrent_Impl object.
+@@ -97,20 +95,7 @@
+      * @return Logically copied slot table if available, otherwise
+      *         underlying slot table.
+      */
+-    Table & current_slot_table (void);
+-
+-    /// Logically (shallow) copy the given slot table.
+-    // returns true if copied, false if it would be self-referencing.
+-    bool lc_slot_table (PICurrent_Impl *p);
+-
+-    /// Return pointer to the logically copied slot table.
+-    /**
+-     * @return Zero if no logically copied slot table.  Non-zero
+-     *         otherwise.
+-     */
+-    Table *lc_slot_table (void) const;
+-
+-  private:
++    Table & current_slot_table ();
+ 
+     /// Prevent copying through the copy constructor and the assignment
+     /// operator.
+@@ -124,23 +109,16 @@
+     /// Array of CORBA::Anys that is the underlying "slot table."
+     Table slot_table_;
+ 
+-    /// Table that was logically copied from a PICurrent in another
++    /// Access to logical copied from a PICurrent in another
+     /// scope, i.e. either the request scope or the thread scope.
+-    Table *lc_slot_table_;
+-
+-    /// Callback object responsible for performing deep copies of a
+-    /// PICurrent's slot table. This is the PICurrent that has our slot_table_
+-    /// referred as lc_slot_table_. This copy is there to make sure that when
+-    /// we want to modify our table, that we can first copy our table to
+-    /// the PICurrent that refers to our table so that it has an unique copy
+-    /// of the data.
+-    PICurrent_Copy_Callback *copy_callback_;
++    PICurrent_Impl *lazy_copy_;
+ 
+     /// PICurrent_Impl object that will be notified of this object's
+-    /// destruction. This is the PICurrent that has our slot_table_ as
+-    /// lc_slot_table_.
+-    PICurrent_Impl *destruction_callback_;
+-
++    /// impending destruction or change to its slot_table_. This is
++    /// the PICurrent_Impl that has access to our slot_table_ via its
++    /// lazy_copy_ pointer. As necessary this allows that object's
++    /// convert_from_lazy_to_real_copy() to be called.
++    PICurrent_Impl *impending_change_callback_;
+   };
+ }
+
+
+
+===================================================================
+RCS file: TAO/tao/PI/PICurrent_Impl.inl,v
+diff -u -w -b -r1.4 PICurrent_Impl.inl
+--- PICurrent_Impl.inl	22 Feb 2006 11:33:58 -0000	1.4
++++ PICurrent_Impl.inl	5 Jun 2006 13:36:37 -0000
+@@ -4,67 +4,58 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-ACE_INLINE void
+-TAO::PICurrent_Impl::copy_callback (TAO::PICurrent_Copy_Callback *cb)
++ACE_INLINE
++TAO::PICurrent_Impl::PICurrent_Impl (void)
++  : slot_table_ (),
++    lazy_copy_ (0),
++    impending_change_callback_ (0)
+ {
+-  this->copy_callback_ = cb;
+ }
+ 
+-ACE_INLINE void
+-TAO::PICurrent_Impl::destruction_callback (TAO::PICurrent_Impl *p)
+-{
+-  this->destruction_callback_ = p;
++ACE_INLINE
++TAO::PICurrent_Impl::~PICurrent_Impl (void)
++{
++  // Break any existing ties that another PICurrent has with our table
++  // since our table will no longer exist once this destructor completes.
++  if (0 != this->impending_change_callback_)
++    this->impending_change_callback_->convert_from_lazy_to_real_copy ();
++
++  // If we have logically copied another table, ensure it is told about our
++  // demise so that it will not call our non-existant
++  // convert_from_lazy_to_real_copy() when it changes/destructs.
++  if (0 != this->lazy_copy_)
++    this->lazy_copy_->set_callback_for_impending_change (0);
+ }
+ 
+-ACE_INLINE TAO::PICurrent_Impl::Table &
+-TAO::PICurrent_Impl::slot_table (void)
++ACE_INLINE void
++TAO::PICurrent_Impl::convert_from_lazy_to_real_copy ()
+ {
+-  return this->slot_table_;
++  // Make sure we take a physical copy of the existing logical
++  // copy of the table before it disappears/changes.
++  if (0 != this->lazy_copy_)
++    {
++      this->slot_table_ = this->lazy_copy_->current_slot_table ();
++
++      // Must tell the old copied PICurrent_Impl that we no
++      // longer want to be told when/if it is going to be
++      // changed or destroyed.
++      this->lazy_copy_->set_callback_for_impending_change (0);
++      this_>lazy_copy_ = 0;
+ }
+-
+-ACE_INLINE TAO::PICurrent_Impl::Table &
+-TAO::PICurrent_Impl::current_slot_table (void)
+-{
+-  return
+-    this->lc_slot_table_ == 0 ? this->slot_table_ : *this->lc_slot_table_;
+ }
+ 
+-ACE_INLINE bool
+-TAO::PICurrent_Impl::lc_slot_table (TAO::PICurrent_Impl *p)
+-{
+-  // Being told to lazy copy some other table?
+-  if (p != 0)
+-    {
+-      // Which actual table are we supposed to lazy copy?
+-      Table * t = &p->current_slot_table ();
+-
+-      // Only if we have not already lazy copied this table
+-      if (t != this->lc_slot_table_)
+-        {
+-          // Whould this be a lazy copy of ourselves?
+-          if (t == &this->slot_table_)
+-            this->lc_slot_table_ = 0; // Already ourself!
+-          else
++ACE_INLINE void
++TAO::PICurrent_Impl::set_callback_for_impending_change (TAO::PICurrent_Impl *p)
+             {
+-              this->lc_slot_table_ = t;
+-
+-              // Ensure remote table will tell us if it is
+-              // going to change or destroy itself.
+-              if (this != p)
+-                p->destruction_callback (this);
+-            }
+-        }
+-    }
+-  else
+-    this->lc_slot_table_ = 0;
+-
+-  return (0 != this->lc_slot_table_);
++  this->impending_change_callback_ = (this == p) ? 0 : p;
+ }
+ 
+-ACE_INLINE TAO::PICurrent_Impl::Table *
+-TAO::PICurrent_Impl::lc_slot_table (void) const
++ACE_INLINE TAO::PICurrent_Impl::Table &
++TAO::PICurrent_Impl::current_slot_table ()
+ {
+-  return this->lc_slot_table_;
++  return (0 == this->lazy_copy_) ?
++         this->slot_table_ :
++         this->lazy_copy_->current_slot_table ();
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+
+
+
+===================================================================
+RCS file: TAO/tao/PI_Server/PICurrent_Guard.cpp,v
+diff -u -w -b -r1.5 PICurrent_Guard.cpp
+--- PICurrent_Guard.cpp	10 Mar 2006 07:19:12 -0000	1.5
++++ PICurrent_Guard.cpp	5 Jun 2006 12:30:03 -0000
+@@ -10,7 +10,6 @@
+ 
+ #include "tao/ORB_Core.h"
+ #include "tao/TAO_Server_Request.h"
+-#include "tao/PI/PICurrent_Copy_Callback.h"
+ #include "tao/PI/PICurrent.h"
+ #include "tao/PI/PICurrent_Impl.h"
+ 
+@@ -19,9 +18,7 @@
+ TAO::PICurrent_Guard::PICurrent_Guard (TAO_ServerRequest &server_request,
+                                        bool tsc_to_rsc)
+   : src_ (0),
+-    dest_ (0),
+-    copy_callback_ (server_request.pi_current_copy_callback ()),
+-    tsc_to_rsc_ (tsc_to_rsc)
++    dest_ (0)
+ {
+   // This constructor is used on the server side.
+ 
+@@ -64,21 +61,9 @@
+ TAO::PICurrent_Guard::~PICurrent_Guard (void)
+ {
+   if (this->src_ != 0 && this->dest_ != 0
+-      && this->src_ != this->dest_
+-      && this->dest_->lc_slot_table (this->src_))
++      && this->src_ != this->dest_)
+     {
+-      // PICurrent will potentially have to call back on the request
+-      // scope current so that it can deep copy the contents of the
+-      // thread scope current if the contents of the thread scope
+-      // current are about to be modified.  It is necessary to do this
+-      // deep copy once in order to completely isolate the request
+-      // scope current from the thread scope current.  This is only
+-      // necessary, if the thread scope current is modified after its
+-      // contents have been *logically* copied to the request scope
+-      // current.  The same goes for the reverse, i.e. RSC to TSC.
+-
+-      this->copy_callback_->src_and_dst (this->src_, this->dest_);
+-      this->src_->copy_callback (this->copy_callback_);
++      this->dest_->take_lazy_copy (this->src_);
+     }
+ }
+ 
+
+
+===================================================================
+RCS file: TAO/tao/PI_Server/PICurrent_Guard.h,v
+diff -u -w -b -r1.5 PICurrent_Guard.h
+--- PICurrent_Guard.h	10 Mar 2006 07:19:12 -0000	1.5
++++ PICurrent_Guard.h	5 Jun 2006 12:32:38 -0000
+@@ -33,7 +33,6 @@
+ namespace TAO
+ {
+   class PICurrent_Impl;
+-  class PICurrent_Copy_Callback;
+ 
+   /**
+    * @class PICurrent_Guard
+@@ -85,19 +84,6 @@
+     /// The PICurrent implementation whose slot table will be filled
+     /// with the contents of another PICurrent's slot table.
+     PICurrent_Impl *dest_;
+-
+-    /// Callback object responsible for performing deep copies of a
+-    /// PICurrent's slot table.
+-    PICurrent_Copy_Callback *copy_callback_;
+-
+-    /// Flag that indicates if the TSC is to be copied to the RSC.
+-    /**
+-     * If false, then the RSC must be deep copied upon leaving the
+-     * request scope and entering the thread scope.  This is necessary
+-     * since the RSC slot table is no longer available upon leaving
+-     * the thread scope, meaning that a logical copy is not enough.
+-     */
+-    const bool tsc_to_rsc_;
+   };
+ }
+ 
+
+
+===================================================================
+RCS file: TAO/tao/PI_Server/ServerInterceptorAdapter.cpp,v
+diff -u -w -b -r1.11 ServerInterceptorAdapter.cpp
+--- ServerInterceptorAdapter.cpp	10 Mar 2006 07:19:12 -0000	1.11
++++ ServerInterceptorAdapter.cpp	5 Jun 2006 12:34:44 -0000
+@@ -15,7 +15,6 @@
+ #include "tao/TAO_Server_Request.h"
+ #include "tao/ORB_Core.h"
+ #include "tao/PI/PICurrent_Impl.h"
+-#include "tao/PI/PICurrent_Copy_Callback.h"
+ #include "tao/PortableServer/Upcall_Command.h"
+ #include "tao/PortableInterceptor.h"
+ 
+@@ -582,16 +581,6 @@
+   return pi;
+ }
+ 
+-TAO::PICurrent_Copy_Callback *
+-TAO::ServerRequestInterceptor_Adapter_Impl::allocate_pi_current_callback (void)
+-{
+-  TAO::PICurrent_Copy_Callback * pi = 0;
+-  ACE_NEW_RETURN (pi,
+-                  TAO::PICurrent_Copy_Callback,
+-                  pi);
+-  return pi;
+-}
+-
+ void
+ TAO::ServerRequestInterceptor_Adapter_Impl::deallocate_pi_current (
+         TAO::PICurrent_Impl *picurrent)
+@@ -600,13 +589,6 @@
+ }
+ 
+ void
+-TAO::ServerRequestInterceptor_Adapter_Impl::deallocate_pi_current_callback (
+-  TAO::PICurrent_Copy_Callback * callback)
+-{
+-  delete callback;
+-}
+-
+-void
+ TAO::ServerRequestInterceptor_Adapter_Impl::execute_command (
+   TAO_ServerRequest & server_request,
+   TAO::Upcall_Command & command
+
+
+
+===================================================================
+RCS file: TAO/tao/PI_Server/ServerInterceptorAdapter.h,v
+diff -u -w -b -r1.8 ServerInterceptorAdapter.h
+--- ServerInterceptorAdapter.h	10 Mar 2006 07:19:12 -0000	1.8
++++ ServerInterceptorAdapter.h	5 Jun 2006 12:35:11 -0000
+@@ -170,15 +170,9 @@
+ 
+     virtual TAO::PICurrent_Impl *allocate_pi_current (void);
+ 
+-    virtual TAO::PICurrent_Copy_Callback *
+-        allocate_pi_current_callback (void);
+-
+     virtual void deallocate_pi_current (
+         TAO::PICurrent_Impl *picurrent);
+ 
+-    virtual void deallocate_pi_current_callback (
+-        TAO::PICurrent_Copy_Callback *callback);
+-
+     virtual void execute_command (
+         TAO_ServerRequest &server_request,
+         TAO::Upcall_Command &command
+
+
+
+===================================================================
