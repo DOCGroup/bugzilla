@@ -1,0 +1,3928 @@
+
+Property changes on: protocols/tests/RMCast
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+receiver
+sender
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+receiver
+sender
+.obj
+
+
+
+Property changes on: protocols/tests/HTBP/Reactor_Tests
+___________________________________________________________________
+Modified: svn:ignore
+   - client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+client
+server
+
+   + client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+client
+server
+.obj
+
+
+
+Property changes on: protocols/tests/HTBP/Send_Large_Msg
+___________________________________________________________________
+Modified: svn:ignore
+   - client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: protocols/tests/HTBP/Send_Recv_Tests
+___________________________________________________________________
+Modified: svn:ignore
+   - SendRecv_Test
+SendRecv_Test
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + SendRecv_Test
+SendRecv_Test
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: protocols/tests/HTBP/ping
+___________________________________________________________________
+Modified: svn:ignore
+   - client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+client
+server
+
+   + client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+client
+server
+.obj
+
+
+
+Property changes on: protocols/ace/RMCast
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libACE_RMCast.dylib
+
+
+
+Property changes on: protocols/ace/TMCast
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libACE_TMCast.dylib
+
+
+
+Property changes on: protocols/ace/HTBP
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libACE_HTBP.dylib
+
+
+
+Property changes on: protocols/examples/RMCast/Send_Msg
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+receiver
+sender
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+receiver
+sender
+.obj
+
+
+
+Property changes on: protocols/examples/TMCast/Member
+___________________________________________________________________
+Modified: svn:ignore
+   - member
+.depend.*
+GNUmakefile*
+Makefile.in
+member
+
+   + member
+.depend.*
+GNUmakefile*
+Makefile.in
+member
+.obj
+
+
+
+Property changes on: ace/SSL
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libACE_SSL.dylib
+
+
+
+Property changes on: ace/ETCL
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libACE_ETCL.dylib
+libACE_ETCL_Parser.dylib
+
+
+Index: ace/Service_Repository.cpp
+===================================================================
+--- ace/Service_Repository.cpp	(.../trunk/ACE)	(revision 89931)
++++ ace/Service_Repository.cpp	(.../branches/bugzilla_fix_3334)	(revision 89931)
+@@ -113,8 +113,9 @@
+   ACE_TRACE ("ACE_Service_Repository::ACE_Service_Repository");
+ }
+ 
+-          
++
+ /// Finalize (call fini() and possibly delete) all the services.
++
+ int
+ ACE_Service_Repository::fini (void)
+ {
+@@ -125,71 +126,80 @@
+   // Do not be tempted to use the prefix decrement operator.  Use
+   // postfix decrement operator since the index is unsigned and may
+   // wrap around the 0
++  //
++  // debug output for empty service entries
++#ifndef ACE_NLOGGING
++  if (ACE::debug ())
++  {
++    for (size_t i = this->service_array_.size (); i-- != 0;)
++    {
++      ACE_Service_Type *s =
++        const_cast<ACE_Service_Type *> (this->service_array_[i]);
++      if (s == 0)
++        ACE_DEBUG ((LM_DEBUG,
++                    ACE_TEXT ("ACE (%P|%t) SR::fini, repo=%@ [%d] -> 0\n"),
++                    this,
++                    i));
++    }
++  }
++#endif
++  //
++  // Remove all the Service_Object and Stream instances
++  //
+   for (size_t i = this->service_array_.size (); i-- != 0;)
+   {
+     // <fini> the services in reverse order.
+     ACE_Service_Type *s =
+       const_cast<ACE_Service_Type *> (this->service_array_[i]);
+ 
+-    if (s->type ()->service_type () != ACE_Service_Type::MODULE)
++    if (s != 0 && (s->type ()->service_type () != ACE_Service_Type::MODULE))
+     {
+ #ifndef ACE_NLOGGING
+       if (ACE::debug ())
+       {
+-        if (s != 0)
+-          ACE_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("ACE (%P|%t) SR::fini, repo=%@ [%d], ")
+-                      ACE_TEXT ("name=%s, type=%@, object=%@, active=%d\n"),
+-                      this,
+-                      i,
+-                      s->name (),
+-                      s->type (),
+-                      (s->type () != 0) ? s->type ()->object () : 0,
+-                      s->active ()));
+-        else
+-          ACE_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("ACE (%P|%t) SR::fini, repo=%@ [%d] -> 0\n"),
+-                      this,
+-                      i));
++        ACE_DEBUG ((LM_DEBUG,
++                    ACE_TEXT ("ACE (%P|%t) SR::fini, repo=%@ [%d], ")
++                    ACE_TEXT ("name=%s, type=%@, object=%@, active=%d\n"),
++                    this,
++                    i,
++                    s->name (),
++                    s->type (),
++                    (s->type () != 0) ? s->type ()->object () : 0,
++                    s->active ()));
+       }
+ #endif
+ 
+       // Collect any errors.
+-      if (s != 0)
+-        retval += s->fini ();
++      retval += s->fini ();
+     }
+   }
++  //
++  // Remove all the Module instances
++  //
+   for (size_t i = this->service_array_.size (); i-- != 0;)
+   {
+     // <fini> the services in reverse order.
+     ACE_Service_Type *s =
+       const_cast<ACE_Service_Type *> (this->service_array_[i]);
+ 
+-    if (s->type ()->service_type () == ACE_Service_Type::MODULE)
++    if (s != 0 && (s->type ()->service_type () == ACE_Service_Type::MODULE))
+     {
+ #ifndef ACE_NLOGGING
+       if (ACE::debug ())
+       {
+-        if (s != 0)
+-          ACE_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("ACE (%P|%t) SR::fini, repo=%@ [%d], ")
+-                      ACE_TEXT ("name=%s, type=%@, object=%@, active=%d\n"),
+-                      this,
+-                      i,
+-                      s->name (),
+-                      s->type (),
+-                      (s->type () != 0) ? s->type ()->object () : 0,
+-                      s->active ()));
+-        else
+-          ACE_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("ACE (%P|%t) SR::fini, repo=%@ [%d] -> 0\n"),
+-                      this,
+-                      i));
++        ACE_DEBUG ((LM_DEBUG,
++                    ACE_TEXT ("ACE (%P|%t) SR::fini, repo=%@ [%d], ")
++                    ACE_TEXT ("name=%s, type=%@, object=%@, active=%d\n"),
++                    this,
++                    i,
++                    s->name (),
++                    s->type (),
++                    (s->type () != 0) ? s->type ()->object () : 0,
++                    s->active ()));
+       }
+ #endif
+       // Collect any errors.
+-      if (s != 0)
+-        retval += s->fini ();
++      retval += s->fini ();
+     }
+   }
+   return (retval == 0) ? 0 : -1;
+
+Property changes on: ace/Monitor_Control
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libACE_Monitor_Control.dylib
+
+
+
+Property changes on: ace
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+config.h.in
+.shobj
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+config.h.in
+.shobj
+libACE.dylib
+
+
+
+Property changes on: performance-tests/Synch-Benchmarks/Base_Test
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libBase_Test.dylib
+
+
+
+Property changes on: performance-tests/Synch-Benchmarks/Synch_Lib
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libSynch_Lib.dylib
+
+
+
+Property changes on: performance-tests/Synch-Benchmarks/Perf_Test
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libPerf_Test.dylib
+
+
+
+Property changes on: performance-tests/Synch-Benchmarks
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: performance-tests/Server_Concurrency/Leader_Follower
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: performance-tests/Server_Concurrency/Queue_Based_Workers
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: performance-tests/TCP
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: performance-tests/UDP
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: performance-tests/SCTP
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: performance-tests/Misc
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: Kokyu/tests/FIFO
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: Kokyu/tests/DSRT_MIF
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: Kokyu/tests/EDF
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: Kokyu
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libKokyu.dylib
+
+
+
+Property changes on: tests
+___________________________________________________________________
+Modified: svn:ignore
+   - ACE_Init_Test
+ACE_Test
+Aio_Platform_Test
+Arg_Shifter_Test
+ARGV_Test
+Array_Map_Test
+Atomic_Op_Test
+Auto_Event_Test
+Auto_IncDec_Test
+Barrier_Test
+Based_Pointer_Test
+Basic_Types_Test
+Bound_Ptr_Test
+Buffer_Stream_Test
+Bug_1576_Regression_Test
+Bug_1890_Regression_Test
+Bug_2368_Regression_Test
+Bug_2497_Regression_Test
+Bug_2540_Regression_Test
+Bug_2653_Regression_Test
+Bug_2659_Regression_Test
+Bug_2815_Regression_Test
+Bug_2820_Regression_Test
+Cached_Accept_Conn_Test
+Cached_Allocator_Test
+Cached_Conn_Test
+Cache_Map_Manager_Test
+Capabilities_Test
+CDR_Array_Test
+CDR_File_Test
+CDR_Test
+Codecs_Test
+Collection_Test
+Config_Test
+Conn_Test
+Date_Time_Test
+.depend.*
+Dev_Poll_Reactor_Test
+Dirent_Test
+DLList_Test
+DLL_Test
+Dynamic_Priority_Test
+Enum_Interfaces_Test
+Env_Value_Test
+FIFO_Test
+FlReactor_Test
+Framework_Component_Test
+Future_Set_Test
+Future_Test
+Get_Opt_Test
+GNUmakefile*
+Handle_Set_Test
+Hash_Map_Bucket_Iterator_Test
+Hash_Map_Manager_Test
+Hash_Multi_Map_Manager_Test
+High_Res_Timer_Test
+INET_Addr_Test
+INET_Addr_Test_IPV6
+Integer_Truncate_Test
+IOStream_Test
+Lazy_Map_Manager_Test
+Logging_Strategy_Test
+Log_Msg_Test
+Makefile.in
+Malloc_Test
+Manual_Event_Test
+Map_Manager_Test
+Map_Test
+Max_Default_Port_Test
+Max_Default_Port_Test_IPV6
+Memcpy_Test
+Mem_Map_Test
+MEM_Stream_Test
+Message_Block_Test
+Message_Queue_Notifications_Test
+Message_Queue_Test
+Message_Queue_Test_Ex
+MM_Shared_Memory_Test
+MT_Reactor_Timer_Test
+MT_Reactor_Upcall_Test
+MT_Reference_Counted_Event_Handler_Test
+MT_Reference_Counted_Notify_Test
+MT_SOCK_Test
+Multicast_Test
+Multicast_Test_IPV6
+Multihomed_INET_Addr_Test
+Multihomed_INET_Addr_Test_IPV6
+Naming_Test
+Network_Adapters_Test
+New_Fail_Test
+NonBlocking_Conn_Test
+Notify_Performance_Test
+Notification_Queue_Unit_Test
+Object_Manager_Test
+Obstack_Test
+OrdMultiSet_Test
+OS_Test
+Pipe_Test
+Priority_Buffer_Test
+Priority_Reactor_Test
+Priority_Task_Test
+Proactor_Scatter_Gather_Test
+Proactor_Test
+Proactor_Test_IPV6
+Proactor_Timer_Test
+Process_Manager_Test
+Process_Manual_Event_Test
+Process_Mutex_Test
+Process_Semaphore_Test
+Process_Strategy_Test
+QtReactor_Test
+QtReactor_Test_moc.cpp
+RB_Tree_Test
+Reactor_Dispatch_Order_Test
+Reactor_Exceptions_Test
+Reactor_Notification_Queue_Test
+Reactor_Notify_Test
+Reactor_Performance_Test
+Reactor_Registration_Test
+Reactors_Test
+Reactor_Timer_Test
+Reader_Writer_Test
+Recursive_Condition_Bug_Test
+Recursive_Condition_Test
+Recursive_Mutex_Test
+Refcounted_Auto_Ptr_Test
+Reference_Counted_Event_Handler_Test
+Reverse_Lock_Test
+Semaphore_Test
+Sendfile_Test
+Service_Config_Test
+Signal_Test
+Sigset_Ops_Test
+Simple_Message_Block_Test
+SOCK_Connector_Test
+SOCK_Dgram_Bcast_Test
+SOCK_Dgram_Test
+SOCK_Netlink_Test
+SOCK_Send_Recv_Test
+SOCK_Send_Recv_Test_IPV6
+SOCK_SEQPACK_SCTP_Test
+SOCK_Test
+SOCK_Test_IPv6
+SPIPE_Test
+SString_Test
+Svc_Handler_Test
+SV_Shared_Memory_Test
+Task_Ex_Test
+Task_Test
+test.reg
+testConfig.ini
+Thread_Creation_Threshold_Test
+Thread_Manager_Test
+Thread_Mutex_Test
+Thread_Pool_Reactor_Resume_Test
+Thread_Pool_Reactor_Test
+Thread_Pool_Test
+Timeprobe_Test
+Timer_Cancellation_Test
+Timer_Queue_Reference_Counting_Test
+Timer_Queue_Test
+Time_Service_Test
+Time_Value_Test
+TkReactor_Test
+Tokens_Test
+Token_Strategy_Test
+TP_Reactor_Test
+TSS_Static_Test
+TSS_Test
+Unbounded_Set_Test
+Unbounded_Set_Test_Ex
+UnloadLibACE
+Upgradable_RW_Test
+UPIPE_SAP_Test
+UUIDTest
+Vector_Test
+WFMO_Reactor_Test
+XtAthenaReactor_Test
+XtMotifReactor_Test
+XtReactor_Test
+.obj
+.shobj
+
+   + ACE_Init_Test
+ACE_Test
+Aio_Platform_Test
+Arg_Shifter_Test
+ARGV_Test
+Array_Map_Test
+Atomic_Op_Test
+Auto_Event_Test
+Auto_IncDec_Test
+Barrier_Test
+Based_Pointer_Test
+Basic_Types_Test
+Bound_Ptr_Test
+Buffer_Stream_Test
+Bug_1576_Regression_Test
+Bug_1890_Regression_Test
+Bug_2368_Regression_Test
+Bug_2497_Regression_Test
+Bug_2540_Regression_Test
+Bug_2653_Regression_Test
+Bug_2659_Regression_Test
+Bug_2815_Regression_Test
+Bug_2820_Regression_Test
+Cached_Accept_Conn_Test
+Cached_Allocator_Test
+Cached_Conn_Test
+Cache_Map_Manager_Test
+Capabilities_Test
+CDR_Array_Test
+CDR_File_Test
+CDR_Test
+Codecs_Test
+Collection_Test
+Config_Test
+Conn_Test
+Date_Time_Test
+.depend.*
+Dev_Poll_Reactor_Test
+Dirent_Test
+DLList_Test
+DLL_Test
+Dynamic_Priority_Test
+Enum_Interfaces_Test
+Env_Value_Test
+FIFO_Test
+FlReactor_Test
+Framework_Component_Test
+Future_Set_Test
+Future_Test
+Get_Opt_Test
+GNUmakefile*
+Handle_Set_Test
+Hash_Map_Bucket_Iterator_Test
+Hash_Map_Manager_Test
+Hash_Multi_Map_Manager_Test
+High_Res_Timer_Test
+INET_Addr_Test
+INET_Addr_Test_IPV6
+Integer_Truncate_Test
+IOStream_Test
+Lazy_Map_Manager_Test
+Logging_Strategy_Test
+Log_Msg_Test
+Makefile.in
+Malloc_Test
+Manual_Event_Test
+Map_Manager_Test
+Map_Test
+Max_Default_Port_Test
+Max_Default_Port_Test_IPV6
+Memcpy_Test
+Mem_Map_Test
+MEM_Stream_Test
+Message_Block_Test
+Message_Queue_Notifications_Test
+Message_Queue_Test
+Message_Queue_Test_Ex
+MM_Shared_Memory_Test
+MT_Reactor_Timer_Test
+MT_Reactor_Upcall_Test
+MT_Reference_Counted_Event_Handler_Test
+MT_Reference_Counted_Notify_Test
+MT_SOCK_Test
+Multicast_Test
+Multicast_Test_IPV6
+Multihomed_INET_Addr_Test
+Multihomed_INET_Addr_Test_IPV6
+Naming_Test
+Network_Adapters_Test
+New_Fail_Test
+NonBlocking_Conn_Test
+Notify_Performance_Test
+Notification_Queue_Unit_Test
+Object_Manager_Test
+Obstack_Test
+OrdMultiSet_Test
+OS_Test
+Pipe_Test
+Priority_Buffer_Test
+Priority_Reactor_Test
+Priority_Task_Test
+Proactor_Scatter_Gather_Test
+Proactor_Test
+Proactor_Test_IPV6
+Proactor_Timer_Test
+Process_Manager_Test
+Process_Manual_Event_Test
+Process_Mutex_Test
+Process_Semaphore_Test
+Process_Strategy_Test
+QtReactor_Test
+QtReactor_Test_moc.cpp
+RB_Tree_Test
+Reactor_Dispatch_Order_Test
+Reactor_Exceptions_Test
+Reactor_Notification_Queue_Test
+Reactor_Notify_Test
+Reactor_Performance_Test
+Reactor_Registration_Test
+Reactors_Test
+Reactor_Timer_Test
+Reader_Writer_Test
+Recursive_Condition_Bug_Test
+Recursive_Condition_Test
+Recursive_Mutex_Test
+Refcounted_Auto_Ptr_Test
+Reference_Counted_Event_Handler_Test
+Reverse_Lock_Test
+Semaphore_Test
+Sendfile_Test
+Service_Config_Test
+Signal_Test
+Sigset_Ops_Test
+Simple_Message_Block_Test
+SOCK_Connector_Test
+SOCK_Dgram_Bcast_Test
+SOCK_Dgram_Test
+SOCK_Netlink_Test
+SOCK_Send_Recv_Test
+SOCK_Send_Recv_Test_IPV6
+SOCK_SEQPACK_SCTP_Test
+SOCK_Test
+SOCK_Test_IPv6
+SPIPE_Test
+SString_Test
+Svc_Handler_Test
+SV_Shared_Memory_Test
+Task_Ex_Test
+Task_Test
+test.reg
+testConfig.ini
+Thread_Creation_Threshold_Test
+Thread_Manager_Test
+Thread_Mutex_Test
+Thread_Pool_Reactor_Resume_Test
+Thread_Pool_Reactor_Test
+Thread_Pool_Test
+Timeprobe_Test
+Timer_Cancellation_Test
+Timer_Queue_Reference_Counting_Test
+Timer_Queue_Test
+Time_Service_Test
+Time_Value_Test
+TkReactor_Test
+Tokens_Test
+Token_Strategy_Test
+TP_Reactor_Test
+TSS_Static_Test
+TSS_Test
+Unbounded_Set_Test
+Unbounded_Set_Test_Ex
+UnloadLibACE
+Upgradable_RW_Test
+UPIPE_SAP_Test
+UUIDTest
+Vector_Test
+WFMO_Reactor_Test
+XtAthenaReactor_Test
+XtMotifReactor_Test
+XtReactor_Test
+.obj
+.shobj
+libBased_Pointer_Test_Lib.dylib
+libBug_2980_Regression.dylib
+libDLL_Test_Lib.dylib
+libDLL_Test_Parent.dylib
+libFramework_Component_DLL.dylib
+libService_Config_DLL.dylib
+libService_Config_Stream_DLL.dylib
+libTest_Output.dylib
+
+
+
+Property changes on: apps/Gateway/Gateway
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libGateway.dylib
+
+
+
+Property changes on: apps/Gateway/Peer
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libGateway_Peer.dylib
+
+
+
+Property changes on: apps/mkcsregdb
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: apps/drwho
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: apps/gperf/tests
+___________________________________________________________________
+Modified: svn:ignore
+   - ada.cpp
+ada.cpp
+adadefs.cpp
+adadefs.cpp
+aout
+aout
+aout.out
+aout.out
+c.cpp
+c.cpp
+corba.cpp
+corba.cpp
+cout
+cout
+cout.out
+cout.out
+cpp.cpp
+cpp.cpp
+cppout
+cppout
+cppout.out
+cppout.out
+idl.cpp
+idl.cpp
+iout
+iout
+iout.out
+iout.out
+iout2
+iout2
+iout2.out
+iout2.out
+m3out
+m3out
+m3out.out
+m3out.out
+modula3.cpp
+modula3.cpp
+pascal.cpp
+pascal.cpp
+pout
+pout
+pout.out
+pout.out
+preout
+preout
+preout.out
+preout.out
+tao.cpp
+tao.cpp
+taoout
+taoout
+taoout.out
+taoout.out
+tout
+tout
+tout.out
+tout.out
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + ada.cpp
+ada.cpp
+adadefs.cpp
+adadefs.cpp
+aout
+aout
+aout.out
+aout.out
+c.cpp
+c.cpp
+corba.cpp
+corba.cpp
+cout
+cout
+cout.out
+cout.out
+cpp.cpp
+cpp.cpp
+cppout
+cppout
+cppout.out
+cppout.out
+idl.cpp
+idl.cpp
+iout
+iout
+iout.out
+iout.out
+iout2
+iout2
+iout2.out
+iout2.out
+m3out
+m3out
+m3out.out
+m3out.out
+modula3.cpp
+modula3.cpp
+pascal.cpp
+pascal.cpp
+pout
+pout
+pout.out
+pout.out
+preout
+preout
+preout.out
+preout.out
+tao.cpp
+tao.cpp
+taoout
+taoout
+taoout.out
+taoout.out
+tout
+tout
+tout.out
+tout.out
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: apps/gperf/src
+___________________________________________________________________
+Modified: svn:ignore
+   - gperf
+gperf
+.depend.*
+GNUmakefile*
+Makefile.in
+gperf
+
+   + gperf
+gperf
+.depend.*
+GNUmakefile*
+Makefile.in
+gperf
+.obj
+.shobj
+libACE_gperf_lib.dylib
+
+
+
+Property changes on: apps/JAWS/clients/Blobby
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: apps/JAWS/clients/Caching
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: apps/JAWS/server
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libJAWS.dylib
+
+
+
+Property changes on: apps/JAWS2/HTTPU
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libHTTPU.dylib
+
+
+
+Property changes on: apps/JAWS2/JAWS
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libJAWS2.dylib
+
+
+
+Property changes on: apps/JAWS3/jaws3
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libJAWS3.dylib
+
+
+
+Property changes on: apps/soreduce
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: lib
+___________________________________________________________________
+Added: svn:ignore
+   + libACE.dylib
+libACE_ETCL.dylib
+libACE_ETCL_Parser.dylib
+libACE_gperf_lib.dylib
+libACE_HTBP.dylib
+libACE_Monitor_Control.dylib
+libACE_RMCast.dylib
+libACE_SSL.dylib
+libACE_TMCast.dylib
+libACEXML.dylib
+libACEXML_Parser.dylib
+libACEXML_XML_Svc_Conf_Parser.dylib
+libasnmp.dylib
+libGateway.dylib
+libGateway_Peer.dylib
+libHTTPU.dylib
+libJAWS.dylib
+libJAWS2.dylib
+libJAWS3.dylib
+libKokyu.dylib
+libMC_Test_Utilities.dylib
+libnetsvcs.dylib
+libwebsvcs.dylib
+
+
+Index: bin/MakeProjectCreator/config/global.features
+===================================================================
+--- bin/MakeProjectCreator/config/global.features	(.../trunk/ACE)	(revision 89931)
++++ bin/MakeProjectCreator/config/global.features	(.../branches/bugzilla_fix_3334)	(revision 89931)
+@@ -144,6 +144,6 @@
+ link_codecfactory = 0
+ 
+ // Feature for LwCCM
+-ccm_lw = 1
++ccm_lw = 0
+ 
+ valuetype_out_indirection=1
+
+Property changes on: bin
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+catior*
+tao_imr*
+gperf*
+tao_ifr*
+nsdel*
+tao_idl*
+nsadd*
+nslist*
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+catior*
+tao_imr*
+gperf*
+tao_ifr*
+nsdel*
+tao_idl*
+nsadd*
+nslist*
+.obj
+
+
+
+Property changes on: ACEXML/tests/util
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: ACEXML/tests
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: ACEXML/apps/svcconf
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libACEXML_XML_Svc_Conf_Parser.dylib
+
+
+
+Property changes on: ACEXML/common
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libACEXML.dylib
+
+
+
+Property changes on: ACEXML/parser/parser
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libACEXML_Parser.dylib
+
+
+
+Property changes on: ACEXML/examples/SAXPrint
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: websvcs/tests
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: websvcs/lib
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libwebsvcs.dylib
+
+
+
+Property changes on: netsvcs/clients/Logger
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: netsvcs/clients/Naming/Dump_Restore
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: netsvcs/clients/Naming/Client
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: netsvcs/lib
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libnetsvcs.dylib
+
+
+
+Property changes on: netsvcs/servers
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+Index: ChangeLog
+===================================================================
+--- ChangeLog	(.../trunk/ACE)	(revision 89931)
++++ ChangeLog	(.../branches/bugzilla_fix_3334)	(revision 89931)
+@@ -1,3 +1,21 @@
++Mon Apr 19 18:17:30 UTC 2010 UTC 2010 Chad Beaulac <chad@objectivesolutions.com
++
++   * ace/Service_Repository.cpp
++     Modified ASR::fini to print debug info for empty
++     service entries and handle empty service entries.
++     This fixes the ASR remove functionality that was
++     one of the reasons SC_Server was crashing at shutdown.
++
++   * examples/ASX/CCM_App/SC_Server.cpp
++     Removing signal handler before main exit to present SEGV
++
++   * tests/run_test.lst
++     Removed !FIXED_BUGS_ONLY from Bug_3334_Regression_Test
++     Apparently it was missed in the last commit.
++	
++  This fixes Bugzilla #2916 and #3205.
++  I'll create another patch for #3334 after this commit.
++
+ Mon Apr 19 12:44:56 UTC 2010 Chad Beaulac <chad@objectivesolutions.com>
+ 
+    * ace/Service_Types.h
+
+Property changes on: examples/OS/Process
+___________________________________________________________________
+Modified: svn:ignore
+   - imore
+imore
+process
+process
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + imore
+imore
+process
+process
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Synch
+___________________________________________________________________
+Modified: svn:ignore
+   - proc_sema
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + proc_sema
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Timer_Queue
+___________________________________________________________________
+Modified: svn:ignore
+   - Asynch_Timer_Queue_Test
+Reactor_Timer_Queue_Test
+Thread_Timer_Queue_Test
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Asynch_Timer_Queue_Test
+Reactor_Timer_Queue_Test
+Thread_Timer_Queue_Test
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libtqtd.dylib
+
+
+
+Property changes on: examples/Monitor/Bytes_Sent
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Monitor/Message_Queue_Size
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Monitor/Constraint
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Monitor/CPU_Load
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Monitor/Num_Threads
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Monitor/Group
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Monitor/Memory_Usage
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Monitor
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libMC_Test_Utilities.dylib
+
+
+
+Property changes on: examples/Log_Msg
+___________________________________________________________________
+Modified: svn:ignore
+   - test_callback
+test_callback
+test_log_msg
+test_log_msg
+test_ostream
+test_ostream
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + test_callback
+test_callback
+test_log_msg
+test_log_msg
+test_ostream
+test_ostream
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Misc
+___________________________________________________________________
+Modified: svn:ignore
+   - test_XtReactor1
+test_XtReactor2
+test_dump
+test_dump
+test_get_opt
+test_get_opt
+test_profile_timer
+test_profile_timer
+test_read_buffer
+test_read_buffer
+test_set
+test_set
+test_sstring
+test_sstring
+test_trace
+test_trace
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + test_XtReactor1
+test_XtReactor2
+test_dump
+test_dump
+test_get_opt
+test_get_opt
+test_profile_timer
+test_profile_timer
+test_read_buffer
+test_read_buffer
+test_set
+test_set
+test_sstring
+test_sstring
+test_trace
+test_trace
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+Index: examples/ASX/CCM_App/SC_Server.cpp
+===================================================================
+--- examples/ASX/CCM_App/SC_Server.cpp	(.../trunk/ACE)	(revision 89931)
++++ examples/ASX/CCM_App/SC_Server.cpp	(.../branches/bugzilla_fix_3334)	(revision 89931)
+@@ -82,5 +82,6 @@
+   // Perform logging service until we receive SIGINT.
+ 
+   ACE_Reactor::instance ()->run_reactor_event_loop ();
++  handler.remove_stdin_handler (ACE_Reactor::instance (),ACE_Thread_Manager::instance ());  
+   return 0;
+ }
+
+Property changes on: examples/ASX/CCM_App
+___________________________________________________________________
+Modified: svn:ignore
+   - client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libCCM_App.dylib
+
+
+
+Property changes on: examples/ASX/Event_Server/Transceiver
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/ASX/Event_Server/Event_Server
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/ASX/Message_Queue
+___________________________________________________________________
+Modified: svn:ignore
+   - bounded_buffer
+bounded_buffer
+buffer_stream
+buffer_stream
+priority_buffer
+priority_buffer
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + bounded_buffer
+bounded_buffer
+buffer_stream
+buffer_stream
+priority_buffer
+priority_buffer
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/ASX/UPIPE_Event_Server
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Web_Crawler
+___________________________________________________________________
+Modified: svn:ignore
+   - main
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + main
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Shared_Malloc
+___________________________________________________________________
+Modified: svn:ignore
+   - malloc
+multiple
+persistence
+posind
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + malloc
+multiple
+persistence
+posind
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Bounded_Packet_Relay
+___________________________________________________________________
+Modified: svn:ignore
+   - bpr_thread
+bpr_thread
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + bpr_thread
+bpr_thread
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/System_V_IPC/SV_Message_Queues
+___________________________________________________________________
+Modified: svn:ignore
+   - mqclient
+mqserver
+tmqclient
+tmqserver
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + mqclient
+mqserver
+tmqclient
+tmqserver
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/System_V_IPC/SV_Semaphores
+___________________________________________________________________
+Modified: svn:ignore
+   - sem1
+sem2
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + sem1
+sem2
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Semaphores
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Map_Manager
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Svc_Config
+___________________________________________________________________
+Modified: svn:ignore
+   - HA_Configurable_Server_Dynamic
+HA_Configurable_Server_Dynamic
+HA_Configurable_Server_Static
+HA_Configurable_Server_Static
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + HA_Configurable_Server_Dynamic
+HA_Configurable_Server_Dynamic
+HA_Configurable_Server_Static
+HA_Configurable_Server_Static
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libHA_Status.dylib
+
+
+
+Property changes on: examples/APG/ThreadSafety
+___________________________________________________________________
+Modified: svn:ignore
+   - Atomic_Op
+Atomic_Op
+Barrier
+Barrier
+Mutex
+Mutex
+RW_Lock
+RW_Lock
+Semaphore
+Semaphore
+TSS
+TSS
+Tokens
+Tokens
+Tokens_Deadlock
+Tokens_Deadlock
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Atomic_Op
+Atomic_Op
+Barrier
+Barrier
+Mutex
+Mutex
+RW_Lock
+RW_Lock
+Semaphore
+Semaphore
+TSS
+TSS
+Tokens
+Tokens
+Tokens_Deadlock
+Tokens_Deadlock
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/ThreadPools
+___________________________________________________________________
+Modified: svn:ignore
+   - Futures
+Futures
+LF_ThreadPool
+LF_ThreadPool
+TP_Reactor
+TP_Reactor
+Task_ThreadPool
+Task_ThreadPool
+ThreadPool
+ThreadPool
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Futures
+Futures
+LF_ThreadPool
+LF_ThreadPool
+TP_Reactor
+TP_Reactor
+Task_ThreadPool
+Task_ThreadPool
+ThreadPool
+ThreadPool
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Active_Objects
+___________________________________________________________________
+Modified: svn:ignore
+   - AO
+AO
+AO2
+AO2
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + AO
+AO
+AO2
+AO2
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Logging
+___________________________________________________________________
+Modified: svn:ignore
+   - Change_Instance_Default
+Change_Instance_Default
+Change_Mask
+Change_Mask
+Howto_Syslog
+Howto_Syslog
+Simple1
+Simple1
+Simple2
+Simple2
+Trace_Return
+Trace_Return
+Use_Callback
+Use_Callback
+Use_Callback2
+Use_Callback2
+Use_LogManager
+Use_LogManager
+Use_Logger
+Use_Logger
+Use_Logging_Server
+Use_Logging_Server
+Use_Logging_Strategy
+Use_Logging_Strategy
+Use_Multiple_Sinks
+Use_Multiple_Sinks
+Use_Ostream
+Use_Ostream
+Use_Stderr
+Use_Stderr
+Use_Syslog
+Use_Syslog
+Wrap_Macros
+Wrap_Macros
+Wrap_Macros_Alt
+Wrap_Macros_Alt
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Change_Instance_Default
+Change_Instance_Default
+Change_Mask
+Change_Mask
+Howto_Syslog
+Howto_Syslog
+Simple1
+Simple1
+Simple2
+Simple2
+Trace_Return
+Trace_Return
+Use_Callback
+Use_Callback
+Use_Callback2
+Use_Callback2
+Use_LogManager
+Use_LogManager
+Use_Logger
+Use_Logger
+Use_Logging_Server
+Use_Logging_Server
+Use_Logging_Strategy
+Use_Logging_Strategy
+Use_Multiple_Sinks
+Use_Multiple_Sinks
+Use_Ostream
+Use_Ostream
+Use_Stderr
+Use_Stderr
+Use_Syslog
+Use_Syslog
+Wrap_Macros
+Wrap_Macros
+Wrap_Macros_Alt
+Wrap_Macros_Alt
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Misc_IPC
+___________________________________________________________________
+Modified: svn:ignore
+   - UDP_Broadcast
+UDP_Broadcast
+UDP_Multicast
+UDP_Multicast
+UDP_Unicast
+UDP_Unicast
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + UDP_Broadcast
+UDP_Broadcast
+UDP_Multicast
+UDP_Multicast
+UDP_Unicast
+UDP_Unicast
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Proactor
+___________________________________________________________________
+Modified: svn:ignore
+   - HA_Proactive_Status
+HA_Proactive_Status
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + HA_Proactive_Status
+HA_Proactive_Status
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Threads
+___________________________________________________________________
+Modified: svn:ignore
+   - Activate
+Activate
+Condition_Variables
+Condition_Variables
+Guards
+Guards
+Message_Blocks
+Message_Blocks
+Message_Queue
+Message_Queue
+Mutexes
+Mutexes
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Activate
+Activate
+Condition_Variables
+Condition_Variables
+Guards
+Guards
+Message_Blocks
+Message_Blocks
+Message_Queue
+Message_Queue
+Mutexes
+Mutexes
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Shared_Memory
+___________________________________________________________________
+Modified: svn:ignore
+   - Hash_Map
+Hash_Map
+Malloc
+Malloc
+Mem_Map
+Mem_Map
+PI_Malloc
+PI_Malloc
+Pool_Growth
+Pool_Growth
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Hash_Map
+Hash_Map
+Malloc
+Malloc
+Mem_Map
+Mem_Map
+PI_Malloc
+PI_Malloc
+Pool_Growth
+Pool_Growth
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Reactor
+___________________________________________________________________
+Modified: svn:ignore
+   - Client
+Client
+HAStatus
+HAStatus
+HAStatus-AC
+HAStatus-AC
+Reschedule
+Reschedule
+Schedule_Timers
+Schedule_Timers
+Timer_Cancel
+Timer_Cancel
+Timer_State_Data
+Timer_State_Data
+Timers
+Timers
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Client
+Client
+HAStatus
+HAStatus
+HAStatus-AC
+HAStatus-AC
+Reschedule
+Reschedule
+Schedule_Timers
+Schedule_Timers
+Timer_Cancel
+Timer_Cancel
+Timer_State_Data
+Timer_State_Data
+Timers
+Timers
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Signals
+___________________________________________________________________
+Modified: svn:ignore
+   - SigAction
+SigAction
+SigGuard
+SigGuard
+SigHandler
+SigHandler
+SigHandlers
+SigHandlers
+SigInfo
+SigInfo
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + SigAction
+SigAction
+SigGuard
+SigGuard
+SigHandler
+SigHandler
+SigHandlers
+SigHandlers
+SigInfo
+SigInfo
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Timers
+___________________________________________________________________
+Modified: svn:ignore
+   - Alarm
+Alarm
+Task
+Task
+Timers
+Timers
+Upcall
+Upcall
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Alarm
+Alarm
+Task
+Task
+Timers
+Timers
+Upcall
+Upcall
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/ThreadManagement
+___________________________________________________________________
+Modified: svn:ignore
+   - Async_Cancel
+Async_Cancel
+Coop_Cancel
+Coop_Cancel
+ExitHandler
+ExitHandler
+Pool
+Pool
+Priorities
+Priorities
+Signals
+Signals
+Signals2
+Signals2
+Start_Hook
+Start_Hook
+State
+State
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Async_Cancel
+Async_Cancel
+Coop_Cancel
+Coop_Cancel
+ExitHandler
+ExitHandler
+Pool
+Pool
+Priorities
+Priorities
+Signals
+Signals
+Signals2
+Signals2
+Start_Hook
+Start_Hook
+State
+State
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Config
+___________________________________________________________________
+Modified: svn:ignore
+   - ARGV_Example
+ARGV_Example
+Get_Opt
+Get_Opt
+Get_Opt_Long
+Get_Opt_Long
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + ARGV_Example
+ARGV_Example
+Get_Opt
+Get_Opt
+Get_Opt_Long
+Get_Opt_Long
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Containers
+___________________________________________________________________
+Modified: svn:ignore
+   - Allocator
+Allocator
+Array
+Array
+DLList
+DLList
+Hash_Map
+Hash_Map
+Hash_Map_Hash
+Hash_Map_Hash
+Map_Manager
+Map_Manager
+Map_Manager_Specialization
+Map_Manager_Specialization
+Queues
+Queues
+RB_Tree
+RB_Tree
+RB_Tree_Functors
+RB_Tree_Functors
+Sets
+Sets
+Stacks
+Stacks
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Allocator
+Allocator
+Array
+Array
+DLList
+DLList
+Hash_Map
+Hash_Map
+Hash_Map_Hash
+Hash_Map_Hash
+Map_Manager
+Map_Manager
+Map_Manager_Specialization
+Map_Manager_Specialization
+Queues
+Queues
+RB_Tree
+RB_Tree
+RB_Tree_Functors
+RB_Tree_Functors
+Sets
+Sets
+Stacks
+Stacks
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Processes
+___________________________________________________________________
+Modified: svn:ignore
+   - Process_Manager_Death
+Process_Manager_Death
+Process_Manager_Spawn
+Process_Manager_Spawn
+Process_Mutex
+Process_Mutex
+Spawn
+Spawn
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Process_Manager_Death
+Process_Manager_Death
+Process_Manager_Spawn
+Process_Manager_Spawn
+Process_Mutex
+Process_Mutex
+Spawn
+Spawn
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Naming
+___________________________________________________________________
+Modified: svn:ignore
+   - Netlocal
+Netlocal
+Netlocal_reader
+Netlocal_reader
+Nodelocal
+Nodelocal
+Nodelocal_shared
+Nodelocal_shared
+Nodelocal_shared_reader
+Nodelocal_shared_reader
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Netlocal
+Netlocal
+Netlocal_reader
+Netlocal_reader
+Nodelocal
+Nodelocal
+Nodelocal_shared
+Nodelocal_shared
+Nodelocal_shared_reader
+Nodelocal_shared_reader
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Sockets
+___________________________________________________________________
+Modified: svn:ignore
+   - Basic
+Basic
+Basic_Robust
+Basic_Robust
+Iovec
+Iovec
+Server
+Server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Basic
+Basic
+Basic_Robust
+Basic_Robust
+Iovec
+Iovec
+Server
+Server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/APG/Streams
+___________________________________________________________________
+Modified: svn:ignore
+   - Answerer
+Answerer
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Answerer
+Answerer
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Smart_Pointers
+___________________________________________________________________
+Modified: svn:ignore
+   - Widget
+gadget
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + Widget
+gadget
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/DLL
+___________________________________________________________________
+Modified: svn:ignore
+   - test_dll
+test_dll
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + test_dll
+test_dll
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libDLL_Newsweek.dylib
+libDLL_Today.dylib
+
+
+
+Property changes on: examples/IPC_SAP/DEV_SAP/reader
+___________________________________________________________________
+Modified: svn:ignore
+   - reader
+reader
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + reader
+reader
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IPC_SAP/DEV_SAP/writer
+___________________________________________________________________
+Modified: svn:ignore
+   - writer
+writer
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + writer
+writer
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IPC_SAP/FILE_SAP
+___________________________________________________________________
+Modified: svn:ignore
+   - client
+client
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + client
+client
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IPC_SAP/SOCK_SAP
+___________________________________________________________________
+Modified: svn:ignore
+   - C-inclient
+C-inclient
+C-inserver
+C-inserver
+CPP-inclient
+CPP-inclient
+CPP-inserver
+CPP-inserver
+CPP-memclient
+CPP-memclient
+CPP-memserver
+CPP-memserver
+CPP-unclient
+CPP-unclient
+CPP-unserver
+CPP-unserver
+FD-unclient
+FD-unclient
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + C-inclient
+C-inclient
+C-inserver
+C-inserver
+CPP-inclient
+CPP-inclient
+CPP-inserver
+CPP-inserver
+CPP-memclient
+CPP-memclient
+CPP-memserver
+CPP-memserver
+CPP-unclient
+CPP-unclient
+CPP-unserver
+CPP-unserver
+FD-unclient
+FD-unclient
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IPC_SAP/SPIPE_SAP
+___________________________________________________________________
+Modified: svn:ignore
+   - NPClient
+NPClient
+NPServer
+NPServer
+client
+client
+consumer_msg
+consumer_msg
+consumer_read
+consumer_read
+producer_msg
+producer_msg
+producer_read
+producer_read
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + NPClient
+NPClient
+NPServer
+NPServer
+client
+client
+consumer_msg
+consumer_msg
+consumer_read
+consumer_read
+producer_msg
+producer_msg
+producer_read
+producer_read
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IPC_SAP/ATM_SAP
+___________________________________________________________________
+Modified: svn:ignore
+   - client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IPC_SAP/SSL_SAP
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IPC_SAP/UPIPE_SAP
+___________________________________________________________________
+Modified: svn:ignore
+   - ex1
+ex1
+ex2
+ex2
+ex3
+ex3
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + ex1
+ex1
+ex2
+ex2
+ex3
+ex3
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IPC_SAP/FIFO_SAP
+___________________________________________________________________
+Modified: svn:ignore
+   - FIFO-Msg-client
+FIFO-Msg-client
+FIFO-Msg-server
+FIFO-Msg-server
+FIFO-client
+FIFO-client
+FIFO-server
+FIFO-server
+FIFO-test
+FIFO-test
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + FIFO-Msg-client
+FIFO-Msg-client
+FIFO-Msg-server
+FIFO-Msg-server
+FIFO-client
+FIFO-client
+FIFO-server
+FIFO-server
+FIFO-test
+FIFO-test
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IPC_SAP/TLI_SAP
+___________________________________________________________________
+Modified: svn:ignore
+   - ATM-client
+ATM-client
+ATM-server
+ATM-server
+CPP-client
+CPP-client
+CPP-server
+CPP-server
+db-client
+db-client
+db-server
+db-server
+ftp-client
+ftp-client
+ftp-server
+ftp-server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + ATM-client
+ATM-client
+ATM-server
+ATM-server
+CPP-client
+CPP-client
+CPP-server
+CPP-server
+db-client
+db-client
+db-server
+db-server
+ftp-client
+ftp-client
+ftp-server
+ftp-server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Logger/Acceptor-server
+___________________________________________________________________
+Modified: svn:ignore
+   - server_loggerd
+server_loggerd
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + server_loggerd
+server_loggerd
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Logger/simple-server
+___________________________________________________________________
+Modified: svn:ignore
+   - server_loggerd
+server_loggerd
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + server_loggerd
+server_loggerd
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Logger/client
+___________________________________________________________________
+Modified: svn:ignore
+   - logging_app
+logging_app
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + logging_app
+logging_app
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Export
+___________________________________________________________________
+Modified: svn:ignore
+   - test
+test
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + test
+test
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libExport_Lib.dylib
+
+
+
+Property changes on: examples/Service_Configurator/IPC-tests/server
+___________________________________________________________________
+Modified: svn:ignore
+   - server_test
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + server_test
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libIPC_Tests_Server.dylib
+
+
+
+Property changes on: examples/Service_Configurator/IPC-tests/client
+___________________________________________________________________
+Modified: svn:ignore
+   - local_dgram_test
+local_fifo_test
+local_pipe_test
+local_spipe_test
+local_stream_test
+remote_broadcast_test
+remote_dgram_test
+remote_service_directory_test
+remote_stream_test
+remote_thr_stream_test
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + local_dgram_test
+local_fifo_test
+local_pipe_test
+local_spipe_test
+local_stream_test
+remote_broadcast_test
+remote_dgram_test
+remote_service_directory_test
+remote_stream_test
+remote_thr_stream_test
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Service_Configurator/Misc
+___________________________________________________________________
+Modified: svn:ignore
+   - main
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + main
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libTimer.dylib
+
+
+
+Property changes on: examples/IOStream/server
+___________________________________________________________________
+Modified: svn:ignore
+   - iostream_server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + iostream_server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/IOStream/client
+___________________________________________________________________
+Modified: svn:ignore
+   - iostream_client
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + iostream_client
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Threads
+___________________________________________________________________
+Modified: svn:ignore
+   - auto_event
+barrier1
+barrier2
+cancel
+future1
+future2
+manual_event
+process_mutex
+process_semaphore
+reader_writer
+recursive_mutex
+task_five
+task_four
+task_one
+task_three
+task_two
+thread_manager
+thread_pool
+thread_specific
+token
+tss1
+tss2
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + auto_event
+barrier1
+barrier2
+cancel
+future1
+future2
+manual_event
+process_mutex
+process_semaphore
+reader_writer
+recursive_mutex
+task_five
+task_four
+task_one
+task_three
+task_two
+thread_manager
+thread_pool
+thread_specific
+token
+tss1
+tss2
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Shared_Memory
+___________________________________________________________________
+Modified: svn:ignore
+   - testmm
+testsv
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + testmm
+testsv
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Connection/non_blocking
+___________________________________________________________________
+Modified: svn:ignore
+   - lsock_client
+lsock_client
+lsock_server
+lsock_server
+sock_client
+sock_client
+sock_server
+sock_server
+spipe_client
+spipe_client
+spipe_server
+spipe_server
+tli_client
+tli_client
+tli_server
+tli_server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + lsock_client
+lsock_client
+lsock_server
+lsock_server
+sock_client
+sock_client
+sock_server
+sock_server
+spipe_client
+spipe_client
+spipe_server
+spipe_server
+tli_client
+tli_client
+tli_server
+tli_server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Connection/blocking
+___________________________________________________________________
+Modified: svn:ignore
+   - acceptor
+acceptor
+connector
+connector
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + acceptor
+acceptor
+connector
+connector
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Connection/misc
+___________________________________________________________________
+Modified: svn:ignore
+   - handler
+handler
+test_upipe
+test_upipe
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + handler
+handler
+test_upipe
+test_upipe
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Reactor/Ntalker
+___________________________________________________________________
+Modified: svn:ignore
+   - ntalker
+ntalker
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + ntalker
+ntalker
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Reactor/TP_Reactor
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Reactor/FIFO
+___________________________________________________________________
+Modified: svn:ignore
+   - client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Reactor/Multicast
+___________________________________________________________________
+Modified: svn:ignore
+   - client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + client
+client
+server
+server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Reactor/Proactor
+___________________________________________________________________
+Modified: svn:ignore
+   - test_cancel
+test_end_event_loop
+test_multiple_loops
+test_post_completions
+test_proactor
+test_timeout
+test_udp_proactor
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + test_cancel
+test_end_event_loop
+test_multiple_loops
+test_post_completions
+test_proactor
+test_timeout
+test_udp_proactor
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Reactor/Dgram
+___________________________________________________________________
+Modified: svn:ignore
+   - codgram
+codgram
+dgram
+dgram
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + codgram
+codgram
+dgram
+dgram
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Reactor/Misc
+___________________________________________________________________
+Modified: svn:ignore
+   - demuxing
+demuxing
+early_timeouts
+early_timeouts
+notification
+notification
+pingpong
+pingpong
+reactors
+reactors
+signals_1
+signals_1
+signals_2
+signals_2
+timer_queue
+timer_queue
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + demuxing
+demuxing
+early_timeouts
+early_timeouts
+notification
+notification
+pingpong
+pingpong
+reactors
+reactors
+signals_1
+signals_1
+signals_2
+signals_2
+timer_queue
+timer_queue
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Naming
+___________________________________________________________________
+Modified: svn:ignore
+   - multiple_contexts
+non_existent
+open
+writers
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + multiple_contexts
+non_existent
+open
+writers
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Mem_Map/IO-tests
+___________________________________________________________________
+Modified: svn:ignore
+   - test_io
+test_io
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + test_io
+test_io
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/Mem_Map/file-reverse
+___________________________________________________________________
+Modified: svn:ignore
+   - file-reverse
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + file-reverse
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/C++NPv1
+___________________________________________________________________
+Modified: svn:ignore
+   - RTTPC_logging_server
+RTTPC_logging_server
+iterative_logging_server
+iterative_logging_server
+logging_client
+logging_client
+ppc_logging_server
+ppc_logging_server
+reactive_logging_server
+reactive_logging_server
+reactive_logging_server_ex
+reactive_logging_server_ex
+tpc_logging_server
+tpc_logging_server
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + RTTPC_logging_server
+RTTPC_logging_server
+iterative_logging_server
+iterative_logging_server
+logging_client
+logging_client
+ppc_logging_server
+ppc_logging_server
+reactive_logging_server
+reactive_logging_server
+reactive_logging_server_ex
+reactive_logging_server_ex
+tpc_logging_server
+tpc_logging_server
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: examples/C++NPv2
+___________________________________________________________________
+Modified: svn:ignore
+   - configurable_logging_server
+configurable_logging_server
+display_logfile
+display_logfile
+reactor_logging_server
+reactor_logging_server
+select_reactor_loggin_server
+select_reactor_loggin_server
+sr_configurable_logging_server
+sr_configurable_logging_server
+tp_reactor_logging_server
+tp_reactor_logging_server
+x
+x
+.depend.*
+GNUmakefile*
+Makefile.in
+
+
+   + configurable_logging_server
+configurable_logging_server
+display_logfile
+display_logfile
+reactor_logging_server
+reactor_logging_server
+select_reactor_loggin_server
+select_reactor_loggin_server
+sr_configurable_logging_server
+sr_configurable_logging_server
+tp_reactor_logging_server
+tp_reactor_logging_server
+x
+x
+.depend.*
+GNUmakefile*
+Makefile.in
+.obj
+.shobj
+libAC_CLD.dylib
+libAIO_CLD.dylib
+libCLD.dylib
+libSLD.dylib
+libSLDex.dylib
+libTPCLS.dylib
+libTPLS.dylib
+
+
+
+Property changes on: ASNMP/tests
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: ASNMP/agent
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: ASNMP/asnmp
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.shobj
+libasnmp.dylib
+
+
+
+Property changes on: ASNMP/examples/get
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: ASNMP/examples/trap
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: ASNMP/examples/set
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: ASNMP/examples/next
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: ASNMP/examples/walk
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+Makefile.in
+
+   + .depend.*
+GNUmakefile*
+Makefile.in
+.obj
+
+
+
+Property changes on: .
+___________________________________________________________________
+Modified: svn:ignore
+   - .depend.*
+GNUmakefile*
+MPC
+Makefile.in
+TAO
+aclocal.m4
+autom4te.cache
+aux_config
+configure
+
+   + .depend.*
+GNUmakefile*
+MPC
+Makefile.in
+TAO
+aclocal.m4
+autom4te.cache
+aux_config
+configure
+.dep.inc
+
+
