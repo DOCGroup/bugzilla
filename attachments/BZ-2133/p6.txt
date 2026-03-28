@@ -1,0 +1,567 @@
+Index: Synch_Invocation.h
+===================================================================
+--- Synch_Invocation.h	(revision 79903)
++++ Synch_Invocation.h	(working copy)
+@@ -107,6 +107,9 @@
+                                       TAO_Synch_Reply_Dispatcher &rd,
+                                       TAO_Bind_Dispatcher_Guard &bd);
+ 
++    /// Callback when the transport resolver has resolved a transport
++    virtual void transport_resolved (void);
++
+   private:
+ 
+     /// Helper method that checks the reply status of the
+Index: DynamicInterface/DII_Invocation.cpp
+===================================================================
+--- DynamicInterface/DII_Invocation.cpp	(revision 79903)
++++ DynamicInterface/DII_Invocation.cpp	(working copy)
+@@ -17,6 +17,8 @@
+ #include "tao/Profile_Transport_Resolver.h"
+ #include "tao/ORB_Constants.h"
+ #include "tao/SystemException.h"
++#include "tao/Transport.h"
++#include "tao/GIOP_Message_Base.h"
+ 
+ #include "ace/OS_NS_string.h"
+ 
+@@ -83,6 +85,15 @@
+     return Synch_Twoway_Invocation::remote_twoway (max_wait_time);
+   }
+ 
++  void
++  DII_Invocation::transport_resolved (void)
++  {
++    Synch_Twoway_Invocation::transport_resolved ();
++
++    this->resolver_.transport ()->messaging_object ()->out_stream ().reset_byte_order (
++        host_->_tao_byte_order ());
++  }
++
+   Invocation_Status
+   DII_Invocation::handle_user_exception (TAO_InputCDR &cdr)
+   {
+@@ -207,9 +218,18 @@
+   Invocation_Status
+   DII_Deferred_Invocation::remote_invocation (ACE_Time_Value *max_wait_time)
+   {
++    return Asynch_Remote_Invocation::remote_invocation (max_wait_time);
++  }
++
++  void
++  DII_Deferred_Invocation::transport_resolved (void)
++  {
++    Asynch_Remote_Invocation::transport_resolved ();
++
+     this->safe_rd_->transport (this->resolver_.transport ());
+ 
+-    return Asynch_Remote_Invocation::remote_invocation (max_wait_time);
++    this->resolver_.transport ()->messaging_object ()->out_stream ().reset_byte_order (
++        host_->_tao_byte_order ());
+   }
+ }
+ 
+Index: DynamicInterface/DII_Invocation_Adapter.cpp
+===================================================================
+--- DynamicInterface/DII_Invocation_Adapter.cpp	(revision 79903)
++++ DynamicInterface/DII_Invocation_Adapter.cpp	(working copy)
+@@ -9,8 +9,6 @@
+ #include "tao/ORB_Constants.h"
+ #include "tao/Profile_Transport_Resolver.h"
+ #include "tao/Transport.h"
+-#include "tao/Transport.h"
+-#include "tao/GIOP_Message_Base.h"
+ #include "tao/SystemException.h"
+ #include "tao/operation_details.h"
+ 
+@@ -87,16 +85,12 @@
+           CORBA::COMPLETED_NO);
+       }
+ 
+-    r.transport ()->messaging_object ()->out_stream ().reset_byte_order (
+-        request_->_tao_byte_order ());
+-
+     TAO::DII_Invocation synch (this->target_,
+                                r,
+                                op,
+                                this->exception_list_,
+                                this->request_);
+ 
+-
+     Invocation_Status status = synch.remote_invocation (max_wait_time);
+ 
+     if (status == TAO_INVOKE_RESTART && synch.is_forwarded ())
+@@ -194,7 +188,6 @@
+           CORBA::COMPLETED_NO);
+       }
+ 
+-    r.transport ()->messaging_object ()->out_stream ().reset_byte_order (request_->_tao_byte_order ());
+     TAO::DII_Deferred_Invocation synch (
+         this->target_,
+         r,
+@@ -202,8 +195,6 @@
+         this->rd_,
+         this->request_);
+ 
+-    r.transport ()->messaging_object ()->out_stream ().reset_byte_order (request_->_tao_byte_order ());
+-
+     Invocation_Status status = synch.remote_invocation (max_wait_time);
+ 
+     if (status == TAO_INVOKE_RESTART)
+Index: DynamicInterface/DII_Invocation.h
+===================================================================
+--- DynamicInterface/DII_Invocation.h	(revision 79903)
++++ DynamicInterface/DII_Invocation.h	(working copy)
+@@ -60,6 +60,10 @@
+     Invocation_Status remote_invocation (ACE_Time_Value *max_wait_time);
+ 
+     virtual Invocation_Status handle_user_exception (TAO_InputCDR &cdr);
++
++  protected:
++    virtual void transport_resolved (void);
++
+   private:
+ 
+     CORBA::ExceptionList *excp_list_;
+@@ -88,11 +92,12 @@
+ 
+     Invocation_Status remote_invocation (ACE_Time_Value *max_wait_time);
+ 
++  protected:
++    virtual void transport_resolved (void);
++
+   private:
+-
+     /// Back pointer to the DII request that created us.
+     CORBA::Request_ptr host_;
+-
+   };
+ 
+   /**
+Index: Messaging/Asynch_Invocation.cpp
+===================================================================
+--- Messaging/Asynch_Invocation.cpp	(revision 79903)
++++ Messaging/Asynch_Invocation.cpp	(working copy)
+@@ -41,12 +41,6 @@
+   Invocation_Status
+   Asynch_Remote_Invocation::remote_invocation (ACE_Time_Value *max_wait_time)
+   {
+-    TAO_Target_Specification tspec;
+-    this->init_target_spec (tspec);
+-
+-    TAO_OutputCDR & cdr =
+-      this->resolver_.transport ()->messaging_object ()->out_stream ();
+-
+     Invocation_Status s = TAO_INVOKE_FAILURE;
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -61,7 +55,39 @@
+     try
+       {
+ #endif /* TAO_HAS_INTERCEPTORS */
++        bool const is_timeout = max_wait_time && (*max_wait_time != ACE_Time_Value::zero);
+ 
++        this->resolver_.resolve (max_wait_time);
++
++        if (TAO_debug_level)
++          {
++            if (is_timeout && max_wait_time && *max_wait_time == ACE_Time_Value::zero)
++              ACE_DEBUG ((LM_DEBUG,
++                          ACE_TEXT ("TAO (%P|%t) Asynch_Remote_Invocation::remote_invocation: ")
++                          ACE_TEXT ("max wait time consumed during transport resolution\n")));
++          }
++
++        // Callback that the transport has been resolved. Derived classes
++        // can now use the transport if they need to
++        this->transport_resolved ();
++
++        TAO_Transport* const transport = this->resolver_.transport ();
++
++        if (this->safe_rd_.get ())
++          {
++            this->safe_rd_->transport (transport);
++            // AMI Timeout Handling Begin
++            ACE_Time_Value tmp;
++
++            if (is_timeout)
++              {
++                this->safe_rd_->schedule_timer (this->details_.request_id (), *max_wait_time);
++              }
++          }
++
++        TAO_OutputCDR & cdr =
++          this->resolver_.transport ()->messaging_object ()->out_stream ();
++
+         // Oneway semantics.  See comments for below send_message()
+         // call.
+         cdr.message_attributes (this->details_.request_id (),
+@@ -69,7 +95,7 @@
+                                 TAO_Transport::TAO_ONEWAY_REQUEST,
+                                 max_wait_time);
+ 
+-        this->write_header (tspec, cdr);
++        this->write_header (cdr);
+ 
+         this->marshal_data (cdr);
+ 
+@@ -78,7 +104,7 @@
+         TAO_Bind_Dispatcher_Guard dispatch_guard (
+           this->details_.request_id (),
+           this->safe_rd_.get (),
+-          this->resolver_.transport ()->tms ());
++          transport->tms ());
+ 
+         // Now that we have bound the reply dispatcher to the map, just
+         // loose ownership of the reply dispatcher.
+@@ -132,7 +158,7 @@
+ 
+         // NOTE: Not sure how things are handles with exclusive muxed
+         // strategy.
+-        if (this->resolver_.transport ()->idle_after_send ())
++        if (transport->idle_after_send ())
+           (void) this->resolver_.transport_released ();
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+Index: Messaging/Asynch_Invocation_Adapter.cpp
+===================================================================
+--- Messaging/Asynch_Invocation_Adapter.cpp	(revision 79903)
++++ Messaging/Asynch_Invocation_Adapter.cpp	(working copy)
+@@ -170,20 +170,6 @@
+           CORBA::COMPLETED_NO);
+       }
+ 
+-    if (this->safe_rd_.get ())
+-      {
+-        // Cache the  transport in the reply dispatcher
+-        this->safe_rd_->transport (r.transport ());
+-
+-        // AMI Timeout Handling Begin
+-        ACE_Time_Value tmp;
+-
+-        if (this->get_timeout (r.stub (), tmp))
+-          {
+-            this->safe_rd_->schedule_timer (op.request_id (), *max_wait_time);
+-          }
+-      }
+-
+     // Loose ownership of the reply dispatcher
+     TAO::Asynch_Remote_Invocation asynch (
+        effective_target.in (),
+Index: Invocation_Adapter.cpp
+===================================================================
+--- Invocation_Adapter.cpp	(revision 79903)
++++ Invocation_Adapter.cpp	(working copy)
+@@ -9,7 +9,6 @@
+ #include "tao/debug.h"
+ #include "tao/Collocated_Invocation.h"
+ #include "tao/Transport.h"
+-#include "tao/Transport_Mux_Strategy.h"
+ #include "tao/Collocation_Proxy_Broker.h"
+ #include "tao/GIOP_Utils.h"
+ #include "tao/TAOC.h"
+@@ -67,8 +66,7 @@
+     // Initial state
+     TAO::Invocation_Status status = TAO_INVOKE_START;
+ 
+-    while (status == TAO_INVOKE_START ||
+-           status == TAO_INVOKE_RESTART)
++    while (status == TAO_INVOKE_START || status == TAO_INVOKE_RESTART)
+       {
+         // Default we go to remote
+         Collocation_Strategy strat = TAO_CS_REMOTE_STRATEGY;
+@@ -232,7 +230,7 @@
+ 
+     (void) this->set_response_flags (stub, details);
+ 
+-    CORBA::Octet rflags = details.response_flags ();
++    CORBA::Octet const rflags = details.response_flags ();
+     bool const block_connect =
+       rflags != static_cast<CORBA::Octet> (Messaging::SYNC_NONE)
+       && rflags != static_cast<CORBA::Octet> (TAO::SYNC_DELAYED_BUFFERING);
+@@ -244,35 +242,24 @@
+       stub,
+       block_connect);
+ 
+-    resolver.resolve (max_wait_time);
+-
+-    if (TAO_debug_level)
++    switch (this->type_)
+       {
+-        if (is_timeout && *max_wait_time == ACE_Time_Value::zero)
+-          ACE_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("(%P|%t)Invocation_Adapter::invoke_remote_i: ")
+-                      ACE_TEXT ("max wait time consumed during transport resolution\n")));
+-      }
++        case TAO_ONEWAY_INVOCATION:
++          {
++            return this->invoke_oneway (details,
++                                        effective_target,
++                                        resolver,
++                                        max_wait_time);
++          }
++        case TAO_TWOWAY_INVOCATION:
++          {
++            return this->invoke_twoway (details,
++                                        effective_target,
++                                        resolver,
++                                        max_wait_time);
+ 
+-
+-    // Update the request id now that we have a transport
+-    details.request_id (resolver.transport ()->tms ()->request_id ());
+-
+-    if (this->type_ == TAO_ONEWAY_INVOCATION)
+-      {
+-        return this->invoke_oneway (details,
+-                                    effective_target,
+-                                    resolver,
+-                                    max_wait_time);
++          }
+       }
+-    else if (this->type_ == TAO_TWOWAY_INVOCATION)
+-      {
+-        return this->invoke_twoway (details,
+-                                    effective_target,
+-                                    resolver,
+-                                    max_wait_time);
+-      }
+-
+     return TAO_INVOKE_FAILURE;
+   }
+ 
+@@ -370,8 +357,6 @@
+           TAO_INVOCATION_LOCATION_FORWARD_MINOR_CODE,
+           errno),
+         CORBA::COMPLETED_NO);
+-
+-    return;
+   }
+ } // End namespace TAO
+ 
+Index: TransportCurrent/IIOP_Current_Impl.cpp
+===================================================================
+--- TransportCurrent/IIOP_Current_Impl.cpp	(revision 79903)
++++ TransportCurrent/IIOP_Current_Impl.cpp	(working copy)
+@@ -30,11 +30,11 @@
+ #if defined (TAO_HAS_IIOP) && (TAO_HAS_IIOP != 0)
+       const TAO_Transport* t = this->transport ();
+       if (t == 0)
+-        throw ::CORBA::NO_IMPLEMENT ();
++        throw NoContext ();
+ 
+       TAO_Connection_Handler *ch = const_cast<TAO_Transport*>(t)->connection_handler ();
+       if (ch == 0)
+-        throw ::CORBA::NO_IMPLEMENT ();
++        throw NoContext ();
+ 
+       return dynamic_cast <TAO_IIOP_Connection_Handler*> (ch);
+ #else
+Index: Object.cpp
+===================================================================
+--- Object.cpp	(revision 79903)
++++ Object.cpp	(working copy)
+@@ -208,7 +208,7 @@
+ {
+   TAO_OBJECT_IOR_EVALUATE_RETURN;
+ 
+-  // NOTE: if istub->type_id is nonzero and we have local knowledge of
++  // NOTE: if _stub->type_id is nonzero and we have local knowledge of
+   // it, we can answer this question without a costly remote call.
+   //
+   // That "local knowledge" could come from stubs or skeletons linked
+Index: Remote_Invocation.h
+===================================================================
+--- Remote_Invocation.h	(revision 79903)
++++ Remote_Invocation.h	(working copy)
+@@ -68,8 +68,7 @@
+     void init_target_spec (TAO_Target_Specification &spec);
+ 
+     /// Write the GIOP header into the stream.
+-    void write_header (TAO_Target_Specification &spec,
+-                       TAO_OutputCDR &out_stream);
++    void write_header (TAO_OutputCDR &out_stream);
+ 
+     /// Marshal the arguments into the stream.
+     void marshal_data (TAO_OutputCDR &cdr);
+Index: Remote_Invocation.cpp
+===================================================================
+--- Remote_Invocation.cpp	(revision 79903)
++++ Remote_Invocation.cpp	(working copy)
+@@ -99,9 +99,11 @@
+   }
+ 
+   void
+-  Remote_Invocation::write_header (TAO_Target_Specification &spec,
+-                                   TAO_OutputCDR &out_stream)
++  Remote_Invocation::write_header (TAO_OutputCDR &out_stream)
+   {
++    TAO_Target_Specification spec;
++    this->init_target_spec (spec);
++
+     this->resolver_.transport ()->clear_translators (0, &out_stream);
+ 
+     // Send the request for the header
+@@ -142,7 +144,7 @@
+     if (nph != 0)
+       {
+         // nph = 0, means DiffServ library is not used
+-        // nph = 0, means DiffServ library is used, and 
++        // nph = 0, means DiffServ library is used, and
+         // request DSCP and reply DSCP are set.
+         // Note that the application could still be using
+         // RTCORBA, but still setting DIffServ codepoints
+Index: Synch_Invocation.cpp
+===================================================================
+--- Synch_Invocation.cpp	(revision 79903)
++++ Synch_Invocation.cpp	(working copy)
+@@ -15,6 +15,7 @@
+ #include "tao/ORB_Core.h"
+ #include "tao/Service_Context.h"
+ #include "tao/SystemException.h"
++#include "tao/Transport_Mux_Strategy.h"
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+ # include "tao/PortableInterceptorC.h"
+@@ -58,9 +59,6 @@
+     TAO_Synch_Reply_Dispatcher rd (this->resolver_.stub ()->orb_core (),
+                                    this->details_.reply_service_info ());
+ 
+-    TAO_Target_Specification tspec;
+-    this->init_target_spec (tspec);
+-
+     Invocation_Status s = TAO_INVOKE_FAILURE;
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -76,15 +74,32 @@
+     try
+       {
+ #endif /*TAO_HAS_INTERCEPTORS */
++        bool const is_timeout = max_wait_time && (*max_wait_time != ACE_Time_Value::zero);
+ 
+-        TAO_OutputCDR &cdr = this->resolver_.transport ()->out_stream ();
++        this->resolver_.resolve (max_wait_time);
+ 
++        if (TAO_debug_level)
++          {
++            if (is_timeout && max_wait_time && *max_wait_time == ACE_Time_Value::zero)
++              ACE_DEBUG ((LM_DEBUG,
++                          ACE_TEXT ("TAO (%P|%t) Synch_Oneway_Invocation::remote_twoway: ")
++                          ACE_TEXT ("max wait time consumed during transport resolution\n")));
++          }
++
++        // Callback that the transport has been resolved. Derived classes
++        // can now use the transport if they need to
++        this->transport_resolved ();
++
++        TAO_Transport* const transport = this->resolver_.transport ();
++
++        TAO_OutputCDR &cdr = transport->out_stream ();
++
+         cdr.message_attributes (this->details_.request_id (),
+                                 this->resolver_.stub (),
+                                 TAO_Transport::TAO_TWOWAY_REQUEST,
+                                 max_wait_time);
+ 
+-        this->write_header (tspec, cdr);
++        this->write_header (cdr);
+ 
+         this->marshal_data (cdr);
+ 
+@@ -93,13 +108,13 @@
+         TAO_Bind_Dispatcher_Guard dispatch_guard (
+           this->details_.request_id (),
+           &rd,
+-          this->resolver_.transport ()->tms ());
++          transport->tms ());
+ 
+         if (dispatch_guard.status () != 0)
+           {
+             // @@ What is the right way to handle this error? Why should
+             // we close the connection?
+-            this->resolver_.transport ()->close_connection ();
++            transport->close_connection ();
+ 
+             throw ::CORBA::INTERNAL (0, CORBA::COMPLETED_NO);
+           }
+@@ -132,7 +147,7 @@
+         // For some strategies one may want to release the transport
+         // back to  cache. If the idling is successfull let the
+         // resolver about that.
+-        if (this->resolver_.transport ()->idle_after_send ())
++        if (transport->idle_after_send ())
+           this->resolver_.transport_released ();
+ 
+         // @@ In all MT environments, there's a cancellation point lurking
+@@ -175,7 +190,7 @@
+ 
+         // For some strategies one may want to release the transport
+         // back to  cache after receiving the reply.
+-        if (this->resolver_.transport ()->idle_after_reply ())
++        if (transport->idle_after_reply ())
+           this->resolver_.transport_released ();
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+@@ -238,7 +253,7 @@
+     int const reply_error =
+       this->resolver_.transport ()->wait_strategy ()->wait (max_wait_time, rd);
+ 
+-    if (TAO_debug_level > 0 && max_wait_time != 0)
++    if (TAO_debug_level > 0 && max_wait_time)
+       {
+         CORBA::ULong const msecs = max_wait_time->msec ();
+ 
+@@ -595,6 +610,12 @@
+     return TAO_INVOKE_SYSTEM_EXCEPTION;
+   }
+ 
++  void Synch_Twoway_Invocation::transport_resolved (void)
++  {
++    // Update the request id now that we have a transport
++    this->details_.request_id (this->resolver_.transport ()->tms ()->request_id ());
++  }
++
+   // =========================================================================
+ 
+   Synch_Oneway_Invocation::Synch_Oneway_Invocation (
+@@ -622,9 +643,6 @@
+         return s;
+       }
+ 
+-    TAO_Target_Specification tspec;
+-    this->init_target_spec (tspec);
+-
+ #if TAO_HAS_INTERCEPTORS == 1
+     s = this->send_request_interception ();
+ 
+@@ -634,7 +652,22 @@
+     try
+       {
+ #endif /*TAO_HAS_INTERCEPTORS */
++        bool const is_timeout = max_wait_time && (*max_wait_time != ACE_Time_Value::zero);
+ 
++        this->resolver_.resolve (max_wait_time);
++
++        if (TAO_debug_level)
++          {
++            if (is_timeout && max_wait_time && *max_wait_time == ACE_Time_Value::zero)
++              ACE_DEBUG ((LM_DEBUG,
++                          ACE_TEXT ("TAO (%P|%t) Synch_Oneway_Invocation::remote_oneway: ")
++                          ACE_TEXT ("max wait time consumed during transport resolution\n")));
++          }
++
++        // Callback that the transport has been resolved. Derived classes
++        // can now use the transport if they need to
++        this->transport_resolved ();
++
+         TAO_Transport* const transport = this->resolver_.transport ();
+ 
+         TAO_OutputCDR &cdr = transport->out_stream ();
+@@ -644,7 +677,7 @@
+                                 TAO_Transport::TAO_ONEWAY_REQUEST,
+                                 max_wait_time);
+ 
+-        this->write_header (tspec, cdr);
++        this->write_header (cdr);
+ 
+         this->marshal_data (cdr);
+ 
