@@ -1,0 +1,108 @@
+Index: ORB_Core_TSS_Resources.cpp
+===================================================================
+--- ORB_Core_TSS_Resources.cpp	(revision 91137)
++++ ORB_Core_TSS_Resources.cpp	(working copy)
+@@ -1,6 +1,7 @@
+ // $Id$
+ 
+ #include "tao/ORB_Core_TSS_Resources.h"
++#include "tao/ORB_Core.h"
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -16,17 +17,17 @@
+ 
+ TAO_ORB_Core_TSS_Resources::~TAO_ORB_Core_TSS_Resources (void)
+ {
+-  //@@ This is broken on platforms that use TSS emulation since this
+-  //   destructor is invoked after the ORB.  Since we're under
+-  //   pressure to release a beta, we'll have to leak the TSS objects
+-  //   stores in the <ts_objects_> array.  However, the only service
+-  //   known to currently use this array is the SSLIOP pluggable
+-  //   protocol.  Fortunately, it registeres a null cleanup function
+-  //   so we're not leaking anything yet.  We *do* need to fix this
+-  //   before other services start to use this array.
+-  //      -Ossama
+-  // if (this->orb_core_ != 0)
+-  //   this->orb_core_->tss_cleanup_funcs ()->cleanup (this->ts_objects_);
++  this->fini ();
+ }
+ 
++void
++TAO_ORB_Core_TSS_Resources::fini (void)
++{
++  if (this->orb_core_ != 0)
++    {
++      this->orb_core_->tss_cleanup (this->ts_objects_);
++    }
++  this->orb_core_ = 0;
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: ORB_Core.cpp
+===================================================================
+--- ORB_Core.cpp	(revision 91137)
++++ ORB_Core.cpp	(working copy)
+@@ -2368,6 +2368,15 @@
+   // Invoke Interceptor::destroy() on all registered interceptors.
+   this->destroy_interceptors ();
+ 
++  // Clean TSS resources. This cannot be done in shutdown() since the later
++  // can be called during an upcall and once it's done it will remove
++  // resources such as PICurrent that are required after the upcall. And this
++  // cannot be postponed to TAO_ORB_Core's destructor as fini() needs access
++  // to orb core and what is more important orb core can be destroyed too late
++  // when some required libraries are already unloaded and we'll get
++  // 'pure virtual method called' during cleanup.
++  this->get_tss_resources ()->fini ();
++
+   // Now remove it from the ORB table so that it's ORBid may be
+   // reused.
+   TAO::ORB_Table::instance ()->unbind (this->orbid_);
+Index: ORB_Core.inl
+===================================================================
+--- ORB_Core.inl	(revision 91137)
++++ ORB_Core.inl	(working copy)
+@@ -324,10 +324,10 @@
+   return 0;
+ }
+ 
+-ACE_INLINE TAO_Cleanup_Func_Registry *
+-TAO_ORB_Core::tss_cleanup_funcs (void)
++ACE_INLINE void
++TAO_ORB_Core::tss_cleanup (ACE_Array_Base<void *> &ts_objects)
+ {
+-  return &(this->tss_cleanup_funcs_);
++  this->tss_cleanup_funcs_.cleanup (ts_objects);
+ }
+ 
+ ACE_INLINE bool
+Index: ORB_Core_TSS_Resources.h
+===================================================================
+--- ORB_Core_TSS_Resources.h	(revision 91137)
++++ ORB_Core_TSS_Resources.h	(working copy)
+@@ -48,6 +48,9 @@
+   /// destructor
+   ~TAO_ORB_Core_TSS_Resources (void);
+ 
++  /// Cleans TSS resources.
++  void fini (void);
++
+ private:
+ 
+   /// The ORB Core TSS resources should not be copied
+Index: ORB_Core.h
+===================================================================
+--- ORB_Core.h	(revision 91137)
++++ ORB_Core.h	(working copy)
+@@ -564,8 +564,8 @@
+   /// argument.  This method return 0 on success, and -1 on failure.
+   int add_tss_cleanup_func (ACE_CLEANUP_FUNC cleanup, size_t &slot_id);
+ 
+-  /// Return the underlying TSS cleanup function registry.
+-  TAO_Cleanup_Func_Registry *tss_cleanup_funcs (void);
++  /// Cleans up ts_objects using the underlying TSS cleanup function registry.
++  void tss_cleanup (ACE_Array_Base<void *> &ts_objects);
+ 
+   /// Get access to the leader_follower class.
+   TAO_Leader_Follower &leader_follower (void);
