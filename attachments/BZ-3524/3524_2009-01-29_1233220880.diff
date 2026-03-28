@@ -1,0 +1,358 @@
+Index: tao/CDR.inl
+===================================================================
+--- tao/CDR.inl	(revision 84254)
++++ tao/CDR.inl	(working copy)
+@@ -275,56 +275,6 @@
+ 
+ // ****************************************************************
+ 
+-ACE_INLINE
+-TAO_OutputCDR::from_bounded_string::from_bounded_string (const ACE_CDR::Char *s,
+-                                                         ACE_CDR::ULong b)
+-  : val_ (const_cast<ACE_CDR::Char *> (s)),
+-    bound_ (b)
+-{
+-}
+-
+-ACE_INLINE
+-TAO_InputCDR::to_bounded_string::to_bounded_string (ACE_CDR::Char *&s,
+-                                                    ACE_CDR::ULong b)
+-  : val_ (s),
+-    bound_ (b)
+-{
+-}
+-
+-ACE_INLINE
+-TAO_InputCDR::to_bounded_string::to_bounded_string (const ACE_CDR::Char *&s,
+-                                                    ACE_CDR::ULong b)
+-  : val_ (const_cast<ACE_CDR::Char *&> (s)),
+-    bound_ (b)
+-{
+-}
+-
+-ACE_INLINE
+-TAO_OutputCDR::from_bounded_wstring::from_bounded_wstring (const ACE_CDR::WChar *ws,
+-                                                           ACE_CDR::ULong b)
+-  : val_ (const_cast<ACE_CDR::WChar *> (ws)),
+-    bound_ (b)
+-{
+-}
+-
+-ACE_INLINE
+-TAO_InputCDR::to_bounded_wstring::to_bounded_wstring (ACE_CDR::WChar *&ws,
+-                                                      ACE_CDR::ULong b)
+-  : val_ (ws),
+-    bound_ (b)
+-{
+-}
+-
+-ACE_INLINE
+-TAO_InputCDR::to_bounded_wstring::to_bounded_wstring (const ACE_CDR::WChar *&ws,
+-                                                      ACE_CDR::ULong b)
+-  : val_ (const_cast<ACE_CDR::WChar *&> (ws)),
+-    bound_ (b)
+-{
+-}
+-
+-// ****************************************************************
+-
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       CORBA::Short x)
+ {
+@@ -427,7 +377,7 @@
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+-                                      TAO_OutputCDR::from_bounded_string x)
++                                      ACE_OutputCDR::from_string x)
+ {
+   if (x.val_ != 0 &&
+       ACE_OS::strlen (x.val_) > x.bound_)
+@@ -438,7 +388,7 @@
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator<< (TAO_OutputCDR &os,
+-                                      TAO_OutputCDR::from_bounded_wstring x)
++                                      ACE_OutputCDR::from_wstring x)
+ {
+   if (x.val_ != 0 &&
+       ACE_OS::strlen (x.val_) > x.bound_)
+@@ -517,9 +467,9 @@
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator>> (TAO_InputCDR &is,
+-                                      TAO_InputCDR::to_bounded_string x)
++                                      ACE_InputCDR::to_string x)
+ {
+-  CORBA::Boolean const marshal_flag = is >> x.val_;
++  CORBA::Boolean const marshal_flag = is >> const_cast<ACE_CDR::Char *&> (x.val_);
+   if (marshal_flag && x.val_ != 0 &&
+       ACE_OS::strlen (x.val_) > x.bound_)
+     {
+@@ -529,9 +479,9 @@
+ }
+ 
+ ACE_INLINE CORBA::Boolean operator>> (TAO_InputCDR &is,
+-                                      TAO_InputCDR::to_bounded_wstring x)
++                                      ACE_InputCDR::to_wstring x)
+ {
+-  CORBA::Boolean const marshal_flag = is >> x.val_;
++  CORBA::Boolean const marshal_flag = is >> const_cast<ACE_CDR::WChar *&> (x.val_);
+   if (marshal_flag && x.val_ != 0 &&
+       ACE_OS::strlen (x.val_) > x.bound_)
+     {
+Index: tao/CDR.h
+===================================================================
+--- tao/CDR.h	(revision 84254)
++++ tao/CDR.h	(working copy)
+@@ -150,22 +150,6 @@
+   /// Destructor.
+   ~TAO_OutputCDR (void);
+ 
+-  struct TAO_Export from_bounded_string
+-  {
+-    from_bounded_string (const ACE_CDR::Char* s,
+-                         ACE_CDR::ULong b);
+-    ACE_CDR::Char *val_;
+-    ACE_CDR::ULong bound_;
+-  };
+-
+-  struct TAO_Export from_bounded_wstring
+-  {
+-    from_bounded_wstring (const ACE_CDR::WChar* ws,
+-                          ACE_CDR::ULong b);
+-    ACE_CDR::WChar *val_;
+-    ACE_CDR::ULong bound_;
+-  };
+-
+   // @todo do we want a special method to write an array of
+   // strings and wstrings?
+ 
+@@ -384,26 +368,6 @@
+   /// Destructor
+   ~TAO_InputCDR (void);
+ 
+-  struct TAO_Export to_bounded_string
+-  {
+-    to_bounded_string (ACE_CDR::Char *&s,
+-                       ACE_CDR::ULong b);
+-    to_bounded_string (const ACE_CDR::Char *&s,
+-                       ACE_CDR::ULong b);
+-    ACE_CDR::Char *&val_;
+-    ACE_CDR::ULong bound_;
+-  };
+-
+-  struct TAO_Export to_bounded_wstring
+-  {
+-    to_bounded_wstring (ACE_CDR::WChar *&ws,
+-                        ACE_CDR::ULong b);
+-    to_bounded_wstring (const ACE_CDR::WChar *&ws,
+-                        ACE_CDR::ULong b);
+-    ACE_CDR::WChar *&val_;
+-    ACE_CDR::ULong bound_;
+-  };
+-
+   // = TAO specific methods.
+ 
+   /// Accessor
+@@ -466,9 +430,9 @@
+ TAO_Export CORBA::Boolean operator<< (TAO_OutputCDR &os,
+                                       const CORBA::WChar* x);
+ TAO_Export CORBA::Boolean operator<< (TAO_OutputCDR &os,
+-                                      TAO_OutputCDR::from_bounded_string x);
++                                      ACE_OutputCDR::from_string x);
+ TAO_Export CORBA::Boolean operator<< (TAO_OutputCDR &os,
+-                                      TAO_OutputCDR::from_bounded_wstring x);
++                                      ACE_OutputCDR::from_wstring x);
+ 
+ // CDR input operators for CORBA types
+ 
+@@ -495,9 +459,9 @@
+ TAO_Export CORBA::Boolean operator>> (TAO_InputCDR &is,
+                                       CORBA::WChar* &x);
+ TAO_Export CORBA::Boolean operator>> (TAO_InputCDR &os,
+-                                      TAO_InputCDR::to_bounded_string x);
++                                      ACE_InputCDR::to_string x);
+ TAO_Export CORBA::Boolean operator>> (TAO_InputCDR &os,
+-                                      TAO_InputCDR::to_bounded_wstring x);
++                                      ACE_InputCDR::to_wstring x);
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+Index: TAO_IDL/be/be_visitor_union_branch/cdr_op_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_union_branch/cdr_op_cs.cpp	(revision 84254)
++++ TAO_IDL/be/be_visitor_union_branch/cdr_op_cs.cpp	(working copy)
+@@ -766,14 +766,14 @@
+         {
+           if (node->width () == (long) sizeof (char))
+             {
+-              *os << "result = strm >> TAO_InputCDR::to_bounded_string ("
++              *os << "result = strm >> ACE_InputCDR::to_string ("
+                   << "_tao_union_tmp.out (), "
+                   << node->max_size ()->ev ()->u.ulval << ");"
+                   << be_nl << be_nl;
+             }
+           else
+             {
+-              *os << "result = strm >> TAO_InputCDR::to_bounded_wstring ("
++              *os << "result = strm >> ACE_InputCDR::to_wstring ("
+                   << "_tao_union_tmp.out (), "
+                   << node->max_size ()->ev ()->u.ulval << ");"
+                   << be_nl << be_nl;
+@@ -798,13 +798,13 @@
+         {
+           if (node->width () == (long) sizeof (char))
+             {
+-              *os << "result = strm << TAO_OutputCDR::from_bounded_string ("
++              *os << "result = strm << ACE_OutputCDR::from_string ("
+                   << "_tao_union." << f->local_name () << " (), "
+                   << node->max_size ()->ev ()->u.ulval << ");";
+             }
+           else
+             {
+-              *os << "result = strm << TAO_OutputCDR::from_bounded_wstring ("
++              *os << "result = strm << ACE_OutputCDR::from_wstring ("
+                   << "_tao_union." << f->local_name () << " (), "
+                   << node->max_size ()->ev ()->u.ulval << ");";
+             }
+Index: TAO_IDL/be/be_visitor_array/cdr_op_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_array/cdr_op_cs.cpp	(revision 84254)
++++ TAO_IDL/be/be_visitor_array/cdr_op_cs.cpp	(working copy)
+@@ -665,11 +665,11 @@
+             {
+               if (str->width () == (long) sizeof (char))
+                 {
+-                  *os << "TAO_InputCDR::to_bounded_string (_tao_array ";
++                  *os << "ACE_InputCDR::to_string (_tao_array ";
+                 }
+               else
+                 {
+-                  *os << "TAO_InputCDR::to_bounded_wstring (_tao_array ";
++                  *os << "ACE_InputCDR::to_wstring (_tao_array ";
+                 }
+             }
+           else
+@@ -792,11 +792,11 @@
+             {
+               if (str->width () == (long) sizeof (char))
+                 {
+-                  *os << "TAO_OutputCDR::from_bounded_string (_tao_array ";
++                  *os << "ACE_OutputCDR::from_string (_tao_array ";
+                 }
+               else
+                 {
+-                  *os << "TAO_OutputCDR::from_bounded_wstring (_tao_array ";
++                  *os << "ACE_OutputCDR::from_wstring (_tao_array ";
+                 }
+             }
+           else
+Index: TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp	(revision 84254)
++++ TAO_IDL/be/be_visitor_valuebox/valuebox_cs.cpp	(working copy)
+@@ -278,13 +278,13 @@
+     {
+       if (str->width () == (long) sizeof (char))
+         {
+-          *os << "::TAO_InputCDR::to_bounded_string "
++          *os << "::ACE_InputCDR::to_string "
+               << "(vb_object->_pd_value, "
+               << str->max_size ()->ev ()->u.ulval << ")";
+         }
+       else
+         {
+-          *os << "::TAO_InputCDR::to_bounded_wstring "
++          *os << "::ACE_InputCDR::to_wstring "
+               << "(vb_object->_pd_value, "
+               << str->max_size ()->ev ()->u.ulval << ")";
+         }
+@@ -634,13 +634,13 @@
+     {
+       if (str->width () == (long) sizeof (char))
+         {
+-          os << "::TAO_OutputCDR::from_bounded_string "
++          os << "::ACE_OutputCDR::from_string "
+              << "(this->_pd_value, "
+              << str->max_size ()->ev ()->u.ulval << ")";
+         }
+       else
+         {
+-          os << "::TAO_OutputCDR::from_bounded_wstring "
++          os << "::ACE_OutputCDR::from_wstring "
+              << "(this->_pd_value, "
+              << str->max_size ()->ev ()->u.ulval << ")";
+         }
+Index: TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp	(revision 84254)
++++ TAO_IDL/be/be_visitor_valuetype/field_cdr_cs.cpp	(working copy)
+@@ -651,13 +651,13 @@
+         {
+           if (str->width () == (long) sizeof (char))
+             {
+-              *os << "(strm >> TAO_InputCDR::to_bounded_string ("
++              *os << "(strm >> ACE_InputCDR::to_string ("
+                   << this->pre_ << f->local_name () << this->post_
+                   << ".out (), " << str->max_size ()->ev ()->u.ulval << "))";
+             }
+           else
+             {
+-              *os << "(strm >> TAO_InputCDR::to_bounded_wstring ("
++              *os << "(strm >> ACE_InputCDR::to_wstring ("
+                   << this->pre_ << f->local_name () << this->post_
+                   << ".out (), " << str->max_size ()->ev ()->u.ulval << "))";
+             }
+@@ -673,13 +673,13 @@
+         {
+           if (str->width () == (long) sizeof (char))
+             {
+-              *os << "(strm << TAO_OutputCDR::from_bounded_string ("
++              *os << "(strm << ACE_OutputCDR::from_string ("
+                   <<  this->pre_ << f->local_name () << this->post_
+                   << ".in (), " << str->max_size ()->ev ()->u.ulval << "))";
+             }
+           else
+             {
+-              *os << "(strm << TAO_OutputCDR::from_bounded_wstring ("
++              *os << "(strm << ACE_OutputCDR::from_wstring ("
+                   <<  this->pre_ << f->local_name () << this->post_
+                   << ".in (), " << str->max_size ()->ev ()->u.ulval << "))";
+             }
+Index: TAO_IDL/be/be_visitor_field/cdr_op_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_field/cdr_op_cs.cpp	(revision 84254)
++++ TAO_IDL/be/be_visitor_field/cdr_op_cs.cpp	(working copy)
+@@ -653,13 +653,13 @@
+         {
+           if (str->width () == (long) sizeof (char))
+             {
+-              *os << "(strm >> TAO_InputCDR::to_bounded_string (_tao_aggregate."
++              *os << "(strm >> ACE_InputCDR::to_string (_tao_aggregate."
+                   << f->local_name () << ".out (), "
+                   << str->max_size ()->ev ()->u.ulval << "))";
+             }
+           else
+             {
+-              *os << "(strm >> TAO_InputCDR::to_bounded_wstring (_tao_aggregate."
++              *os << "(strm >> ACE_InputCDR::to_wstring (_tao_aggregate."
+                   << f->local_name () << ".out (), "
+                   << str->max_size ()->ev ()->u.ulval << "))";
+             }
+@@ -675,13 +675,13 @@
+         {
+           if (str->width () == (long) sizeof (char))
+             {
+-              *os << "(strm << TAO_OutputCDR::from_bounded_string (_tao_aggregate."
++              *os << "(strm << ACE_OutputCDR::from_string (_tao_aggregate."
+                   << f->local_name () << ".in (), "
+                   << str->max_size ()->ev ()->u.ulval << "))";
+             }
+           else
+             {
+-              *os << "(strm << TAO_OutputCDR::from_bounded_wstring (_tao_aggregate."
++              *os << "(strm << ACE_OutputCDR::from_wstring (_tao_aggregate."
+                   << f->local_name () << ".in (), "
+                   << str->max_size ()->ev ()->u.ulval << "))";
+             }
