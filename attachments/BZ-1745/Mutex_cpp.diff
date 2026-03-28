@@ -1,0 +1,32 @@
+--- Mutex.cpp	2003-11-01 06:15:14.000000000 -0500
++++ /cygdrive/c/welchj/c/apps/ACE_wrappers/ace/Mutex.cpp	2004-02-17 12:39:06.739696000 -0500
+@@ -28,7 +28,8 @@
+ }
+ 
+ ACE_Mutex::ACE_Mutex (int type, const ACE_TCHAR *name,
+-                      ACE_mutexattr_t *arg, mode_t mode)
++                      ACE_mutexattr_t *arg, mode_t mode,
++					  LPSECURITY_ATTRIBUTES sa)
+   :
+ #if defined (CHORUS) || defined (ACE_HAS_PTHREADS) || defined(ACE_HAS_STHREADS)
+     process_lock_ (0),
+@@ -83,7 +84,8 @@
+           && ACE_OS::mutex_init (this->process_lock_,
+                                  type,
+                                  name,
+-                                 arg) != 0)
++                                 arg,
++								 sa) != 0)
+         return;
+     }
+    // It is ok to fall through into the <mutex_init> below if the
+@@ -95,7 +97,8 @@
+   if (ACE_OS::mutex_init (&this->lock_,
+                           type,
+                           name,
+-                          arg) != 0)
++                          arg,
++						  sa) != 0)
+     ACE_ERROR ((LM_ERROR,
+                 ACE_LIB_TEXT ("%p\n"),
+                 ACE_LIB_TEXT ("ACE_Mutex::ACE_Mutex")));
