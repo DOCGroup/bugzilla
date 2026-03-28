@@ -1,0 +1,4728 @@
+Index: BD_String_Argument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/BD_String_Argument_T.cpp,v
+retrieving revision 1.14
+diff -u -u -w -b -r1.14 BD_String_Argument_T.cpp
+--- BD_String_Argument_T.cpp    22 Jun 2006 06:48:08 -0000      1.14
++++ BD_String_Argument_T.cpp    26 Jun 2006 19:08:57 -0000
+@@ -13,7 +13,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -27,13 +27,13 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+   typedef typename S_var::s_traits::from_type from_type;
+-  Insert_Policy<from_type>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       from_type (this->x_, BOUND)
+     );
+@@ -45,7 +45,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -57,7 +57,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -72,13 +72,13 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+   typedef typename S_var::s_traits::from_type from_type;
+-  Insert_Policy<from_type>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       from_type (this->x_, BOUND)
+     );
+@@ -90,7 +90,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -104,13 +104,13 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+   typedef typename S_var::s_traits::from_type from_type;
+-  Insert_Policy<from_type>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       from_type (this->x_, BOUND)
+     );
+@@ -122,7 +122,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -136,13 +136,13 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+   typedef typename S_var::s_traits::from_type from_type;
+-  Insert_Policy<from_type>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       from_type (this->x_.in (), BOUND)
+     );
+Index: BD_String_Argument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/BD_String_Argument_T.h,v
+retrieving revision 1.9
+diff -u -u -w -b -r1.9 BD_String_Argument_T.h
+--- BD_String_Argument_T.h      20 Jun 2006 05:45:23 -0000      1.9
++++ BD_String_Argument_T.h      26 Jun 2006 18:14:14 -0000
+@@ -37,7 +37,7 @@
+    */
+   template<typename S_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_BD_String_Argument_T : public InArgument
+   {
+   public:
+@@ -63,7 +63,7 @@
+    */
+   template<typename S_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_BD_String_Argument_T : public InoutArgument
+   {
+   public:
+@@ -88,7 +88,7 @@
+    */
+   template<typename S_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_BD_String_Argument_T : public OutArgument
+   {
+   public:
+@@ -112,7 +112,7 @@
+    */
+   template<typename S_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_BD_String_Argument_T : public RetArgument
+   {
+   public:
+@@ -139,7 +139,7 @@
+    */
+   template<typename T_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct BD_String_Arg_Traits_T
+   {
+     typedef typename T_var::s_traits::char_type *         ret_type;
+Index: BD_String_Argument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/BD_String_Argument_T.inl,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 BD_String_Argument_T.inl
+--- BD_String_Argument_T.inl    20 Jun 2006 05:45:23 -0000      1.6
++++ BD_String_Argument_T.inl    26 Jun 2006 18:14:17 -0000
+@@ -6,7 +6,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::In_BD_String_Argument_T (
+     const typename S_var::s_traits::char_type * x
+@@ -16,7 +16,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ const typename S_var::s_traits::char_type *
+ TAO::In_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::arg (void) const
+@@ -28,7 +28,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::
+ Inout_BD_String_Argument_T (typename S_var::s_traits::char_type *& x)
+@@ -37,7 +37,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *&
+ TAO::Inout_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::arg (void)
+@@ -49,7 +49,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::
+ Out_BD_String_Argument_T (typename S_var::s_traits::string_out x)
+@@ -58,7 +58,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *&
+ TAO::Out_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::arg (void)
+@@ -70,7 +70,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::
+ Ret_BD_String_Argument_T (void)
+@@ -79,7 +79,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *
+ TAO::Ret_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::excp (void)
+@@ -89,7 +89,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *
+ TAO::Ret_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::retn (void)
+@@ -99,7 +99,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *&
+ TAO::Ret_BD_String_Argument_T<S_var,BOUND,Insert_Policy>::arg (void)
+Index: Basic_Argument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Basic_Argument_T.cpp,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Basic_Argument_T.cpp
+--- Basic_Argument_T.cpp        20 Jun 2006 05:43:00 -0000      1.6
++++ Basic_Argument_T.cpp        26 Jun 2006 18:45:07 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Basic_Argument_T<S, Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -22,11 +22,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Basic_Argument_T<S, Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -34,7 +34,7 @@
+ // ===========================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Basic_Argument_T<S, Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -42,7 +42,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Basic_Argument_T<S, Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -52,11 +52,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Basic_Argument_T<S, Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -64,7 +64,7 @@
+ // ==============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Basic_Argument_T<S, Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -74,11 +74,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Basic_Argument_T<S, Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -86,7 +86,7 @@
+ // ============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Basic_Argument_T<S, Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -96,11 +96,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Basic_Argument_T<S, Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: Basic_Argument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Basic_Argument_T.h,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 Basic_Argument_T.h
+--- Basic_Argument_T.h  20 Jun 2006 05:43:00 -0000      1.10
++++ Basic_Argument_T.h  26 Jun 2006 18:14:14 -0000
+@@ -32,7 +32,7 @@
+    * @brief Template class for IN stub argument of basic IDL types.
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Basic_Argument_T : public InArgument
+   {
+   public:
+@@ -55,7 +55,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Basic_Argument_T : public InoutArgument
+   {
+   public:
+@@ -79,7 +79,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Basic_Argument_T : public OutArgument
+   {
+   public:
+@@ -102,7 +102,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Basic_Argument_T : public RetArgument
+   {
+   public:
+@@ -128,7 +128,7 @@
+    * @brief Template class for stub argument traits of basic IDL types.
+    *
+    */
+-  template<typename T, template <typename> class Insert_Policy>
++  template<typename T, class Insert_Policy>
+   struct Basic_Arg_Traits_T
+   {
+     typedef T                                          ret_type;
+Index: Basic_Argument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Basic_Argument_T.inl,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 Basic_Argument_T.inl
+--- Basic_Argument_T.inl        20 Jun 2006 05:43:00 -0000      1.5
++++ Basic_Argument_T.inl        26 Jun 2006 18:14:17 -0000
+@@ -5,14 +5,14 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Basic_Argument_T<S, Insert_Policy>::In_Basic_Argument_T (S const & x)
+   : x_ (x)
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S
+ TAO::In_Basic_Argument_T<S, Insert_Policy>::arg (void) const
+@@ -23,14 +23,14 @@
+ // ================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Basic_Argument_T<S, Insert_Policy>::Inout_Basic_Argument_T (S & x)
+   : x_ (x)
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Inout_Basic_Argument_T<S, Insert_Policy>::arg (void)
+@@ -41,14 +41,14 @@
+ // ================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Basic_Argument_T<S, Insert_Policy>::Out_Basic_Argument_T (S & x)
+   : x_ (x)
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Out_Basic_Argument_T<S, Insert_Policy>::arg (void)
+@@ -59,14 +59,14 @@
+ // ================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Basic_Argument_T<S, Insert_Policy>::Ret_Basic_Argument_T (void)
+ {
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Ret_Basic_Argument_T<S, Insert_Policy>::arg (void)
+@@ -75,7 +75,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S
+ TAO::Ret_Basic_Argument_T<S, Insert_Policy>::excp (void)
+@@ -84,7 +84,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S
+ TAO::Ret_Basic_Argument_T<S, Insert_Policy>::retn (void)
+Index: Basic_Arguments.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Basic_Arguments.h,v
+retrieving revision 1.8
+diff -u -u -w -b -r1.8 Basic_Arguments.h
+--- Basic_Arguments.h   20 Jun 2006 05:39:26 -0000      1.8
++++ Basic_Arguments.h   26 Jun 2006 18:40:21 -0000
+@@ -53,63 +53,63 @@
+   template<>
+   class TAO_Export Arg_Traits<CORBA::Short>
+     : public Basic_Arg_Traits_T<CORBA::Short,
+-                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::Short> >
+   {
+   };
+
+   template<>
+   class TAO_Export Arg_Traits<CORBA::Long>
+     : public Basic_Arg_Traits_T<CORBA::Long,
+-                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::Long> >
+   {
+   };
+
+   template<>
+   class TAO_Export Arg_Traits<CORBA::UShort>
+     : public Basic_Arg_Traits_T<CORBA::UShort,
+-                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::UShort> >
+   {
+   };
+
+   template<>
+   class TAO_Export Arg_Traits<CORBA::ULong>
+     : public Basic_Arg_Traits_T<CORBA::ULong,
+-                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::ULong> >
+   {
+   };
+
+   template<>
+   class TAO_Export Arg_Traits<CORBA::Float>
+     : public Basic_Arg_Traits_T<CORBA::Float,
+-                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::Float> >
+   {
+   };
+
+   template<>
+   class TAO_Export Arg_Traits<CORBA::Double>
+     : public Basic_Arg_Traits_T<CORBA::Double,
+-                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::Double> >
+   {
+   };
+
+   template<>
+   class TAO_Export Arg_Traits<CORBA::LongLong>
+     : public Basic_Arg_Traits_T<CORBA::LongLong,
+-                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::LongLong> >
+   {
+   };
+
+   template<>
+   class TAO_Export Arg_Traits<CORBA::ULongLong>
+     : public Basic_Arg_Traits_T<CORBA::ULongLong,
+-                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::ULongLong> >
+   {
+   };
+
+   template<>
+   class TAO_Export Arg_Traits<CORBA::LongDouble>
+     : public Basic_Arg_Traits_T<CORBA::LongDouble,
+-                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::LongDouble> >
+   {
+   };
+ }
+Index: DomainC.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/DomainC.cpp,v
+retrieving revision 1.105
+diff -u -u -w -b -r1.105 DomainC.cpp
+--- DomainC.cpp 20 Jun 2006 05:47:22 -0000      1.105
++++ DomainC.cpp 26 Jun 2006 18:54:45 -0000
+@@ -75,7 +75,7 @@
+
+   template<>
+   CORBA::Boolean
+-  In_Object_Argument_T<CORBA::InterfaceDef_ptr, TAO::Any_Insert_Policy_IFR_Client_Adapter>::marshal (TAO_OutputCDR &cdr)
++  In_Object_Argument_T<CORBA::InterfaceDef_ptr, TAO::Any_Insert_Policy_IFR_Client_Adapter <CORBA::InterfaceDef_ptr> >::marshal (TAO_OutputCDR &cdr)
+   {
+     TAO_IFR_Client_Adapter *adapter =
+       ACE_Dynamic_Service<TAO_IFR_Client_Adapter>::instance (
+@@ -101,7 +101,7 @@
+             CORBA::Policy_var,
+             CORBA::Policy_out,
+             TAO::Objref_Traits<CORBA::Policy>,
+-            TAO::Any_Insert_Policy_AnyTypeCode_Adapter
++            TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::Policy_ptr>
+           >
+   {
+   };
+@@ -119,7 +119,7 @@
+             CORBA::InterfaceDef_var,
+             CORBA::InterfaceDef_out,
+             TAO::Objref_Traits<CORBA::InterfaceDef>,
+-            TAO::Any_Insert_Policy_IFR_Client_Adapter
++            TAO::Any_Insert_Policy_IFR_Client_Adapter <CORBA::InterfaceDef_ptr>
+           >
+   {
+   };
+Index: Fixed_Array_Argument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Fixed_Array_Argument_T.cpp,v
+retrieving revision 1.12
+diff -u -u -w -b -r1.12 Fixed_Array_Argument_T.cpp
+--- Fixed_Array_Argument_T.cpp  21 Jun 2006 12:14:14 -0000      1.12
++++ Fixed_Array_Argument_T.cpp  26 Jun 2006 19:13:02 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Fixed_Array_Argument_T<S_forany,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -24,12 +24,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Fixed_Array_Argument_T<S_forany,Insert_Policy>::
+   interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -37,7 +37,7 @@
+ // ===========================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Fixed_Array_Argument_T<S_forany,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -47,7 +47,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Fixed_Array_Argument_T<S_forany,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -59,12 +59,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Fixed_Array_Argument_T<S_forany,Insert_Policy>::
+   interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -72,7 +72,7 @@
+ // ==============================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Fixed_Array_Argument_T<S_forany,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr)
+@@ -83,12 +83,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Fixed_Array_Argument_T<S_forany,Insert_Policy>::
+   interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -97,7 +97,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Fixed_Array_Argument_T<S_var,S_forany,Insert_Policy>::
+   demarshal (TAO_InputCDR & cdr)
+@@ -116,12 +116,12 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Fixed_Array_Argument_T<S_var,S_forany,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, S_forany (this->x_.ptr ()));
++  Insert_Policy::any_insert (any, S_forany (this->x_.ptr ()));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: Fixed_Array_Argument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Fixed_Array_Argument_T.h,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 Fixed_Array_Argument_T.h
+--- Fixed_Array_Argument_T.h    20 Jun 2006 05:49:04 -0000      1.10
++++ Fixed_Array_Argument_T.h    26 Jun 2006 18:14:14 -0000
+@@ -32,7 +32,7 @@
+    *
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Fixed_Array_Argument_T : public InArgument
+   {
+   public:
+@@ -55,7 +55,7 @@
+    *
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Fixed_Array_Argument_T : public InoutArgument
+   {
+   public:
+@@ -79,7 +79,7 @@
+    *
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Fixed_Array_Argument_T : public OutArgument
+   {
+   public:
+@@ -103,7 +103,7 @@
+    */
+   template<typename S_var,
+            typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Fixed_Array_Argument_T : public RetArgument
+   {
+   public:
+@@ -130,7 +130,7 @@
+    */
+   template<typename T_var,
+            typename T_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Fixed_Array_Arg_Traits_T
+   {
+     typedef typename T_forany::_slice_type *            ret_type;
+Index: Fixed_Array_Argument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Fixed_Array_Argument_T.inl,v
+retrieving revision 1.12
+diff -u -u -w -b -r1.12 Fixed_Array_Argument_T.inl
+--- Fixed_Array_Argument_T.inl  20 Jun 2006 05:49:04 -0000      1.12
++++ Fixed_Array_Argument_T.inl  26 Jun 2006 18:14:17 -0000
+@@ -5,7 +5,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Fixed_Array_Argument_T<S_forany,Insert_Policy>::
+ In_Fixed_Array_Argument_T (const typename S_forany::_slice_type * x)
+@@ -26,7 +26,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ const typename S_forany::_slice_type *
+ TAO::In_Fixed_Array_Argument_T<S_forany,Insert_Policy>::arg (void) const
+@@ -37,7 +37,7 @@
+ // ===========================================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Fixed_Array_Argument_T<S_forany,Insert_Policy>::
+ Inout_Fixed_Array_Argument_T (typename S_forany::_slice_type *& x)
+@@ -45,7 +45,7 @@
+ {}
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *
+ TAO::Inout_Fixed_Array_Argument_T<S_forany,Insert_Policy>::arg (void)
+@@ -56,7 +56,7 @@
+ // ===========================================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Fixed_Array_Argument_T<
+     S_forany,
+@@ -66,7 +66,7 @@
+ {}
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *&
+ TAO::Out_Fixed_Array_Argument_T<S_forany,Insert_Policy>::arg (void)
+@@ -78,7 +78,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Fixed_Array_Argument_T<S_var,S_forany,Insert_Policy>::
+ Ret_Fixed_Array_Argument_T (void)
+@@ -86,7 +86,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *&
+ TAO::Ret_Fixed_Array_Argument_T<S_var,S_forany,Insert_Policy>::arg (void)
+@@ -96,7 +96,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *
+ TAO::Ret_Fixed_Array_Argument_T<S_var,S_forany,Insert_Policy>::excp (void)
+@@ -106,7 +106,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *
+ TAO::Ret_Fixed_Array_Argument_T<S_var,S_forany,Insert_Policy>::retn (void)
+Index: Fixed_Size_Argument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Fixed_Size_Argument_T.cpp,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Fixed_Size_Argument_T.cpp
+--- Fixed_Size_Argument_T.cpp   20 Jun 2006 05:49:35 -0000      1.7
++++ Fixed_Size_Argument_T.cpp   26 Jun 2006 18:45:07 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Fixed_Size_Argument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -22,11 +22,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Fixed_Size_Argument_T<S,Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, *this->x_);
++  Insert_Policy::any_insert (any, *this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -34,7 +34,7 @@
+ // ===========================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Fixed_Size_Argument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -42,7 +42,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Fixed_Size_Argument_T<S,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -52,11 +52,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Fixed_Size_Argument_T<S,Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, *this->x_);
++  Insert_Policy::any_insert (any, *this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -64,7 +64,7 @@
+ // ==============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Fixed_Size_Argument_T<S,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -74,11 +74,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Fixed_Size_Argument_T<S,Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -86,7 +86,7 @@
+ // ============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Fixed_Size_Argument_T<S,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -96,12 +96,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Fixed_Size_Argument_T<S,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: Fixed_Size_Argument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Fixed_Size_Argument_T.h,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 Fixed_Size_Argument_T.h
+--- Fixed_Size_Argument_T.h     20 Jun 2006 05:49:35 -0000      1.10
++++ Fixed_Size_Argument_T.h     26 Jun 2006 18:14:14 -0000
+@@ -32,7 +32,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Fixed_Size_Argument_T : public InArgument
+   {
+   public:
+@@ -55,7 +55,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Fixed_Size_Argument_T : public InoutArgument
+   {
+   public:
+@@ -79,7 +79,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Fixed_Size_Argument_T : public OutArgument
+   {
+   public:
+@@ -103,7 +103,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Fixed_Size_Argument_T : public RetArgument
+   {
+   public:
+@@ -128,7 +128,7 @@
+    *
+    */
+   template<typename T,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Fixed_Size_Arg_Traits_T
+   {
+     typedef T                                            ret_type;
+Index: Fixed_Size_Argument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Fixed_Size_Argument_T.inl,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Fixed_Size_Argument_T.inl
+--- Fixed_Size_Argument_T.inl   20 Jun 2006 05:49:35 -0000      1.6
++++ Fixed_Size_Argument_T.inl   26 Jun 2006 18:14:17 -0000
+@@ -5,7 +5,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Fixed_Size_Argument_T<S,Insert_Policy>::
+ In_Fixed_Size_Argument_T (S const & x)
+@@ -13,7 +13,7 @@
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ const S &
+ TAO::In_Fixed_Size_Argument_T<S,Insert_Policy>::arg (void) const
+@@ -24,7 +24,7 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Fixed_Size_Argument_T<S,Insert_Policy>::
+ Inout_Fixed_Size_Argument_T (S & x)
+@@ -32,7 +32,7 @@
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Inout_Fixed_Size_Argument_T<S,Insert_Policy>::arg (void)
+@@ -43,7 +43,7 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Fixed_Size_Argument_T<S,Insert_Policy>::
+ Out_Fixed_Size_Argument_T (S & x)
+@@ -52,7 +52,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Out_Fixed_Size_Argument_T<S,Insert_Policy>::arg (void)
+@@ -63,7 +63,7 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Fixed_Size_Argument_T<S,Insert_Policy>::
+ Ret_Fixed_Size_Argument_T (void)
+@@ -71,7 +71,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Ret_Fixed_Size_Argument_T<S,Insert_Policy>::arg (void)
+@@ -80,7 +80,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S
+ TAO::Ret_Fixed_Size_Argument_T<S,Insert_Policy>::excp (void)
+@@ -89,7 +89,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S
+ TAO::Ret_Fixed_Size_Argument_T<S,Insert_Policy>::retn (void)
+Index: Object.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object.h,v
+retrieving revision 1.114
+diff -u -u -w -b -r1.114 Object.h
+--- Object.h    20 Jun 2006 05:52:10 -0000      1.114
++++ Object.h    26 Jun 2006 18:39:13 -0000
+@@ -427,7 +427,7 @@
+                                  CORBA::Object_var,
+                                  CORBA::Object_out,
+                                  TAO::Objref_Traits<CORBA::Object>,
+-                                 TAO::Any_Insert_Policy_CORBA_Object>
++                                 TAO::Any_Insert_Policy_CORBA_Object <CORBA::Object_ptr> >
+   {
+   };
+
+Index: Object_Argument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object_Argument_T.cpp,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Object_Argument_T.cpp
+--- Object_Argument_T.cpp       20 Jun 2006 05:51:15 -0000      1.7
++++ Object_Argument_T.cpp       26 Jun 2006 18:44:07 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_ptr,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Object_Argument_T<S_ptr,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -22,11 +22,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_ptr,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Object_Argument_T<S_ptr,Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S_ptr>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -35,7 +35,7 @@
+
+ template<typename S_ptr,
+          typename S_traits,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Object_Argument_T<S_ptr,S_traits,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -44,7 +44,7 @@
+
+ template<typename S_ptr,
+          typename S_traits,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Object_Argument_T<S_ptr,S_traits,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -56,12 +56,12 @@
+
+ template<typename S_ptr,
+          typename S_traits,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Object_Argument_T<S_ptr,S_traits,Insert_Policy>::interceptor_value (
+     CORBA::Any *any) const
+ {
+-  Insert_Policy<S_ptr>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -70,7 +70,7 @@
+
+ template<typename S_ptr,
+          typename S_out,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Object_Argument_T<S_ptr,S_out,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -81,12 +81,12 @@
+
+ template<typename S_ptr,
+          typename S_out,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Object_Argument_T<S_ptr,S_out,Insert_Policy>::interceptor_value (
+     CORBA::Any *any) const
+ {
+-  Insert_Policy<S_ptr>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -95,7 +95,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Object_Argument_T<S_ptr,S_var,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -106,12 +106,12 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Object_Argument_T<S_ptr,S_var,Insert_Policy>::interceptor_value (
+     CORBA::Any *any) const
+ {
+-  Insert_Policy<S_ptr>::any_insert (any, this->x_.in ());
++  Insert_Policy::any_insert (any, this->x_.in ());
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: Object_Argument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object_Argument_T.h,v
+retrieving revision 1.9
+diff -u -u -w -b -r1.9 Object_Argument_T.h
+--- Object_Argument_T.h 20 Jun 2006 05:51:15 -0000      1.9
++++ Object_Argument_T.h 26 Jun 2006 18:14:14 -0000
+@@ -33,7 +33,7 @@
+    *
+    */
+   template<typename S_ptr,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Object_Argument_T : public InArgument
+   {
+   public:
+@@ -57,7 +57,7 @@
+    */
+   template<typename S_ptr,
+            typename S_traits,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Object_Argument_T : public InoutArgument
+   {
+   public:
+@@ -82,7 +82,7 @@
+    */
+   template<typename S_ptr,
+            typename S_out,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Object_Argument_T : public OutArgument
+   {
+   public:
+@@ -106,7 +106,7 @@
+    */
+   template<typename S_ptr,
+            typename S_var,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Object_Argument_T : public RetArgument
+   {
+   public:
+@@ -135,7 +135,7 @@
+            typename T_var,
+            typename T_out,
+            typename T_traits,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Object_Arg_Traits_T
+   {
+     typedef T_ptr                                         ret_type;
+Index: Object_Argument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Object_Argument_T.inl,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Object_Argument_T.inl
+--- Object_Argument_T.inl       20 Jun 2006 05:51:15 -0000      1.6
++++ Object_Argument_T.inl       26 Jun 2006 18:14:18 -0000
+@@ -5,14 +5,14 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_ptr,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Object_Argument_T<S_ptr,Insert_Policy>::In_Object_Argument_T (S_ptr x)
+   : x_ (x)
+ {}
+
+ template<typename S_ptr,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_ptr
+ TAO::In_Object_Argument_T<S_ptr,Insert_Policy>::arg (void) const
+@@ -24,7 +24,7 @@
+
+ template<typename S_ptr,
+          typename S_traits,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Object_Argument_T<S_ptr,S_traits,Insert_Policy>::Inout_Object_Argument_T (
+     S_ptr & x
+@@ -34,7 +34,7 @@
+
+ template<typename S_ptr,
+          typename S_traits,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_ptr &
+ TAO::Inout_Object_Argument_T<S_ptr,S_traits,Insert_Policy>::arg (void)
+@@ -46,7 +46,7 @@
+
+ template<typename S_ptr,
+          typename S_out,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Object_Argument_T<S_ptr,S_out,Insert_Policy>::Out_Object_Argument_T (S_out & x)
+   : x_ (x.ptr ())
+@@ -54,7 +54,7 @@
+
+ template<typename S_ptr,
+          typename S_out,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_out
+ TAO::Out_Object_Argument_T<S_ptr,S_out,Insert_Policy>::arg (void)
+@@ -66,14 +66,14 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Object_Argument_T<S_ptr,S_var,Insert_Policy>::Ret_Object_Argument_T (void)
+ {}
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_ptr &
+ TAO::Ret_Object_Argument_T<S_ptr,S_var,Insert_Policy>::arg (void)
+@@ -83,7 +83,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_ptr
+ TAO::Ret_Object_Argument_T<S_ptr,S_var,Insert_Policy>::excp (void)
+@@ -93,7 +93,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_ptr
+ TAO::Ret_Object_Argument_T<S_ptr,S_var,Insert_Policy>::retn (void)
+Index: PolicyC.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PolicyC.cpp,v
+retrieving revision 1.106
+diff -u -u -w -b -r1.106 PolicyC.cpp
+--- PolicyC.cpp 20 Jun 2006 06:06:24 -0000      1.106
++++ PolicyC.cpp 26 Jun 2006 19:03:50 -0000
+@@ -85,7 +85,7 @@
+             CORBA::Policy_var,
+             CORBA::Policy_out,
+             TAO::Objref_Traits<CORBA::Policy>,
+-            TAO::Any_Insert_Policy_AnyTypeCode_Adapter
++            TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::Policy_ptr>
+           >
+   {
+   };
+Index: Special_Basic_Argument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Special_Basic_Argument_T.cpp,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Special_Basic_Argument_T.cpp
+--- Special_Basic_Argument_T.cpp        20 Jun 2006 05:57:20 -0000      1.7
++++ Special_Basic_Argument_T.cpp        26 Jun 2006 18:45:45 -0000
+@@ -15,7 +15,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -27,12 +27,12 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<from_S>::any_insert (any, from_S (this->x_));
++  Insert_Policy::any_insert (any, from_S (this->x_));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -42,7 +42,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr)
+@@ -53,7 +53,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -67,12 +67,12 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<from_S>::any_insert (any, from_S (this->x_));
++  Insert_Policy::any_insert (any, from_S (this->x_));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -82,7 +82,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -96,12 +96,12 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<from_S>::any_insert (any, from_S (this->x_));
++  Insert_Policy::any_insert (any, from_S (this->x_));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -111,7 +111,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -125,12 +125,12 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<from_S>::any_insert (any, from_S (this->x_));
++  Insert_Policy::any_insert (any, from_S (this->x_));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: Special_Basic_Argument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Special_Basic_Argument_T.h,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 Special_Basic_Argument_T.h
+--- Special_Basic_Argument_T.h  20 Jun 2006 05:57:20 -0000      1.10
++++ Special_Basic_Argument_T.h  26 Jun 2006 18:14:14 -0000
+@@ -36,7 +36,7 @@
+   template<typename S,
+            typename to_S,
+            typename from_S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Special_Basic_Argument_T : public InArgument
+   {
+   public:
+@@ -61,7 +61,7 @@
+   template<typename S,
+            typename to_S,
+            typename from_S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Special_Basic_Argument_T : public InoutArgument
+   {
+   public:
+@@ -87,7 +87,7 @@
+   template<typename S,
+            typename to_S,
+            typename from_S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Special_Basic_Argument_T : public OutArgument
+   {
+   public:
+@@ -112,7 +112,7 @@
+   template<typename S,
+            typename to_S,
+            typename from_S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Special_Basic_Argument_T : public RetArgument
+   {
+   public:
+@@ -148,7 +148,7 @@
+   template<typename T,
+            typename to_T,
+            typename from_T,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Special_Basic_Arg_Traits_T
+   {
+     typedef T                                               ret_type;
+Index: Special_Basic_Argument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Special_Basic_Argument_T.inl,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Special_Basic_Argument_T.inl
+--- Special_Basic_Argument_T.inl        20 Jun 2006 05:57:20 -0000      1.6
++++ Special_Basic_Argument_T.inl        26 Jun 2006 18:14:18 -0000
+@@ -7,7 +7,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::In_Special_Basic_Argument_T (
+      S const & x
+@@ -18,7 +18,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S const &
+ TAO::In_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::arg (void) const
+@@ -31,7 +31,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::
+ Inout_Special_Basic_Argument_T (S & x)
+@@ -41,7 +41,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Inout_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::arg (void)
+@@ -54,7 +54,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::
+ Out_Special_Basic_Argument_T (S & x)
+@@ -64,7 +64,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Out_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::arg (void)
+@@ -77,7 +77,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::
+ Ret_Special_Basic_Argument_T (void)
+@@ -87,7 +87,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Ret_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::arg (void)
+@@ -98,7 +98,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S
+ TAO::Ret_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::excp (void)
+@@ -109,7 +109,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S
+ TAO::Ret_Special_Basic_Argument_T<S,to_S,from_S,Insert_Policy>::retn (void)
+Index: Special_Basic_Arguments.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Special_Basic_Arguments.h,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Special_Basic_Arguments.h
+--- Special_Basic_Arguments.h   20 Jun 2006 05:57:20 -0000      1.6
++++ Special_Basic_Arguments.h   26 Jun 2006 18:47:25 -0000
+@@ -41,7 +41,7 @@
+     : public Special_Basic_Arg_Traits_T<CORBA::Char,
+                                         ACE_InputCDR::to_char,
+                                         ACE_OutputCDR::from_char,
+-                                        TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                        TAO::Any_Insert_Policy_AnyTypeCode_Adapter <ACE_OutputCDR::from_char> >
+   {
+   };
+
+@@ -50,7 +50,7 @@
+     : public Special_Basic_Arg_Traits_T<CORBA::WChar,
+                                         ACE_InputCDR::to_wchar,
+                                         ACE_OutputCDR::from_wchar,
+-                                        TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                        TAO::Any_Insert_Policy_AnyTypeCode_Adapter <ACE_OutputCDR::from_wchar> >
+   {
+   };
+
+@@ -59,7 +59,7 @@
+     : public Special_Basic_Arg_Traits_T<CORBA::Octet,
+                                         ACE_InputCDR::to_octet,
+                                         ACE_OutputCDR::from_octet,
+-                                        TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                        TAO::Any_Insert_Policy_AnyTypeCode_Adapter <ACE_OutputCDR::from_octet> >
+   {
+   };
+
+@@ -68,7 +68,7 @@
+     : public Special_Basic_Arg_Traits_T<CORBA::Boolean,
+                                         ACE_InputCDR::to_boolean,
+                                         ACE_OutputCDR::from_boolean,
+-                                        TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                        TAO::Any_Insert_Policy_AnyTypeCode_Adapter <ACE_OutputCDR::from_boolean> >
+   {
+   };
+ }
+Index: UB_String_Argument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/UB_String_Argument_T.cpp,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 UB_String_Argument_T.cpp
+--- UB_String_Argument_T.cpp    20 Jun 2006 06:47:26 -0000      1.10
++++ UB_String_Argument_T.cpp    26 Jun 2006 18:48:11 -0000
+@@ -13,7 +13,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_UB_String_Argument_T<S_var,Insert_Policy>::marshal (
+     TAO_OutputCDR &cdr
+@@ -25,13 +25,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_UB_String_Argument_T<S_var,Insert_Policy>::interceptor_value (
+     CORBA::Any *any
+   ) const
+ {
+-  Insert_Policy<typename S_var::s_traits::char_type const *>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -39,7 +39,7 @@
+ // ===========================================================
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_UB_String_Argument_T<S_var,Insert_Policy>::marshal (
+     TAO_OutputCDR &cdr
+@@ -49,7 +49,7 @@
+ }
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_UB_String_Argument_T<S_var,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -62,13 +62,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_UB_String_Argument_T<S_var,Insert_Policy>::interceptor_value (
+     CORBA::Any *any
+   ) const
+ {
+-  Insert_Policy<typename S_var::s_traits::char_type const *>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       this->x_
+     );
+@@ -79,7 +79,7 @@
+ // ==============================================================
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_UB_String_Argument_T<S_var,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -89,13 +89,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_UB_String_Argument_T<S_var,Insert_Policy>::interceptor_value (
+     CORBA::Any *any
+   ) const
+ {
+-  Insert_Policy<typename S_var::s_traits::char_type const *>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       this->x_
+     );
+@@ -106,7 +106,7 @@
+ // ============================================================
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_UB_String_Argument_T<S_var,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -116,12 +116,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_UB_String_Argument_T<S_var,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<typename S_var::s_traits::char_type const *>::any_insert (any, this->x_.in ());
++  Insert_Policy::any_insert (any, this->x_.in ());
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: UB_String_Argument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/UB_String_Argument_T.h,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 UB_String_Argument_T.h
+--- UB_String_Argument_T.h      20 Jun 2006 05:57:50 -0000      1.10
++++ UB_String_Argument_T.h      26 Jun 2006 18:14:14 -0000
+@@ -33,7 +33,7 @@
+    *
+    */
+   template<typename S_var,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_UB_String_Argument_T : public InArgument
+   {
+   public:
+@@ -56,7 +56,7 @@
+    *
+    */
+   template<typename S_var,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_UB_String_Argument_T : public InoutArgument
+   {
+   public:
+@@ -80,7 +80,7 @@
+    *
+    */
+   template<typename S_var,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_UB_String_Argument_T : public OutArgument
+   {
+   public:
+@@ -103,7 +103,7 @@
+    *
+    */
+   template<typename S_var,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_UB_String_Argument_T : public RetArgument
+   {
+   public:
+@@ -128,7 +128,7 @@
+    *
+    */
+   template<typename T_var,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct UB_String_Arg_Traits_T
+   {
+     typedef typename T_var::s_traits::char_type *            ret_type;
+Index: UB_String_Argument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/UB_String_Argument_T.inl,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 UB_String_Argument_T.inl
+--- UB_String_Argument_T.inl    20 Jun 2006 05:57:50 -0000      1.6
++++ UB_String_Argument_T.inl    26 Jun 2006 18:14:18 -0000
+@@ -5,7 +5,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_UB_String_Argument_T<S_var,Insert_Policy>::In_UB_String_Argument_T (
+   const typename S_var::s_traits::char_type * x)
+@@ -13,7 +13,7 @@
+ {}
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ const typename S_var::s_traits::char_type *
+ TAO::In_UB_String_Argument_T<S_var,Insert_Policy>::arg (void) const
+@@ -24,7 +24,7 @@
+ // ==========================================================================
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_UB_String_Argument_T<S_var,Insert_Policy>::Inout_UB_String_Argument_T (
+     typename S_var::s_traits::char_type *& x
+@@ -33,7 +33,7 @@
+ {}
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *&
+ TAO::Inout_UB_String_Argument_T<S_var,Insert_Policy>::arg (void)
+@@ -44,7 +44,7 @@
+ // ==========================================================================
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_UB_String_Argument_T<S_var,Insert_Policy>::Out_UB_String_Argument_T (
+     typename S_var::s_traits::string_out & x
+@@ -53,7 +53,7 @@
+ {}
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *&
+ TAO::Out_UB_String_Argument_T<S_var,Insert_Policy>::arg (void)
+@@ -64,13 +64,13 @@
+ // ==========================================================================
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_UB_String_Argument_T<S_var,Insert_Policy>::Ret_UB_String_Argument_T (void)
+ {}
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *&
+ TAO::Ret_UB_String_Argument_T<S_var,Insert_Policy>::arg (void)
+@@ -79,7 +79,7 @@
+ }
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *
+ TAO::Ret_UB_String_Argument_T<S_var,Insert_Policy>::excp (void)
+@@ -88,7 +88,7 @@
+ }
+
+ template<typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *
+ TAO::Ret_UB_String_Argument_T<S_var,Insert_Policy>::retn (void)
+Index: UB_String_Arguments.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/UB_String_Arguments.h,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 UB_String_Arguments.h
+--- UB_String_Arguments.h       20 Jun 2006 05:57:50 -0000      1.7
++++ UB_String_Arguments.h       26 Jun 2006 18:48:52 -0000
+@@ -37,14 +37,14 @@
+   template<>
+   class TAO_Export Arg_Traits<CORBA::Char *>
+     : public UB_String_Arg_Traits_T<CORBA::String_var,
+-                                    TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                    TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::Char const *> >
+   {
+   };
+
+   template<>
+   class TAO_Export Arg_Traits<CORBA::WChar *>
+     : public UB_String_Arg_Traits_T<CORBA::WString_var,
+-                                    TAO::Any_Insert_Policy_AnyTypeCode_Adapter>
++                                    TAO::Any_Insert_Policy_AnyTypeCode_Adapter <CORBA::WChar const *> >
+   {
+   };
+ }
+Index: Var_Array_Argument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Var_Array_Argument_T.cpp,v
+retrieving revision 1.14
+diff -u -u -w -b -r1.14 Var_Array_Argument_T.cpp
+--- Var_Array_Argument_T.cpp    21 Jun 2006 12:14:14 -0000      1.14
++++ Var_Array_Argument_T.cpp    26 Jun 2006 19:13:03 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Var_Array_Argument_T<S_forany,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -24,12 +24,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Var_Array_Argument_T<S_forany,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -37,7 +37,7 @@
+ // ===========================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Var_Array_Argument_T<S_forany,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -47,7 +47,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Var_Array_Argument_T<S_forany,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -59,12 +59,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Var_Array_Argument_T<S_forany,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -73,7 +73,7 @@
+
+ template<typename S_out,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Var_Array_Argument_T<S_out,S_forany,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -91,13 +91,13 @@
+
+ template<typename S_out,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Var_Array_Argument_T<S_out,S_forany,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+   S_forany tmp (this->x_);
+-  Insert_Policy<S_forany>::any_insert (any, tmp);
++  Insert_Policy::any_insert (any, tmp);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -106,7 +106,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Var_Array_Argument_T<S_var,S_forany,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -126,12 +126,12 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Var_Array_Argument_T<S_var,S_forany,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, S_forany (this->x_.ptr ()));
++  Insert_Policy::any_insert (any, S_forany (this->x_.ptr ()));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: Var_Array_Argument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Var_Array_Argument_T.h,v
+retrieving revision 1.12
+diff -u -u -w -b -r1.12 Var_Array_Argument_T.h
+--- Var_Array_Argument_T.h      20 Jun 2006 09:03:38 -0000      1.12
++++ Var_Array_Argument_T.h      26 Jun 2006 18:14:14 -0000
+@@ -32,7 +32,7 @@
+    *
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Var_Array_Argument_T : public InArgument
+   {
+   public:
+@@ -55,7 +55,7 @@
+    *
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Var_Array_Argument_T : public InoutArgument
+   {
+   public:
+@@ -80,7 +80,7 @@
+    */
+   template<typename S_out,
+            typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Var_Array_Argument_T : public OutArgument
+   {
+   public:
+@@ -104,7 +104,7 @@
+    */
+   template<typename S_var,
+            typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Var_Array_Argument_T : public RetArgument
+   {
+   public:
+@@ -131,7 +131,7 @@
+    */
+   template<typename T_out,
+            typename T_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Var_Array_Arg_Traits_T
+   {
+     typedef typename T_forany::_slice_type *            ret_type;
+Index: Var_Array_Argument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Var_Array_Argument_T.inl,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 Var_Array_Argument_T.inl
+--- Var_Array_Argument_T.inl    20 Jun 2006 06:00:38 -0000      1.10
++++ Var_Array_Argument_T.inl    26 Jun 2006 18:14:18 -0000
+@@ -5,7 +5,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Var_Array_Argument_T<S_forany,Insert_Policy>::
+ In_Var_Array_Argument_T (const typename S_forany::_slice_type * x)
+@@ -14,7 +14,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type const *
+ TAO::In_Var_Array_Argument_T<S_forany,Insert_Policy>::arg (void) const
+@@ -25,7 +25,7 @@
+ // ==========================================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Var_Array_Argument_T<S_forany,Insert_Policy>::
+ Inout_Var_Array_Argument_T (typename S_forany::_slice_type  *&x)
+@@ -34,7 +34,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *
+ TAO::Inout_Var_Array_Argument_T<S_forany,Insert_Policy>::arg (void)
+@@ -46,7 +46,7 @@
+
+ template<typename S_out,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Var_Array_Argument_T<S_out,S_forany,Insert_Policy>::
+ Out_Var_Array_Argument_T (S_out x)
+@@ -56,7 +56,7 @@
+
+ template<typename S_out,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *&
+ TAO::Out_Var_Array_Argument_T<S_out,S_forany,Insert_Policy>::arg (void)
+@@ -68,7 +68,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Var_Array_Argument_T<S_var,S_forany,Insert_Policy>::
+ Ret_Var_Array_Argument_T (void)
+@@ -76,7 +76,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *&
+ TAO::Ret_Var_Array_Argument_T<S_var,S_forany,Insert_Policy>::arg (void)
+@@ -86,7 +86,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *
+ TAO::Ret_Var_Array_Argument_T<S_var,S_forany,Insert_Policy>::excp (void)
+@@ -96,7 +96,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *
+ TAO::Ret_Var_Array_Argument_T<S_var,S_forany,Insert_Policy>::retn (void)
+Index: Var_Size_Argument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Var_Size_Argument_T.cpp,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Var_Size_Argument_T.cpp
+--- Var_Size_Argument_T.cpp     20 Jun 2006 06:00:38 -0000      1.7
++++ Var_Size_Argument_T.cpp     26 Jun 2006 18:45:07 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Var_Size_Argument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -22,13 +22,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Var_Size_Argument_T<S,Insert_Policy>::interceptor_value (
+     CORBA::Any *any
+   ) const
+ {
+-  Insert_Policy<S>::any_insert (any, *this->x_);
++  Insert_Policy::any_insert (any, *this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -36,7 +36,7 @@
+ // ===========================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Var_Size_Argument_T<S,Insert_Policy>::marshal (
+     TAO_OutputCDR &cdr
+@@ -46,7 +46,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Var_Size_Argument_T<S,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -58,13 +58,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Var_Size_Argument_T<S,Insert_Policy>::interceptor_value (
+     CORBA::Any *any
+   ) const
+ {
+-  Insert_Policy<S>::any_insert (any, *this->x_);
++  Insert_Policy::any_insert (any, *this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -72,7 +72,7 @@
+ // ==============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Var_Size_Argument_T<S,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -85,13 +85,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Var_Size_Argument_T<S,Insert_Policy>::interceptor_value (
+     CORBA::Any *any
+   ) const
+ {
+-  Insert_Policy<S>::any_insert (any, *this->x_);
++  Insert_Policy::any_insert (any, *this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -99,7 +99,7 @@
+ // ============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Var_Size_Argument_T<S,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -116,13 +116,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Var_Size_Argument_T<S,Insert_Policy>::interceptor_value (
+     CORBA::Any *any
+   ) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_.in ());
++  Insert_Policy::any_insert (any, this->x_.in ());
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: Var_Size_Argument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Var_Size_Argument_T.h,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 Var_Size_Argument_T.h
+--- Var_Size_Argument_T.h       20 Jun 2006 06:00:38 -0000      1.10
++++ Var_Size_Argument_T.h       26 Jun 2006 18:42:31 -0000
+@@ -32,7 +32,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Var_Size_Argument_T : public InArgument
+   {
+   public:
+@@ -46,9 +46,6 @@
+
+   private:
+     const S * x_;
+-#if TAO_HAS_INTERCEPTORS == 1
+-    Insert_Policy <S> insert_policy_;
+-#endif /* TAO_HAS_INTERCEPTORS == 1 */
+   };
+
+   /**
+@@ -58,7 +55,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Var_Size_Argument_T : public InoutArgument
+   {
+   public:
+@@ -82,7 +79,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Var_Size_Argument_T : public OutArgument
+   {
+   public:
+@@ -105,7 +102,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Var_Size_Argument_T : public RetArgument
+   {
+   public:
+@@ -132,7 +129,7 @@
+    *
+    */
+   template<typename T,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Var_Size_Arg_Traits_T
+   {
+     typedef T *                                         ret_type;
+Index: Var_Size_Argument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Var_Size_Argument_T.inl,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Var_Size_Argument_T.inl
+--- Var_Size_Argument_T.inl     20 Jun 2006 06:00:38 -0000      1.7
++++ Var_Size_Argument_T.inl     26 Jun 2006 18:14:18 -0000
+@@ -5,7 +5,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Var_Size_Argument_T<S,Insert_Policy>::In_Var_Size_Argument_T (S const & x)
+   : x_ (&x)
+@@ -13,7 +13,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ const S &
+ TAO::In_Var_Size_Argument_T<S,Insert_Policy>::arg (void) const
+@@ -24,7 +24,7 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Var_Size_Argument_T<S,Insert_Policy>::Inout_Var_Size_Argument_T (S & x)
+   : x_ (&x)
+@@ -32,7 +32,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Inout_Var_Size_Argument_T<S,Insert_Policy>::arg (void)
+@@ -43,7 +43,7 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Var_Size_Argument_T<S,Insert_Policy>::Out_Var_Size_Argument_T (
+     typename S::_out_type x
+@@ -52,7 +52,7 @@
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S *&
+ TAO::Out_Var_Size_Argument_T<S,Insert_Policy>::arg (void)
+@@ -63,14 +63,14 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Var_Size_Argument_T<S,Insert_Policy>::Ret_Var_Size_Argument_T (void)
+ {
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S *&
+ TAO::Ret_Var_Size_Argument_T<S,Insert_Policy>::arg (void)
+@@ -79,7 +79,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S *
+ TAO::Ret_Var_Size_Argument_T<S,Insert_Policy>::excp (void)
+@@ -88,7 +88,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S *
+ TAO::Ret_Var_Size_Argument_T<S,Insert_Policy>::retn (void)
+Index: AnyTypeCode/Any_Arg_Traits.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/Any_Arg_Traits.h,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 Any_Arg_Traits.h
+--- AnyTypeCode/Any_Arg_Traits.h        20 Jun 2006 06:09:15 -0000      1.5
++++ AnyTypeCode/Any_Arg_Traits.h        26 Jun 2006 18:42:58 -0000
+@@ -39,7 +39,7 @@
+     : public
+         Var_Size_Arg_Traits_T<
+             CORBA::Any,
+-            TAO::Any_Insert_Policy_Stream
++            TAO::Any_Insert_Policy_Stream <CORBA::Any>
+           >
+   {
+   };
+Index: AnyTypeCode/TypeCode.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/AnyTypeCode/TypeCode.h,v
+retrieving revision 1.12
+diff -u -u -w -b -r1.12 TypeCode.h
+--- AnyTypeCode/TypeCode.h      20 Jun 2006 06:10:20 -0000      1.12
++++ AnyTypeCode/TypeCode.h      26 Jun 2006 18:39:07 -0000
+@@ -567,7 +567,7 @@
+                                  CORBA::TypeCode_var,
+                                  CORBA::TypeCode_out,
+                                  TAO::Objref_Traits<CORBA::TypeCode>,
+-                                 TAO::Any_Insert_Policy_Stream>
++                                 TAO::Any_Insert_Policy_Stream <CORBA::TypeCode_ptr> >
+   {
+   };
+
+Index: IFR_Client/IFR_Client_Adapter_Impl.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IFR_Client/IFR_Client_Adapter_Impl.cpp,v
+retrieving revision 1.21
+diff -u -u -w -b -r1.21 IFR_Client_Adapter_Impl.cpp
+--- IFR_Client/IFR_Client_Adapter_Impl.cpp      20 Jun 2006 06:11:32 -0000      1.21
++++ IFR_Client/IFR_Client_Adapter_Impl.cpp      26 Jun 2006 18:49:30 -0000
+@@ -27,7 +27,7 @@
+             CORBA::InterfaceDef_var,
+             CORBA::InterfaceDef_out,
+             TAO::Objref_Traits<CORBA::InterfaceDef>,
+-            TAO::Any_Insert_Policy_Stream
++            TAO::Any_Insert_Policy_Stream <CORBA::InterfaceDef_ptr>
+           >
+   {
+   };
+Index: PortableServer/Any_SArg_Traits.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Any_SArg_Traits.h,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Any_SArg_Traits.h
+--- PortableServer/Any_SArg_Traits.h    20 Jun 2006 06:17:21 -0000      1.7
++++ PortableServer/Any_SArg_Traits.h    26 Jun 2006 19:26:36 -0000
+@@ -38,7 +38,7 @@
+     : public
+         Var_Size_SArg_Traits_T<
+             CORBA::Any,
+-            TAO::Any_Insert_Policy_Stream
++            TAO::Any_Insert_Policy_Stream <CORBA::Any>
+           >
+   {
+   };
+Index: PortableServer/BD_String_SArgument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/BD_String_SArgument_T.cpp,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 BD_String_SArgument_T.cpp
+--- PortableServer/BD_String_SArgument_T.cpp    22 Jun 2006 14:38:32 -0000      1.10
++++ PortableServer/BD_String_SArgument_T.cpp    26 Jun 2006 19:08:45 -0000
+@@ -13,7 +13,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -27,13 +27,13 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+   typedef typename S_var::s_traits::from_type from_type;
+-  Insert_Policy<from_type>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       from_type (this->x_.in (), BOUND)
+     );
+@@ -45,7 +45,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -57,7 +57,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -71,13 +71,13 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+   typedef typename S_var::s_traits::from_type from_type;
+-  Insert_Policy<from_type>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       from_type (this->x_.in (), BOUND)
+     );
+@@ -89,7 +89,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::marshal (
+     TAO_OutputCDR &cdr
+@@ -103,13 +103,13 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+   typedef typename S_var::s_traits::from_type from_type;
+-  Insert_Policy<from_type>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       from_type (this->x_.in (), BOUND)
+     );
+@@ -121,7 +121,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -135,13 +135,13 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+   typedef typename S_var::s_traits::from_type from_type;
+-  Insert_Policy<from_type>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       from_type (this->x_.in (), BOUND)
+     );
+Index: PortableServer/BD_String_SArgument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/BD_String_SArgument_T.h,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 BD_String_SArgument_T.h
+--- PortableServer/BD_String_SArgument_T.h      20 Jun 2006 06:21:19 -0000      1.7
++++ PortableServer/BD_String_SArgument_T.h      26 Jun 2006 18:14:14 -0000
+@@ -37,7 +37,7 @@
+    */
+   template<typename S_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_BD_String_SArgument_T : public InArgument
+   {
+   public:
+@@ -61,7 +61,7 @@
+    */
+   template<typename S_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_BD_String_SArgument_T : public InoutArgument
+   {
+   public:
+@@ -86,7 +86,7 @@
+    */
+   template<typename S_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_BD_String_SArgument_T : public OutArgument
+   {
+   public:
+@@ -110,7 +110,7 @@
+    */
+   template<typename S_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_BD_String_SArgument_T : public RetArgument
+   {
+   public:
+@@ -134,7 +134,7 @@
+    */
+   template<typename T_var,
+            size_t BOUND,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct BD_String_SArg_Traits_T
+   {
+     typedef typename T_var::s_traits::char_type *       ret_type;
+Index: PortableServer/BD_String_SArgument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/BD_String_SArgument_T.inl,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 BD_String_SArgument_T.inl
+--- PortableServer/BD_String_SArgument_T.inl    20 Jun 2006 06:21:19 -0000      1.6
++++ PortableServer/BD_String_SArgument_T.inl    26 Jun 2006 18:14:17 -0000
+@@ -6,7 +6,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+ In_BD_String_SArgument_T (void)
+@@ -14,7 +14,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ const typename S_var::s_traits::char_type *
+ TAO::In_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+@@ -27,7 +27,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+ Inout_BD_String_SArgument_T (void)
+@@ -35,7 +35,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *&
+ TAO::Inout_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+@@ -48,7 +48,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+ Out_BD_String_SArgument_T (void)
+@@ -56,7 +56,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *&
+ TAO::Out_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+@@ -69,7 +69,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+ Ret_BD_String_SArgument_T (void)
+@@ -77,7 +77,7 @@
+
+ template<typename S_var,
+          size_t BOUND,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_var::s_traits::char_type *&
+ TAO::Ret_BD_String_SArgument_T<S_var,BOUND,Insert_Policy>::
+Index: PortableServer/Basic_SArgument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Basic_SArgument_T.cpp,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 Basic_SArgument_T.cpp
+--- PortableServer/Basic_SArgument_T.cpp        20 Jun 2006 06:20:44 -0000      1.5
++++ PortableServer/Basic_SArgument_T.cpp        26 Jun 2006 18:45:07 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Basic_SArgument_T<S,Insert_Policy>::demarshal (TAO_InputCDR &cdr)
+ {
+@@ -22,11 +22,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Basic_SArgument_T<S,Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -34,7 +34,7 @@
+ // ===========================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Basic_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -42,7 +42,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Basic_SArgument_T<S,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -52,11 +52,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Basic_SArgument_T<S,Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -64,7 +64,7 @@
+ // ==============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Basic_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -74,11 +74,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Basic_SArgument_T<S,Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -86,7 +86,7 @@
+ // ============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Basic_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -96,11 +96,11 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Basic_SArgument_T<S,Insert_Policy>::interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: PortableServer/Basic_SArgument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Basic_SArgument_T.h,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Basic_SArgument_T.h
+--- PortableServer/Basic_SArgument_T.h  20 Jun 2006 06:20:44 -0000      1.6
++++ PortableServer/Basic_SArgument_T.h  26 Jun 2006 18:14:14 -0000
+@@ -32,7 +32,7 @@
+    * @brief Template class for IN skeleton argument of basic IDL types.
+    *
+    */
+-  template<typename S, template <typename> class Insert_Policy>
++  template<typename S, class Insert_Policy>
+   class In_Basic_SArgument_T : public InArgument
+   {
+   public:
+@@ -54,7 +54,7 @@
+    * @brief Template class for INOUT skeleton argument of basic IDL types.
+    *
+    */
+-  template<typename S, template <typename> class Insert_Policy>
++  template<typename S, class Insert_Policy>
+   class Inout_Basic_SArgument_T : public InoutArgument
+   {
+   public:
+@@ -77,7 +77,7 @@
+    * @brief Template class for OUT skeleton argument of basic IDL types.
+    *
+    */
+-  template<typename S, template <typename> class Insert_Policy>
++  template<typename S, class Insert_Policy>
+   class Out_Basic_SArgument_T : public OutArgument
+   {
+   public:
+@@ -99,7 +99,7 @@
+    * @brief Template class for return skeleton value of basic IDL types.
+    *
+    */
+-  template<typename S, template <typename> class Insert_Policy>
++  template<typename S, class Insert_Policy>
+   class Ret_Basic_SArgument_T : public RetArgument
+   {
+   public:
+@@ -121,7 +121,7 @@
+    * @brief Template class for skeleton argument traits of basic IDL types.
+    *
+    */
+-  template<typename T, template <typename> class Insert_Policy>
++  template<typename T, class Insert_Policy>
+   struct Basic_SArg_Traits_T
+   {
+     typedef T                           ret_type;
+Index: PortableServer/Basic_SArgument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Basic_SArgument_T.inl,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 Basic_SArgument_T.inl
+--- PortableServer/Basic_SArgument_T.inl        20 Jun 2006 06:20:44 -0000      1.5
++++ PortableServer/Basic_SArgument_T.inl        26 Jun 2006 18:14:17 -0000
+@@ -5,13 +5,13 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Basic_SArgument_T<S,Insert_Policy>::In_Basic_SArgument_T (void)
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S
+ TAO::In_Basic_SArgument_T<S,Insert_Policy>::arg (void) const
+@@ -22,13 +22,13 @@
+ // ================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Basic_SArgument_T<S,Insert_Policy>::Inout_Basic_SArgument_T (void)
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Inout_Basic_SArgument_T<S,Insert_Policy>::arg (void)
+@@ -39,13 +39,13 @@
+ // ================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Basic_SArgument_T<S,Insert_Policy>::Out_Basic_SArgument_T (void)
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Out_Basic_SArgument_T<S,Insert_Policy>::arg (void)
+@@ -56,13 +56,13 @@
+ // ================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Basic_SArgument_T<S,Insert_Policy>::Ret_Basic_SArgument_T (void)
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Ret_Basic_SArgument_T<S,Insert_Policy>::arg (void)
+Index: PortableServer/Basic_SArguments.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Basic_SArguments.h,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 Basic_SArguments.h
+--- PortableServer/Basic_SArguments.h   20 Jun 2006 06:20:44 -0000      1.5
++++ PortableServer/Basic_SArguments.h   26 Jun 2006 19:10:12 -0000
+@@ -53,55 +53,55 @@
+
+   template<>
+   class TAO_PortableServer_Export SArg_Traits<CORBA::Short>
+-    : public Basic_SArg_Traits_T<CORBA::Short, TAO::Any_Insert_Policy_Stream>
++    : public Basic_SArg_Traits_T<CORBA::Short, TAO::Any_Insert_Policy_Stream <CORBA::Short> >
+   {
+   };
+
+   template<>
+   class TAO_PortableServer_Export SArg_Traits<CORBA::Long>
+-    : public Basic_SArg_Traits_T<CORBA::Long, TAO::Any_Insert_Policy_Stream>
++    : public Basic_SArg_Traits_T<CORBA::Long, TAO::Any_Insert_Policy_Stream <CORBA::Long> >
+   {
+   };
+
+   template<>
+   class TAO_PortableServer_Export SArg_Traits<CORBA::UShort>
+-    : public Basic_SArg_Traits_T<CORBA::UShort, TAO::Any_Insert_Policy_Stream>
++    : public Basic_SArg_Traits_T<CORBA::UShort, TAO::Any_Insert_Policy_Stream <CORBA::UShort> >
+   {
+   };
+
+   template<>
+   class TAO_PortableServer_Export SArg_Traits<CORBA::ULong>
+-    : public Basic_SArg_Traits_T<CORBA::ULong, TAO::Any_Insert_Policy_Stream>
++    : public Basic_SArg_Traits_T<CORBA::ULong, TAO::Any_Insert_Policy_Stream <CORBA::ULong> >
+   {
+   };
+
+   template<>
+   class TAO_PortableServer_Export SArg_Traits<CORBA::Float>
+-    : public Basic_SArg_Traits_T<CORBA::Float, TAO::Any_Insert_Policy_Stream>
++    : public Basic_SArg_Traits_T<CORBA::Float, TAO::Any_Insert_Policy_Stream <CORBA::Float> >
+   {
+   };
+
+   template<>
+   class TAO_PortableServer_Export SArg_Traits<CORBA::Double>
+-    : public Basic_SArg_Traits_T<CORBA::Double, TAO::Any_Insert_Policy_Stream>
++    : public Basic_SArg_Traits_T<CORBA::Double, TAO::Any_Insert_Policy_Stream <CORBA::Double> >
+   {
+   };
+
+   template<>
+   class TAO_PortableServer_Export SArg_Traits<CORBA::LongLong>
+-    : public Basic_SArg_Traits_T<CORBA::LongLong, TAO::Any_Insert_Policy_Stream>
++    : public Basic_SArg_Traits_T<CORBA::LongLong, TAO::Any_Insert_Policy_Stream <CORBA::LongLong> >
+   {
+   };
+
+   template<>
+   class TAO_PortableServer_Export SArg_Traits<CORBA::ULongLong>
+-    : public Basic_SArg_Traits_T<CORBA::ULongLong, TAO::Any_Insert_Policy_Stream>
++    : public Basic_SArg_Traits_T<CORBA::ULongLong, TAO::Any_Insert_Policy_Stream <CORBA::ULongLong> >
+   {
+   };
+
+   template<>
+   class TAO_PortableServer_Export SArg_Traits<CORBA::LongDouble>
+-    : public Basic_SArg_Traits_T<CORBA::LongDouble, TAO::Any_Insert_Policy_Stream>
++    : public Basic_SArg_Traits_T<CORBA::LongDouble, TAO::Any_Insert_Policy_Stream <CORBA::LongDouble> >
+   {
+   };
+
+Index: PortableServer/Fixed_Array_SArgument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Fixed_Array_SArgument_T.cpp,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 Fixed_Array_SArgument_T.cpp
+--- PortableServer/Fixed_Array_SArgument_T.cpp  22 Jun 2006 16:16:37 -0000      1.10
++++ PortableServer/Fixed_Array_SArgument_T.cpp  26 Jun 2006 19:13:02 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Fixed_Array_SArgument_T<S_forany,
+                                 Insert_Policy>::demarshal (TAO_InputCDR &cdr)
+@@ -23,13 +23,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Fixed_Array_SArgument_T<S_forany,
+                                 Insert_Policy>::interceptor_value (
+     CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -37,7 +37,7 @@
+ // ===========================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Fixed_Array_SArgument_T<S_forany,
+                                    Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+@@ -46,7 +46,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Fixed_Array_SArgument_T<S_forany,
+                                    Insert_Policy>::
+@@ -58,13 +58,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Fixed_Array_SArgument_T<S_forany,
+                                    Insert_Policy>::interceptor_value (
+     CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -72,7 +72,7 @@
+ // ==============================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Fixed_Array_SArgument_T<S_forany,
+                                  Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+@@ -83,13 +83,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Fixed_Array_SArgument_T<S_forany,
+                                  Insert_Policy>::interceptor_value (
+     CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -98,7 +98,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Fixed_Array_SArgument_T<S_var,
+                                  S_forany,
+@@ -113,14 +113,14 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Fixed_Array_SArgument_T<S_var,
+                                  S_forany,
+                                  Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, S_forany (this->x_.ptr ()));
++  Insert_Policy::any_insert (any, S_forany (this->x_.ptr ()));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: PortableServer/Fixed_Array_SArgument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Fixed_Array_SArgument_T.h,v
+retrieving revision 1.13
+diff -u -u -w -b -r1.13 Fixed_Array_SArgument_T.h
+--- PortableServer/Fixed_Array_SArgument_T.h    23 Jun 2006 07:35:54 -0000      1.13
++++ PortableServer/Fixed_Array_SArgument_T.h    26 Jun 2006 18:14:14 -0000
+@@ -34,7 +34,7 @@
+    *
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Fixed_Array_SArgument_T : public InArgument
+   {
+   public:
+@@ -56,7 +56,7 @@
+    * @brief INOUT skeleton argument of fixed size element array.
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Fixed_Array_SArgument_T : public InoutArgument
+   {
+   public:
+@@ -79,7 +79,7 @@
+    * @brief OUT skeleton argument of fixed size element array.
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Fixed_Array_SArgument_T : public OutArgument
+   {
+   public:
+@@ -103,7 +103,7 @@
+    */
+   template<typename S_var,
+            typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Fixed_Array_SArgument_T : public RetArgument
+   {
+   public:
+@@ -127,7 +127,7 @@
+    */
+   template<typename T_var,
+            typename T_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Fixed_Array_SArg_Traits_T
+   {
+     typedef typename T_forany::_slice_type *             ret_type;
+Index: PortableServer/Fixed_Array_SArgument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Fixed_Array_SArgument_T.inl,v
+retrieving revision 1.10
+diff -u -u -w -b -r1.10 Fixed_Array_SArgument_T.inl
+--- PortableServer/Fixed_Array_SArgument_T.inl  22 Jun 2006 16:16:37 -0000      1.10
++++ PortableServer/Fixed_Array_SArgument_T.inl  26 Jun 2006 18:14:17 -0000
+@@ -5,7 +5,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Fixed_Array_SArgument_T<S_forany,
+                                 Insert_Policy>::In_Fixed_Array_SArgument_T (void)
+@@ -13,7 +13,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type const *
+ TAO::In_Fixed_Array_SArgument_T<S_forany,
+@@ -25,7 +25,7 @@
+ // ===========================================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Fixed_Array_SArgument_T<S_forany,
+                                    Insert_Policy>::
+@@ -34,7 +34,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *
+ TAO::Inout_Fixed_Array_SArgument_T<S_forany,
+@@ -46,7 +46,7 @@
+ // ===========================================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Fixed_Array_SArgument_T<S_forany,
+                                  Insert_Policy>::
+@@ -55,7 +55,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *
+ TAO::Out_Fixed_Array_SArgument_T<S_forany,
+@@ -68,7 +68,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Fixed_Array_SArgument_T<S_var,
+                                  S_forany,
+@@ -79,7 +79,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *&
+ TAO::Ret_Fixed_Array_SArgument_T<S_var,
+Index: PortableServer/Fixed_Size_SArgument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Fixed_Size_SArgument_T.cpp,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Fixed_Size_SArgument_T.cpp
+--- PortableServer/Fixed_Size_SArgument_T.cpp   20 Jun 2006 06:23:19 -0000      1.6
++++ PortableServer/Fixed_Size_SArgument_T.cpp   26 Jun 2006 18:45:07 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Fixed_Size_SArgument_T<S,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -22,12 +22,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Fixed_Size_SArgument_T<S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -35,7 +35,7 @@
+ // ===========================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Fixed_Size_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -43,7 +43,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Fixed_Size_SArgument_T<S,Insert_Policy>::demarshal (
+   TAO_InputCDR & cdr)
+@@ -54,12 +54,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Fixed_Size_SArgument_T<S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -67,7 +67,7 @@
+ // ==============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Fixed_Size_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -77,12 +77,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Fixed_Size_SArgument_T<S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -90,7 +90,7 @@
+ // ============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Fixed_Size_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -100,12 +100,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Fixed_Size_SArgument_T<S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: PortableServer/Fixed_Size_SArgument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Fixed_Size_SArgument_T.h,v
+retrieving revision 1.8
+diff -u -u -w -b -r1.8 Fixed_Size_SArgument_T.h
+--- PortableServer/Fixed_Size_SArgument_T.h     20 Jun 2006 09:47:18 -0000      1.8
++++ PortableServer/Fixed_Size_SArgument_T.h     26 Jun 2006 18:14:14 -0000
+@@ -36,7 +36,7 @@
+    * Skeleton class template for operation "IN" arguments of fixed
+    * size IDL types.
+    */
+-  template<typename S, template <typename> class Insert_Policy>
++  template<typename S, class Insert_Policy>
+   class In_Fixed_Size_SArgument_T : public InArgument
+   {
+   public:
+@@ -75,7 +75,7 @@
+    * @brief Template class for INOUT skeleton arg of fixed size IDL types.
+    *
+    */
+-  template<typename S, template <typename> class Insert_Policy>
++  template<typename S, class Insert_Policy>
+   class Inout_Fixed_Size_SArgument_T : public InoutArgument
+   {
+   public:
+@@ -114,7 +114,7 @@
+    * @brief Template class for OUT skeleton argument of fixed size IDL types.
+    *
+    */
+-  template<typename S, template <typename> class Insert_Policy>
++  template<typename S, class Insert_Policy>
+   class Out_Fixed_Size_SArgument_T : public OutArgument
+   {
+   public:
+@@ -153,7 +153,7 @@
+    * @brief Template class for return skeleton value of fixed size IDL types.
+    *
+    */
+-  template<typename S, template <typename> class Insert_Policy>
++  template<typename S, class Insert_Policy>
+   class Ret_Fixed_Size_SArgument_T : public RetArgument
+   {
+   public:
+@@ -193,7 +193,7 @@
+    *
+    */
+   template<typename T,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Fixed_Size_SArg_Traits_T
+   {
+     typedef T                                               ret_type;
+Index: PortableServer/Fixed_Size_SArgument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Fixed_Size_SArgument_T.inl,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Fixed_Size_SArgument_T.inl
+--- PortableServer/Fixed_Size_SArgument_T.inl   20 Jun 2006 06:23:19 -0000      1.6
++++ PortableServer/Fixed_Size_SArgument_T.inl   26 Jun 2006 18:14:17 -0000
+@@ -5,7 +5,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S const &
+ TAO::In_Fixed_Size_SArgument_T<S,Insert_Policy>::arg (void) const
+@@ -16,7 +16,7 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Fixed_Size_SArgument_T<S,Insert_Policy>::
+ Inout_Fixed_Size_SArgument_T (void)
+@@ -24,7 +24,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Inout_Fixed_Size_SArgument_T<S,Insert_Policy>::arg (void)
+@@ -35,7 +35,7 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Fixed_Size_SArgument_T<S,
+                                 Insert_Policy>::
+@@ -43,7 +43,7 @@
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Out_Fixed_Size_SArgument_T<S,Insert_Policy>::arg (void)
+@@ -54,13 +54,13 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Fixed_Size_SArgument_T<S,Insert_Policy>::Ret_Fixed_Size_SArgument_T (void)
+ {}
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Ret_Fixed_Size_SArgument_T<S,Insert_Policy>::arg (void)
+Index: PortableServer/Object_SArg_Traits.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Object_SArg_Traits.h,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Object_SArg_Traits.h
+--- PortableServer/Object_SArg_Traits.h 20 Jun 2006 06:28:44 -0000      1.7
++++ PortableServer/Object_SArg_Traits.h 26 Jun 2006 19:12:01 -0000
+@@ -48,7 +48,8 @@
+     : public Object_SArg_Traits_T<CORBA::Object_ptr,
+                                   CORBA::Object_var,
+                                   CORBA::Object_out,
+-                                  TAO::Any_Insert_Policy_Stream>
++                                  TAO::Any_Insert_Policy_Stream <CORBA::Object_ptr>
++                                 >
+   {
+   };
+ }
+Index: PortableServer/Object_SArgument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Object_SArgument_T.cpp,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 Object_SArgument_T.cpp
+--- PortableServer/Object_SArgument_T.cpp       20 Jun 2006 06:25:51 -0000      1.5
++++ PortableServer/Object_SArgument_T.cpp       26 Jun 2006 18:44:06 -0000
+@@ -13,7 +13,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::demarshal (TAO_InputCDR &cdr)
+ {
+@@ -24,12 +24,12 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S_ptr>::any_insert (any, this->x_.in ());
++  Insert_Policy::any_insert (any, this->x_.in ());
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -38,7 +38,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -47,7 +47,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -58,12 +58,12 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S_ptr>::any_insert (any, this->x_.in ());
++  Insert_Policy::any_insert (any, this->x_.in ());
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -73,7 +73,7 @@
+ template<typename S_ptr,
+          typename S_var,
+          typename S_out,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Object_SArgument_T<S_ptr,S_var,S_out,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -85,12 +85,12 @@
+ template<typename S_ptr,
+          typename S_var,
+          typename S_out,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Object_SArgument_T<S_ptr,S_var,S_out,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S_ptr>::any_insert (any, this->x_.in ());
++  Insert_Policy::any_insert (any, this->x_.in ());
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -99,7 +99,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -110,12 +110,12 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S_ptr>::any_insert (any, this->x_.in ());
++  Insert_Policy::any_insert (any, this->x_.in ());
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: PortableServer/Object_SArgument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Object_SArgument_T.h,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Object_SArgument_T.h
+--- PortableServer/Object_SArgument_T.h 20 Jun 2006 06:25:51 -0000      1.6
++++ PortableServer/Object_SArgument_T.h 26 Jun 2006 18:14:14 -0000
+@@ -39,7 +39,7 @@
+    */
+   template<typename S_ptr,
+            typename S_var,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Object_SArgument_T : public InArgument
+   {
+   public:
+@@ -62,7 +62,7 @@
+    */
+   template<typename S_ptr,
+            typename S_var,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Object_SArgument_T : public InoutArgument
+   {
+   public:
+@@ -88,7 +88,7 @@
+   template<typename S_ptr,
+            typename S_var,
+            typename S_out,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Object_SArgument_T : public OutArgument
+   {
+   public:
+@@ -112,7 +112,7 @@
+    */
+   template<typename S_ptr,
+            typename S_var,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Object_SArgument_T : public RetArgument
+   {
+   public:
+@@ -137,7 +137,7 @@
+   template<typename T_ptr,
+            typename T_var,
+            typename T_out,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Object_SArg_Traits_T
+   {
+     typedef T_ptr                                         ret_type;
+Index: PortableServer/Object_SArgument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Object_SArgument_T.inl,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 Object_SArgument_T.inl
+--- PortableServer/Object_SArgument_T.inl       20 Jun 2006 06:25:51 -0000      1.5
++++ PortableServer/Object_SArgument_T.inl       26 Jun 2006 18:14:17 -0000
+@@ -7,7 +7,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_ptr
+ TAO::In_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::arg (void) const
+@@ -19,7 +19,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::
+ Inout_Object_SArgument_T (void)
+@@ -28,7 +28,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_ptr&
+ TAO::Inout_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::arg (void)
+@@ -41,7 +41,7 @@
+ template<typename S_ptr,
+          typename S_var,
+          typename S_out,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Object_SArgument_T<S_ptr,S_var,S_out,Insert_Policy>::
+ Out_Object_SArgument_T (void)
+@@ -51,7 +51,7 @@
+ template<typename S_ptr,
+          typename S_var,
+          typename S_out,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_out
+ TAO::Out_Object_SArgument_T<S_ptr,S_var,S_out,Insert_Policy>::arg (void)
+@@ -63,7 +63,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::
+ Ret_Object_SArgument_T (void)
+@@ -72,7 +72,7 @@
+
+ template<typename S_ptr,
+          typename S_var,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S_ptr &
+ TAO::Ret_Object_SArgument_T<S_ptr,S_var,Insert_Policy>::arg (void)
+Index: PortableServer/Special_Basic_SArgument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Special_Basic_SArgument_T.cpp,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Special_Basic_SArgument_T.cpp
+--- PortableServer/Special_Basic_SArgument_T.cpp        20 Jun 2006 07:17:50 -0000      1.6
++++ PortableServer/Special_Basic_SArgument_T.cpp        26 Jun 2006 18:45:44 -0000
+@@ -17,7 +17,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -31,12 +31,12 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<from_S>::any_insert (any, from_S (this->x_));
++  Insert_Policy::any_insert (any, from_S (this->x_));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -46,7 +46,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -58,7 +58,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::demarshal (
+     TAO_InputCDR & cdr
+@@ -72,12 +72,12 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<from_S>::any_insert (any, from_S (this->x_));
++  Insert_Policy::any_insert (any, from_S (this->x_));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -87,7 +87,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -101,12 +101,12 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<from_S>::any_insert (any, from_S (this->x_));
++  Insert_Policy::any_insert (any, from_S (this->x_));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -116,7 +116,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::marshal (
+     TAO_OutputCDR & cdr
+@@ -130,12 +130,12 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::
+ interceptor_value (CORBA::Any *any) const
+ {
+-  Insert_Policy<from_S>::any_insert (any, from_S (this->x_));
++  Insert_Policy::any_insert (any, from_S (this->x_));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: PortableServer/Special_Basic_SArgument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Special_Basic_SArgument_T.h,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Special_Basic_SArgument_T.h
+--- PortableServer/Special_Basic_SArgument_T.h  20 Jun 2006 07:17:50 -0000      1.6
++++ PortableServer/Special_Basic_SArgument_T.h  26 Jun 2006 18:14:14 -0000
+@@ -36,7 +36,7 @@
+   template<typename S,
+            typename to_S,
+            typename from_S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Special_Basic_SArgument_T : public InArgument
+   {
+   public:
+@@ -61,7 +61,7 @@
+   template<typename S,
+            typename to_S,
+            typename from_S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Special_Basic_SArgument_T : public InoutArgument
+   {
+   public:
+@@ -87,7 +87,7 @@
+   template<typename S,
+            typename to_S,
+            typename from_S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Special_Basic_SArgument_T : public OutArgument
+   {
+   public:
+@@ -112,7 +112,7 @@
+   template<typename S,
+            typename to_S,
+            typename from_S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Special_Basic_SArgument_T : public RetArgument
+   {
+   public:
+@@ -135,7 +135,7 @@
+    *  of (w)char/boolean/octet.
+    *
+    */
+-  template<typename T, typename to_T, typename from_T, template <typename> class Insert_Policy>
++  template<typename T, typename to_T, typename from_T, class Insert_Policy>
+   struct Special_Basic_SArg_Traits_T
+   {
+     typedef T                                               ret_type;
+Index: PortableServer/Special_Basic_SArgument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Special_Basic_SArgument_T.inl,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 Special_Basic_SArgument_T.inl
+--- PortableServer/Special_Basic_SArgument_T.inl        20 Jun 2006 07:17:50 -0000      1.5
++++ PortableServer/Special_Basic_SArgument_T.inl        26 Jun 2006 18:14:17 -0000
+@@ -7,7 +7,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::
+ In_Special_Basic_SArgument_T (void)
+@@ -17,7 +17,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S const &
+ TAO::In_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::arg (void) const
+@@ -30,7 +30,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::
+ Inout_Special_Basic_SArgument_T (void)
+@@ -40,7 +40,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Inout_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::arg (void)
+@@ -53,7 +53,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::
+ Out_Special_Basic_SArgument_T (void)
+@@ -63,7 +63,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ S &
+ TAO::Out_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::arg (void)
+ {
+@@ -75,7 +75,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::
+ Ret_Special_Basic_SArgument_T (void)
+@@ -85,7 +85,7 @@
+ template<typename S,
+          typename to_S,
+          typename from_S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S &
+ TAO::Ret_Special_Basic_SArgument_T<S,to_S,from_S,Insert_Policy>::arg (void)
+Index: PortableServer/Special_Basic_SArguments.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Special_Basic_SArguments.h,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 Special_Basic_SArguments.h
+--- PortableServer/Special_Basic_SArguments.h   20 Jun 2006 07:17:50 -0000      1.6
++++ PortableServer/Special_Basic_SArguments.h   26 Jun 2006 19:11:16 -0000
+@@ -43,7 +43,7 @@
+     : public Special_Basic_SArg_Traits_T<CORBA::Char,
+                                          ACE_InputCDR::to_char,
+                                          ACE_OutputCDR::from_char,
+-                                         TAO::Any_Insert_Policy_Stream>
++                                         TAO::Any_Insert_Policy_Stream <ACE_OutputCDR::from_char> >
+   {
+   };
+
+@@ -52,7 +52,7 @@
+     : public Special_Basic_SArg_Traits_T<CORBA::WChar,
+                                          ACE_InputCDR::to_wchar,
+                                          ACE_OutputCDR::from_wchar,
+-                                         TAO::Any_Insert_Policy_Stream>
++                                         TAO::Any_Insert_Policy_Stream <ACE_OutputCDR::from_wchar> >
+   {
+   };
+
+@@ -61,7 +61,7 @@
+     : public Special_Basic_SArg_Traits_T<CORBA::Octet,
+                                          ACE_InputCDR::to_octet,
+                                          ACE_OutputCDR::from_octet,
+-                                         TAO::Any_Insert_Policy_Stream>
++                                         TAO::Any_Insert_Policy_Stream <ACE_OutputCDR::from_octet> >
+   {
+   };
+
+@@ -70,7 +70,7 @@
+     : public Special_Basic_SArg_Traits_T<CORBA::Boolean,
+                                          ACE_InputCDR::to_boolean,
+                                          ACE_OutputCDR::from_boolean,
+-                                         TAO::Any_Insert_Policy_Stream>
++                                         TAO::Any_Insert_Policy_Stream <ACE_OutputCDR::from_boolean> >
+
+   {
+   };
+Index: PortableServer/TypeCode_SArg_Traits.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/TypeCode_SArg_Traits.h,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 TypeCode_SArg_Traits.h
+--- PortableServer/TypeCode_SArg_Traits.h       20 Jun 2006 07:18:19 -0000      1.7
++++ PortableServer/TypeCode_SArg_Traits.h       26 Jun 2006 19:11:39 -0000
+@@ -48,7 +48,7 @@
+     : public Object_SArg_Traits_T<CORBA::TypeCode_ptr,
+                                   CORBA::TypeCode_var,
+                                   CORBA::TypeCode_out,
+-                                  TAO::Any_Insert_Policy_Stream
++                                  TAO::Any_Insert_Policy_Stream <CORBA::TypeCode_ptr>
+                                  >
+   {
+   };
+Index: PortableServer/Var_Array_SArgument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Var_Array_SArgument_T.cpp,v
+retrieving revision 1.13
+diff -u -u -w -b -r1.13 Var_Array_SArgument_T.cpp
+--- PortableServer/Var_Array_SArgument_T.cpp    22 Jun 2006 07:13:22 -0000      1.13
++++ PortableServer/Var_Array_SArgument_T.cpp    26 Jun 2006 19:13:02 -0000
+@@ -12,7 +12,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Var_Array_SArgument_T<S_forany,
+                               Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+@@ -24,13 +24,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Var_Array_SArgument_T<S_forany,
+                               Insert_Policy>::interceptor_value (
+     CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, S_forany (this->x_));
++  Insert_Policy::any_insert (any, S_forany (this->x_));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -38,7 +38,7 @@
+ // ===========================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Var_Array_SArgument_T<S_forany,
+                                  Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+@@ -47,7 +47,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Var_Array_SArgument_T<S_forany,
+                                  Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+@@ -59,14 +59,14 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Var_Array_SArgument_T<S_forany,
+                                  Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+   typedef typename S_forany::_slice_type slice_type;
+-  Insert_Policy<S_forany>::any_insert (
++  Insert_Policy::any_insert (
+       any,
+       S_forany (const_cast <slice_type *>(this->x_))
+     );
+@@ -78,7 +78,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Var_Array_SArgument_T<S_var,
+                                S_forany,
+@@ -94,14 +94,14 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Var_Array_SArgument_T<S_var,
+                                S_forany,
+                                Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, S_forany (this->x_.ptr ()));
++  Insert_Policy::any_insert (any, S_forany (this->x_.ptr ()));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -110,7 +110,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Var_Array_SArgument_T<S_var,
+                                S_forany,
+@@ -125,14 +125,14 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Var_Array_SArgument_T<S_var,
+                                S_forany,
+                                Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S_forany>::any_insert (any, S_forany (this->x_.ptr ()));
++  Insert_Policy::any_insert (any, S_forany (this->x_.ptr ()));
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: PortableServer/Var_Array_SArgument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Var_Array_SArgument_T.h,v
+retrieving revision 1.9
+diff -u -u -w -b -r1.9 Var_Array_SArgument_T.h
+--- PortableServer/Var_Array_SArgument_T.h      20 Jun 2006 07:19:59 -0000      1.9
++++ PortableServer/Var_Array_SArgument_T.h      26 Jun 2006 18:14:14 -0000
+@@ -32,7 +32,7 @@
+    *
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Var_Array_SArgument_T : public InArgument
+   {
+   public:
+@@ -56,7 +56,7 @@
+    *
+    */
+   template<typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Var_Array_SArgument_T : public InoutArgument
+   {
+   public:
+@@ -81,7 +81,7 @@
+    */
+   template<typename S_var,
+            typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Var_Array_SArgument_T : public OutArgument
+   {
+   public:
+@@ -105,7 +105,7 @@
+    */
+   template<typename S_var,
+            typename S_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Var_Array_SArgument_T : public RetArgument
+   {
+   public:
+@@ -129,7 +129,7 @@
+    */
+   template<typename T_out,
+            typename T_forany,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Var_Array_SArg_Traits_T
+   {
+     typedef typename T_forany::_slice_type *            ret_type;
+Index: PortableServer/Var_Array_SArgument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Var_Array_SArgument_T.inl,v
+retrieving revision 1.8
+diff -u -u -w -b -r1.8 Var_Array_SArgument_T.inl
+--- PortableServer/Var_Array_SArgument_T.inl    20 Jun 2006 09:47:34 -0000      1.8
++++ PortableServer/Var_Array_SArgument_T.inl    26 Jun 2006 18:14:17 -0000
+@@ -5,14 +5,14 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::In_Var_Array_SArgument_T<S_forany,
+                               Insert_Policy>::In_Var_Array_SArgument_T (void)
+ {}
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type const *
+ TAO::In_Var_Array_SArgument_T<S_forany,
+@@ -25,7 +25,7 @@
+ // ==========================================================================
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Var_Array_SArgument_T<S_forany,
+                                  Insert_Policy>::
+@@ -34,7 +34,7 @@
+ }
+
+ template<typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ typename S_forany::_slice_type *
+ TAO::Inout_Var_Array_SArgument_T<S_forany,
+                                  Insert_Policy>::arg (void)
+@@ -47,7 +47,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Var_Array_SArgument_T<S_var,
+                                S_forany,
+@@ -58,7 +58,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ typename S_forany::_slice_type *&
+ TAO::Out_Var_Array_SArgument_T<S_var,
+                                S_forany,
+@@ -71,7 +71,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Var_Array_SArgument_T<S_var,
+                                S_forany,
+@@ -82,7 +82,7 @@
+
+ template<typename S_var,
+          typename S_forany,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ typename S_forany::_slice_type *&
+ TAO::Ret_Var_Array_SArgument_T<S_var,
+Index: PortableServer/Var_Size_SArgument_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Var_Size_SArgument_T.cpp,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Var_Size_SArgument_T.cpp
+--- PortableServer/Var_Size_SArgument_T.cpp     20 Jun 2006 06:30:04 -0000      1.7
++++ PortableServer/Var_Size_SArgument_T.cpp     26 Jun 2006 18:45:07 -0000
+@@ -13,7 +13,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::In_Var_Size_SArgument_T<S,Insert_Policy>::demarshal (TAO_InputCDR &cdr)
+ {
+@@ -23,13 +23,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::In_Var_Size_SArgument_T<S,Insert_Policy>::interceptor_value (
+     CORBA::Any *any
+   ) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -37,7 +37,7 @@
+ // ===========================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Var_Size_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -45,7 +45,7 @@
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Inout_Var_Size_SArgument_T<S,Insert_Policy>::demarshal (TAO_InputCDR & cdr)
+ {
+@@ -55,13 +55,13 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Inout_Var_Size_SArgument_T<S,Insert_Policy>::interceptor_value (
+     CORBA::Any *any
+   ) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_);
++  Insert_Policy::any_insert (any, this->x_);
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -69,7 +69,7 @@
+ // ==============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Out_Var_Size_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -79,12 +79,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Out_Var_Size_SArgument_T<S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_.in ());
++  Insert_Policy::any_insert (any, this->x_.in ());
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+@@ -92,7 +92,7 @@
+ // ============================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ CORBA::Boolean
+ TAO::Ret_Var_Size_SArgument_T<S,Insert_Policy>::marshal (TAO_OutputCDR &cdr)
+ {
+@@ -102,12 +102,12 @@
+ #if TAO_HAS_INTERCEPTORS == 1
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ void
+ TAO::Ret_Var_Size_SArgument_T<S,Insert_Policy>::interceptor_value (
+   CORBA::Any *any) const
+ {
+-  Insert_Policy<S>::any_insert (any, this->x_.in ());
++  Insert_Policy::any_insert (any, this->x_.in ());
+ }
+
+ #endif /* TAO_HAS_INTERCEPTORS */
+Index: PortableServer/Var_Size_SArgument_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Var_Size_SArgument_T.h,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Var_Size_SArgument_T.h
+--- PortableServer/Var_Size_SArgument_T.h       20 Jun 2006 06:30:04 -0000      1.7
++++ PortableServer/Var_Size_SArgument_T.h       26 Jun 2006 18:14:14 -0000
+@@ -31,7 +31,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class In_Var_Size_SArgument_T : public InArgument
+   {
+   public:
+@@ -53,7 +53,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Inout_Var_Size_SArgument_T : public InoutArgument
+   {
+   public:
+@@ -77,7 +77,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Out_Var_Size_SArgument_T : public OutArgument
+   {
+   public:
+@@ -100,7 +100,7 @@
+    *
+    */
+   template<typename S,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   class Ret_Var_Size_SArgument_T : public RetArgument
+   {
+   public:
+@@ -124,7 +124,7 @@
+    *
+    */
+   template<typename T,
+-           template <typename> class Insert_Policy>
++           class Insert_Policy>
+   struct Var_Size_SArg_Traits_T
+   {
+     typedef T *                                             ret_type;
+Index: PortableServer/Var_Size_SArgument_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/Var_Size_SArgument_T.inl,v
+retrieving revision 1.7
+diff -u -u -w -b -r1.7 Var_Size_SArgument_T.inl
+--- PortableServer/Var_Size_SArgument_T.inl     20 Jun 2006 06:30:04 -0000      1.7
++++ PortableServer/Var_Size_SArgument_T.inl     26 Jun 2006 18:14:17 -0000
+@@ -5,7 +5,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ S const &
+ TAO::In_Var_Size_SArgument_T<S,Insert_Policy>::arg (void) const
+ {
+@@ -15,14 +15,14 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Inout_Var_Size_SArgument_T<S,Insert_Policy>::Inout_Var_Size_SArgument_T (void)
+ {
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ S &
+ TAO::Inout_Var_Size_SArgument_T<S,Insert_Policy>::arg (void)
+ {
+@@ -32,14 +32,14 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Out_Var_Size_SArgument_T<S,Insert_Policy>::Out_Var_Size_SArgument_T (void)
+ {
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ S *&
+ TAO::Out_Var_Size_SArgument_T<S,Insert_Policy>::arg (void)
+ {
+@@ -49,14 +49,14 @@
+ // ==========================================================================
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ TAO::Ret_Var_Size_SArgument_T<S,Insert_Policy>::Ret_Var_Size_SArgument_T (void)
+ {
+ }
+
+ template<typename S,
+-         template <typename> class Insert_Policy>
++         class Insert_Policy>
+ ACE_INLINE
+ S *&
+ TAO::Ret_Var_Size_SArgument_T<S,Insert_Policy>::arg (void)
+Index: Valuetype/AbstractBase.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Valuetype/AbstractBase.h,v
+retrieving revision 1.21
+diff -u -u -w -b -r1.21 AbstractBase.h
+--- Valuetype/AbstractBase.h    20 Jun 2006 07:13:56 -0000      1.21
++++ Valuetype/AbstractBase.h    26 Jun 2006 19:14:44 -0000
+@@ -163,7 +163,7 @@
+           CORBA::AbstractBase_var,
+           CORBA::AbstractBase_out,
+           TAO::Objref_Traits<CORBA::AbstractBase>,
+-          TAO::Any_Insert_Policy_Stream
++          TAO::Any_Insert_Policy_Stream <CORBA::AbstractBase_ptr>
+         >
+   {
+   };
+Index: Valuetype/ValueBase.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Valuetype/ValueBase.h,v
+retrieving revision 1.24
+diff -u -u -w -b -r1.24 ValueBase.h
+--- Valuetype/ValueBase.h       20 Jun 2006 07:12:28 -0000      1.24
++++ Valuetype/ValueBase.h       26 Jun 2006 19:07:43 -0000
+@@ -345,7 +345,7 @@
+                                  CORBA::ValueBase_var,
+                                  CORBA::ValueBase_out,
+                                  TAO::Value_Traits<CORBA::ValueBase>,
+-                                 TAO::Any_Insert_Policy_Stream>
++                                 TAO::Any_Insert_Policy_Stream <CORBA::ValueBase *> >
+   {
+   };
+
