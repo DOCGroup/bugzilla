@@ -1,0 +1,30 @@
+? ace/Select_Reactor_T.cpp.fix1
+Index: ace/Select_Reactor_T.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Select_Reactor_T.cpp,v
+retrieving revision 4.95
+diff -u -r4.95 Select_Reactor_T.cpp
+--- ace/Select_Reactor_T.cpp	9 May 2006 07:25:08 -0000	4.95
++++ ace/Select_Reactor_T.cpp	25 May 2006 22:34:04 -0000
+@@ -1352,14 +1352,13 @@
+         // State has changed, so exit loop.
+         break;
+ 
+-      // if state changed, we need to re-eval active_handle_count,
+-      // so we will not end with an endless loop
+-      if (this->state_changed_)
+-      {
+-          active_handle_count = this->dispatch_set_.rd_mask_.num_set ()
+-              + this->dispatch_set_.wr_mask_.num_set ()
+-              + this->dispatch_set_.ex_mask_.num_set ();
+-      }
++      // Re-eval active_handle_count after each loop.  The state may have
++      // changed but the state_changed_ flag is not reliable due to nested
++      // event loops.  Check the following bug report for details:
++      //  http://deuce.doc.wustl.edu/bugzilla/show_bug.cgi?id=2540
++      active_handle_count = this->dispatch_set_.rd_mask_.num_set ()
++	  + this->dispatch_set_.wr_mask_.num_set ()
++	  + this->dispatch_set_.ex_mask_.num_set ();
+     }
+   while (active_handle_count > 0);
+ 
