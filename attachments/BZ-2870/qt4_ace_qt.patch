@@ -1,0 +1,11 @@
+Index: MakeProjectCreator/config/ace_qt.mpb
+===================================================================
+--- MakeProjectCreator/config/ace_qt.mpb	(revision 77833)
++++ MakeProjectCreator/config/ace_qt.mpb	(working copy)
+@@ -24,5 +24,6 @@
+   specific(vc6, vc7, vc71, vc8, nmake) {
+     lit_libs -= qt-mt$(QT_VERSION)
+     pure_libs += $(PLATFORM_QT_LIBS)
++    QTDEBUG = d4
+   }
+ }
