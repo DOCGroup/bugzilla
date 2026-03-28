@@ -1,0 +1,80 @@
+--- RB_Tree.h	2005-06-13 14:27:04.000000000 -0700
++++ RB_Tree.h.orig	2004-10-01 23:31:16.000000000 -0700
+@@ -4,7 +4,7 @@
+ /**
+  *  @file    RB_Tree.h
+  *
+- *  RB_Tree.h,v 1.49 2004/10/02 06:31:16 ossama Exp
++ *  $Id: RB_Tree.h,v 1.49 2004/10/02 06:31:16 ossama Exp $
+  *
+  *  @author  Chris Gill
+  */
+@@ -41,20 +41,6 @@
+ {
+ public:
+   enum RB_Tree_Node_Color {RED, BLACK};
+-  
+-  template < typename T > class RelativePointer
+-  {
+-    public:
+-      RelativePointer ( ) { }
+-      explicit RelativePointer ( T const * copy ) { *this = copy; }
+-      RelativePointer ( RelativePointer const & copy ) { T * ptr = copy; *this = ptr; }
+-      RelativePointer & operator = ( T const * ptr ) { delta_ = (char *)ptr; if(ptr) delta_ -= (ptrdiff_t)this; return *this; }
+-      RelativePointer & operator = ( RelativePointer const & copy ) { T * ptr = copy; *this = ptr; return *this; }
+-      operator T * () const { char * ptr = delta_; if(ptr) ptr += (ptrdiff_t)this; return (T *)ptr; }
+-      T * operator -> () const { T * ptr = *this; return ptr; }
+-    private:
+-      char * delta_;
+-  };
+ };
+ 
+ class ACE_RB_Tree_Base
+@@ -90,9 +76,7 @@
+ template <class EXT_ID, class INT_ID>
+ class ACE_RB_Tree_Node : public ACE_RB_Tree_Node_Base
+ {
+-public:  
+-  typedef RelativePointer<ACE_RB_Tree_Node<EXT_ID, INT_ID> > ACE_RB_Tree_Node_Ptr;
+-
++public:
+   // = Initialization and termination methods.
+ 
+   /// Constructor.
+@@ -141,18 +125,18 @@
+ 
+   /// Color of the node.
+   RB_Tree_Node_Color color_;
+-  
++
+   /// Pointer to node's parent.
+-  ACE_RB_Tree_Node_Ptr parent_;
++  ACE_RB_Tree_Node<EXT_ID, INT_ID> *parent_;
+ 
+   /// Pointer to node's left child.
+-  ACE_RB_Tree_Node_Ptr left_;
++  ACE_RB_Tree_Node<EXT_ID, INT_ID> *left_;
+ 
+   /// Pointer to node's right child.
+-  ACE_RB_Tree_Node_Ptr right_;
++  ACE_RB_Tree_Node<EXT_ID, INT_ID> *right_;
+ 
+   /// Pointer to tree base (to get the allocator).
+-  const RelativePointer<ACE_RB_Tree_Base> tree_;
++  const ACE_RB_Tree_Base *tree_;
+ };
+ 
+ /**
+@@ -585,10 +569,9 @@
+   /// Synchronization variable for the MT_SAFE <ACE_RB_Tree>.
+   ACE_LOCK lock_;
+ 
+-  typedef ACE_RB_Tree_Node_Base::RelativePointer<ACE_RB_Tree_Node<EXT_ID, INT_ID> > ACE_RB_Tree_Node_Ptr;
+   /// The root of the tree.
+-  ACE_RB_Tree_Node_Ptr root_;
+-  
++  ACE_RB_Tree_Node<EXT_ID, INT_ID> *root_;
++
+   /// Comparison functor for comparing nodes in the tree.
+   COMPARE_KEYS compare_keys_;
+ 
