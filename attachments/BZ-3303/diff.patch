@@ -1,0 +1,239 @@
+--- config-win32-common.h	Tue Mar 04 22:51:23 2008
++++ config-win32-common.h	Thu Apr 24 08:27:22 2008
+@@ -494,6 +494,9 @@
+ #  else
+ #    pragma comment(lib, "ws2_32.lib")
+ #    pragma comment(lib, "mswsock.lib")
++#    if defined (ACE_HAS_IPV6)
++#      pragma comment(lib, "Iphlpapi.lib")
++#    endif
+ #  endif /* ACE_HAS_WINCE */
+ # endif /* _MSC_VER */
+ 
+--- INET_Addr.cpp	Tue Mar 25 17:09:11 2008
++++ INET_Addr.cpp	Thu Apr 24 08:34:32 2008
+@@ -800,19 +800,6 @@
+ }
+ #endif /* ACE_HAS_WCHAR */
+ 
+-// Return the character representation of the hostname.
+-
+-const char *
+-ACE_INET_Addr::get_host_name (void) const
+-{
+-  ACE_TRACE ("ACE_INET_Addr::get_host_name");
+-
+-  static char name[MAXHOSTNAMELEN + 1];
+-  if (this->get_host_name (name, MAXHOSTNAMELEN + 1) == -1)
+-    ACE_OS::strcpy (name, "<unknown>");
+-  return name;
+-}
+-
+ void
+ ACE_INET_Addr::set_port_number (u_short port_number,
+                                 int encode)
+@@ -1127,30 +1114,6 @@
+   ACE_OS::strsncpy (dst, ch, size);
+   return ch;
+ #endif
+-}
+-
+-// Return the dotted Internet address.
+-const char *
+-ACE_INET_Addr::get_host_addr (void) const
+-{
+-  ACE_TRACE ("ACE_INET_Addr::get_host_addr");
+-#if defined (ACE_HAS_IPV6)
+-  static char buf[INET6_ADDRSTRLEN];
+-  return this->get_host_addr (buf, INET6_ADDRSTRLEN);
+-#else /* ACE_HAS_IPV6 */
+-#  if defined (ACE_VXWORKS)
+-  // It would be nice to be able to encapsulate this into
+-  // ACE_OS::inet_ntoa(), but that would lead to either inefficiencies
+-  // on vxworks or lack of thread safety.
+-  //
+-  // So, we use the way that vxworks suggests.
+-  ACE_INET_Addr *ncthis = const_cast<ACE_INET_Addr *> (this);
+-  inet_ntoa_b (this->inet_addr_.in4_.sin_addr, ncthis->buf_);
+-  return &buf_[0];
+-#  else /* ACE_VXWORKS */
+-  return ACE_OS::inet_ntoa (this->inet_addr_.in4_.sin_addr);
+-#  endif /* !ACE_VXWORKS */
+-#endif /* !ACE_HAS_IPV6 */
+ }
+ 
+ // Return the 4-byte IP address, converting it into host byte order.
+--- INET_Addr.h	Thu Mar 20 20:43:29 2008
++++ INET_Addr.h	Thu Apr 24 08:33:38 2008
+@@ -284,12 +284,10 @@
+   /**
+    * Return the character representation of the hostname.  This
+    * version is non-reentrant since it returns a pointer to a static
+-   * data area.  You should therefore either (1) do a "deep copy" of
+-   * the address returned by get_host_name(), e.g., using strdup() or
+-   * (2) use the "reentrant" version of get_host_name() described
++   * data area. Use the "reentrant" version of get_host_name() described
+    * above.
+    */
+-  const char *get_host_name (void) const;
++  //const char *get_host_name (void) const;
+ 
+   /**
+    * Return the "dotted decimal" Internet address representation of
+@@ -301,12 +299,10 @@
+   /**
+    * Return the "dotted decimal" Internet address representation of
+    * the hostname.  This version is non-reentrant since it returns a
+-   * pointer to a static data area.  You should therefore either
+-   * (1) do a "deep copy" of the address returned by get_host_addr(), e.g.,
+-   * using strdup() or (2) use the "reentrant" version of
++   * pointer to a static data area. Use the "reentrant" version of
+    * get_host_addr() described above.
+    */
+-  const char *get_host_addr (void) const;
++  //const char *get_host_addr (void) const;
+ 
+   /// Return the 4-byte IP address, converting it into host byte
+   /// order.
+--- MEM_Addr.cpp	Tue Mar 04 22:51:23 2008
++++ MEM_Addr.cpp	Thu Apr 24 08:36:03 2008
+@@ -137,15 +137,6 @@
+   return this->external_.get_host_name (hostname, len);
+ }
+ 
+-// Return the character representation of the hostname.
+-
+-const char *
+-ACE_MEM_Addr::get_host_name (void) const
+-{
+-  ACE_TRACE ("ACE_MEM_Addr::get_host_name");
+-  return this->external_.get_host_name ();
+-}
+-
+ u_long
+ ACE_MEM_Addr::hash (void) const
+ {
+--- MEM_Addr.h	Tue Mar 04 22:51:23 2008
++++ MEM_Addr.h	Thu Apr 24 08:36:41 2008
+@@ -100,16 +100,6 @@
+   int get_host_name (ACE_TCHAR hostname[],
+                      size_t hostnamelen) const;
+ 
+-  /**
+-   * Return the character representation of the hostname (this version
+-   * is non-reentrant since it returns a pointer to a static data
+-   * area).
+-   */
+-  const char *get_host_name (void) const;
+-
+-  /// Return the "dotted decimal" external address.
+-  const char *get_host_addr (void) const;
+-
+   /// Return the 4-byte external IP address, converting it into host byte
+   /// order.
+   ACE_UINT32 get_ip_address (void) const;
+--- MEM_Addr.inl	Tue Mar 04 22:51:23 2008
++++ MEM_Addr.inl	Thu Apr 24 08:36:09 2008
+@@ -43,15 +43,6 @@
+   return this->internal_.get_port_number ();
+ }
+ 
+-// Return the dotted Internet address.
+-
+-ACE_INLINE const char *
+-ACE_MEM_Addr::get_host_addr (void) const
+-{
+-  ACE_TRACE ("ACE_MEM_Addr::get_host_addr");
+-  return this->internal_.get_host_addr ();
+-}
+-
+ // Return the 4-byte IP address, converting it into host byte order.
+ 
+ ACE_INLINE ACE_UINT32
+--- MEM_Connector.cpp	Tue Mar 04 22:51:23 2008
++++ MEM_Connector.cpp	Thu Apr 24 08:46:45 2008
+@@ -2,6 +2,7 @@
+ // $Id: MEM_Connector.cpp 80826 2008-03-04 14:51:23Z wotte $
+ 
+ #include "ace/MEM_Connector.h"
++#include "ace/OS_NS_netdb.h"
+ 
+ ACE_RCSID(ace, MEM_Connector, "$Id: MEM_Connector.cpp 80826 2008-03-04 14:51:23Z wotte $")
+ 
+@@ -69,15 +70,22 @@
+   ACE_TRACE ("ACE_MEM_Connector::connect");
+ 
+   if (!this->address_.same_host (remote_sap))
+-    ACE_ERROR_RETURN ((LM_ERROR,
++  {
++      char  remote_hoststr[MAXHOSTNAMELEN+1] = "<unknow>";
++      remote_sap.get_host_name (remote_hoststr, MAXHOSTNAMELEN+1);
++      char  local_hoststr[MAXHOSTNAMELEN+1] = "<unknow>";
++      this->address_.get_host_name (local_hoststr, MAXHOSTNAMELEN+1);
++  
++      ACE_ERROR_RETURN ((LM_ERROR,
+                        ACE_TEXT ("(%P|%t) MEM_Connector can't connect ")
+                        ACE_TEXT ("to %s:%d which is not a local endpoint ")
+                        ACE_TEXT ("(local address is %s:%d)\n"),
+-                       ACE_TEXT_CHAR_TO_TCHAR (remote_sap.get_host_name ()),
++                       ACE_TEXT_CHAR_TO_TCHAR (remote_hoststr),
+                        remote_sap.get_port_number (),
+-                       ACE_TEXT_CHAR_TO_TCHAR (this->address_.get_host_name ()),
++                       ACE_TEXT_CHAR_TO_TCHAR (local_hoststr),
+                        this->address_.get_port_number ()),
+                       -1);
++  }
+   else
+     this->address_.set_port_number (remote_sap.get_port_number ());
+ 
+--- Service_Manager.cpp	Tue Mar 04 22:51:23 2008
++++ Service_Manager.cpp	Thu Apr 24 08:44:24 2008
+@@ -11,6 +11,7 @@
+ #include "ace/WFMO_Reactor.h"
+ #include "ace/OS_NS_stdio.h"
+ #include "ace/OS_NS_string.h"
++#include "ace/OS_NS_netdb.h"
+ 
+ ACE_RCSID (ace,
+            Service_Manager,
+@@ -301,10 +302,11 @@
+       ACE_INET_Addr sa;
+       if (this->client_stream_.get_remote_addr (sa) == -1)
+         return -1;
+-
++      char  hoststr[MAXHOSTNAMELEN+1] = "<unknow>";
++      sa.get_host_name (hoststr, MAXHOSTNAMELEN+1);
+       ACE_DEBUG ((LM_DEBUG,
+                   ACE_TEXT ("accepted from host %s at port %d\n"),
+-                  ACE_TEXT_CHAR_TO_TCHAR (sa.get_host_name ()),
++                  ACE_TEXT_CHAR_TO_TCHAR (hoststr),
+                   sa.get_port_number ()));
+     }
+ 
+--- SOCK_Dgram_Mcast.cpp	Tue Mar 04 22:51:23 2008
++++ SOCK_Dgram_Mcast.cpp	Thu Apr 24 08:40:45 2008
+@@ -363,10 +363,11 @@
+                   // Convert to 0-based for indexing, next loop check.
+                   if (if_addrs[if_cnt].get_type () != AF_INET || if_addrs[if_cnt].is_loopback ())
+                     continue;
++                  char hostaddr[INET6_ADDRSTRLEN];
+                   if (this->join (mcast_addr,
+                                   reuse_addr,
+                                   ACE_TEXT_CHAR_TO_TCHAR
+-                                   (if_addrs[if_cnt].get_host_addr ())) == 0)
++                                   (if_addrs[if_cnt].get_host_addr (hostaddr, INET6_ADDRSTRLEN))) == 0)
+                     ++nr_subscribed;
+                 }
+             }
+@@ -722,9 +723,10 @@
+                   // Convert to 0-based for indexing, next loop check
+                   if (if_addrs[if_cnt].get_type () != AF_INET || if_addrs[if_cnt].is_loopback ())
+                     continue;
++                  char hostaddr[INET6_ADDRSTRLEN];
+                   if (this->leave (mcast_addr,
+                                    ACE_TEXT_CHAR_TO_TCHAR
+-                                   (if_addrs[if_cnt].get_host_addr ())) == 0)
++                                   (if_addrs[if_cnt].get_host_addr (hostaddr, INET6_ADDRSTRLEN))) == 0)
+                     ++nr_unsubscribed;
+                 }
+             }
