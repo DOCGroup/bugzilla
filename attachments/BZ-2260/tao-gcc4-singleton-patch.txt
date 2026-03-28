@@ -1,0 +1,64 @@
+--- ACE_wrappers.orig/TAO/orbsvcs/orbsvcs/AV/AV_Core.h	2005-08-29 22:24:14.000000000 -0400
++++ ACE_wrappers/TAO/orbsvcs/orbsvcs/AV/AV_Core.h	2005-10-10 20:32:34.000000000 -0400
+@@ -156,8 +156,6 @@
+   CORBA::Boolean stop_run_;
+ };
+ 
+-typedef ACE_Singleton<TAO_AV_Core, ACE_Null_Mutex> TAO_AV_CORE;
+-
+ #if defined (__BORLANDC__)
+ # if !defined (TAO_AV_BUILD_DLL)
+ #   pragma option push -Jgx
+@@ -170,5 +168,7 @@
+ # endif
+ #endif
+ 
++typedef ACE_Singleton<TAO_AV_Core, ACE_Null_Mutex> TAO_AV_CORE;
++
+ #include /**/ "ace/post.h"
+ #endif /* TAO_AV_CORE_H */
+--- ACE_wrappers.orig/TAO/orbsvcs/orbsvcs/Notify/Properties.h	2005-08-29 21:47:14.000000000 -0400
++++ ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/Properties.h	2005-10-10 20:32:47.000000000 -0400
+@@ -141,10 +141,10 @@
+   CosNotification::QoSProperties pc_qos_;
+ };
+ 
+-typedef TAO_Singleton<TAO_Notify_Properties, TAO_SYNCH_MUTEX> TAO_Notify_PROPERTIES;
+-
+ TAO_NOTIFY_SERV_SINGLETON_DECLARE (TAO_Singleton, TAO_Notify_Properties, TAO_SYNCH_MUTEX)
+ 
++typedef TAO_Singleton<TAO_Notify_Properties, TAO_SYNCH_MUTEX> TAO_Notify_PROPERTIES;
++
+ #if defined (__ACE_INLINE__)
+ #include "Properties.inl"
+ #endif /* __ACE_INLINE__ */
+--- ACE_wrappers.orig/TAO/orbsvcs/orbsvcs/Notify/RT_Properties.h	2003-12-30 07:45:00.000000000 -0500
++++ ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/RT_Properties.h	2005-10-10 20:32:59.000000000 -0400
+@@ -53,10 +53,10 @@
+   RTCORBA::Current_var current_;
+ };
+ 
+-typedef TAO_Singleton<TAO_Notify_RT_Properties, TAO_SYNCH_MUTEX> TAO_Notify_RT_PROPERTIES;
+-
+ TAO_RT_NOTIFY_SINGLETON_DECLARE (TAO_Singleton, TAO_Notify_RT_Properties, TAO_SYNCH_MUTEX)
+ 
++typedef TAO_Singleton<TAO_Notify_RT_Properties, TAO_SYNCH_MUTEX> TAO_Notify_RT_PROPERTIES;
++
+ #if defined (__ACE_INLINE__)
+ #include "RT_Properties.inl"
+ #endif /* __ACE_INLINE__ */
+--- ACE_wrappers.orig/TAO/orbsvcs/tests/Notify/lib/LookupManager.h	2004-08-16 19:53:16.000000000 -0400
++++ ACE_wrappers/TAO/orbsvcs/tests/Notify/lib/LookupManager.h	2005-10-10 20:33:11.000000000 -0400
+@@ -110,10 +110,10 @@
+   TAO_Notify_Tests_Priority_Mapping *priority_mapping_;
+ };
+ 
+-typedef ACE_Singleton<TAO_Notify_Tests_LookupManager, TAO_SYNCH_MUTEX> _TAO_Notify_Tests_LookupManager;
+-
+ TAO_NOTIFY_TEST_SINGLETON_DECLARE (ACE_Singleton, TAO_Notify_Tests_LookupManager, TAO_SYNCH_MUTEX)
+ 
++typedef ACE_Singleton<TAO_Notify_Tests_LookupManager, TAO_SYNCH_MUTEX> _TAO_Notify_Tests_LookupManager;
++
+ #define LOOKUP_MANAGER  _TAO_Notify_Tests_LookupManager::instance()
+ 
+ #include /**/ "ace/post.h"
