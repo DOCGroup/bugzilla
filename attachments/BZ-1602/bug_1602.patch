@@ -1,0 +1,89 @@
+Index: tao/IIOP_Connector.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/tao/IIOP_Connector.cpp,v
+retrieving revision 1.1.1.5
+retrieving revision 1.1.1.5.2.1
+diff -u -r1.1.1.5 -r1.1.1.5.2.1
+--- tao/IIOP_Connector.cpp	10 Aug 2003 20:23:39 -0000	1.1.1.5
++++ tao/IIOP_Connector.cpp	30 Sep 2003 23:42:04 -0000	1.1.1.5.2.1
+@@ -174,15 +174,17 @@
+                                                remote_address,
+                                                synch_options);
+ 
++   // Cache the handle for logging purposes...
+ 
++   ACE_HANDLE handle = svc_handler->get_handle();
+    if (result == -1 && errno == EWOULDBLOCK)
+      {
+        if (TAO_debug_level > 2)
+          ACE_DEBUG ((LM_DEBUG,
+                      "TAO (%P|%t) - IIOP_Connector::make_connection, "
+-                     "going to wait for connection completion on local"
++                     "going to wait for connection completion on local "
+                      "handle [%d]\n",
+-                     svc_handler->get_handle ()));
++                        handle));
+ 
+        result =
+          this->active_connect_strategy_->wait (svc_handler,
+@@ -192,13 +194,14 @@
+          {
+            ACE_DEBUG ((LM_DEBUG,
+                        "TAO (%P|%t) - IIOP_Connector::make_connection"
+-                       "wait done for handle[%d], result = %d\n",
+-                       svc_handler->get_handle (), result));
++                       "wait done for handle[%d], result = %d (%p)\n",
++                          handle, result,
++                          "errno"));
+          }
+ 
+      }
+ 
+-   int status =
++   int is_finalized =
+      svc_handler->is_finalized ();
+ 
+    // Reduce the refcount to the svc_handler that we have. The
+@@ -211,22 +214,33 @@
+ 
+    ACE_ASSERT (refcount >= 0);
+ 
+-   ACE_UNUSED_ARG (refcount);
+-
+    if (result == -1)
+      {
+-       // Give users a clue to the problem.
++       int cancel_result = 0;
++       if (is_finalized == 0)
++         {
++           // The connection failed, but it was not closed during the
++           // event loop, we need to cancel the asynchronous connection in
++           // the ACE_Connector<>, and destroy the service handler.
++           cancel_result = this->base_connector_.cancel (svc_handler);
++         }
++
++       int post_failed_result =
++         this->active_connect_strategy_->post_failed_connect (
++             svc_handler, is_finalized);
++       
+        if (TAO_debug_level)
+          {
+            ACE_DEBUG ((LM_ERROR,
+-                       "TAO (%P|%t) - IIOP_Connector::make_connection, "
+-                       "connection to <%s:%d> failed (%p)\n",
+-                       iiop_endpoint->host (), iiop_endpoint->port (),
+-                       "errno"));
++                        "TAO (%P|%t) - IIOP_Connector::make_connection, "
++                        "connection to <%s:%d> on handle [%d] failed (%p),"
++                          "cancel_result=%d, post_failed_result=%d,"
++                          "refcount=%d, is_finalized=%d\n",
++                          iiop_endpoint->host (), iiop_endpoint->port (),
++                          handle, "errno", cancel_result,
++                          post_failed_result, refcount, is_finalized));
+          }
+ 
+-       (void) this->active_connect_strategy_->post_failed_connect (svc_handler,
+-                                                                   status);
+ 
+        return -1;
+      }
