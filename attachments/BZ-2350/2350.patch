@@ -1,0 +1,89 @@
+Index: be/be_visitor_operation/upcall_command_ss.cpp
+===================================================================
+--- be/be_visitor_operation/upcall_command_ss.cpp	(revision 76323)
++++ be/be_visitor_operation/upcall_command_ss.cpp	(working copy)
+@@ -278,7 +278,9 @@
+                               UTL_Scope::IK_decls);
+ 
+   unsigned int index = 1;
+-
++  const char* op_name = node->flat_name ();
++  bool excep_method = (ACE_OS::strstr (op_name, "_excep") ==
++                       (op_name + ACE_OS::strlen (op_name) - 6));
+   for (; !si.is_done (); si.next (), ++index)
+     {
+       AST_Argument * const arg =
+@@ -369,6 +371,32 @@
+ 
+     }
+ 
++  --index;
++
++  // We have determined that this is an "_excep" method, there is exactly
++  // one argument.  Now, if the node has exceptions, we're in business.
++  if (excep_method && index == 1 && node->exceptions())
++    {
++      be_visitor_operation_exceptlist_cs exceplist (this->ctx ());
++      exceplist.visit_operation (node);
++
++      unsigned int exceptions_count = 0;
++      for (UTL_ExceptlistActiveIterator ei (node->exceptions ());
++           !ei.is_done (); ei.next ())
++        {
++          ++exceptions_count;
++        }
++
++      os << be_nl
++         << "TAO::ExceptionHolder *tao_excepholder = " << be_idt_nl
++         << "dynamic_cast<TAO::ExceptionHolder *> (arg_" << index
++         << ");" << be_uidt_nl
++         << "if (tao_excepholder != 0)" << be_idt_nl
++         << "tao_excepholder->set_exception_data "
++            "(_tao_" << op_name << "_exceptiondata, " << exceptions_count << ");" << be_uidt_nl
++         << be_nl;
++    }
++
+   if (!node->void_return_type ())
+     {
+       os << "retval =" << be_idt_nl;
+Index: be/be_codegen.cpp
+===================================================================
+--- be/be_codegen.cpp	(revision 76323)
++++ be/be_codegen.cpp	(working copy)
+@@ -1953,6 +1953,14 @@
+         );
+     }
+ 
++  if (be_global->ami_call_back () == true)
++    {
++      this->gen_standard_include (this->server_skeletons_,
++                                  "tao/Exception_Data.h");
++      this->gen_standard_include (this->server_skeletons_,
++                                  "tao/Messaging/ExceptionHolder_i.h");
++    }
++
+   this->gen_standard_include (this->server_skeletons_,
+                               "tao/PortableServer/Upcall_Command.h");
+   this->gen_standard_include (this->server_skeletons_,
+Index: be/be_visitor_ami_pre_proc.cpp
+===================================================================
+--- be/be_visitor_ami_pre_proc.cpp	(revision 76323)
++++ be/be_visitor_ami_pre_proc.cpp	(working copy)
+@@ -989,9 +989,15 @@
+   arg->set_name (arg_name);
+   arg->set_defined_in (operation);
+ 
+-  // We do not copy the exceptions because the exceptions
+-  // are delivered by the excep methods.
++  // Copy the exceptions since the user exception information may
++  // be needed when collocation is disabled.
++  UTL_ExceptList *exceptions = node->exceptions ();
+ 
++  if (0 != exceptions)
++    {
++      operation->be_add_exceptions (exceptions->copy ());
++    }
++
+   // After having generated the operation we insert it into the
+   // reply handler interface.
+   if (0 == reply_handler->be_add_operation (operation))
