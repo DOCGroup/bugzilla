@@ -1,0 +1,75 @@
+ 	NTDLL.DLL!77f82870() 	
+ 	NTDLL.DLL!77f8822a() 	
+ 	NTDLL.DLL!77f85469() 	
+ 	NTDLL.DLL!77f8549a() 	
+ 	NTDLL.DLL!77f85475() 	
+ 	NTDLL.DLL!77f8819b() 	
+>	ACEd.dll!ACE_OS::thread_mutex_lock(_RTL_CRITICAL_SECTION * m=0x01bfccec)  Line 4441 + 0xc	C++
+ 	ACEd.dll!ACE_Thread_Mutex::acquire()  Line 50 + 0x9	C++
+ 	TAOd.dll!ACE_Guard<ACE_Thread_Mutex>::acquire()  Line 9 + 0xd	C++
+ 	TAOd.dll!ACE_Guard<ACE_Thread_Mutex>::ACE_Guard<ACE_Thread_Mutex>(ACE_Thread_Mutex & l={...})  Line 36	C++
+ 	TAOd.dll!TAO_ORB_Core::_incr_refcnt()  Line 8 + 0xf	C++
+		locks via:
+                ACE_GUARD_RETURN (TAO_SYNCH_MUTEX, guard, this->lock_, 0);
+
+		this = 0x1bfcce8
+		Already acquired by ownerThread = 3080 (=0xc08)
+
+		Heres the watch info for the windows RTL_CRITICAL_SECTION that this guard tries to acquire:
+		m	0x01bfccec {DebugInfo=0x00145c38 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01bfccec {DebugInfo=0x00145c38 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01bfccec ...} LockCount=2 RecursionCount=1 ...} ...} LockCount=2 RecursionCount=1 ...}	_RTL_CRITICAL_SECTION *
+		-	DebugInfo	0x00145c38 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01bfccec {DebugInfo=0x00145c38 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01bfccec {DebugInfo=0x00145c38 LockCount=2 RecursionCount=1 ...} ...} LockCount=2 RecursionCount=1 ...} ...}	_RTL_CRITICAL_SECTION_DEBUG *
+				Type	0	unsigned short
+				CreatorBackTraceIndex	0	unsigned short
+			+	CriticalSection	0x01bfccec {DebugInfo=0x00145c38 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01bfccec {DebugInfo=0x00145c38 {Type=0 CreatorBackTraceIndex=0 CriticalSection=0x01bfccec ...} LockCount=2 RecursionCount=1 ...} ...} LockCount=2 RecursionCount=1 ...}	_RTL_CRITICAL_SECTION *
+			+	ProcessLocksList	{Flink=0x00145c68 {Flink=0x00145c90 {Flink=0x00145cb8 {Flink=0x00145ce0 Blink=0x00145c90 } Blink=0x00145c68 {Flink=0x00145c90 Blink=0x00145c40 } } Blink=0x00145c40 {Flink=0x00145c68 {Flink=0x00145c90 Blink=0x00145c40 } Blink=0x00145c18 {Flink=0x00145c40 Blink=0x00145bf0 } } } Blink=0x00145c18 {Flink=0x00145c40 {Flink=0x00145c68 {Flink=0x00145c90 Blink=0x00145c40 } Blink=0x00145c18 {Flink=0x00145c40 Blink=0x00145bf0 } } Blink=0x00145bf0 {Flink=0x00145c18 {Flink=0x00145c40 Blink=0x00145bf0 } Blink=0x00145bc8 {Flink=0x00145bf0 Blink=0x00145ba0 } } } }	_LIST_ENTRY
+				EntryCount	5	unsigned long
+				ContentionCount	5	unsigned long
+			+	Spare	0x00145c50	unsigned long [2]
+			LockCount	2	long
+			RecursionCount	1	long
+			OwningThread	0x00000c08	void *  ---> Thread3080
+			LockSemaphore	0x00001200	void *
+			SpinCount	0	unsigned long
+
+
+ 	TAOd.dll!TAO_Stub::TAO_Stub(const char * repository_id=0x00bba384, const TAO_MProfile & profiles={...}, TAO_ORB_Core * orb_core=0x01bfcce8)  Line 71	C++
+ 	TAOd.dll!TAO_Default_Stub_Factory::create_stub(const char * repository_id=0x00bba384, const TAO_MProfile & profiles={...}, TAO_ORB_Core * orb_core=0x01bfcce8)  Line 31 + 0x31	C++
+ 	TAOd.dll!TAO_ORB_Core::create_stub(const char * repository_id=0x00bba384, const TAO_MProfile & profiles={...})  Line 1643 + 0x24	C++
+ 	TAOd.dll!TAO_ORB_Core::create_stub_object(TAO_MProfile & mprofile={...}, const char * type_id=0x00bba384, CORBA::PolicyList * policy_list=0x1614d2a8)  Line 1687 + 0x10	C++
+ 	TAO_PortableServerd.dll!TAO_POA::create_stub_object(const TAO::ObjectKey & object_key={...}, const char * type_id=0x00bba384, CORBA::PolicyList * policy_list=0x1614d2a8, TAO_Acceptor_Filter * filter=0x0582e3cc, TAO_Acceptor_Registry & acceptor_registry={...})  Line 3897 + 0x1d	C++
+ 	TAO_PortableServerd.dll!TAO_POA::key_to_stub_i(const TAO::ObjectKey & key={...}, const char * type_id=0x00bba384, short priority=-1)  Line 3766 + 0x47	C++
+ 	TAO_PortableServerd.dll!TAO_POA::key_to_object(const TAO::ObjectKey & key={...}, const char * type_id=0x00bba384, TAO_ServantBase * servant=0x1613bd54, bool collocated=true, short priority=-1)  Line 3698 + 0x1a	C++
+ 	TAO_PortableServerd.dll!TAO_POA::invoke_key_to_object()  Line 3600 + 0x3a	C++
+ 	TAO_PortableServerd.dll!TAO_POA::invoke_key_to_object_helper_i(const char * repository_id=0x00bba384, const CORBA::OctetSeq & id={...})  Line 1981	C++
+ 	TAO_PortableServerd.dll!TAO_POA::id_to_reference_i(const CORBA::OctetSeq & id={...})  Line 2647 + 0x39	C++
+ 	TAO_PortableServerd.dll!TAO_POA::id_to_reference(const CORBA::OctetSeq & oid={...})  Line 422 + 0x12	C++
+ 	corbaUtils.dll!CorbaNS::POASmartVar::idToReference(const CORBA::OctetSeq & oid={...})  Line 330 + 0x31	C++
+ 	ECM.exe!DBCorba::BaseReplica::BindServantToPOA()  Line 333 + 0x21	C++
+ 	ECM.exe!DBCorba::BaseReplica::bindToDBObject()  Line 55	C++
+ 	ECM.exe!DBCorba::ReplImpl<DBCorba::CTPObjectData>::bindToDBObject()  Line 152	C++
+ 	ECM.exe!DBCorba::ReplImplFactory::getReplica(nfcNS::SmartPtr<DBCorba::BaseReplica,nfcNS::ImplRepWithVirtualDeletion> & a_replica={...}, DataDefinitions::ObjectType a_type=CTP, const DBCorba::ObjectDBKey & a_id={...}, const DBCorba::ObjectDBKey & a_holderId={...}, DataDefinitions::ObjectType a_holderType=EMPTY, DBObject::DBObject_I * a_dbObj=0x00000000, bool a_bindToDBObject=true)  Line 267 + 0x2d	C++
+ 	ECM.exe!DBCorba::BaseReplica::insertChild(const DataDefinitions::Key & a_id={...}, DataDefinitions::ObjectType a_type=CTP)  Line 287 + 0xa5	C++
+ 	ECM.exe!POA_DBReplica::DBReplica_I::insertChild_skel(TAO_ServerRequest & _tao_server_request={...}, void * _tao_servant=0x087c4c68, void * _tao_servant_upcall=0x0582f140)  Line 1992 + 0x15	C++
+ 	TAO_PortableServerd.dll!TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest & req={...}, void * servant_upcall=0x0582f140, void * derived_this=0x087c4c68)  Line 228 + 0x11	C++
+ 	ECM.exe!POA_DBReplica::DBReplica_I::_dispatch(TAO_ServerRequest & req={...}, void * servant_upcall=0x0582f140)  Line 2753 + 0x34	C++
+ 	TAO_PortableServerd.dll!TAO_Object_Adapter::dispatch_servant(const TAO::ObjectKey & key={...}, TAO_ServerRequest & req={...}, TAO_Pseudo_Out_T<CORBA::Object,TAO_Pseudo_Var_T<CORBA::Object> > forward_to={...})  Line 340 + 0x4d	C++
+		Somewhere around here the TAO_Object_Adapter's lock is acquired.
+		I couldn't put my finger exactly where since the lock is acquired manually
+		and not via a guard - but since the other thread deadlocks on trying to
+		acquire the TAO_Object_Adapter's lock then it must have been acquired!
+	
+ 	TAO_PortableServerd.dll!TAO_Object_Adapter::dispatch(TAO::ObjectKey & key={...}, TAO_ServerRequest & request={...}, TAO_Pseudo_Out_T<CORBA::Object,TAO_Pseudo_Var_T<CORBA::Object> > forward_to={...})  Line 762 + 0x28	C++
+ 	TAOd.dll!TAO_Adapter_Registry::dispatch(TAO::ObjectKey & key={...}, TAO_ServerRequest & request={...}, TAO_Pseudo_Out_T<CORBA::Object,TAO_Pseudo_Var_T<CORBA::Object> > forward_to={...})  Line 139 + 0x31	C++
+ 	TAOd.dll!TAO_Request_Dispatcher::dispatch(TAO_ORB_Core * orb_core=0x01bfcce8, TAO_ServerRequest & request={...}, TAO_Pseudo_Out_T<CORBA::Object,TAO_Pseudo_Var_T<CORBA::Object> > forward_to={...})  Line 28	C++
+ 	TAOd.dll!TAO_GIOP_Message_Base::process_request(TAO_Transport * transport=0x03f51828, TAO_InputCDR & cdr={...}, TAO_OutputCDR & output={...}, TAO_GIOP_Message_Generator_Parser * parser=0x03f5616c)  Line 835	C++
+ 	TAOd.dll!TAO_GIOP_Message_Base::process_request_message(TAO_Transport * transport=0x03f51828, TAO_Queued_Data * qd=0x0582f938)  Line 616 + 0x1e	C++
+ 	TAOd.dll!TAO_Transport::process_parsed_messages(TAO_Queued_Data * qd=0x0582f938, TAO_Resume_Handle & rh={...})  Line 2106 + 0x2c	C++
+ 	TAOd.dll!TAO_Transport::handle_input(TAO_Resume_Handle & rh={...}, ACE_Time_Value * max_wait_time=0x0582fe58, int __formal=0)  Line 1375 + 0x13	C++
+ 	TAOd.dll!TAO_Connection_Handler::svc_i()  Line 134 + 0x22	C++
+ 	TAOd.dll!TAO_Thread_Per_Connection_Handler::svc()  Line 69	C++
+ 	ACEd.dll!ACE_Task_Base::svc_run(void * args=0x03f564b0)  Line 203 + 0xd	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke_i()  Line 149 + 0x9	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke()  Line 93 + 0xd	C++
+ 	ACEd.dll!ace_thread_adapter(void * args=0x01c5f648)  Line 131 + 0xd	C++
+ 	msvcr71d.dll!10203266() 	
+ 	KERNEL32.DLL!7c57b388() 	
