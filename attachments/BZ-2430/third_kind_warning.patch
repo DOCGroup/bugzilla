@@ -1,0 +1,153 @@
+Index: ace/UUID.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/UUID.cpp,v
+retrieving revision 1.28
+diff -u -r1.28 UUID.cpp
+--- ace/UUID.cpp	21 Dec 2005 18:11:29 -0000	1.28
++++ ace/UUID.cpp	10 Mar 2006 00:16:36 -0000
+@@ -371,8 +371,8 @@
+     u_char cseqHAV;
+     {
+       ACE_GUARD (ACE_SYNCH_MUTEX, mon, *lock_);
+-      uuid.clockSeqLow (uuid_state_.clockSequence & 0xFF);
+-      cseqHAV = (uuid_state_.clockSequence & 0x3f00) >> 8;
++      uuid.clockSeqLow ((u_char)uuid_state_.clockSequence & 0xFF);
++      cseqHAV = ((u_char)uuid_state_.clockSequence & 0x3f00) >> 8;
+       uuid_state_.timestamp = timestamp;
+     }
+ 
+@@ -418,7 +418,7 @@
+     // Account for the clock being set back. Increment the clock /
+     // sequence.
+     if (timestamp <= timeLast_)
+-      uuid_state_.clockSequence = (uuid_state_.clockSequence + 1) & ACE_UUID_CLOCK_SEQ_MASK;
++      uuid_state_.clockSequence = (ACE_UINT16)((uuid_state_.clockSequence + 1) & ACE_UUID_CLOCK_SEQ_MASK);
+ 
+     // If the system time ticked since the last UUID was
+     // generated. Set / the clock sequence back.
+Index: ace/Codecs.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/Codecs.cpp,v
+retrieving revision 4.8
+diff -u -r4.8 Codecs.cpp
+--- ace/Codecs.cpp	28 Oct 2005 16:14:51 -0000	4.8
++++ ace/Codecs.cpp	10 Mar 2006 00:15:10 -0000
+@@ -157,9 +157,9 @@
+ 
+       if (char_count == 4)
+         {
+-          result[pos++] = bits >> 16;
+-          result[pos++] = (bits >> 8) & 0xff;
+-          result[pos++] = bits & 0xff;
++          result[pos++] = (ACE_Byte)bits >> 16;
++          result[pos++] = ((ACE_Byte)bits >> 8) & 0xff;
++          result[pos++] = (ACE_Byte)bits & 0xff;
+           bits = 0;
+           char_count = 0;
+         }
+@@ -190,11 +190,11 @@
+           errors++;
+           break;
+         case 2:
+-          result[pos++] = bits >> 10;
++          result[pos++] = (ACE_Byte)bits >> 10;
+           break;
+         case 3:
+-          result[pos++] = bits >> 16;
+-          result[pos++] = (bits >> 8) & 0xff;
++          result[pos++] = (ACE_Byte)bits >> 16;
++          result[pos++] = ((ACE_Byte)bits >> 8) & 0xff;
+           break;
+         }
+     }
+Index: apps/gperf/src/Options.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/apps/gperf/src/Options.cpp,v
+retrieving revision 4.43
+diff -u -r4.43 Options.cpp
+--- apps/gperf/src/Options.cpp	24 Apr 2004 04:21:49 -0000	4.43
++++ apps/gperf/src/Options.cpp	10 Mar 2006 02:34:39 -0000
+@@ -129,7 +129,7 @@
+           // Oh no, a duplicate!!!
+           return 0;
+ 
+-      base[curr] = tmp;
++      base[curr] = (char)tmp;
+     }
+ 
+   return 1;
+@@ -523,7 +523,7 @@
+                                        usage),
+                                       -1);
+                   else
+-                    *l_key_pos = value;;
++                    *l_key_pos = (char)value;;
+ 
+                 *l_key_pos = EOS;
+ 
+Index: apps/gperf/src/List_Node.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/apps/gperf/src/List_Node.cpp,v
+retrieving revision 4.14
+diff -u -r4.14 List_Node.cpp
+--- apps/gperf/src/List_Node.cpp	21 Jan 2005 02:45:12 -0000	4.14
++++ apps/gperf/src/List_Node.cpp	10 Mar 2006 02:37:52 -0000
+@@ -42,7 +42,7 @@
+     {
+       char curr, tmp;
+ 
+-      for (curr = i + 1, tmp = base[curr];
++      for (curr = (char)(i + 1), tmp = base[curr];
+            curr > 0 && tmp < base[curr-1];
+            curr--)
+         base[curr] = base[curr - 1];
+@@ -81,7 +81,7 @@
+   if (option[STRCASECMP])
+     for (char *p = k; *p; p++)
+       if (isupper (*p))
+-        *p = tolower (*p);
++        *p = (char)tolower (*p);
+ 
+   if (option[ALLCHARS])         // Use all the character position in the KEY.
+     for (; *k; k++, ptr++)
+Index: apps/gperf/src/Key_List.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/apps/gperf/src/Key_List.cpp,v
+retrieving revision 4.63
+diff -u -r4.63 Key_List.cpp
+--- apps/gperf/src/Key_List.cpp	3 Oct 2005 13:51:58 -0000	4.63
++++ apps/gperf/src/Key_List.cpp	10 Mar 2006 02:40:07 -0000
+@@ -137,7 +137,7 @@
+           delete [] buf;
+           buf = temp;
+         }
+-      buf[i] = c;
++      buf[i] = (char)c;
+     }
+ 
+   return 0;
+@@ -256,7 +256,7 @@
+                                                         delimiter))),
+                           -1);
+           for (temp = this->head;
+-               (buffer = input.read ('\n'))
++               (0 != (buffer = input.read ('\n')))
+                  && ACE_OS::strcmp (buffer, "%%");
+                temp = temp->next)
+             {
+Index: apps/gperf/src/Gen_Perf.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/apps/gperf/src/Gen_Perf.cpp,v
+retrieving revision 4.21
+diff -u -r4.21 Gen_Perf.cpp
+--- apps/gperf/src/Gen_Perf.cpp	1 Nov 2003 11:15:22 -0000	4.21
++++ apps/gperf/src/Gen_Perf.cpp	10 Mar 2006 02:40:46 -0000
+@@ -102,7 +102,7 @@
+            curr--)
+         union_set[curr] = union_set[curr - 1];
+ 
+-      union_set[curr] = tmp;
++      union_set[curr] = (char)tmp;
+     }
+ }
+ 
