@@ -1,0 +1,101 @@
+Index: tao/Messaging/ExceptionHolder_i.cpp
+===================================================================
+--- tao/Messaging/ExceptionHolder_i.cpp	(revision 75305)
++++ tao/Messaging/ExceptionHolder_i.cpp	(working copy)
+@@ -35,6 +35,15 @@
+   {
+   }
+ 
++
++  void
++  ExceptionHolder::set_exception_data (::TAO::Exception_Data* data,
++                                       ::CORBA::ULong exceptions_count)
++  {
++    this->data_ = data;
++    this->count_ = exceptions_count;
++  }
++
+   void ExceptionHolder::raise_exception (
+         ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS
+     )
+@@ -92,4 +101,3 @@
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+-
+Index: tao/Messaging/ExceptionHolder_i.h
+===================================================================
+--- tao/Messaging/ExceptionHolder_i.h	(revision 75305)
++++ tao/Messaging/ExceptionHolder_i.h	(working copy)
+@@ -57,6 +57,9 @@
+       ::CORBA::ULong exceptions_count
+     );
+ 
++    void set_exception_data ( ::TAO::Exception_Data* data_,
++                              ::CORBA::ULong exceptions_count);
++
+     virtual void raise_exception (ACE_ENV_SINGLE_ARG_DECL_WITH_DEFAULTS);
+ 
+     virtual void raise_exception_with_list (
+@@ -71,8 +74,8 @@
+ 
+   private:
+ 
+-    TAO::Exception_Data* const data_;
+-    CORBA::ULong const count_;
++    TAO::Exception_Data* data_;
++    CORBA::ULong count_;
+ 
+   };
+ 
+@@ -97,4 +100,3 @@
+ 
+ #include /**/ "ace/post.h"
+ #endif /* TAO_MESSAGING_EXCEPTIONHOLDER_I_H */
+-
+--- tests/AMI/ami_testS.cpp~	2006-11-09 14:19:43.000000000 -0600
++++ tests/AMI/ami_testS.cpp	2006-11-09 15:43:29.000000000 -0600
+@@ -47,6 +47,8 @@
+ #include "tao/AnyTypeCode/DynamicC.h"
+ #include "tao/CDR.h"
+ #include "tao/operation_details.h"
++#include "tao/Exception_Data.h"
++#include "tao/Messaging/ExceptionHolder_i.h"
+ #include "tao/PortableInterceptor.h"
+ #include "tao/PortableServer/Basic_SArguments.h"
+ #include "tao/PortableServer/Object_SArgument_T.h"
+@@ -1557,12 +1559,29 @@
+     
+     virtual void execute (ACE_ENV_SINGLE_ARG_DECL)
+     {
++
++      static TAO::Exception_Data exceptions_data [] =
++      {
++        {
++          "IDL:A/DidTheRightThing:1.0",
++          A::DidTheRightThing::_alloc
++#if TAO_HAS_INTERCEPTORS == 1
++          , A::_tc_DidTheRightThing
++#endif /* TAO_HAS_INTERCEPTORS */
++        }
++      };
++
++      ::CORBA::ULong const exceptions_count = 1;
++
++
+       TAO::SArg_Traits< ::Messaging::ExceptionHolder>::in_arg_type arg_1 =
+         TAO::Portable_Server::get_in_arg< ::Messaging::ExceptionHolder> (
+           this->operation_details_,
+           this->args_,
+           1);
+         
++      reinterpret_cast<TAO::ExceptionHolder *>(arg_1)->set_exception_data (exceptions_data, exceptions_count);
++
+       this->servant_->foo_excep (
+         arg_1
+         ACE_ENV_ARG_PARAMETER);
+@@ -2607,4 +2626,3 @@
+ }
+ 
+ #endif /* ifndef */
+-
