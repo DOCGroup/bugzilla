@@ -1,0 +1,13 @@
+--- SSLIOP_Connector.cpp	2007-12-06 09:07:20.000000000 -0800
++++ orig/SSLIOP_Connector.cpp	2007-12-06 09:06:13.000000000 -0800
+@@ -488,10 +488,6 @@
+         desc,
+         transport) == 0)
+     {
+-        // required to be released if connnection already exists...
+-        ACE_Auto_Basic_Ptr<TAO::SSLIOP::Connection_Handler>
+-            safe_handler (svc_handler);
+-
+       if (TAO_debug_level > 2)
+         ACE_DEBUG ((LM_DEBUG,
+                     ACE_TEXT ("TAO (%P|%t) - SSLIOP_Connector::ssliop_connect, ")
