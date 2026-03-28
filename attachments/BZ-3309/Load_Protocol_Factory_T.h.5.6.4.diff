@@ -1,0 +1,14 @@
+53c53
+<                         ACE_TEXT("(%P|%t) WARNING - No <%s> found in Service")
+---
+>                         ACE_TEXT("(%P|%t) WARNING - No <%C> found in Service")
+89,90c89,90
+<                       ACE_TEXT("<%s> to protocol factory set.\n"),
+<                       ACE_TEXT_CHAR_TO_TCHAR(item->protocol_name ().c_str ())));
+---
+>                       ACE_TEXT("<%C> to protocol factory set.\n"),
+>                       item->protocol_name ().c_str ()));
+104c104
+<                       ACE_TEXT("protocol <%s>\n"),
+---
+>                       ACE_TEXT("protocol <%C>\n"),
