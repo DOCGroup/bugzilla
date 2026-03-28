@@ -1,0 +1,20 @@
+--- orig/fwdC.h	2005-03-23 11:40:34.861778000 -0800
++++ mod/fwdC.h	2005-03-23 12:10:43.724939200 -0800
+@@ -485,7 +485,8 @@
+ 
+ // TAO_IDL - Generated from
+ // c:\projects\ace_win\ace_wrappers\tao\tao_idl\be\be_visitor_structure/any_op_ch.cpp:52
+-
++namespace mod2
++{
+  void operator<<= (CORBA::Any &, const mod2::scope_struct &); // copying version
+  void operator<<= (CORBA::Any &, mod2::scope_struct*); // noncopying version
+  CORBA::Boolean operator>>= (const CORBA::Any &, mod2::scope_struct *&); // deprecated
+@@ -527,6 +528,7 @@
+  void operator<<= (CORBA::Any &, mod2::fwd_ptr); // copying
+  void operator<<= (CORBA::Any &, mod2::fwd_ptr *); // non-copying
+  CORBA::Boolean operator>>= (const CORBA::Any &, mod2::fwd *&);
++}
+ 
+ // TAO_IDL - Generated from
+ // c:\projects\ace_win\ace_wrappers\tao\tao_idl\be\be_visitor_interface_fwd/cdr_op_ch.cpp:66
