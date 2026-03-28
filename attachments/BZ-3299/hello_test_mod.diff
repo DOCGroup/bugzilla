@@ -1,0 +1,165 @@
+Index: client.cpp
+===================================================================
+--- client.cpp	(revision 81378)
++++ client.cpp	(working copy)
+@@ -55,20 +55,35 @@
+                             1);
+         }
+ 
+-      CORBA::String_var the_string = hello->get_string ();
++      try
++        {
++          CORBA::String_var the_string = hello->get_string ();
+ 
+-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) - string returned <%s>\n",
+-                  the_string.in ()));
++          ACE_DEBUG ((LM_DEBUG, "(%P|%t) - string returned <%s>\n",
++                      the_string.in ()));
+ 
+-      hello->shutdown ();
++          // The *first* invocation of the get_string server always throws a COMPLETED_MAYBE exception. For the call to
++          // succeed we must have reinvoked breaking 'at most once' rules. The job is, therefore, a bogey.
++          ACE_ERROR ((LM_ERROR, "Error - Regression - Test has failed. ORB has retried a COMPLETED_MAYBE\n"));
++        }
++      catch (const CORBA::TRANSIENT& trans)
++        {
++          // We are expecting a TRANSIENT COMPLETED_MAYBE.
++          if (trans.completed () == CORBA::COMPLETED_MAYBE)
++            {
++              // Everything is Peach
++              hello->shutdown ();
+ 
+-      orb->destroy ();
++              orb->destroy ();
++
++              return 0;
++            }
++        }
+     }
+   catch (const CORBA::Exception& ex)
+     {
+-      ex._tao_print_exception ("Exception caught:");
+-      return 1;
++      ex._tao_print_exception ("Unexpected exception caught:");
+     }
+ 
+-  return 0;
++  return 1;
+ }
+Index: Hello.mpc
+===================================================================
+--- Hello.mpc	(revision 81378)
++++ Hello.mpc	(working copy)
+@@ -9,7 +9,7 @@
+   custom_only = 1
+ }
+ 
+-project(*Server): taoserver {
++project(*Server): taoserver, iortable {
+   after += *idl
+   Source_Files {
+     Hello.cpp
+Index: Hello.cpp
+===================================================================
+--- Hello.cpp	(revision 81378)
++++ Hello.cpp	(working copy)
+@@ -5,6 +5,8 @@
+ 
+ ACE_RCSID(Hello, Hello, "$Id$")
+ 
++int count = 0;
++
+ Hello::Hello (CORBA::ORB_ptr orb)
+   : orb_ (CORBA::ORB::_duplicate (orb))
+ {
+@@ -13,7 +15,14 @@
+ char *
+ Hello::get_string (void)
+ {
+-  return CORBA::string_dup ("Hello there!");
++  if (count == 0)
++    {
++      ++count;
++      throw ::CORBA::TRANSIENT (0,
++              CORBA::COMPLETED_MAYBE);
++    }
++
++  return CORBA::string_dup ("You shouldn't ever see this message");
+ }
+ 
+ void
+Index: server.cpp
+===================================================================
+--- server.cpp	(revision 81378)
++++ server.cpp	(working copy)
+@@ -3,6 +3,7 @@
+ #include "Hello.h"
+ #include "ace/Get_Opt.h"
+ #include "ace/OS_NS_stdio.h"
++#include "tao/IORTable/IORTable.h"
+ 
+ ACE_RCSID (Hello,
+            server,
+@@ -75,6 +76,19 @@
+ 
+       CORBA::String_var ior = orb->object_to_string (hello.in ());
+ 
++
++      CORBA::Object_var tmp = orb->resolve_initial_references("IORTable");
++      IORTable::Table_var iorTable = IORTable::Table::_narrow(tmp.in ());
++      if (CORBA::is_nil(iorTable.in ()))
++        {
++          ACE_ERROR ((LM_ERROR, "could not get the IORTable, will not register\n"));
++	}
++      else
++        {
++          iorTable->rebind("Hello", ior.in());
++	}
++
++
+       // Output the IOR to the <ior_output_file>
+       FILE *output_file= ACE_OS::fopen (ior_output_file, "w");
+       if (output_file == 0)
+Index: run_test.pl
+===================================================================
+--- run_test.pl	(revision 81378)
++++ run_test.pl	(working copy)
+@@ -15,7 +15,7 @@
+ foreach $i (@ARGV) {
+     if ($i eq '-debug') {
+         $debug_level = '10';
+-    } 
++    }
+ }
+ 
+ my $target = PerlACE::TestTarget::create_target ($PerlACE::TestConfig);
+@@ -30,10 +30,10 @@
+     $SV = new PerlACE::ProcessVX ("server", "-ORBDebuglevel $debug_level -o $iorbase");
+ }
+ else {
+-    $SV = $target->CreateProcess ("server", "-ORBdebuglevel $debug_level -o $iorfile");
++    $SV = $target->CreateProcess ("server", "-ORBListenEndpoints iiop://:23232 -ORBdebuglevel $debug_level -o $iorfile");
+ }
+-$CL = $host->CreateProcess ("client", "-k file://$iorbase");
+-    
++$CL = $host->CreateProcess ("client", "-k corbaloc:iiop:127.0.0.1:23232/Hello");
++
+ $server = $SV->Spawn ();
+ 
+ if ($server != 0) {
+@@ -46,13 +46,13 @@
+     print STDERR "ERROR: cannot find file <$iorfile>\n";
+     $SV->Kill (); $SV->TimedWait (1);
+     exit 1;
+-} 
++}
+ 
+ if ($target->GetFile ($iorfile, $iorbase) == -1) {
+     print STDERR "ERROR: cannot retrieve file <$iorfile>\n";
+     $SV->Kill (); $SV->TimedWait (1);
+     exit 1;
+-} 
++}
+ 
+ $client = $CL->SpawnWaitKill (300);
+ 
