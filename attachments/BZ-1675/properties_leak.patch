@@ -1,0 +1,162 @@
+Index: Properties.h
+===================================================================
+--- Properties.h	(revision 76488)
++++ Properties.h	(working copy)
+@@ -137,20 +137,28 @@
+   /// The Update period for updates.
+   ACE_Time_Value update_period_;
+ 
+-  /// The default EC QoS Properties.
+-  CosNotification::QoSProperties ec_qos_;
++  struct Specific_Properties
++  {
++    Specific_Properties (void);
++    ~Specific_Properties (void);
+ 
+-  /// The default SA QoS Properties.
+-  CosNotification::QoSProperties sa_qos_;
++    /// The default EC QoS Properties.
++    CosNotification::QoSProperties *ec_qos_;
+ 
+-  /// The default CA QoS Properties.
+-  CosNotification::QoSProperties ca_qos_;
++    /// The default SA QoS Properties.
++    CosNotification::QoSProperties *sa_qos_;
+ 
+-  /// The default PS QoS Properties.
+-  CosNotification::QoSProperties ps_qos_;
++    /// The default CA QoS Properties.
++    CosNotification::QoSProperties *ca_qos_;
+ 
+-  /// The default PC QoS Properties.
+-  CosNotification::QoSProperties pc_qos_;
++    /// The default PS QoS Properties.
++    CosNotification::QoSProperties *ps_qos_;
++
++    /// The default PC QoS Properties.
++    CosNotification::QoSProperties *pc_qos_;
++  };
++
++  Specific_Properties specific_properties_;
+ };
+ 
+ /**
+Index: Properties.cpp
+===================================================================
+--- Properties.cpp	(revision 76488)
++++ Properties.cpp	(working copy)
+@@ -28,9 +28,9 @@
+   NotifyExt::ThreadPoolParams tp_params =
+     {NotifyExt::CLIENT_PROPAGATED,0, 0, 0, 0, 0, 0, 0,0};
+ 
+-  this->ec_qos_.length (1);
+-  this->ec_qos_[0].name = CORBA::string_dup (NotifyExt::ThreadPool);
+-  this->ec_qos_[0].value <<= tp_params;
++  this->specific_properties_.ec_qos_->length (1);
++  (*this->specific_properties_.ec_qos_)[0].name = CORBA::string_dup (NotifyExt::ThreadPool);
++  (*this->specific_properties_.ec_qos_)[0].value <<= tp_params;
+ 
+   if (TAO_debug_level > 1)
+     ACE_DEBUG ((LM_DEBUG, "in TAO_Properties ctos %x\n", this));
+@@ -49,4 +49,25 @@
+   return
+     TAO_Singleton<TAO_Notify_Properties, TAO_SYNCH_MUTEX>::instance ();
+ }
++
++TAO_Notify_Properties::Specific_Properties::Specific_Properties (void)
++  : ec_qos_ (0)
++  , sa_qos_ (0)
++  , ca_qos_ (0)
++  , ps_qos_ (0)
++  , pc_qos_ (0)
++{
++  ACE_NEW (this->ec_qos_, CosNotification::QoSProperties);
++  ACE_NEW (this->sa_qos_, CosNotification::QoSProperties);
++  ACE_NEW (this->ca_qos_, CosNotification::QoSProperties);
++  ACE_NEW (this->ps_qos_, CosNotification::QoSProperties);
++  ACE_NEW (this->pc_qos_, CosNotification::QoSProperties);
++}
++
++TAO_Notify_Properties::Specific_Properties::~Specific_Properties (void)
++{
++  // Explicitly leak these property sequences due to static
++  // destruction problems pertaining to type codes.
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: Properties.inl
+===================================================================
+--- Properties.inl	(revision 76488)
++++ Properties.inl	(working copy)
+@@ -115,61 +115,61 @@
+ ACE_INLINE const CosNotification::QoSProperties&
+ TAO_Notify_Properties::default_event_channel_qos_properties (void)
+ {
+-  return this->ec_qos_;
++  return *this->specific_properties_.ec_qos_;
+ }
+ 
+ ACE_INLINE void
+ TAO_Notify_Properties::default_event_channel_qos_properties (const CosNotification::QoSProperties &ec_qos)
+ {
+-  this->ec_qos_ = ec_qos;
++  *this->specific_properties_.ec_qos_ = ec_qos;
+ }
+ 
+ ACE_INLINE const CosNotification::QoSProperties&
+ TAO_Notify_Properties::default_supplier_admin_qos_properties (void)
+ {
+-  return this->sa_qos_;
++  return *this->specific_properties_.sa_qos_;
+ }
+ 
+ ACE_INLINE void
+ TAO_Notify_Properties::default_supplier_admin_qos_properties (const CosNotification::QoSProperties &sa_qos)
+ {
+-  this->sa_qos_ = sa_qos;
++  *this->specific_properties_.sa_qos_ = sa_qos;
+ }
+ 
+ ACE_INLINE const CosNotification::QoSProperties&
+ TAO_Notify_Properties::default_consumer_admin_qos_properties (void)
+ {
+-  return this->ca_qos_;
++  return *this->specific_properties_.ca_qos_;
+ }
+ 
+ ACE_INLINE void
+ TAO_Notify_Properties::default_consumer_admin_qos_properties (const CosNotification::QoSProperties &ca_qos)
+ {
+-  this->ca_qos_ = ca_qos;
++  *this->specific_properties_.ca_qos_ = ca_qos;
+ }
+ 
+ ACE_INLINE const CosNotification::QoSProperties&
+ TAO_Notify_Properties::default_proxy_supplier_qos_properties (void)
+ {
+-  return this->ps_qos_;
++  return *this->specific_properties_.ps_qos_;
+ }
+ 
+ ACE_INLINE void
+ TAO_Notify_Properties::default_proxy_supplier_qos_properties (const CosNotification::QoSProperties &ps_qos)
+ {
+-  this->ps_qos_ = ps_qos;
++  *this->specific_properties_.ps_qos_ = ps_qos;
+ }
+ 
+ ACE_INLINE const CosNotification::QoSProperties&
+ TAO_Notify_Properties::default_proxy_consumer_qos_properties (void)
+ {
+-  return this->pc_qos_;
++  return *this->specific_properties_.pc_qos_;
+ }
+ 
+ ACE_INLINE void
+ TAO_Notify_Properties::default_proxy_consumer_qos_properties (const CosNotification::QoSProperties &pc_qos)
+ {
+-  this->pc_qos_ = pc_qos;
++  *this->specific_properties_.pc_qos_ = pc_qos;
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
