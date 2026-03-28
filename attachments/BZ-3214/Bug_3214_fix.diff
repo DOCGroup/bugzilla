@@ -1,0 +1,92 @@
+Index: TAO/tao/AnyTypeCode/Any_Unknown_IDL_Type.cpp
+===================================================================
+RCS file: /local/cvs/master/pspACETAO/Current/source/ACE_wrappers/TAO/tao/AnyTypeCode/Any_Unknown_IDL_Type.cpp,v
+retrieving revision 1.4
+retrieving revision 1.5
+diff -u -w -r1.4 -r1.5
+--- TAO/tao/AnyTypeCode/Any_Unknown_IDL_Type.cpp	4 Oct 2007 22:42:16 -0000	1.4
++++ TAO/tao/AnyTypeCode/Any_Unknown_IDL_Type.cpp	1 Feb 2008 18:14:28 -0000	1.5
+@@ -1,4 +1,4 @@
+-// $Id: Any_Unknown_IDL_Type.cpp,v 1.4 2007/10/04 22:42:16 othman Exp $
++// $Id: Any_Unknown_IDL_Type.cpp,v 1.5 2008/02/01 18:14:28 rmora Exp $
+ 
+ #include "tao/AnyTypeCode/Any_Unknown_IDL_Type.h"
+ #include "tao/AnyTypeCode/Marshal.h"
+@@ -13,21 +13,22 @@
+ 
+ ACE_RCSID (tao,
+            Any_Unknown_IDL_Type,
+-           "$Id: Any_Unknown_IDL_Type.cpp,v 1.4 2007/10/04 22:42:16 othman Exp $")
++           "$Id: Any_Unknown_IDL_Type.cpp,v 1.5 2008/02/01 18:14:28 rmora Exp $")
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-ACE_Lock *
++TAO::Unknown_IDL_Type::LOCK
+ TAO::Unknown_IDL_Type::lock_i (void)
+ {
+-  static ACE_Auto_Ptr<ACE_Lock> lock_ (new ACE_Lock_Adapter<TAO_SYNCH_MUTEX>());
+-  return lock_.get ();
++  static LOCK base_lock_ (new ACE_Lock_Adapter<TAO_SYNCH_MUTEX>());
++  return base_lock_;
+ }
+ 
+ TAO::Unknown_IDL_Type::Unknown_IDL_Type (CORBA::TypeCode_ptr tc,
+                                          TAO_InputCDR &cdr)
+   : TAO::Any_Impl (0, tc, true)
+-  , cdr_ (static_cast<ACE_Message_Block*>(0), lock_i ())
++  , lock_ (lock_i ())
++  , cdr_ (static_cast<ACE_Message_Block*>(0), lock_.get ())
+ {
+   try
+     {
+@@ -40,7 +41,8 @@
+ 
+ TAO::Unknown_IDL_Type::Unknown_IDL_Type (CORBA::TypeCode_ptr tc)
+   : TAO::Any_Impl (0, tc, true)
+-  , cdr_ (static_cast<ACE_Message_Block*>(0), lock_i ())
++  , lock_ (lock_i ())
++  , cdr_ (static_cast<ACE_Message_Block*>(0), lock_.get ())
+ {
+ }
+ 
+Index: TAO/tao/AnyTypeCode/Any_Unknown_IDL_Type.h
+===================================================================
+RCS file: /local/cvs/master/pspACETAO/Current/source/ACE_wrappers/TAO/tao/AnyTypeCode/Any_Unknown_IDL_Type.h,v
+retrieving revision 1.2
+retrieving revision 1.3
+diff -u -w -r1.2 -r1.3
+--- TAO/tao/AnyTypeCode/Any_Unknown_IDL_Type.h	16 Jun 2006 10:47:30 -0000	1.2
++++ TAO/tao/AnyTypeCode/Any_Unknown_IDL_Type.h	1 Feb 2008 18:14:28 -0000	1.3
+@@ -4,7 +4,7 @@
+ /**
+  *  @file    Any_Unknown_IDL_Type.h
+  *
+- *  $Id: Any_Unknown_IDL_Type.h,v 1.2 2006/06/16 10:47:30 othman Exp $
++ *  $Id: Any_Unknown_IDL_Type.h,v 1.3 2008/02/01 18:14:28 rmora Exp $
+  *
+  *  @author Carlos O'Ryan
+  *  @author Jeff Parsons
+@@ -19,7 +19,8 @@
+ #include "tao/AnyTypeCode/Any_Impl.h"
+ #include "tao/CDR.h"
+ 
+-#include "ace/Auto_Ptr.h"
++#include "ace/Refcounted_Auto_Ptr.h"
++#include "ace/Lock_Adapter_T.h"
+ 
+ #if !defined (ACE_LACKS_PRAGMA_ONCE)
+ # pragma once
+@@ -76,8 +77,10 @@
+     // lot of fun :) ...  Bottom line, use a static function, which
+     // encapsulates a local static initializer, guaranteed to be
+     // initialized at the first invocation.
+-    static ACE_Lock *lock_i (void);
+-
++    typedef ACE_Refcounted_Auto_Ptr<ACE_Lock,
++                                    ACE_Lock_Adapter<TAO_SYNCH_MUTEX> > LOCK;
++    static LOCK lock_i (void);
++    LOCK const lock_;
+     mutable TAO_InputCDR cdr_;
+   };
+ }
