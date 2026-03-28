@@ -1,0 +1,16 @@
+--- orig/Acceptor.cpp	2006-07-07 12:47:16.000000000 -0400
++++ Acceptor.cpp	2006-07-17 16:44:51.000000000 -0400
+@@ -388,9 +388,12 @@
+                         ACE_LIB_TEXT ("make_svc_handler")));
+           return 0;
+         }
++
++      ACE_Event_Handler_var safe_handler (svc_handler);
++
+       // Accept connection into the Svc_Handler.
+ 
+-      else if (this->accept_svc_handler (svc_handler) == -1)
++      if (this->accept_svc_handler (svc_handler) == -1)
+         {
+           // Note that <accept_svc_handler> closes the <svc_handler>
+           // on failure.
