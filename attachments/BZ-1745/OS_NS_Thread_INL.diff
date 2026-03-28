@@ -1,0 +1,173 @@
+--- OS_NS_Thread.inl	2004-01-07 14:25:26.000000000 -0500
++++ /cygdrive/c/welchj/c/apps/ACE_wrappers/ace/OS_NS_Thread.inl	2004-02-17 18:10:40.454794800 -0500
+@@ -1,10 +1,9 @@
+ // -*- C++ -*-
+-// OS_NS_Thread.inl,v 1.11 2004/01/07 19:25:26 bala Exp
++// OS_NS_Thread.inl,v 1.8 2003/12/02 21:37:22 shuston Exp
+ 
+ #include "ace/OS_NS_macros.h"
+ // for timespec_t, perhaps move it to os_time.h
+ #include "ace/Time_Value.h"
+-#include "ace/OS_NS_sys_mman.h"
+ #include "ace/OS_NS_sys_time.h"
+ #include "ace/OS_NS_string.h"
+ #include "ace/OS_NS_unistd.h"
+@@ -696,14 +695,24 @@
+                                        FALSE,
+                                        name);
+ #   endif /* ACE_HAS_WINCE */
+-      if (m->proc_mutex_ == 0)
+-        ACE_FAIL_RETURN (-1);
+-      else
+-        {
++	  if(m->proc_mutex_ == 0) {
++#if defined(ACE_HAS_WINCE)
++		  m_proc_mutex_ = ::OpenMutexW(SYNCHRONIZE,FALSE,ACE_Ascii_To_Wide (name).wchar_rep ());
++#else   /* ACE_HAS_WINCE */
++		  m->proc_mutex_ = ::OpenMutexA(SYNCHRONIZE,FALSE,name);
++#endif  /* ACE_HAS_WINCE */
++		  if(m->proc_mutex_ == 0) {
++              ACE_FAIL_RETURN (-1);
++		  } else {
++              // Make sure to set errno to ERROR_ALREADY_EXISTS if necessary.
++             ACE_OS::set_errno_to_last_error ();
++             return 0;
++		  }
++	  } else {
+           // Make sure to set errno to ERROR_ALREADY_EXISTS if necessary.
+           ACE_OS::set_errno_to_last_error ();
+           return 0;
+-        }
++      }
+     case USYNC_THREAD:
+       return ACE_OS::thread_mutex_init (&m->thr_mutex_,
+                                         type,
+@@ -819,7 +828,6 @@
+   ACE_UNUSED_ARG (sa);
+   event->manual_reset_ = manual_reset;
+   event->is_signaled_ = initial_state;
+-  event->auto_event_signaled_ = false;
+   event->waiting_threads_ = 0;
+ 
+   int result = ACE_OS::cond_init (&event->condition_,
+@@ -938,7 +946,6 @@
+     {
+       // Reset event.
+       event->is_signaled_ = 0;
+-      event->auto_event_signaled_ = false;
+ 
+       // Now we can let go of the lock.
+       ACE_OS::mutex_unlock (&event->lock_);
+@@ -967,15 +974,14 @@
+       // Manual-reset event.
+       if (event->manual_reset_ == 1)
+         {
++          // signal event
++          event->is_signaled_ = 1;
+           // wakeup all
+           if (ACE_OS::cond_broadcast (&event->condition_) != 0)
+             {
+               result = -1;
+               error = errno;
+             }
+-
+-          // signal event
+-          event->is_signaled_ = 1;
+         }
+       // Auto-reset event
+       else
+@@ -983,14 +989,13 @@
+           if (event->waiting_threads_ == 0)
+             // No waiters: signal event.
+             event->is_signaled_ = 1;
++
+           // Waiters: wakeup one waiter.
+           else if (ACE_OS::cond_signal (&event->condition_) != 0)
+             {
+               result = -1;
+               error = errno;
+             }
+-
+-          event->auto_event_signaled_ = true;
+         }
+ 
+       // Now we can let go of the lock.
+@@ -1076,11 +1081,8 @@
+         // event is currently signaled
+         {
+           if (event->manual_reset_ == 0)
+-            {
+-              // AUTO: reset state
+-              event->is_signaled_ = 0;
+-              event->auto_event_signaled_ = false;
+-            }
++            // AUTO: reset state
++            event->is_signaled_ = 0;
+         }
+       else
+         // event is currently not signaled
+@@ -1094,24 +1096,14 @@
+           if (use_absolute_time == 0)
+             absolute_timeout += ACE_OS::gettimeofday ();
+ 
+-          while (event->is_signaled_ == 0 &&
+-                 event->auto_event_signaled_ == false)
++          if (ACE_OS::cond_timedwait (&event->condition_,
++                                      &event->lock_,
++                                      &absolute_timeout) != 0)
+             {
+-              if (ACE_OS::cond_timedwait (&event->condition_,
+-                                          &event->lock_,
+-                                          &absolute_timeout) != 0)
+-                {
+-                  result = -1;
+-                  error = errno;
+-                  break;
+-                }
++              result = -1;
++              error = errno;
+             }
+ 
+-          // Reset the auto_event_signaled_ to false now that we have
+-          // woken up.
+-          if (event->auto_event_signaled_ == true)
+-            event->auto_event_signaled_ = false;
+-
+           event->waiting_threads_--;
+         }
+ 
+@@ -1159,27 +1151,19 @@
+             // AUTO: reset state
+             event->is_signaled_ = 0;
+         }
+-      else // event is currently not signaled
++      else
++        // event is currently not signaled
+         {
+           event->waiting_threads_++;
+ 
+-          while (event->is_signaled_ == 0 &&
+-                 event->auto_event_signaled_ == false)
++          if (ACE_OS::cond_wait (&event->condition_,
++                                 &event->lock_) != 0)
+             {
+-              if (ACE_OS::cond_wait (&event->condition_,
+-                                     &event->lock_) != 0)
+-                {
+-                  result = -1;
+-                  error = errno;
+-                  // Something went wrong...
+-                  break;
+-              }
++              result = -1;
++              error = errno;
++              // Something went wrong...
+             }
+ 
+-          // Reset it since we have woken up.
+-          if (event->auto_event_signaled_ == true)
+-            event->auto_event_signaled_ = false;
+-
+           event->waiting_threads_--;
+         }
+ 
