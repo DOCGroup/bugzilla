@@ -1,0 +1,49 @@
+diff -up ./Select_Reactor_Base.cpp.orig ./Select_Reactor_Base.cpp
+--- ./Select_Reactor_Base.cpp.orig	2008-04-02 13:29:29.000000000 -0400
++++ ./Select_Reactor_Base.cpp	2008-04-02 13:31:11.000000000 -0400
+@@ -347,35 +347,17 @@ ACE_Select_Reactor_Handler_Repository::u
+           // We've deleted the last entry, so we need to figure out
+           // the last valid place in the array that is worth looking
+           // at.
+-          ACE_HANDLE const wait_rd_max =
+-            this->select_reactor_.wait_set_.rd_mask_.max_set ();
+-          ACE_HANDLE const wait_wr_max =
+-            this->select_reactor_.wait_set_.wr_mask_.max_set ();
+-          ACE_HANDLE const wait_ex_max =
+-            this->select_reactor_.wait_set_.ex_mask_.max_set ();
+-
+-          ACE_HANDLE const suspend_rd_max =
+-            this->select_reactor_.suspend_set_.rd_mask_.max_set ();
+-          ACE_HANDLE const suspend_wr_max =
+-            this->select_reactor_.suspend_set_.wr_mask_.max_set ();
+-          ACE_HANDLE const suspend_ex_max =
+-            this->select_reactor_.suspend_set_.ex_mask_.max_set ();
+-
+-          // Compute the maximum of six values.
+-          this->max_handlep1_ = wait_rd_max;
+-          if (this->max_handlep1_ < wait_wr_max)
+-            this->max_handlep1_ = wait_wr_max;
+-          if (this->max_handlep1_ < wait_ex_max)
+-            this->max_handlep1_ = wait_ex_max;
+-
+-          if (this->max_handlep1_ < suspend_rd_max)
+-            this->max_handlep1_ = suspend_rd_max;
+-          if (this->max_handlep1_ < suspend_wr_max)
+-            this->max_handlep1_ = suspend_wr_max;
+-          if (this->max_handlep1_ < suspend_ex_max)
+-            this->max_handlep1_ = suspend_ex_max;
++          this->max_handlep1_ = 0;
+ 
+-          ++this->max_handlep1_;
++          ACE_HANDLE i;
++          for(i = handle - 1; i >= 0; --i)
++          {
++            if(this->event_handlers_[i] != 0)
++            {
++              this->max_handlep1_ = i + 1;
++              break;
++            }
++          }
+         }
+ 
+ #endif /* ACE_WIN32 */
