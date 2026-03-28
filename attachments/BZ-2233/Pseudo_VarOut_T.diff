@@ -1,0 +1,55 @@
+Index: Pseudo_VarOut_T.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Pseudo_VarOut_T.h,v
+retrieving revision 1.10
+diff -u -r1.10 Pseudo_VarOut_T.h
+--- Pseudo_VarOut_T.h	4 Jan 2005 10:01:49 -0000	1.10
++++ Pseudo_VarOut_T.h	6 Sep 2005 22:23:44 -0000
+@@ -40,6 +40,8 @@
+ # pragma once
+ #endif /* ACE_LACKS_PRAGMA_ONCE */
+ 
++#include "tao/varbase.h"
++
+ /**
+  * @class TAO_Pseudo_Var_T
+  *
+@@ -50,7 +52,7 @@
+  *
+  */
+ template <typename T>
+-class TAO_Pseudo_Var_T
++class TAO_Pseudo_Var_T : private TAO_Base_var
+ {
+ public:
+   TAO_Pseudo_Var_T (void);
+@@ -81,6 +83,12 @@
+   _retn_type    ptr (void) const;
+ 
+ private:
++
++  // Unimplemented - prevents widening assignment.
++  TAO_Pseudo_Var_T (const TAO_Base_var &);
++  void operator= (const TAO_Base_var &);
++
++private:
+   T * ptr_;
+ };
+ 
+Index: Pseudo_VarOut_T.inl
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/Pseudo_VarOut_T.inl,v
+retrieving revision 1.6
+diff -u -r1.6 Pseudo_VarOut_T.inl
+--- Pseudo_VarOut_T.inl	26 Jul 2003 18:37:56 -0000	1.6
++++ Pseudo_VarOut_T.inl	6 Sep 2005 22:23:44 -0000
+@@ -17,7 +17,8 @@
+ template <typename T>
+ ACE_INLINE
+ TAO_Pseudo_Var_T<T>::TAO_Pseudo_Var_T (const TAO_Pseudo_Var_T<T> & p)
+-  : ptr_ (T::_duplicate (p.ptr ()))
++  : TAO_Base_var ()
++  , ptr_ (T::_duplicate (p.ptr ()))
+ {}
+ 
+ template <typename T>
