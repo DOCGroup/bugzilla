@@ -1,0 +1,28 @@
+--- ACE_wrappers/TAO/tao/default_resource.cpp	2005-08-30 16:10:52.000000000 -0700
++++ ACE_wrappers/TAO/tao/default_resource.cpp.new	2005-08-30 16:11:24.000000000 -0700
+@@ -1019,7 +1019,7 @@
+ #if !defined (TAO_AS_STATIC_LIBS)
+       // only for dynamic libs, check to see if default factory and if so,
+       // remove it
+-      ACE_Service_Config::process_directive("remove TAO_Codeset");
++      ACE_Service_Config::process_directive(ACE_REMOVE_SERVICE_DIRECTIVE("TAO_Codeset"));
+       ACE_Service_Config::process_directive
+         (ACE_DYNAMIC_SERVICE_DIRECTIVE("TAO_Codeset",
+                                        "TAO_Codeset",
+--- ACE_wrappers/ace/Service_Config.h	2005-08-30 16:19:23.000000000 -0700
++++ ACE_wrappers/ace/Service_Config.h.new	2005-08-30 16:20:01.000000000 -0700
+@@ -41,12 +41,14 @@
+ #if (ACE_USES_CLASSIC_SVC_CONF == 1)
+ #define ACE_DYNAMIC_SERVICE_DIRECTIVE(ident, libpathname, objectclass, parameters) \
+   "dynamic " ident " Service_Object * " libpathname ":" objectclass "() \"" parameters "\""
++#define ACE_REMOVE_SERVICE_DIRECTIVE(ident) "remove " ident
+ class ACE_Svc_Conf_Param;
+ #else
+ #define ACE_DYNAMIC_SERVICE_DIRECTIVE(ident, libpathname, objectclass, parameters) \
+   "<ACE_Svc_Conf><dynamic id=\"" ident "\" type=\"Service_Object\">" \
+   "<initializer path=\"" libpathname "\" init=\"" objectclass "\"" \
+   " params=\"" parameters "\"/></dynamic></ACE_Svc_Conf>"
++#define ACE_REMOVE_SERVICE_DIRECTIVE(ident) "<ACE_Svc_Conf><remove id=\"" ident "\"></remove></ACE_Svc_Conf>"
+ class ACE_XML_Svc_Conf;
+ #endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+ 
