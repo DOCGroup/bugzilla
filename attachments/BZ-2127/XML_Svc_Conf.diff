@@ -1,0 +1,234 @@
+diff -ur /opt2/src/ACE/cvs-latest/ACE_wrappers/ace/Service_Config.h /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/ace/Service_Config.h
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/ace/Service_Config.h	2005-04-14 14:36:24.000000000 -0700
++++ /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/ace/Service_Config.h	2005-06-15 10:52:36.000000000 -0700
+@@ -39,8 +39,14 @@
+ class ACE_DLL;
+ 
+ #if (ACE_USES_CLASSIC_SVC_CONF == 1)
++#define ACE_DYNAMIC_SERVICE_DIRECTIVE(name, solib, function, args) \
++  "dynamic " name " Service_Object * " solib ":" function "() \"" args "\""
+ class ACE_Svc_Conf_Param;
+ #else
++#define ACE_DYNAMIC_SERVICE_DIRECTIVE(name, solib, function, args) \
++  "<ACE_Svc_Conf><dynamic id=\"" name "\" type=\"Service_Object\">" \
++  "<initializer path=\"" solib "\" init=\"" function "\"" \
++  " params=\"" args "\"/></dynamic></ACE_Svc_Conf>"
+ class ACE_XML_Svc_Conf;
+ #endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+ 
+diff -ur /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/orbsvcs/orbsvcs/PortableGroup/PortableGroup_ORBInitializer.cpp /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/orbsvcs/orbsvcs/PortableGroup/PortableGroup_ORBInitializer.cpp
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/orbsvcs/orbsvcs/PortableGroup/PortableGroup_ORBInitializer.cpp	2005-06-14 01:54:59.000000000 -0700
++++ /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/orbsvcs/orbsvcs/PortableGroup/PortableGroup_ORBInitializer.cpp	2005-06-15 10:54:25.000000000 -0700
+@@ -15,7 +15,8 @@
+ 
+ 
+ static const char pg_poa_factory_name[] = "TAO_PG_POA";
+-static const char pg_poa_factory_directive[] = "dynamic TAO_PG_POA Service_Object * TAO_PortableGroup:_make_TAO_PG_Object_Adapter_Factory()";
++static const char pg_poa_factory_directive[] = ACE_DYNAMIC_SERVICE_DIRECTIVE(
++  "TAO_PG_POA", "TAO_PortableGroup", "_make_TAO_PG_Object_Adapter_Factory", "");
+ 
+ void
+ TAO_PortableGroup_ORBInitializer::pre_init (
+diff -ur /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/ORB_Core.cpp /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/ORB_Core.cpp
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/ORB_Core.cpp	2005-06-14 04:38:47.000000000 -0700
++++ /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/ORB_Core.cpp	2005-06-15 11:03:29.000000000 -0700
+@@ -123,7 +123,7 @@
+     iorinterceptor_adapter_factory_name_ ("IORInterceptor_Adapter_Factory"),
+     valuetype_adapter_name_ ("Valuetype_Adapter"),
+     poa_factory_name_ ("TAO_Object_Adapter_Factory"),
+-    poa_factory_directive_ ("dynamic TAO_Object_Adapter_Factory Service_Object * TAO_PortableServer:_make_TAO_Object_Adapter_Factory()")
++    poa_factory_directive_ (ACE_DYNAMIC_SERVICE_DIRECTIVE("TAO_Object_Adapter_Factory", "TAO_PortableServer", "_make_TAO_Object_Adapter_Factory", ""))
+ {
+ }
+ 
+@@ -1420,8 +1420,8 @@
+   if (loader == 0)
+     {
+       ACE_Service_Config::process_directive (
+-        ACE_TEXT("dynamic TAO_PolicyFactory_Registry_Factory Service_Object *")
+-        ACE_TEXT("TAO_PI:_make_PolicyFactory_Loader()"));
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("TAO_PolicyFactory_Registry_Factory",
++          "TAO_PI", "_make_PolicyFactory_Loader", ""));
+       loader =
+         ACE_Dynamic_Service<TAO_PolicyFactory_Registry_Factory>::instance (
+           "PolicyFactory_Loader");
+@@ -1451,8 +1451,8 @@
+   if (orbinitializer_registry_ == 0)
+     {
+       ACE_Service_Config::process_directive (
+-        ACE_TEXT_CHAR_TO_TCHAR (
+-        "dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry()"));
++        ACE_DYNAMIC_SERVICE_DIRECTIVE(
++          "ORBInitializer_Registry", "TAO_PI", "_make_ORBInitializer_Registry", ""));
+       orbinitializer_registry_ =
+         ACE_Dynamic_Service<TAO::ORBInitializer_Registry_Adapter>::instance
+           ("ORBInitializer_Registry");
+@@ -2237,8 +2237,9 @@
+     ACE_Dynamic_Service<TAO_Object_Loader>::instance ("TypeCodeFactory_Loader");
+   if (loader == 0)
+     {
+-      ACE_Service_Config::process_directive (ACE_TEXT("dynamic TypeCodeFactory Service_Object *")
+-                                             ACE_TEXT("TAO_TypeCodeFactory:_make_TAO_TypeCodeFactory_Loader()"));
++      ACE_Service_Config::process_directive (
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("TypeCodeFactory",
++          "TAO_TypeCodeFactory", "_make_TAO_TypeCodeFactory_Loader", ""));
+       loader =
+         ACE_Dynamic_Service<TAO_Object_Loader>::instance ("TypeCodeFactory_Loader");
+       if (loader == 0)
+@@ -2255,8 +2256,9 @@
+     ACE_Dynamic_Service<TAO_Object_Loader>::instance ("CodecFactory_Loader");
+   if (loader == 0)
+     {
+-      ACE_Service_Config::process_directive (ACE_TEXT("dynamic CodecFactory Service_Object *")
+-                                             ACE_TEXT("TAO_CodecFactory:_make_TAO_CodecFactory_Loader()"));
++      ACE_Service_Config::process_directive (
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("CodecFactory",
++          "TAO_CodecFactory", "_make_TAO_CodecFactory_Loader", ""));
+       loader =
+         ACE_Dynamic_Service<TAO_Object_Loader>::instance ("CodecFactory_Loader");
+       if (loader == 0)
+@@ -2275,8 +2277,9 @@
+     ACE_Dynamic_Service<TAO_Object_Loader>::instance ("PICurrent_Loader");
+   if (loader == 0)
+     {
+-      ACE_Service_Config::process_directive (ACE_TEXT("dynamic PICurrent_Loader Service_Object *")
+-                                             ACE_TEXT("TAO:_make_TAO_PICurrent_Loader()"));
++      ACE_Service_Config::process_directive (
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("PICurrent_Loader",
++          "TAO", "_make_TAO_PICurrent_Loader", ""));
+       loader =
+         ACE_Dynamic_Service<TAO_Object_Loader>::instance ("PICurrent_Loader");
+       if (loader == 0)
+@@ -2299,8 +2302,9 @@
+     ACE_Dynamic_Service<TAO_Object_Loader>::instance ("DynamicAny_Loader");
+   if (loader == 0)
+     {
+-      ACE_Service_Config::process_directive (ACE_TEXT("dynamic DynamicAny_Loader Service_Object *")
+-                                             ACE_TEXT("TAO_DynamicAny:_make_TAO_DynamicAny_Loader()"));
++      ACE_Service_Config::process_directive (
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("DynamicAny_Loader",
++          "TAO_DynamicAny", "_make_TAO_DynamicAny_Loader", ""));
+       loader =
+         ACE_Dynamic_Service<TAO_Object_Loader>::instance ("DynamicAny_Loader");
+       if (loader == 0)
+@@ -2318,8 +2322,9 @@
+ 
+   if (loader == 0)
+     {
+-      ACE_Service_Config::process_directive (ACE_TEXT("dynamic IORManip_Loader Service_Object *")
+-                                             ACE_TEXT("TAO_IORManip:_make_TAO_IORManip_Loader()"));
++      ACE_Service_Config::process_directive (
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("IORManip_Loader",
++          "TAO_IORManip", "_make_TAO_IORManip_Loader", ""));
+       loader =
+         ACE_Dynamic_Service<TAO_Object_Loader>::instance ("IORManip_Loader");
+       if (loader == 0)
+@@ -2336,8 +2341,9 @@
+     ACE_Dynamic_Service<TAO_Adapter_Factory>::instance ("TAO_IORTable");
+   if (factory == 0)
+     {
+-      ACE_Service_Config::process_directive (ACE_TEXT("dynamic TAO_IORTable Service_Object *")
+-                                             ACE_TEXT("TAO_IORTable:_make_TAO_Table_Adapter_Factory()"));
++      ACE_Service_Config::process_directive (
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("TAO_IORTable Service_Object",
++          "TAO_IORTable", "_make_TAO_Table_Adapter_Factory", ""));
+       factory =
+         ACE_Dynamic_Service<TAO_Adapter_Factory>::instance ("TAO_IORTable");
+     }
+diff -ur /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/ORBInitializer_Registry.cpp /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/ORBInitializer_Registry.cpp
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/ORBInitializer_Registry.cpp	2005-06-15 09:29:07.000000000 -0700
++++ /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/ORBInitializer_Registry.cpp	2005-06-15 11:01:41.000000000 -0700
+@@ -53,8 +53,8 @@
+   if (orbinitializer_registry_ == 0)
+     {
+       ACE_Service_Config::process_directive (
+-        ACE_TEXT_CHAR_TO_TCHAR (
+-        "dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry()"));
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("ORBInitializer_Registry",
++          "TAO_PI", "_make_ORBInitializer_Registry", ""));
+       orbinitializer_registry_ =
+         ACE_Dynamic_Service<TAO::ORBInitializer_Registry_Adapter>::instance
+           ("ORBInitializer_Registry");
+diff -ur /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/PI/ORBInitInfo.cpp /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/PI/ORBInitInfo.cpp
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/PI/ORBInitInfo.cpp	2005-06-14 01:42:12.000000000 -0700
++++ /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/PI/ORBInitInfo.cpp	2005-06-15 11:03:52.000000000 -0700
+@@ -127,8 +127,9 @@
+ 
+       if (loader == 0)
+         {
+-          ACE_Service_Config::process_directive (ACE_TEXT("dynamic CodecFactory Service_Object *")
+-                                                 ACE_TEXT("TAO_CodecFactory:_make_TAO_CodecFactory_Loader()"));
++          ACE_Service_Config::process_directive (
++            ACE_DYNAMIC_SERVICE_DIRECTIVE("CodecFactory",
++              "TAO_CodecFactory", "_make_TAO_CodecFactory_Loader", ""));
+           loader =
+             ACE_Dynamic_Service<TAO_Object_Loader>::instance ("CodecFactory_Loader");
+         }
+diff -ur /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/PortableServer/LifespanStrategyPersistent.cpp /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/PortableServer/LifespanStrategyPersistent.cpp
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/PortableServer/LifespanStrategyPersistent.cpp	2005-05-27 09:38:14.000000000 -0700
++++ /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/PortableServer/LifespanStrategyPersistent.cpp	2005-06-15 10:47:30.000000000 -0700
+@@ -69,19 +69,9 @@
+       if (adapter == 0)
+         {
+           ACE_Service_Config::process_directive (
+-#if !defined ACE_HAS_XML_SVC_CONF
+-            ACE_TEXT("dynamic ImR_Client_Adapter Service_Object *")
+-            ACE_TEXT("TAO_ImR_Client:_make_ImR_Client_Adapter_Impl()")
+-#else
+-            ACE_TEXT("<ACE_Svc_Conf>")
+-            ACE_TEXT("<dynamic id=\"ImR_Client_Adapter\" type=\"Service_Object\">")
+-            ACE_TEXT("<initializer path=\"TAO_ImR_Client\"")
+-            ACE_TEXT(" init=\"_make_ImR_Client_Adapter_Impl\"")
+-            ACE_TEXT(" params=\"\"/>")
+-            ACE_TEXT("</dynamic>")
+-            ACE_TEXT("</ACE_Svc_Conf>")
+-#endif
+-            );
++            ACE_DYNAMIC_SERVICE_DIRECTIVE(
++              "ImR_Client_Adapter", "TAO_ImR_Client",
++              "_make_ImR_Client_Adapter_Impl", ""));
+ 
+           adapter =
+             ACE_Dynamic_Service<ImR_Client_Adapter>::instance (
+diff -ur /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/RTCORBA/RT_ORBInitializer.cpp /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/RTCORBA/RT_ORBInitializer.cpp
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tao/RTCORBA/RT_ORBInitializer.cpp	2005-06-15 04:56:51.000000000 -0700
++++ /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tao/RTCORBA/RT_ORBInitializer.cpp	2005-06-15 10:35:30.000000000 -0700
+@@ -37,7 +37,9 @@
+ #include "ace/Sched_Params.h"
+ 
+ static const char *rt_poa_factory_name = "TAO_RT_Object_Adapter_Factory";
+-static const char *rt_poa_factory_directive = "dynamic TAO_RT_Object_Adapter_Factory Service_Object * TAO_RTPortableServer:_make_TAO_RT_Object_Adapter_Factory()";
++static const char *rt_poa_factory_directive = ACE_DYNAMIC_SERVICE_DIRECTIVE(
++  "TAO_RT_Object_Adapter_Factory", "TAO_RTPortableServer",
++  "_make_TAO_RT_Object_Adapter_Factory", "");
+ 
+ TAO_RT_ORBInitializer::TAO_RT_ORBInitializer (int priority_mapping_type,
+                                               int network_priority_mapping_type,
+diff -ur /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tests/DLL_ORB/client.cpp /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tests/DLL_ORB/client.cpp
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tests/DLL_ORB/client.cpp	2001-08-30 15:27:43.000000000 -0700
++++ /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tests/DLL_ORB/client.cpp	2005-06-15 10:51:37.000000000 -0700
+@@ -27,7 +27,9 @@
+   //
+   // In the process of doing this, the Test method provided by target
+   // CORBA object will be invoked.
+-  if (ACE_Service_Config::process_directive ("dynamic Client_Module Service_Object * Test_Client_Module:_make_Test_Client_Module() \"-k file://test.ior\"") != 0)
++  if (ACE_Service_Config::process_directive (
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("Client_Module",
++          "Test_Client_Module", "_make_Test_Client_Module", "-k file://test.ior") != 0)
+     {
+ 
+       ACE_ERROR_RETURN ((LM_ERROR,
+diff -ur /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tests/DLL_ORB/server.cpp /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tests/DLL_ORB/server.cpp
+--- /opt2/src/ACE/cvs-latest/ACE_wrappers/TAO/tests/DLL_ORB/server.cpp	2001-08-30 15:27:43.000000000 -0700
++++ /opt2/linux/x86_64/ACE/cvs-latest/ACE_wrappers/TAO/tests/DLL_ORB/server.cpp	2005-06-15 10:50:17.000000000 -0700
+@@ -27,7 +27,9 @@
+   //
+   // In the process of doing this, the Test CORBA object will be
+   // activated, and the ORB will be run.
+-  if (ACE_Service_Config::process_directive ("dynamic Server_Module Service_Object * Test_Server_Module:_make_Test_Server_Module() \"\"") != 0)
++  if (ACE_Service_Config::process_directive (
++        ACE_DYNAMIC_SERVICE_DIRECTIVE("Server_Module",
++          "Test_Server_Module", "_make_Test_Server_Module", "")) != 0)
+     {
+       ACE_ERROR_RETURN ((LM_ERROR,
+                          "%p\n",
