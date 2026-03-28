@@ -1,0 +1,2651 @@
+Index: ace/Acceptor.cpp
+===================================================================
+--- ace/Acceptor.cpp	(revision 80980)
++++ ace/Acceptor.cpp	(working copy)
+@@ -294,7 +294,7 @@
+       ACE_Errno_Guard error(errno);
+ 
+       // Close down handler to avoid memory leaks.
+-      svc_handler->close (0);
++      svc_handler->close (CLOSE_DURING_NEW_CONNECTION);
+ 
+       return -1;
+     }
+@@ -334,7 +334,7 @@
+     result = -1;
+ 
+   if (result == -1)
+-    svc_handler->close (0);
++    svc_handler->close (CLOSE_DURING_NEW_CONNECTION);
+ 
+   return result;
+ }
+@@ -1046,7 +1046,7 @@
+       // Check whether we just timed out or whether we failed...
+       if (!(errno == EWOULDBLOCK || errno == ETIME))
+         // Close down handler to avoid memory leaks.
+-        svc_handler->close (0);
++        svc_handler->close (CLOSE_DURING_NEW_CONNECTION);
+       return -1;
+     }
+   // Activate the <svc_handler> using the designated concurrency
+Index: ace/Svc_Handler.h
+===================================================================
+--- ace/Svc_Handler.h	(revision 80980)
++++ ace/Svc_Handler.h	(working copy)
+@@ -31,6 +31,10 @@
+ // Forward decls.
+ class ACE_Connection_Recycling_Strategy;
+ 
++enum ACE_Svc_Handler_Close { NORMAL_CLOSE_OPERATION = 0x00,
++                             CLOSE_DURING_NEW_CONNECTION = 0x01
++                           };
++
+ /**
+  * @class ACE_Svc_Handler
+  *
+Index: ace/Strategies_T.cpp
+===================================================================
+--- ace/Strategies_T.cpp	(revision 80980)
++++ ace/Strategies_T.cpp	(working copy)
+@@ -17,6 +17,7 @@
+ #include "ace/OS_NS_dlfcn.h"
+ #include "ace/OS_NS_string.h"
+ #include "ace/OS_Errno.h"
++#include "ace/Svc_Handler.h"
+ #if defined (ACE_OPENVMS)
+ # include "ace/Lib_Find.h"
+ #endif
+@@ -197,7 +198,7 @@
+     result = -1;
+ 
+   if (result == -1)
+-    svc_handler->close (0);
++    svc_handler->close (CLOSE_DURING_NEW_CONNECTION);
+ 
+   return result;
+ }
+@@ -252,7 +253,7 @@
+     return this->inherited::activate_svc_handler (svc_handler, arg);
+ 
+   if (result == -1)
+-    svc_handler->close (0);
++    svc_handler->close (CLOSE_DURING_NEW_CONNECTION);
+ 
+   return result;
+ }
+@@ -354,7 +355,7 @@
+       ACE_Errno_Guard error(errno);
+ 
+       // Close down handler to avoid memory leaks.
+-      svc_handler->close (0);
++      svc_handler->close (CLOSE_DURING_NEW_CONNECTION);
+ 
+       return -1;
+     }
+@@ -777,7 +778,7 @@
+                                           entry) == -1)
+             {
+               // Close the svc handler.
+-              potential_handler->close (0);
++              potential_handler->close (CLOSE_DURING_NEW_CONNECTION);
+ 
+               return -1;
+             }
+Index: ace/Connector.cpp
+===================================================================
+--- ace/Connector.cpp	(revision 80980)
++++ ace/Connector.cpp	(working copy)
+@@ -145,7 +145,7 @@
+ 
+   // Close Svc_Handler.
+   if (svc_handler != 0)
+-    svc_handler->close (0);
++    svc_handler->close (NORMAL_CLOSE_OPERATION);
+ 
+   return retval;
+ }
+@@ -233,7 +233,7 @@
+     {
+       // Make sure to close down the <svc_handler> to avoid descriptor
+       // leaks.
+-      svc_handler->close (0);
++      svc_handler->close (CLOSE_DURING_NEW_CONNECTION);
+       return -1;
+     }
+   else
+@@ -431,10 +431,10 @@
+       if (sh_copy == 0)
+         {
+           if (sh)
+-            sh->close (0);
++            sh->close (CLOSE_DURING_NEW_CONNECTION);
+         }
+       else if (*sh_copy)
+-        (*sh_copy)->close (0);
++        (*sh_copy)->close (CLOSE_DURING_NEW_CONNECTION);
+     }
+ 
+   return -1;
+@@ -571,7 +571,7 @@
+  reactor_registration_failure:
+   // Close the svc_handler
+ 
+-  sh->close (0);
++  sh->close (CLOSE_DURING_NEW_CONNECTION);
+ 
+   return -1;
+ }
+@@ -617,7 +617,7 @@
+         this->activate_svc_handler (svc_handler);
+       else // do the svc handler close below...
+ #endif /* ACE_WIN32 */
+-        svc_handler->close (0);
++        svc_handler->close (NORMAL_CLOSE_OPERATION);
+     }
+ }
+ 
+@@ -692,7 +692,7 @@
+       this->cancel (svc_handler);
+ 
+       // Close the associated Svc_Handler.
+-      svc_handler->close (0);
++      svc_handler->close (NORMAL_CLOSE_OPERATION);
+     }
+ 
+   return 0;
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp
+===================================================================
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	(revision 80980)
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	(working copy)
+@@ -200,9 +200,9 @@
+ }
+ 
+ int
+-TAO_UIPMC_Connection_Handler::close (u_long)
++TAO_UIPMC_Connection_Handler::close (u_long flags)
+ {
+-  return this->close_handler ();
++  return this->close_handler (flags);
+ }
+ 
+ int
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Mcast_Connection_Handler.cpp
+===================================================================
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Mcast_Connection_Handler.cpp	(revision 80980)
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Mcast_Connection_Handler.cpp	(working copy)
+@@ -195,9 +195,9 @@
+ }
+ 
+ int
+-TAO_UIPMC_Mcast_Connection_Handler::close (u_long)
++TAO_UIPMC_Mcast_Connection_Handler::close (u_long flags)
+ {
+-  return this->close_handler ();
++  return this->close_handler (flags);
+ }
+ 
+ int
+Index: TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connector.cpp
+===================================================================
+--- TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connector.cpp	(revision 80980)
++++ TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connector.cpp	(working copy)
+@@ -485,9 +485,12 @@
+     }
+ 
+   // Check the Cache first for connections
++  size_t busy_count = 0; //not used but needed for the call
+   if (this->orb_core ()->lane_resources ().transport_cache ().find_transport (
+         desc,
+-        transport) == 0)
++        transport,
++        busy_count)
++        == TAO::Transport_Cache_Manager::CACHE_FOUND_AVAILABLE)
+     {
+       // ...eliminate svc_handle memory leak...
+       // The make_svc_handler() method creates the service handler and
+@@ -516,6 +519,7 @@
+       if (!transport->is_connected())
+         {
+           if (!this->wait_for_connection_completion (resolver,
++                                                     *desc,
+                                                      transport,
+                                                      max_wait_time))
+             {
+@@ -659,6 +663,7 @@
+               // get a connected transport or not. In case of non block we get
+               // a connected or not connected transport
+               if (!this->wait_for_connection_completion (resolver,
++                                                         *desc,
+                                                          transport,
+                                                          max_wait_time))
+                 {
+Index: TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp
+===================================================================
+--- TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	(revision 80980)
++++ TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	(working copy)
+@@ -295,9 +295,9 @@
+ }
+ 
+ int
+-TAO::SSLIOP::Connection_Handler::close (u_long)
++TAO::SSLIOP::Connection_Handler::close (u_long flags)
+ {
+-  return this->close_handler ();
++  return this->close_handler (flags);
+ }
+ 
+ int
+Index: TAO/orbsvcs/orbsvcs/SSLIOP/IIOP_SSL_Connector.cpp
+===================================================================
+--- TAO/orbsvcs/orbsvcs/SSLIOP/IIOP_SSL_Connector.cpp	(revision 80980)
++++ TAO/orbsvcs/orbsvcs/SSLIOP/IIOP_SSL_Connector.cpp	(working copy)
+@@ -180,6 +180,7 @@
+           // get a connected transport or not. In case of non block we get
+           // a connected or not connected transport
+           if (!this->wait_for_connection_completion (r,
++                                                     desc,
+                                                      transport,
+                                                      max_wait_time))
+             {
+Index: TAO/tao/Connection_Handler.cpp
+===================================================================
+--- TAO/tao/Connection_Handler.cpp	(revision 80980)
++++ TAO/tao/Connection_Handler.cpp	(working copy)
+@@ -10,6 +10,7 @@
+ #include "ace/SOCK.h"
+ #include "ace/Reactor.h"
+ #include "ace/os_include/sys/os_socket.h"
++#include "ace/Svc_Handler.h"
+ 
+ //@@ CONNECTION_HANDLER_SPL_INCLUDE_FORWARD_DECL_ADD_HOOK
+ 
+@@ -427,18 +428,26 @@
+ }
+ 
+ int
+-TAO_Connection_Handler::close_handler (void)
++TAO_Connection_Handler::close_handler (u_long flags)
+ {
+   this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED,
+                        this->orb_core_->leader_follower ());
+-  this->transport ()->purge_entry();
+-  this->transport ()->remove_reference ();
+ 
+-  // @@ I think that if the connection_pending state is true
+-  // when close_handler is calld, we should probably release
+-  // another reference so that the connector doesn't have to
+-  // worry about it.
++  // Save these for later.  It's possible that purge_entry() called on
++  // the transport could cause our own death.
++  bool pending = this->connection_pending_;
++  TAO_Transport* transport = this->transport ();
+ 
++  // After calling this, it is unsafe to assume that this object has
++  // *NOT* been deleted!  Only if pending is true are we still around.
++  transport->purge_entry();
++
++  // We only need to remove the reference from the transport if there
++  // were connections pending at the time that the handler is closed or
++  // the handler is being closed during a new connection.
++  if (pending || ACE_BIT_DISABLED(flags, CLOSE_DURING_NEW_CONNECTION))
++    transport->remove_reference ();
++
+   return 0;
+ }
+ 
+Index: TAO/tao/Transport.cpp
+===================================================================
+--- TAO/tao/Transport.cpp	(revision 80980)
++++ TAO/tao/Transport.cpp	(working copy)
+@@ -209,9 +209,6 @@
+       // When we have a not connected transport we could have buffered
+       // messages on this transport which we have to cleanup now.
+       this->cleanup_queue_i();
+-
+-      // Cleanup our cache entry
+-      this->purge_entry();
+     }
+ 
+   // Release the partial message block, however we may
+@@ -325,6 +322,33 @@
+   return true;
+ }
+ 
++bool
++TAO_Transport::register_if_necessary (void)
++{
++  if (this->is_connected_ &&
++      ! this->wait_strategy ()->is_registered () &&
++      this->wait_strategy ()->register_handler () != 0)
++    {
++      // Registration failures.
++
++      // Purge from the connection cache, if we are not in the cache, this
++      // just does nothing.
++      (void) this->purge_entry ();
++
++      // Close the handler.
++      (void) this->close_connection ();
++
++      if (TAO_debug_level > 0)
++        ACE_ERROR ((LM_ERROR,
++                    ACE_TEXT ("(%P|%t) IIOP_Connector [%d]::register_if_necessary, ")
++                    ACE_TEXT ("could not register the transport ")
++                    ACE_TEXT ("in the reactor.\n"),
++                    this->id ()));
++      return false;
++    }
++  return true;
++}
++
+ void
+ TAO_Transport::close_connection (void)
+ {
+@@ -457,7 +481,14 @@
+ int
+ TAO_Transport::purge_entry (void)
+ {
+-  return this->transport_cache_manager ().purge_entry (this->cache_map_entry_);
++  // We must store our entry in a temporary and zero out the data member.
++  // If there is only one reference count on us, we will end up causing
++  // our own destruction.  And we can not be holding a cache map entry if
++  // that happens.
++  TAO::Transport_Cache_Manager::HASH_MAP_ENTRY* entry = this->cache_map_entry_;
++  this->cache_map_entry_ = 0;
++
++  return this->transport_cache_manager ().purge_entry (entry);
+ }
+ 
+ int
+@@ -2606,7 +2637,14 @@
+ void
+ TAO_Transport::pre_close (void)
+ {
++  // @TODO: something needs to be done with is_connected_. Checking it is
++  // guarded by a mutex, but setting it is not. Until the need for mutexed
++  // protection is required, the transport cache is holding its own copy
++  // of the is_connected_ flag, so that during cache lookups the cache
++  // manager doesn't need to be burdened by the lock in is_connected().
+   this->is_connected_ = false;
++  this->transport_cache_manager ().mark_connected (this->cache_map_entry_,
++                                                   false);
+   this->purge_entry ();
+   {
+     ACE_MT (ACE_GUARD (ACE_Lock, guard, *this->handler_lock_));
+@@ -2619,43 +2657,58 @@
+ {
+   this->id_ = id;
+ 
+-  {
+-    ACE_GUARD_RETURN (ACE_Lock,
+-                      ace_mon,
+-                      *this->handler_lock_,
+-                      false);
+-    this->is_connected_ = true;
+-  }
+-
+   // When we have data in our outgoing queue schedule ourselves
+   // for output
+-  if (this->queue_is_empty_i ())
+-    return true;
+-
+-  // If the wait strategy wants us to be registered with the reactor
+-  // then we do so. If registeration is required and it succeeds,
+-  // #REFCOUNT# becomes two.
+-  if (this->wait_strategy ()->register_handler () != 0)
++  if (!this->queue_is_empty_i ())
+     {
+-      // Registration failures.
++      // If the wait strategy wants us to be registered with the reactor
++      // then we do so. If registeration is required and it succeeds,
++      // #REFCOUNT# becomes two.
++      if (this->wait_strategy ()->register_handler () == 0)
++        {
++          TAO_Flushing_Strategy *flushing_strategy =
++            this->orb_core ()->flushing_strategy ();
+ 
+-      // Purge from the connection cache, if we are not in the cache, this
+-      // just does nothing.
+-      (void) this->purge_entry ();
++          if (flushing_strategy == 0)
++            throw CORBA::INTERNAL ();
+ 
+-      // Close the handler.
+-      (void) this->close_connection ();
++          (void) flushing_strategy->schedule_output (this);
++        }
++      else
++        {
++          // Registration failures.
+ 
+-      if (TAO_debug_level > 0)
+-        ACE_ERROR ((LM_ERROR,
+-           ACE_TEXT ("TAO (%P|%t) - Transport[%d]::post_connect , ")
+-           ACE_TEXT ("could not register the transport ")
+-           ACE_TEXT ("in the reactor.\n"),
+-           this->id ()));
++          // Purge from the connection cache, if we are not in the cache, this
++          // just does nothing.
++          (void) this->purge_entry ();
+ 
+-      return false;
++          // Close the handler.
++          (void) this->close_connection ();
++
++          if (TAO_debug_level > 0)
++            ACE_ERROR ((LM_ERROR,
++                   ACE_TEXT ("TAO (%P|%t) - Transport[%d]::post_open , ")
++               ACE_TEXT ("could not register the transport ")
++               ACE_TEXT ("in the reactor.\n"),
++               this->id ()));
++
++          return false;
++        }
+     }
+ 
++  // @TODO: something needs to be done with is_connected_. Checking it is
++  // guarded by a mutex, but setting it is not. Until the need for mutexed
++  // protection is required, the transport cache is holding its own copy
++  // of the is_connected_ flag, so that during cache lookups the cache
++  // manager doesn't need to be burdened by the lock in is_connected().
++  this->is_connected_ = true;
++  this->transport_cache_manager ().mark_connected (this->cache_map_entry_,
++                                                   true);
++
++  // update transport cache to make this entry available
++  this->transport_cache_manager ().set_entry_state (
++    this->cache_map_entry_,
++    TAO::ENTRY_IDLE_BUT_NOT_PURGABLE);
+   return true;
+ }
+ 
+Index: TAO/tao/Connection_Handler.h
+===================================================================
+--- TAO/tao/Connection_Handler.h	(revision 80980)
++++ TAO/tao/Connection_Handler.h	(working copy)
+@@ -111,7 +111,7 @@
+ 
+   /// A close() hook, called by the Transport Connector when they want to close
+   /// this handler
+-  virtual int close_handler (void);
++  virtual int close_handler (u_long flags = 0);
+ 
+   /// When waiting for an asynchronous connection to complete an
+   /// additional reference must be maintained, related to bugzilla
+Index: TAO/tao/Transport.h
+===================================================================
+--- TAO/tao/Transport.h	(revision 80980)
++++ TAO/tao/Transport.h	(working copy)
+@@ -330,6 +330,10 @@
+    */
+   bool queue_is_empty (void);
+ 
++  /// Register with the reactor via the wait strategy
++  bool register_if_necessary (void);
++
++
+   /// Added event handler to the handlers set.
+   /**
+    * Called by the cache when the cache is closing.
+Index: TAO/tao/Transport_Connector.cpp
+===================================================================
+--- TAO/tao/Transport_Connector.cpp	(revision 80980)
++++ TAO/tao/Transport_Connector.cpp	(working copy)
+@@ -27,47 +27,6 @@
+            Connector,
+            "$Id$")
+ 
+-namespace
+-{
+-  class TransportCleanupGuard
+-  {
+-  public:
+-
+-    TransportCleanupGuard (TAO_Transport *tp)
+-      : tp_ (tp)
+-      , awake_ (true)
+-    {
+-    }
+-
+-    ~TransportCleanupGuard ()
+-    {
+-      if (this->awake_ && this->tp_)
+-        {
+-          // Purge from the connection cache.  If we are not in the
+-          // cache, this does nothing.
+-          this->tp_->purge_entry ();
+-
+-          // Close the handler.
+-          this->tp_->close_connection ();
+-
+-          this->tp_->remove_reference ();
+-        }
+-    }
+-
+-    /// Turn off the guard.
+-    void down ()
+-    {
+-      this->awake_ = false;
+-    }
+-
+-  private:
+-
+-    TAO_Transport * const tp_;
+-    bool awake_;
+-
+-  };
+-}
+-
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ // Connector
+@@ -322,8 +281,9 @@
+        ep = ep->next_filtered(this->orb_core(),root_ep))
+     {
+       TAO_Base_Transport_Property desc2(ep,0);
+-      if (tcm.find_transport (&desc2,
+-                              base_transport) == 0)
++      size_t busy_count = 0;
++      if (tcm.find_transport (&desc2, base_transport, busy_count) ==
++          TAO::Transport_Cache_Manager::CACHE_FOUND_AVAILABLE )
+         {
+           if (TAO_debug_level)
+             {
+@@ -347,123 +307,294 @@
+   return this->make_parallel_connection (r,*desc,timeout);
+ }
+ 
+-TAO_Transport*
+-TAO_Connector::connect (TAO::Profile_Transport_Resolver *r,
+-                        TAO_Transport_Descriptor_Interface *desc,
+-                        ACE_Time_Value *timeout)
++bool
++TAO_Connector::wait_for_transport(TAO::Profile_Transport_Resolver *r,
++                                  TAO_Transport *transport,
++                                  ACE_Time_Value *timeout,
++                                  bool force_wait)
+ {
+-  if (desc == 0 ||
+-      (this->set_validate_endpoint (desc->endpoint ()) == -1))
+-    return 0;
+-
+-  TAO_Transport *base_transport = 0;
+-
+-  TAO::Transport_Cache_Manager &tcm =
+-    this->orb_core ()->lane_resources ().transport_cache ();
+-
+-  // Check the Cache first for connections
+-  // If transport found, reference count is incremented on assignment
+-  // @@todo: We need to send the timeout value to the cache registry
+-  // too. That should be the next step!
+-  if (tcm.find_transport (desc,
+-                          base_transport) != 0)
++  if (transport->connection_handler ()->is_timeout ())
+     {
+-      // @@TODO: This is not the right place for this!
+-      // Purge connections (if necessary)
+-      tcm.purge ();
++      if (TAO_debug_level > 2)
++        {
++          ACE_DEBUG ((LM_DEBUG,
++            ACE_TEXT("TAO (%P|%t) - TAO_Connector::wait_for_transport, ")
++            ACE_TEXT("transport [%d], Connection Timed out.\n"),
++            transport->id () ));
++        }
++    }
++  else if (transport->connection_handler()->is_closed ())
++    {
++      if (TAO_debug_level > 2)
++        {
++          ACE_DEBUG ((LM_DEBUG,
++            ACE_TEXT("TAO (%P|%t) - TAO_Connector::wait_for_transport, ")
++            ACE_TEXT("transport [%d], Connection failed. (%d)\n"),
++            transport->id (),
++            errno));
++        }
+ 
+-      TAO_Transport* t = this->make_connection (r, *desc, timeout);
++      // purge from the connection cache.  If we are not in the
++      // cache, this does nothing.
++      transport->purge_entry ();
+ 
+-      if (t == 0)
+-        return t;
++      // Close the handler.
++      transport->close_connection ();
+ 
+-      t->opened_as (TAO::TAO_CLIENT_ROLE);
++    }
+ 
+-      if (TAO_debug_level > 4)
++  if (transport->connection_handler ()->is_open ())
++    {
++      if (TAO_debug_level > 5)
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT("TAO (%P|%t) - Transport_Connector::connect, ")
+-                      ACE_TEXT("opening Transport[%d] in TAO_CLIENT_ROLE\n"),
+-                      t->id ()));
++            ACE_TEXT("TAO (%P|%t) - TAO_Connector::wait_for_transport, ")
++            ACE_TEXT("transport [%d], connection is open: no wait.\n"),
++            transport->id () ));
+         }
+ 
+-      // Call post connect hook. If the post_connect_hook () returns
+-      // false, just purge the entry.
+-      if (!t->post_connect_hook ())
++      return true;
++    }
++  else if (force_wait || r->blocked_connect ())
++    {
++      if (TAO_debug_level > 2)
+         {
+-          (void) t->purge_entry ();
++          ACE_DEBUG ((LM_DEBUG,
++            ACE_TEXT("TAO (%P|%t) - TAO_Connector::wait_for_transport, ")
++            ACE_TEXT(" waiting on transport [%d]\n"),
++            transport->id () ));
++        }
++      int result = this->active_connect_strategy_->wait (transport, timeout);
++      if (result == -1 && errno == ETIME)
++        {
++          if (TAO_debug_level > 2)
++            {
++              ACE_DEBUG ((LM_DEBUG,
++              ACE_TEXT("TAO (%P|%t) - TAO_Connector::wait_for_transport, ")
++              ACE_TEXT(" timeout while waiting on transport [%d]\n"),
++              transport->id () ));
++            }
++        }
++      else if (result == -1)
++        {
++          if (TAO_debug_level > 2)
++            {
++              static int complain10times = 10;
++              if (complain10times > 0)
++                {
++                  --complain10times;
++                  ACE_DEBUG ((LM_DEBUG,
++                    ACE_TEXT("TAO (%P|%t) - TAO_Connector::wait_for_transport, ")
++                    ACE_TEXT(" unknown error waiting on transport [%d] (%d)\n"),
++                    transport->id (),
++                    errno));
++                }
++            }
++          // purge from the connection cache.  If we are not in the
++          // cache, this does nothing.
++          transport->purge_entry ();
+ 
+-          // Call connect again
+-          return this->connect (r, desc, timeout);
++          // Close the handler.
++          transport->close_connection ();
+         }
+-
+-      return t;
++      else
++        {
++          if (TAO_debug_level > 5)
++            {
++              ACE_DEBUG ((LM_DEBUG,
++                ACE_TEXT("TAO (%P|%t) - TAO_Connector::wait_for_transport, ")
++                ACE_TEXT("transport [%d], wait completed ok.\n"),
++                transport->id () ));
++            }
++          return true;
++        }
+     }
+-
+-  if (TAO_debug_level > 4)
++  else
+     {
+-      TAO::Connection_Role cr = base_transport->opened_as ();
++      if (TAO_debug_level > 2)
++        {
++          ACE_DEBUG ((LM_DEBUG,
++            ACE_TEXT("TAO (%P|%t) - TAO_Connector::wait_for_transport, ")
++            ACE_TEXT(" Connection not complete [%d]\n"),
++            transport->id () ));
++        }
++      transport->connection_handler ()->reset_state (
++        TAO_LF_Event::LFS_CONNECTION_WAIT);
+ 
+-      ACE_DEBUG ((LM_DEBUG,
+-                  "TAO (%P|%t) - Transport_Connector::connect, "
+-                  "got an existing %s Transport[%d] in role %s\n",
+-                  base_transport->is_connected () ? "connected" : "unconnected",
+-                  base_transport->id (),
+-                  cr == TAO::TAO_SERVER_ROLE ? "TAO_SERVER_ROLE" :
+-                  cr == TAO::TAO_CLIENT_ROLE ? "TAO_CLIENT_ROLE" :
+-                  "TAO_UNSPECIFIED_ROLE" ));
++      return true;
+     }
+ 
+-  // If connected return.
+-  if (base_transport->is_connected ())
+-    return base_transport;
++  return false;
++}
+ 
+-  // It it possible to get a transport from the cache that is not
+-  // connected? If not, then the following code is bogus. We cannot
+-  // wait for a connection to complete on a transport in the cache.
+-  //
+-  // (mesnier_p@ociweb.com) It is indeed possible to reach this point.
+-  // The AMI_Buffering test does. When using non-blocking connects and
+-  // the first request(s) are asynch and may be queued, the connection
+-  // establishment may not be completed by the time the invocation is
+-  // done with it. In that case it is up to a subsequent invocation to
+-  // handle the connection completion.
++TAO_Transport*
++TAO_Connector::connect (TAO::Profile_Transport_Resolver *r,
++                        TAO_Transport_Descriptor_Interface *desc,
++                        ACE_Time_Value *timeout)
++{
++  if (desc == 0 ||
++      (this->set_validate_endpoint (desc->endpoint ()) == -1))
++    return 0;
+ 
+-  TransportCleanupGuard tg(base_transport);
+-  if (!this->wait_for_connection_completion (r, base_transport, timeout))
++  TAO::Transport_Cache_Manager &tcm =
++    this->orb_core ()->lane_resources ().transport_cache ();
++  // Stay in this loop until we find:
++  // a usable connection, or a timeout happens
++  while (true)
+     {
+-      if (TAO_debug_level > 2)
++      // Find a connection in the cache
++      // If transport found, reference count is incremented on assignment
++      TAO_Transport *base_transport = 0;
++      size_t busy_count = 0;
++      TAO::Transport_Cache_Manager::Find_Result found =
++          tcm.find_transport (desc,
++                              base_transport,
++                              busy_count);
++
++      if (found == TAO::Transport_Cache_Manager::CACHE_FOUND_AVAILABLE)
+         {
+-          ACE_ERROR ((LM_ERROR,
+-                      "TAO (%P|%t) - Transport_Connector::"
+-                      "connect, "
+-                      "wait for completion failed\n"));
++          // one last check before using the cached connection
++          if (base_transport->connection_handler()->error_detected ())
++            {
++              if (TAO_debug_level > 0)
++                {
++                  ACE_DEBUG ((LM_DEBUG,
++                    ACE_TEXT("TAO (%P|%t) Transport_Connector::connect")
++                    ACE_TEXT(" error in transport from cache\n")));
++                }
++              (void) base_transport->close_connection ();
++              (void) base_transport->purge_entry ();
++              base_transport = 0;
++            }
++          else
++            {
++              if (TAO_debug_level > 4)
++                {
++                  TAO::Connection_Role cr = base_transport->opened_as ();
++
++                  ACE_DEBUG ((LM_DEBUG,
++                              "TAO (%P|%t) - Transport_Connector::connect, "
++                              "got an existing %s Transport[%d] in role %s\n",
++                              base_transport->is_connected () ? "connected" :
++                                                                "unconnected",
++                              base_transport->id (),
++                              cr == TAO::TAO_SERVER_ROLE ? "TAO_SERVER_ROLE" :
++                              cr == TAO::TAO_CLIENT_ROLE ? "TAO_CLIENT_ROLE" :
++                              "TAO_UNSPECIFIED_ROLE" ));
++                }
++              return base_transport;
++            }
+         }
+-      return 0;
+-    }
++      else if (found == TAO::Transport_Cache_Manager::CACHE_FOUND_CONNECTING)
++        {
++          if (r->blocked_connect ())
++            {
++              if (TAO_debug_level > 4)
++                {
++                  ACE_DEBUG ((LM_DEBUG,
++                              ACE_TEXT("TAO (%P|%t) - Transport_Connector::waiting")
++                              ACE_TEXT(" for connection on transport [%d]\n"),
++                              base_transport->id ()));
++                }
+ 
+-  if (base_transport->is_connected () &&
+-      base_transport->wait_strategy ()->register_handler () == -1)
+-    {
+-      // Registration failures.
+-      if (TAO_debug_level > 0)
++              // If wait_for_transport returns no errors, the base_transport
++              // points to the connection we wait for.
++              if (this->wait_for_transport (r, base_transport, timeout, false))
++                {
++                  // be sure this transport is registered with the reactor
++                  // before using it.
++                  if (!base_transport->register_if_necessary ())
++                    {
++                        base_transport->remove_reference ();
++                        return 0;
++                    }
++                }
++
++              // In either success or failure cases of wait_for_transport, the
++              // ref counter in corresponding to the ref counter added by
++              // find_transport is decremented.
++              base_transport->remove_reference ();
++            }
++          else
++            {
++              if (TAO_debug_level > 4)
++                {
++                  ACE_DEBUG ((LM_DEBUG,
++                    ACE_TEXT("TAO (%P|%t) - Transport_Connector::non-blocking: returning unconnected transport [%d]\n"),
++                    base_transport->id ()));
++                }
++
++              // return the transport in it's current, unconnected state
++              return base_transport;
++            }
++        }
++      else
+         {
+-          ACE_ERROR ((LM_ERROR,
+-                      "TAO (%P|%t) - Transport_Connector [%d]::connect, "
+-                      "could not register the transport "
+-                      "in the reactor.\n",
+-                      base_transport->id ()));
++          // @todo: This is not the right place for this! (bugzilla 3023)
++          // Purge connections (if necessary)
++          tcm.purge ();
++          bool make_new_connection =
++            (found == TAO::Transport_Cache_Manager::CACHE_FOUND_NONE) ||
++            (found == TAO::Transport_Cache_Manager::CACHE_FOUND_BUSY
++                && this->new_connection_is_ok (busy_count));
++
++          if (make_new_connection)
++            {
++              // we aren't going to use the transport returned from the cache (if any)
++              if (base_transport != 0)
++                {
++                  base_transport->remove_reference ();
++                }
++
++              base_transport = this->make_connection (r, *desc, timeout);
++              if (base_transport == 0)
++                {
++                  return base_transport;
++                }
++
++              // Should this code be moved?  If so, where to?
++              base_transport->opened_as (TAO::TAO_CLIENT_ROLE);
++
++              if (TAO_debug_level > 4)
++                {
++                  ACE_DEBUG ((LM_DEBUG,
++                              ACE_TEXT("TAO (%P|%t) - Transport_Connector::connect, ")
++                              ACE_TEXT("opening Transport[%d] in TAO_CLIENT_ROLE\n"),
++                              base_transport->id ()));
++                }
++
++              // Call post connect hook. If the post_connect_hook () returns
++              // false, just purge the entry.
++              if (!base_transport->post_connect_hook ())
++                {
++                  if (TAO_debug_level > 4)
++                    {
++                      ACE_DEBUG ((LM_DEBUG,
++                                  ACE_TEXT("TAO (%P|%t) - Post_connect_hook failed.  ")
++                                  ACE_TEXT("Purging transport[%d]\n"),
++                                  base_transport->id ()));
++                    }
++                  (void) base_transport->purge_entry ();
++                }
++              // The new transport is in the cache.  We'll pick it up from there
++              // next time thru this loop (using it from here causes more problems
++              // than it fixes due to the changes that allow a new connection to be
++              // re-used by a nested upcall before we get back here.)
++              base_transport->remove_reference ();
++            }
++          else // not making new connection
++            {
++               (void) this->wait_for_transport (r, base_transport, timeout, true);
++                base_transport->remove_reference ();
++            }
+         }
+-      return 0;
+     }
+-
+-  tg.down ();
+-  return base_transport;
+ }
+ 
+ bool
+ TAO_Connector::wait_for_connection_completion (
+     TAO::Profile_Transport_Resolver *r,
++    TAO_Transport_Descriptor_Interface& desc,
+     TAO_Transport *&transport,
+     ACE_Time_Value *timeout)
+ {
+@@ -516,6 +647,18 @@
+     }
+   else
+     {
++      if (TAO_debug_level > 4)
++        {
++            ACE_DEBUG ((LM_DEBUG,
++                        "TAO (%P|%t) - Transport_Connector::"
++                        "caching connection before wait_for_connection_completion "
++                        "%d = [%d]\n",
++                        desc.hash(),
++                        transport->id ()));
++        }
++      TAO::Transport_Cache_Manager &tcm =
++        this->orb_core ()->lane_resources ().transport_cache ();
++      tcm.cache_transport (&desc, transport, TAO::ENTRY_CONNECTING);
+       if (TAO_debug_level > 2)
+         {
+             ACE_DEBUG ((LM_DEBUG,
+@@ -525,6 +668,7 @@
+                         "[%d]\n",
+                         transport->id ()));
+         }
++
+       result = this->active_connect_strategy_->wait (transport, timeout);
+ 
+       if (TAO_debug_level > 2)
+@@ -535,43 +679,53 @@
+                       "transport [%d], wait done result = %d\n",
+                       transport->id (), result));
+         }
+-    // There are three possibilities when wait() returns: (a)
+-    // connection succeeded; (b) connection failed; (c) wait()
+-    // failed because of some other error.  It is easy to deal with
+-    // (a) and (b).  (c) is tricky since the connection is still
+-    // pending and may get completed by some other thread.  The
+-    // following code deals with (c).
+ 
+-    if (result == -1)
+-      {
+-        if (errno == ETIME)
+-          {
+-            if (TAO_debug_level > 2)
+-              {
+-                ACE_DEBUG ((LM_DEBUG,
+-                            "TAO (%P|%t) - Transport_Connector::"
+-                            "wait_for_connection_completion, "
+-                            "transport [%d], Connection timed out.\n",
+-                            transport->id ()));
+-              }
+-          }
+-        else
+-          {
+-            // The wait failed for some other reason.
+-            // Report that making the connection failed, don't print errno
+-            // because we touched the reactor and errno could be changed
+-            if (TAO_debug_level > 2)
+-              {
+-                ACE_ERROR ((LM_ERROR,
+-                            "TAO (%P|%t) - Transport_Connector::"
+-                            "wait_for_connection_completion, "
+-                  "transport [%d], wait for completion failed (%d) %p\n",
+-                  transport->id (), errno, ""));
+-              }
+-            TAO_Connection_Handler *con = transport->connection_handler ();
+-            result = this->check_connection_closure (con);
+-          }
+-      }
++      // There are three possibilities when wait() returns: (a)
++      // connection succeeded; (b) connection failed; (c) wait()
++      // failed because of some other error.  It is easy to deal with
++      // (a) and (b).  (c) is tricky since the connection is still
++      // pending and may get completed by some other thread.  The
++      // following code deals with (c).
++
++      if (result == -1)
++        {
++          if (errno == ETIME)
++            {
++              if (timeout == 0)
++                {
++                  // There was an error during connecting and the errno was
++                  // ETIME.  We didn't pass in a timeout, so there's
++                  // something wrong with this transport.  So, it must be
++                  // purged.
++                  transport->purge_entry ();
++                }
++
++              if (TAO_debug_level > 2)
++                {
++                  ACE_DEBUG ((LM_DEBUG,
++                              "TAO (%P|%t) - Transport_Connector::"
++                              "wait_for_connection_completion, "
++                              "transport [%d], Connection timed out.\n",
++                              transport->id ()));
++                }
++            }
++          else
++            {
++              // The wait failed for some other reason.
++              // Report that making the connection failed, don't print errno
++              // because we touched the reactor and errno could be changed
++              if (TAO_debug_level > 2)
++                {
++                  ACE_ERROR ((LM_ERROR,
++                              "TAO (%P|%t) - Transport_Connector::"
++                              "wait_for_connection_completion, "
++                    "transport [%d], wait for completion failed (%d) %p\n",
++                    transport->id (), errno, ""));
++                }
++              TAO_Connection_Handler *con = transport->connection_handler ();
++              result = this->check_connection_closure (con);
++            }
++        }
+     }
+ 
+   if (result == -1)
+@@ -721,6 +875,18 @@
+   return 0;
+ }
+ 
++bool
++TAO_Connector::new_connection_is_ok (size_t busy_count)
++{
++  if (this->orb_core_ == 0)
++    return true;
++
++  unsigned int mux_limit = this->orb_core_->resource_factory ()
++    ->max_muxed_connections ();
++
++  return mux_limit == 0 || busy_count < mux_limit;
++}
++
+ int
+ TAO_Connector::check_connection_closure (
+   TAO_Connection_Handler *connection_handler)
+Index: TAO/tao/Transport_Cache_Manager.h
+===================================================================
+--- TAO/tao/Transport_Cache_Manager.h	(revision 80980)
++++ TAO/tao/Transport_Cache_Manager.h	(working copy)
+@@ -15,6 +15,7 @@
+ 
+ #include /**/ "ace/pre.h"
+ #include "ace/Null_Mutex.h"
++#include "ace/Thread_Mutex.h"
+ 
+ #if !defined (ACE_LACKS_PRAGMA_ONCE)
+ #define  ACE_LACKS_PRAGMA_ONCE
+@@ -60,6 +61,15 @@
+   class TAO_Export Transport_Cache_Manager
+   {
+   public:
++    // results of a find
++    enum Find_Result
++    {
++      CACHE_FOUND_NONE,
++      CACHE_FOUND_CONNECTING,
++      CACHE_FOUND_BUSY,
++      CACHE_FOUND_AVAILABLE
++    };
++
+     // Some useful typedef's
+     typedef ACE_Hash_Map_Manager_Ex <Cache_ExtId,
+                                      Cache_IntId,
+@@ -86,35 +96,48 @@
+     /// Add the transport to the cache.
+     /**
+      * The transport has the property definition based on which caching
+-     * can be done. This method marks the transport
+-     * <CODE>ACE_RECYCLABLE_BUSY </CODE> which helps the threads
+-     * opening up connections to use the  transport immediately.
++     * can be done. This method sets the cache entry status.  By
++     * default the status is set to <CODE>ENTRY_IDLE_BUT_NOT_PURGABLE</CODE>
+      */
+     int cache_transport (TAO_Transport_Descriptor_Interface *prop,
+-                         TAO_Transport *transport);
++                         TAO_Transport *transport,
++                         Cache_Entries_State state =
++                           ENTRY_IDLE_BUT_NOT_PURGABLE);
+ 
+-    /// Similar to the one above, but the transport is left in <CODE>
+-    /// ENTRY_IDLE_AND_PURGABLE</CODE> state.
++    /// this is just a shortcut for cache_transport with a third argument of
++    /// <CODE>ENTRY_IDLE_AND_PURGABLE</CODE>
++    /// @@TODO: it should be replaced with a direct call to cache_transport,
++    /// but that would require changes to all *_Connection_Handler so I'm
++    /// deferring this for now. (wilsond@ociweb.com)
+     int cache_idle_transport (TAO_Transport_Descriptor_Interface *prop,
+                               TAO_Transport *transport);
+ 
+     /// Check the Transport Cache to check whether the connection exists
+     /// in the Cache and return the connection
+-    int find_transport (TAO_Transport_Descriptor_Interface *prop,
+-                        TAO_Transport *&transport);
++    Find_Result find_transport (
++      TAO_Transport_Descriptor_Interface *prop,
++      TAO_Transport *&transport,
++      size_t & busy_count);
+ 
+     /// Remove entries from the cache depending upon the strategy.
+     int purge (void);
+ 
+     /// Purge the entry from the Cache Map
+-    int purge_entry (HASH_MAP_ENTRY *&);
++    int purge_entry (HASH_MAP_ENTRY *& entry);
+ 
+     /// Mark the entry as invalid for use but keep it in cache.
+-    void mark_invalid (HASH_MAP_ENTRY *&);
++    void mark_invalid (HASH_MAP_ENTRY * entry);
+ 
++    /// Mark the entry as connected.
++    void mark_connected (HASH_MAP_ENTRY * entry, bool state);
++
+     /// Make the entry idle and ready for use.
+-    int make_idle (HASH_MAP_ENTRY *&entry);
++    int make_idle (HASH_MAP_ENTRY *entry);
+ 
++    /// Modify the state setting on the provided entry.
++    void set_entry_state (HASH_MAP_ENTRY *entry,
++                          TAO::Cache_Entries_State state);
++
+     /// Mark the entry as touched. This call updates the purging
+     /// strategy policy information.
+     int update_entry (HASH_MAP_ENTRY *&entry);
+@@ -152,16 +175,16 @@
+ 
+     /// Lookup entry<key,value> in the cache. Grabs the lock and calls the
+     /// implementation function find_i.
+-    int find (const Cache_ExtId &key,
+-              Cache_IntId &value);
++    Find_Result find (
++      TAO_Transport_Descriptor_Interface *prop,
++      TAO_Transport *&transport,
++      size_t & busy_count);
+ 
+     /**
+      * Non-Locking version and actual implementation of bind ()
+      * call. Calls bind on the Hash_Map_Manager that it holds. If the
+      * bind succeeds, it adds the Hash_Map_Entry in to the
+-     * Transport for its reference. If the bind fails because
+-     * of an exiting entry, this method calls the get_last_index_bind
+-     * ().
++     * Transport for its reference.
+      */
+     int bind_i (Cache_ExtId &ext_id,
+                 Cache_IntId &int_id);
+@@ -172,11 +195,13 @@
+      * Hash_Map_Manager. If the find succeeds, it calls the
+      * get_idle_transport ().
+      */
+-    int find_i (const Cache_ExtId &key,
+-                Cache_IntId &value);
++    Find_Result find_i (
++      TAO_Transport_Descriptor_Interface *prop,
++      TAO_Transport *&transport,
++      size_t & busy_count);
+ 
+     /// Non-locking version and actual implementation of make_idle ().
+-    int make_idle_i (HASH_MAP_ENTRY *&entry);
++    int make_idle_i (HASH_MAP_ENTRY *entry);
+ 
+     /// Non-locking version and actual implementation of close ()
+     int close_i (Connection_Handler_Set &handlers);
+@@ -185,27 +210,18 @@
+     int purge_entry_i (HASH_MAP_ENTRY *&entry);
+ 
+     /// Mark the entry as invalid for use but keep it in cache.
+-    void mark_invalid_i (HASH_MAP_ENTRY *&);
++    void mark_invalid_i (HASH_MAP_ENTRY *entry);
+ 
+   private:
+-    /**
+-     * This is called by the bind () call when a bind fails with a
+-     * available entry. When a new connection is created in TAO with an
+-     * already existing endpoint, in addition to an exisitng one, we
+-     * mark the connections with an index. This method, finds out the
+-     * last highest index and binds the entry with an index = (last
+-     * highest index + 1).
+-     */
+-    int get_last_index_bind (Cache_ExtId &key,
+-                             Cache_IntId &val,
+-                             HASH_MAP_ENTRY *&entry);
++  /**
++   * Tries to find if the <int_id_> in entry is available for use.
++   */
++    bool is_entry_available (const HASH_MAP_ENTRY &entry);
+ 
+   /**
+-   * Tries to find if the <int_id_> in entry is idle for use. If it is
+-   * idle it is immediately markes as busy and returns a value of
+-   * 1, else it returns a value of 0
++   * Tries to find if the <int_id_> in entry is connect pending
+    */
+-    bool is_entry_idle (HASH_MAP_ENTRY *&entry);
++    bool is_entry_connecting (const HASH_MAP_ENTRY &entry);
+ 
+ #if !defined(ACE_LACKS_QSORT)
+     /// Used by qsort
+@@ -221,16 +237,6 @@
+     /// a sorted order.
+     int fill_set_i (DESCRIPTOR_SET& sorted_set);
+ 
+-    /// Wait for connections if we have reached the limit on the number
+-    /// of muxed connections. If not (ie. if we dont use a muxed
+-    /// connection or if we have not reached the limit) this just
+-    /// behaves as a no-op. <extid> has all the information about the
+-    /// connection that is being searched.
+-    int wait_for_connection (Cache_ExtId &extid);
+-
+-    /// Is the wakeup useful todo some work?
+-    int is_wakeup_useful (Cache_ExtId &extid);
+-
+     /// Non-locking version of blockable_client_transports ().
+     bool blockable_client_transports_i (Connection_Handler_Set &handlers);
+ 
+@@ -244,23 +250,10 @@
+     /// The hash map that has the connections
+     HASH_MAP cache_map_;
+ 
+-    /// The condition variable
+-    CONDITION *condition_;
++    TAO_SYNCH_MUTEX cache_map_mutex_;
+ 
+     /// The lock that is used by the cache map
+     ACE_Lock *cache_lock_;
+-
+-    /// Number of allowed muxed connections
+-    CORBA::ULong muxed_number_;
+-
+-    /// Number of threads waiting for connections
+-    int no_waiting_threads_;
+-
+-    /// This is for optimization purposes. In a situation where number
+-    /// of threads are waiting for connections, the last connection that
+-    /// is put back is cached here. This should prevent all th threads
+-    /// trying to search for their required entry.
+-    Cache_ExtId *last_entry_returned_;
+   };
+ 
+ }
+Index: TAO/tao/IIOP_Connection_Handler.cpp
+===================================================================
+--- TAO/tao/IIOP_Connection_Handler.cpp	(revision 80980)
++++ TAO/tao/IIOP_Connection_Handler.cpp	(working copy)
+@@ -342,9 +342,9 @@
+ }
+ 
+ int
+-TAO_IIOP_Connection_Handler::close (u_long)
++TAO_IIOP_Connection_Handler::close (u_long flags)
+ {
+-  return this->close_handler ();
++  return this->close_handler (flags);
+ }
+ 
+ int
+Index: TAO/tao/IIOP_Connector.cpp
+===================================================================
+--- TAO/tao/IIOP_Connector.cpp	(revision 80980)
++++ TAO/tao/IIOP_Connector.cpp	(working copy)
+@@ -382,6 +382,35 @@
+   return result;
+ }
+ 
++namespace
++{
++  /// RAII holder for a TAO_Transport list
++  class TList_Holder
++  {
++  public:
++    TList_Holder (size_t count)
++      : tlist_ (0)
++    {
++      // Resources are acquired during initialization (RAII)
++      ACE_NEW (tlist_, TAO_Transport*[count]);
++    }
++
++    ~TList_Holder (void)
++    {
++      // Resources are unacquired during uninitialization
++      delete [] tlist_;
++    }
++
++    operator TAO_Transport** (void)
++    {
++      return tlist_;
++    }
++
++  private:
++    TAO_Transport** tlist_;
++  };
++}
++
+ TAO_Transport *
+ TAO_IIOP_Connector::complete_connection (int result,
+                                          TAO_Transport_Descriptor_Interface &desc,
+@@ -395,9 +424,9 @@
+   // Make sure that we always do a remove_reference for every member
+   // of the list
+   TAO_IIOP_Connection_Handler_Array_Guard svc_handler_auto_ptr (sh_list,count);
++  TList_Holder tlist(count);
++
+   TAO_Transport *transport  = 0;
+-  TAO_Transport **tlist = 0;
+-  ACE_NEW_RETURN (tlist,TAO_Transport*[count],0);
+ 
+   //  populate the transport list
+   for (unsigned i = 0; i < count; i++)
+@@ -415,7 +444,9 @@
+       if (count == 1)
+         {
+           transport = tlist[0];
++          desc.reset_endpoint(ep_list[0]);
+           if (!this->wait_for_connection_completion (r,
++                                                     desc,
+                                                      transport,
+                                                      timeout))
+             {
+@@ -461,8 +492,6 @@
+   ACE_OS::nanosleep (&ts);
+ #endif // INDUCE_BUG_2654_A
+ 
+-  int retval = -1;
+-
+   // At this point, the connection has been successfully created
+   // connected or not connected, but we have a connection.
+   TAO_IIOP_Connection_Handler *svc_handler = 0;
+@@ -470,33 +499,19 @@
+ 
+   if (transport != 0)
+     {
+-      if (count == 1)
++      for (unsigned i = 0; i < count; i++)
+         {
+-          svc_handler = sh_list[0];
+-          iiop_endpoint = ep_list[0];
+-        }
+-      else
+-        {
+-          for (unsigned i = 0; i < count; i++)
++          if (transport == tlist[i])
+             {
+-              if (transport == tlist[i])
+-                {
+-                  svc_handler = sh_list[i];
+-                  iiop_endpoint = ep_list[i];
+-                  break;
+-                }
++              svc_handler = sh_list[i];
++              iiop_endpoint = ep_list[i];
++              break;
+             }
+         }
+     }
+-
+-
+-  // Done with the transport list. It was a temporary that did not
+-  // affect the reference count.
+-  delete [] tlist;
+-
+-  // In case of errors transport is zero
+-  if (transport == 0)
++  else
+     {
++      // In case of errors transport is zero
+       // Give users a clue to the problem.
+       if (TAO_debug_level > 3)
+         {
+@@ -559,9 +574,9 @@
+   struct timespec ts = udelay;
+   ACE_OS::nanosleep (&ts);
+ #endif // INDUCE_BUG_2654_C
++  int retval = 0;
+ 
+-
+-  // Add the handler to Cache
++  // Update the cache to show this in idle state
+   if (count == 1 || desc.reset_endpoint(iiop_endpoint))
+     {
+       retval = this->orb_core ()->
+@@ -610,25 +625,10 @@
+   ACE_OS::nanosleep (&ts);
+ #endif // INDUCE_BUG_2654_D
+ 
+-  if (transport->is_connected () &&
+-      transport->wait_strategy ()->register_handler () != 0)
++  // Have the transport register itself with the wait strategy and
++  // deal with the transport cache if there is a failure.
++  if (!transport->register_if_necessary ())
+     {
+-      // Registration failures.
+-
+-      // Purge from the connection cache, if we are not in the cache, this
+-      // just does nothing.
+-      (void) transport->purge_entry ();
+-
+-      // Close the handler.
+-      (void) transport->close_connection ();
+-
+-      if (TAO_debug_level > 0)
+-        ACE_ERROR ((LM_ERROR,
+-                    ACE_TEXT ("TAO (%P|%t) IIOP_Connector [%d]::make_connection, ")
+-                    ACE_TEXT ("could not register the transport ")
+-                    ACE_TEXT ("in the reactor.\n"),
+-                    transport->id ()));
+-
+       return 0;
+     }
+ 
+Index: TAO/tao/Transport_Cache_Manager.cpp
+===================================================================
+--- TAO/tao/Transport_Cache_Manager.cpp	(revision 80980)
++++ TAO/tao/Transport_Cache_Manager.cpp	(working copy)
+@@ -19,7 +19,13 @@
+            Transport_Cache_Manager,
+            "$Id$")
+ 
++// notes on debug level and LM_xxxx codes for transport cache
++// TAO_debug_level > 0: recoverable error condition (LM_ERROR)
++// TAO_debug_level > 4: normal transport cache operations (LM_INFO)
++// TAO_debug_level > 6: detailed cache operations (LM_DEBUG)
++// TAO_debug_level > 8: for debugging the cache itself (LM_DEBUG)
+ 
++
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ namespace TAO
+@@ -28,26 +34,15 @@
+     : percent_ (orb_core.resource_factory ()->purge_percentage ())
+     , purging_strategy_ (orb_core.resource_factory ()->create_purging_strategy ())
+     , cache_map_ (orb_core.resource_factory ()->cache_maximum ())
+-    , condition_ (0)
+     , cache_lock_ (0)
+-    , muxed_number_ (orb_core.resource_factory ()->max_muxed_connections ())
+-    , no_waiting_threads_ (0)
+-    , last_entry_returned_ (0)
+   {
+     if (orb_core.resource_factory ()->locked_transport_cache ())
+       {
+-        ACE_NEW (this->condition_,
+-                 TAO_Condition <TAO_SYNCH_MUTEX>);
+-
+         ACE_NEW (this->cache_lock_,
+-                 ACE_Lock_Adapter <TAO_SYNCH_MUTEX> (*this->condition_->mutex ()));
++                 ACE_Lock_Adapter <TAO_SYNCH_MUTEX> (this->cache_map_mutex_));
+       }
+     else
+       {
+-        /// If the cache is not going to be locked then dont create a
+-        /// condition variable. Make the <muxed_number_> to 0, else a
+-        /// single thread could get into waiting mode
+-        this->muxed_number_ = 0;
+         ACE_NEW (this->cache_lock_,
+                  ACE_Lock_Adapter<ACE_SYNCH_NULL_MUTEX>);
+       }
+@@ -55,12 +50,6 @@
+ 
+   Transport_Cache_Manager::~Transport_Cache_Manager (void)
+   {
+-    // Wakeup all the waiting threads threads before we shutdown stuff
+-    if (this->no_waiting_threads_)
+-      {
+-        this->condition_->broadcast ();
+-      }
+-
+     // Delete the lock that we have
+     if (this->cache_lock_)
+       {
+@@ -75,12 +64,6 @@
+         this->purging_strategy_ = 0;
+       }
+ 
+-    // Delete the condition variable
+-    if (this->condition_)
+-      {
+-        delete this->condition_;
+-        this->condition_ = 0;
+-      }
+   }
+ 
+ 
+@@ -88,13 +71,14 @@
+   Transport_Cache_Manager::bind_i (Cache_ExtId &ext_id,
+                                    Cache_IntId &int_id)
+   {
+-    if (TAO_debug_level > 0)
++    if (TAO_debug_level > 4)
+        {
+          ACE_DEBUG ((LM_INFO,
+-            ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::bind_i, ")
+-            ACE_TEXT ("Transport[%d]; hash %d\n"),
++            ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::bind_i: ")
++            ACE_TEXT ("Transport[%d] @ hash:index{%d:%d}\n"),
+             int_id.transport ()->id (),
+-            ext_id.hash ()
++            ext_id.hash (),
++            ext_id.index ()
+             ));
+        }
+ 
+@@ -104,208 +88,230 @@
+     // Update the purging strategy information while we
+     // are holding our lock
+     this->purging_strategy_->update_item (int_id.transport ());
+-
+-    int retval = this->cache_map_.bind (ext_id, int_id, entry);
+-    if (retval == 0)
++    int retval = 0;
++    bool more_to_do = true;
++    while (more_to_do)
+       {
+-        // The entry has been added to cache succesfully
+-        // Add the cache_map_entry to the transport
+-        int_id.transport ()->cache_map_entry (entry);
+-      }
+-    else if (retval == 1)
+-      {
+-        if (TAO_debug_level > 4)
+-          {
+-            ACE_DEBUG ((LM_DEBUG,
+-                        "TAO (%P|%t) - Transport_Cache_Manager::bind_i, "
+-                        "unable to bind in the first attempt. "
+-                        "Trying with a new index\n"));
+-          }
+-
+-        // There was an entry like this before, so let us do some
+-        // minor adjustments and rebind
+-        retval = this->get_last_index_bind (ext_id, int_id, entry);
++        retval = this->cache_map_.bind (ext_id, int_id, entry);
+         if (retval == 0)
+           {
++            // The entry has been added to cache succesfully
++            // Add the cache_map_entry to the transport
+             int_id.transport ()->cache_map_entry (entry);
++            more_to_do = false;
+           }
++        else if (retval == 1)
++          {
++            if (entry->item ().transport () == int_id.transport ())
++              {
++                // update the cache status
++                // we are already holding the lock, do not call set_entry_state
++                entry->item ().recycle_state (int_id.recycle_state ());
++                retval = 0;
++                more_to_do = false;
++              }
++            else
++            {
++              ext_id.index (ext_id.index () + 1);
++              if (TAO_debug_level > 8)
++                {
++                  ACE_DEBUG ((LM_DEBUG,
++                    ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::bind_i: ")
++                    ACE_TEXT ("Unable to bind Transport[%d] @ hash:index{%d:%d}. ")
++                    ACE_TEXT ("Trying with a new index \n"),
++                    int_id.transport ()->id (),
++                    ext_id.hash (),
++                    ext_id.index ()));
++                }
++            }
++          }
++        else
++          {
++            if (TAO_debug_level > 0)
++              {
++                ACE_ERROR ((LM_ERROR,
++                  "TAO (%P|%t) - Transport_Cache_Manager::bind_i, "
++                  "ERROR: unable to bind transport\n"));
++              }
++            more_to_do = false;
++          }
+       }
+-
+-    if (TAO_debug_level > 5 && retval != 0)
++    if (retval == 0)
+       {
+-        ACE_ERROR ((LM_ERROR,
+-                    "TAO (%P|%t) - Transport_Cache_Manager::bind_i, "
+-                    "unable to bind\n"));
++        if (TAO_debug_level > 4)
++          {
++            ACE_DEBUG ((LM_INFO,
++              ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::bind_i: ")
++              ACE_TEXT ("Success Transport[%d] @ hash:index{%d:%d}. ")
++              ACE_TEXT ("Cache size is [%d]\n"),
++              int_id.transport ()->id (),
++              ext_id.hash (),
++              ext_id.index (),
++              this->current_size ()
++              ));
++          }
+       }
+-    else if (TAO_debug_level > 3)
+-      {
+-        ACE_DEBUG ((LM_DEBUG,
+-                    "TAO (%P|%t) - Transport_Cache_Manager::bind_i, "
+-                    "cache size is [%d]\n",
+-                    this->current_size ()));
+-      }
+ 
+     return retval;
+   }
+ 
+-  int
++  Transport_Cache_Manager::Find_Result
+   Transport_Cache_Manager::find_transport (
+     TAO_Transport_Descriptor_Interface *prop,
+-    TAO_Transport *&transport)
++    TAO_Transport *&transport,
++    size_t &busy_count)
+   {
+     if (prop == 0)
+       {
+         transport = 0;
+-        return -1;
++        return CACHE_FOUND_NONE;
+       }
+ 
+-    // Compose the ExternId
+-    Cache_ExtId ext_id (prop);
+-    Cache_IntId int_id;
+-
+-    int const retval = this->find (ext_id, int_id);
+-    if (retval == 0)
++    Transport_Cache_Manager::Find_Result find_result = this->find (
++      prop, transport, busy_count);
++    if (find_result != CACHE_FOUND_NONE)
+       {
+-        transport = int_id.relinquish_transport ();
+-
+-        if (transport->wait_strategy ()->non_blocking () == 0 &&
+-            transport->orb_core ()->client_factory ()->use_cleanup_options ())
++        if (find_result == CACHE_FOUND_AVAILABLE)
+           {
+-            ACE_Event_Handler * const eh = transport->event_handler_i ();
+-            ACE_Reactor * const r = transport->orb_core ()->reactor ();
+-
+-            if (eh &&
+-                r->remove_handler (eh,
+-                                   ACE_Event_Handler::READ_MASK |
+-                                   ACE_Event_Handler::DONT_CALL) == -1)
++            if (transport->wait_strategy ()->non_blocking () == 0 &&
++                transport->orb_core ()->client_factory ()->use_cleanup_options ())
+               {
+-                if (TAO_debug_level > 0)
+-                  ACE_ERROR ((LM_ERROR,
+-                              ACE_TEXT ("TAO (%P|%t) - TAO_Transport_Cache_Manager[%d]")
+-                              ACE_TEXT ("::find_transport, remove_handler failed \n"),
+-                              transport->id ()));
++                ACE_Event_Handler * const eh =
++                  transport->event_handler_i ();
++
++                ACE_Reactor * const r =
++                  transport->orb_core ()->reactor ();
++
++                if (eh &&
++                    r->remove_handler (eh,
++                                       ACE_Event_Handler::READ_MASK |
++                                       ACE_Event_Handler::DONT_CALL) == -1)
++                  {
++                    if (TAO_debug_level > 0)
++                      ACE_ERROR ((LM_ERROR,
++                                  ACE_TEXT ("TAO (%P|%t) - TAO_Transport_Cache_Manager[%d]")
++                                  ACE_TEXT ("::find_transport, remove_handler failed \n"),
++                                  transport->id ()));
++                  }
++                else
++                  {
++                    transport->wait_strategy ()->is_registered (false);
++                  }
+               }
+-            else
+-              {
+-                transport->wait_strategy ()->is_registered (false);
+-              }
+           }
+       }
+-
+-    return retval;
++    return find_result;
+   }
+ 
+-  int
+-  Transport_Cache_Manager::find (const Cache_ExtId &key,
+-                                 Cache_IntId &value)
++  Transport_Cache_Manager::Find_Result
++  Transport_Cache_Manager::find_i (
++    TAO_Transport_Descriptor_Interface *prop,
++    TAO_Transport *&transport,
++    size_t &busy_count)
+   {
+-    ACE_MT (ACE_GUARD_RETURN  (ACE_Lock,
+-                               guard,
+-                               *this->cache_lock_,
+-                               -1));
+-
+-    int const status =  this->find_i (key, value);
+-
+-    if (status == 0)
+-      {
+-        // Update the purging strategy information while we
+-        // are holding our lock
+-        this->purging_strategy_->update_item (value.transport ());
+-      }
+-
+-    return status;
+-  }
+-
+-  int
+-  Transport_Cache_Manager::find_i (const Cache_ExtId &key,
+-                                   Cache_IntId &value)
+-  {
+-    HASH_MAP_ENTRY *entry = 0;
+-
+     // Get the entry from the Hash Map
+-    int retval = 0;
++    Transport_Cache_Manager::Find_Result found = CACHE_FOUND_NONE;
+ 
+     // Make a temporary object. It does not do a copy.
+-    Cache_ExtId tmp_key (key.property ());
++    Cache_ExtId key (prop);
++    HASH_MAP_ENTRY *entry = 0;
++    busy_count = 0;
++    int cache_status = 0;
++    HASH_MAP_ENTRY *found_entry = 0;
+ 
+-    while (retval == 0)
++    // loop until we find a usable transport, or until we've checked
++    // all cached entries for this endpoint
++    while (found != CACHE_FOUND_AVAILABLE && cache_status == 0)
+       {
+-        // Wait for a connection..
+-        this->wait_for_connection (tmp_key);
+-
+-        // Look for an entry in the map
+-        retval = this->cache_map_.find (tmp_key, entry);
+-
+-        // We have an entry in the map, check whether it is idle.
+-        if (entry)
++        entry = 0;
++        cache_status = this->cache_map_.find (key, entry);
++        if (cache_status == 0 && entry)
+           {
+-            CORBA::Boolean const idle = this->is_entry_idle (entry);
+-
+-            if (idle)
++            if (this->is_entry_available (*entry))
+               {
+                 // Successfully found a TAO_Transport.
+ 
+-                entry->int_id_.recycle_state (ENTRY_BUSY);
++                found = CACHE_FOUND_AVAILABLE;
++                found_entry = entry;
++                entry->item ().recycle_state (ENTRY_BUSY);
+ 
+-                // NOTE: This assignment operator indirectly incurs two
+-                //       lock operations since it duplicates and releases
+-                //       TAO_Transport objects.
+-                value = entry->int_id_;
+-
+-                if (TAO_debug_level > 4)
++                if (TAO_debug_level > 6)
+                   {
+                     ACE_DEBUG ((LM_DEBUG,
+-                                ACE_TEXT("TAO (%P|%t) - Transport_Cache_Manager::find_i, ")
+-                                ACE_TEXT("at index %d (Transport[%d]) - idle\n"),
+-                                entry->ext_id_.index (),
+-                                entry->int_id_.transport ()->id ()));
++                      ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::find_i: ")
++                      ACE_TEXT ("Found available Transport[%d] @hash:index {%d:%d}\n"),
++                      entry->item ().transport ()->id (),
++                      entry->ext_id_.hash (),
++                      entry->ext_id_.index ()
++                      ));
+                   }
+-
+-                return 0;
+               }
+-            else if (TAO_debug_level > 6)
++            else if (this->is_entry_connecting (*entry))
++              {
++                if (TAO_debug_level > 6)
+                   {
+                     ACE_DEBUG ((LM_DEBUG,
+-                                ACE_TEXT("TAO (%P|%t) - Transport_Cache_Manager::find_i, ")
+-                                ACE_TEXT("at index %d (Transport[%d]) - not idle\n"),
+-                                entry->ext_id_.index (),
+-                                entry->int_id_.transport ()->id ()));
++                      ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::find_i: ")
++                      ACE_TEXT ("Found connecting Transport[%d] @hash:index {%d:%d}\n"),
++                      entry->item ().transport ()->id (),
++                      entry->ext_id_.hash (),
++                      entry->ext_id_.index ()
++                      ));
+                   }
++                // if this is the first interesting entry
++                if (found != CACHE_FOUND_CONNECTING)
++                  {
++                    found_entry = entry;
++                    found = CACHE_FOUND_CONNECTING;
++                  }
++              }
++            else
++              {
++                // if this is the first busy entry
++                if (found == CACHE_FOUND_NONE && busy_count == 0)
++                  {
++                    found_entry = entry;
++                    found = CACHE_FOUND_BUSY;
++                  }
++                busy_count += 1;
++                if (TAO_debug_level > 6)
++                  {
++                    ACE_DEBUG ((LM_DEBUG,
++                      ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::find_i: ")
++                      ACE_TEXT ("Found busy Transport[%d] @hash:index {%d:%d}\n"),
++                      entry->item ().transport ()->id (),
++                      entry->ext_id_.hash (),
++                      entry->ext_id_.index ()
++                      ));
++                  }
++              }
+           }
+ 
+         // Bump the index up
+-        tmp_key.incr_index ();
++        key.incr_index ();
+       }
+-
+-    // If we are here then it is an error
+-    if (TAO_debug_level > 4 && retval != 0)
+-      {
+-        ACE_ERROR ((LM_ERROR,
+-                    "TAO (%P|%t) - Transport_Cache_Manager::find_i, "
+-                    "no idle transport is available\n"));
+-      }
+-
+-    return retval;
++    if (found_entry != 0)
++    {
++      transport = found_entry->item ().transport ();
++      transport->add_reference ();
++      if (found == CACHE_FOUND_AVAILABLE)
++        {
++          // Update the purging strategy information while we
++          // are holding our lock
++          this->purging_strategy_->update_item (transport);
++        }
++    }
++    return found;
+   }
+ 
+   int
+-  Transport_Cache_Manager::make_idle_i (HASH_MAP_ENTRY *&entry)
++  Transport_Cache_Manager::make_idle_i (HASH_MAP_ENTRY *entry)
+   {
+     if (entry == 0)
+       return -1;
+ 
+-    entry->int_id_.recycle_state (ENTRY_IDLE_AND_PURGABLE);
++    entry->item ().recycle_state (ENTRY_IDLE_AND_PURGABLE);
+ 
+-    // Does any one need waking?
+-    if (this->no_waiting_threads_)
+-      {
+-        // We returned this entry to the map
+-        this->last_entry_returned_ = &entry->ext_id_;
+-
+-        // Wake up a thread
+-        this->condition_->signal ();
+-      }
+-
+     return 0;
+   }
+ 
+@@ -323,7 +329,7 @@
+       return -1;
+ 
+     TAO_Connection_Purging_Strategy *st = this->purging_strategy_;
+-    (void) st->update_item (entry->int_id_.transport ());
++    (void) st->update_item (entry->item ().transport ());
+ 
+     return 0;
+   }
+@@ -395,7 +401,7 @@
+   }
+ 
+   void
+-  Transport_Cache_Manager::mark_invalid_i (HASH_MAP_ENTRY *&entry)
++  Transport_Cache_Manager::mark_invalid_i (HASH_MAP_ENTRY *entry)
+   {
+     if (entry == 0)
+       {
+@@ -403,53 +409,57 @@
+       }
+ 
+     // Mark the entry as not usable
+-    entry->int_id_.recycle_state (ENTRY_PURGABLE_BUT_NOT_IDLE);
++    entry->item ().recycle_state (ENTRY_PURGABLE_BUT_NOT_IDLE);
+   }
+ 
+-  int
+-  Transport_Cache_Manager::get_last_index_bind (Cache_ExtId &key,
+-                                                Cache_IntId &val,
+-                                                HASH_MAP_ENTRY *&entry)
++  bool
++  Transport_Cache_Manager::is_entry_available (const HASH_MAP_ENTRY &entry)
+   {
+-    CORBA::ULong ctr = entry->ext_id_.index ();
+-    int retval = 0;
++    Cache_Entries_State entry_state = entry.int_id_.recycle_state ();
++    bool result = (entry_state == ENTRY_IDLE_AND_PURGABLE ||
++                   entry_state == ENTRY_IDLE_BUT_NOT_PURGABLE);
+ 
+-    while (retval == 0)
+-      {
+-        // Set the index
+-        key.index (++ctr);
++    if (result && entry.int_id_.transport () != 0)
++    {
++      // if it's not connected, it's not available
++      result = entry.int_id_.is_connected_;
++    }
+ 
+-        // Check to see if an element exists in the Map. If it exists we
+-        // loop, else we drop out of the loop
+-        retval = this->cache_map_.find (key);
++    if (TAO_debug_level > 8)
++      {
++        ACE_DEBUG ((LM_DEBUG,
++          ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::is_entry_available:")
++          ACE_TEXT ("returns %s state is [%d]\n"),
++          (result?"True":"False"),
++          entry_state));
+       }
+ 
+-    // Now do a bind again with the new index
+-    return  this->cache_map_.bind (key,
+-                                   val,
+-                                   entry);
++    return result;
+   }
+ 
+-
+   bool
+-  Transport_Cache_Manager::is_entry_idle (HASH_MAP_ENTRY *&entry)
++  Transport_Cache_Manager::is_entry_connecting (const HASH_MAP_ENTRY &entry)
+   {
+-    Cache_Entries_State entry_state =
+-      entry->int_id_.recycle_state ();
++    Cache_Entries_State entry_state = entry.int_id_.recycle_state ();
++    bool result = (entry_state == ENTRY_CONNECTING);
+ 
+-    if (TAO_debug_level)
++    if (!result && entry.int_id_.transport () != 0)
+       {
++        // if we're not connected, that counts, too.
++        // Can this happen?  Not sure <wilsond@ociweb.com>
++        result = !entry.int_id_.is_connected_;
++      }
++
++    if (TAO_debug_level  > 8)
++      {
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_TEXT("TAO (%P|%t) - Transport_Cache_Manager::is_entry_idle, ")
+-                    ACE_TEXT("state is [%d]\n"),
+-                    entry_state));
++          ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::is_entry_connecting: ")
++          ACE_TEXT ("Returns %s, state is [%d]\n"),
++          (result?"True":"False"),
++          entry_state));
+       }
+ 
+-    if (entry_state == ENTRY_IDLE_AND_PURGABLE ||
+-        entry_state == ENTRY_IDLE_BUT_NOT_PURGABLE)
+-      return true;
+-
+-    return false;
++    return result;
+   }
+ 
+ #if !defined (ACE_LACKS_QSORT)
+@@ -491,20 +501,20 @@
+           // Calculate the number of entries to purge
+           int const amount = (sorted_size * this->percent_) / 100;
+ 
+-          if (TAO_debug_level > 0)
++          if (TAO_debug_level > 4)
+             {
+-              ACE_DEBUG ((LM_DEBUG,
+-                          ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::")
+-                          ACE_TEXT ("purge,  purging %d of %d cache entries\n"),
+-                          amount,
+-                          sorted_size));
++              ACE_DEBUG ((LM_INFO,
++                ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::purge: ")
++                ACE_TEXT ("Purging %d of %d cache entries\n"),
++                amount,
++                sorted_size));
+             }
+ 
+           int count = 0;
+ 
+           for (int i = 0; count < amount && i < sorted_size; ++i)
+             {
+-              if (this->is_entry_idle (sorted_set[i]))
++              if (this->is_entry_available (*sorted_set[i]))
+                 {
+                   sorted_set[i]->int_id_.recycle_state (ENTRY_BUSY);
+ 
+@@ -512,22 +522,26 @@
+                     sorted_set[i]->int_id_.transport ();
+                   transport->add_reference ();
+ 
+-                  if (transports_to_be_closed.push (transport) != 0)
++                  if (TAO_debug_level > 4)
+                     {
+                       ACE_DEBUG ((LM_INFO,
+-                                  ACE_TEXT ("TAO (%P|%t) - ")
+-                                  ACE_TEXT ("Unable to push transport %u ")
+-                                  ACE_TEXT ("on the to-be-closed stack, so ")
+-                                  ACE_TEXT ("it will leak\n"),
+-                                transport->id ()));
++                        ACE_TEXT ("TAO (%P|%t) Transport_Cache_Manager::purge ")
++                        ACE_TEXT ("Purgable Transport[%d] found in ")
++                        ACE_TEXT ("cache\n"),
++                        transport->id ()));
+                     }
+ 
+-                  if (TAO_debug_level > 0)
++                  if (transports_to_be_closed.push (transport) != 0)
+                     {
+-                      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("TAO (%P|%t) - ")
+-                                  ACE_TEXT ("Idle transport found in ")
+-                                  ACE_TEXT ("cache: [%d] \n"),
+-                                  transport->id ()));
++                      if (TAO_debug_level > 0)
++                        {
++                          ACE_DEBUG ((LM_ERROR,
++                            ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::purge: ")
++                            ACE_TEXT ("Unable to push transport[%u] ")
++                            ACE_TEXT ("on the to-be-closed stack, so ")
++                            ACE_TEXT ("it will leak\n"),
++                            transport->id ()));
++                        }
+                     }
+ 
+                   // Count this as a successful purged entry
+@@ -555,6 +569,14 @@
+               }
+           }
+       }
++    if (TAO_debug_level > 4)
++          {
++            ACE_DEBUG ((LM_INFO,
++              ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::purge: ")
++              ACE_TEXT ("Cache size after purging is [%d]\n"),
++              this->current_size ()
++              ));
++          }
+ 
+     return 0;
+   }
+@@ -575,7 +597,7 @@
+ 
+             for(int j = i; j > 0 &&
+                   entries[j - 1]->int_id_.transport ()->purging_order () >
+-                  entry->int_id_.transport ()->purging_order (); --j)
++                  entry->item ().transport ()->purging_order (); --j)
+               {
+                 HASH_MAP_ENTRY* holder = entries[j];
+                 entries[j] = entries[j - 1];
+@@ -602,14 +624,14 @@
+     // Do we need to worry about cache purging?
+     if (cache_maximum >= 0)
+       {
+-        current_size = static_cast<int> (this->cache_map_.current_size ());
++        current_size = static_cast<int> (this->current_size ());
+ 
+-        if (TAO_debug_level > 0)
++        if (TAO_debug_level > 6)
+           {
+             ACE_DEBUG ((LM_DEBUG,
+-                        ACE_TEXT("TAO (%P|%t) - Transport_Cache_Manager::fill_set_i, ")
+-                        ACE_TEXT("current_size = %d, cache_maximum = %d\n"),
+-                        current_size, cache_maximum));
++              ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager::fill_set_i: ")
++              ACE_TEXT ("current_size = %d, cache_maximum = %d\n"),
++              current_size, cache_maximum));
+           }
+ 
+         if (current_size >= cache_maximum)
+@@ -631,82 +653,6 @@
+     return current_size;
+   }
+ 
+-
+-  int
+-  Transport_Cache_Manager::wait_for_connection (Cache_ExtId &extid)
+-  {
+-    if (this->muxed_number_ && this->muxed_number_ == extid.index ())
+-      {
+-        // If we have a limit on the number of muxed connections for
+-        // a particular endpoint just wait to get the connection
+-        ++this->no_waiting_threads_;
+-
+-        if (TAO_debug_level > 2)
+-          {
+-            ACE_DEBUG ((LM_DEBUG,
+-                        ACE_TEXT("TAO (%P|%t) - Transport_Cache_Manager")
+-                        ACE_TEXT("::wait_for_connection, ")
+-                        ACE_TEXT("entering wait loop\n")));
+-          }
+-
+-        int ready_togo = 0;
+-
+-        while (ready_togo == 0)
+-          {
+-            this->condition_->wait ();
+-
+-            // Check whether we are waiting for this connection
+-            ready_togo = this->is_wakeup_useful (extid);
+-          }
+-
+-        if (TAO_debug_level > 2)
+-          {
+-            ACE_DEBUG ((LM_DEBUG,
+-                        ACE_TEXT("TAO (%P|%t) - Transport_Cache_Manager::wait_for_connection, ")
+-                        ACE_TEXT("left wait loop\n")));
+-          }
+-
+-        // We are not waiting anymore
+-        --this->no_waiting_threads_;
+-      }
+-
+-    return 0;
+-  }
+-
+-  int
+-  Transport_Cache_Manager::is_wakeup_useful (Cache_ExtId &extid)
+-  {
+-    // Get the underlying property that we are looking for
+-    TAO_Transport_Descriptor_Interface *prop = extid.property ();
+-
+-    // Just check the underlying property for equivalence. If the last
+-    // connection that was returned  had the same property just return
+-    // 1.
+-    if (this->last_entry_returned_ &&
+-        prop->is_equivalent (this->last_entry_returned_->property ()))
+-      {
+-        // Set the index to be right so that we can pick teh connection
+-        // right away..
+-        extid.index (this->last_entry_returned_->index ());
+-
+-        // There is no more use for it ...
+-        this->last_entry_returned_ = 0;
+-
+-        return 1;
+-      }
+-
+-    // If there  is an entry that was returned and if there are more
+-    // threads just wake up the peer to check for the returned
+-    // connection.
+-    if (this->last_entry_returned_ &&
+-        this->no_waiting_threads_ > 1)
+-      {
+-        this->condition_->signal ();
+-      }
+-
+-    return 0;
+-  }
+-
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: TAO/tao/Strategies/UIOP_Connection_Handler.cpp
+===================================================================
+--- TAO/tao/Strategies/UIOP_Connection_Handler.cpp	(revision 80980)
++++ TAO/tao/Strategies/UIOP_Connection_Handler.cpp	(working copy)
+@@ -206,9 +206,9 @@
+ }
+ 
+ int
+-TAO_UIOP_Connection_Handler::close (u_long)
++TAO_UIOP_Connection_Handler::close (u_long flags)
+ {
+-  return this->close_handler ();
++  return this->close_handler (flags);
+ }
+ 
+ int
+Index: TAO/tao/Strategies/SHMIOP_Connection_Handler.cpp
+===================================================================
+--- TAO/tao/Strategies/SHMIOP_Connection_Handler.cpp	(revision 80980)
++++ TAO/tao/Strategies/SHMIOP_Connection_Handler.cpp	(working copy)
+@@ -231,9 +231,9 @@
+ }
+ 
+ int
+-TAO_SHMIOP_Connection_Handler::close (u_long)
++TAO_SHMIOP_Connection_Handler::close (u_long flags)
+ {
+-  return this->close_handler ();
++  return this->close_handler (flags);
+ }
+ 
+ int
+Index: TAO/tao/Strategies/UIOP_Connector.cpp
+===================================================================
+--- TAO/tao/Strategies/UIOP_Connector.cpp	(revision 80980)
++++ TAO/tao/Strategies/UIOP_Connector.cpp	(working copy)
+@@ -202,6 +202,7 @@
+           // get a connected transport or not. In case of non block we get
+           // a connected or not connected transport
+           if (!this->wait_for_connection_completion (r,
++                                                     desc,
+                                                      transport,
+                                                      max_wait_time))
+             {
+Index: TAO/tao/Strategies/DIOP_Connection_Handler.cpp
+===================================================================
+--- TAO/tao/Strategies/DIOP_Connection_Handler.cpp	(revision 80980)
++++ TAO/tao/Strategies/DIOP_Connection_Handler.cpp	(working copy)
+@@ -269,9 +269,9 @@
+ }
+ 
+ int
+-TAO_DIOP_Connection_Handler::close (u_long)
++TAO_DIOP_Connection_Handler::close (u_long flags)
+ {
+-  return this->close_handler ();
++  return this->close_handler (flags);
+ }
+ 
+ int
+Index: TAO/tao/Strategies/COIOP_Connection_Handler.cpp
+===================================================================
+--- TAO/tao/Strategies/COIOP_Connection_Handler.cpp	(revision 80980)
++++ TAO/tao/Strategies/COIOP_Connection_Handler.cpp	(working copy)
+@@ -135,9 +135,9 @@
+ }
+ 
+ int
+-TAO_COIOP_Connection_Handler::close (u_long)
++TAO_COIOP_Connection_Handler::close (u_long flags)
+ {
+-  return this->close_handler ();
++  return this->close_handler (flags);
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: TAO/tao/Strategies/SCIOP_Connector.cpp
+===================================================================
+--- TAO/tao/Strategies/SCIOP_Connector.cpp	(revision 80980)
++++ TAO/tao/Strategies/SCIOP_Connector.cpp	(working copy)
+@@ -226,6 +226,7 @@
+           // get a connected transport or not. In case of non block we get
+           // a connected or not connected transport
+           if (!this->wait_for_connection_completion (r,
++                                                     desc,
+                                                      transport,
+                                                      timeout))
+             {
+Index: TAO/tao/Strategies/SCIOP_Connection_Handler.cpp
+===================================================================
+--- TAO/tao/Strategies/SCIOP_Connection_Handler.cpp	(revision 80980)
++++ TAO/tao/Strategies/SCIOP_Connection_Handler.cpp	(working copy)
+@@ -267,9 +267,9 @@
+ }
+ 
+ int
+-TAO_SCIOP_Connection_Handler::close (u_long)
++TAO_SCIOP_Connection_Handler::close (u_long flags)
+ {
+-  return this->close_handler ();
++  return this->close_handler (flags);
+ }
+ 
+ int
+Index: TAO/tao/Transport_Cache_Manager.inl
+===================================================================
+--- TAO/tao/Transport_Cache_Manager.inl	(revision 80980)
++++ TAO/tao/Transport_Cache_Manager.inl	(working copy)
+@@ -23,7 +23,8 @@
+   ACE_INLINE int
+   Transport_Cache_Manager::cache_transport (
+     TAO_Transport_Descriptor_Interface *prop,
+-    TAO_Transport *transport)
++    TAO_Transport *transport,
++    Cache_Entries_State state/* = ENTRY_IDLE_BUT_NOT_PURGABLE*/)
+   {
+     // Compose the ExternId & Intid
+     Cache_ExtId ext_id (prop);
+@@ -37,7 +38,7 @@
+                                 -1));
+ 
+       // Do as the semantics of this method dictates
+-      int_id.recycle_state (ENTRY_BUSY);
++      int_id.recycle_state (state);
+ 
+       retval = this->bind_i (ext_id,
+                              int_id);
+@@ -51,30 +52,12 @@
+     TAO_Transport_Descriptor_Interface *prop,
+     TAO_Transport *transport)
+   {
+-    // Compose the ExternId & Intid
+-    Cache_ExtId ext_id (prop);
+-    Cache_IntId int_id (transport);
+-
+-    int retval = 0;
+-    {
+-      ACE_MT (ACE_GUARD_RETURN (ACE_Lock,
+-                                guard,
+-                                *this->cache_lock_,
+-                                -1));
+-
+-      // Do as the semantics of this method dictates
+-      int_id.recycle_state (ENTRY_IDLE_AND_PURGABLE);
+-      retval = this->bind_i (ext_id,
+-                             int_id);
+-    }
+-
+-    return retval;
++    return cache_transport(prop, transport, ENTRY_IDLE_AND_PURGABLE);
+   }
+ 
+   ACE_INLINE int
+   Transport_Cache_Manager::purge_entry (HASH_MAP_ENTRY *&entry)
+   {
+-    // Double checked locking
+     if(entry == 0)
+       return 0;
+ 
+@@ -84,19 +67,30 @@
+   }
+ 
+   ACE_INLINE void
+-  Transport_Cache_Manager::mark_invalid (HASH_MAP_ENTRY *&entry)
++  Transport_Cache_Manager::mark_invalid (HASH_MAP_ENTRY *entry)
+   {
+     if(entry == 0)
+       return;
+ 
+-    // Double checked locking
+     ACE_MT (ACE_GUARD (ACE_Lock, guard, *this->cache_lock_));
+ 
+     this->mark_invalid_i (entry);
+   }
+ 
++  ACE_INLINE void
++  Transport_Cache_Manager::mark_connected (HASH_MAP_ENTRY *entry,
++                                           bool state)
++  {
++    if(entry == 0)
++      return;
++
++    ACE_MT (ACE_GUARD (ACE_Lock, guard, *this->cache_lock_));
++
++    entry->item().is_connected_ = state;
++  }
++
+   ACE_INLINE int
+-  Transport_Cache_Manager::make_idle (HASH_MAP_ENTRY *&entry)
++  Transport_Cache_Manager::make_idle (HASH_MAP_ENTRY *entry)
+   {
+     if(entry == 0)
+       return -1;
+@@ -105,6 +99,33 @@
+     return this->make_idle_i (entry);
+   }
+ 
++  ACE_INLINE void
++  Transport_Cache_Manager::set_entry_state (
++    HASH_MAP_ENTRY *entry,
++    TAO::Cache_Entries_State state)
++  {
++    if(entry != 0)
++      {
++        ACE_MT (ACE_GUARD (ACE_Lock, guard, *this->cache_lock_));
++        entry->item ().recycle_state (state);
++      }
++  }
++
++  ACE_INLINE Transport_Cache_Manager::Find_Result
++  Transport_Cache_Manager::find (
++    TAO_Transport_Descriptor_Interface *prop,
++    TAO_Transport *&transport,
++    size_t &busy_count)
++  {
++    ACE_MT (ACE_GUARD_RETURN  (ACE_Lock,
++                               guard,
++                               *this->cache_lock_,
++                               Transport_Cache_Manager::CACHE_FOUND_NONE));
++
++    return this->find_i (prop, transport, busy_count);
++  }
++
++
+   ACE_INLINE int
+   Transport_Cache_Manager::close (Connection_Handler_Set &handlers)
+   {
+Index: TAO/tao/Transport_Connector.h
+===================================================================
+--- TAO/tao/Transport_Connector.h	(revision 80980)
++++ TAO/tao/Transport_Connector.h	(working copy)
+@@ -172,6 +172,7 @@
+    */
+   virtual bool wait_for_connection_completion(
+       TAO::Profile_Transport_Resolver *r,
++      TAO_Transport_Descriptor_Interface &desc,
+       TAO_Transport *&transport,
+       ACE_Time_Value *timeout);
+ 
+@@ -186,6 +187,18 @@
+       TAO_LF_Multi_Event *mev,
+       ACE_Time_Value *timeout);
+ 
++  /// See if a new connection is allowed
++  bool new_connection_is_ok (size_t busy_count);
++
++  /// Wait for a transport to be connected
++  /// Note: no longer changes transport reference count
++  /// @ returns true if wait was uneventful
++  /// @         false if error occurred during wait
++  bool wait_for_transport(TAO::Profile_Transport_Resolver *r,
++                          TAO_Transport *base_transport,
++                          ACE_Time_Value * timeout,
++                          bool force_wait);
++
+   /// Set the ORB Core pointer
+   void orb_core (TAO_ORB_Core *orb_core);
+ 
+Index: TAO/tao/Transport.inl
+===================================================================
+--- TAO/tao/Transport.inl	(revision 80980)
++++ TAO/tao/Transport.inl	(working copy)
+@@ -169,6 +169,9 @@
+ ACE_INLINE bool
+ TAO_Transport::is_connected (void) const
+ {
++  // @TODO: this flag does not seem to be protecting anything.
++  // The state of is_connected_ is modified without the guard
++  // in Transport.cpp.
+   ACE_GUARD_RETURN (ACE_Lock,
+                     ace_mon,
+                     *this->handler_lock_,
+Index: TAO/tao/Profile_Transport_Resolver.cpp
+===================================================================
+--- TAO/tao/Profile_Transport_Resolver.cpp	(revision 80980)
++++ TAO/tao/Profile_Transport_Resolver.cpp	(working copy)
+@@ -244,10 +244,12 @@
+       this->profile_->orb_core()->lane_resources ().transport_cache();
+ 
+     // the cache increments the reference count on the transport if
+-    // the find is successful. Cache.find_transport returns 0 on success.
+-    // but we want to return a "boolean" of 0 for failure, 1 for success.
++    // the find is successful. We want to return a "boolean" of 0 for
++    // failure, 1 for success.
++    size_t busy_count;
+     TAO_Transport* tmp = this->transport_.get ();
+-    if (cache.find_transport(desc, tmp) != 0)
++    if (cache.find_transport(desc, tmp, busy_count) !=
++        Transport_Cache_Manager::CACHE_FOUND_AVAILABLE)
+       return 0;
+ 
+     this->transport_.set (tmp);
+Index: TAO/tests/BiDirectional/run_test.pl
+===================================================================
+--- TAO/tests/BiDirectional/run_test.pl	(revision 80980)
++++ TAO/tests/BiDirectional/run_test.pl	(working copy)
+@@ -22,7 +22,6 @@
+ }
+ $CL = new PerlACE::Process ("client", "-k file://$iorfile");
+ 
+-# print $SV->CommandLine ()."\n";
+ $SV->Spawn ();
+ 
+ if (PerlACE::waitforfile_timed ($iorfile, $PerlACE::wait_interval_for_process_creation) == -1) {
+@@ -31,7 +30,6 @@
+     exit 1;
+ }
+ 
+-# print $CL->CommandLine ()."\n";
+ $client = $CL->SpawnWaitKill (20);
+ 
+ if ($client != 0) {
+Index: TAO/tests/Bug_1361_Regression/client.cpp
+===================================================================
+--- TAO/tests/Bug_1361_Regression/client.cpp	(revision 80980)
++++ TAO/tests/Bug_1361_Regression/client.cpp	(working copy)
+@@ -36,7 +36,7 @@
+   int handle_timeout (ACE_Time_Value const & , void const *)
+   {
+     // kill the application
+-    raise (SIGABRT);
++    raise (9);
+     this->reactor ()->cancel_timer (this);
+     return 0;
+   }
+Index: TAO/tests/Bug_1361_Regression/Echo.cpp
+===================================================================
+--- TAO/tests/Bug_1361_Regression/Echo.cpp	(revision 80980)
++++ TAO/tests/Bug_1361_Regression/Echo.cpp	(working copy)
+@@ -28,7 +28,7 @@
+     {
+       ACE_DEBUG ((LM_DEBUG, "(%P|%t) Echo::echo_payload, aborting\n"));
+       // Kill the app
+-      raise(SIGABRT);
++      raise(9);
+     }
+ }
+ 
+@@ -45,9 +45,9 @@
+ 
+   if (this->abort_counter_ == 0)
+     {
+-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) Echo::echo_payload_out, aborting\n"));
++      ACE_DEBUG ((LM_DEBUG, "(%P|%t) Echo::echo_payload, aborting\n"));
+       // Kill the app
+-      raise(SIGABRT);
++      raise(9);
+     }
+ 
+ }
+Index: TAO/tests/AMI/run_test.pl
+===================================================================
+--- TAO/tests/AMI/run_test.pl	(revision 80980)
++++ TAO/tests/AMI/run_test.pl	(working copy)
+@@ -18,7 +18,7 @@
+         $client_conf = PerlACE::LocalFile ("muxed$PerlACE::svcconf_ext");
+     }
+     elsif ($i eq '-debug') {
+-        $debug_level = '7';
++        $debug_level = '1';
+     }
+     elsif ($i eq '-exclusive') {
+         $client_conf = PerlACE::LocalFile ("exclusive$PerlACE::svcconf_ext");
+Index: TAO/tests/Bug_1476_Test/client.cpp
+===================================================================
+--- TAO/tests/Bug_1476_Test/client.cpp	(revision 80980)
++++ TAO/tests/Bug_1476_Test/client.cpp	(working copy)
+@@ -183,21 +183,44 @@
+         1);
+       }
+ 
+-      if (tcm.find_transport (&desc, transport) != 0) {
+-        ACE_ERROR_RETURN ((LM_ERROR,
+-         "The cache should have returned the just created transport.\n"),
+-        1);
+-      }
++      size_t busy_count = 0;
++      TAO::Transport_Cache_Manager::Find_Result find_result =
++        tcm.find_transport (&desc, transport, busy_count);
+ 
+-      if (transport->is_connected()) {
+-        ACE_ERROR_RETURN ((LM_ERROR,
+-         "This cannot happen. No server to connect to."),
+-        1);
++      switch (find_result){
++        case TAO::Transport_Cache_Manager::CACHE_FOUND_NONE:
++          {
++            ACE_ERROR_RETURN ((LM_ERROR,
++              ACE_TEXT("Expected to find a transport in the cache.\n")
++              ),1);
++          }
++        case TAO::Transport_Cache_Manager::CACHE_FOUND_CONNECTING:
++          {
++            ACE_DEBUG (( LM_DEBUG,
++              ACE_TEXT ("Transport Cache contains connecting entry as expected.\n")
++              ));
++            break; // that's what we expected
++          }
++        case TAO::Transport_Cache_Manager::CACHE_FOUND_BUSY:
++          {
++            ACE_ERROR_RETURN ((LM_ERROR,
++              ACE_TEXT("Cached Transport is busy.  Should not happen because there's no server.\n")
++              ),1);
++          }
++        case TAO::Transport_Cache_Manager::CACHE_FOUND_AVAILABLE:
++          {
++            ACE_ERROR_RETURN ((LM_ERROR,
++              ACE_TEXT("Cached Transport is available.  Should not happen because there's no server.\n")
++              ),1);
++          }
++        default:
++          {
++            ACE_ERROR_RETURN ((LM_ERROR,
++              ACE_TEXT("Transport_Cache::find returned unknown status.\n")
++              ),1);
++          }
+       }
+ 
+-      if (transport != 0) {
+-        ACE_DEBUG ((LM_DEBUG, "Transport is %s\n", (transport->is_connected()?"connected":"not connected")));
+-      }
+ 
+       orb->destroy ();
+     }
+Index: TAO/NEWS
+===================================================================
+--- TAO/NEWS	(revision 80980)
++++ TAO/NEWS	(working copy)
+@@ -107,6 +107,13 @@
+   user can connect to a service that allows querying statistics gathered by
+   the Notification Service.
+ 
++. Repaired the -ORBMuxedConnectionMax <limit> option on the resource factory.
++  This service configurator option defines an upper limit to the number of
++  connections an orb will open to the same endpoint.
++
++. Repaired a problem that caused the ORB to open too many connections to
++  an endpoint.
++
+ . Moved the BufferingConstraintPolicy to the Messaging lib
+ 
+ . Made it possible to disable not needed IOR parsers to reduce footprint
