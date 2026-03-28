@@ -1,0 +1,34 @@
+Index: get_arg.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/PortableServer/get_arg.h,v
+retrieving revision 1.3
+diff -u -r1.3 get_arg.h
+--- get_arg.h	4 Nov 2005 09:26:56 -0000	1.3
++++ get_arg.h	24 May 2006 18:27:21 -0000
+@@ -57,7 +57,7 @@
+                  TAO::Argument * const * skel_args)
+     {
+       return
+-        details
++        (details != 0 && details->args () != 0)
+         ? static_cast<typename TAO::Arg_Traits<T>::ret_val *> (
+             details->args ()[0])->arg ()
+         : static_cast<typename TAO::SArg_Traits<T>::ret_val *> (
+@@ -103,7 +103,7 @@
+                    size_t i)
+     {
+       return
+-        details
++        (details != 0 && details->args () != 0)
+         ? static_cast<typename TAO::Arg_Traits<T>::inout_arg_val *> (
+             details->args ()[i])->arg ()
+         : static_cast<typename TAO::SArg_Traits<T>::inout_arg_val *> (
+@@ -126,7 +126,7 @@
+                  size_t i)
+     {
+       return
+-        details
++        (details != 0 && details->args () != 0)
+         ? static_cast<typename TAO::Arg_Traits<T>::out_arg_val *> (
+             details->args ()[i])->arg ()
+         : static_cast<typename TAO::SArg_Traits<T>::out_arg_val *> (
