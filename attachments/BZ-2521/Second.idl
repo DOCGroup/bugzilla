@@ -1,0 +1,22 @@
+// The idea here is that we are trying to re-open the same module
+// for our library, but our definitions are using sequences of
+// standard corba strings of the same length (in the multiple
+// idl definitions) even though they are called different types.
+//
+// In a real definition we would then go on to use these types
+// in their respective interfaces etc.
+
+#ifndef SECOND_PART_OF_MODULE_idl
+#define SECOND_PART_OF_MODULE_idl
+
+module TheSecondModule {
+   // Second incidental type we are defining, that would be
+   // used in this IDL definition file only.
+
+   typedef string<32> Second;
+
+   // Would be using the "Second" type here....
+
+}; /* End TheSecondModule */
+
+#endif // SECOND_PART_OF_MODULE_idl
