@@ -1,0 +1,180 @@
+Index: tests/Process_Manager_Test.cpp
+===================================================================
+RCS file: /local/cvs/master/pspACETAO/Current/source/ACE_wrappers/tests/Process_Manager_Test.cpp,v
+retrieving revision 1.1.1.1
+retrieving revision 1.2
+diff -u -w -r1.1.1.1 -r1.2
+--- tests/Process_Manager_Test.cpp	6 Dec 2005 23:30:45 -0000	1.1.1.1
++++ tests/Process_Manager_Test.cpp	29 Jan 2008 16:52:12 -0000	1.2
+@@ -1,4 +1,4 @@
+-// $Id: Process_Manager_Test.cpp,v 1.1.1.1 2005/12/06 23:30:45 othman Exp $
++// $Id: Process_Manager_Test.cpp,v 1.2 2008/01/29 16:52:12 rmora Exp $
+ 
+ // ============================================================================
+ //
+@@ -32,6 +32,10 @@
+ #include "ace/Thread.h"
+ #include "ace/Reactor.h"
+ 
++#if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0)
++#include "ace/Task.h"
++#endif /* ACE_MT_SAFE */
++
+ ACE_RCSID(tests, Process_Manager_Test, "Process_Manager_Test.cpp,v 4.11 1999/09/02 04:36:30 schmidt Exp")
+ 
+ static u_int debug_test = 0;
+@@ -74,7 +78,8 @@
+ static pid_t
+ spawn_child (const ACE_TCHAR *argv0,
+              ACE_Process_Manager &mgr,
+-             int sleep_time = 0)
++             int sleep_time = 0,
++             ACE_Process * process = 0)
+ {
+ #if defined (ACE_WIN32)
+ const ACE_TCHAR *cmdline_format = ACE_TEXT("\"%s\" %s %d");
+@@ -90,7 +95,11 @@
+                      debug_test ? ACE_TEXT ("-d") : ACE_TEXT (""),
+                      sleep_time);
+ 
+-  pid_t  result = mgr.spawn (opts);
++  pid_t  result = -1;
++  if (process)
++    result = mgr.spawn (process, opts);
++  else
++    result = mgr.spawn (opts);
+ 
+   if (result != ACE_INVALID_PID)
+     ACE_DEBUG ((LM_DEBUG,
+@@ -291,18 +300,86 @@
+   mgr.register_handler (new Exit_Handler ("specific"),
+                         child6);
+ 
++
++#if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0) && !defined(ACE_WIN32)
++  // Run the reactor event loop in another thread
++  class Reactor_Worker: public ACE_Task_Base
++  {
++  public:
++    virtual int svc (void)
++    {
++      ACE_Time_Value how_long (15);
++      ACE_Reactor::instance ()->owner (ACE_OS::thr_self ());
++      return ACE_Reactor::instance ()->run_reactor_event_loop (how_long);
++    }
++  } reactor_worker;
++  if (reactor_worker.activate () != 0)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  ACE_TEXT ("(%P) Failed to spawn reactor thread\n")));
++      test_status = 1;
++    }
++
++  // ACE_Process::parent is called just after the child process is
++  // spawned but before the child process is added to the
++  // ACE_Process_Manager's list of managed child processes - if we
++  // sleep here we give the reactor an opportunity to cleanup the
++  // child process before it is registered.
++  class Delay_Process : public ACE_Process
++  {
++  public:
++    Delay_Process ()
++      : unmanaged_ (false)
++    {}
++    virtual void parent (pid_t)
++    {
++      // Give the reactor a chance to catch the child process exit
++      if (ACE_OS::sleep (2) != 0 && errno == EINTR)
++        {
++          // child process has exited - give the reactor a little more time
++          ACE_OS::sleep (2);
++        }
++    }
++    virtual void unmanage (void)
++    {
++      this->unmanaged_ = true;
++    }
++    bool unmanaged_;
++  } delay_process;
++  spawn_child (argv[0],
++               mgr,
++               0,
++               &delay_process);
++
++  reactor_worker.wait ();
++
++#else  /* ACE_MT_SAFE */
+   ACE_Time_Value how_long (10);
+ 
+   ACE_Reactor::instance ()->run_reactor_event_loop (how_long);
++#endif /* ACE_MT_SAFE */
+ 
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("(%P) Reactor loop done!\n") ));
+ 
++#if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0) && !defined (ACE_WIN32)
++  if (delay_process.unmanaged_ == false)
++    {
++      ACE_ERROR ((LM_ERROR,
++                  ACE_TEXT ("(%P) Child process not correctly cleaned-up")
++                  ACE_TEXT (" - check for 'oops' in log\n")));
++      test_status = 1;
++    }
++#endif /* ACE_MT_SAFE */
++
+   size_t nr_procs = mgr.managed ();
+   if (nr_procs != 0)
++    {
+     ACE_ERROR ((LM_ERROR,
+                 ACE_TEXT ("(%P) %d processes left in manager\n"),
+                 nr_procs));
++      test_status = 1;
++    }
+ 
+   ACE_END_TEST;
+   return test_status;
+Index: ace/Process_Manager.cpp
+===================================================================
+RCS file: /local/cvs/master/pspACETAO/Current/source/ACE_wrappers/ace/Process_Manager.cpp,v
+retrieving revision 1.1.1.1
+retrieving revision 1.2
+diff -u -w -r1.1.1.1 -r1.2
+--- ace/Process_Manager.cpp	6 Dec 2005 23:26:27 -0000	1.1.1.1
++++ ace/Process_Manager.cpp	29 Jan 2008 16:55:11 -0000	1.2
+@@ -1,4 +1,4 @@
+-// $Id: Process_Manager.cpp,v 1.1.1.1 2005/12/06 23:26:27 othman Exp $
++// $Id: Process_Manager.cpp,v 1.2 2008/01/29 16:55:11 rmora Exp $
+ 
+ // Process_Manager.cpp
+ #include "ace/Process_Manager.h"
+@@ -22,7 +22,7 @@
+ 
+ ACE_RCSID (ace,
+            Process_Manager,
+-           "$Id: Process_Manager.cpp,v 1.1.1.1 2005/12/06 23:26:27 othman Exp $")
++           "$Id: Process_Manager.cpp,v 1.2 2008/01/29 16:55:11 rmora Exp $")
+ 
+ #if defined (ACE_HAS_SIG_C_FUNC)
+ extern "C" void
+@@ -441,14 +441,21 @@
+ {
+   ACE_TRACE ("ACE_Process_Manager::spawn");
+ 
++#if !defined (ACE_WIN32)
++  ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
++                            ace_mon, this->lock_, -1));
++#endif /* ACE_WIN32 */
++
+   pid_t pid = process->spawn (options);
+ 
+   // Only include the pid in the parent's table.
+   if (pid == ACE_INVALID_PID || pid == 0)
+     return pid;
+ 
++#if defined (ACE_WIN32)
+   ACE_MT (ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                             ace_mon, this->lock_, -1));
++#endif /* ACE_WIN32 */
+ 
+   if (this->append_proc (process) == -1)
+     // bad news: spawned, but not registered in table.
