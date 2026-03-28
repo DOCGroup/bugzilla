@@ -1,0 +1,54 @@
+*** Proactor.cpp.old	Fri Dec 30 02:58:12 2005
+--- Proactor.cpp	Wed Aug  2 17:57:59 2006
+*************** ACE_Proactor_Timer_Handler::svc (void)
+*** 120,134 ****
+    ACE_Time_Value absolute_time;
+    ACE_Time_Value relative_time;
+    int result = 0;
+  
+    while (this->shutting_down_ == 0)
+      {
+!       // Check whether the timer queue has any items in it.
+!       if (this->proactor_.timer_queue ()->is_empty () == 0)
+          {
+!           // Get the earliest absolute time.
+!           absolute_time = this->proactor_.timer_queue ()->earliest_time ();
+  
+            // Get current time from timer queue since we don't know
+            // which <gettimeofday> was used.
+            ACE_Time_Value cur_time = this->proactor_.timer_queue ()->gettimeofday ();
+--- 120,153 ----
+    ACE_Time_Value absolute_time;
+    ACE_Time_Value relative_time;
+    int result = 0;
++   bool empty;
+  
+    while (this->shutting_down_ == 0)
+      {
+!       // must hold the mutex for calls to is_empty() and earliest_time()
+!       if (this->proactor_.timer_queue ()->mutex().acquire() == -1)
+          {
+!           ACE_ERROR_RETURN ((LM_ERROR,
+!                              ACE_LIB_TEXT ("%N:%l:(%P | %t):%p\n"),
+!                              ACE_LIB_TEXT ("ACE_Proactor_Timer_Handler::svc:mutex failed")),
+!                             -1);
+!         }
+!       else
+!         {
+!          // Check whether the timer queue has any items in it.
+!          empty = this->proactor_.timer_queue ()->is_empty () != 0;
+! 
+!          if (!empty)
+!            // Get the earliest absolute time.
+!            absolute_time = this->proactor_.timer_queue ()->earliest_time ();
+  
++          // end critical section
++          this->proactor_.timer_queue ()->mutex().release();
++         }
++ 
++       // Compute and wait relative time if the timer queue has an item
++       if (!empty)
++         {
+            // Get current time from timer queue since we don't know
+            // which <gettimeofday> was used.
+            ACE_Time_Value cur_time = this->proactor_.timer_queue ()->gettimeofday ();
