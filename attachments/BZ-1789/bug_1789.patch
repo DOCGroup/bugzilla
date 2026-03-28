@@ -1,0 +1,208 @@
+Index: orbsvcs/orbsvcs/ReliableEvent/REC_Basic_Sequence_Verifier.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/orbsvcs/orbsvcs/ReliableEvent/REC_Basic_Sequence_Verifier.cpp,v
+retrieving revision 1.9.8.3
+diff -u -r1.9.8.3 REC_Basic_Sequence_Verifier.cpp
+--- orbsvcs/orbsvcs/ReliableEvent/REC_Basic_Sequence_Verifier.cpp	14 Apr 2004 20:11:38 -0000	1.9.8.3
++++ orbsvcs/orbsvcs/ReliableEvent/REC_Basic_Sequence_Verifier.cpp	20 Apr 2004 21:02:44 -0000
+@@ -86,18 +86,25 @@
+     // If the application is willing to miss events then we can just
+     // accept the current one and accept it, we can also accept the
+     // event if its sequence number is 0.
+-    if (accept_gaps_ || state_entry->int_id_.next_ == 0)
++    if (accept_gaps_ || state_entry->int_id_.next_ == 1)
+     {
+-      state_entry->int_id_.next_ = event.header.event_sequence + 1;
+-      pass_to_application = 1;
+-    }
+-
+-    // Even if the previous test is successful, we cannot pass the
+-    // event to the application if it is a heartbeat...
+-    // the application
+-    if(type == ACE_ES_EVENT_HEARTBEAT)
+-    {
+-      pass_to_application = 0;
++      // Even if the previous test is successful, we cannot pass the
++      // event to the application if it is a heartbeat, notice that in
++      // this case there is no need to ask for a resend, the heartbeat
++      // is simply saying that the *next* message will have sequence
++      // number 1, so we have not missed anything.
++      if (type != ACE_ES_EVENT_HEARTBEAT)
++      {
++        state_entry->int_id_.next_ = event.header.event_sequence + 1;
++        pass_to_application = 1;
++      }
++    }
++    else
++    {
++      // the message is out of order, we need to schedule a resend,
++      // and should be expecting sequence number 1.
++      state_entry->int_id_.next_ = 1;
++      this->schedule_resend_request (event.header, state_entry);
+     }
+ 
+     // The object was not there and thus it was just inserted, update
+@@ -162,40 +169,9 @@
+   // This is not what we are waiting for, request a resend if
+   // necessary.
+ 
+-  if (event.header.event_sequence > state_entry->int_id_.next_
+-      && ! state_entry->int_id_.resend_requested())
++  if (event.header.event_sequence > state_entry->int_id_.next_)
+   {
+-    const char * heartbeat = "";
+-    if (type == ACE_ES_EVENT_HEARTBEAT)
+-      heartbeat = " (HEARTBEAT)";
+-
+-    ACE_DEBUG ((EC_FORMAT (NOTICE,
+-                    "Requesting resend. "
+-                    "Out of order event from source %d: "
+-                    "received seq %Q%s expecting %Q"),
+-                   event.header.source,
+-                   event.header.event_sequence,
+-                   heartbeat,
+-                   state_entry->int_id_.next_));
+-
+-    state_entry->int_id_.timer_id_ =
+-      this->reactor_->schedule_timer (&this->adapter_,
+-          ACE_static_cast(void*,state_entry),
+-          ACE_Time_Value (0, 1),
+-          this->rate_);
+-    if (state_entry->int_id_.timer_id_ == -1)
+-    {
+-      ACE_DEBUG ((EC_FORMAT (CRITICAL,
+-                      "Unable to schedule resend request timer.")));
+-    }
+-
+-    // Calling resend() directly from here (as shown below) as
+-    // opposed to scheduling with Reactor causes deadlock with
+-    // copy_on_read when a new call on ProxySupplier is made.
+-    // this->supplier_->resend (source,
+-    //                          state_entry->int_id_.next_ - 1
+-    //                          ACE_ENV_ARG_DECL);
+-    return 0;
++    this->schedule_resend_request (event.header, state_entry);
+   }
+ 
+ //   ACE_DEBUG ((EC_FORMAT (NOTICE,
+@@ -225,9 +201,9 @@
+ 
+   ACE_TRY_NEW_ENV
+     {
+-      this->supplier_->resend (state_entry->ext_id_,
+-                               state_entry->int_id_.next_ - 1
+-                               ACE_ENV_ARG_PARAMETER);
++      this->ask_for_resend(state_entry->ext_id_,
++                           state_entry->int_id_.next_ - 1
++                           ACE_ENV_ARG_PARAMETER);
+       ACE_TRY_CHECK;
+     }
+   ACE_CATCHANY
+@@ -242,6 +218,16 @@
+ }
+ 
+ void TAO_REC_Basic_Sequence_Verifier::
++ask_for_resend (ReliableEventComm::EventSourceID source,
++                ReliableEventComm::SequenceNumber last_received
++                ACE_ENV_ARG_DECL)
++{
++  this->supplier_->resend (source,
++                           last_received 
++                           ACE_ENV_ARG_PARAMETER);
++}
++
++void TAO_REC_Basic_Sequence_Verifier::
+ persist_new_entry(MAP::ENTRY * )
+ {
+ }
+@@ -263,4 +249,46 @@
+   // Try to insert into the map, if the insertion fails the value is
+   // left unmodified and we return false.
+   return 0 == this->sequence_state_map_.trybind(source_id, state, entry);
++}
++
++void TAO_REC_Basic_Sequence_Verifier::
++schedule_resend_request (ReliableEventComm::EventHeader const & header,
++                         MAP::ENTRY * state_entry)
++{
++  if (state_entry->int_id_.resend_requested())
++  {
++    return;
++  }
++
++  const char * heartbeat = "";
++  if (header.type == ACE_ES_EVENT_HEARTBEAT)
++    heartbeat = " (HEARTBEAT)";
++
++  ACE_DEBUG ((EC_FORMAT (NOTICE,
++                  "Requesting resend. "
++                  "Out of order event from source %d: "
++                  "received seq %Q%s expecting %Q"),
++                 header.source,
++                 header.event_sequence,
++                 heartbeat,
++                 state_entry->int_id_.next_));
++
++  state_entry->int_id_.timer_id_ =
++    this->reactor_->schedule_timer (&this->adapter_,
++        ACE_static_cast(void*,state_entry),
++        ACE_Time_Value (0, 1),
++        this->rate_);
++
++  if (state_entry->int_id_.timer_id_ == -1)
++  {
++    ACE_DEBUG ((EC_FORMAT (CRITICAL,
++                    "Unable to schedule resend request timer.")));
++  }
++
++  // Calling resend() directly from here (as shown below) as
++  // opposed to scheduling with Reactor causes deadlock with
++  // copy_on_read when a new call on ProxySupplier is made.
++  // this->supplier_->resend (source,
++  //                          state_entry->int_id_.next_ - 1
++  //                          ACE_ENV_ARG_DECL);
+ }
+Index: orbsvcs/orbsvcs/ReliableEvent/REC_Basic_Sequence_Verifier.h
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/orbsvcs/orbsvcs/ReliableEvent/REC_Basic_Sequence_Verifier.h,v
+retrieving revision 1.4.8.1
+diff -u -r1.4.8.1 REC_Basic_Sequence_Verifier.h
+--- orbsvcs/orbsvcs/ReliableEvent/REC_Basic_Sequence_Verifier.h	5 Mar 2004 01:58:06 -0000	1.4.8.1
++++ orbsvcs/orbsvcs/ReliableEvent/REC_Basic_Sequence_Verifier.h	20 Apr 2004 21:02:44 -0000
+@@ -13,6 +13,7 @@
+ 
+ #include "event_export.h"
+ #include "REC_Sequence_Verifier.h"
++#include "orbsvcs/ReliableEventCommC.h"
+ 
+ #if !defined (ACE_LACKS_PRAGMA_ONCE)
+ # pragma once
+@@ -107,12 +108,28 @@
+   typedef ACE_Hash_Map_Manager_Ex<CORBA::Long, SEQUENCE_STATE,
+     ACE_Hash<CORBA::Long>, ACE_Equal_To<CORBA::Long>, ACE_Null_Mutex> MAP;
+ 
++  /**
++   * @brief Call resend() on the ProxyPushSupplier.
++   *
++   * The extra level of indirection allows us to write unit tests for
++   * this class. Yes, testing should change the design and the
++   * interfaces of your classes.
++   */
++  virtual void ask_for_resend(
++      ReliableEventComm::EventSourceID source,
++      ReliableEventComm::SequenceNumber last_received
++      ACE_ENV_ARG_DECL);
++
+   virtual void persist_new_entry(MAP::ENTRY * entry);
+   virtual void persist_old_entry(MAP::ENTRY * entry);
+   bool entry_loaded(
+       CORBA::Long source_id,
+       RtecEventComm::SequenceNumber next,
+       unsigned long index);
++
++private:
++  void schedule_resend_request (ReliableEventComm::EventHeader const & header,
++                                MAP::ENTRY * state_entry);
+ 
+ private:
+   /// Keep the state for each remote source ID and the events we
