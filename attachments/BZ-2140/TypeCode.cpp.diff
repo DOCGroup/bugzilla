@@ -1,0 +1,25 @@
+Index: TAO/tao/TypeCode.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/TypeCode.cpp,v
+retrieving revision 1.14
+diff -u -r1.14 TypeCode.cpp
+--- TAO/tao/TypeCode.cpp	12 May 2005 00:54:18 -0000	1.14
++++ TAO/tao/TypeCode.cpp	6 Jun 2005 08:09:24 -0000
+@@ -139,7 +139,7 @@
+       if (ACE_OS::strlen (this_id) == 0
+           || ACE_OS::strlen (tc_id) == 0)
+         {
+-          return this->equivalent_i (tc
++          return this->equivalent_i (unaliased_tc.in ()
+                                      ACE_ENV_ARG_PARAMETER);
+         }
+       else if (ACE_OS::strcmp (this_id, tc_id) != 0)
+@@ -152,7 +152,7 @@
+       // Some TypeCodes do not support the id() operation.  Ignore the
+       // failure, and continue equivalence verification using TypeCode
+       // subclass-specific techniques.
+-      return this->equivalent_i (tc
++      return this->equivalent_i (unaliased_tc.in ()
+                                  ACE_ENV_ARG_PARAMETER);
+     }
+   ACE_ENDTRY;
