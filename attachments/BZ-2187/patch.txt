@@ -1,0 +1,131 @@
+Index: params.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/params.cpp,v
+retrieving revision 1.72
+diff -u -r1.72 params.cpp
+--- params.cpp  30 Jun 2005 16:58:14 -0000      1.72
++++ params.cpp  7 Jul 2005 15:28:22 -0000
+@@ -24,6 +24,7 @@
+   , cdr_memcpy_tradeoff_ (ACE_DEFAULT_CDR_MEMCPY_TRADEOFF)
+   , use_lite_protocol_ (0)
+   , use_dotted_decimal_addresses_ (0)
++  , cache_incoming_by_dotted_decimal_address_ (0)
+   , linger_ (-1)
+   , std_profile_components_ (1)
+   , ace_sched_policy_ (ACE_SCHED_OTHER)
+Index: params.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/params.h,v
+retrieving revision 1.85
+diff -u -r1.85 params.h
+--- params.h    4 Jul 2005 14:12:12 -0000       1.85
++++ params.h    7 Jul 2005 15:28:22 -0000
+@@ -112,6 +112,11 @@
+   int use_dotted_decimal_addresses (void) const;
+   void use_dotted_decimal_addresses (int);
+ 
++  /// The ORB will cache incoming connections against the dotted
++  /// decimal form of the peer's address
++  int cache_incoming_by_dotted_decimal_address (void) const;
++  void cache_incoming_by_dotted_decimal_address (int);
++  
+   /// The ORB will turn off SO_LINGER if this is zero.
+   int linger (void) const;
+   void linger (int);
+@@ -235,6 +240,10 @@
+ 
+   /// For selecting a address notation
+   int use_dotted_decimal_addresses_;
++  
++  /// If incoming connections should be cached against IP (true) or 
++  /// hostname (false).
++  int cache_incoming_by_dotted_decimal_address_;
+ 
+   /// For setting the SO_LINGER option
+   int linger_;
+Index: params.i
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/params.i,v
+retrieving revision 1.55
+diff -u -r1.55 params.i
+--- params.i    10 Jun 2005 12:52:51 -0000      1.55
++++ params.i    7 Jul 2005 15:28:22 -0000
+@@ -48,6 +48,17 @@
+   this->use_dotted_decimal_addresses_ = x;
+ }
+ 
++ACE_INLINE int
++TAO_ORB_Parameters::cache_incoming_by_dotted_decimal_address (void) const
++{
++  return this->cache_incoming_by_dotted_decimal_address_;
++}
++
++ACE_INLINE void
++TAO_ORB_Parameters::cache_incoming_by_dotted_decimal_address (int x)
++{
++  this->cache_incoming_by_dotted_decimal_address_ = x;
++}
+ 
+ ACE_INLINE int
+ TAO_ORB_Parameters::linger (void) const
+Index: ORB_Core.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Core.cpp,v
+retrieving revision 1.554
+diff -u -r1.554 ORB_Core.cpp
+--- ORB_Core.cpp        1 Jul 2005 11:40:12 -0000       1.554
++++ ORB_Core.cpp        7 Jul 2005 15:29:09 -0000
+@@ -327,6 +327,9 @@
+   int dotted_decimal_addresses = 0;
+ #endif /* TAO_USE_DOTTED_DECIMAL_ADDRESSES */
+ 
++  // Disable looking up the host name for incoming connections.
++  int no_server_side_name_lookups = 0;
++
+ #if defined (TAO_STD_PROFILE_COMPONENTS)
+   int std_profile_components = 1;
+ #else
+@@ -375,6 +378,15 @@
+           arg_shifter.consume_arg ();
+         }
+       else if ((current_arg = arg_shifter.get_the_parameter
++                (ACE_LIB_TEXT("-ORBNoServerSideNameLookups"))))
++        {
++          // Don't look up the host name for incoming connections
++          no_server_side_name_lookups =
++            ACE_OS::atoi (current_arg);
++
++          arg_shifter.consume_arg ();
++        }
++      else if ((current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBNameServicePort"))))
+         {
+           // Specify the port number for the NameService.
+@@ -1121,6 +1133,11 @@
+   this->orb_params ()->service_port (IMPLREPOSERVICE, ir_port);
+ 
+   this->orb_params ()->use_dotted_decimal_addresses (dotted_decimal_addresses);
++  // When caching incoming transports don't use the host name if 
++  // -ORBDottedDecimalAddresses or -ORBNoServerSideNameLookups is true.
++  this->orb_params ()->cache_incoming_by_dotted_decimal_address 
++                                            (no_server_side_name_lookups
++                                             || dotted_decimal_addresses);
+   this->orb_params ()->linger (linger);
+   this->orb_params ()->nodelay (nodelay);
+   if (rcv_sock_size >= 0)
+Index: IIOP_Connection_Handler.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/IIOP_Connection_Handler.cpp,v
+retrieving revision 1.96
+diff -u -r1.96 IIOP_Connection_Handler.cpp
+--- IIOP_Connection_Handler.cpp 6 Jul 2005 14:54:43 -0000       1.96
++++ IIOP_Connection_Handler.cpp 7 Jul 2005 15:33:18 -0000
+@@ -290,7 +290,7 @@
+   // Construct an  IIOP_Endpoint object
+   TAO_IIOP_Endpoint endpoint (
+       addr,
+-      this->orb_core()->orb_params()->use_dotted_decimal_addresses ());
++      this->orb_core()->orb_params()->cache_incoming_by_dotted_decimal_address ());
+ 
+   // Construct a property object
+   TAO_Base_Transport_Property prop (&endpoint);
