@@ -1,0 +1,196 @@
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.h
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.h	(revision 77352)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.h	(working copy)
+@@ -74,22 +74,6 @@
+ 
+   /// Cancel the passed cvs handler from the connector
+   virtual int cancel_svc_handler (TAO_Connection_Handler * svc_handler);
+-
+-private:
+-  // @@ Michael: UDP Addition
+-  ACE_Hash_Map_Manager_Ex < ACE_INET_Addr,
+-                            TAO_UIPMC_Connection_Handler *,
+-                            ACE_Hash < ACE_INET_Addr >,
+-                            ACE_Equal_To < ACE_INET_Addr >,
+-                            ACE_Null_Mutex >
+-    svc_handler_table_;
+-
+-  typedef ACE_Hash_Map_Iterator_Ex < ACE_INET_Addr,
+-                                     TAO_UIPMC_Connection_Handler *,
+-                                     ACE_Hash < ACE_INET_Addr >,
+-                                     ACE_Equal_To < ACE_INET_Addr >,
+-                                     ACE_Null_Mutex >
+-    SvcHandlerIterator;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Acceptor.cpp
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Acceptor.cpp	(revision 77352)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Acceptor.cpp	(working copy)
+@@ -186,9 +186,6 @@
+   if (result == -1)
+     return result;
+ 
+-  // Connection handler ownership now belongs to the Reactor.
+-  this->connection_handler_->remove_reference ();
+-
+   // Set the port for each addr.  If there is more than one network
+   // interface then the endpoint created on each interface will be on
+   // the same port.  This is how a wildcard socket bind() is supposed
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h	(revision 77352)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.h	(working copy)
+@@ -54,8 +54,8 @@
+ 
+   /// Constructor.
+   TAO_UIPMC_Transport (TAO_UIPMC_Connection_Handler *handler,
+-                      TAO_ORB_Core *orb_core,
+-                      CORBA::Boolean flag);
++                       TAO_ORB_Core *orb_core,
++                       CORBA::Boolean flag);
+ 
+   /// Default destructor.
+   ~TAO_UIPMC_Transport (void);
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp	(revision 77352)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp	(working copy)
+@@ -7,6 +7,7 @@
+ #include "tao/ORB_Core.h"
+ #include "tao/Base_Transport_Property.h"
+ #include "tao/Protocols_Hooks.h"
++#include "tao/Thread_Lane_Resources.h"
+ 
+ #include "ace/Connector.h"
+ #include "ace/OS_NS_strings.h"
+@@ -42,14 +43,6 @@
+ int
+ TAO_UIPMC_Connector::close (void)
+ {
+-  SvcHandlerIterator iter (svc_handler_table_);
+-
+-  while (!iter.done ())
+-    {
+-      (*iter).int_id_->remove_reference ();
+-      iter++;
+-    }
+-
+   return 0;
+ }
+ 
+@@ -60,7 +53,7 @@
+     return -1;
+ 
+   TAO_UIPMC_Endpoint *uipmc_endpoint =
+-    dynamic_cast<TAO_UIPMC_Endpoint *> (endpoint );
++    dynamic_cast<TAO_UIPMC_Endpoint *> (endpoint);
+ 
+   if (uipmc_endpoint == 0)
+     return -1;
+@@ -104,36 +97,63 @@
+ 
+   TAO_UIPMC_Connection_Handler *svc_handler = 0;
+ 
+-  if (this->svc_handler_table_.find (remote_address, svc_handler) == -1)
++  ACE_NEW_RETURN (svc_handler,
++                  TAO_UIPMC_Connection_Handler (this->orb_core ()),
++                  0);
++
++  svc_handler->local_addr (ACE_sap_any_cast (ACE_INET_Addr &));
++  svc_handler->addr (remote_address);
++
++  svc_handler->open (0);
++
++  if (TAO_debug_level > 2)
++    ACE_DEBUG ((LM_DEBUG,
++                ACE_TEXT ("(%P|%t) UIPMC_Connector::make_connection, ")
++                ACE_TEXT ("new connection on HANDLE %d\n"),
++                svc_handler->get_handle ()));
++
++  TAO_UIPMC_Transport *transport =
++    dynamic_cast<TAO_UIPMC_Transport *> (svc_handler->transport ());
++
++  // In case of errors transport is zero
++  if (transport == 0)
+     {
+-      TAO_UIPMC_Connection_Handler *svc_handler_i = 0;
+-      ACE_NEW_RETURN (svc_handler_i,
+-                      TAO_UIPMC_Connection_Handler (this->orb_core ()),
+-                      0);
++      // Give users a clue to the problem.
++      if (TAO_debug_level > 3)
++          ACE_DEBUG ((LM_ERROR,
++                      "TAO (%P|%t) - UIPMC_Connector::make_connection, "
++                      "connection to <%s:%u> failed (%p)\n",
++                      ACE_TEXT_CHAR_TO_TCHAR (uipmc_endpoint->get_host_addr ()),
++                      uipmc_endpoint->port (),
++                      ACE_TEXT ("errno")));
+ 
+-      svc_handler_i->local_addr (ACE_sap_any_cast (ACE_INET_Addr &));
+-      svc_handler_i->addr (remote_address);
++      return 0;
++    }
+ 
+-      svc_handler_i->open (0);
++  // Add the handler to Cache
++  int retval =
++    this->orb_core ()->lane_resources ().transport_cache ().cache_transport (&desc,
++                                                                             transport);
+ 
+-      svc_handler_table_.bind (remote_address,
+-                               svc_handler_i);
+-      svc_handler = svc_handler_i;
++  // Failure in adding to cache.
++  if (retval != 0)
++    {
++      // Close the handler.
++      svc_handler->close ();
+ 
+-      if (TAO_debug_level > 2)
+-        ACE_DEBUG ((LM_DEBUG,
+-                    ACE_TEXT ("(%P|%t) UIPMC_Connector::make_connection, ")
+-                    ACE_TEXT ("new connection on HANDLE %d\n"),
+-                    svc_handler->get_handle ()));
+-   }
++      if (TAO_debug_level > 0)
++        {
++          ACE_ERROR ((LM_ERROR,
++                      "TAO (%P|%t) - UIPMC_Connector::make_connection, "
++                      "could not add the new connection to cache\n"));
++        }
+ 
+-  // @@ Michael: We do not use traditional connection management.
+-  svc_handler->add_reference ();
++      return 0;
++    }
+ 
+-  return svc_handler->transport ();
++  return transport;
+ }
+ 
+-
+ TAO_Profile *
+ TAO_UIPMC_Connector::create_profile (TAO_InputCDR& cdr)
+ {
+@@ -210,4 +230,3 @@
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+-
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	(revision 77352)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	(working copy)
+@@ -253,9 +253,6 @@
+ int
+ TAO_UIPMC_Connection_Handler::close (u_long)
+ {
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED,
+-           this->orb_core ()->leader_follower ());
+-  this->transport ()->remove_reference ();
+   return 0;
+ }
+ 
