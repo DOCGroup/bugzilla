@@ -1,0 +1,9 @@
+diff  C:/Users/Auge/Desktop/orig_CDR_Stream.inl C:/Users/Auge/Desktop/CDR_Stream.inl
+298a299,305
+> ACE_INLINE ACE_CDR::Boolean 
+> ACE_OutputCDR::write_wstring( const ACE_WString &x )
+> {
+> 	return this->write_wstring(x.length(), x.c_str());
+> }
+> 
+> 
