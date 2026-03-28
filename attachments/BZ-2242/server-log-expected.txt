@@ -1,0 +1,111 @@
+ad-fpilhofe5:~/tt5 > ./server.exe -ORBDebugLevel 10
+TAO (2336|2272) Loaded default protocol <IIOP_Factory>
+TAO (2336|2272) created new ORB <>
+TAO (2336|2272) - IIOP_Acceptor::open_i, listening on: <141.2.23.170:2146>
+TAO (2336|2272) - Transport_Cache_Manager::find_i, no idle transport is available
+TAO (2336|2272) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (2336|2272) - IIOP_Connector::make_connection, to <141.2.23.170:2143> whichshould block
+TAO (2336|2272) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[14323768]
+TAO (2336|2272) - Leader_Follower[14323768]::wait_for_event, (leader) enter reactor event loop
+TAO (2336|2272) - IIOP_Connection_Handler::open, The local addr is <141.2.23.170>
+TAO (2336|2272) - IIOP_Connection_Handler::open, IIOP connection to peer <141.2.23.170:2143> on 576
+TAO (2336|2272) - Leader_Follower[14323768]::wait_for_event, (leader) exit reactor event loop
+TAO (2336|2272) - Transport_Connector::wait_for_connection_completion, transport [576], wait done result = 1
+TAO (2336|2272) - IIOP_Connector::make_connection, new connected connection to <141.2.23.170:2143> on Transport[576]
+TAO (2336|2272) - Transport_Cache_Manager::bind_i, 0x12fa28 -> 0xda9038 Transport[576]
+TAO (2336|2272) - Transport_Cache_Manager::bind_i, cache size is [1]
+TAO (2336|2272) - Transport[576]::register_handler
+TAO (2336|2272) - Transport_Connector::connect, opening Transport[576] in TAO_CLIENT_ROLE
+TAO (2336|2272) - Codeset_Manager::set_tcs, setting char translator (00010001)
+TAO (2336|2272) - Codeset_Manager::set_tcs, setting wchar translator (00010109)
+TAO (2336|2272) - Codeset_Manager::get_wchar_trans, Using utf16 BOM translator
+TAO (2336|2272) - Muxed_TMS[576]::request_id, <1>
+TAO (2336|2272) - UTF16_BOM_Translator:forceBE 0
+TAO (2336|2272) - Codeset_Manager::generate_service_context, using tcs_c = 00010001, tcs_w = 00010109
+TAO (2336|2272) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 111 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 123 bytes
+47 49 4f 50 01 02 01 00  6f 00 00 00 01 00 00 00   GIOP....o.......
+00 00 00 00 00 00 cd cd  1b 00 00 00 14 01 0f 00   ................
+52 53 54 76 60 42 43 5e  48 07 00 00 00 00 00 01   RSTv`BC^H.......
+00 00 00 01 00 00 00 cd  08 00 00 00 73 74 61 72   ............star
+74 65 64 00 01 00 00 00  01 00 00 00 0c 00 00 00   ted.............
+01 cd cd cd 01 00 01 00  09 01 01 00 cd cd cd cd   ................
+17 00 00 00 54 68 65 20  73 65 72 76 65 72 20 69   ....The server i
+73 20 73 74 61 72 74 65  64 2e 00                  s started..
+TAO (2336|2272) - Transport[576]::send_message_shared_i, trying to send the message (ml = 123)
+TAO (2336|2272) - Transport[576]::cleanup_queue, byte_count = 123
+TAO (2336|2272) - Transport[576]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (2336|2272) - Transport[576]::drain_queue_helper, byte_count = 123, head_is_empty = 1
+TAO (2336|2272) - Transport[576]::drain_queue_i, helper retval = 1
+TAO (2336|2272) - Transport[576]::make_idle
+Running ...
+TAO (2336|2272) - ORB_Core::run, start [run]
+TAO (2336|2272) - ORB_Core::run, calling handle_events()
+TAO (2336|2272) - Transport_Cache_Manager::fill_set_i, current_size = 1, cache_maximum = 512
+TAO (2336|2272) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (2336|2272) - IIOP_Connection_Handler::open, The local addr is <141.2.23.170>
+TAO (2336|2272) - IIOP_Connection_Handler::open, IIOP connection to peer <141.2.23.170:2155> on 544
+TAO (2336|2272) - Transport_Cache_Manager::bind_i, 0x12e9c4 -> 0xdad7f8 Transport[544]
+TAO (2336|2272) - Transport_Cache_Manager::bind_i, cache size is [2]
+TAO (2336|2272) - Transport[544]::register_handler
+TAO (2336|2272) - ORB_Core::run, handle_events() returns 1
+TAO (2336|2272) - ORB_Core::run, calling handle_events()
+TAO (2336|2272) - Connection_Handler[544]::handle_input, handle = 544/544
+TAO (2336|2272) - Transport[544]::handle_input
+TAO (2336|2272) - Transport[544]::process_queue_head
+TAO (2336|2272) - Transport[544]::handle_input, read 96 bytes
+TAO (2336|2272) - GIOP_Message_State::parse_message_header_i
+TAO (2336|2272) - GIOP_Message_State::get_version_info
+TAO (2336|2272) - GIOP_Message_State::get_byte_order_info
+TAO (2336|2272) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 84 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 96 bytes
+47 49 4f 50 01 02 01 00  54 00 00 00 01 00 00 00   GIOP....T.......
+03 00 00 00 00 00 cd cd  1b 00 00 00 14 01 0f 00   ................
+52 53 54 78 60 42 43 54  3e 08 00 00 00 00 00 01   RSTx`BCT>.......
+00 00 00 01 00 00 00 cd  09 00 00 00 73 68 75 74   ............shut
+64 6f 77 6e 00 cd cd cd  01 00 00 00 01 00 00 00   down............
+0c 00 00 00 01 cd cd cd  01 00 01 00 09 01 01 00   ................
+TAO (2336|2272) - Codeset_Manager::process_service_context, using tcsc = 00010001, tcsw = 00010109
+TAO (2336|2272) - Codeset_Manager::get_wchar_trans, Using utf16 BOM translator
+TAO (2336|2272) - Transport_Cache_Manager::is_entry_idle, state is [0]
+TAO (2336|2272) - Transport_Cache_Manager::find_i, at index 0 (Transport[576]) - idle
+TAO (2336|2272) - Transport_Connector::connect, got an existing connected Transport[576] in role TAO_CLIENT_ROLE
+TAO (2336|2272) - Muxed_TMS[576]::request_id, <2>
+TAO (2336|2272) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 87 data bytes, my endian, Type Request[2]
+GIOP message - HEXDUMP 99 bytes
+47 49 4f 50 01 02 01 00  57 00 00 00 02 00 00 00   GIOP....W.......
+00 00 00 00 00 00 cd cd  1b 00 00 00 14 01 0f 00   ................
+52 53 54 76 60 42 43 5e  48 07 00 00 00 00 00 01   RSTv`BC^H.......
+00 00 00 01 00 00 00 cd  08 00 00 00 73 74 6f 70   ............stop
+70 65 64 00 00 00 00 00  17 00 00 00 54 68 65 20   ped.........The
+73 65 72 76 65 72 20 69  73 20 73 74 6f 70 70 65   server is stoppe
+64 2e 00                                           d..
+TAO (2336|2272) - Transport[576]::send_message_shared_i, trying to send the message (ml = 99)
+TAO (2336|2272) - Transport[576]::cleanup_queue, byte_count = 99
+TAO (2336|2272) - Transport[576]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (2336|2272) - Transport[576]::drain_queue_helper, byte_count = 99, head_is_empty = 1
+TAO (2336|2272) - Transport[576]::drain_queue_i, helper retval = 1
+TAO (2336|2272) - Transport[576]::make_idle
+TAO (2336|2272) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 12 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........
+TAO (2336|2272) - Transport[544]::cleanup_queue, byte_count = 24
+TAO (2336|2272) - Transport[544]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (2336|2272) - Transport[544]::drain_queue_helper, byte_count = 24, head_is_empty = 1
+TAO (2336|2272) - Transport[544]::drain_queue_i, helper retval = 1
+TAO (2336|2272) - Connection_Handler[544]::handle_input, handle = 544/544, retval = 0
+TAO (2336|2272) - ORB_Core::run, handle_events() returns 1
+TAO (2336|2272) - ORB_Core::run, ends with result = 1
+Shutting down ...
+TAO (2336|2272) - Connection_Handler[576]::close_connection_eh, purging entry from cache
+TAO (2336|2272) - Connection_Handler[576]::close_connection_eh, removing from the reactor
+TAO (2336|2272) - Connection_Handler[576]::close_connection_eh, cancel all timers
+TAO (2336|2272) - Transport[576]::cleanup_queue_i, cleaning up complete queue
+TAO (2336|2272) - Connection_Handler[576]::close_connection_eh
+TAO (2336|2272) - Connection_Handler[544]::close_connection_eh, purging entry from cache
+TAO (2336|2272) - Connection_Handler[544]::close_connection_eh, removing from the reactor
+TAO (2336|2272) - Connection_Handler[544]::close_connection_eh, cancel all timers
+TAO (2336|2272) - Transport[544]::cleanup_queue_i, cleaning up complete queue
+TAO (2336|2272) - Connection_Handler[544]::close_connection_eh
+CORBA::ORB::destroy() has been called on ORB <>.
