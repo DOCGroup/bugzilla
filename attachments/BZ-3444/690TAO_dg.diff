@@ -1,0 +1,590 @@
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	(revision 83006)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	(working copy)
+@@ -108,6 +108,32 @@
+ int
+ TAO_UIPMC_Connection_Handler::open (void*)
+ {
++  // Since only client can send data over MIOP
++  // then ttl is only applicable to client socket.
++
++  TAO_DIOP_Protocol_Properties protocol_properties;
++
++  // Initialize values from ORB params.
++  protocol_properties.hop_limit_ =
++    this->orb_core ()->orb_params ()->ip_hoplimit ();
++  protocol_properties.enable_multicast_loop_ =
++    this->orb_core ()->orb_params ()->ip_multicastloop ();
++
++  TAO_Protocols_Hooks *tph =
++    this->orb_core ()->get_protocols_hooks ();
++
++  if (tph != 0)
++    {
++      try
++        {
++          tph->client_protocol_properties_at_orb_level (protocol_properties);
++        }
++      catch (const ::CORBA::Exception&)
++        {
++          return -1;
++        }
++    }
++
+   this->peer ().open (this->local_addr_);
+ 
+   if (TAO_debug_level > 5)
+@@ -119,6 +145,110 @@
+                  this->local_addr_.get_port_number ()));
+   }
+ 
++  if (protocol_properties.hop_limit_ >= 0)
++    {
++      int result = 0;
++#if defined (ACE_HAS_IPV6)
++      if (this->local_addr_.get_type () == AF_INET6)
++        {
++#if defined (ACE_WIN32)
++          DWORD hop_limit =
++            static_cast<DWORD> (protocol_properties.hop_limit_);
++#else
++          int hop_limit =
++            static_cast<int> (protocol_properties.hop_limit_);
++#endif
++          result = this->peer ().set_option (
++            IPPROTO_IPV6,
++            IPV6_MULTICAST_HOPS,
++            (void *) &hop_limit,
++            sizeof (hop_limit));
++        }
++      else
++#endif /* ACE_HAS_IPV6 */
++        {
++#if defined (ACE_WIN32)
++          DWORD hop_limit =
++            static_cast<DWORD> (protocol_properties.hop_limit_);
++#elif defined (linux)
++          int hop_limit =
++            static_cast<int> (protocol_properties.hop_limit_);
++#else
++          unsigned char hop_limit =
++            static_cast<unsigned char> (protocol_properties.hop_limit_);
++#endif
++          result = this->peer ().set_option (
++            IPPROTO_IP,
++            IP_MULTICAST_TTL,
++            (void *) &hop_limit,
++            sizeof (hop_limit));
++        }
++
++      if (result != 0)
++        {
++          if (TAO_debug_level)
++            {
++              ACE_ERROR ((LM_ERROR,
++                          ACE_TEXT("TAO (%P|%t) - UIPMC_Connection_Handler::open, ")
++                          ACE_TEXT("couldn't set hop limit\n\n")));
++            }
++          return -1;
++        }
++    }
++
++  int result = 0;
++#if defined (ACE_HAS_IPV6)
++  if (this->local_addr_.get_type () == AF_INET6)
++    {
++#if defined (ACE_WIN32)
++      DWORD enable_loop =
++        static_cast<DWORD> (protocol_properties.enable_multicast_loop_);
++#elif defined (linux)
++      bool enable_loop =
++        static_cast<bool> (protocol_properties.enable_multicast_loop_);
++#else
++      unsigned int enable_loop =
++        static_cast<unsigned int> (protocol_properties.enable_multicast_loop_);
++#endif
++      result = this->peer ().set_option (
++        IPPROTO_IPV6,
++        IPV6_MULTICAST_LOOP,
++        (void *) &enable_loop,
++        sizeof (enable_loop));
++    }
++  else
++#endif /* ACE_HAS_IPV6 */
++    {
++#if defined (ACE_WIN32)
++      DWORD enable_loop =
++        static_cast<DWORD> (protocol_properties.enable_multicast_loop_);
++#elif defined (linux)
++      int enable_loop =
++        static_cast<int> (protocol_properties.enable_multicast_loop_);
++#else
++      unsigned char enable_loop =
++        static_cast<unsigned char> (protocol_properties.enable_multicast_loop_);
++#endif
++      result = this->peer ().set_option (
++        IPPROTO_IP,
++        IP_MULTICAST_LOOP,
++        (void *) &enable_loop,
++        sizeof (enable_loop));
++    }
++
++  if (result != 0)
++    {
++      if (TAO_debug_level)
++        {
++          ACE_ERROR ((LM_ERROR,
++                      ACE_TEXT("TAO (%P|%t) - UIPMC_Connection_Handler::open, ")
++                      ACE_TEXT("couldn't %s multicast packets looping\n\n"),
++                      protocol_properties.enable_multicast_loop_ ?
++                      ACE_TEXT("enable") : ACE_TEXT("disable")));
++        }
++      return -1;
++    }
++
+   // Set that the transport is now connected, if fails we return -1
+   // Use C-style cast b/c otherwise we get warnings on lots of
+   // compilers
+Index: tao/ORB_Core.cpp
+===================================================================
+--- tao/ORB_Core.cpp	(revision 83006)
++++ tao/ORB_Core.cpp	(working copy)
+@@ -383,6 +383,12 @@
+   // Use SO_DONTROUTE (default 0)
+   int so_dontroute = 0;
+ 
++  // Number of hops for a datagram sent through socket.
++  int ip_hoplimit = -1;
++
++  // Use IP_MILTICAST_LOOP (default 1).
++  int ip_multicastloop = 1;
++
+   // Use dotted decimal addresses
+   // @@ This option will be treated as a suggestion to each loaded
+   //    protocol to use a character representation for the numeric
+@@ -511,6 +517,24 @@
+           arg_shifter.consume_arg ();
+         }
+       else if (0 != (current_arg = arg_shifter.get_the_parameter
++                (ACE_TEXT("-ORBIPHopLimit"))))
++        {
++          // Number of IP hops.
++          ip_hoplimit =
++            ACE_OS::atoi (current_arg);
++
++          arg_shifter.consume_arg ();
++        }
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
++                (ACE_TEXT("-ORBIPMulticastLoop"))))
++        {
++          // Use IP_MULTICAST_LOOP or not.
++          ip_multicastloop =
++            ACE_OS::atoi (current_arg);
++
++          arg_shifter.consume_arg ();
++        }
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
+                 (ACE_TEXT("-ORBTradingServicePort"))))
+         {
+           // Specify the port number for the TradingService.
+@@ -1255,6 +1279,8 @@
+   this->orb_params ()->nodelay (nodelay);
+   this->orb_params ()->sock_keepalive (so_keepalive);
+   this->orb_params ()->sock_dontroute (so_dontroute);
++  this->orb_params ()->ip_hoplimit (ip_hoplimit);
++  this->orb_params ()->ip_multicastloop (ip_multicastloop);
+   if (rcv_sock_size >= 0)
+     this->orb_params ()->sock_rcvbuf_size (rcv_sock_size);
+   if (snd_sock_size >= 0)
+Index: tao/params.h
+===================================================================
+--- tao/params.h	(revision 83006)
++++ tao/params.h	(working copy)
+@@ -93,6 +93,14 @@
+   int sock_dontroute (void);
+   void sock_dontroute (int);
+ 
++  /// Set/Get the number of hops to be used for datagrams sent through socket.
++  int ip_hoplimit (void);
++  void ip_hoplimit (int);
++
++  /// Set/Get whether we should set IP_MULTICAST_LOOP on the socket or not.
++  int ip_multicastloop (void);
++  void ip_multicastloop (int);
++
+   /**
+    * Octet sequences are marshalled without doing any copies, we
+    * simply append a block to the CDR message block chain. When the
+@@ -292,6 +300,12 @@
+   /// 1 if we're using SO_DONTROUTE and 0 otherwise (default 0).
+   int sock_dontroute_;
+ 
++  /// Number of hops to be used for datagrams sent through socket.
++  int ip_hoplimit_;
++
++  /// 1 if we're using IP_MULTICAST_LOOP and 0 otherwise.
++  int ip_multicastloop_;
++
+   /// Control the strategy for copying vs. appeding octet sequences in
+   /// CDR streams.
+   int cdr_memcpy_tradeoff_;
+Index: tao/params.cpp
+===================================================================
+--- tao/params.cpp	(revision 83006)
++++ tao/params.cpp	(working copy)
+@@ -25,6 +25,8 @@
+   , nodelay_ (1)
+   , sock_keepalive_ (0)
+   , sock_dontroute_ (0)
++  , ip_hoplimit_ (-1)
++  , ip_multicastloop_ (1)
+   , cdr_memcpy_tradeoff_ (ACE_DEFAULT_CDR_MEMCPY_TRADEOFF)
+   , max_message_size_ (0) // Disable outgoing GIOP fragments by default
+   , use_dotted_decimal_addresses_ (0)
+Index: tao/IIOP_Connection_Handler.cpp
+===================================================================
+--- tao/IIOP_Connection_Handler.cpp	(revision 83006)
++++ tao/IIOP_Connection_Handler.cpp	(working copy)
+@@ -1,3 +1,4 @@
++
+ #include "tao/IIOP_Connection_Handler.h"
+ 
+ #if defined (TAO_HAS_IIOP) && (TAO_HAS_IIOP != 0)
+@@ -133,6 +134,8 @@
+     this->orb_core ()->orb_params ()->sock_keepalive ();
+   protocol_properties.dont_route_ =
+    this->orb_core ()->orb_params ()->sock_dontroute ();
++  protocol_properties.hop_limit_ =
++   this->orb_core ()->orb_params ()->ip_hoplimit ();
+ 
+   TAO_Protocols_Hooks *tph = this->orb_core ()->get_protocols_hooks ();
+ 
+@@ -198,6 +201,59 @@
+     }
+ #endif /* ! ACE_LACKS_SO_DONTROUTE */
+ 
++  if (protocol_properties.hop_limit_ >= 0)
++    {
++      int result = 0;
++#if defined (ACE_HAS_IPV6)
++      ACE_INET_Addr local_addr;
++      if (this->peer ().get_local_addr (local_addr) == -1)
++        {
++          result = -1;
++        }
++      else if (local_addr.get_type () == AF_INET6)
++        {
++#if defined (ACE_WIN32)
++          DWORD hop_limit =
++            static_cast<DWORD> (protocol_properties.hop_limit_);
++#else
++          int hop_limit =
++            static_cast<int> (protocol_properties.hop_limit_);
++#endif
++          result = this->peer ().set_option (
++            IPPROTO_IPV6,
++            IPV6_UNICAST_HOPS,
++            (void *) &hop_limit,
++            sizeof (hop_limit));
++        }
++      else
++#endif /* ACE_HAS_IPV6 */
++        {
++#if defined (ACE_WIN32)
++          DWORD hop_limit =
++            static_cast<DWORD> (protocol_properties.hop_limit_);
++#else
++          int hop_limit =
++            static_cast<int> (protocol_properties.hop_limit_);
++#endif
++          result = this->peer ().set_option (
++            IPPROTO_IP,
++            IP_TTL,
++            (void *) &hop_limit,
++            sizeof (hop_limit));
++        }
++
++      if (result != 0)
++        {
++          if (TAO_debug_level)
++            {
++              ACE_ERROR ((LM_ERROR,
++                          ACE_TEXT("TAO (%P|%t) - IIOP_Connection_Handler::open, ")
++                          ACE_TEXT("couldn't set hop limit\n\n")));
++            }
++          return -1;
++        }
++    }
++
+   if (this->transport ()->wait_strategy ()->non_blocking ()
+       || this->transport ()->opened_as () == TAO::TAO_SERVER_ROLE)
+     {
+Index: tao/Protocols_Hooks.h
+===================================================================
+--- tao/Protocols_Hooks.h	(revision 83006)
++++ tao/Protocols_Hooks.h	(working copy)
+@@ -50,6 +50,7 @@
+   int dont_route_;
+   int no_delay_;
+   CORBA::Boolean enable_network_priority_;
++  CORBA::Long hop_limit_;
+ };
+ 
+ class TAO_Export TAO_UIOP_Protocol_Properties
+@@ -87,6 +88,8 @@
+   CORBA::Long send_buffer_size_;
+   CORBA::Long recv_buffer_size_;
+   CORBA::Boolean enable_network_priority_;
++  CORBA::Long hop_limit_;
++  CORBA::Boolean enable_multicast_loop_;
+ };
+ 
+ class TAO_Export TAO_SCIOP_Protocol_Properties
+@@ -101,6 +104,7 @@
+   int dont_route_;
+   int no_delay_;
+   CORBA::Boolean enable_network_priority_;
++  CORBA::Long hop_limit_;
+ };
+ 
+ class TAO_Export TAO_Protocols_Hooks : public ACE_Service_Object
+Index: tao/params.inl
+===================================================================
+--- tao/params.inl	(revision 83006)
++++ tao/params.inl	(working copy)
+@@ -188,6 +188,30 @@
+ }
+ 
+ ACE_INLINE int
++TAO_ORB_Parameters::ip_hoplimit (void)
++{
++  return this->ip_hoplimit_;
++}
++
++ACE_INLINE void
++TAO_ORB_Parameters::ip_hoplimit (int x)
++{
++  this->ip_hoplimit_ = x;
++}
++
++ACE_INLINE int
++TAO_ORB_Parameters::ip_multicastloop (void)
++{
++  return this->ip_multicastloop_;
++}
++
++ACE_INLINE void
++TAO_ORB_Parameters::ip_multicastloop (int x)
++{
++  this->ip_multicastloop_ = x;
++}
++
++ACE_INLINE int
+ TAO_ORB_Parameters::ace_sched_policy (void) const
+ {
+   return this->ace_sched_policy_;
+Index: tao/Strategies/DIOP_Connection_Handler.cpp
+===================================================================
+--- tao/Strategies/DIOP_Connection_Handler.cpp	(revision 83006)
++++ tao/Strategies/DIOP_Connection_Handler.cpp	(working copy)
+@@ -110,6 +110,8 @@
+     this->orb_core ()->orb_params ()->sock_sndbuf_size ();
+   protocol_properties.recv_buffer_size_ =
+     this->orb_core ()->orb_params ()->sock_rcvbuf_size ();
++  protocol_properties.hop_limit_ =
++    this->orb_core ()->orb_params ()->ip_hoplimit ();
+ 
+   TAO_Protocols_Hooks *tph = this->orb_core ()->get_protocols_hooks ();
+ 
+@@ -139,6 +141,54 @@
+                                protocol_properties.recv_buffer_size_) == -1)
+     return -1;
+ 
++  if (protocol_properties.hop_limit_ >= 0)
++    {
++      int result = 0;
++#if defined (ACE_HAS_IPV6)
++      if (this->local_addr_.get_type () == AF_INET6)
++        {
++#if defined (ACE_WIN32)
++          DWORD hop_limit =
++            static_cast<DWORD> (protocol_properties.hop_limit_);
++#else
++          int hop_limit =
++            static_cast<int> (protocol_properties.hop_limit_);
++#endif
++          result = this->peer ().set_option (
++            IPPROTO_IPV6,
++            IPV6_UNICAST_HOPS,
++            (void *) &hop_limit,
++            sizeof (hop_limit));
++        }
++      else
++#endif /* ACE_HAS_IPV6 */
++        {
++#if defined (ACE_WIN32)
++          DWORD hop_limit =
++            static_cast<DWORD> (protocol_properties.hop_limit_);
++#else
++          int hop_limit =
++            static_cast<int> (protocol_properties.hop_limit_);
++#endif
++          result = this->peer ().set_option (
++            IPPROTO_IP,
++            IP_TTL,
++            (void *) &hop_limit,
++            sizeof (hop_limit));
++        }
++
++      if (result != 0)
++        {
++          if (TAO_debug_level)
++            {
++              ACE_ERROR ((LM_ERROR,
++                          ACE_TEXT("TAO (%P|%t) - DIOP_Connection_Handler::open, ")
++                          ACE_TEXT("couldn't set hop limit\n\n")));
++            }
++          return -1;
++        }
++    }
++
+   if (TAO_debug_level > 5)
+   {
+      ACE_DEBUG ((LM_DEBUG,
+Index: tao/Strategies/SCIOP_Connection_Handler.cpp
+===================================================================
+--- tao/Strategies/SCIOP_Connection_Handler.cpp	(revision 83006)
++++ tao/Strategies/SCIOP_Connection_Handler.cpp	(working copy)
+@@ -97,6 +97,8 @@
+     this->orb_core ()->orb_params ()->sock_rcvbuf_size ();
+   protocol_properties.no_delay_ =
+     this->orb_core ()->orb_params ()->nodelay ();
++  protocol_properties.hop_limit_ =
++    this->orb_core ()->orb_params ()->ip_hoplimit ();
+ 
+   TAO_Protocols_Hooks *tph = this->orb_core ()->get_protocols_hooks ();
+ 
+@@ -132,6 +134,59 @@
+     return -1;
+ #endif /* ! ACE_LACKS_TCP_NODELAY */
+ 
++  if (protocol_properties.hop_limit_ >= 0)
++    {
++      int result = 0;
++#if defined (ACE_HAS_IPV6)
++      ACE_INET_Addr local_addr;
++      if (this->peer ().get_local_addr (local_addr) == -1)
++        {
++          result = -1;
++        }
++      else if (local_addr.get_type () == AF_INET6)
++        {
++#if defined (ACE_WIN32)
++          DWORD hop_limit =
++            static_cast<DWORD> (protocol_properties.hop_limit_);
++#else
++          int hop_limit =
++            static_cast<int> (protocol_properties.hop_limit_);
++#endif
++          result = this->peer ().set_option (
++            IPPROTO_IPV6,
++            IPV6_UNICAST_HOPS,
++            (void *) &hop_limit,
++            sizeof (hop_limit));
++        }
++      else
++#endif /* ACE_HAS_IPV6 */
++        {
++#if defined (ACE_WIN32)
++          DWORD hop_limit =
++            static_cast<DWORD> (protocol_properties.hop_limit_);
++#else
++          int hop_limit =
++            static_cast<int> (protocol_properties.hop_limit_);
++#endif
++          result = this->peer ().set_option (
++            IPPROTO_IP,
++            IP_TTL,
++            (void *) &hop_limit,
++            sizeof (hop_limit));
++        }
++
++      if (result != 0)
++        {
++          if (TAO_debug_level)
++            {
++              ACE_ERROR ((LM_ERROR,
++                          ACE_TEXT("TAO (%P|%t) - SCIOP_Connection_Handler::open, ")
++                          ACE_TEXT("couldn't set hop limit\n\n")));
++            }
++          return -1;
++        }
++    }
++
+   if (this->transport ()->wait_strategy ()->non_blocking ())
+     {
+       if (this->peer ().enable (ACE_NONBLOCK) == -1)
+Index: tao/Protocols_Hooks.cpp
+===================================================================
+--- tao/Protocols_Hooks.cpp	(revision 83006)
++++ tao/Protocols_Hooks.cpp	(working copy)
+@@ -15,7 +15,8 @@
+     keep_alive_ (0),
+     dont_route_ (0),
+     no_delay_ (0),
+-    enable_network_priority_ (0)
++    enable_network_priority_ (0),
++    hop_limit_ (-1)
+ {
+ }
+ 
+@@ -40,7 +41,9 @@
+ TAO_DIOP_Protocol_Properties::TAO_DIOP_Protocol_Properties (void)
+   : send_buffer_size_ (0),
+     recv_buffer_size_ (0),
+-    enable_network_priority_ (0)
++    enable_network_priority_ (0),
++    hop_limit_ (-1),
++    enable_multicast_loop_ (1)
+ {
+ }
+ 
+@@ -50,7 +53,8 @@
+     keep_alive_ (0),
+     dont_route_ (0),
+     no_delay_ (0),
+-    enable_network_priority_ (0)
++    enable_network_priority_ (0),
++    hop_limit_ (-1)
+ {
+ }
+ 
+Index: docs/Options.html
+===================================================================
+--- docs/Options.html	(revision 83006)
++++ docs/Options.html	(working copy)
+@@ -606,6 +606,23 @@
+         </td>
+       </tr>
+       <tr>
++        <td><code>-ORBIPHopLimit</code> <em>hops</em></td>
++        <td><a name="-ORBIPHopLimit"></a>This option allows users to
++        specify the TTL (IPv4) or hop limit (IPv6) value used when datagrams are
++        sent over a socket. The default is the one selected by the Operating System.
++        The <code>hops</code> value can be in the range of zero to the
++        maximum signed integer value for the particular platform on which
++        TAO is running. Currently this feature works in IIOP, SCIOP, and MIOP.
++        </td>
++      </tr>
++      <tr>
++        <td><code>-ORBIPMulticastLoop</code> <em>boolean (0|1)</em></td>
++        <td><a name="-ORBIPMulticastLoop"></a>This option allows users to
++        specify that the IP_MULTICAST_LOOP / IPV6_MULTICAST_LOOP option is set on
++        multicast sockets. The default is <code>1</code> (true).
++        </td>
++      </tr>
++      <tr>
+         <td><code>-ORBListenEndpoints</code> <em>endpoint</em></td>
+         <td><a name="-ORBListenEndpoints"></a> This option was
+         introduced with the CORBA <a
