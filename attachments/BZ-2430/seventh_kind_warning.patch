@@ -1,0 +1,16 @@
+Index: ace/MEM_Acceptor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/ace/MEM_Acceptor.cpp,v
+retrieving revision 4.29
+diff -u -r4.29 MEM_Acceptor.cpp
+--- ace/MEM_Acceptor.cpp	28 Oct 2005 16:14:53 -0000	4.29
++++ ace/MEM_Acceptor.cpp	10 Mar 2006 00:38:34 -0000
+@@ -176,7 +176,7 @@
+   // Protocol negociation:
+   //   Tell the client side what level of signaling strategy
+   //   we support.
+-  ACE_INT16 client_signaling =
++  ACE_MEM_IO::Signal_Strategy client_signaling =
+ #if defined (ACE_WIN32) || !defined (_ACE_USE_SV_SEM)
+     this->preferred_strategy_;
+ #else
