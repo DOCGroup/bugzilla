@@ -1,0 +1,175 @@
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Acceptor.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Acceptor.cpp,v
+retrieving revision 1.18
+diff -u -r1.18 UIPMC_Acceptor.cpp
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Acceptor.cpp	14 Mar 2006 06:14:34 -0000	1.18
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Acceptor.cpp	15 May 2006 14:48:24 -0000
+@@ -25,7 +25,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ TAO_UIPMC_Acceptor::TAO_UIPMC_Acceptor (CORBA::Boolean /*flag*/)
+-  : TAO_Acceptor (TAO_TAG_UIPMC_PROFILE),
++  : TAO_Acceptor (IOP::TAG_UIPMC),
+     addrs_ (0),
+     hosts_ (0),
+     endpoint_count_ (0),
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp,v
+retrieving revision 1.26
+diff -u -r1.26 UIPMC_Connector.cpp
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp	20 Apr 2006 11:06:50 -0000	1.26
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Connector.cpp	15 May 2006 14:48:24 -0000
+@@ -18,7 +18,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ TAO_UIPMC_Connector::TAO_UIPMC_Connector (CORBA::Boolean)
+-  : TAO_Connector (TAO_TAG_UIPMC_PROFILE)
++  : TAO_Connector (IOP::TAG_UIPMC)
+ {
+ }
+ 
+@@ -57,7 +57,7 @@
+ int
+ TAO_UIPMC_Connector::set_validate_endpoint (TAO_Endpoint *endpoint)
+ {
+-  if (endpoint->tag () != TAO_TAG_UIPMC_PROFILE)
++  if (endpoint->tag () != IOP::TAG_UIPMC)
+     return -1;
+ 
+   TAO_UIPMC_Endpoint *uipmc_endpoint =
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Endpoint.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Endpoint.cpp,v
+retrieving revision 1.12
+diff -u -r1.12 UIPMC_Endpoint.cpp
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Endpoint.cpp	14 Mar 2006 06:14:34 -0000	1.12
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Endpoint.cpp	15 May 2006 14:48:24 -0000
+@@ -1,6 +1,7 @@
+ // $Id: UIPMC_Endpoint.cpp,v 1.12 2006/03/14 06:14:34 jtc Exp $
+ 
+ #include "orbsvcs/PortableGroup/UIPMC_Endpoint.h"
++#include "orbsvcs/PortableGroup/UIPMC_Profile.h"
+ 
+ #include "tao/debug.h"
+ #include "ace/Guard_T.h"
+@@ -21,7 +22,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ TAO_UIPMC_Endpoint::TAO_UIPMC_Endpoint (void)
+-  : TAO_Endpoint (TAO_TAG_UIPMC_PROFILE),
++  : TAO_Endpoint (IOP::TAG_UIPMC),
+     object_addr_ (),
+     next_ (0)
+ {
+@@ -29,7 +30,7 @@
+ 
+ 
+ TAO_UIPMC_Endpoint::TAO_UIPMC_Endpoint (const ACE_INET_Addr &addr)
+-  : TAO_Endpoint (TAO_TAG_UIPMC_PROFILE),
++  : TAO_Endpoint (IOP::TAG_UIPMC),
+     object_addr_ (addr),
+     next_ (0)
+ {
+@@ -38,7 +39,7 @@
+ 
+ TAO_UIPMC_Endpoint::TAO_UIPMC_Endpoint (const CORBA::Octet class_d_address[4],
+                                         CORBA::UShort port)
+-  : TAO_Endpoint (TAO_TAG_UIPMC_PROFILE),
++  : TAO_Endpoint (IOP::TAG_UIPMC),
+     port_ (port),
+     next_ (0)
+ {
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Factory.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Factory.cpp,v
+retrieving revision 1.7
+diff -u -r1.7 UIPMC_Factory.cpp
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Factory.cpp	14 Mar 2006 06:14:34 -0000	1.7
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Factory.cpp	15 May 2006 14:48:24 -0000
+@@ -15,7 +15,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ TAO_UIPMC_Protocol_Factory::TAO_UIPMC_Protocol_Factory (void)
+-  :  TAO_Protocol_Factory (TAO_TAG_UIPMC_PROFILE),
++  :  TAO_Protocol_Factory (IOP::TAG_UIPMC),
+      major_ (TAO_DEF_GIOP_MAJOR),
+      minor_ (TAO_DEF_GIOP_MINOR)
+ {
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Profile.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Profile.cpp,v
+retrieving revision 1.27
+diff -u -r1.27 UIPMC_Profile.cpp
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Profile.cpp	16 Mar 2006 15:53:36 -0000	1.27
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Profile.cpp	15 May 2006 14:48:24 -0000
+@@ -35,7 +35,7 @@
+ 
+ 
+ TAO_UIPMC_Profile::TAO_UIPMC_Profile (TAO_ORB_Core *orb_core)
+-  : TAO_Profile (TAO_TAG_UIPMC_PROFILE,
++  : TAO_Profile (IOP::TAG_UIPMC,
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (),
+@@ -47,7 +47,7 @@
+ 
+ TAO_UIPMC_Profile::TAO_UIPMC_Profile (const ACE_INET_Addr &addr,
+                                       TAO_ORB_Core *orb_core)
+-  : TAO_Profile (TAO_TAG_UIPMC_PROFILE,
++  : TAO_Profile (IOP::TAG_UIPMC,
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (addr),
+@@ -60,7 +60,7 @@
+ TAO_UIPMC_Profile::TAO_UIPMC_Profile (const CORBA::Octet class_d_address[4],
+                                       CORBA::UShort port,
+                                       TAO_ORB_Core *orb_core)
+-  : TAO_Profile (TAO_TAG_UIPMC_PROFILE,
++  : TAO_Profile (IOP::TAG_UIPMC,
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (class_d_address, port),
+@@ -486,7 +486,7 @@
+   if (this->tagged_profile_.profile_data.length () == 0)
+     {
+       // As we have not created we will now create the TaggedProfile
+-      this->tagged_profile_.tag = TAO_TAG_UIPMC_PROFILE;
++      this->tagged_profile_.tag = IOP::TAG_UIPMC;
+ 
+       // Create the encapsulation....
+       TAO_OutputCDR encap;
+Index: TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp,v
+retrieving revision 1.36
+diff -u -r1.36 UIPMC_Transport.cpp
+--- TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp	20 Apr 2006 12:37:17 -0000	1.36
++++ TAO/orbsvcs/orbsvcs/PortableGroup/UIPMC_Transport.cpp	15 May 2006 14:48:25 -0000
+@@ -71,7 +71,7 @@
+ TAO_UIPMC_Transport::TAO_UIPMC_Transport (TAO_UIPMC_Connection_Handler *handler,
+                                           TAO_ORB_Core *orb_core,
+                                           CORBA::Boolean /*flag*/)
+-  : TAO_Transport (TAO_TAG_UIPMC_PROFILE,
++  : TAO_Transport (IOP::TAG_UIPMC,
+                    orb_core)
+   , connection_handler_ (handler)
+   , messaging_object_ (0)
+Index: TAO/tao/ORB_Constants.h
+===================================================================
+RCS file: /project/cvs-repository/ACE_wrappers-repository/TAO/tao/ORB_Constants.h,v
+retrieving revision 1.8
+diff -u -r1.8 ORB_Constants.h
+--- TAO/tao/ORB_Constants.h	2 Nov 2005 07:13:03 -0000	1.8
++++ TAO/tao/ORB_Constants.h	15 May 2006 14:48:30 -0000
+@@ -179,9 +179,6 @@
+ /// UDP
+ const CORBA::ULong TAO_TAG_DIOP_PROFILE = 0x54414f04U;
+ 
+-/// Unreliable IP Multicast
+-const CORBA::ULong TAO_TAG_UIPMC_PROFILE = 0x54414f0CU;
+-
+ /// SCIOP
+ const CORBA::ULong TAO_TAG_SCIOP_PROFILE = 0x54414f0EU;
+ 
