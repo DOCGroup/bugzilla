@@ -1,0 +1,238 @@
+Index: include/idl_global.h
+===================================================================
+--- include/idl_global.h	(revision 80052)
++++ include/idl_global.h	(working copy)
+@@ -621,6 +621,9 @@
+   static char* translateName(const char* name, char *name_buf);
+ #endif
+ 
++  bool validate_orb_include (UTL_String *);
++  // Check if included file is in TAO specific include dirs.
++
+ private:
+   // Data
+   UTL_ScopeStack             pd_scopes;              // Store scopes stack
+Index: be/be_global.cpp
+===================================================================
+--- be/be_global.cpp	(revision 80052)
++++ be/be_global.cpp	(working copy)
+@@ -111,7 +111,8 @@
+     gen_local_iface_anyops_ (true),
+     use_clonable_in_args_ (false),
+     gen_template_export_ (false),
+-    gen_ostream_operators_ (false)
++    gen_ostream_operators_ (false),
++    gen_custom_ending_ (true)
+ {
+ }
+ 
+@@ -253,6 +254,9 @@
+   ACE_CString fn (idl_file_name->get_string ());
+   ACE_CString fn_ext = fn.substr (fn.length () - 5);
+   bool orb_file = (fn_ext == ".pidl" || fn_ext == ".PIDL");
++  if (!orb_file && !be_global->gen_custom_ending () &&
++      idl_global->validate_orb_include (idl_file_name))
++    orb_file = true;
+ 
+   return be_change_idl_file_extension (idl_file_name,
+                                        orb_file
+@@ -285,6 +289,9 @@
+   ACE_CString fn (idl_file_name->get_string ());
+   ACE_CString fn_ext = fn.substr (fn.length () - 5);
+   bool orb_file = (fn_ext == ".pidl" || fn_ext == ".PIDL");
++  if (!orb_file && !be_global->gen_custom_ending () &&
++      idl_global->validate_orb_include (idl_file_name))
++    orb_file = true;
+ 
+   return be_change_idl_file_extension (idl_file_name,
+                                        orb_file
+@@ -1598,6 +1605,18 @@
+   this->gen_local_iface_anyops_ = val;
+ }
+ 
++bool
++BE_GlobalData::gen_custom_ending (void) const
++{
++  return this->gen_custom_ending_;
++}
++
++void
++BE_GlobalData::gen_custom_ending (bool val)
++{
++  this->gen_custom_ending_ = val;
++}
++
+ ACE_CString
+ BE_GlobalData::spawn_options (void)
+ {
+@@ -2321,6 +2340,12 @@
+                   ));
+               }
+           }
++        else if (av[i][2] == 'e')
++          {
++            // disable custom file endings for included idl/pidl
++            // files from TAO specific include paths.
++            be_global->gen_custom_ending (false);
++          }
+         else
+           {
+             ACE_ERROR ((
+@@ -2880,6 +2905,15 @@
+       ACE_TEXT (" -Sorb\t\t\tsuppress generating include of ORB.h")
+       ACE_TEXT (" (disabled by default)\n")
+     ));
++  ACE_DEBUG ((
++      LM_DEBUG,
++      ACE_TEXT (" -Se\t\t\tdisable custom file ending for included")
++      ACE_TEXT (" idl/pidl files\n\t\t\t")
++      ACE_TEXT ("that are found in TAO specific includes directories,\n\t\t\t")
++      ACE_TEXT ("(i.e. $TAO_ROOT, $TAO_ROOT/tao, $TAO_ROOT/orbsvcs,\n\t\t\t")
++      ACE_TEXT ("$TAO_ROOT/CIAO, $TAO_ROOT/CIAO/ciao)")
++      ACE_TEXT (" (enabled by default)\n")
++    ));
+ }
+ 
+ AST_Generator *
+Index: be_include/be_global.h
+===================================================================
+--- be_include/be_global.h	(revision 80052)
++++ be_include/be_global.h	(working copy)
+@@ -574,6 +574,10 @@
+   void gen_local_iface_anyops (bool val);
+   // Accessors for the member gen_local_iface_anyops_.
+ 
++  bool gen_custom_ending (void) const;
++  void gen_custom_ending (bool val);
++  // Accessors for the member gen_custom_ending_.
++
+   ACE_CString spawn_options (void);
+   // Command line passed to ACE_Process::spawn. Different
+   // implementations in IDL and IFR backends.
+@@ -818,6 +822,11 @@
+   bool gen_ostream_operators_;
+   // Generate ostream operators for each type declaration, for
+   // debuggin or logging.
++
++  bool gen_custom_ending_;
++  // True by default, but a command line option can turn this off so
++  // custom ending will not be applied to files in $TAO_ROOT/,
++  // $TAO_ROOT/tao, $TAO_ROOT/orbsvcs, $TAO_ROOT/CIAO, $TAO_ROOT/CIAO/ciao.
+ };
+ 
+ #endif /* _BE_GLOBAL_H */
+Index: driver/drv_preproc.cpp
+===================================================================
+--- driver/drv_preproc.cpp	(revision 80052)
++++ driver/drv_preproc.cpp	(working copy)
+@@ -269,6 +269,8 @@
+ 
+       char* TAO_ROOT = ACE_OS::getenv ("TAO_ROOT");
+ 
++      // When adding new dirs here don't forget to update
++      // IDL_GlobalData::validate_orb_include accordingly.
+       if (TAO_ROOT != 0)
+         {
+             DRV_add_include_path (include_path1, TAO_ROOT, 0);
+@@ -297,7 +299,7 @@
+             }
+         }
+ 
+-        idl_global->tao_root (include_path1.c_str ());
++      idl_global->tao_root (include_path1.c_str ());
+     }
+ 
+   // Add any flags in platform_cpp_args to cpp's DRV_arglist.
+@@ -486,6 +488,8 @@
+ 
+   ACE_CString include_path3, include_path4, include_path5;
+ 
++  // When adding new dirs here don't forget to update
++  // IDL_GlobalData::validate_orb_include accordingly.
+   if (TAO_ROOT != 0)
+     {
+       DRV_add_include_path (include_path3, TAO_ROOT, "/orbsvcs");
+Index: util/utl_global.cpp
+===================================================================
+--- util/utl_global.cpp	(revision 80052)
++++ util/utl_global.cpp	(working copy)
+@@ -1859,3 +1859,79 @@
+ 
+   return f;
+ }
++
++bool
++IDL_GlobalData::validate_orb_include (UTL_String *idl_file_name)
++{
++  // It's important to update the check of include_counter
++  // at the end of this method once new TAO include dirs are
++  // added somewhere in driver/drv_preproc.cpp
++
++  char abspath[MAXPATHLEN] = "";
++  char *full_path = 0;
++  unsigned int include_counter = 0;
++
++  for (ACE_Unbounded_Queue_Iterator<char *>iter (
++           this->include_paths_
++         );
++       !iter.done (); )
++    {
++      ACE_CString partial;
++      if (include_counter == 0)
++        {
++          char *path_tmp = ACE_OS::getcwd (abspath, MAXPATHLEN);
++          partial = path_tmp;
++        }
++      else
++        {
++          char **path_tmp = 0;
++          iter.next (path_tmp);
++          iter.advance ();
++          partial = *path_tmp;
++        }
++
++      // If the include path has literal "s (because of an include
++      // of a Windows path with spaces), we must remove them here.
++      if (this->hasspace (partial.c_str ()))
++        {
++          partial =
++            partial.substr (1, partial.length () - 2);
++        }
++
++      partial += ACE_DIRECTORY_SEPARATOR_STR;
++      partial += idl_file_name->get_string ();
++      full_path =
++        ACE_OS::realpath (partial.c_str (), abspath);
++
++      if (full_path != 0)
++        {
++          FILE *test = ACE_OS::fopen (abspath, "r");
++
++          if (test == 0)
++            {
++              continue;
++            }
++
++          ACE_OS::fclose (test);
++
++          // This file name is an orb file if it is either in first 3
++          // dirs (i.e. $TAO_ROOT/idl, $TAO_ROOT, $TAO_ROOT/tao) or in
++          // last 3 dirs (i.e. $TAO_ROOT/orbsvcs, $TAO_ROOT/CIAO,
++          // $TAO_ROOT/CIAO/ciao)
++          if (include_counter != 0 &&
++              (include_counter <= 2 ||
++               include_counter >= this->include_paths_.size () - 3))
++            {
++              return true;
++            }
++          else
++            {
++              return false;
++            }
++        }
++
++      ++include_counter;
++    }
++
++  return false;
++}
