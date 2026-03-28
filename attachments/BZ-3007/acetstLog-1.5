@@ -1,0 +1,72 @@
+(29272|182897092416) SC::open_i - this=0x5025d8, opened=0, loadstatics=0
+starting up daemon ./acetst-1.5
+ACE (29272|182897092416) SG::init_svc_conf_file_queue - this=0x5025d8, repo=0x5026c0
+ACE (29272|182897092416) SG::open_i - this=0x5025d8, opened=0, loadstatics=0
+ACE (29272|182897092416) SG::process_directive_i, repo=0x5026c0 - ACE_Service_Manager, dll=<null>, force=1
+ACE (29272|182897092416) SR::insert - repo=0x5026c0 [0] (1024), name=ACE_Service_Manager, type=0x51c110, object=0x51c0c0, active=0
+ACE (29272|182897092416) SG::add_processed_statisc_svc, repo=0x5026c0 - ACE_Service_Manager
+ACE (29272|182897092416) SG::process_directive_i, repo=0x5026c0 - ACE_Naming_Context, dll=<null>, force=1
+ACE (29272|182897092416) SR::insert - repo=0x5026c0 [1] (1024), name=ACE_Naming_Context, type=0x51d3a0, object=0x51c250, active=0
+ACE (29272|182897092416) SG::add_processed_statisc_svc, repo=0x5026c0 - ACE_Naming_Context
+ACE (29272|182897092416) STDG::<ctor>, repo=0x5026c0 [2], name=logsvc.conf, type=0x51d4c0, impl=(nil), object=(nil), active=0 - inserting dummy forward
+ACE (29272|182897092416) SR::insert - repo=0x5026c0 [2] (1024), name=logsvc.conf, type=(nil), object=(nil), active=0
+ACE (29272|182897092416) Service_Config_Guard:<ctor> - repo=0x5026c0 superceded by repo=0x5026c0
+ACE (29272|182897092416) SG::process_directives_i, repo=0x5026c0 - <from file>
+ACE (29272|182897092416) SG::initialize - repo=0x5026c0, looking up dynamic service 'Logger' to initialize
+ACE (29272|182897092416) STDG::<ctor>, repo=0x5026c0 [3], name=Logger, type=0x522970, impl=(nil), object=(nil), active=0 - inserting dummy forward
+ACE (29272|182897092416) SR::insert - repo=0x5026c0 [3] (1024), name=Logger, type=(nil), object=(nil), active=0
+ACE (29272|182897092416) LN::open_dll - path=ACE
+ACE (29272|182897092416) DLL_Handle::open ("ACE.so", 0x101) -> failed: ACE.so: cannot open shared object file: No such file or directory
+ACE (29272|182897092416) DLL_Handle::open ("libACE.so", 0x101) -> succeeded: no error
+ACE (29272|182897092416) DLL_Handle::open - ACE (-1789565208), refcount=1
+ACE (29272|182897092416) DLL_Handle::open - ACE (-1789565208), refcount=2
+ACE (29272|182897092416) SR::insert - repo=0x5026c0 [3] (1024), name=Logger, type=0x524d30, object=0x524c90, active=1
+ACE (29272|182897092416) SR::insert - destroying (replacing), repo=0x5026c0 [3] (1024), name=Logger, type=(nil), object=(nil), active=0
+ACE (29272|182897092416) STDG::<dtor>, repo=0x5026c0, name=Logger - updating [3 - 4]
+ACE (29272|182897092416) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (29272|182897092416) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (29272|182897092416) STDG::<dtor>, repo=0x5026c0 [3], name=Logger, type=0x524dc0, impl=0x524d30, object=0x524c90, active=1 - loaded
+ACE (29272|182897092416) Dynamic_Node::apply - Did dynamic on Logger (yyerrno=0)
+ACE (29272|182897092416) DLL_Handle::close - ACE (handle=-1789565208, refcount=1)
+ACE (29272|182897092416) Service_Config_Guard:<dtor> - new repo=0x5026c0
+ACE (29272|182897092416) STDG::<dtor>, repo=0x5026c0, name=logsvc.conf, type=0x51d4c0, impl=(nil), object=(nil), active=0 - removing dummy forward
+LogTest: Trace
+LogTest: Debug
+LogTest: Info
+LogTest: Warning
+LogTest: Notice
+LogTest: Error
+beginning reconfiguration at Tue Jul 24 09:19:46 2007
+ACE (29272|182897092416) STDG::<ctor>, repo=0x5026c0 [3], name=logsvc.conf, type=0x524b30, impl=(nil), object=(nil), active=0 - inserting dummy forward
+ACE (29272|182897092416) SR::insert - repo=0x5026c0 [3] (1024), name=logsvc.conf, type=(nil), object=(nil), active=0
+ACE (29272|182897092416) Service_Config_Guard:<ctor> - repo=0x5026c0 superceded by repo=0x5026c0
+ACE (29272|182897092416) SG::process_directives_i, repo=0x5026c0 - <from file>
+ACE (29272|182897092416) SG::initialize - repo=0x5026c0, looking up dynamic service 'Logger' to initialize
+ACE (29272|182897092416) SG::initialize - repo=0x5026c0, Logger is already initialized. Remove before re-initializing.
+ACE (29272|182897092416) Dynamic_Node::apply - Did dynamic on Logger (yyerrno=0)
+ACE (29272|182897092416) Service_Config_Guard:<dtor> - new repo=0x5026c0
+ACE (29272|182897092416) STDG::<dtor>, repo=0x5026c0, name=logsvc.conf, type=0x524b30, impl=(nil), object=(nil), active=0 - removing dummy forward
+LogTest: Trace
+LogTest: Debug
+LogTest: Info
+LogTest: Warning
+LogTest: Notice
+LogTest: Error
+ACE (29272|182897092416) SR::fini, repo=0x5026c0 [2] (1024), name=Logger, type=0x524d30, impl=0x524c90, object=0x3700000001, active=5252824
+destroying Logger, flags = 3
+ACE (29272|182897092416) DLL_Handle::close - ACE (handle=-1789565208, refcount=0)
+ACE (29272|182897092416) DLL_Handle::close: Unloading ACE (handle=-1789565208)
+AFR::remove_dll_components_i (ACE) component "ACE_Reactor"
+ACE (29272|182897092416) SR::fini, repo=0x5026c0 [1] (1024), name=ACE_Naming_Context, type=0x51d3a0, impl=0x51c250, object=0x3700000000, active=5252824
+destroying ACE_Naming_Context, flags = 3
+ACE (29272|182897092416) SR::fini, repo=0x5026c0 [0] (1024), name=ACE_Service_Manager, type=0x51c110, impl=0x51c0c0, object=0x3700000000, active=5252824
+destroying ACE_Service_Manager, flags = 3
+ACE (29272|182897092416) SG::close - complete this=0x5025d8, repo=0x5026c0, owned=0
+(29272|182897092416) SR::<dtor>, this=0x5026c0
+(29272|182897092416) SR::close, this=0x5026c0, size=3
+(29272|182897092416) SR::close, this=0x5026c0, delete so[2]=0x524dc0 (Logger)
+(29272|182897092416) SR::close, this=0x5026c0, delete so[1]=0x51d3f0 (ACE_Naming_Context)
+(29272|182897092416) SR::close, this=0x5026c0, delete so[0]=0x51c140 (ACE_Service_Manager)
+ACE (29272|182897092416) SG::dtor - this=0x5025d8, pss = (nil)
+ACE (29272|182897092416) DLL_Handle::close - ACE (handle=0, refcount=0)
+ACE (29272|182897092416) DLL_Handle::close - ACE (handle=0, refcount=0)
