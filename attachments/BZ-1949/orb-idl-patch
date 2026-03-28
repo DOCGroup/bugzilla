@@ -1,0 +1,158 @@
+diff -r -u TAO.orig/TAO_IDL/be/be_codegen.cpp TAO/TAO_IDL/be/be_codegen.cpp
+--- TAO.orig/TAO_IDL/be/be_codegen.cpp	2004-09-28 10:46:36.615942200 -0400
++++ TAO/TAO_IDL/be/be_codegen.cpp	2004-09-28 11:03:17.525005400 -0400
+@@ -207,6 +207,11 @@
+     {
+       char* idl_name = idl_global->included_idl_files ()[j];
+ 
++      if (ACE_OS::strcmp (idl_name, "orb.idl") == 0) {
++	this->client_header_->print ("\n#include <tao/orbC.h>");
++	continue;
++      }
++
+       // Make a String out of it.
+       UTL_String idl_name_str = idl_name;
+ 
+@@ -418,6 +423,11 @@
+     {
+       char* idl_name = idl_global->included_idl_files ()[j];
+ 
++      if (ACE_OS::strcmp (idl_name, "orb.idl") == 0) {
++	this->server_header_->print ("\n#include <tao/orbS.h>");
++	continue;
++      }
++
+       // String'ifying the name.
+       UTL_String idl_name_str (idl_name);
+ 
+diff -r -u TAO.orig/TAO_IDL/driver/drv_preproc.cpp TAO/TAO_IDL/driver/drv_preproc.cpp
+--- TAO.orig/TAO_IDL/driver/drv_preproc.cpp	2004-09-28 10:46:56.162567000 -0400
++++ TAO/TAO_IDL/driver/drv_preproc.cpp	2004-09-28 10:34:00.547495000 -0400
+@@ -424,44 +424,7 @@
+   // Terminate this string.
+   file_name [i] = '\0';
+ 
+-  // Store in the idl_global, unless it's "orb.idl" -
+-  // we don't want to generate header includes for that.
+-  if (ACE_OS::strcmp (file_name, "orb.idl") == 0)
+-    {
+-      // However, we do want to generate includes for the
+-      // .pidl files that it contains.
+-      DRV_get_orb_idl_includes ();
+-    }
+-  else
+-    {
+-      idl_global->add_to_included_idl_files (file_name);
+-    }
+-}
+-
+-void
+-DRV_get_orb_idl_includes (void)
+-{
+-  ACE_CString orb_idl_path (idl_global->tao_root ());
+-  orb_idl_path += "/orb.idl";
+-  FILE *fd = ACE_OS::fopen (orb_idl_path.fast_rep (), "r");
+-
+-  if (fd == 0) {
+-    ACE_ERROR ((LM_ERROR,
+-		"%s%s",
+-		orb_idl_path.fast_rep (),
+-		": cannot open input file\n"));
+-
+-    ACE_OS::exit (99);
+-  }
+-
+-  while (DRV_get_line (fd))
+-    {
+-      // Find the included .pidl files and add them to
+-      // the included IDL file list.
+-      DRV_check_for_include (drv_line);
+-    }
+-
+-  ACE_OS::fclose (fd);
++  idl_global->add_to_included_idl_files (file_name);
+ }
+ 
+ // Copy to a file.
+diff -r -u TAO.orig/TAO_IDL/include/drv_extern.h TAO/TAO_IDL/include/drv_extern.h
+--- TAO.orig/TAO_IDL/include/drv_extern.h	2004-09-28 10:46:58.146916600 -0400
++++ TAO/TAO_IDL/include/drv_extern.h	2004-09-28 10:34:01.094363000 -0400
+@@ -78,6 +78,5 @@
+ extern void DRV_cpp_init (void);
+ extern void DRV_cpp_putarg (const char *str);
+ extern void DRV_cpp_new_location (const char *new_loc);
+-extern void DRV_get_orb_idl_includes (void);
+ 
+ #endif           // _DRV_EXTERN_DRV_EXTERN_HH
+diff -r -u TAO.orig/tao/orbC.h TAO/tao/orbC.h
+--- TAO.orig/tao/orbC.h	2004-09-28 11:21:09.714406000 -0400
++++ TAO/tao/orbC.h	2004-09-28 11:12:02.846406000 -0400
+@@ -0,0 +1,32 @@
++// -*- C++ -*-
++
++#ifndef TAO_ORBC_H
++#define TAO_ORBC_H
++
++#include <tao/AnySeqC.h>
++#include <tao/BooleanSeqC.h>
++#include <tao/CharSeqC.h>
++#include <tao/DoubleSeqC.h>
++#include <tao/FloatSeqC.h>
++#include <tao/LongDoubleSeqC.h>
++#include <tao/LongSeqC.h>
++#include <tao/OctetSeqC.h>
++#include <tao/ShortSeqC.h>
++#include <tao/StringSeqC.h>
++#include <tao/ULongSeqC.h>
++#include <tao/UShortSeqC.h>
++#include <tao/WCharSeqC.h>
++#include <tao/WStringSeqC.h>
++
++#if ! defined (ACE_LACKS_LONGLONG_T)
++#include <tao/LongLongSeqC.h>
++#endif /* ! defined (ACE_LACKS_LONGLONG_T) */
++
++#if ! defined (ACE_LACKS_U_LONGLONG_T)
++#include <tao/ULongLongSeqC.h>
++#endif /* ! defined (ACE_LACKS_U_LONGLONG_T) */
++
++#include <tao/PolicyC.h>
++#include <tao/ServicesC.h>
++
++#endif /* TAO_ORBC_H */
+diff -r -u TAO.orig/tao/orbS.h TAO/tao/orbS.h
+--- TAO.orig/tao/orbS.h	2004-09-28 11:21:12.167499000 -0400
++++ TAO/tao/orbS.h	2004-09-28 11:12:05.018253000 -0400
+@@ -0,0 +1,32 @@
++// -*- C++ -*-
++
++#ifndef TAO_ORBS_H
++#define TAO_ORBS_H
++
++#include <tao/AnySeqS.h>
++#include <tao/BooleanSeqS.h>
++#include <tao/CharSeqS.h>
++#include <tao/DoubleSeqS.h>
++#include <tao/FloatSeqS.h>
++#include <tao/LongDoubleSeqS.h>
++#include <tao/LongSeqS.h>
++#include <tao/OctetSeqS.h>
++#include <tao/ShortSeqS.h>
++#include <tao/StringSeqS.h>
++#include <tao/ULongSeqS.h>
++#include <tao/UShortSeqS.h>
++#include <tao/WCharSeqS.h>
++#include <tao/WStringSeqS.h>
++
++#if ! defined (ACE_LACKS_LONGLONG_T)
++#include <tao/LongLongSeqS.h>
++#endif /* ! defined (ACE_LACKS_LONGLONG_T) */
++
++#if ! defined (ACE_LACKS_U_LONGLONG_T)
++#include <tao/ULongLongSeqS.h>
++#endif /* ! defined (ACE_LACKS_U_LONGLONG_T) */
++
++#include <tao/PolicyS.h>
++#include <tao/ServicesS.h>
++
++#endif /* TAO_ORBC_H */
