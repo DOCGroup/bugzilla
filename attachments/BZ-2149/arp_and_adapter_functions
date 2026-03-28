@@ -1,0 +1,1045 @@
+--- ACE_wrappers/ace/Sock_Connect.cpp	2005-01-02 21:04:12.000000000 +0200
++++ ACE_wrappers_new/ace/Sock_Connect.cpp	2005-03-17 11:44:00.605894152 +0200
+@@ -56,6 +56,12 @@
+ }
+ #endif /* ACE_HAS_IPV6 */
+ 
++#if defined (ACE_HAS_ENHANCED_INTERFACE_FUNCTIONS)
++#include <net/if_arp.h>
++#include <netpacket/packet.h>
++#include <net/ethernet.h>
++# endif /* ACE_HAS_ENHANCED_INTERFACE_FUNCTIONS */
++
+ // This is a hack to work around a problem with Visual Age C++ 5 and 6 on AIX.
+ // Without this, the compiler auto-instantiates the ACE_Auto_Array_Ptr for
+ // ifreq (contained in this module) but only adds the #include for <net/if.h>
+@@ -526,19 +532,26 @@
+ #endif /* !ACE_WIN32 && !__INTERIX */
+ }
+ 
++
++
+ // return an array of all configured IP interfaces on this host, count
+ // rc = 0 on success (count == number of interfaces else -1 caller is
+-// responsible for calling delete [] on parray
++// responsible for calling delete [] on addrs, as well as delete each if_names[count]
++// and further delete [] if_names.
+ 
+ int
+ ACE::get_ip_interfaces (size_t &count,
+-                        ACE_INET_Addr *&addrs)
++                        ACE_INET_Addr *&addrs,
++                        if_name_node_t **if_names)
+ {
+   ACE_TRACE ("ACE::get_ip_interfaces");
+ 
+   count = 0;
+   addrs = 0;
+ 
++  if (if_names)
++      *if_names = 0;
++
+ #if defined (ACE_WIN32)
+   // Win32 can do this by a simple API call if MSVC 5 or later is the compiler.
+   // Not sure if Borland supplies the needed header/lib, but it might.
+@@ -1078,11 +1091,19 @@
+   ACE_OS::close (handle);
+ 
+   // Now create and initialize output array.
+-
+   ACE_NEW_RETURN (addrs,
+                   ACE_INET_Addr[num_ifs],
+                   -1); // caller must free
+ 
++  if_name_node_t* names = NULL;
++
++  if (if_names)
++  {
++      ACE_NEW_RETURN (names,
++                      if_name_node_t [num_ifs],
++                      -1); // caller must free
++  }
++  
+   struct ifreq *pcur = p_ifs.get ();
+   // Pull the address out of each INET interface.  Not every interface
+   // is for IP, so be careful to count properly.  When setting the
+@@ -1107,6 +1128,12 @@
+               addrs[count].set ((u_short) 0,
+                                 addr->sin_addr.s_addr,
+                                 0);
++
++              if (if_names)
++                  ACE_OS::strncpy ((char*) names[count].name_, 
++                                   pcur->ifr_name, 
++                                   sizeof names[count].name_) ;
++
+               count++;
+             }
+ #else /* ! _UNICOS */
+@@ -1142,6 +1169,10 @@
+         }
+ #endif /* !defined(CHORUS_4) && !defined(AIX) && !defined (__QNX__) && !defined (__FreeBSD__) && !defined(__NetBSD__) */
+     }
++
++  if (if_names)
++      *if_names = names;
++
+   return 0;
+ #elif defined (VXWORKS)
+   count = 0;
+@@ -1371,6 +1402,749 @@
+ #endif /* ACE_HAS_IPV6 */
+ }
+ 
++
++#if defined (ACE_HAS_ENHANCED_INTERFACE_FUNCTIONS)
++
++int
++ACE::get_netmask_addr (ACE_UINT32 &netmask_addr,
++                       const ACE_TCHAR *host_name,
++                       const ACE_TCHAR *if_name,
++                       ACE_HANDLE handle)
++{
++    ACE_TRACE ("ACE::get_netmask_addr");
++#if !defined(ACE_WIN32) && !defined(__INTERIX)
++    
++    ACE_TCHAR interface_name[IF_NAMESIZE] ;
++    struct sockaddr_in ip_addr;
++
++    // Get host ip address if necessary.
++    if (host_name)
++    {
++        hostent *hp = ACE_OS::gethostbyname (ACE_TEXT_ALWAYS_CHAR (host_name));  
++        if (hp == 0)
++        {
++            ACE_ERROR_RETURN ((LM_ERROR,
++                               ACE_LIB_TEXT ("ACE::get_netmask_addr () failed\n")
++                               ACE_LIB_TEXT ("ACE_OS::gethostbyname failed for host_name \"%s\"\n"), 
++                               host_name),
++                              -1);
++        }
++        else
++#if !defined(_UNICOS)
++            ACE_OS::memcpy ((char *) &ip_addr.sin_addr.s_addr,
++                            (char *) hp->h_addr,
++                            hp->h_length);
++#else /* _UNICOS */
++        {
++            ACE_UINT64 haddr;  // a place to put the address
++            char * haddrp = (char *) &haddr;  // convert to char pointer
++            ACE_OS::memcpy(haddrp, (char *) hp->h_addr,hp->h_length);
++            ip_addr.sin_addr.s_addr = haddr;
++      }
++#endif /* ! _UNICOS */
++
++        // resolve the sockaddr_in into interface / device name (like "eth0")
++
++        ACE_INET_Addr dev_addr (&ip_addr, sizeof ip_addr);
++        if_name_node_t dev_name;
++
++        if (get_interface_name (dev_addr, 
++                                dev_name) == -1)
++        {
++            char dev_addr_buffer[16];
++            dev_addr.addr_to_string (dev_addr_buffer, sizeof dev_addr_buffer);
++            ACE_ERROR_RETURN ((LM_ERROR,
++                               ACE_LIB_TEXT ("ACE::get_netmask_addr () failed\n")
++                               ACE_LIB_TEXT ("Couldnt find interface for ip-address \"%s\"\n"), dev_addr_buffer),
++                              -1);
++         }
++
++        ACE_OS::strncpy (interface_name, 
++                         (const char*) dev_name.name_, 
++                         sizeof interface_name);
++    }
++    else if (if_name && ACE_OS::strlen (if_name))
++    {
++        ACE_OS::strncpy (interface_name, if_name, sizeof interface_name);
++    }
++    else 
++    {
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("ACE::get_netmask_addr () failed\n")
++                           ACE_LIB_TEXT ("Needs for lookup either hostname/ip-address or interface name\n")),
++                          -1);
++    }
++
++    // get the netmask using name of the interface/device
++    //
++
++    ACE_HANDLE s = handle;
++    if (s == ACE_INVALID_HANDLE)
++        s = ACE_OS::socket (AF_INET, SOCK_DGRAM, 0);
++    
++    if (s == ACE_INVALID_HANDLE)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("%p\n"),
++                           ACE_LIB_TEXT ("ACE_OS::socket")),
++                          -1);
++
++    struct ifreq if_req;
++    ACE_OS::memset (&if_req, 0, sizeof (struct ifreq)) ;
++
++    ACE_OS::strncpy (if_req.ifr_name, interface_name, sizeof (if_req.ifr_name)) ;
++
++    int result = ACE_OS::ioctl (s, 
++                                SIOCGIFNETMASK, 
++                                (char *)&if_req) ;
++
++    if (result == -1)
++    {
++        ACE_ERROR ((LM_ERROR,
++                    ACE_LIB_TEXT ("%p\n"),
++                    ACE_LIB_TEXT ("ACE::get_netmask_addr:")
++                    ACE_LIB_TEXT ("ioctl (get netmask addr)")));
++    }
++    else
++    {
++        ACE_OS::memcpy (ACE_reinterpret_cast(sockaddr_in *, &ip_addr),
++                        ACE_reinterpret_cast(sockaddr_in *, &if_req.ifr_addr),
++                        sizeof if_req.ifr_addr);
++
++        ACE_OS::memcpy ((void *) &netmask_addr,
++                        (void *) &ip_addr.sin_addr,
++                        sizeof netmask_addr);
++    }
++ 
++    ACE_OS::close (s) ;
++
++    return result;
++#else
++  ACE_UNUSED_ARG (netmask_addr);
++  ACE_UNUSED_ARG (host_name);
++  ACE_UNUSED_ARG (if_name);
++  ACE_UNUSED_ARG (handle);
++  ACE_NOTSUP_RETURN (-1);
++#endif /* !ACE_WIN32 && !__INTERIX */
++}
++
++int
++ACE::get_interface_name (const ACE_INET_Addr& addr,
++                         if_name_node_t& ifname)
++{
++    ACE_TRACE ("ACE::get_interface_name");
++
++    ACE_OS::memset (&ifname, 
++                    0, 
++                    sizeof ifname);
++
++    size_t count = 0;
++    ACE_INET_Addr *addrs = 0;
++    if_name_node_t* interfaces = 0;
++
++    if ((ACE::get_ip_interfaces (count,
++                                 addrs,
++                                 &interfaces) == -1) || !addrs || !interfaces)
++    {
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("ACE::get_interface_name () failed\n")
++                           ACE_LIB_TEXT ("ACE::get_ip_interfaces - error\n")),
++                          -1);
++    }
++    
++    int result = -1;
++
++    for (size_t i = 0 ; i < count ; i++)
++    {
++        if (addr == addrs[i])
++        {
++            ACE_OS::strncpy ((char *) ifname.name_, 
++                             (const char *) interfaces[i].name_, 
++                             sizeof ifname.name_);
++            result = 0;
++            break;
++        }
++    }
++
++    delete [] interfaces;
++    delete [] addrs;
++
++    return result;
++}
++
++int
++ACE::get_interface_mac (const ACE_INET_Addr& addr,
++                        ACE_OS::macaddr_node_t &mac_addr,
++                        ACE_HANDLE handle)
++{
++    ACE_TRACE ("ACE::get_interface_mac");
++
++    ACE_OS::memset (&mac_addr, 
++                    0,
++                    sizeof mac_addr);
++
++    if_name_node_t dev_name;
++
++    if (ACE::get_interface_name (addr, dev_name) == -1)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("ACE::get_interface_mac () failed on\n")
++                           ACE_LIB_TEXT ("ACE::get_interface_name - error\n")),
++                          -1);
++
++    int result = ACE::get_interface_mac (dev_name, 
++                                         mac_addr,
++                                         handle);
++    
++    return result;
++}
++
++int
++ACE::get_interface_mac (if_name_node_t& ifname,
++                        ACE_OS::macaddr_node_t &mac_addr,
++                        ACE_HANDLE handle)
++{
++    ACE_TRACE ("ACE::get_interface_mac");
++#if !defined(ACE_WIN32) && !defined(__INTERIX)
++    ACE_HANDLE s = handle;
++
++    if (s == ACE_INVALID_HANDLE)
++        s = ACE_OS::socket (AF_INET, SOCK_DGRAM, 0);
++    
++    if (s == ACE_INVALID_HANDLE)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("%p\n"),
++                           ACE_LIB_TEXT ("ACE_OS::socket")),
++                          -1);
++
++    // get the hw-address using name of the interface/device
++    //
++    struct ifreq if_req;
++    ACE_OS::memset (&if_req, 0, sizeof (struct ifreq)) ;
++    
++    ACE_OS::strncpy (if_req.ifr_name, 
++                     (const char*) ifname.name_, 
++                     sizeof (if_req.ifr_name)) ;
++    
++    int result = ACE_OS::ioctl (s, 
++                                SIOCGIFHWADDR, 
++                                (char *)&if_req);
++    
++    if (result == -1)
++    {
++        ACE_ERROR ((LM_ERROR,
++                    ACE_LIB_TEXT ("%p\n"),
++                    ACE_LIB_TEXT ("ACE::get_interface_mac:")
++                    ACE_LIB_TEXT ("ioctl (get hw addr)")));
++    }
++    else
++    {
++        char mac_human[18] ;
++        ACE_OS::sprintf (mac_human,
++                                 "%02x:%02x:%02x:%02x:%02x:%02x", 
++                                 (u_char) if_req.ifr_hwaddr.sa_data[0],
++                                 (u_char) if_req.ifr_hwaddr.sa_data[1],
++                                 (u_char) if_req.ifr_hwaddr.sa_data[2],
++                                 (u_char) if_req.ifr_hwaddr.sa_data[3],
++                                 (u_char) if_req.ifr_hwaddr.sa_data[4],
++                                 (u_char) if_req.ifr_hwaddr.sa_data[5]) ;
++
++        ACE_DEBUG ((LM_DEBUG, 
++                    "ACE::get_interface_mac: - mac %s found \n", mac_human));
++        
++
++        // copy now  the raw data mac (ok for ether_data on linux)
++        ACE_OS::memcpy (mac_addr.node, 
++                        &if_req.ifr_hwaddr.sa_data, 
++                        sizeof mac_addr.node);
++    }
++
++    ACE_OS::close (s);
++
++    return result;
++
++#else
++  ACE_UNUSED_ARG (netmask_addr);
++  ACE_UNUSED_ARG (host_name);
++  ACE_UNUSED_ARG (if_name);
++  ACE_UNUSED_ARG (handle);
++  ACE_NOTSUP_RETURN (-1);
++#endif /* !ACE_WIN32 && !__INTERIX */
++}
++
++int
++ACE::get_interface_ip_address (if_name_node_t &ifname,
++                               ACE_INET_Addr &addr)
++{
++    ACE_TRACE ("ACE::get_interface_ip_address");
++
++    size_t count = 0;
++    ACE_INET_Addr *addresses = 0;
++    if_name_node_t* interfaces = 0;
++
++    if ((ACE::get_ip_interfaces (count,
++                                 addresses,
++                                 &interfaces) == -1) || !addresses || !interfaces)
++    {
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("ACE::get_interface_name () - ")
++                           ACE_LIB_TEXT ("ACE::get_ip_interfaces - error\n")),
++                          -1);
++    }
++    
++    int result = -1;
++
++    for (size_t i = 0 ; i < count ; i++)
++    {
++        if (! ACE_OS::strcmp ((const char*) ifname.name_, 
++                              (const char*) interfaces[i].name_) )
++        {
++            addr = addresses[i];
++            result = 0;
++            break;
++        }
++    }
++
++    delete [] addresses;
++    delete [] interfaces;
++
++    return result;
++}
++
++int
++ACE::get_interface_index (const ACE_INET_Addr& addr,
++                          int &if_index)
++{
++    ACE_TRACE ("ACE::get_interface_index");
++    
++    if_index = -1;
++
++   if_name_node_t dev_name;
++    
++    if (ACE::get_interface_name (addr, 
++                                 dev_name) == -1)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("ACE::get_interface_index - failed on\n")
++                           ACE_LIB_TEXT ("ACE::get_interface_name () - error\n")),
++                          -1);
++        
++    struct ifreq if_req;
++    ACE_OS::memset (&if_req, 0, sizeof (struct ifreq));
++
++    ACE_OS::strncpy (if_req.ifr_name, 
++                     (const char*) dev_name.name_, 
++                     sizeof (if_req.ifr_name));
++
++    ACE_HANDLE s = ACE_OS::socket (AF_INET, SOCK_DGRAM, 0);
++    
++    if (s == ACE_INVALID_HANDLE)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("%p\n"),
++                           ACE_LIB_TEXT ("ACE::get_interface_index - failed on\n")
++                           ACE_LIB_TEXT ("ACE_OS::socket")),
++                          -1);
++    
++    int result = ACE_OS::ioctl (s, 
++                                SIOCGIFINDEX, 
++                                (char*)&if_req);
++    if (result == -1)
++    {
++        ACE_ERROR ((LM_ERROR,
++                    ACE_LIB_TEXT ("%p\n"),
++                    ACE_LIB_TEXT ("ACE::get_interface_mac:")
++                    ACE_LIB_TEXT ("ioctl (get hw addr)")));
++    }
++    else
++    {
++        if_index = if_req.ifr_ifindex;
++    }
++    return result;
++}
++
++
++#pragma pack(1)
++struct Arp_Message
++{
++    
++    struct ether_header	ethhdr_ ;
++
++    // The hardware type for ethernet ARPHRD_ETHER.
++    ACE_UINT16 hw_type_ ;
++
++    // Protocol type to be ETHERTYPE_IP.
++    ACE_UINT16 prot_type_ ;
++
++    // Hardware address length, which is 6 for ethernet mac
++    u_char  hw_len_ ;
++
++    // Protocol addr lenght, which is 4 for IP addresses
++    u_char  prot_len_ ;		/* protocol address length (must be 4) */
++
++    // ARP operation code
++    u_short op_ ;
++
++    // Source (sender) hw addr
++    u_char  src_hw_addr_ [ETH_ALEN];
++
++    // Source (sender) IPv4 addr
++    u_char  src_ip_addr_ [4];
++
++    // Destination hw addr
++    u_char  target_hw_addr_ [ETH_ALEN];
++
++    // Destination IPv4 addr
++    u_char  target_ip_addr_ [4];
++
++    // Padding yo minimal ethernet payload (60 bytes)
++    u_char  pad_ [18];
++} ;
++#pragma pack(0)
++
++namespace ACE
++{
++  /// The broadcasting address of ethernet
++  static const ether_addr ethernet_broadcast_address = {{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
++}
++
++int
++ACE::prepare_arp_request_msg (const ACE_INET_Addr &src_ip,
++                              const ACE_INET_Addr &target_ip,
++                              Arp_Message &arp_req)
++{
++    ACE_TRACE ("ACE::prepare_arp_request_msg");
++
++    struct ether_addr src_ethernet_addr, dst_ethernet_addr;
++
++    ACE_OS::macaddr_node_t src_mac;
++
++    if (get_interface_mac (src_ip,
++                           src_mac) == -1)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("ACE::get_lan_mac_by_arp () - ")
++                           ACE_LIB_TEXT ("ACE::get_interface_mac () - error\n")),
++                          -1);
++
++    ACE_OS::memcpy (&src_ethernet_addr,
++                    &src_mac.node, 
++                    sizeof (struct ether_addr));
++
++    // For all other cases destination MAC shall be the broadcast address
++    ACE_OS::memcpy (&dst_ethernet_addr, 
++                    &ACE::ethernet_broadcast_address,
++                    sizeof (struct ether_addr));
++
++    ACE_OS::memset (&arp_req, 0, sizeof arp_req) ;
++
++    //
++    // ethernet header
++    //
++
++    // mac-destination is the ethernet broadcast mac, if not gra...
++    ACE_OS::memcpy (arp_req.ethhdr_.ether_dhost, &dst_ethernet_addr, ETH_ALEN);
++    // mac-source is the outbound interface hw address
++    ACE_OS::memcpy (arp_req.ethhdr_.ether_shost, &src_ethernet_addr, ETH_ALEN);
++
++    arp_req.ethhdr_.ether_type = htons(ETHERTYPE_ARP);
++    arp_req.hw_type_	= htons(ARPHRD_ETHER);
++    arp_req.prot_type_	= htons(ETHERTYPE_IP);
++    arp_req.hw_len_	= ETH_ALEN;
++    arp_req.prot_len_	= 4; // ip-addresses
++    arp_req.op_	        = htons(ARPOP_REQUEST);
++
++    // source is the outbound interface hw address
++    ACE_OS::memcpy (arp_req.src_hw_addr_, &src_ethernet_addr, ETH_ALEN);
++
++    
++    ACE_UINT32 ip_s = 0;
++    if (target_ip == src_ip)
++    {
++        // vip for gratituious ARP
++        ip_s = target_ip.get_ip_address ();
++        ip_s = ACE_HTONL (ip_s);
++    }
++    else
++    {
++        // source ip of the outbound interface
++        ip_s = src_ip.get_ip_address ();
++        ip_s = ACE_HTONL (ip_s);
++    }
++    ACE_OS::memcpy (arp_req.src_ip_addr_, &ip_s, sizeof (arp_req.src_ip_addr_));
++
++    // target/destination ip-address, for which MAC we are looking for.
++    ACE_UINT32 ip_d = target_ip.get_ip_address ();
++    ip_d = ACE_HTONL (ip_d);
++    ACE_OS::memcpy (&arp_req.target_ip_addr_, &ip_d, sizeof (arp_req.target_ip_addr_));
++
++    // target/destination MAC shall be zero in ARP-request 
++    //
++
++    return 0;
++}
++
++int
++ACE::send_arp_message (Arp_Message& arp_msg,
++                       const int if_index,
++                       ACE_HANDLE &socket)
++{  
++    ACE_TRACE ("ACE::send_arp_message");
++
++    struct sockaddr_ll ll_addr;
++
++    // Open ARP-socket
++    //
++    if (socket == ACE_INVALID_HANDLE)
++    {
++        socket = ACE_OS::socket (AF_PACKET, 
++                                 SOCK_RAW, 
++                                 htons(ETH_P_ARP));
++
++        if (socket == ACE_INVALID_HANDLE)
++        {
++            ACE_ERROR_RETURN ((LM_ERROR,
++                               ACE_LIB_TEXT ("%p\n"),
++                               ACE_LIB_TEXT ("ACE::send_arp_message (): ")
++                               ACE_LIB_TEXT ("ACE_OS::socket")),
++                              -1);
++        }
++
++        // Bind ARP-socket to the relevant interface
++        //
++        ACE_OS::memset (&ll_addr, 0, sizeof ll_addr);
++        ll_addr.sll_family = AF_PACKET;
++        ll_addr.sll_protocol = htons (ETH_P_ARP);
++        ll_addr.sll_ifindex = if_index;
++        
++        if (ACE_OS::bind (socket,
++                          (sockaddr*)&ll_addr,
++                          sizeof (ll_addr)) == -1)
++        {
++            ACE_OS::close (socket);
++            socket = ACE_INVALID_HANDLE;
++
++            ACE_ERROR_RETURN ((LM_ERROR,
++                               ACE_LIB_TEXT ("%p\n"),
++                               ACE_LIB_TEXT ("ACE::send_arp_message (): ")
++                               ACE_LIB_TEXT ("ACE_OS::bind")),
++                              -1);
++        }
++    }
++
++    // Send ARP-request finally
++    if (ACE_OS::sendto (socket,
++                        (char const *) &arp_msg,
++                        sizeof (arp_msg),
++                        0,
++                        (sockaddr const *) &ll_addr,
++                        sizeof (ll_addr)) == -1)
++    {
++        ACE_OS::close (socket);
++        socket = ACE_INVALID_HANDLE;
++
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("%p\n"),
++                           ACE_LIB_TEXT ("ACE::send_arp_message (): ")
++                           ACE_LIB_TEXT ("ACE_OS::sendto")),
++                          -1);
++    }
++    return 0;
++}
++
++int
++ACE::get_lan_mac_by_arp (ACE_OS::macaddr_node_t &target_mac,
++                         const ACE_INET_Addr &src_ip,
++                         const ACE_INET_Addr &target_ip,
++                         size_t arp_requests_number,             // 2- default
++                         const ACE_Time_Value &timeout)  // ACE::arp_wait_default_timeout
++{
++    ACE_TRACE ("ACE::get_lan_mac_by_arp");
++
++    Arp_Message arp_msg;
++
++    if (ACE::prepare_arp_request_msg (src_ip,
++                                      target_ip,
++                                      arp_msg) == -1)
++    {
++         ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("ACE::get_lan_mac_by_arp () - ")
++                           ACE_LIB_TEXT ("ACE::prepare_arp_request_msg () - failed.\n")),
++                          -1);
++    }
++    
++    // Fetch index of the interface
++    int index = -1;
++    if (ACE::get_interface_index (src_ip, 
++                                  index) == -1 ||  index < 0)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_LIB_TEXT ("ACE::get_lan_mac_by_arp () - ")
++                           ACE_LIB_TEXT ("ACE::get_interface_mac () - error\n")),
++                          -1);
++
++    ACE_HANDLE socket = ACE_INVALID_HANDLE;
++
++    int result = -1;
++
++    do
++    {
++        if (ACE::send_arp_message (arp_msg,
++                                   index,
++                                   socket) == -1)
++        {
++            ACE_ERROR_RETURN ((LM_ERROR,
++                               ACE_LIB_TEXT ("ACE::get_lan_mac_by_arp () - ")
++                               ACE_LIB_TEXT ("ACE::send_arp_message () - failed.\n")),
++                              -1);
++        }
++        
++        result = ACE::receive_arp_reply (target_mac,
++                                         src_ip,
++                                         target_ip,
++                                         socket,
++                                         timeout);
++        if (result < 0)
++        {
++            // returns -2 on timeout
++            ACE_DEBUG ((LM_DEBUG, 
++                        ACE_LIB_TEXT ("ACE::get_lan_mac_by_arp: - ")
++                        ACE_LIB_TEXT ("timeout of ACE::receive_arp_reply () passed")
++                        ACE_LIB_TEXT ("or there is an error with errno %d"), errno));
++        }
++        
++        ACE_OS::sleep (ACE_Time_Value (0, 20000)); // wait for 20 msec and send it once more
++        if (socket != ACE_INVALID_HANDLE)
++        {
++            ACE_OS::close (socket);
++            socket = ACE_INVALID_HANDLE;
++        }
++
++    } while (result && arp_requests_number-- > 0);
++
++    if (! result)
++    {
++        char mac_human[18] ;
++        ACE_OS::sprintf (mac_human,
++                         "%02x:%02x:%02x:%02x:%02x:%02x",
++                         (u_char) target_mac.node[0],
++                         (u_char) target_mac.node[1],
++                         (u_char) target_mac.node[2],
++                         (u_char) target_mac.node[3],
++                         (u_char) target_mac.node[4],
++                         (u_char) target_mac.node[5]);
++        
++        ACE_DEBUG ((LM_DEBUG, 
++                    "ACE::get_lan_mac_by_arp - mac \"%s\" responded.\n", mac_human));
++    }
++
++    return result ;
++}
++
++int
++ACE::receive_arp_reply (ACE_OS::macaddr_node_t &target_mac_req,
++                        const ACE_INET_Addr &src_ip_req,
++                        const ACE_INET_Addr &target_ip_req,
++                        ACE_HANDLE handle,
++                        const ACE_Time_Value &timeout)
++{
++    ACE_TRACE ("ACE::receive_arp_reply");
++
++    ACE_Time_Value after,
++        before = ACE_OS::gettimeofday (),
++        wait_time = timeout;
++
++    const ACE_Time_Value half_millisec (0, 500);
++
++    Arp_Message arp_msg;
++
++    do
++    {
++        int rval_recv = ACE::recv (handle,
++                                   &arp_msg,
++                                   sizeof arp_msg,
++                                   0, // flags
++                                   &wait_time);
++
++        if  (rval_recv < 0)
++        {
++            if (errno == EINTR)
++            {
++                after = ACE_OS::gettimeofday ();
++                ACE_Time_Value time_left = timeout - after + before;
++                
++                if (time_left > half_millisec)
++                {
++                    // if more than 0.5 ms left, lets come to wait on select()
++                    wait_time = time_left;
++                    continue;
++                }
++                else
++                {
++                    errno = ETIME;
++                    return -2 ; // timeout expired
++                }
++            }
++            ACE_ERROR_RETURN ((LM_ERROR,
++                               ACE_LIB_TEXT ("%p\n"),
++                               ACE_LIB_TEXT ("ACE::receive_arp_reply: ")
++                               ACE_LIB_TEXT ("recv (receive arp reply)")),
++                              -1);
++        }
++        else if ( !ACE::process_inbound_arp (target_mac_req,
++                                             src_ip_req,
++                                             target_ip_req,
++                                             arp_msg))
++        {
++            // success !!!
++            return 0;
++        }
++        else
++        {
++            // we got not arp-reply, arp-reply not for us, etc, etc, etc
++            
++            after = ACE_OS::gettimeofday ();
++            
++            if ((after - before) >= timeout)
++            {
++                errno = ETIME;
++                ACE_ERROR_RETURN ((LM_ERROR,
++                                   ACE_LIB_TEXT ( "%p\n"),
++                                   ACE_LIB_TEXT ("ACE::receive_arp_reply: ")
++                                   ACE_LIB_TEXT ("select returned 0, timed out.")),
++                                  -2);
++            }
++            // new timeout, we are coming back to sit on select
++            wait_time = timeout - after + before;
++        }
++    
++    } while (wait_time >= half_millisec);
++
++    return -2; // means timeout
++}
++
++int
++ACE::process_inbound_arp (ACE_OS::macaddr_node_t &target_mac,
++                          const ACE_INET_Addr &src_ip_req,
++                          const ACE_INET_Addr &target_ip_req,
++                          Arp_Message &arp_msg)
++{
++    if (
++        (ACE_NTOHS (arp_msg.ethhdr_.ether_type) == ETHERTYPE_ARP) &&  // 1. this is ARP
++        (ACE_NTOHS (arp_msg.op_) == ARPOP_REPLY) &&      // 2. this is ARP-reply
++        (((sockaddr_in *)src_ip_req.get_addr ())->sin_addr.s_addr == 
++         *((in_addr_t *)arp_msg.target_ip_addr_)) &&                         // 3. SrcIP of ARP-Request == TargetIP of Reply
++        (((sockaddr_in *)target_ip_req.get_addr ())->sin_addr.s_addr ==
++         *((in_addr_t *)arp_msg.src_ip_addr_))                                    // 4. TargetIP of ARP-Request == SrcIP of Reply
++        )
++    {
++        ACE_OS::memcpy (target_mac.node, 
++                        arp_msg.src_hw_addr_, 
++                        sizeof (target_mac.node)) ;
++        return 0;
++    }
++    
++    ACE_DEBUG ((LM_DEBUG, 
++                    "ACE::process_inbound_arp: - not expected ARP-reply\n"));
++    return -1;
++}
++
++# endif /* ACE_HAS_ENHANCED_INTERFACE_FUNCTIONS */
++
+ #if defined (__unix) || defined (__unix__) || defined (__Lynx__) || \
+     defined (_AIX)
+ #  if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+--- ACE_wrappers/ace/Sock_Connect.h	2005-01-02 21:04:12.000000000 +0200
++++ ACE_wrappers_new/ace/Sock_Connect.h	2005-03-17 10:15:00.486715664 +0200
+@@ -24,9 +24,11 @@
+ 
+ #include "ace/Basic_Types.h"
+ #include "ace/os_include/netinet/os_in.h"
++#include "ace/Time_Value.h"
++#include "ace/OS_NS_netdb.h"
+ 
+-// Forward Declarations
+ class ACE_INET_Addr;
++struct Arp_Message;
+ 
+ namespace ACE
+ {
+@@ -52,12 +54,28 @@
+     ACE_HANDLE handle = ACE_INVALID_HANDLE);
+ 
+   /**
+-   * Return count and array of all configured IP interfaces on this
+-   * host, rc = 0 on success (count == number of interfaces else -1).
+-   * Caller is responsible for calling delete [] on @a addr_array.
++   * Keeps name of the network interface.
++   * @todo:
++   */
++  struct if_name_node_t 
++  {
++     // The name of the interface.
++    unsigned char name_[16];
++  };
++
++  /**
++   * Returns count 0 on success (count == number of interfaces 
++   * else -1) and array of ACE_INET_Addr objects with ip-addresses
++   * of the local host and ports set to 0 @a addr_array.
++   * When to the function passed non-zero array of interfaces names 
++   * @a if_names_array, it will be filled with the names of the local 
++   * host interfaces. 
++   * Caller is responsible for calling delete [] on @a addr_array
++   * delete [] on dereference of @a if_names_array.
+    */
+   extern ACE_Export int get_ip_interfaces (size_t &count,
+-                                           ACE_INET_Addr *&addr_array);
++                                           ACE_INET_Addr *&addr_array,
++                                           if_name_node_t **if_names_array = 0);
+ 
+   /**
+    * Helper routine for get_ip_interfaces, differs by UNIX platform so
+@@ -80,6 +98,157 @@
+    * so it only gets checked once.
+    */
+   extern ACE_Export int ipv6_enabled (void);
++
++
++#if defined (ACE_HAS_ENHANCED_INTERFACE_FUNCTIONS)
++
++  /**
++   * Get netmask address for our @a hostname (either hostname or ipv4
++   * dotted string).  If @a hostname is non-0 we'll use to find its netmask.  
++   * If @a hostname is 0 and interface name @if_name is non-0 we'll use
++   * the name of the interface to look for its netmask. 
++   * if @a handle is not ACE_INVALID_HANDLE then we'll use this to
++   * determine netmask address, otherwise we'll have to create a
++   * socket internally (and free it).  Returns -1 on failure and 0 on
++   * success.
++   */
++  extern ACE_Export int get_netmask_addr (ACE_UINT32 &netmask_addr,
++                                          const ACE_TCHAR *hostname = 0,
++                                          const ACE_TCHAR *if_name = 0,
++                                          ACE_HANDLE handle = ACE_INVALID_HANDLE);
++
++  /**
++   * Performs lookup by a valid ip_address @a addr with a zero port set. 
++   * On success returns 0 and fills interface name in @a ifname.
++   * On errors returns -1.
++  */
++    extern ACE_Export int get_interface_name (const ACE_INET_Addr& addr,
++                                              if_name_node_t& ifname);
++
++  /**
++   * Performs lookup by a valid ip_address @a addr with a zero port set. 
++   * On success returns 0 and fills node field in macaddr_node_t of 
++   * @a mac_addr.
++   * On errors returns -1.
++  */
++  extern ACE_Export int get_interface_mac (const ACE_INET_Addr& addr,
++                                           ACE_OS::macaddr_node_t &mac_addr,
++                                           ACE_HANDLE handle = ACE_INVALID_HANDLE);
++
++  /**
++   * Performs lookup by an interface name @a ifname. On success 
++   * returns 0 and  fills node field in macaddr_node_t of @a mac_addr.
++   * On errors returns -1.
++  */
++  extern ACE_Export int get_interface_mac (if_name_node_t& ifname,
++                                           ACE_OS::macaddr_node_t &mac_addr,
++                                           ACE_HANDLE handle = ACE_INVALID_HANDLE);
++
++  /**
++   * Performs lookup by an interface name @a ifname. On success 
++   * returns 0 and fills ip-address with zero port in @a addr.
++   On errors returns -1.
++  */
++  extern ACE_Export int get_interface_ip_address (
++      if_name_node_t& ifname,
++      ACE_INET_Addr &addr);
++
++  /**
++   * Performs lookup by an address @a addr. On success 
++   * returns 0 and positive interface index in @a if_index.  
++   * On errors returns -1 and sets @a if_index to -1.
++  */  
++  extern ACE_Export int get_interface_index (const ACE_INET_Addr& addr,
++                                               int &if_index);
++
++  /// Default timeout to wait for ARP-response in the LAN to be 20 msec
++  static const ACE_Time_Value arp_wait_default_timeout (0, 20000);
++
++  /**
++   * On success returns 0 and fills node in structure @a mac_addr, 
++   * which is the result of ARP-made inside look up by 
++   * sending ARP request from the interface with a valid ip address and 
++   * a zero port set in @a src_ip and receiving ARP-response, whereas 
++   * @dst_ip (ip and a zero port) is normally ethernet broadcast set by 
++   * ACE::ethernet_bcast_addr and may be the same as the 
++   * @a src_addr for the case of gratuitous arp.
++   *
++   * Parameters @a arp_requests_number and @a timeout control 
++   * number of ARP-requests retransmissions and the time prior to giving 
++   * up and returning error.
++   *
++   * Source address @src_ip is used in linux/unix systems to determine
++   * the interface of the host to be used for arp-socket binding and further
++   * sending of arp broadcasts.
++   *
++   * Caller is responsible for de-allocation of @a mac_addr by calling
++   * delete mac_addr.
++   * On errors the function returns -1.
++   */
++  extern ACE_Export int get_lan_mac_by_arp (
++      ACE_OS::macaddr_node_t &target_mac,
++      const ACE_INET_Addr &src_ip,
++      const ACE_INET_Addr &dst_ip,
++      size_t arp_requests_number = 2,
++      const ACE_Time_Value & timeout = ACE::arp_wait_default_timeout);
++
++
++  /**
++   * Fills in the fields of @a arp_msg, using @a src_ip and @a target_ip.
++   * On success returns 0, on errors -1.
++  */
++  int prepare_arp_request_msg (
++      const ACE_INET_Addr &src_ip,
++      const ACE_INET_Addr &target_ip,
++      Arp_Message &arp_msg);
++
++  /** 
++   * If a socket passed @a handle is a ACE_INVALID_HANDLE, 
++   * creates an AF_PACKET domain socket with SOCK_RAW type,
++   * binds it to the network interface @a interface with ARP-only params, 
++   * and sends passed ARP-message buffer @a arp_msg as is.
++   *
++   * If the socket passed @a handle is a valid socket, it is assumed, that
++   * necessary binding has been done, therefore the step is skipped, and
++   * ARP-message buffer @a arp_msg is broadcasted.
++  */
++  int send_arp_message (
++      Arp_Message& arp_msg,
++      const int if_index,
++      ACE_HANDLE &handle);
++
++  /**
++   * Waits for @a timeout to receive ARP-reply by reading from socket
++   * @a handle. The message to be validated in process_inbound_arp ()
++   * using @a src_ip_req and @a target_ip_req.
++   *
++   * On success returns 0 and fills mac-address in @target_mac, while 
++   * on errors returns -1. 
++   * When @a timeout to wait for a valid ARP-reply expires return -2 to
++   * signal for the event.
++  */
++  int receive_arp_reply (
++      ACE_OS::macaddr_node_t &target_mac,
++      const ACE_INET_Addr &src_ip_req,
++      const ACE_INET_Addr &target_ip_req,
++      ACE_HANDLE handle,
++      const ACE_Time_Value &timeout);
++
++  /**
++   * Processes inbound ARP-message in @a arp_msg and validates it to 
++   * be a reply to our ARP-request, based on the request params 
++   * @a src_ip_req and @a target_ip_req.
++   *
++   * On success returns 0 and fills mac-address in @target_mac, while 
++   * on errors returns -1.
++  */
++  int process_inbound_arp (
++      ACE_OS::macaddr_node_t &target_mac,
++      const ACE_INET_Addr &src_ip_req,
++      const ACE_INET_Addr &target_ip_req,
++      Arp_Message& arp_msg);
++
++# endif /* ACE_HAS_ENHANCED_INTERFACE_FUNCTIONS */
+ }
+ 
+ #include /**/ "ace/post.h"
