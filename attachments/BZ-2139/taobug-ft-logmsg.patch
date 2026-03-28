@@ -1,0 +1,110 @@
+--- ACE-current/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_ClientPolicy_i.cpp	2005-02-18 04:07:07.000000000 -0500
++++ ACE-new/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_ClientPolicy_i.cpp	2005-06-03 15:14:42.000000000 -0400
+@@ -87,7 +87,7 @@
+       CORBA::ULong msecs =
+         static_cast<CORBA::ULong> (microseconds / 1000);
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("TAO (%P|%t) Timeout is <%u>\n"),
++                  ACE_TEXT ("TAO-FT (%P|%t) - Timeout is <%u>\n"),
+                   msecs));
+     }
+ }
+@@ -182,7 +182,7 @@
+       CORBA::ULong msecs =
+         static_cast<CORBA::ULong> (microseconds / 1000);
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("TAO (%P|%t) Timeout is <%u>\n"),
++                  ACE_TEXT ("TAO-FT (%P|%t) - Timeout is <%u>\n"),
+                   msecs));
+     }
+ }
+--- ACE-current/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_ClientRequest_Interceptor.cpp	2005-02-18 04:07:07.000000000 -0500
++++ ACE-new/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_ClientRequest_Interceptor.cpp	2005-06-03 15:19:02.000000000 -0400
+@@ -84,7 +84,7 @@
+         ACE_CHECK;
+ 
+         ACE_DEBUG ((LM_DEBUG,
+-                    "TAO_FT (%P|%t): %s called for %s \n",
++                    ACE_TEXT ("TAO-FT (%P|%t) - %s called for %s\n"),
+                     this->name_,
+                     op.in ()));
+       }
+@@ -300,7 +300,7 @@
+         ftrsc.retention_id = ++this->retention_id_;
+ 
+       //  ACE_DEBUG ((LM_DEBUG,
+-      //    "(%P|%t) Retention id [%d]\n",
++      //    ACE_TEXT ("TAO-FT (%P|%t) - Retention id [%d]\n"),
+       //    ftrsc.retention_id));
+         tss->retention_id_ = ftrsc.retention_id;
+         tss->clean_flag_ = false;
+@@ -377,8 +377,8 @@
+         if (TAO_debug_level > 3)
+           {
+             ACE_DEBUG ((LM_DEBUG,
+-                        "(%P|%t) TAO_FT - Using default value",
+-                        " of 15 seconds \n"));
++                        ACE_TEXT ("TAO-FT (%P|%t) - Using default value")
++			ACE_TEXT ("of 15 seconds\n")));
+           }
+         t = 15 * 1000000;
+       }
+--- ACE-current/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_IOGR_Property.cpp	2005-01-27 14:44:46.000000000 -0500
++++ ACE-new/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_IOGR_Property.cpp	2005-06-03 15:18:11.000000000 -0400
+@@ -266,8 +266,8 @@
+     {
+       if (TAO_debug_level > 2)
+         ACE_ERROR_RETURN ((LM_ERROR,
+-                           "TAO-FT (%P|%t) - The group tagged component ",
+-                           "is null \n"),
++                           ACE_TEXT ("TAO-FT (%P|%t) - The group tagged component ")
++                           ACE_TEXT ("is null\n")),
+                           0);
+     }
+ 
+--- ACE-current/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_Invocation_Endpoint_Selectors.cpp	2005-01-27 14:44:46.000000000 -0500
++++ ACE-new/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_Invocation_Endpoint_Selectors.cpp	2005-06-03 15:18:22.000000000 -0400
+@@ -224,7 +224,7 @@
+   if (TAO_debug_level > 2)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  "(%P|%t) TAO-FT - Got a primary component \n"));
++                  ACE_TEXT ("TAO-FT (%P|%t) - Got a primary component\n")));
+     }
+ 
+   return true;
+--- ACE-current/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_Policy_i.cpp	2005-02-18 04:07:07.000000000 -0500
++++ ACE-new/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_Policy_i.cpp	2005-06-03 15:16:39.000000000 -0400
+@@ -85,7 +85,7 @@
+       CORBA::ULong msecs =
+         static_cast<CORBA::ULong> (microseconds / 1000);
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("TAO (%P|%t) Timeout is <%u>\n"),
++                  ACE_TEXT ("TAO-FT (%P|%t) - Timeout is <%u>\n"),
+                   msecs));
+     }
+ }
+@@ -180,7 +180,7 @@
+       CORBA::ULong msecs =
+         static_cast<CORBA::ULong> (microseconds / 1000);
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("TAO (%P|%t) Timeout is <%u>\n"),
++                  ACE_TEXT ("TAO-FT (%P|%t) - Timeout is <%u>\n"),
+                   msecs));
+     }
+ }
+--- ACE-current/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_ServerRequest_Interceptor.cpp	2005-04-12 15:09:23.000000000 -0400
++++ ACE-new/TAO/orbsvcs/orbsvcs/FaultTolerance/FT_ServerRequest_Interceptor.cpp	2005-06-03 15:24:46.000000000 -0400
+@@ -152,8 +152,10 @@
+         this->object_group_ref_version_)
+       {
+         ACE_ERROR ((LM_ERROR,
+-                    "TAO-FT (%P|%t) - Wrong version information "
+-                    "within the interceptor \n"));
++                    ACE_TEXT ("TAO-FT (%P|%t) - Wrong version information ")
++                    ACE_TEXT ("within the interceptor (%u > %u)\n"),
++		    fgvsc.object_group_ref_version,
++		    this->object_group_ref_version_));
+       }
+     else if (fgvsc.object_group_ref_version <
+              this->object_group_ref_version_)
