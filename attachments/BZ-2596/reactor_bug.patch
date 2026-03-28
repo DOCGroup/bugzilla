@@ -1,0 +1,154 @@
+--- Select_Reactor_Base.h    2006-03-13 09:11:03.000000000 -0600
++++ /tmp/ace/Select_Reactor_Base.h      2006-07-09 22:56:47.000000000 -0500
+@@ -336,7 +336,7 @@
+   size_t size (void) const;
+
+   /// Maximum ACE_HANDLE value, plus 1.
+-  size_t max_handlep1 (void);
++  size_t max_handlep1 (void) const;
+
+   /// Dump the state of an object.
+   void dump (void) const;
+@@ -373,6 +373,11 @@
+    * the ACE_HANDLE value.
+    */
+   ACE_Event_Handler **event_handlers_;
++
++  /// Set of all the handles present in the repository, including those
++  /// that are not currently registered for any type of event in the
++  /// reactor.
++  ACE_Handle_Set valid_handles_;
+ #endif /* ACE_WIN32 */
+ };
+
+--- Select_Reactor_Base.cpp  2006-03-13 08:58:24.000000000 -0600
++++ /tmp/ace/Select_Reactor_Base.cpp    2006-07-09 22:56:47.000000000 -0500
+@@ -71,14 +71,6 @@
+       }
+ }
+
+-size_t
+-ACE_Select_Reactor_Handler_Repository::max_handlep1 (void)
+-{
+-  ACE_TRACE ("ACE_Select_Reactor_Handler_Repository::max_handlep1");
+-
+-  return this->max_handlep1_;
+-}
+-
+ int
+ ACE_Select_Reactor_Handler_Repository::open (size_t size)
+ {
+@@ -284,12 +276,16 @@
+       // Remember that this handle is already registered in the
+       // Reactor.
+       existing_handle = 1;
+-    }
+
+-  ACE_SELECT_REACTOR_EVENT_HANDLER (this, handle) = event_handler;
++      ACE_ASSERT (handle < this->max_handlep1_);
++    }
++  else
++    {
++      ACE_SELECT_REACTOR_EVENT_HANDLER (this, handle) = event_handler;
+
+-  if (this->max_handlep1_ < handle + 1)
+-    this->max_handlep1_ = handle + 1;
++      this->valid_handles_.set_bit (handle);
++      this->max_handlep1_ = this->valid_handles_.max_set () + 1;
++    }
+
+ #endif /* ACE_WIN32 */
+
+@@ -354,18 +350,17 @@
+   // If there are no longer any outstanding events on this <handle>
+   // then we can totally shut down the Event_Handler.
+
+-  int has_any_wait_mask =
++  int has_any_wait_or_suspend_mask =
+     (this->select_reactor_.wait_set_.rd_mask_.is_set (handle)
+      || this->select_reactor_.wait_set_.wr_mask_.is_set (handle)
+-     || this->select_reactor_.wait_set_.ex_mask_.is_set (handle));
+-  int has_any_suspend_mask =
+-    (this->select_reactor_.suspend_set_.rd_mask_.is_set (handle)
++     || this->select_reactor_.wait_set_.ex_mask_.is_set (handle)
++     || this->select_reactor_.suspend_set_.rd_mask_.is_set (handle)
+      || this->select_reactor_.suspend_set_.wr_mask_.is_set (handle)
+      || this->select_reactor_.suspend_set_.ex_mask_.is_set (handle));
+
+   int complete_removal = 0;
+
+-  if (!has_any_wait_mask && !has_any_suspend_mask)
++  if (!has_any_wait_or_suspend_mask)
+     {
+       // The handle has been completed removed.
+       complete_removal = 1;
+@@ -395,41 +390,8 @@
+
+ #else
+
+-      if (this->max_handlep1_ == handle + 1)
+-        {
+-          // We've deleted the last entry, so we need to figure out
+-          // the last valid place in the array that is worth looking
+-          // at.
+-          ACE_HANDLE wait_rd_max =
+-            this->select_reactor_.wait_set_.rd_mask_.max_set ();
+-          ACE_HANDLE wait_wr_max =
+-            this->select_reactor_.wait_set_.wr_mask_.max_set ();
+-          ACE_HANDLE wait_ex_max =
+-            this->select_reactor_.wait_set_.ex_mask_.max_set ();
+-
+-          ACE_HANDLE suspend_rd_max =
+-            this->select_reactor_.suspend_set_.rd_mask_.max_set ();
+-          ACE_HANDLE suspend_wr_max =
+-            this->select_reactor_.suspend_set_.wr_mask_.max_set ();
+-          ACE_HANDLE suspend_ex_max =
+-            this->select_reactor_.suspend_set_.ex_mask_.max_set ();
+-
+-          // Compute the maximum of six values.
+-          this->max_handlep1_ = wait_rd_max;
+-          if (this->max_handlep1_ < wait_wr_max)
+-            this->max_handlep1_ = wait_wr_max;
+-          if (this->max_handlep1_ < wait_ex_max)
+-            this->max_handlep1_ = wait_ex_max;
+-
+-          if (this->max_handlep1_ < suspend_rd_max)
+-            this->max_handlep1_ = suspend_rd_max;
+-          if (this->max_handlep1_ < suspend_wr_max)
+-            this->max_handlep1_ = suspend_wr_max;
+-          if (this->max_handlep1_ < suspend_ex_max)
+-            this->max_handlep1_ = suspend_ex_max;
+-
+-          ++this->max_handlep1_;
+-        }
++      this->valid_handles_.clr_bit (handle);
++      this->max_handlep1_ = this->valid_handles_.max_set () + 1;
+
+ #endif /* ACE_WIN32 */
+
+@@ -533,8 +495,8 @@
+   for (ACE_Select_Reactor_Handler_Repository_Iterator iter (this);
+        iter.next (event_handler) != 0;
+        iter.advance ())
+-    ACE_DEBUG ((LM_DEBUG, ACE_LIB_TEXT (" (event_handler = %x, event_handler->handle_ = %d)\n"),
+-                event_handler, event_handler->get_handle ()));
++    ACE_DEBUG ((LM_DEBUG, ACE_LIB_TEXT (" %d (event_handler = %@, event_handler->handle_ = %d)\n"),
++                iter.current_, event_handler, event_handler->get_handle ()));
+
+   ACE_DEBUG ((LM_DEBUG, ACE_LIB_TEXT (" ]\n")));
+   ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+--- Select_Reactor_Base.inl  2005-10-28 11:14:55.000000000 -0500
++++ /tmp/ace/Select_Reactor_Base.inl    2006-07-09 22:56:47.000000000 -0500
+@@ -27,6 +27,12 @@
+   return this->max_size_;
+ }
+
++ACE_INLINE size_t
++ACE_Select_Reactor_Handler_Repository::max_handlep1 (void) const
++{
++  return this->max_handlep1_;
++}
++
+ ACE_INLINE
+ ACE_Event_Tuple::ACE_Event_Tuple (void)
+ :  handle_ (ACE_INVALID_HANDLE),
