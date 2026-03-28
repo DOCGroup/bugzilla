@@ -1,0 +1,1387 @@
+Index: orbsvcs/orbsvcs/FaultTolerance/FT_ClientRequest_Interceptor.cpp
+===================================================================
+--- orbsvcs/orbsvcs/FaultTolerance/FT_ClientRequest_Interceptor.cpp	(revision 80572)
++++ orbsvcs/orbsvcs/FaultTolerance/FT_ClientRequest_Interceptor.cpp	(working copy)
+@@ -29,6 +29,7 @@
+       , uuid_ (0)
+       , lock_ (0)
+       , retention_id_ (0)
++      , ft_send_extended_sc_ (false)
+   {
+     ACE_Utils::UUID_GENERATOR::instance ()->init ();
+ 
+@@ -226,48 +227,53 @@
+   {
+     try
+     {
+-      // Grab the object group version
+-      // @@ NOTE: This involves an allocation and a dellocation. This is
+-      // really bad.
+-      TAO_InputCDR cdr (reinterpret_cast<const char*> (tp->component_data.get_buffer ()),
+-        tp->component_data.length ());
+-      CORBA::Boolean byte_order;
+-
+-      if ((cdr >> ACE_InputCDR::to_boolean (byte_order)) == 0)
+-        return;
+-
+-      cdr.reset_byte_order (static_cast<int> (byte_order));
+-
+-      FT::TagFTGroupTaggedComponent gtc;
+-
+-      if ((cdr >> gtc) == 0)
+-        throw CORBA::BAD_PARAM (CORBA::OMGVMCID | 28, CORBA::COMPLETED_NO);
+-
+       IOP::ServiceContext sc;
+       sc.context_id = IOP::FT_GROUP_VERSION;
+-
+-      TAO_OutputCDR ocdr;
+-      if (!(ocdr << ACE_OutputCDR::from_boolean (TAO_ENCAP_BYTE_ORDER)))
+-        return;
+-        //ACE_THROW (CORBA::MARSHAL ());
+-
+-      if (!(ocdr << gtc.object_group_ref_version))
+-        return;
+-        //ACE_THROW (CORBA::MARSHAL ());
+-
+-      CORBA::ULong length =
+-        static_cast<CORBA::ULong> (ocdr.total_length ());
+-      sc.context_data.length (length);
+-      CORBA::Octet *buf = sc.context_data.get_buffer ();
+-
+-      for (const ACE_Message_Block *i = ocdr.begin ();
+-        i != 0;
+-        i = i->cont ())
+-      {
+-        ACE_OS::memcpy (buf, i->rd_ptr (), i->length ());
+-        buf += i->length ();
+-      }
+-
++      
++      if (this->ft_send_extended_sc_)
++        {
++          // We send the whole tagged component as a service context.
++          sc.context_data.length (tp->component_data.length ());
++          CORBA::Octet *sc_buf = sc.context_data.get_buffer ();
++          ACE_OS::memcpy (sc_buf, tp->component_data.get_buffer (), tp->component_data.length ());
++        }
++      else
++        {
++          // Grab the object group version
++          TAO_InputCDR cdr (reinterpret_cast<const char*> (tp->component_data.get_buffer ()),
++            tp->component_data.length ());
++          CORBA::Boolean byte_order;
++    
++          if ((cdr >> ACE_InputCDR::to_boolean (byte_order)) == 0)
++            return;
++    
++          cdr.reset_byte_order (static_cast<int> (byte_order));
++    
++          FT::TagFTGroupTaggedComponent gtc;
++    
++          if ((cdr >> gtc) == 0)
++            throw CORBA::BAD_PARAM (CORBA::OMGVMCID | 28, CORBA::COMPLETED_NO);
++    
++          TAO_OutputCDR ocdr;
++          if (!(ocdr << ACE_OutputCDR::from_boolean (TAO_ENCAP_BYTE_ORDER)))
++            return;
++            
++          if (!(ocdr << gtc.object_group_ref_version))
++            return;
++            
++          CORBA::ULong length =
++            static_cast<CORBA::ULong> (ocdr.total_length ());
++          sc.context_data.length (length);
++          CORBA::Octet *buf = sc.context_data.get_buffer ();
++    
++          for (const ACE_Message_Block *i = ocdr.begin ();
++            i != 0;
++            i = i->cont ())
++          {
++            ACE_OS::memcpy (buf, i->rd_ptr (), i->length ());
++            buf += i->length ();
++          }
++        }
+       // Add this context to the service context list.
+       ri->add_request_service_context (sc,
+         0);
+@@ -276,7 +282,6 @@
+     catch (const CORBA::Exception&)
+     {
+       // Not much can be done anyway. Just keep quiet
+-      // ACE_RE_THROW;
+     }
+ 
+     return;
+@@ -327,11 +332,9 @@
+       TAO_OutputCDR ocdr;
+       if (!(ocdr << ACE_OutputCDR::from_boolean (TAO_ENCAP_BYTE_ORDER)))
+         return;
+-        //ACE_THROW (CORBA::MARSHAL ());
+ 
+       if (!(ocdr << ftrsc))
+         return;
+-        // ACE_THROW (CORBA::MARSHAL ());
+ 
+       // Make a *copy* of the CDR stream...
+       CORBA::ULong length =
+@@ -353,7 +356,6 @@
+     }
+     catch (const CORBA::Exception&)
+     {
+-      // ACE_RE_THROW;
+     }
+     return;
+   }
+@@ -392,6 +394,12 @@
+ 
+     return t;
+   }
++
++  void
++  FT_ClientRequest_Interceptor::ft_send_extended_sc (CORBA::Boolean send)
++  {
++    this->ft_send_extended_sc_ = send;
++  }
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: orbsvcs/orbsvcs/FaultTolerance/FT_ClientRequest_Interceptor.h
+===================================================================
+--- orbsvcs/orbsvcs/FaultTolerance/FT_ClientRequest_Interceptor.h	(revision 80572)
++++ orbsvcs/orbsvcs/FaultTolerance/FT_ClientRequest_Interceptor.h	(working copy)
+@@ -90,6 +90,8 @@
+     virtual void receive_other (PortableInterceptor::ClientRequestInfo_ptr);
+ 
+     virtual void receive_exception (PortableInterceptor::ClientRequestInfo_ptr ri);
++        
++    void ft_send_extended_sc (CORBA::Boolean send);
+ 
+   protected:
+ 
+@@ -117,6 +119,10 @@
+ 
+     /// Retention id generated by the client
+     CORBA::Long retention_id_;
++        
++    /// Transmit a TAG_FT_GROUP component in place of the
++    /// FT_GROUP_VERSION data required by the spec.
++    CORBA::Boolean ft_send_extended_sc_;
+   };
+ }
+ 
+Index: orbsvcs/orbsvcs/FaultTolerance/FT_ClientORBInitializer.cpp
+===================================================================
+--- orbsvcs/orbsvcs/FaultTolerance/FT_ClientORBInitializer.cpp	(revision 80572)
++++ orbsvcs/orbsvcs/FaultTolerance/FT_ClientORBInitializer.cpp	(working copy)
+@@ -9,6 +9,8 @@
+ #include "tao/ORB_Core.h"
+ #include "tao/Exception.h"
+ #include "tao/ORB_Constants.h"
++#include "tao/ORB_Core.h"
++#include "tao/PI/ORBInitInfo.h"
+ 
+ ACE_RCSID (FaultTolerance,
+            FT_ClientORBInitializer,
+@@ -79,16 +81,22 @@
+ TAO_FT_ClientORBInitializer::register_client_request_interceptors (
+     PortableInterceptor::ORBInitInfo_ptr info)
+ {
+-  PortableInterceptor::ClientRequestInterceptor_ptr cri =
+-    PortableInterceptor::ClientRequestInterceptor::_nil ();
++  TAO::FT_ClientRequest_Interceptor* ftcri = 0;
+ 
+-  ACE_NEW_THROW_EX (cri,
++  ACE_NEW_THROW_EX (ftcri,
+                     TAO::FT_ClientRequest_Interceptor,
+                     CORBA::NO_MEMORY ());
+ 
+   PortableInterceptor::ClientRequestInterceptor_var
+-    client_interceptor = cri;
++    client_interceptor = ftcri;
+ 
++  TAO_ORBInitInfo* real_info = dynamic_cast<TAO_ORBInitInfo*> (info);
++
++  if (real_info)
++    {
++      ftcri->ft_send_extended_sc (real_info->orb_core ()->ft_send_extended_sc ());
++    }
++
+   info->add_client_request_interceptor (client_interceptor.in ());
+ }
+ 
+Index: orbsvcs/tests/Bug_3216_Regression/client.cpp
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/client.cpp	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/client.cpp	(revision 0)
+@@ -0,0 +1,147 @@
++// $Id$
++
++#include "TestC.h"
++#include "ace/Get_Opt.h"
++#include "orbsvcs/FaultTolerance/FT_ClientService_Activate.h"
++#include "Hello.h"
++
++ACE_RCSID(Hello, client, "$Id$")
++
++const char *ior = "file://test.ior";
++
++int
++parse_args (int argc, char *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, "k:");
++  int c;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'k':
++        ior = get_opts.opt_arg ();
++        break;
++
++      case '?':
++      default:
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "usage:  %s "
++                           "-k <ior> "
++                           "\n",
++                           argv [0]),
++                          -1);
++      }
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++int
++main (int argc, char *argv[])
++{
++  CORBA::Boolean result = 0;
++  try
++    {
++      int one = 1;
++      char CLIENT[] = "client"; // Copy const into non-const storage.
++      char *argv1[] = { CLIENT, 0 };
++
++      CORBA::ORB_var orb1 =
++      CORBA::ORB_init (one, argv1, "orb1" );
++
++      int three = 3;
++      char OPTION[] = "-ORBFTSendFullGroupTC"; // Copy const into non-const storage.
++      char VALUE[]  = "1"; // Copy const into non-const storage.
++      char *argv2[] = { CLIENT, OPTION, VALUE, 0 };
++      CORBA::ORB_var orb2;
++
++      try
++        {
++          orb2 =
++            CORBA::ORB_init (three, argv2, "orb2" );
++        }
++      catch (CORBA::BAD_PARAM bad_param)
++        {
++          ACE_UNUSED_ARG (bad_param);
++          ACE_DEBUG ((LM_ERROR, "Error - REGRESSION - ORB doesn't even accept the config option\n"));
++          return 1;
++        }
++
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      CORBA::Object_var tmp =
++        orb1->string_to_object (ior );
++
++      Test::Hello_var hello =
++        Test::Hello::_narrow(tmp.in () );
++
++      if (CORBA::is_nil (hello.in ()))
++        {
++          ACE_ERROR_RETURN ((LM_DEBUG,
++                             "Test failed - Not regression - Unexpected Nil Test::Hello reference <%s>\n",
++                             ior),
++                            1);
++        }
++
++      try
++        {
++          hello->check_normal_context ();
++        }
++      catch (Test::MyException my_ex)
++        {
++          ACE_UNUSED_ARG (my_ex);
++          ACE_DEBUG ((LM_ERROR, "Error - REGRESSION - normal format service context not transmitted\n"));
++          result = 1;
++        }
++
++
++      tmp =
++        orb2->string_to_object (ior );
++
++      hello =
++        Test::Hello::_narrow(tmp.in () );
++
++      if (CORBA::is_nil (hello.in ()))
++        {
++          ACE_ERROR_RETURN ((LM_DEBUG,
++                             "Test failed - Not regression - Unexpected Nil Test::Hello reference <%s>\n",
++                             ior),
++                            1);
++        }
++
++      try
++        {
++          hello->check_extended_context ();
++        }
++      catch (Test::MyException my_ex)
++        {
++          ACE_UNUSED_ARG (my_ex);
++          ACE_DEBUG ((LM_ERROR, "Error - REGRESSION - extended format service context not transmitted\n"));
++          result = 1;
++        }
++
++
++      hello->shutdown ();
++
++      orb1->destroy ();
++      orb2->destroy ();
++    }
++  catch (const CORBA::Exception& ex)
++    {
++      ex._tao_print_exception (
++                           "Test failed (Not regression) because unexpected exception caught:");
++      return 1;
++    }
++
++
++  if (result)
++    {
++      ACE_DEBUG ((LM_ERROR, "Error: REGRESSION identified!!!\n"));
++    }
++  else
++    {
++      ACE_DEBUG ((LM_DEBUG, "Test passed !!!\n"));
++    }
++  return result;
++}
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/client.cpp
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/ServerORBInitializer.h
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/ServerORBInitializer.h	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/ServerORBInitializer.h	(revision 0)
+@@ -0,0 +1,48 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ *  $Id$
++ */
++//=============================================================================
++#ifndef TAO249_SERVER_ORBINITIALIZER_H
++#define TAO249_SERVER_ORBINITIALIZER_H
++
++#include /**/ "ace/pre.h"
++
++#include "tao/PortableInterceptorC.h"
++#include "tao/PI_Server/PI_Server_includeC.h"
++#include "tao/PI/PI.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++#include "tao/LocalObject.h"
++
++/// RTCORBA ORB initializer.
++class Server_ORBInitializer :
++  public virtual PortableInterceptor::ORBInitializer,
++  public virtual TAO_Local_RefCounted_Object
++{
++public:
++
++  virtual void pre_init (PortableInterceptor::ORBInitInfo_ptr info
++                         );
++
++  virtual void post_init (PortableInterceptor::ORBInitInfo_ptr info
++                          );
++
++private:
++
++  /// Register the necessary interceptors.
++  void register_server_request_interceptors (
++         PortableInterceptor::ORBInitInfo_ptr info
++         );
++
++};
++
++#include /**/ "ace/post.h"
++
++#endif /* TAO249_SERVER_ORBINITIALIZER_H */
++
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/ServerORBInitializer.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/ServerRequest_Interceptor.h
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/ServerRequest_Interceptor.h	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/ServerRequest_Interceptor.h	(revision 0)
+@@ -0,0 +1,80 @@
++// -*- C++ -*-
++
++//=============================================================================
++/**
++ * $Id$
++ */
++//=============================================================================
++
++#ifndef TAO249_SERVER_REQUEST_INTERCEPTOR_H
++#define TAO249_SERVER_REQUEST_INTERCEPTOR_H
++
++#include "ace/config-all.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++#include "tao/LocalObject.h"
++#include "tao/PortableInterceptorC.h"
++#include "tao/ORB.h"
++#include "tao/PI/PI.h"
++#include "tao/PI_Server/PI_Server.h"
++
++/**
++* $Id$
++*/
++class TAO249_ServerRequest_Interceptor
++: public virtual PortableInterceptor::ServerRequestInterceptor,
++  public virtual TAO_Local_RefCounted_Object
++{
++public:
++
++/// Constructor.
++TAO249_ServerRequest_Interceptor (void);
++
++/// Destructor.
++~TAO249_ServerRequest_Interceptor (void);
++
++/**
++ * @name Methods Required by the Server Request Interceptor
++ * Interface
++ *
++ * These are methods that must be implemented since they are pure
++ * virtual in the abstract base class.  They are the canonical
++ * methods required for all server request interceptors.
++ */
++//@{
++/// Return the name of this ServerRequestinterceptor.
++virtual char * name ();
++
++virtual void destroy ();
++
++virtual void receive_request_service_contexts (
++  PortableInterceptor::ServerRequestInfo_ptr ri
++  );
++
++virtual void receive_request (
++    PortableInterceptor::ServerRequestInfo_ptr ri
++    );
++
++virtual void send_reply (
++    PortableInterceptor::ServerRequestInfo_ptr ri
++    );
++
++virtual void send_exception (
++    PortableInterceptor::ServerRequestInfo_ptr ri
++    );
++
++virtual void send_other (
++    PortableInterceptor::ServerRequestInfo_ptr ri
++    );
++//@}
++private:
++
++CORBA::ORB_var orb_;
++
++CORBA:: Long client_id_;
++};
++
++#endif  /* TAO249_SERVER_REQUEST_INTERCEPTOR_H */
++
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/ServerRequest_Interceptor.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/Hello.cpp
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/Hello.cpp	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/Hello.cpp	(revision 0)
+@@ -0,0 +1,37 @@
++//
++// $Id$
++//
++#include "Hello.h"
++
++ACE_RCSID(Hello, Hello, "$Id$")
++
++CORBA::Boolean
++Hello::normal_context_ok_ = 0;
++
++CORBA::Boolean
++Hello::extended_context_ok_ = 0;
++
++Hello::Hello (CORBA::ORB_ptr orb)
++  : orb_ (CORBA::ORB::_duplicate (orb))
++{
++}
++
++void
++Hello::shutdown ()
++{
++  this->orb_->shutdown (0 );
++}
++
++void
++Hello::check_normal_context ()
++{
++  if (! normal_context_ok_)
++    ACE_THROW (Test::MyException ());
++}
++
++void
++Hello::check_extended_context ()
++{
++  if (! extended_context_ok_)
++    ACE_THROW (Test::MyException ());
++}
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/Hello.cpp
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/Test.idl
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/Test.idl	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/Test.idl	(revision 0)
+@@ -0,0 +1,25 @@
++//
++// $Id$
++//
++
++/// Put the interfaces in a module, to avoid global namespace pollution
++module Test
++{
++  exception MyException {};
++  /// A very simple interface
++  interface Hello
++  {
++    /// A method to shutdown the ORB
++    /**
++     * This method is used to simplify the test shutdown process
++     */
++    oneway void shutdown ();
++
++    // check the version of the context as per the spec
++    void check_normal_context () raises (MyException);
++
++    // check the extended version of the context
++    void check_extended_context () raises (MyException);
++
++  };
++};
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/Test.idl
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/Bug_3216_Regression.mpc
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/Bug_3216_Regression.mpc	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/Bug_3216_Regression.mpc	(revision 0)
+@@ -0,0 +1,74 @@
++// -*- MPC -*-
++// $Id$
++
++project(*IDL): taoidldefaults {
++  IDL_Files {
++    Test.idl
++  }
++  custom_only = 1
++}
++
++project(*Client): taoserver, ftclientorb {
++  after += *IDL
++
++  exename = client
++
++  verbatim (gnuace, local) {
++    ifeq ($(target_platform),)
++      tao_target := $(shell uname -srm)
++    else
++      tao_target = $(target_platform)
++    endif
++
++    ifeq (SunOS,$(findstring SunOS,$(tao_target)))
++      ifeq ($(CC),gcc)
++        LDFLAGS += -z now
++      endif
++    endif
++  }
++
++  Source_Files {
++    client.cpp
++    TestC.cpp
++  }
++  IDL_Files {
++  }
++}
++
++project (*Server) : taoserver, ftclientorb, pi_server {
++  after += *IDL
++
++  exename = server
++
++  verbatim (gnuace, local) {
++    ifeq ($(target_platform),)
++      tao_target := $(shell uname -srm)
++    else
++      tao_target = $(target_platform)
++    endif
++
++    ifeq (SunOS,$(findstring SunOS,$(tao_target)))
++      ifeq ($(CC),gcc)
++        # So, in a standard build server requires '-z now' too.
++        ifndef debug
++          ifeq ($(optimize),1)
++            ifeq ($(inline),0)
++              LDFLAGS += -z now
++            endif # inline
++          endif # optimize
++        endif # debug
++      endif
++    endif
++  }
++
++  Source_Files {
++    server.cpp
++    Hello.cpp
++    ServerORBInitializer.cpp
++    ServerRequest_Interceptor.cpp
++    TestS.cpp
++    TestC.cpp
++  }
++  IDL_Files {
++  }
++}
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/Bug_3216_Regression.mpc
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/server.cpp
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/server.cpp	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/server.cpp	(revision 0)
+@@ -0,0 +1,241 @@
++// $Id$
++
++#include "Hello.h"
++#include "ace/Get_Opt.h"
++#include "ace/OS_NS_stdio.h"
++#include "tao/IORManipulation/IORManip_Loader.h"
++#include "tao/PortableServer/PortableServer.h"
++#include "orbsvcs/FaultTolerance/FT_IOGR_Property.h"
++#include "ServerORBInitializer.h"
++#include "ServerRequest_Interceptor.h"
++#include "tao/PI/PI.h"
++#include "tao/ORBInitializer_Registry.h"
++
++ACE_RCSID (Hello,
++           server,
++           "$Id$")
++
++const char *ior_output_file = "test.ior";
++TAO_IOP::TAO_IOR_Manipulation_var iorm = 0;
++
++int
++parse_args (int argc, char *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, "o:");
++  int c;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'o':
++        ior_output_file = get_opts.opt_arg ();
++        break;
++
++      case '?':
++      default:
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "usage:  %s "
++                           "-o <iorfile>"
++                           "\n",
++                           argv [0]),
++                          -1);
++      }
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++CORBA::Object_ptr
++make_iogr (const char* domain_id, CORBA::ULongLong group_id, CORBA::ULong group_version, CORBA::Object_ptr ref )
++{
++  FT::TagFTGroupTaggedComponent ft_tag_component;
++  // Create the list
++  TAO_IOP::TAO_IOR_Manipulation::IORList iors (1);
++  iors.length(1);
++  iors [0] = CORBA::Object::_duplicate (ref);
++
++  CORBA::Object_var new_ref =
++    iorm->merge_iors (iors );
++  ACE_CHECK_RETURN (0);
++
++  // Property values
++
++  // Major and Minor revision numbers
++  ft_tag_component.component_version.major = (CORBA::Octet) 1;
++  ft_tag_component.component_version.minor = (CORBA::Octet) 0;
++
++  // Domain id
++  //const char *id = "iogr_testing";
++  ft_tag_component.group_domain_id = domain_id;
++
++  // Object group id
++  ft_tag_component.object_group_id = group_id;
++
++  // Version
++  ft_tag_component.object_group_ref_version = group_version;
++
++  // Construct the IOGR Property class
++  TAO_FT_IOGR_Property iogr_prop (ft_tag_component);
++
++  // Set the property
++  CORBA::Boolean retval = iorm->set_property (&iogr_prop,
++                                              new_ref.in ()
++                                              );
++  ACE_CHECK_RETURN (0);
++
++  // Set the primary
++  // See we are setting the second ior as the primary
++  if (retval != 0)
++    {
++      retval = iorm->set_primary (&iogr_prop,
++                                  new_ref.in (),
++                                  new_ref.in ()
++                                  );
++      ACE_CHECK_RETURN (0);
++    }
++
++  return new_ref._retn ();
++}
++
++int
++main (int argc, char *argv[])
++{
++  try
++    {
++      Server_ORBInitializer *temp_initializer = 0;
++      ACE_NEW_RETURN (temp_initializer,
++                      Server_ORBInitializer,
++                      -1);  // No exceptions yet!
++      PortableInterceptor::ORBInitializer_var orb_initializer =
++        temp_initializer;
++
++      PortableInterceptor::register_orb_initializer (orb_initializer.in ()
++                                                     );
++      
++
++      CORBA::ORB_var orb =
++        CORBA::ORB_init (argc, argv, "" );
++      
++
++      CORBA::Object_var poa_object =
++        orb->resolve_initial_references("RootPOA" );
++      
++
++      PortableServer::POA_var root_poa =
++        PortableServer::POA::_narrow (poa_object.in () );
++      
++
++      if (CORBA::is_nil (root_poa.in ()))
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           " (%P|%t) Panic: nil RootPOA\n"),
++                          1);
++
++      PortableServer::POAManager_var poa_manager =
++        root_poa->the_POAManager ();
++      
++
++      CORBA::PolicyList policies (2);
++      policies.length (2);
++
++      policies[0] =
++        root_poa->create_id_assignment_policy (PortableServer::USER_ID
++                                               );
++      
++
++      policies[1] =
++        root_poa->create_lifespan_policy (PortableServer::PERSISTENT
++                                          );
++      
++
++      PortableServer::POA_var my_poa =
++        root_poa->create_POA ("my_poa",
++                              poa_manager.in (),
++                              policies
++                              );
++      
++
++      // Creation of the new POA is over, so destroy the Policy_ptr's.
++      for (CORBA::ULong i = 0; i < policies.length (); ++i)
++        {
++          CORBA::Policy_ptr policy = policies[i];
++          policy->destroy ();
++          
++        }
++
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      Hello *hello_impl;
++      ACE_NEW_RETURN (hello_impl,
++                      Hello (orb.in ()),
++                      1);
++
++      PortableServer::ObjectId_var server_id =
++        PortableServer::string_to_ObjectId ("server_id");
++
++      my_poa->activate_object_with_id (server_id.in (),
++                                       hello_impl
++                                       );
++      
++
++      CORBA::Object_var hello =
++        my_poa->id_to_reference (server_id.in () );
++      
++
++      CORBA::String_var ior =
++        orb->object_to_string (hello.in () );
++      
++
++      // Get a ref to the IORManipulation object
++      CORBA::Object_var IORM =
++        orb->resolve_initial_references (TAO_OBJID_IORMANIPULATION,
++                                         0
++                                         );
++      
++
++      // Narrow
++      iorm =
++        TAO_IOP::TAO_IOR_Manipulation::_narrow (IORM.in() );
++      
++
++      CORBA::Object_var iogr = make_iogr ("Domain_1", 1, 1, orb->string_to_object (ior.in ())  );
++      
++
++      CORBA::String_var iorgr_string =
++        orb->object_to_string (iogr.in () );
++      
++
++      // Output the IOR to the <ior_output_file>
++      FILE *output_file= ACE_OS::fopen (ior_output_file, "w");
++      if (output_file == 0)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "Cannot open output file for writing IOR: %s",
++                           ior_output_file),
++                              1);
++      ACE_OS::fprintf (output_file, "%s", iorgr_string.in ());
++      ACE_OS::fclose (output_file);
++
++      poa_manager->activate ();
++      
++
++      orb->run ();
++      
++
++      ACE_DEBUG ((LM_DEBUG, "(%P|%t) server - event loop finished\n"));
++
++      root_poa->destroy (1, 1 );
++      
++
++      orb->destroy ();
++      
++    }
++  catch (const CORBA::Exception& ex)
++    {
++      ex._tao_print_exception (
++                           "Exception caught:");
++      return 1;
++    }
++  
++
++  return 0;
++}
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/server.cpp
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/Hello.h
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/Hello.h	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/Hello.h	(revision 0)
+@@ -0,0 +1,46 @@
++//
++// $Id$
++//
++
++#ifndef HELLO_H
++#define HELLO_H
++#include /**/ "ace/pre.h"
++
++#include "TestS.h"
++
++#if defined (_MSC_VER)
++# pragma warning(push)
++# pragma warning (disable:4250)
++#endif /* _MSC_VER */
++
++/// Implement the Test::Hello interface
++class Hello
++  : public virtual POA_Test::Hello
++{
++public:
++  /// Constructor
++  Hello (CORBA::ORB_ptr orb);
++
++  // = The skeleton methods
++  virtual void shutdown ();
++
++  virtual void check_normal_context ();
++
++  virtual void check_extended_context ();
++
++  static CORBA::Boolean normal_context_ok_;
++
++  static CORBA::Boolean extended_context_ok_;
++
++private:
++  /// Use an ORB reference to conver strings to objects and shutdown
++  /// the application.
++  CORBA::ORB_var orb_;
++};
++
++#if defined(_MSC_VER)
++# pragma warning(pop)
++#endif /* _MSC_VER */
++
++#include /**/ "ace/post.h"
++#endif /* HELLO_H */
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/Hello.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/README
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/README	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/README	(revision 0)
+@@ -0,0 +1,23 @@
++// $Id$
++
++This test checks that the -ORBFTSendFullGroupTC property switches between sending only the IOGR group version as an FTGroupVersionServiceContext on requests or instead the complete FTGroupTaggedComponent data.
++
++_Success Looks Like_
++
++(20413|3074066112) server - event loop finished
++Test passed !!!
++
++_Regression looks like_
++
++[sm@beatrice tao431_regression]$ ./run_test.pl
++Error - REGRESSION - ORB doesn't even accept the config option
++ERROR: client returned 1
++ERROR: server timedout
++ERROR: server returned -1
++
++... or some message like:
++Error - REGRESSION - normal format service context not transmitted
++
++... and / or:
++
++Error - REGRESSION - extended format service context not transmitted
+\ No newline at end of file
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/README
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/run_test.pl
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/run_test.pl	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/run_test.pl	(revision 0)
+@@ -0,0 +1,49 @@
++eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
++     & eval 'exec perl -S $0 $argv:q'
++     if 0;
++
++# $Id$
++# -*- perl -*-
++
++use lib '../../../../bin';
++use PerlACE::Run_Test;
++
++$status = 0;
++
++$iorfile = PerlACE::LocalFile ("server.ior");
++unlink $iorfile;
++
++if (PerlACE::is_vxworks_test()) {
++    $SV = new PerlACE::ProcessVX ("server", "-o server.ior");
++}
++else {
++    $SV = new PerlACE::Process ("server", "-o $iorfile");
++}
++$CL = new PerlACE::Process ("client", " -k file://$iorfile");
++
++$SV->Spawn ();
++
++if (PerlACE::waitforfile_timed ($iorfile,
++                        $PerlACE::wait_interval_for_process_creation) == -1) {
++    print STDERR "ERROR: cannot find file <$iorfile>\n";
++    $SV->Kill (); $SV->TimedWait (1);
++    exit 1;
++}
++
++$client = $CL->SpawnWaitKill (300);
++
++if ($client != 0) {
++    print STDERR "ERROR: client returned $client\n";
++    $status = 1;
++}
++
++$server = $SV->WaitKill (10);
++
++if ($server != 0) {
++    print STDERR "ERROR: server returned $server\n";
++    $status = 1;
++}
++
++unlink $iorfile;
++
++exit $status;
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/run_test.pl
+___________________________________________________________________
+Name: svn:executable
+   + *
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/ServerORBInitializer.cpp
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/ServerORBInitializer.cpp	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/ServerORBInitializer.cpp	(revision 0)
+@@ -0,0 +1,49 @@
++// -*- C++ -*-
++//
++// $Id$
++
++#include "ServerORBInitializer.h"
++#include "ServerRequest_Interceptor.h"
++#include "tao/ORB_Constants.h"
++#include "tao/Exception.h"
++
++
++void
++Server_ORBInitializer::pre_init (
++    PortableInterceptor::ORBInitInfo_ptr
++    )
++{
++
++}
++
++void
++Server_ORBInitializer::post_init (
++    PortableInterceptor::ORBInitInfo_ptr info
++    )
++{
++  this->register_server_request_interceptors (info
++                                              );
++
++}
++
++void
++Server_ORBInitializer::register_server_request_interceptors (
++    PortableInterceptor::ORBInitInfo_ptr info
++    )
++{
++  PortableInterceptor::ServerRequestInterceptor_ptr sri =
++    PortableInterceptor::ServerRequestInterceptor::_nil ();
++
++  ACE_NEW_THROW_EX (sri,
++                    TAO249_ServerRequest_Interceptor,
++                    CORBA::NO_MEMORY ());
++
++  PortableInterceptor::ServerRequestInterceptor_var
++    server_interceptor = sri;
++
++  info->add_server_request_interceptor (server_interceptor.in ()
++                                        );
++
++}
++
++
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/ServerORBInitializer.cpp
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: orbsvcs/tests/Bug_3216_Regression/ServerRequest_Interceptor.cpp
+===================================================================
+--- orbsvcs/tests/Bug_3216_Regression/ServerRequest_Interceptor.cpp	(revision 0)
++++ orbsvcs/tests/Bug_3216_Regression/ServerRequest_Interceptor.cpp	(revision 0)
+@@ -0,0 +1,122 @@
++// -*- C++ -*-
++
++#include "ServerRequest_Interceptor.h"
++#include "orbsvcs/FT_CORBA_ORBC.h"
++#include "tao/IOP_IORC.h"
++#include "tao/ORB_Constants.h"
++#include "tao/AnyTypeCode/DynamicC.h"
++#include "tao/AnyTypeCode/TypeCode.h"
++#include "tao/CDR.h"
++#include "ace/Log_Msg.h"
++#include "ace/OS_NS_string.h"
++#include "Hello.h"
++
++ACE_RCSID (FaultTolerance,
++           TAO249_ServerRequest_Interceptor,
++           "$Id$")
++
++TAO249_ServerRequest_Interceptor::TAO249_ServerRequest_Interceptor (void)
++: orb_ (0),
++  client_id_ (0)
++{
++}
++
++TAO249_ServerRequest_Interceptor::~TAO249_ServerRequest_Interceptor (void)
++{
++}
++
++
++char *
++TAO249_ServerRequest_Interceptor::name ()
++{
++  return CORBA::string_dup ("TAO_TAO249_ServerRequest_Interceptor");
++}
++
++void
++TAO249_ServerRequest_Interceptor::destroy ()
++{
++}
++
++void
++TAO249_ServerRequest_Interceptor::receive_request_service_contexts (
++  PortableInterceptor::ServerRequestInfo_ptr
++  )
++{
++}
++
++void
++TAO249_ServerRequest_Interceptor::receive_request (
++  PortableInterceptor::ServerRequestInfo_ptr ri
++  )
++{
++  CORBA::String_var op = ri->operation ();
++
++  try
++  {
++    IOP::ServiceContext_var sc =
++      ri->get_request_service_context (IOP::FT_GROUP_VERSION
++                                       );
++
++
++    TAO_InputCDR cdr (reinterpret_cast <const char*>
++                     (sc->context_data.get_buffer ()),
++                     sc->context_data.length ());
++
++    CORBA::Boolean byte_order;
++
++    if ((cdr >> ACE_InputCDR::to_boolean (byte_order)) == 0)
++      {
++        ACE_THROW (CORBA::BAD_PARAM (CORBA::OMGVMCID | 28,
++                               CORBA::COMPLETED_NO));
++      }
++
++
++    cdr.reset_byte_order (static_cast <int> (byte_order));
++
++    Hello::normal_context_ok_ = 0;
++    Hello::extended_context_ok_ = 0;
++
++    if (! ACE_OS::strcmp (op.in (), "check_normal_context"))
++      {
++        FT::FTGroupVersionServiceContext ftrsc;
++        Hello::normal_context_ok_ = (cdr >> ftrsc) != 0;
++      }
++    else if (! ACE_OS::strcmp (op.in (), "check_extended_context"))
++      {
++        FT::TagFTGroupTaggedComponent tftgtc;
++        Hello::extended_context_ok_ = (cdr >> tftgtc) != 0;
++      }
++  }
++catch (const CORBA::Exception& ex)
++  {
++    ACE_DEBUG ((LM_ERROR, "Unexpected (non regression) error - test failed\n"));
++    ex._tao_print_exception (
++                               "Exception in TAO249_ServerRequest_Interceptor::receive_request \n");
++    ACE_RE_THROW;
++  }
++
++
++
++}
++
++void
++TAO249_ServerRequest_Interceptor::send_reply (
++  PortableInterceptor::ServerRequestInfo_ptr
++  )
++{
++}
++
++void
++TAO249_ServerRequest_Interceptor::send_exception (
++  PortableInterceptor::ServerRequestInfo_ptr
++  )
++{
++}
++
++void
++TAO249_ServerRequest_Interceptor::send_other (
++  PortableInterceptor::ServerRequestInfo_ptr
++  )
++{
++}
++
+
+Property changes on: orbsvcs/tests/Bug_3216_Regression/ServerRequest_Interceptor.cpp
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Index: tao/ORB_Core.cpp
+===================================================================
+--- tao/ORB_Core.cpp	(revision 80572)
++++ tao/ORB_Core.cpp	(working copy)
+@@ -213,6 +213,7 @@
+     resource_factory_ (0),
+     client_factory_ (0),
+     server_factory_ (0),
++    ft_send_extended_sc_ (false),
+     opt_for_collocation_ (true),
+     use_global_collocation_ (true),
+     collocation_strategy_ (THRU_POA),
+@@ -1037,7 +1038,14 @@
+ 
+           arg_shifter.consume_arg ();
+         }
++      else if (0 != (current_arg = arg_shifter.get_the_parameter
++                (ACE_TEXT("-ORBFTSendFullGroupTC"))))
++        {
++          this->ft_send_extended_sc_ = ACE_OS::atoi (current_arg);
+ 
++          arg_shifter.consume_arg ();
++        }
++
+       ////////////////////////////////////////////////////////////////
+       // catch any unknown -ORB args                                //
+       ////////////////////////////////////////////////////////////////
+Index: tao/ORB_Core.inl
+===================================================================
+--- tao/ORB_Core.inl	(revision 80572)
++++ tao/ORB_Core.inl	(working copy)
+@@ -144,6 +144,12 @@
+   return this->ft_service_;
+ }
+ 
++ACE_INLINE CORBA::Boolean
++TAO_ORB_Core::ft_send_extended_sc (void)
++{
++  return this->ft_send_extended_sc_;
++}
++
+ ACE_INLINE ACE_Thread_Manager *
+ TAO_ORB_Core::thr_mgr (void)
+ {
+Index: tao/ORB_Core.h
+===================================================================
+--- tao/ORB_Core.h	(revision 80572)
++++ tao/ORB_Core.h	(working copy)
+@@ -735,6 +735,11 @@
+   /// Return a reference to the Fault Tolerant service object.
+   TAO_Fault_Tolerance_Service &fault_tolerance_service (void);
+ 
++  /// Transmit the entire TAG_FT_GROUP component data from a server IOGR as
++  /// a FT_GROUP_VERSION tagged service context on requests to that IOGR instead
++  /// of just the group version.
++  CORBA::Boolean ft_send_extended_sc (void);
++
+   /// Raise a comm failure exception if a service is not loaded, else
+   /// delegate to the service to see what the service has to do for
+   /// this case.
+@@ -1080,9 +1085,14 @@
+ 
+   /// Fault Tolerant service hook.
+   TAO_Fault_Tolerance_Service ft_service_;
+-
++  
+   //@}
+ 
++  /// TRUE transmits a full TAG_FT_GROUP component in place of the FT_GROUP_VERSION
++  /// context on FT requests. This is contrary to the spec but enables more effective
++  /// fault tolerant stuff. @todo reference to OMG issue. Default false.
++  CORBA::Boolean ft_send_extended_sc_;
++
+   /// TRUE if we want to take advantage of collocation optimization in
+   /// this ORB.
+   CORBA::Boolean opt_for_collocation_;
