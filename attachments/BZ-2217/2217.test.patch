@@ -1,0 +1,378 @@
+--- ACE_wrappers.orig/tests/Malloc_Test.cpp	2005-01-20 18:19:20.000000000 -0800
++++ ACE_wrappers/tests/Malloc_Test.cpp	2005-08-26 11:34:28.149220800 -0700
+@@ -34,8 +34,12 @@
+ 
+ #if (ACE_HAS_POSITION_INDEPENDENT_POINTERS == 1)
+ typedef ACE_Malloc_T<ACE_MMAP_MEMORY_POOL, ACE_Process_Mutex, ACE_PI_Control_Block> MALLOC;
++// Declare an allocator based PF_Memory_Pool
++typedef ACE_Malloc_T< ACE_PAGEFILE_MEMORY_POOL, ACE_Process_Mutex, ACE_PI_Control_Block > PF_MALLOC;
+ #else
+ typedef ACE_Malloc<ACE_MMAP_MEMORY_POOL, ACE_Process_Mutex> MALLOC;
++// Declare an allocator based PF_Memory_Pool
++typedef ACE_Malloc< ACE_PAGEFILE_MEMORY_POOL, ACE_Process_Mutex > PF_MALLOC;
+ #endif /* ACE_HAS_POSITION_INDEPENDENT_POINTERS == 1 */
+ #define MMAP_FILENAME ACE_TEXT ("test_file")
+ #define MUTEX_NAME ACE_TEXT ("test_lock")
+@@ -93,7 +97,7 @@
+ // <ACE_HAS_NONSTATIC_OBJECT_MANAGER>.
+ 
+ static MALLOC *
+-myallocator (const void *base_addr = 0)
++my_mmapallocator (const void *base_addr = 0)
+ {
+   static auto_ptr<MALLOC> static_allocator;
+ 
+@@ -121,6 +125,29 @@
+   return static_allocator.get ();
+ }
+ 
++static PF_MALLOC*
++my_pfallocator (const void *base_addr = 0)
++{
++  static auto_ptr<PF_MALLOC> static_allocator;
++
++  if (static_allocator.get () == 0)
++    {
++
++#if defined (ACE_HAS_WINCE)
++      // WinCE cannot do fixed base, ever.
++      ACE_Pagefile_Memory_Pool_Options options (ACE_DEFAULT_PAGEFILE_POOL_BASE);
++#else
++      ACE_Pagefile_Memory_Pool_Options options (const_cast<void*>(base_addr));
++#endif /* ACE_HAS_WINCE */
++
++      PF_MALLOC *ptr = new PF_MALLOC (MMAP_FILENAME,
++                                MUTEX_NAME,
++                                &options);
++      ACE_AUTO_PTR_RESET(static_allocator, ptr, PF_MALLOC);
++    }
++  return static_allocator.get ();
++}
++
+ static void
+ init_test (const void *base_addr = 0)
+ {
+@@ -140,10 +167,32 @@
+   int ft = 0;
+   mmap.init_acquire (1024, rbyte, ft);
+   mmap.release ();
++
++#ifdef ACE_WIN32
++#if defined (ACE_HAS_WINCE)
++    // WinCE cannot do fixed base, ever.
++    ACE_Pagefile_Memory_Pool_Options pfoptions (ACE_DEFAULT_PAGEFILE_POOL_BASE);
++#else
++    ACE_Pagefile_Memory_Pool_Options pfoptions (const_cast<void*>(base_addr));
++#endif /* ACE_HAS_WINCE */
++    ACE_Pagefile_Memory_Pool pagefile (MMAP_FILENAME, &pfoptions);
++
++    pagefile.init_acquire (1024, rbyte, ft);
++    pagefile.release();
++
++#endif /* ACE_WIN32 */
+ }
+ 
+-static Test_Data *
+-initialize (MALLOC *allocator)
++// Initialise data segment
++//
++// Use template function to support
++// both Pagefile and MMAP allocators.
++//
++// Note: an ACE_Allocator could have been
++// used but this is a test of ACE_Malloc
++//
++template <class T> static Test_Data *
++initialize (T *allocator)
+ {
+   double *temp = 0;
+   ACE_ALLOCATOR_RETURN (temp,
+@@ -248,11 +297,9 @@
+     }
+ }
+ 
+-static int
+-parent (Test_Data *data)
++template <class T> static int
++parent (T* myalloc, Test_Data *data)
+ {
+-  MALLOC *myalloc = myallocator ();
+-
+   {
+     ACE_GUARD_RETURN (ACE_Process_Mutex, guard, myalloc->mutex (), -1);
+     print ("parent", data);
+@@ -282,8 +329,8 @@
+   return 0;
+ }
+ 
+-static int
+-child (void)
++template <class T> static int
++child (T* alloc)
+ {
+   void *bar;
+   // Perform "busy waiting" here until the parent stores data under a
+@@ -291,8 +338,7 @@
+   // -- it's just to test that synchronization is working across
+   // processes via <ACE_Malloc>.
+   for (ACE_Time_Value timeout (0, 1000 * 10);
+-       myallocator ()->find ("bar",
+-                             bar) == -1;
++       alloc->find ("bar", bar) == -1;
+        )
+     {
+       ACE_DEBUG ((LM_DEBUG,
+@@ -330,9 +376,43 @@
+ }
+ #endif /* defined (ACE_WIN32) && (!defined (ACE_HAS_WINNT4) || (ACE_HAS_WINNT4 == 0)) */
+ 
++
++// Test that ACE_Pagefile_memory_Pool returns the true
++// base address of the memory pool
++//
++// ACE_MMAP_memory_Pool is used to obtain a base address
++// that memory can be mapped to, this address is then
++// freed and used to map an ACE_Pagefile_memory_Pool.
++// The base address retuned by the ACE_Pagefile_Memory_Pool
++// is then compared to the known base address.
++//
++// The result of this test alters the way subsequent tests
++// are performed using the ACE_Pagefile_Memory_Pool
++// (See http://deuce.doc.wustl.edu/bugzilla/show_bug.cgi?id=2217)
++//
++static int 
++pagefile_base_addr_test (PF_MALLOC* pfmalloc, const void* ba)
++{
++    // Get the base address
++    void* pf_baddr = pfmalloc->base_addr();
++
++    // Now check that the base address returned by
++    // both pools is the same
++    if (pf_baddr != ba)
++    {
++	ACE_ERROR_RETURN ((LM_ERROR,
++	    ACE_TEXT ("ACE_Pagefile_memory_Pool does not return correct base address\n")),
++	    -1);
++    }
++    return 0;
++}
++
+ int
+-run_main (int argc, ACE_TCHAR *[])
++run_main (int argc, ACE_TCHAR *argv[])
+ {
++    int retval = 0;
++    ACE_exitcode chld_status = 0;
++
+ #if defined (ACE_WIN32) \
+     && (!defined (ACE_HAS_WINNT4) || (ACE_HAS_WINNT4 == 0))
+   get_base_addrs();
+@@ -356,7 +436,7 @@
+       options.command_line (EXE_LOCATION
+                             ACE_TEXT ("Malloc_Test")
+                             ACE_PLATFORM_EXE_SUFFIX
+-                            ACE_TEXT (" run_as_test"));
++                            ACE_TEXT (" MALLOC_TEST"));
+ 
+ #ifdef ACE_HAS_WINCE
+       // \Windows\Start Menu is where Malloc_Test.exe will be downloaded to.
+@@ -364,13 +444,13 @@
+       options.process_name(ACE_TEXT("\\Windows\\Start Menu\\Malloc_Test.exe"));
+ #endif
+ 
+-      MALLOC *myalloc = myallocator (PARENT_BASE_ADDR);
++      MALLOC *myalloc = my_mmapallocator (PARENT_BASE_ADDR);
+ 
+       Test_Data *data = initialize (myalloc);
+       ACE_ASSERT (data != 0);
+ 
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("(%P) PARENT allocator at = %@, ")
++                  ACE_TEXT ("(%P) PARENT MMAP allocator at = %@, ")
+                   ACE_TEXT ("data allocated at %@\n"),
+                   myalloc,
+                   data));
+@@ -385,39 +465,168 @@
+                            ACE_TEXT ("%p\n"),
+                            ACE_TEXT ("spawn")), 1);
+ 
+-      parent (data);
++      parent (myalloc, data);
+ 
+       // Synchronize on the exit of the child.
+-      result = p.wait ();
++      chld_status = 0;
++      result = p.wait (&chld_status);
+       if (result == -1)
+         ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT ("%p\n"),
+                            ACE_TEXT ("wait")), 1);
++      retval += chld_status;
+       ACE_ASSERT (myalloc->ref_counter () == 1);
+       myalloc->remove ();
++
++#ifdef ACE_WIN32
++      const void* ba = PARENT_BASE_ADDR;
++      PF_MALLOC* pfm = my_pfallocator(ba);
++      if(pfm)
++      {
++	options.command_line (EXE_LOCATION
++				ACE_TEXT ("Malloc_Test")
++				ACE_PLATFORM_EXE_SUFFIX
++				ACE_TEXT (" BASE_ADDRESS_TEST"));
++
++	// (See http://deuce.doc.wustl.edu/bugzilla/show_bug.cgi?id=2217)
++	// Check Mapping in parent on new pagefile pool
++	{
++	    ACE_GUARD_RETURN (ACE_Process_Mutex, guard, pfm->mutex (), -1);
++	    pid_t pid = p.spawn (options);
++	    if (pid == -1)
++	    ACE_ERROR_RETURN ((LM_ERROR,
++			    ACE_TEXT ("%p\n"),
++			    ACE_TEXT ("spawn")), 1);
++	    ACE_DEBUG ((LM_DEBUG,
++		    ACE_TEXT ("(%P) PARENT Pagefile base address test\n")));
++	    retval += pagefile_base_addr_test(pfm, ba);
++	}
++	chld_status = 0;
++	result = p.wait (&chld_status);
++        if (result == -1)
++          ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_TEXT ("%p\n"),
++                           ACE_TEXT ("wait")), 1);
++	retval += chld_status;
++
++	// Perform duplicate of MMAP test using Pagefile
++        // (Check fix to 2217 doesn't break something)
++	options.command_line (EXE_LOCATION
++				ACE_TEXT ("Malloc_Test")
++				ACE_PLATFORM_EXE_SUFFIX
++				ACE_TEXT (" PAGEFILE_TEST"));
++
++
++	ACE_DEBUG ((LM_DEBUG,
++		    ACE_TEXT ("(%P) PARENT Pagefile allocator at = %@, ")
++		    ACE_TEXT ("data allocated at %@\n"),
++		    pfm,
++		    data));
++	data = initialize (pfm);
++	ACE_ASSERT (data != 0);
++
++	pfm->dump ();
++	result = pfm->bind ("foo", data);
++	ACE_ASSERT (result != -1);
++
++	pid = p.spawn (options);
++	if (pid == -1)
++	    ACE_ERROR_RETURN ((LM_ERROR,
++			    ACE_TEXT ("%p\n"),
++			    ACE_TEXT ("spawn")), 1);
++
++	parent (pfm, data);
++
++	// Synchronize on the exit of the child.
++	chld_status = 0;
++	result = p.wait (&chld_status);
++        if (result == -1)
++          ACE_ERROR_RETURN ((LM_ERROR,
++                           ACE_TEXT ("%p\n"),
++                           ACE_TEXT ("wait")), 1);
++	retval += chld_status;
++	ACE_ASSERT (pfm->ref_counter () == 1);
++	pfm->remove();
++      }
++      else
++	  retval = -1;
++
++#endif /* ACE_WIN32 */
+       ACE_END_TEST;
+-      return 0;
++      return retval;
+     }
+   else
+     {
+       // In this case we're the child process.
+-      ACE_APPEND_LOG (ACE_TEXT ("Malloc_Test-child"));
++      int retval = 0;
+ 
+-      void *data = 0;
+-      MALLOC *myalloc = myallocator (CHILD_BASE_ADDR);
+-      int result = myalloc->find ("foo", data);
+-      ACE_ASSERT (result != -1);
++      if(!ACE_OS::strcmp(ACE_TEXT("MALLOC_TEST"), argv[1]))
++	{
++          ACE_APPEND_LOG (ACE_TEXT ("Malloc_Test-MMAP-child"));
++          void *data = 0;
++          MALLOC *myalloc = my_mmapallocator (CHILD_BASE_ADDR);
+ 
+-      ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("(%P) CHILD allocator at = %@, ")
++          int result = myalloc->find ("foo", data);
++          ACE_ASSERT (result != -1);
++
++          ACE_DEBUG ((LM_DEBUG,
++                  ACE_TEXT ("(%P) CHILD MMAP allocator at = %@, ")
+                   ACE_TEXT ("data allocated at %@\n"),
+                   myalloc,
+                   data));
+-      myalloc->dump ();
+-      child ();
+-      myalloc->release ();
+-      ACE_END_LOG;
+-      return 0;
++          myalloc->dump ();
++          child (myalloc);
++          myalloc->release ();
++          ACE_END_LOG;
++	}
++#ifdef ACE_WIN32
++      else if(!ACE_OS::strcmp(ACE_TEXT("PAGEFILE_TEST"), argv[1]))
++	{
++          ACE_APPEND_LOG (ACE_TEXT ("Malloc_Test-Pagefile-child"));
++          void *data = 0;
++	  const void *ba = CHILD_BASE_ADDR;
++          PF_MALLOC *myalloc = my_pfallocator (ba);
++
++          int result = myalloc->find ("foo", data);
++          ACE_ASSERT (result != -1);
++
++          ACE_DEBUG ((LM_DEBUG,
++                  ACE_TEXT ("(%P) CHILD Pagefile allocator at = %@, ")
++                  ACE_TEXT ("data allocated at %@\n"),
++                  myalloc,
++                  data));
++          myalloc->dump ();
++          child (myalloc);
++          myalloc->release ();
++          ACE_END_LOG;
++	}
++      else if(!ACE_OS::strcmp(ACE_TEXT("BASE_ADDRESS_TEST"), argv[1]))
++        {
++          ACE_APPEND_LOG (ACE_TEXT ("Malloc_Test-Pagefile-Base-Address-child"));
++          // (See http://deuce.doc.wustl.edu/bugzilla/show_bug.cgi?id=2217)
++          // Check mapping in child on already existing pagefile pool
++	  const void* ba = CHILD_BASE_ADDR;
++	  PF_MALLOC* myalloc = my_pfallocator(ba);
++          if (myalloc != 0)
++	    {
++	      ACE_GUARD_RETURN (ACE_Process_Mutex, guard, myalloc->mutex (), -1);
++	      retval += pagefile_base_addr_test(myalloc, ba);
++	    }
++	  myalloc->release();
++          ACE_END_LOG;
++        }
++#endif /* ACE_WIN32 */
++      else
++        {
++          ACE_APPEND_LOG (ACE_TEXT ("Malloc_Test-Unknown-child"));
++          ACE_DEBUG ((LM_DEBUG,
++                  ACE_TEXT ("(%P) CHILD unknown test = %s\n"),
++		  argv[1] ? argv[1] : "(null)"));
++          ACE_END_LOG;
++	  retval = 1;
++	}
++
++	return retval;
+     }
+ }
+ 
