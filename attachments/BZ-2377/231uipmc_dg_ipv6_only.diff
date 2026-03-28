@@ -1,0 +1,757 @@
+Index: UIPMC_Connector.h
+===================================================================
+--- UIPMC_Connector.h	(revision 77946)
++++ UIPMC_Connector.h	(working copy)
+@@ -74,22 +74,6 @@
+ 
+   /// Cancel the passed cvs handler from the connector
+   virtual int cancel_svc_handler (TAO_Connection_Handler * svc_handler);
+-
+-private:
+-  // @@ Michael: UDP Addition
+-  ACE_Hash_Map_Manager_Ex < ACE_INET_Addr,
+-                            TAO_UIPMC_Connection_Handler *,
+-                            ACE_Hash < ACE_INET_Addr >,
+-                            ACE_Equal_To < ACE_INET_Addr >,
+-                            ACE_Null_Mutex >
+-    svc_handler_table_;
+-
+-  typedef ACE_Hash_Map_Iterator_Ex < ACE_INET_Addr,
+-                                     TAO_UIPMC_Connection_Handler *,
+-                                     ACE_Hash < ACE_INET_Addr >,
+-                                     ACE_Equal_To < ACE_INET_Addr >,
+-                                     ACE_Null_Mutex >
+-    SvcHandlerIterator;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: UIPMC_Acceptor.cpp
+===================================================================
+--- UIPMC_Acceptor.cpp	(revision 77946)
++++ UIPMC_Acceptor.cpp	(working copy)
+@@ -118,7 +118,56 @@
+   const char *specified_hostname = 0;
+   char tmp_host[MAXHOSTNAMELEN + 1];
+ 
++#if defined (ACE_HAS_IPV6)
++  // IPv6 numeric address in host string?
++  bool ipv6_in_host = false;
++
++  // Check if this is a (possibly) IPv6 supporting profile containing a
++  // numeric IPv6 address representation.
++  if ((this->version_.major > TAO_MIN_IPV6_IIOP_MAJOR ||
++        this->version_.minor >= TAO_MIN_IPV6_IIOP_MINOR) &&
++      address[0] == '[')
++    {
++      // In this case we have to find the end of the numeric address and
++      // start looking for the port separator from there.
++      const char *cp_pos = ACE_OS::strchr(address, ']');
++      if (cp_pos == 0)
++        {
++          // No valid IPv6 address specified.
++          ACE_ERROR_RETURN ((LM_ERROR,
++                             ACE_TEXT ("TAO (%P|%t) - ")
++                             ACE_TEXT ("UIPMC_Acceptor::open, ")
++                             ACE_TEXT ("Invalid IPv6 decimal address specified\n\n")),
++                            -1);
++        }
++      else
++        {
++          if (cp_pos[1] == ':')    // Look for a port
++            port_separator_loc = cp_pos + 1;
++          else
++            port_separator_loc = 0;
++          // Extract out just the host part of the address.
++          const size_t len = cp_pos - (address + 1);
++          ACE_OS::memcpy (tmp_host, address + 1, len);
++          tmp_host[len] = '\0';
++          ipv6_in_host = true; // host string contains full IPv6 numeric address
++        }
++    }
++#endif /* ACE_HAS_IPV6 */
++
+   // Both host and port have to be specified.
++#if defined (ACE_HAS_IPV6)
++  if (ipv6_in_host)
++    {
++      u_short port =
++        static_cast<u_short> (ACE_OS::atoi (port_separator_loc + sizeof (':')));
++
++      if (addr.set (port, tmp_host) != 0)
++        return -1;
++    }
++  else
++    {
++#endif /* ACE_HAS_IPV6 */
+   if (addr.set (address) != 0)
+     return -1;
+ 
+@@ -126,9 +175,26 @@
+   size_t len = port_separator_loc - address;
+   ACE_OS::memcpy (tmp_host, address, len);
+   tmp_host[len] = '\0';
++#if defined (ACE_HAS_IPV6)
++    }
++#endif /* ACE_HAS_IPV6 */
+ 
+   specified_hostname = tmp_host;
+ 
++#if defined (ACE_HAS_IPV6)
++  // Check for violation of ORBConnectIPV6Only option
++  if (this->orb_core_->orb_params ()->connect_ipv6_only () &&
++      addr.is_ipv4_mapped_ipv6 ())
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("TAO (%P|%t) - ")
++                         ACE_TEXT ("UIPMC_Acceptor::open, ")
++                         ACE_TEXT ("non-IPv6 endpoints not allowed when ")
++                         ACE_TEXT ("connect_ipv6_only is set\n\n")),
++                        -1);
++    }
++#endif /* ACE_HAS_IPV6 */
++
+   this->endpoint_count_ = 1;  // Only one hostname to store
+ 
+   ACE_NEW_RETURN (this->addrs_,
+@@ -186,9 +252,6 @@
+   if (result == -1)
+     return result;
+ 
+-  // Connection handler ownership now belongs to the Reactor.
+-  this->connection_handler_->remove_reference ();
+-
+   // Set the port for each addr.  If there is more than one network
+   // interface then the endpoint created on each interface will be on
+   // the same port.  This is how a wildcard socket bind() is supposed
+Index: UIPMC_Endpoint.cpp
+===================================================================
+--- UIPMC_Endpoint.cpp	(revision 77946)
++++ UIPMC_Endpoint.cpp	(working copy)
+@@ -37,6 +37,7 @@
+   this->object_addr (addr);
+ }
+ 
++// Use of this ctr must be avoided
+ TAO_UIPMC_Endpoint::TAO_UIPMC_Endpoint (const CORBA::Octet class_d_address[4],
+                                         CORBA::UShort port)
+   : TAO_Endpoint (IOP::TAG_UIPMC),
+@@ -59,7 +60,6 @@
+ TAO_UIPMC_Endpoint::object_addr (const ACE_INET_Addr &addr)
+ {
+   this->port_ = addr.get_port_number();
+-  this->uint_ip_addr (addr.get_ip_address ());
+ 
+   this->object_addr_.set (addr);
+ }
+@@ -75,19 +75,28 @@
+ TAO_UIPMC_Endpoint::addr_to_string (char *buffer, size_t length)
+ {
+   size_t actual_len =
+-    15                           // chars in dotted decimal addr
++    ACE_OS::strlen (this->object_addr_.get_host_addr ()) // chars in host name
+     + sizeof (':')               // delimiter
+     + 5                          // max port
+     + sizeof ('\0');
+ 
++#if defined (ACE_HAS_IPV6)
++  if (this->object_addr_.get_type () == AF_INET6)
++    actual_len += 2; // '[' + ']'
++#endif /* ACE_HAS_IPV6 */
++
+   if (length < actual_len)
+     return -1;
+ 
+-  ACE_OS::sprintf (buffer, "%d.%d.%d.%d:%d",
+-                   this->class_d_address_[0],
+-                   this->class_d_address_[1],
+-                   this->class_d_address_[2],
+-                   this->class_d_address_[3],
++#if defined (ACE_HAS_IPV6)
++  if (this->object_addr_.get_type () == AF_INET6)
++    ACE_OS::sprintf (buffer, "[%s]:%d",
++                     this->object_addr_.get_host_addr (),
++                     this->port_);
++  else
++#endif /* ACE_HAS_IPV6 */
++  ACE_OS::sprintf (buffer, "%s:%d",
++                   this->object_addr_.get_host_addr (),
+                    this->port_);
+ 
+   return 0;
+@@ -114,15 +123,15 @@
+ CORBA::Boolean
+ TAO_UIPMC_Endpoint::is_equivalent (const TAO_Endpoint *other_endpoint)
+ {
+-  TAO_Endpoint *endpt = const_cast<TAO_Endpoint *> (other_endpoint);
++  const TAO_UIPMC_Endpoint *endpoint =
++    dynamic_cast<const TAO_UIPMC_Endpoint *> (other_endpoint);
+ 
+-  TAO_UIPMC_Endpoint *endpoint = dynamic_cast<TAO_UIPMC_Endpoint *> (endpt);
+   if (endpoint == 0)
+     return 0;
+ 
+   return
+-    this->port_ == endpoint->port_
+-    && ACE_OS::memcmp (this->class_d_address_, endpoint->class_d_address_, 4) == 0;
++    (this->port_ == endpoint->port_
++     && ACE_OS::strcmp (this->get_host_addr (), endpoint->get_host_addr ()) == 0);
+ }
+ 
+ CORBA::ULong
+@@ -140,8 +149,7 @@
+     if (this->hash_val_ != 0)
+       return this->hash_val_;
+ 
+-    this->hash_val_ =
+-      this->uint_ip_addr () + this->port_;
++    this->hash_val_ = this->object_addr_.hash ();
+   }
+ 
+   return this->hash_val_;
+Index: UIPMC_Profile.h
+===================================================================
+--- UIPMC_Profile.h	(revision 77946)
++++ UIPMC_Profile.h	(working copy)
+@@ -134,9 +134,6 @@
+    */
+   TAO_UIPMC_Endpoint endpoint_;
+ 
+-  /// Number of endpoints in the list headed by <endpoint_>.
+-  CORBA::ULong count_;
+-
+ private:
+ 
+   /// Cached version of our tagged profile.
+@@ -150,7 +147,9 @@
+ 
+   /// The group reference's version.
+   PortableGroup::ObjectGroupRefVersion ref_version_;
+-
++  
++  /// A sign whether ref_version is really present
++  bool has_ref_version_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: UIPMC_Factory.cpp
+===================================================================
+--- UIPMC_Factory.cpp	(revision 77946)
++++ UIPMC_Factory.cpp	(working copy)
+@@ -10,7 +10,7 @@
+            UIPMC_Factory,
+            "$Id$")
+ 
+-static const char the_prefix[] = "uipmc";
++static const char the_prefix[] = "miop";
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+Index: UIPMC_Connection_Handler.cpp
+===================================================================
+--- UIPMC_Connection_Handler.cpp	(revision 77946)
++++ UIPMC_Connection_Handler.cpp	(working copy)
+@@ -253,9 +254,6 @@
+ int
+ TAO_UIPMC_Connection_Handler::close (u_long)
+ {
+-  this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED,
+-           this->orb_core ()->leader_follower ());
+-  this->transport ()->remove_reference ();
+   return 0;
+ }
+ 
+Index: UIPMC_Connector.cpp
+===================================================================
+--- UIPMC_Connector.cpp	(revision 77946)
++++ UIPMC_Connector.cpp	(working copy)
+@@ -7,6 +7,7 @@
+ #include "tao/ORB_Core.h"
+ #include "tao/Base_Transport_Property.h"
+ #include "tao/Protocols_Hooks.h"
++#include "tao/Thread_Lane_Resources.h"
+ 
+ #include "ace/Connector.h"
+ #include "ace/OS_NS_strings.h"
+@@ -42,14 +43,6 @@
+ int
+ TAO_UIPMC_Connector::close (void)
+ {
+-  SvcHandlerIterator iter (svc_handler_table_);
+-
+-  while (!iter.done ())
+-    {
+-      (*iter).int_id_->remove_reference ();
+-      iter++;
+-    }
+-
+   return 0;
+ }
+ 
+@@ -71,7 +64,12 @@
+   // Verify that the remote ACE_INET_Addr was initialized properly.
+   // Failure can occur if hostname lookup failed when initializing the
+   // remote ACE_INET_Addr.
+-  if (remote_address.get_type () != AF_INET)
++#if defined (ACE_HAS_IPV6)
++   if (remote_address.get_type () != AF_INET &&
++      remote_address.get_type () != AF_INET6)
++#else /* ACE_HAS_IPV6 */
++   if (remote_address.get_type () != AF_INET)
++#endif /* !ACE_HAS_IPV6 */
+     {
+       if (TAO_debug_level > 0)
+         {
+@@ -102,35 +100,108 @@
+   const ACE_INET_Addr &remote_address =
+     uipmc_endpoint->object_addr ();
+ 
++#if defined (ACE_HAS_IPV6) && !defined (ACE_HAS_IPV6_V6ONLY)
++  // Check if we need to invalidate accepted connections
++  // from IPv4 mapped IPv6 addresses
++  if (this->orb_core ()->orb_params ()->connect_ipv6_only () &&
++      remote_address.is_ipv4_mapped_ipv6 ())
++    {
++      if (TAO_debug_level > 0)
++        {
++          ACE_TCHAR remote_as_string[MAXHOSTNAMELEN + 16];
++
++          (void) remote_address.addr_to_string (remote_as_string,
++                                                sizeof remote_as_string);
++
++          ACE_ERROR ((LM_ERROR,
++                      ACE_TEXT("TAO (%P|%t) - UIPMC_Connection_Handler::open, ")
++                      ACE_TEXT("invalid connection to IPv4 mapped IPv6 interface <%s>!\n"),
++                      remote_as_string));
++        }
++      return 0;
++    }
++#endif /* ACE_HAS_IPV6 && ACE_HAS_IPV6_V6ONLY */
++
+   TAO_UIPMC_Connection_Handler *svc_handler = 0;
+ 
+-  if (this->svc_handler_table_.find (remote_address, svc_handler) == -1)
++  ACE_NEW_RETURN (svc_handler,
++                  TAO_UIPMC_Connection_Handler (this->orb_core ()),
++                  0);
++
++  u_short port = 0;
++  const ACE_UINT32 ia_any = INADDR_ANY;
++  ACE_INET_Addr local_addr(port, ia_any);
++
++#if defined (ACE_HAS_IPV6)
++  if (remote_address.get_type () == AF_INET6)
++    local_addr.set (port,
++                    ACE_IPV6_ANY);
++#endif /* ACE_HAS_IPV6 */
++
++  svc_handler->local_addr (local_addr);
++  svc_handler->addr (remote_address);
++
++  int retval = svc_handler->open (0);
++
++  // Failure to open a connection.
++  if (retval != 0)
+     {
+-      TAO_UIPMC_Connection_Handler *svc_handler_i = 0;
+-      ACE_NEW_RETURN (svc_handler_i,
+-                      TAO_UIPMC_Connection_Handler (this->orb_core ()),
+-                      0);
++      if (TAO_debug_level > 0)
++        {
++          ACE_ERROR ((LM_ERROR,
++                      "TAO (%P|%t) - UIPMC_Connector::make_connection, "
++                      "could not make a new connection\n"));
++        }
+ 
+-      svc_handler_i->local_addr (ACE_sap_any_cast (ACE_INET_Addr &));
+-      svc_handler_i->addr (remote_address);
++      return 0;
++    }
+ 
+-      svc_handler_i->open (0);
++  if (TAO_debug_level > 2)
++    ACE_DEBUG ((LM_DEBUG,
++                ACE_TEXT ("TAO (%P|%t) - UIPMC_Connector::make_connection, ")
++                ACE_TEXT ("new connection on HANDLE %d\n"),
++                svc_handler->get_handle ()));
+ 
+-      svc_handler_table_.bind (remote_address,
+-                               svc_handler_i);
+-      svc_handler = svc_handler_i;
++  TAO_UIPMC_Transport *transport =
++    dynamic_cast<TAO_UIPMC_Transport *> (svc_handler->transport ());
+ 
+-      if (TAO_debug_level > 2)
+-        ACE_DEBUG ((LM_DEBUG,
+-                    ACE_TEXT ("(%P|%t) UIPMC_Connector::make_connection, ")
+-                    ACE_TEXT ("new connection on HANDLE %d\n"),
+-                    svc_handler->get_handle ()));
+-   }
++  // In case of errors transport is zero
++  if (transport == 0)
++    {
++      // Give users a clue to the problem.
++      if (TAO_debug_level > 3)
++          ACE_DEBUG ((LM_ERROR,
++                      "TAO (%P|%t) - UIPMC_Connector::make_connection, "
++                      "connection to <%s:%u> failed (%p)\n",
++                      ACE_TEXT_CHAR_TO_TCHAR (uipmc_endpoint->get_host_addr ()),
++                      uipmc_endpoint->port (),
++                      ACE_TEXT ("errno")));
+ 
+-  // @@ Michael: We do not use traditional connection management.
+-  svc_handler->add_reference ();
++      return 0;
++    }
+ 
+-  return svc_handler->transport ();
++  // Add the handler to Cache
++  retval =
++    this->orb_core ()->lane_resources ().transport_cache ().cache_transport (&desc,
++                                                                             transport);
++
++  // Failure in adding to cache.
++  if (retval != 0)
++    {
++      // Close the handler.
++      svc_handler->close ();
++
++      if (TAO_debug_level > 0)
++        {
++          ACE_ERROR ((LM_ERROR,
++                      "TAO (%P|%t) - UIPMC_Connector::make_connection, "
++                      "could not add the new connection to cache\n"));
++        }
++
++      return 0;
++    }
++
++  return transport;
+ }
+ 
+ 
+Index: UIPMC_Profile.cpp
+===================================================================
+--- UIPMC_Profile.cpp	(revision 77946)
++++ UIPMC_Profile.cpp	(working copy)
+@@ -16,7 +16,7 @@
+            UIPMC_Profile,
+            "$Id$")
+ 
+-static const char the_prefix[] = "uipmc";
++static const char the_prefix[] = "miop";
+ 
+ // UIPMC doesn't support object keys, so send profiles by default in the GIOP 1.2 target
+ // specification.
+@@ -32,13 +32,11 @@
+   return TAO_UIPMC_Profile::object_key_delimiter_;
+ }
+ 
+-
+ TAO_UIPMC_Profile::TAO_UIPMC_Profile (TAO_ORB_Core *orb_core)
+   : TAO_Profile (IOP::TAG_UIPMC,
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (),
+-    count_ (1),
+     tagged_profile_ ()
+ {
+     addressing_mode_ = default_addressing_mode_;
+@@ -50,7 +48,6 @@
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (addr),
+-    count_ (1),
+     tagged_profile_ ()
+ {
+     addressing_mode_ = default_addressing_mode_;
+@@ -63,7 +60,6 @@
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (class_d_address, port),
+-    count_ (1),
+     tagged_profile_ ()
+ {
+     addressing_mode_ = default_addressing_mode_;
+@@ -77,7 +73,6 @@
+                  orb_core,
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+     endpoint_ (),
+-    count_ (1),
+     tagged_profile_ ()
+ {
+   this->add_group_component ();
+@@ -85,16 +80,6 @@
+   addressing_mode_ = default_addressing_mode_;
+ }
+ 
+-TAO_UIPMC_Profile::TAO_UIPMC_Profile (TAO_ORB_Core *orb_core)
+-  : TAO_Profile (TAO_TAG_UIPMC_PROFILE,
+-                 orb_core,
+-                 TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR, TAO_DEF_GIOP_MINOR)),
+-    endpoint_ (),
+-    count_ (1),
+-    tagged_profile_ ()
+-{
+-  addressing_mode_ = default_addressing_mode_;
+-}
+ */
+ 
+ TAO_UIPMC_Profile::~TAO_UIPMC_Profile (void)
+@@ -265,13 +250,10 @@
+   // Parse the group_domain_id.
+   // The Domain ID is terminated with a '-'.
+ 
+-  // Wrap the string in a ACE_CString
+-  ACE_CString ace_str (string, 0, false);
+-
+   // Look for the group domain delimitor.
+-  ACE_CString::size_type pos = ace_str.find ('-');
++  const char *pos = ACE_OS::strchr (string, '-');
+ 
+-  if (pos == ACE_CString::npos)
++  if (pos == 0)
+     {
+       // The group_domain_id is mandatory, so throw an
+       // exception if it isn't found.
+@@ -283,18 +265,18 @@
+     }
+ 
+   // Save the group_domain_id.
+-  ACE_CString group_domain_id = ace_str.substring (0, pos);
++  ACE_CString group_domain_id (string, pos - string);
+ 
+   // Parse the group_id.
+   // The group_id is terminated with a '-' or a '/'.
+ 
+   // Skip past the last '-'.
+-  ++pos;
+-  ACE_CString::size_type end_pos = ace_str.find ('-',pos);
++  string = pos + 1;
++  pos = ACE_OS::strchr (string, '-');
+ 
+   CORBA::Boolean parse_group_ref_version_flag = 0;
+ 
+-  if (end_pos != ACE_CString::npos)
++  if (pos != 0)
+     {
+       // String was terminated by a '-', so there's a group
+       // reference version to be parsed.
+@@ -303,9 +285,9 @@
+   else
+     {
+       // Look for a slash as the separator.
+-      end_pos = ace_str.find ('/', pos);
++      pos = ACE_OS::strchr (string, '/');
+ 
+-      if (end_pos == ACE_CString::npos)
++      if (pos == 0)
+         {
+           // The Group ID is mandatory, so throw an exception.
+           throw CORBA::INV_OBJREF (
+@@ -316,22 +298,23 @@
+         }
+     }
+ 
+-  // Get the domain_id.
+-  ACE_CString str_domain_id = ace_str.substring (pos, end_pos - pos);
++  // Get the group_id.
++  ACE_CString str_group_id (string, pos - string);
+ 
+   // Convert the domain_id into numerical form.
+   // @@ group_id is actually 64 bits, but strtoul only can parse 32 bits.
+   // @@ Need a 64 bit strtoul...
+   PortableGroup::ObjectGroupId group_id =
+-    ACE_OS::strtoul (str_domain_id.c_str (), 0, 10);
++    ACE_OS::strtoul (str_group_id.c_str (), 0, 10);
+ 
++  this->has_ref_version_ = false;
+   PortableGroup::ObjectGroupRefVersion ref_version = 0;
+   if (parse_group_ref_version_flag)
+     {
+       // Try to find the group version.  It is terminated by a '/'.
+-      pos = end_pos + 1;
+-      end_pos = ace_str.find ('/', pos);
+-      if (end_pos == ACE_CString::npos)
++      string = pos + 1;
++      pos = ACE_OS::strchr (string, '/');
++      if (pos == 0)
+         {
+           // The group version was expected but not found,
+           // so throw an exception.
+@@ -342,18 +325,19 @@
+             CORBA::COMPLETED_NO);
+         }
+ 
+-      ACE_CString str_group_ref_ver = ace_str.substring (pos, end_pos - pos);
++      ACE_CString str_group_ref_ver (string, pos - string);
+ 
+       ref_version =
+         ACE_OS::strtoul (str_group_ref_ver.c_str (), 0, 10);
++      this->has_ref_version_ = true;
+     }
+ 
+   // Parse the group multicast address.
+   // The multicast address is terminated by a ':'.
+-  pos = end_pos + 1;
+-  end_pos = ace_str.find (':', pos);
++  string = pos + 1;
++  pos = ACE_OS::strchr (string, ':');
+ 
+-  if (end_pos == ACE_CString::npos)
++  if (pos == 0)
+     {
+       // The multicast address is mandatory, so throw an exception,
+       // since it wasn't found.
+@@ -364,13 +348,54 @@
+         CORBA::COMPLETED_NO);
+     }
+ 
+-  ACE_CString mcast_addr = ace_str.substring (pos, end_pos - pos);
++  ACE_CString mcast_addr;
+ 
++#if defined (ACE_HAS_IPV6)
++  // Check if this is a (possibly) IPv6 supporting profile containing a
++  // decimal IPv6 address representation.
++  if ((this->version().major > TAO_MIN_IPV6_IIOP_MAJOR ||
++        this->version().minor >= TAO_MIN_IPV6_IIOP_MINOR) &&
++      string[0] == '[')
++    {
++      // In this case we have to find the end of the numeric address and
++      // start looking for the port separator from there.
++      pos = ACE_OS::strchr (string, ']');
++      if (pos == 0)
++        {
++          // No valid IPv6 address specified.
++          if (TAO_debug_level > 0)
++            {
++              ACE_DEBUG ((LM_ERROR,
++                       ACE_TEXT ("\nTAO (%P|%t) - UIPMC_Profile: ")
++                       ACE_TEXT ("Invalid IPv6 decimal address specified.\n")));
++            }
++
++          ACE_THROW (CORBA::INV_OBJREF (
++                       CORBA::SystemException::_tao_minor_code (
++                         0,
++                         EINVAL),
++                       CORBA::COMPLETED_NO));
++        }
++      else
++        {
++          ++string;
++          mcast_addr = ACE_CString (string, pos - string);
++          string = pos + 2;
++        }
++    }
++  else
++    {
++#endif /* ACE_HAS_IPV6 */
++  mcast_addr = ACE_CString (string, pos - string);
++  string = pos + 1;
++#if defined (ACE_HAS_IPV6)
++    }
++#endif /* ACE_HAS_IPV6 */
++
+   // Parse the multicast port number.
+ 
+   // First check that there's something left in the string.
+-  pos = end_pos + 1;
+-  if (ace_str[pos] == '\0')
++  if (string[0] == '\0')
+     {
+       // The multicast port is mandatory, so throw an exception,
+       // since it wasn't found.
+@@ -382,7 +407,7 @@
+     }
+ 
+   CORBA::UShort mcast_port =
+-      static_cast<CORBA::UShort> (ACE_OS::strtoul (ace_str.c_str () + pos, 0, 10));
++      static_cast<CORBA::UShort> (ACE_OS::strtoul (string, 0, 10));
+ 
+   //
+   // Finally, set all of the fields of the profile.
+@@ -394,7 +419,6 @@
+   this->set_group_info (group_domain_id.c_str (),
+                         group_id,
+                         ref_version);
+-
+ }
+ 
+ CORBA::Boolean
+@@ -442,27 +466,70 @@
+ char *
+ TAO_UIPMC_Profile::to_string (void)
+ {
+-  // @@ Frank: Update to pull out GroupID information...
++  // corbaloc:miop:1.2@1.0-group_id-1-1/host:port
+ 
+-  size_t buflen = (ACE_OS::strlen (::the_prefix) +
+-                   3 /* "loc" */ +
++  size_t buflen = (8 /* "corbaloc" */ +
+                    1 /* colon separator */ +
+-                   2 /* double-slash separator */ +
++                   ACE_OS::strlen (::the_prefix) + /* "miop" */
++                   1 /* colon separator */ +
+                    1 /* major version */ +
+                    1 /* decimal point */ +
+                    1 /* minor version */ +
+                    1 /* `@' character */ +
+-                   15 /* dotted decimal IPv4 address */ +
++                   1 /* component major version */ +
++                   1 /* decimal point */ +
++                   1 /* component minor version */ +
++                   1 /* `-' character */ +
++                   this->group_domain_id_.length () + /* domain id */
++                   1 /* `-' character */ +
++                   20 /* group id */ +
++                   1 /* `-' character */ +
++                   10 /* group reference version */ +
++                   1 /* `/' character */ +
++                   39 /* IPv4/IPv6 address */ +
+                    1 /* colon separator */ +
+                    5 /* port number */);
++#if defined (ACE_HAS_IPV6)
++  if (this->endpoint_.object_addr ().get_type () == AF_INET6)
++    buflen += 2; // room for '[' and ']'
++#endif /* ACE_HAS_IPV6 */
+ 
++  static const char digits [] = "0123456789";
++
+   char * buf = CORBA::string_alloc (static_cast<CORBA::ULong> (buflen));
+ 
+   ACE_OS::sprintf (buf,
+-                   "corbaloc:%s://1.0@%s:%d",
++                   "corbaloc:%s:%c.%c@%c.%c-%s-%llu",
+                    ::the_prefix,
++                   digits [this->version_.major],
++                   digits [this->version_.minor],
++                   digits [TAO_DEF_MIOP_MAJOR],
++                   digits [TAO_DEF_MIOP_MINOR],
++                   this->group_domain_id_.c_str (),
++                   this->group_id_);
++
++  if (this->has_ref_version_)
++    {
++      ACE_OS::sprintf (&buf[ACE_OS::strlen (buf)],
++                       "-%lu",
++                       this->ref_version_);
++    }
++
++#if defined (ACE_HAS_IPV6)
++  if (this->endpoint_.object_addr ().get_type () == AF_INET6)
++    {
++      ACE_OS::sprintf (&buf[ACE_OS::strlen (buf)],
++                       "/[%s]:%d",
++                       this->endpoint_.get_host_addr (),
++                       this->endpoint_.port ());
++    }
++  else
++#endif /* ACE_HAS_IPV6 */
++  ACE_OS::sprintf (&buf[ACE_OS::strlen (buf)],
++                   "/%s:%d",
+                    this->endpoint_.get_host_addr (),
+                    this->endpoint_.port ());
++
+   return buf;
+ }
+ 
