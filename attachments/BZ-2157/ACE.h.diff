@@ -1,0 +1,22 @@
+--- /software/src/policy/ACE/ACE_wrappers/ace/ACE.h	2004-04-12 11:23:25.000000000 -0400
++++ ACE.h	2005-06-16 11:18:24.000000000 -0400
+@@ -466,6 +466,19 @@
+                                int time_len,
+                                int return_pointer_to_first_digit = 0);
+ 
++#if defined (TIMESTAMP_CHANGE)
++  /**
++   * Returns the current date and timestamp in the format specified
++   * via date_time_fmt, append_usecs, and append_utc.
++   * The formatted output is stored in the <date_and_time> array, which
++   * is a user-supplied array of size <time_len> <ACE_TCHAR>s.  Returns
++   * 0 if unsuccessful, else returns a pointer to beginning of the
++   * <date_and_time> array.
++   */
++  static ACE_TCHAR *formatted_timestamp (ACE_TCHAR date_and_time[],
++                                         int time_len);
++#endif
++
+   /**
+    * if <avoid_zombies> == 0 call <ACE_OS::fork> directly, else create
+    * an orphan process that's inherited by the init process; init
