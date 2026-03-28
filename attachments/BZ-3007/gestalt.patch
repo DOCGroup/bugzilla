@@ -1,0 +1,58 @@
+--- ace/Service_Gestalt.cpp	2007-07-26 13:17:58.000000000 -0500
++++ ace/Service_Gestalt.cpp.orig	2007-04-02 10:08:31.000000000 -0500
+@@ -528,7 +528,6 @@
+   int const retv = this->repo_->find (stf->name (),
+                                       (const ACE_Service_Type **) &srp);
+ 
+-#if 0
+   // If there is an active service already, it must first be removed,
+   // before it could be re-installed.
+   // IJ: This used to be the behavior, before allowing multiple
+@@ -547,22 +546,6 @@
+ #endif
+         return 0;
+     }
+-#else
+-  // If there is an active service already, remove it first
+-  // before it can be re-installed.
+-  if (retv >= 0)
+-    {
+-#ifndef ACE_NLOGGING
+-      if (ACE::debug ())
+-        ACE_DEBUG ((LM_WARNING,
+-                    ACE_LIB_TEXT ("ACE (%P|%t) SG::initialize - repo=%@,")
+-                    ACE_LIB_TEXT (" removing %s before re-initializing.\n"),
+-                    this->repo_,
+-                    stf->name ()));
+-#endif
+-      this->repo_->remove (stf->name (), &srp);
+-    }
+-#endif
+ 
+   // If there is an inactive service by that name it may have been
+   // either inactivated, or just a forward declaration for a service,
+@@ -640,24 +623,12 @@
+   ACE_Service_Type *srp = 0;
+   if (this->repo_->find (sr->name (),
+                          (const ACE_Service_Type **) &srp) >= 0)
+-    {
+-#if 0
+     ACE_ERROR_RETURN ((LM_WARNING,
+                        ACE_LIB_TEXT ("ACE (%P|%t) SG::initialize - \'%s\' ")
+                        ACE_LIB_TEXT ("has already been installed. ")
+                        ACE_LIB_TEXT ("Remove before reinstalling\n"),
+                        sr->name ()),
+                       0);
+-#else
+-#ifndef ACE_NLOGGING
+-    ACE_DEBUG ((LM_WARNING,
+-                ACE_LIB_TEXT ("ACE (%P|%t) SG::initialize - ")
+-                ACE_LIB_TEXT (" removing %s before reinstalling.\n"),
+-                sr->name ()));
+-#endif
+-      this->repo_->remove (sr->name (), &srp);
+-#endif
+-    }
+ 
+   return this->initialize_i (sr, parameters);
+ 
