@@ -1,0 +1,181 @@
+Index: TAO/tao/IIOP_Connection_Handler.cpp
+--- TAO.orig/tao/IIOP_Connection_Handler.cpp	2006-09-28 16:50:37.000000000 +0100
++++ TAO/tao/IIOP_Connection_Handler.cpp	2006-12-15 14:21:03.000000000 +0000
+@@ -459,13 +459,12 @@
+       // The property for this handler has changed. Recache the
+       // handler with this property
+       int retval =
+-        this->transport ()->recache_transport (&prop);
++        this->transport ()->recache_idle_transport (&prop);
+ 
+       if (retval == -1)
+         return retval;
+ 
+       // Make the handler idle and ready for use
+-      this->transport ()->make_idle ();
+     }
+ 
+   return 0;
+Index: TAO/tao/Transport_Cache_Manager.cpp
+--- TAO.orig/tao/Transport_Cache_Manager.cpp	2006-08-31 12:22:59.000000000 +0100
++++ TAO/tao/Transport_Cache_Manager.cpp	2006-12-15 14:25:29.000000000 +0000
+@@ -393,7 +393,13 @@
+   {
+     if (entry == 0)
+       {
+-        return 0;
++        if (TAO_debug_level > 4)
++          {
++            ACE_DEBUG ((LM_DEBUG,
++                        ACE_TEXT("TAO (%P|%t) - Transport_Cache_Manager::purge_entry, ")
++                        ACE_TEXT("no entry, will return 1\n")));
++          }
++        return 1;
+       }
+ 
+     // Remove the entry from the Map
+@@ -690,21 +696,35 @@
+     // Get the underlying property that we are looking for
+     TAO_Transport_Descriptor_Interface *prop = extid.property ();
+ 
+-    // Just check the underlying property for equivalence. If the last
+-    // connection that was returned  had the same property just return
+-    // 1.
+-    if (this->last_entry_returned_ &&
+-        prop->is_equivalent (this->last_entry_returned_->property ()))
+-      {
+-        // Set the index to be right so that we can pick teh connection
+-        // right away..
+-        extid.index (this->last_entry_returned_->index ());
++    // look for a free transport.
++    // The last connection that was returned may have been re-cached.
+ 
+-        // There is no more use for it ...
+-        this->last_entry_returned_ = 0;
++    HASH_MAP_ENTRY *entry = 0;
+ 
+-        return 1;
+-      }
++    Cache_ExtId tmp_key (extid.property ());
++
++    // Get the entry from the Hash Map
++    int retval = 0;
++    while (retval == 0) {
++	    // Look for an entry in the map
++	    retval = this->cache_map_.find (tmp_key,
++                                      entry);
++	    
++	    if (entry) {
++		    CORBA::Boolean idle =
++			    this->is_entry_idle (entry);
++		    
++		    if (idle) {
++			    // Set the index to be right so that we can pick teh connection
++			    // right away..
++          this->last_entry_returned_ = 0;
++			    extid.index (tmp_key.index ());
++			    return 1;
++		    }
++	    }
++	    // Bump the index up
++	    tmp_key.incr_index ();
++    }
+ 
+     // If there  is an entry that was returned and if there are more
+     // threads just wake up the peer to check for the returned
+Index: TAO/tao/Transport_Cache_Manager.h
+--- TAO.orig/tao/Transport_Cache_Manager.h	2005-11-24 11:05:47.000000000 +0000
++++ TAO/tao/Transport_Cache_Manager.h	2006-12-15 14:26:09.000000000 +0000
+@@ -107,6 +107,7 @@
+     int purge (void);
+ 
+     /// Purge the entry from the Cache Map
++    /// returns 0 if removed, else non-zero
+     int purge_entry (HASH_MAP_ENTRY *&);
+ 
+     /// Mark the entry as invalid for use but keep it in cache.
+Index: TAO/tao/Transport_Cache_Manager.inl
+--- TAO.orig/tao/Transport_Cache_Manager.inl	2005-11-02 11:03:27.000000000 +0000
++++ TAO/tao/Transport_Cache_Manager.inl	2006-12-15 14:41:57.000000000 +0000
+@@ -66,6 +66,16 @@
+       int_id.recycle_state (ENTRY_IDLE_AND_PURGABLE);
+       retval = this->bind_i (ext_id,
+                              int_id);
++      // Does any one need waking?
++      if (this->no_waiting_threads_)
++	      {
++		      // We returned this entry to the map
++		      this->last_entry_returned_ = &ext_id;
++		      
++		      // Wake up a thread
++		      this->condition_->signal ();
++	      }
++
+     }
+ 
+     return retval;
+@@ -76,7 +86,7 @@
+   {
+     // Double checked locking
+     if(entry == 0)
+-      return 0;
++      return 1;
+ 
+     ACE_MT (ACE_GUARD_RETURN (ACE_Lock, guard, *this->cache_lock_, -1));
+ 
+Index: TAO/tao/Transport.cpp
+--- TAO.orig/tao/Transport.cpp	2006-12-15 12:46:05.000000000 +0000
++++ TAO/tao/Transport.cpp	2006-12-15 15:48:40.000000000 +0000
+@@ -408,17 +408,38 @@
+ }
+ 
+ /// @todo Ideally the following should be inline.
+-/// @todo purge_entry has a return value, use it
+ int
+ TAO_Transport::recache_transport (TAO_Transport_Descriptor_Interface *desc)
+ {
+-  // First purge our entry
+-  this->purge_entry ();
++  // First purge our entry - if it's not there, another thread may be re-caching it as we speak.
++  int retval = this->purge_entry();
++  if(retval) {
++	return retval;
++  }
+ 
+   // Then add ourselves to the cache
+   return this->transport_cache_manager ().cache_transport (desc,
+                                                            this);
+ }
++int
++TAO_Transport::recache_idle_transport (TAO_Transport_Descriptor_Interface *desc)
++{
++  // First purge our entry - if it's not there, another thread may be re-caching it as we speak.
++  int retval = this->purge_entry();
++  if(TAO_debug_level > 3)
++    {
++      ACE_DEBUG ((LM_DEBUG,
++                  ACE_TEXT ("TAO (%P|%t) - Transport[%d (%@)]::recache_idle_transport, unbind returned %d\n"),
++                  this->id (), this, retval));
++    }
++  if(retval) {
++	return retval;
++  }
++
++  // Then add ourselves to the cache
++  return this->transport_cache_manager ().cache_idle_transport (desc,
++                                                           this);
++}
+ 
+ int
+ TAO_Transport::purge_entry (void)
+Index: TAO/tao/Transport.h
+--- TAO.orig/tao/Transport.h	2006-12-15 12:46:04.000000000 +0000
++++ TAO/tao/Transport.h	2006-12-15 14:11:49.000000000 +0000
+@@ -568,6 +568,7 @@
+ 
+   /// Recache ourselves in the cache
+   int recache_transport (TAO_Transport_Descriptor_Interface* desc);
++  int recache_idle_transport (TAO_Transport_Descriptor_Interface* desc);
+ 
+   /// Callback to read incoming data
+   /**
