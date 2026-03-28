@@ -1,0 +1,11 @@
+--- TAO/orbsvcs/ImplRepo_Service/ImR_Activator_i.cpp.orig	2005-06-01 16:14:03.000000000 -0400
++++ TAO/orbsvcs/ImplRepo_Service/ImR_Activator_i.cpp	2005-06-01 16:14:09.000000000 -0400
+@@ -231,7 +231,7 @@
+     {
+       this->locator_->unregister_activator (name_.c_str(),
+         this->registration_token_ ACE_ENV_ARG_PARAMETER);
+-      ACE_TRY_CHECK(try_block_1);
++      ACE_TRY_CHECK_EX(try_block_1);
+     }
+   }
+   ACE_CATCH(CORBA::COMM_FAILURE, ex)
