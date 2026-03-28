@@ -1,0 +1,684 @@
+Index: ace/Service_Repository.h
+===================================================================
+--- ace/Service_Repository.h	(revision 73818)
++++ ace/Service_Repository.h	(working copy)
+@@ -27,6 +27,7 @@
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ class ACE_Service_Type;
++class Gestalt_Current_DLL_Guard;
+ 
+ #define ACE_Component_Repository ACE_Service_Repository
+ /**
+@@ -48,6 +49,7 @@
+ {
+ public:
+   friend class ACE_Service_Repository_Iterator;
++  friend class Gestalt_Current_DLL_Guard;
+ 
+   enum
+   {
+Index: ace/Service_Object.cpp
+===================================================================
+--- ace/Service_Object.cpp	(revision 73818)
++++ ace/Service_Object.cpp	(working copy)
+@@ -33,18 +33,6 @@
+ #endif /* ACE_HAS_DUMP */
+ 
+ 
+-  // Using printf, since the log facility may not have been
+-  // initialized yet. Using a "//" prefix, in case the executable
+-  // happens to be a code generator and the output gets embedded in
+-  // the generated C++ code.
+-  ACE_OS::fprintf(stderr,
+-                  "// [ST] dump, this=%p, name=%s, type=%p, so=%p, active=%d\n",
+-                  this,
+-                  this->name_,
+-                  this->type_,
+-                  (this->type_ != 0) ? this->type_->object () : 0,
+-                  this->active_);
+-
+ }
+ 
+ ACE_Service_Type::ACE_Service_Type (const ACE_TCHAR *n,
+Index: ace/Parse_Node.cpp
+===================================================================
+--- ace/Parse_Node.cpp	(revision 73818)
++++ ace/Parse_Node.cpp	(working copy)
+@@ -405,13 +405,6 @@
+ {
+   ACE_TRACE ("ACE_Location_Node::open_dll");
+ 
+-#ifndef ACE_NLOGGING
+-  if (ACE::debug ())
+-    ACE_DEBUG ((LM_DEBUG,
+-                ACE_LIB_TEXT ("(%P|%t) LN::open_dll - path=%s\n"),
+-                this->pathname ()));
+-#endif /* ACE_NLOGGING */
+-
+   if (-1 == this->dll_.open (this->pathname ()))
+     {
+       ++yyerrno;
+@@ -758,7 +751,7 @@
+ 
+ ACE_ALLOC_HOOK_DEFINE (ACE_Service_Type_Factory)
+ 
+-ACE_Service_Type_Factory::ACE_Service_Type_Factory (ACE_TCHAR const *name,
++ACE_Service_Type_Factory::ACE_Service_Type_Factory (const ACE_TCHAR *name,
+                                                     int type,
+                                                     ACE_Location_Node *location,
+                                                     int active)
+@@ -775,6 +768,13 @@
+ }
+ 
+ 
++const ACE_DLL& 
++ACE_Service_Type_Factory::dll (void) const
++{
++  return this->location_->dll();
++}
++
++
+ ACE_Service_Type *
+ ACE_Service_Type_Factory::make_service_type (ACE_Service_Gestalt *cfg) const
+ {
+Index: ace/Parse_Node.h
+===================================================================
+--- ace/Parse_Node.h	(revision 73818)
++++ ace/Parse_Node.h	(working copy)
+@@ -491,8 +491,10 @@
+ 
+   ACE_Service_Type *make_service_type (ACE_Service_Gestalt *pcfg) const;
+ 
+-  ACE_TCHAR const* name (void) const;
++  const ACE_TCHAR * name (void) const;
+ 
++  const ACE_DLL& dll (void) const;
++
+   /// Declare the dynamic allocation hooks.
+   ACE_ALLOC_HOOK_DECLARE;
+ 
+Index: ace/Service_Repository.cpp
+===================================================================
+--- ace/Service_Repository.cpp	(revision 73818)
++++ ace/Service_Repository.cpp	(working copy)
+@@ -151,30 +151,25 @@
+       // order.
+ 
+       for (int i = this->current_size_ - 1; i >= 0; i--)
+-  {
+-    ACE_Service_Type *s =
+-      const_cast<ACE_Service_Type *> (this->service_vector_[i]);
++        {
++          ACE_Service_Type *s =
++            const_cast<ACE_Service_Type *> (this->service_vector_[i]);
++          
++          if (ACE::debug ())
++            {
++              ACE_DEBUG ((LM_DEBUG,
++                          ACE_LIB_TEXT ("(%P|%t) SR::fini, %@ [%d] (%d): %s(@%@), type=%@%s\n"),
++                          this, i, this->total_size_,
++                          s->name (), s, s->type (), ((s->active() != 0)?", active" : "")));
++            }
+ 
+-    if (ACE::debug ())
+-      {
+-        ACE_DEBUG ((LM_DEBUG,
+-        ACE_LIB_TEXT ("(%P|%t) SR::fini, %@ [%d] (%d): "),
+-        this, i, this->total_size_));
+-        s->dump();
+-      }
++          // Collect any errors.
++          int ret = s->fini ();
++          retval += ret;
+ 
+-    // Collect any errors.
+-    int ret = s->fini ();
+-    if (ACE::debug ())
+-      {
+-        ACE_DEBUG ((LM_DEBUG,
+-        ACE_LIB_TEXT ("(%P|%t) SR::fini, returned %d\n"),
+-        ret));
+-      }
+-    retval += ret;
+-  }
++        }
+     }
+-
++  
+   return (retval == 0) ? 0 : -1;
+ }
+ 
+@@ -329,12 +324,11 @@
+     if (ACE::debug ())
+       {
+         ACE_DEBUG ((LM_DEBUG,
+-                    ACE_TEXT ("ACE (%P|%t) SR::insert, repo=%@ [%d] (size=%d): "),
++                    ACE_TEXT ("ACE (%P|%t) SR::insert, repo=%@ [%d] (size=%d): %s(@%@), type=%@%s\n"),
+                     this,
+                     i,
+-                    this->total_size_));
+-        sr->dump();
+-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\n")));
++                    this->total_size_,
++                    sr->name (), sr, sr->type (), ((sr->active() != 0)?", active" : "")));
+       }
+   }
+ 
+@@ -344,10 +338,8 @@
+       if (ACE::debug ())
+         {
+           ACE_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("ACE (%P|%t) SR::insert, repo=%@ - destroying : "),
+-                      this));
+-          s->dump();
+-          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\n")));
++                      ACE_TEXT ("ACE (%P|%t) SR::insert, repo=%@ - destroying : %s\n"),
++                      this, s->name ()));
+         }
+       delete s;
+     }
+Index: ace/Service_Object.h
+===================================================================
+--- ace/Service_Object.h	(revision 73818)
++++ ace/Service_Object.h	(working copy)
+@@ -147,6 +147,10 @@
+ 
+   /// 1 if <fini> on <type_> has already been called, otherwise 0.
+   int fini_already_called_;
++
++private:
++  friend class Gestalt_Current_DLL_Guard;
++
+ };
+ 
+ /**
+Index: ace/Service_Gestalt.h
+===================================================================
+--- ace/Service_Gestalt.h	(revision 73818)
++++ ace/Service_Gestalt.h	(working copy)
+@@ -29,6 +29,7 @@
+ #include "ace/Singleton.h"
+ #include "ace/OS_NS_signal.h"
+ #include "ace/Synch_Traits.h"
++#include "ace/DLL.h"
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -436,10 +437,50 @@
+   /// the static_svcs_ list.
+   ACE_PROCESSED_STATIC_SVCS* processed_static_svcs_;
+ 
++private:
++  /// As dynamic service objects are loaded, static service objects
++  /// that come with the same DLL code, may also be registered. The
++  /// static services hoever, have no information about the context in
++  /// which their registration takes place and their relation with the
++  /// DLL is lost. A situation can easily arise where the dynamic
++  /// service object is finalized and its DLL - unmapped, but some of
++  /// the DLL's static services may still be around. Their
++  /// finalization would not be possible, if the DLL containg that
++  /// code is gone. To prevent cases like this, we keep a handler for
++  /// the last DLL dlopen()-ed. On the current thread, there will be
++  /// just one and its handle will be kept here to be used by every
++  /// static service that registers itself. In the space between
++  /// dlopen()-ing a DLL and retrieving the symbol to call init() on,
++  /// any static service that registers will be associated with the
++  /// "current" DLL. During finalization, this will keep the reference
++  /// count positive, until the last static or dynamic service object
++  /// in a DLL is finalized, which will finally unload the DLL.
++  //  ACE_DLL current_dll_;
++
++  friend class Gestalt_Current_DLL_Guard;
++
+ }; /* class ACE_Service_Gestalt */
+ 
++  class Gestalt_Current_DLL_Guard 
++  {
++  public:
++    Gestalt_Current_DLL_Guard (ACE_Service_Gestalt* gestalt);
++    ~Gestalt_Current_DLL_Guard (void);
++    int accept (const ACE_DLL& adll);
++  protected:
++    ACE_UNIMPLEMENTED_FUNC (Gestalt_Current_DLL_Guard (const Gestalt_Current_DLL_Guard&))
++    ACE_UNIMPLEMENTED_FUNC (Gestalt_Current_DLL_Guard& operator= (const Gestalt_Current_DLL_Guard&))
++  private:
++    ACE_Service_Gestalt* gestalt_;
++    ACE_Service_Repository* repo_;
++    ACE_Service_Gestalt::ACE_PROCESSED_STATIC_SVCS* processed_static_svcs_;
++    bool accept_;
++  };
+ 
+ 
++
++
++
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
+ #if defined (__ACE_INLINE__)
+Index: ace/Service_Gestalt.cpp
+===================================================================
+--- ace/Service_Gestalt.cpp	(revision 73818)
++++ ace/Service_Gestalt.cpp	(working copy)
+@@ -171,6 +171,8 @@
+ 
+ 
+ 
++
++
+ // ----------------------------------------
+ 
+ ACE_Service_Gestalt::Processed_Static_Svc::
+@@ -180,23 +182,88 @@
+ {
+   ACE_NEW_NORETURN (name_, ACE_TCHAR[ACE_OS::strlen(assd->name_)+1]);
+   ACE_OS::strcpy(name_,assd->name_);
+-//   if (ACE::debug ())
+-//     ACE_DEBUG ((LM_DEBUG,
+-//                 ACE_LIB_TEXT ("ACE (%P|%t) PSS::ctor -  name = %s\n"),
+-//                 name_));
+ }
+ 
+ ACE_Service_Gestalt::Processed_Static_Svc::
+ ~Processed_Static_Svc (void)
+ {
+-//   if (ACE::debug ())
+-//     ACE_DEBUG ((LM_DEBUG,
+-//                 ACE_LIB_TEXT ("ACE (%P|%t) PSS::dtor -  name = %s\n"),
+-//                 name_));
+-
+   delete [] name_;
+ }
+ 
++Gestalt_Current_DLL_Guard::Gestalt_Current_DLL_Guard (ACE_Service_Gestalt* gestalt)
++  : gestalt_ (gestalt)
++  , repo_ (gestalt->repo_)
++  , processed_static_svcs_ (gestalt->processed_static_svcs_)
++ {
++  ACE_NEW_NORETURN (this->gestalt_->repo_,
++                    ACE_Service_Repository (128));
++  
++  if (this->processed_static_svcs_ == 0)
++    ACE_NEW_NORETURN (this->processed_static_svcs_,
++                      ACE_Service_Gestalt::ACE_PROCESSED_STATIC_SVCS);
++
++  this->gestalt_->processed_static_svcs_ = 0;
++}
++
++
++int
++Gestalt_Current_DLL_Guard::accept (const ACE_DLL& adll)
++{
++  ACE_Service_Repository* target = this->repo_;
++  ACE_Service_Repository* source = this->gestalt_->repo_;
++  
++  if (target->total_size_ <= source->current_size_ + target->current_size_)
++    return -1; // no memory
++  
++  for (size_t i = 0; i < source->current_size_; i++)
++    {
++      ACE_Service_Type* ast = const_cast<ACE_Service_Type*> (source->service_vector_[i]);
++      if (ast->dll_.dll_name_ == 0)
++        {
++          ast->dll_ = adll;
++
++          ACE_DEBUG ((LM_DEBUG, 
++                      ACE_TEXT ("ACE (%P|%t) GCDG::accept, service=%s, dll=%s\n"),
++                      ast->name_, adll.dll_name_));
++        }
++
++      target->insert (ast);
++      source->service_vector_[i] = 0;
++    }
++  source->current_size_ = 0;
++  
++  if (this->gestalt_->processed_static_svcs_ != 0 && !this->gestalt_->processed_static_svcs_->is_empty())
++    {
++      ACE_Service_Gestalt::Processed_Static_Svc **pss = 0;
++      for (ACE_Service_Gestalt::ACE_PROCESSED_STATIC_SVCS_ITERATOR iter (*this->gestalt_->processed_static_svcs_);
++           iter.next (pss) != 0;
++           iter.advance ())
++        {
++          ACE_Service_Gestalt::Processed_Static_Svc *tmp = 0;
++          ACE_NEW_RETURN (tmp, 
++                          ACE_Service_Gestalt::Processed_Static_Svc((*pss)->assd_), 
++                          -1);
++          this->processed_static_svcs_->insert(tmp);
++
++          delete *pss;
++        }
++    }
++
++  return 0;
++}
++
++Gestalt_Current_DLL_Guard::~Gestalt_Current_DLL_Guard (void)
++{
++  delete this->gestalt_->repo_;
++  this->gestalt_->repo_ =
++    this->repo_;
++
++  delete this->gestalt_->processed_static_svcs_;
++  this->gestalt_->processed_static_svcs_ = 
++    this->processed_static_svcs_;
++}
++
++
+ // ----------------------------------------
+ 
+ ACE_Service_Gestalt::~ACE_Service_Gestalt (void)
+@@ -388,7 +455,14 @@
+ 
+ 
+ 
+-///
++/// (Statically) initialize a service object.  Locates the service
++/// object's registration record, identified by svc_name and
++/// initializes it, using the supplied command line parameters. Own
++/// repository is searched first and if the service is located it is
++/// initializaed and activated. The "processed" services descriptors
++/// from the global repository are looked up otherwice, and if one is
++/// found it is duplicated locally. The initialization and activatin
++/// then proceeds as described above.
+ 
+ int
+ ACE_Service_Gestalt::initialize (const ACE_TCHAR *svc_name,
+@@ -411,7 +485,6 @@
+ 
+   const ACE_Service_Type *srp = 0;
+   for (int i = 0; this->repo_->find (svc_name, &srp) == -1 && i < 2; i++)
+-    //  if (this->repo_->find (svc_name, &srp) == -1)
+     {
+       const ACE_Static_Svc_Descriptor *assd =
+         ACE_Service_Config::global()->find_processed_static_svc(svc_name);
+@@ -460,7 +533,7 @@
+                                  const ACE_TCHAR *parameters)
+ {
+   ACE_TRACE ("ACE_Service_Gestalt::initialize");
+-
++  
+ #ifndef ACE_NLOGGING
+   if (ACE::debug ())
+     ACE_DEBUG ((LM_DEBUG,
+@@ -469,11 +542,11 @@
+                 this->repo_,
+                 stf->name ()));
+ #endif
+-
++  
+   ACE_Service_Type *srp = 0;
+   int const retv = this->repo_->find (stf->name (),
+                                       (const ACE_Service_Type **) &srp);
+-
++  
+   // If there is an active service already, it must first be removed,
+   // before it could be re-installed.
+   if (retv >= 0)
+@@ -486,9 +559,9 @@
+                            stf->name ()),
+                           0);
+ #endif
+-        return 0;
++      return 0;
+     }
+-
++  
+   // There is an inactive service by that name, so it may have been
+   // either inactivated, or just a forward declaration for a service,
+   // that is in the process of being loaded. If the latter, then we
+@@ -506,6 +579,7 @@
+                        ACE_LIB_TEXT ("already performing one.\n"),
+                        stf->name ()),
+                       -1);
++  
+ 
+   // Reserve a spot for the dynamic service by inserting an incomplete
+   // service declaration, i.e. one that can not produce a service
+@@ -516,21 +590,25 @@
+   // registered *after* the dynamic service that loads them, so that
+   // their finalization is complete *before* finalizing the dynamic
+   // service.
+-  ACE_Service_Type_Forward_Declaration_Guard dummy (this->repo_,
+-                                                    stf->name ());
++  //  ACE_Service_Type_Forward_Declaration_Guard dummy (this->repo_,
++  //                                                  stf->name ());
+ 
+-  // make_service_type() is doing the dynamic loading and also runs
+-  // any static initializers
+-  ACE_Auto_Ptr<ACE_Service_Type> tmp (stf->make_service_type (this));
+-  if (tmp.get () != 0 &&
+-      this->initialize_i (tmp.get (), parameters) == 0)
++    Gestalt_Current_DLL_Guard current_dll_guard (this);
++    
++    // make_service_type() is doing the dynamic loading and also runs
++    // any static initializers
++    ACE_Auto_Ptr<ACE_Service_Type> tmp (stf->make_service_type (this));
++    if (tmp.get () != 0 
++        && this->initialize_i (tmp.get (), parameters) == 0)
+     {
++      current_dll_guard.accept (tmp->dll ());
++
+       // All good the ACE_Service_Type instance is now owned by the repository
+       // and we should make sure it is not destroyed upon exit from this method.
+       (void)tmp.release ();
+       return 0;
+     }
+-
++  
+   // Something went wrong ...
+ #ifndef ACE_NLOGGING
+   if (ACE::debug ())
+@@ -539,7 +617,7 @@
+                        stf->name()),
+                       -1);
+ #endif
+-
++  
+   return -1;
+ }
+ #endif /* (ACE_USES_CLASSIC_SVC_CONF == 1) */
+@@ -674,27 +752,27 @@
+ 
+ int
+ ACE_Service_Gestalt::process_directive_i (const ACE_Static_Svc_Descriptor &ssd,
+-                                        int force_replace)
++                                          int force_replace)
+ {
++  if (!force_replace)
++    {
++      if (this->repo_->find (ssd.name_, 0, 0) >= 0)
++        {
++          // The service is already there, just return
++          return 0;
++        }
++    }
++
+ #ifndef ACE_NLOGGING
+   if (ACE::debug ())
+     ACE_DEBUG ((LM_DEBUG,
+-                ACE_LIB_TEXT ("ACE (%P|%t) SG::process_directive, ")
++                ACE_LIB_TEXT ("ACE (%P|%t) SG::process_directive_i, ")
+                 ACE_LIB_TEXT ("repo=%@, replace=%d - %s\n"),
+                 this->repo_,
+                 force_replace,
+                 ssd.name_));
+ #endif
+ 
+-  if (!force_replace)
+-    {
+-      if (this->repo_->find (ssd.name_, 0, 0) >= 0)
+-        {
+-          // The service is already there, just return
+-          return 0;
+-        }
+-    }
+-
+   ACE_Service_Object_Exterminator gobbler;
+   void *sym = (ssd.alloc_)(&gobbler);
+ 
+@@ -724,6 +802,8 @@
+   return this->repo_->insert (service_type);
+ }
+ 
++
++
+ #if (ACE_USES_CLASSIC_SVC_CONF == 1)
+ 
+ int
+@@ -820,9 +900,6 @@
+   // The entry will be automaticaly removed once the thread exits this block.
+   ACE_Service_Type_Forward_Declaration_Guard recursion_guard (this->repo_, file);
+ 
+-  /*
+-   * @TODO: Test with ACE_USES_CLASSIC_SVC_CONF turned off!
+-   */
+ #if (ACE_USES_CLASSIC_SVC_CONF == 1)
+   int result = 0;
+ 
+Index: ace/DLL_Manager.cpp
+===================================================================
+--- ace/DLL_Manager.cpp	(revision 73818)
++++ ace/DLL_Manager.cpp	(working copy)
+@@ -551,35 +551,45 @@
+           ACE_NEW_RETURN (temp_handle,
+                           ACE_DLL_Handle,
+                           0);
+-
+-    dll_handle = temp_handle;
++          
++          dll_handle = temp_handle;
+         }
+     }
+-
++  
+   if (dll_handle)
+     {
+-      if (dll_handle->open (dll_name, open_mode, handle) != 0)
+-  {
+-    // Error while openind dll. Free temp handle
++      ACE_DEBUG ((LM_DEBUG,
++                  ACE_LIB_TEXT ("ACE (%P|%t) DLL_Manager::open_dll - Before opening ")
++                  ACE_LIB_TEXT ("%s.\n"),
++                  dll_name));
++      
++     if (dll_handle->open (dll_name, open_mode, handle) != 0)
++        {
++          // Error while openind dll. Free temp handle
+           if (ACE::debug ())
+             ACE_ERROR ((LM_ERROR,
+-                        ACE_LIB_TEXT ("ACE_DLL_Manager::open_dll: Could not ")
++                        ACE_LIB_TEXT ("ACE (%P|%t) DLL_Manager::open_dll: Could not ")
+                         ACE_LIB_TEXT ("open dll %s.\n"),
+                         dll_name));
+-
+-    delete temp_handle;
++          
++          delete temp_handle;
+           return 0;
+         }
++      
++      ACE_DEBUG ((LM_DEBUG,
++                  ACE_LIB_TEXT ("ACE (%P|%t) DLL_Manager::open_dll - After opening ")
++                  ACE_LIB_TEXT ("%s.\n"),
++                  dll_name));
+ 
+       // Add the handle to the vector only if the dll is successfully
+       // opened.
+       if (temp_handle != NULL)
+-  {
+-    this->handle_vector_[this->current_size_] = dll_handle;
++        {
++          this->handle_vector_[this->current_size_] = dll_handle;
+           this->current_size_++;
+-  }
++        }
+     }
+-
++  
+   return dll_handle;
+ }
+ 
+Index: ace/DLL.cpp
+===================================================================
+--- ace/DLL.cpp	(revision 73818)
++++ ace/DLL.cpp	(working copy)
+@@ -24,6 +24,11 @@
+     error_ (0)
+ {
+   ACE_TRACE ("ACE_DLL::ACE_DLL (int)");
++  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("ACE (%P|%t) ACE_DLL::<ctor> %@, close_handle_on=%d\n"), this, this->close_handle_on_destruction_));
++  ACE_DEBUG ((LM_DEBUG, 
++              ACE_TEXT ("ACE (%P|%t) ACE_DLL::<ctor> %@, close_handle_on=%d\n"), 
++              this, 
++              this->close_handle_on_destruction_));
+ }
+ 
+ ACE_DLL::ACE_DLL (const ACE_DLL &rhs)
+@@ -42,8 +47,17 @@
+                      rhs.close_handle_on_destruction_) != 0
+       && ACE::debug ())
+     ACE_ERROR ((LM_ERROR,
+-    ACE_LIB_TEXT ("ACE_DLL::copy_ctor: error: %s\n"),
+-    this->error ()));
++                ACE_LIB_TEXT ("ACE_DLL::copy_ctor: error: %s\n"),
++                this->error ()));
++
++  ACE_DEBUG ((LM_DEBUG, 
++              ACE_TEXT ("ACE (%P|%t) ACE_DLL::<copy-ctor> %@ (%@), dll_name=%s [%d], close_handle_on=%d\n"), 
++              this, 
++              &rhs,
++              (this->dll_name_==0 ? "(null)" : this->dll_name_), 
++              (this->dll_name_==0 ? 0 : ACE_OS::strlen(this->dll_name_)), 
++              this->close_handle_on_destruction_));
++
+ }
+ 
+ // Assignment operator
+@@ -66,9 +80,16 @@
+                      rhs.close_handle_on_destruction_) != 0
+       && ACE::debug ())
+     ACE_ERROR ((LM_ERROR,
+-    ACE_LIB_TEXT ("ACE_DLL::operator=: error: %s\n"),
+-    this->error ()));
+-
++                ACE_LIB_TEXT ("ACE_DLL::operator=: error: %s\n"),
++                this->error ()));
++  
++  ACE_DEBUG ((LM_DEBUG, 
++              ACE_TEXT ("ACE (%P|%t) ACE_DLL::operator= %@ (%@), dll_name=%s [%d], close_handle_on=%d\n"), 
++              this, 
++              &rhs,
++              (this->dll_name_==0 ? "(null)" : this->dll_name_), 
++              (this->dll_name_==0 ? 0 : ACE_OS::strlen(this->dll_name_)), 
++              this->close_handle_on_destruction_));
+   return *this;
+ }
+ 
+@@ -92,6 +113,13 @@
+     ACE_ERROR ((LM_ERROR,
+                 ACE_LIB_TEXT ("ACE_DLL::open: error calling open: %s\n"),
+                 this->error ()));
++
++  ACE_DEBUG ((LM_DEBUG, 
++              ACE_TEXT ("ACE (%P|%t) ACE_DLL::<ctor> %@, dll_name=%s [%d], close_handle_on=%d\n"), 
++              this, 
++              (this->dll_name_==0 ? "(null)" : this->dll_name_), 
++              (this->dll_name_==0 ? 0 : ACE_OS::strlen(this->dll_name_)), 
++              this->close_handle_on_destruction_));
+ }
+ 
+ // The library is closed before the class gets destroyed depending on
+@@ -102,6 +130,13 @@
+ {
+   ACE_TRACE ("ACE_DLL::~ACE_DLL");
+ 
++  ACE_DEBUG ((LM_DEBUG, 
++              ACE_TEXT ("ACE (%P|%t) ACE_DLL::<dtor> %@, dll_name=%s [%d], close_handle_on=%d\n"), 
++              this, 
++              (this->dll_name_==0 ? "(null)" : this->dll_name_), 
++              (this->dll_name_==0 ? 0 : ACE_OS::strlen(this->dll_name_)), 
++              this->close_handle_on_destruction_));
++
+   this->close ();
+ 
+   // Normally delete()d in ACE_DLL::close().  However, that may not
