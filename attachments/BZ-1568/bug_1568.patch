@@ -1,0 +1,641 @@
+Index: ACE_wrappers/TAO/TAO_IDL/be/be_interface.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/TAO_IDL/be/be_interface.cpp,v
+retrieving revision 1.1.1.5
+diff -u -r1.1.1.5 be_interface.cpp
+--- ACE_wrappers/TAO/TAO_IDL/be/be_interface.cpp	10 Aug 2003 20:23:29 -0000	1.1.1.5
++++ ACE_wrappers/TAO/TAO_IDL/be/be_interface.cpp	13 Aug 2003 02:14:45 -0000
+@@ -160,93 +160,80 @@
+   return this->strategy_->relative_skel_name (skel_name);
+ }
+ 
+-
+ void
+-be_interface::compute_full_skel_name (const char *prefix,
+-                                      char *&skelname)
++be_interface::compute_full_skel_name(
++    char const * global_prefix,
++    char const * local_prefix,
++    char * & skelname)
+ {
+   if (skelname != 0)
+     {
+       return;
+     }
+-  else
+-    {
+-      long namelen = ACE_OS::strlen (prefix);
+-      long first = I_TRUE;
+-      long second = I_FALSE;
+-      char *item_name = 0;
+-
+-      // In the first loop compute the total length.
+-      for (UTL_IdListActiveIterator i (this->name ());
+-           !i.is_done ();
+-           i.next ())
+-        {
+-          if (!first)
+-            {
+-              namelen += 2; // for "::"
+-            }
+-          else if (second)
+-            {
+-              first = second = I_FALSE;
+-            }
+ 
+-          // Print the identifier.
+-          item_name = i.item ()->get_string ();
+-          namelen += ACE_OS::strlen (item_name);
++  // Compute how much space is required for the string
++  size_t namelen =
++    ACE_OS::strlen (global_prefix) + ACE_OS::strlen(local_prefix);
++  for(UTL_IdListActiveIterator i (this->name ());
++      !i.is_done ();
++      i.next ())
++  {
++    char * item_name = i.item ()->get_string ();
++    namelen += ACE_OS::strlen (item_name);
++    
++    // Add space for the "::" separator, yeah we overallocate memory
++    // if there is only one of them, big deal...
++    namelen += 2;
++  }
+ 
+-          // Additional 4 for the POA_ characters.
+-          if (first)
+-            {
+-              if (ACE_OS::strcmp (item_name, "") != 0)
+-                {
+-                  // Does not start with a "".
+-                  first = I_FALSE;
+-                }
+-              else
+-                {
+-                  second = I_TRUE;
+-                }
+-            }
+-        }
++  // Allocate the string, sigh, ACE_NEW makes this stuff so inelegant.
++  char * result;
++  ACE_NEW(result, char[namelen+1]);
++  ACE_Auto_Array_Ptr<char> result_holder(result);
++
++  // Null terminate the string.
++  result[0] = '\0';
++
++  // This is the first "identifier" that we will add
++  ACE_OS::strcat(result, global_prefix);
++  char const * ident_to_add = global_prefix;
++
++  // insert each of the elements, the loop is a bit weird, in each
++  // iteration we add the *previous* string...
++  bool first = true;
++  UTL_IdListActiveIterator j (this->name ());
++  for(ident_to_add = j.item()->get_string();
++      !j.is_done ();
++      j.next())
++  {
++    ACE_OS::strcat(result, ident_to_add);
++    // Fetch the next identifier...
++    ident_to_add = j.item()->get_string();
+ 
+-      ACE_NEW (skelname,
+-               char [namelen+1]);
+-      skelname[0] = '\0';
+-      first = I_TRUE;
+-      second = I_FALSE;
+-      ACE_OS::strcat (skelname, prefix);
+-
+-      for (UTL_IdListActiveIterator j (this->name ());
+-           !j.is_done ();
+-           j.next ())
+-        {
+-          if (!first)
+-            {
+-              ACE_OS::strcat (skelname, "::");
+-            }
+-          else if (second)
+-            {
+-              first = second = I_FALSE;
+-            }
++    if(!first)
++    {
++      ACE_OS::strcat (result, "::");
++    }
++    else
++    {
++      if(ACE_OS_String::strcmp(ident_to_add, "") == 0)
++      {
++        continue;
++      }
++      first = false;
++    }
++  }
++  ACE_OS::strcat(result, local_prefix);
++  ACE_OS::strcat(result, ident_to_add);
+ 
+-          // Print the identifier.
+-          item_name = j.item ()->get_string ();
+-          ACE_OS::strcat (skelname, item_name);
++  skelname = result_holder.release();
++}
+ 
+-          if (first)
+-            {
+-              if (ACE_OS::strcmp (item_name, "") != 0)
+-                {
+-                  // Does not start with a "".
+-                  first = I_FALSE;
+-                }
+-              else
+-                {
+-                  second = I_TRUE;
+-                }
+-            }
+-        }
+-    }
++void
++be_interface::compute_full_skel_name (const char *prefix,
++                                      char *&skelname)
++{
++  compute_full_skel_name(prefix, "", skelname);
+ }
+ 
+ const char*
+@@ -2180,9 +2167,11 @@
+ 
+ 
+ int
+-be_interface::gen_skel_helper (be_interface *derived,
+-                               be_interface *ancestor,
+-                               TAO_OutStream *os)
++be_interface::gen_skel_helper_i(
++    char const * prefix,
++    be_interface *derived,
++    be_interface *ancestor,
++    TAO_OutStream *os)
+ {
+   // If derived and ancestor are same, skip it.
+   if (derived == ancestor)
+@@ -2203,167 +2192,210 @@
+ 
+   // Else generate code that does the cast to the appropriate type.
+ 
+-  if (ancestor->nmembers () > 0)
++  if (ancestor->nmembers() <= 0)
+     {
+-      // If there are elements in ancestor scope i.e., any operations and
+-      // attributes defined by "ancestor", become methods on the derived class
+-      // which call the corresponding method of the base class by doing the
+-      // proper casting.
++      return 0;
++    }
+ 
+-      for (UTL_ScopeActiveIterator si (ancestor, UTL_Scope::IK_decls);
+-           !si.is_done ();
+-           si.next ())
+-        {
+-          // Get the next AST decl node
+-          AST_Decl *d = si.item ();
++  // If there are elements in ancestor scope i.e., any operations and
++  // attributes defined by "ancestor", become methods on the derived class
++  // which call the corresponding method of the base class by doing the
++  // proper casting.
++
++  char * skelname = 0;
++  derived->compute_full_skel_name("POA_", prefix, skelname);
++  if(skelname == 0)
++  {
++    return -1;
++  }
++  ACE_Auto_Array_Ptr<char> derived_skel_name(skelname);
+ 
+-          if (d->node_type () == AST_Decl::NT_op)
+-            {
+-              *os << be_nl << be_nl << "// TAO_IDL - Generated from" << be_nl
+-                  << "// " << __FILE__ << ":" << __LINE__ << be_nl << be_nl;
++  skelname = 0;
++  ancestor->compute_full_skel_name("POA_", prefix, skelname);
++  if(skelname == 0)
++  {
++    return -1;
++  }
++  ACE_Auto_Array_Ptr<char> ancestor_skel_name(skelname);
+ 
+-              if (os->stream_type () == TAO_OutStream::TAO_SVR_HDR)
+-                {
+-                  // Generate the static method corresponding to this method.
+-                  *os << "static void " << d->local_name ()
+-                      << "_skel (" << be_idt << be_idt_nl
+-                      << "TAO_ServerRequest &req, " << be_nl
+-                      << "void *obj," << be_nl
+-                      << "void *context" << be_nl
+-                      << "ACE_ENV_ARG_DECL_WITH_DEFAULTS" << be_uidt_nl
+-                      << ");" << be_uidt;
+-                }
+-              else
+-                { // Generate code in the inline file.
+-                  // Generate the static method corresponding to this method.
+-                  *os << "ACE_INLINE void "
+-                      << derived->full_skel_name () << "::"
+-                      << d->local_name ()
+-                      << "_skel (" << be_idt << be_idt_nl
+-                      << "TAO_ServerRequest &req," << be_nl
+-                      << "void *obj," << be_nl
+-                      << "void *context" << be_nl
+-                      << "ACE_ENV_ARG_DECL" << be_uidt_nl
+-                      << ")" << be_uidt_nl
+-                      << "{" << be_idt_nl;
+-                  *os << ancestor->full_skel_name ()
+-                      << "_ptr impl = ("
+-                      << derived->full_skel_name ()
+-                      << "_ptr) obj;" << be_nl;
+-                  *os << ancestor->full_skel_name ()
+-                      << "::" << d->local_name ()
+-                      << "_skel (" << be_idt << be_idt_nl
+-                      << "req," << be_nl
+-                      << "(" << ancestor->full_skel_name ()
+-                      << "_ptr) impl," << be_nl
+-                      << "context" << be_nl
+-                      << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
+-                      << ");" << be_uidt << be_uidt_nl
+-                      << "}";
+-                }
+-            }
+-          else if (d->node_type () == AST_Decl::NT_attr)
+-            {
+-              AST_Attribute *attr = AST_Attribute::narrow_from_decl (d);
++  for (UTL_ScopeActiveIterator si (ancestor, UTL_Scope::IK_decls);
++       !si.is_done ();
++       si.next ())
++  {
++    // Get the next AST decl node
++    AST_Decl *d = si.item ();
+ 
+-              if (attr == 0)
+-                {
+-                  return -1;
+-                }
++    if (d->node_type () == AST_Decl::NT_op)
++    {
++      *os << be_nl << be_nl << "// TAO_IDL - Generated from" << be_nl
++          << "// " << __FILE__ << ":" << __LINE__
++          << " prefix=" << prefix
++          << be_nl << be_nl;
+ 
+-             // Start from current indentation level.
+-              os->indent ();
+-              if (os->stream_type () == TAO_OutStream::TAO_SVR_HDR)
+-                {
+-                  // Generate the static method corresponding to this method.
+-                  *os << "static void _get_" << d->local_name ()
+-                      << "_skel (" << be_idt << be_idt_nl
+-                      << "TAO_ServerRequest &req," << be_nl
+-                      << "void *obj," << be_nl
+-                      << "void *context" << be_nl
+-                      << "ACE_ENV_ARG_DECL_WITH_DEFAULTS" << be_uidt_nl
+-                      << ");" << be_uidt;
+-                }
+-              else
+-                { // Generate code in the inline file.
+-                  // Generate the static method corresponding to this method.
+-                  *os << "ACE_INLINE void "
+-                      << derived->full_skel_name () << "::_get_"
+-                      << d->local_name ()
+-                      << "_skel (" << be_idt << be_idt_nl
+-                      << "TAO_ServerRequest &req," << be_nl
+-                      << "void *obj," << be_nl
+-                      << "void *context" << be_nl
+-                      << "ACE_ENV_ARG_DECL" << be_uidt_nl
+-                      << ")" << be_uidt_nl
+-                      << "{" << be_idt_nl
+-                      << ancestor->full_skel_name ()
+-                      << "_ptr impl = ("
+-                      << derived->full_skel_name ()
+-                      << "_ptr) obj;" << be_nl;
+-                  *os << ancestor->full_skel_name ()
+-                      << "::_get_" << d->local_name ()
+-                      << "_skel (" << be_idt << be_idt_nl
+-                      << "req," << be_nl
+-                      << "(" << ancestor->full_skel_name ()
+-                      << "_ptr) impl," << be_nl
+-                      << "context" << be_nl
+-                      << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
+-                      << ");" << be_uidt << be_uidt_nl
+-                      << "}";
+-                }
++      if (os->stream_type () == TAO_OutStream::TAO_SVR_HDR)
++      {
++        // Generate the static method corresponding to this method.
++        *os << "static void " << d->local_name ()
++            << "_skel (" << be_idt << be_idt_nl
++            << "TAO_ServerRequest &req, " << be_nl
++            << "void *obj," << be_nl
++            << "void *context" << be_nl
++            << "ACE_ENV_ARG_DECL_WITH_DEFAULTS" << be_uidt_nl
++            << ");" << be_uidt;
++      }
++      else
++      {
++        // Generate code in the inline file.
++        // Generate the static method corresponding to this method.
++        *os << "ACE_INLINE void "
++            << derived_skel_name.get() << "::"
++            << d->local_name ()
++            << "_skel (" << be_idt << be_idt_nl
++            << "TAO_ServerRequest &req," << be_nl
++            << "void *obj," << be_nl
++            << "void *context" << be_nl
++            << "ACE_ENV_ARG_DECL" << be_uidt_nl
++            << ")" << be_uidt_nl
++            << "{" << be_idt_nl;
++
++        *os << ancestor_skel_name.get()
++            << "_ptr impl = ("
++            << derived_skel_name.get()
++            << "_ptr) obj;" << be_nl;
++        *os << ancestor_skel_name.get()
++            << "::" << d->local_name ()
++            << "_skel (" << be_idt << be_idt_nl
++            << "req," << be_nl
++            << "(" << ancestor_skel_name.get()
++            << "_ptr) impl," << be_nl
++            << "context" << be_nl
++            << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
++            << ");" << be_uidt << be_uidt_nl
++            << "}";
++      }
++    }
++    else if (d->node_type () == AST_Decl::NT_attr)
++    {
++      AST_Attribute *attr = AST_Attribute::narrow_from_decl (d);
+ 
+-              if (!attr->readonly ())
+-                {
+-                  *os << be_nl << be_nl;
++      if (attr == 0)
++      {
++        return -1;
++      }
+ 
+-                  if (os->stream_type () == TAO_OutStream::TAO_SVR_HDR)
+-                    {
+-                      // Generate the static method corresponding to
+-                      // this method.
+-                      *os << "static void _set_" << d->local_name ()
+-                          << "_skel (" << be_idt << be_idt_nl
+-                          << "TAO_ServerRequest &req," << be_nl
+-                          << "void *obj," << be_nl
+-                          << "void *context" << be_nl
+-                          << "ACE_ENV_ARG_DECL_WITH_DEFAULTS" << be_uidt_nl
+-                          << ");" << be_uidt;
+-                    }
+-                  else
+-                    { // Generate code in the inline file.
+-                      // Generate the static method corresponding to
+-                      // this method.
+-                      *os << "ACE_INLINE void "
+-                          << derived->full_skel_name ()
+-                          << "::_set_" << d->local_name ()
+-                          << "_skel (" << be_idt << be_idt_nl
+-                          << "TAO_ServerRequest &req," << be_nl
+-                          << "void *obj," << be_nl
+-                          << "void *context" << be_nl
+-                          << "ACE_ENV_ARG_DECL" << be_uidt_nl
+-                          << ")" << be_uidt_nl
+-                          << "{" << be_idt_nl
+-                          << ancestor->full_skel_name ()
+-                          << "_ptr impl = ("
+-                          << derived->full_skel_name ()
+-                          << "_ptr) obj;" << be_nl;
+-                      *os << ancestor->full_skel_name ()
+-                          << "::_set_" << d->local_name ()
+-                          << "_skel (" << be_idt << be_idt_nl
+-                          << "req," << be_nl
+-                          << "(" << ancestor->full_skel_name ()
+-                          << "_ptr) impl," << be_nl
+-                          << "context" << be_nl
+-                          << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
+-                          << ");" << be_uidt << be_uidt_nl
+-                          << "}";
+-                    }
+-                }
+-            }
+-        } // End of while.
++      // Start from current indentation level.
++      os->indent ();
++      if (os->stream_type () == TAO_OutStream::TAO_SVR_HDR)
++      {
++        // Generate the static method corresponding to this method.
++        *os << "static void _get_" << d->local_name ()
++            << "_skel (" << be_idt << be_idt_nl
++            << "TAO_ServerRequest &req," << be_nl
++            << "void *obj," << be_nl
++            << "void *context" << be_nl
++            << "ACE_ENV_ARG_DECL_WITH_DEFAULTS" << be_uidt_nl
++            << ");" << be_uidt;
++      }
++      else
++      {
++        // Generate code in the inline file.
++        // Generate the static method corresponding to this method.
++        *os << "ACE_INLINE void "
++            << derived_skel_name.get() << "::_get_"
++            << d->local_name ()
++            << "_skel (" << be_idt << be_idt_nl
++            << "TAO_ServerRequest &req," << be_nl
++            << "void *obj," << be_nl
++            << "void *context" << be_nl
++            << "ACE_ENV_ARG_DECL" << be_uidt_nl
++            << ")" << be_uidt_nl
++            << "{" << be_idt_nl
++            << ancestor_skel_name.get()
++            << "_ptr impl = ("
++            << derived_skel_name.get()
++            << "_ptr) obj;" << be_nl;
++
++        *os << ancestor_skel_name.get()
++            << "::_get_" << d->local_name ()
++            << "_skel (" << be_idt << be_idt_nl
++            << "req," << be_nl
++            << "(" << ancestor_skel_name.get()
++            << "_ptr) impl," << be_nl
++            << "context" << be_nl
++            << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
++            << ");" << be_uidt << be_uidt_nl
++            << "}";
++      }
++
++      if (!attr->readonly ())
++      {
++        *os << be_nl << be_nl;
++
++        if (os->stream_type () == TAO_OutStream::TAO_SVR_HDR)
++        {
++          // Generate the static method corresponding to
++          // this method.
++          *os << "static void _set_" << d->local_name ()
++              << "_skel (" << be_idt << be_idt_nl
++              << "TAO_ServerRequest &req," << be_nl
++              << "void *obj," << be_nl
++              << "void *context" << be_nl
++              << "ACE_ENV_ARG_DECL_WITH_DEFAULTS" << be_uidt_nl
++              << ");" << be_uidt;
++        }
++        else
++        {
++          // Generate code in the inline file.
++          // Generate the static method corresponding to
++          // this method.
++          *os << "ACE_INLINE void "
++              << derived_skel_name.get()
++              << "::_set_" << d->local_name ()
++              << "_skel (" << be_idt << be_idt_nl
++              << "TAO_ServerRequest &req," << be_nl
++              << "void *obj," << be_nl
++              << "void *context" << be_nl
++              << "ACE_ENV_ARG_DECL" << be_uidt_nl
++              << ")" << be_uidt_nl
++              << "{" << be_idt_nl
++              << ancestor_skel_name.get()
++              << "_ptr impl = ("
++              << derived_skel_name.get()
++              << "_ptr) obj;" << be_nl;
++
++          *os << ancestor_skel_name.get()
++              << "::_set_" << d->local_name ()
++              << "_skel (" << be_idt << be_idt_nl
++              << "req," << be_nl
++              << "(" << ancestor_skel_name.get()
++              << "_ptr) impl," << be_nl
++              << "context" << be_nl
++              << "ACE_ENV_ARG_PARAMETER" << be_uidt_nl
++              << ");" << be_uidt << be_uidt_nl
++              << "}";
++        }
++      }
+     }
++  } // End of while.
+ 
+   return 0;
++}
++
++int
++be_interface::gen_skel_helper (be_interface *derived,
++                               be_interface *ancestor,
++                               TAO_OutStream *os)
++{
++  return gen_skel_helper_i("", derived, ancestor, os);
++
++}
++
++int
++be_interface::gen_amh_skel_helper (be_interface *derived,
++  be_interface *ancestor,
++  TAO_OutStream *os)
++{
++  return gen_skel_helper_i("AMH_", derived, ancestor, os);
+ }
+ 
+ int
+Index: ACE_wrappers/TAO/TAO_IDL/be/be_visitor_interface/interface_si.cpp
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/TAO_IDL/be/be_visitor_interface/interface_si.cpp,v
+retrieving revision 1.1.1.2
+diff -u -r1.1.1.2 interface_si.cpp
+--- ACE_wrappers/TAO/TAO_IDL/be/be_visitor_interface/interface_si.cpp	18 Jul 2002 19:30:52 -0000	1.1.1.2
++++ ACE_wrappers/TAO/TAO_IDL/be/be_visitor_interface/interface_si.cpp	13 Aug 2003 02:14:45 -0000
+@@ -47,6 +47,15 @@
+       return 0;
+     }
+ 
++  if (this->generate_amh_classes (node) == -1)
++    {
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         "be_visitor_interface_sh::"
++                         "visit_interface - "
++                         "codegen for AMH classes failed\n"),
++                        -1);
++    }
++
+   TAO_OutStream *os = this->ctx_->stream ();
+ 
+   // Determine if we are in some form of a multiple inheritance.
+@@ -95,4 +104,17 @@
+     }
+ 
+   return 0;
++}
++
++int
++be_visitor_interface_si::generate_amh_classes (be_interface *node)
++{
++   if (!be_global->gen_amh_classes ())
++    {
++      return 0;
++    }
++
++  TAO_OutStream *os = this->ctx_->stream ();
++  return node->traverse_inheritance_graph (
++      be_interface::gen_amh_skel_helper, os);
+ }
+Index: ACE_wrappers/TAO/TAO_IDL/be_include/be_interface.h
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/TAO_IDL/be_include/be_interface.h,v
+retrieving revision 1.1.1.3
+diff -u -r1.1.1.3 be_interface.h
+--- ACE_wrappers/TAO/TAO_IDL/be_include/be_interface.h	10 Aug 2003 20:23:30 -0000	1.1.1.3
++++ ACE_wrappers/TAO/TAO_IDL/be_include/be_interface.h	13 Aug 2003 02:14:45 -0000
+@@ -276,6 +276,11 @@
+   // Helper method passed to the template method to generate code for the
+   // skeletons in the inline file.
+ 
++  static int gen_amh_skel_helper (be_interface *,
++      be_interface *,
++      TAO_OutStream *os);
++  // Like the previous member function, but for AMH code generation.
++
+   static int copy_ctor_helper (be_interface *,
+                                be_interface *,
+                                TAO_OutStream *os);
+@@ -350,6 +355,23 @@
+   // Do we have both abstract and concrete parents?
+ 
+ private:
++  void compute_full_skel_name(
++      char const * global_prefix,
++      char const * local_prefix,
++      char * & skelname);
++  // Helper method to implement compute_full_skel_name() and
++  // get_skel_helper_i().  This method computes the skeleton name for
++  // an interface, it prepends @c global_prefix to the fully qualified
++  // name of the interface, and @c local_prefix to the innermost name.
++  // For example, if global_prefix is "POA_" and local_prefix is
++  // "AMI_" then Foo::Bar::Baz maps to POA_Foo::Bar::AMI_Baz.
++
++  static int gen_skel_helper_i (
++      char const * prefix,
++      be_interface *, be_interface *, TAO_OutStream *os);
++  // Helper method to implement both gen_skel_helper() and
++  // gen_amh_skel_helper()
++
+   void gen_gperf_input_header (TAO_OutStream *ss);
+   // Output the header (type declaration and %%) to the gperf's input
+   // file.
+Index: ACE_wrappers/TAO/TAO_IDL/be_include/be_visitor_interface/interface_si.h
+===================================================================
+RCS file: /home/src/ACE_wrappers/TAO/TAO_IDL/be_include/be_visitor_interface/interface_si.h,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 interface_si.h
+--- ACE_wrappers/TAO/TAO_IDL/be_include/be_visitor_interface/interface_si.h	14 Sep 2001 18:02:42 -0000	1.1.1.1
++++ ACE_wrappers/TAO/TAO_IDL/be_include/be_visitor_interface/interface_si.h	13 Aug 2003 02:14:45 -0000
+@@ -41,6 +41,9 @@
+ 
+   virtual int visit_interface (be_interface *node);
+   // set the right context and make a visitor
++
++protected:
++  virtual int generate_amh_classes (be_interface *node);
+ };
+ 
+ #endif /* _BE_INTERFACE_INTERFACE_SI_H_ */
