@@ -1,0 +1,89 @@
+Thu Dec  9 15:44:25 CET 2004  Thomas Girard <thomas.g.girard@free.fr>
+  * Fix DLL_Strategy when ACE_TCHAR != char
+
+diff -rN -u ACE_wrappers-old/ace/Strategies_T.cpp ACE_wrappers-new/ace/Strategies_T.cpp
+--- ACE_wrappers-old/ace/Strategies_T.cpp	2004-12-09 16:15:53.000000000 +0100
++++ ACE_wrappers-new/ace/Strategies_T.cpp	2004-12-09 15:39:38.000000000 +0100
+@@ -54,9 +54,9 @@
+ }
+ 
+ template <class SVC_HANDLER> int
+-ACE_DLL_Strategy<SVC_HANDLER>::open (const char dll_name[],
+-                                     const char factory_function[],
+-                                     const char svc_name[],
++ACE_DLL_Strategy<SVC_HANDLER>::open (const ACE_TCHAR dll_name[],
++                                     const ACE_TCHAR factory_function[],
++                                     const ACE_TCHAR svc_name[],
+                                      ACE_Service_Repository *svc_rep,
+                                      ACE_Thread_Manager *thr_mgr)
+ {
+diff -rN -u ACE_wrappers-old/ace/Strategies_T.h ACE_wrappers-new/ace/Strategies_T.h
+--- ACE_wrappers-old/ace/Strategies_T.h	2004-12-09 16:15:53.000000000 +0100
++++ ACE_wrappers-new/ace/Strategies_T.h	2004-12-09 15:29:56.000000000 +0100
+@@ -191,17 +191,17 @@
+ 
+   /// Initialize the DLL strategy based upon the service's DLL
+   /// information contained in the <svc_dll_info> string.
+-  ACE_DLL_Strategy (const char dll_name[],
+-                    const char factory_function[],
+-                    const char svc_name[],
++  ACE_DLL_Strategy (const ACE_TCHAR dll_name[],
++                    const ACE_TCHAR factory_function[],
++                    const ACE_TCHAR svc_name[],
+                     ACE_Service_Repository *,
+                     ACE_Thread_Manager * = 0);
+ 
+   /// Initialize the DLL strategy based upon the service's DLL
+   /// information contained in the <svc_dll_info> string.
+-  int open (const char dll_name[],
+-            const char factory_function[],
+-            const char svc_name[],
++  int open (const ACE_TCHAR dll_name[],
++            const ACE_TCHAR factory_function[],
++            const ACE_TCHAR svc_name[],
+             ACE_Service_Repository *,
+             ACE_Thread_Manager * = 0);
+ 
+@@ -220,14 +220,14 @@
+   typedef ACE_Creation_Strategy<SVC_HANDLER> inherited;
+ 
+   /// Name of the DLL to dynamically link.
+-  char dll_name_[MAXPATHLEN + 1];
++  ACE_TCHAR dll_name_[MAXPATHLEN + 1];
+ 
+   /// Name of the factory function in the shared library to use to
+   /// obtain a pointer to the new SVC_HANDLER.
+-  char factory_function_[MAXPATHLEN + 1];
++  ACE_TCHAR factory_function_[MAXPATHLEN + 1];
+ 
+   /// Name of the service.
+-  char svc_name_[MAXNAMELEN + 1];
++  ACE_TCHAR svc_name_[MAXNAMELEN + 1];
+ 
+   /// Pointer to the <Service_Repository>.
+   ACE_Service_Repository *svc_rep_;
+diff -rN -u ACE_wrappers-old/ace/Strategies_T.inl ACE_wrappers-new/ace/Strategies_T.inl
+--- ACE_wrappers-old/ace/Strategies_T.inl	2004-12-09 16:15:53.000000000 +0100
++++ ACE_wrappers-new/ace/Strategies_T.inl	2004-12-09 15:43:02.000000000 +0100
+@@ -95,9 +95,9 @@
+ }
+ 
+ template <class SVC_HANDLER> ACE_INLINE
+-ACE_DLL_Strategy<SVC_HANDLER>::ACE_DLL_Strategy (const char dll_name[],
+-                                                 const char factory_function[],
+-                                                 const char svc_name[],
++ACE_DLL_Strategy<SVC_HANDLER>::ACE_DLL_Strategy (const ACE_TCHAR dll_name[],
++                                                 const ACE_TCHAR factory_function[],
++                                                 const ACE_TCHAR svc_name[],
+                                                  ACE_Service_Repository *svc_rep,
+                                                  ACE_Thread_Manager *thr_mgr)
+ {
+@@ -122,7 +122,7 @@
+ ACE_Concurrency_Strategy<SVC_HANDLER>::ACE_Concurrency_Strategy (int flags)
+   : flags_ (flags)
+ {
+-  ACE_TRACE ("ACE_Concurrency_Strategy<SVC_HANDLER>::~ACE_Concurrency_Strategy");
++  ACE_TRACE ("ACE_Concurrency_Strategy<SVC_HANDLER>::ACE_Concurrency_Strategy");
+ }
+ 
+ template <class SVC_HANDLER> ACE_INLINE
