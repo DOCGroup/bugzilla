@@ -1,0 +1,80 @@
+--- ACE-current/TAO/tests/Sequence_Unit_Tests/bounded_string_sequence_ut.cpp	2004-10-19 20:31:41.000000000 -0400
++++ ACE-new/TAO/tests/Sequence_Unit_Tests/bounded_string_sequence_ut.cpp	2005-06-03 14:50:14.000000000 -0400
+@@ -338,6 +338,7 @@
+   boost::weak_ptr<Tester> self_;
+ };
+ 
++ACE_Proper_Export_Flag
+ test_suite *
+ init_unit_test_suite(int, char*[])
+ {
+--- ACE-current/TAO/tests/Sequence_Unit_Tests/bounded_value_sequence_ut.cpp	2004-09-28 21:00:55.000000000 -0400
++++ ACE-new/TAO/tests/Sequence_Unit_Tests/bounded_value_sequence_ut.cpp	2005-06-03 14:50:14.000000000 -0400
+@@ -304,6 +304,7 @@
+   boost::weak_ptr<Tester> self_;
+ };
+ 
++ACE_Proper_Export_Flag
+ test_suite *
+ init_unit_test_suite(int, char*[])
+ {
+--- ACE-current/TAO/tests/Sequence_Unit_Tests/object_reference_sequence_element_ut.cpp	2004-11-20 09:51:42.000000000 -0500
++++ ACE-new/TAO/tests/Sequence_Unit_Tests/object_reference_sequence_element_ut.cpp	2005-06-03 14:50:14.000000000 -0400
+@@ -327,6 +327,7 @@
+   boost::weak_ptr<Tester> self_;
+ };
+ 
++ACE_Proper_Export_Flag
+ test_suite *
+ init_unit_test_suite(int, char*[])
+ {
+--- ACE-current/TAO/tests/Sequence_Unit_Tests/string_sequence_element_ut.cpp	2004-11-20 09:51:42.000000000 -0500
++++ ACE-new/TAO/tests/Sequence_Unit_Tests/string_sequence_element_ut.cpp	2005-06-03 14:50:14.000000000 -0400
+@@ -381,6 +381,7 @@
+   boost::weak_ptr<Tester> self_;
+ };
+ 
++ACE_Proper_Export_Flag
+ test_suite *
+ init_unit_test_suite(int, char*[])
+ {
+--- ACE-current/TAO/tests/Sequence_Unit_Tests/testing_allocation_traits_ut.cpp	2004-09-28 21:00:55.000000000 -0400
++++ ACE-new/TAO/tests/Sequence_Unit_Tests/testing_allocation_traits_ut.cpp	2005-06-03 14:50:14.000000000 -0400
+@@ -172,6 +172,7 @@
+ 
+ struct Foo { int y; };
+ 
++ACE_Proper_Export_Flag
+ test_suite *
+ init_unit_test_suite(int, char*[])
+ {
+--- ACE-current/TAO/tests/Sequence_Unit_Tests/unbounded_object_reference_sequence_ut.cpp	2005-01-02 14:32:58.000000000 -0500
++++ ACE-new/TAO/tests/Sequence_Unit_Tests/unbounded_object_reference_sequence_ut.cpp	2005-06-03 14:50:14.000000000 -0400
+@@ -262,6 +262,7 @@
+   boost::weak_ptr<Tester> self_;
+ };
+ 
++ACE_Proper_Export_Flag
+ test_suite *
+ init_unit_test_suite(int, char*[])
+ {
+--- ACE-current/TAO/tests/Sequence_Unit_Tests/unbounded_string_sequence_ut.cpp	2004-09-28 21:00:55.000000000 -0400
++++ ACE-new/TAO/tests/Sequence_Unit_Tests/unbounded_string_sequence_ut.cpp	2005-06-03 14:50:14.000000000 -0400
+@@ -489,6 +489,7 @@
+   boost::weak_ptr<Tester> self_;
+ };
+ 
++ACE_Proper_Export_Flag
+ test_suite *
+ init_unit_test_suite(int, char*[])
+ {
+--- ACE-current/TAO/tests/Sequence_Unit_Tests/unbounded_value_sequence_ut.cpp	2004-09-28 21:00:55.000000000 -0400
++++ ACE-new/TAO/tests/Sequence_Unit_Tests/unbounded_value_sequence_ut.cpp	2005-06-03 14:50:14.000000000 -0400
+@@ -423,6 +423,7 @@
+   boost::weak_ptr<Tester> self_;
+ };
+ 
++ACE_Proper_Export_Flag
+ test_suite *
+ init_unit_test_suite(int, char*[])
+ {
