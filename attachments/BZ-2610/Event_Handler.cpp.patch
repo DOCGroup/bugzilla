@@ -1,0 +1,23 @@
+--- Event_Handler.cpp.orig	2009-05-01 07:43:56.000000000 -0400
++++ Event_Handler.cpp	2010-03-10 11:57:03.000000000 -0500
+@@ -312,7 +312,9 @@
+ ACE_Event_Handler_var::ACE_Event_Handler_var (const ACE_Event_Handler_var &b)
+   : ptr_ (b.ptr_)
+ {
+-  if (this->ptr_ != 0)
++  if (this->ptr_ != 0 &&
++      this->reference_counting_policy().value() !=
++      ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
+     {
+       this->ptr_->add_reference ();
+     }
+@@ -320,7 +322,8 @@
+ 
+ ACE_Event_Handler_var::~ACE_Event_Handler_var (void)
+ {
+-  if (this->ptr_ != 0)
++  if (this->ptr_ != 0 &&
++      this->reference_counting_policy().value() !=
+     {
+       ACE_Errno_Guard eguard (errno);
+       this->ptr_->remove_reference ();
