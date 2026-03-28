@@ -1,0 +1,15 @@
+diff -r -u PortableServer.orig/Servant_Upcall.cpp PortableServer/Servant_Upcall.cpp
+--- PortableServer.orig/Servant_Upcall.cpp	2006-02-13 04:23:52.000000000 +0100
++++ PortableServer/Servant_Upcall.cpp	2006-04-21 11:00:18.480507500 +0200
+@@ -288,7 +288,10 @@
+           // Cleanup servant locator related state.  Note that because
+           // this operation does not change any Object Adapter related
+           // state, it is ok to call it outside the lock.
+-          this->post_invoke_servant_cleanup ();
++          if ( this->operation() && this->servant() )
++          {
++            this->post_invoke_servant_cleanup ();
++          }
+ 
+           // Since the object adapter lock was released, we must acquire
+           // it.
