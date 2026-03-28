@@ -1,0 +1,38 @@
+--- ACE_wrappers/ace/OS_NS_time.inl	2006-07-31 21:20:52.000000000 +0300
++++ ACE_wrappers_mod/ace/OS_NS_time.inl	2006-08-09 15:05:17.000000000 +0300
+@@ -7,6 +7,7 @@
+ #include "ace/Time_Value.h"
+ #include "ace/OS_NS_unistd.h"
+ #include "ace/OS_NS_sys_time.h"
++#include "ace/OS_NS_stdio.h"
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -234,7 +235,26 @@
+   //
+   // Read the high-res tick counter directly into memory variable "now".
+   // The A constraint signifies a 64-bit int.
+-  asm volatile ("rdtsc" : "=A" (now) : : "memory");
++  //asm volatile ("rdtsc" : "=A" (now) : : "memory");
++
++  volatile ACE_UINT32 low, high;
++
++  // Using "cpuid" serializing instruction in order not to mess 
++  // with cachelines shared by several Intel hyperthreading or dual cores.
++  //
++  __asm__ __volatile__(
++                       /*do we need alignment ? ".align 64\n\t"*/
++                       "cpuid\n\t" /* Is it faster to call cpuid, when eax has some valid value? "xor %%eax,%%eax\n\t"*/
++                       "rdtsc\n\t"
++                       "mov %%eax, %0\n\t"
++                       "mov %%edx, %1\n\t"
++                       "cpuid\n\t" 
++                       : "=m" (low), "=m" (high)
++                       :
++                       : "eax", "ecx", "edx");
++
++
++  now = (((ACE_hrtime_t) low) | (((ACE_hrtime_t)high) <<32));
+ 
+ # if defined (ACE_LACKS_LONGLONG_T)
+   ACE_UINT32 least, most;
