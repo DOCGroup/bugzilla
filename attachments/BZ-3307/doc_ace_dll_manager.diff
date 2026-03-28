@@ -1,0 +1,117 @@
+Index: ace/DLL_Manager.cpp
+===================================================================
+--- ace/DLL_Manager.cpp	(revision 81434)
++++ ace/DLL_Manager.cpp	(working copy)
+@@ -344,6 +344,30 @@
+   return 0;
+ }
+ 
++void
++ACE_DLL_Handle::merge (ACE_DLL_Handle & rhs)
++{
++  if (&rhs == this)
++    {
++      return;
++    }
++  // Add rhs refcount to this->refcount the slow way
++  // This limits the types of operations that the
++  // (atomic) refcount needs to support.
++  // Because this is only executed by a corner case during
++  // which we've already loaded a dll, speed is not critical.
++  while (rhs.refcount_ != 0)
++    {
++      --rhs.refcount_;
++      ++this->refcount_;
++    }
++
++  // should we assert this->handle_ == rhs.handle_ ?
++  // how about this->dll_name+ [equals] rhs.dll_name_ ?
++  rhs.handle_ = ACE_SHLIB_INVALID_HANDLE;
++}
++
++
+ ACE_SHLIB_HANDLE
+ ACE_DLL_Handle::get_handle (int become_owner)
+ {
+@@ -509,7 +533,15 @@
+           ACE_NEW_RETURN (ACE_DLL_Manager::instance_,
+                           ACE_DLL_Manager (size),
+                           0);
++          if (ACE::debug ())
++            {
++              ACE_DEBUG ((LM_DEBUG,
++                        ACE_LIB_TEXT ("ACE (%P|%t) DLL_Manager::instance created @%@\n"),
++                        ACE_DLL_Manager::instance_
++                      ));
++            }
+         }
++
+     }
+ 
+   return ACE_DLL_Manager::instance_;
+@@ -572,6 +604,11 @@
+                             0);
+ 
+             dll_handle = temp_handle;
++            if (ACE::debug ())
++              ACE_DEBUG ((LM_DEBUG, ACE_LIB_TEXT("ACE (%P|%t) DLL_Manager open allocate DLL handle @%@ for %s\n"),
++                dll_handle,
++                dll_name
++                ));
+           }
+       }
+   }
+@@ -596,8 +633,37 @@
+       if (temp_handle != 0)
+         {
+           ACE_MT (ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, this->lock_, 0));
+-          this->handle_vector_[this->current_size_] = dll_handle;
+-          ++this->current_size_;
++          // check the table again.  It may have changed while
++          // the mutex was unlocked
++          dll_handle = this->find_dll (dll_name);
++          if (dll_handle != 0)
++            {
++              // merge the new entry into the existing table entry
++              if (ACE::debug ())
++                {
++                  ACE_DEBUG ((LM_DEBUG,
++                              ACE_LIB_TEXT ("ACE_DLL_Manager::open_dll: Merge duplicate handles for %s"),
++                              dll_name));
++                }
++              dll_handle->merge (*temp_handle);
++              delete temp_handle;
++              temp_handle = 0;
++              // Todo: we executed a extra dll->open.  Do we care?
++            }
++          else
++            {
++              dll_handle = temp_handle;
++              this->handle_vector_[this->current_size_] = dll_handle;
++              ++this->current_size_;
++              if (ACE::debug ())
++                {
++                    ACE_DEBUG ((LM_DEBUG, ACE_LIB_TEXT("ACE (%P|%t) DLL_Manager open save [%d] DLL handle @%@ for %s\n"),
++                      this->current_size_,
++                      dll_handle,
++                      dll_name
++                      ));
++                }
++            }
+         }
+     }
+ 
+Index: ace/DLL_Manager.h
+===================================================================
+--- ace/DLL_Manager.h	(revision 81434)
++++ ace/DLL_Manager.h	(working copy)
+@@ -102,6 +102,9 @@
+    */
+   ACE_SHLIB_HANDLE get_handle (int become_owner = 0);
+ 
++  /// Merge an existing DLL handle into this one.  Presume that they
++  /// are handles for the same DLL.
++  void merge (ACE_DLL_Handle & rhs);
+ private:
+ 
+   /// Returns a pointer to a string explaining why <symbol> or <open>
