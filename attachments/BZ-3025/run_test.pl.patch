@@ -1,0 +1,21 @@
+119,125d118
+< if ($OSNAME ne "MSWin32") {
+<     print STDERR "============================================================\n";
+<     print STDERR "Running IDL_Cubit with the SHMIOP protocol.\n\n";
+< 
+<     $SV->Arguments ($svflags . $svnsflags
+<                     . " -ORBEndpoint shmiop:// -ORBSvcconf $server_shmiop_conf ");
+<     $CL->Arguments ($clflags . $clnsflags . $quietflag . " -x ");
+127c120,127
+<     run_test_helper ();
+---
+> print STDERR "============================================================\n";
+> print STDERR "Running IDL_Cubit with the SHMIOP protocol.\n\n";
+> 
+> $SV->Arguments ($svflags . $svnsflags
+>                 . " -ORBEndpoint shmiop:// -ORBSvcconf $server_shmiop_conf ");
+> $CL->Arguments ($clflags . $clnsflags . $quietflag . " -x ");
+> 
+> run_test_helper ();
+132d131
+< }
