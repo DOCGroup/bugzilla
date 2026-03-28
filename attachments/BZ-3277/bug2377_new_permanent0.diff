@@ -1,0 +1,407 @@
+Index: Invocation_Utils.h
+===================================================================
+--- Invocation_Utils.h	(revision 81213)
++++ Invocation_Utils.h	(working copy)
+@@ -70,6 +70,16 @@
+     TAO_DII_DEFERRED_INVOCATION,
+     TAO_DII_ASYNCH_INVOCATION
+   };
++
++  /// Enum for forward statuses.
++  enum Forward_Status {
++    /// No forward happened to the invocation.
++    TAO_NO_INVOCATION_FORWARD,
++    /// The invocation was forwarded to another object.
++    TAO_INVOCATION_FORWARD,
++    /// The invocation was permanently forwarded.
++    TAO_INVOCATION_FORWARD_PERM
++  };
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: Invocation_Base.h
+===================================================================
+--- Invocation_Base.h	(revision 81213)
++++ Invocation_Base.h	(working copy)
+@@ -88,8 +88,9 @@
+     /// Return the forwarded object location by loosing ownership.
+     CORBA::Object_ptr steal_forwarded_reference (void);
+ 
+-    /// Did the invocation got forwarded to a new location?
+-    bool is_forwarded (void) const;
++    /// Returns the status of forward.
++    Forward_Status forward_status (void) const;
++    void forward_status (Forward_Status s);
+ 
+     /// Mutator to set the reply status of the invocation.
+     void reply_received (Invocation_Status s);
+@@ -138,8 +139,11 @@
+     /// Forwarded object reference.
+     CORBA::Object_var forwarded_to_;
+ 
+-    /// If we get nil forward reference we need more reliable indication of forwarding.
+-    bool is_forwarded_;
++    /// If we get a nil forward reference we need a more reliable
++    /// indication of forwarding then non-nil forwarded_to_. We also
++    /// need to distinguish between "no forward", LOCATION_FORWARD, and
++    /// LOCATION_FORWARD_PERM.
++    Forward_Status forward_status_;
+ 
+     /// Is response expected?
+     bool response_expected_;
+Index: LocateRequest_Invocation_Adapter.cpp
+===================================================================
+--- LocateRequest_Invocation_Adapter.cpp	(revision 81213)
++++ LocateRequest_Invocation_Adapter.cpp	(working copy)
+@@ -80,16 +80,20 @@
+             TAO::LocateRequest_Invocation synch (this->target_, resolver, op);
+ 
+             s = synch.invoke (max_wait_time);
+-            if (s == TAO_INVOKE_RESTART && synch.is_forwarded ())
++
++            if (s == TAO_INVOKE_RESTART &&
++                (synch.forward_status () == TAO_INVOCATION_FORWARD ||
++                 synch.forward_status () == TAO_INVOCATION_FORWARD_PERM))
+               {
+-                effective_target = synch.steal_forwarded_reference ();
+-
+ #if TAO_HAS_INTERCEPTORS == 1
+                 CORBA::Boolean const is_permanent_forward =
+-                  (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
++                  (synch.forward_status () == TAO_INVOCATION_FORWARD_PERM);
+ #else
+                 CORBA::Boolean const is_permanent_forward = false;
+ #endif
++
++                effective_target = synch.steal_forwarded_reference ();
++
+                 this->object_forwarded (effective_target,
+                                         resolver.stub (),
+                                         is_permanent_forward);
+Index: Invocation_Base.cpp
+===================================================================
+--- Invocation_Base.cpp	(revision 81213)
++++ Invocation_Base.cpp	(working copy)
+@@ -41,7 +41,7 @@
+                                     bool TAO_INTERCEPTOR (request_is_remote))
+     : details_ (details)
+     , forwarded_to_ (0)
+-    , is_forwarded_ (false)
++    , forward_status_ (TAO_NO_INVOCATION_FORWARD)
+     , response_expected_ (response_expected)
+     , otarget_ (ot)
+     , target_ (t)
+@@ -59,9 +59,7 @@
+ 
+   Invocation_Base::~Invocation_Base (void)
+   {
+-#if TAO_HAS_INTERCEPTORS == 1
+-    adapter_ = 0;
+-#endif /* TAO_HAS_INTERCEPTORS == 1 */
++    TAO_INTERCEPTOR (adapter_ = 0);
+   }
+ 
+   void
+@@ -105,7 +103,7 @@
+             throw;
+           }
+ 
+-        if (this->is_forwarded_)
++        if (this->forward_status_ == TAO_INVOCATION_FORWARD)
+           return TAO_INVOKE_RESTART;
+       }
+ 
+@@ -133,11 +131,7 @@
+             throw;
+           }
+ 
+-        PortableInterceptor::ReplyStatus const status =
+-          this->adapter_->pi_reply_status (*this);
+-
+-        if (status == PortableInterceptor::LOCATION_FORWARD ||
+-            status == PortableInterceptor::TRANSPORT_RETRY)
++        if (this->forward_status_ == TAO_INVOCATION_FORWARD)
+           return TAO_INVOKE_RESTART;
+       }
+ 
+@@ -164,7 +158,7 @@
+             throw;
+           }
+ 
+-        if (this->is_forwarded_)
++        if (this->forward_status_ == TAO_INVOCATION_FORWARD)
+           return TAO_INVOKE_RESTART;
+       }
+ 
+@@ -183,7 +177,7 @@
+       {
+         this->adapter_->receive_exception (*this);
+ 
+-        if (this->is_forwarded_)
++        if (this->forward_status_ == TAO_INVOCATION_FORWARD)
+           {
+             status = PortableInterceptor::LOCATION_FORWARD;
+           }
+@@ -223,7 +217,7 @@
+       this->invoke_status_ = TAO::TAO_INVOKE_USER_EXCEPTION;
+ 
+     this->forwarded_to_ = CORBA::Object::_nil ();
+-    this->is_forwarded_ = false;
++    this->forward_status_ = TAO_NO_INVOCATION_FORWARD;
+     this->caught_exception_ = exception;
+   }
+ 
+Index: Collocated_Invocation.cpp
+===================================================================
+--- Collocated_Invocation.cpp	(revision 81213)
++++ Collocated_Invocation.cpp	(working copy)
+@@ -76,28 +76,38 @@
+                                   request,
+                                   this->forwarded_to_.out ());
+ 
+-            this->is_forwarded_ = request.is_forwarded ();
++            if (request.is_forwarded ())
++              {
++                this->forward_status_ = TAO_INVOCATION_FORWARD;
++              }
+           }
+         else
+           {
++            bool is_forwarded = false;
++
+             cpb->dispatch (this->effective_target (),
+                            this->forwarded_to_.out (),
+-                           this->is_forwarded_,
++                           is_forwarded,
+                            this->details_.args (),
+                            this->details_.args_num (),
+                            this->details_.opname (),
+                            this->details_.opname_len (),
+                            strat);
++
++            if (is_forwarded)
++              {
++                this->forward_status_ = TAO_INVOCATION_FORWARD;
++              }
+           }
+ 
+         // Invocation completed succesfully
+         s = TAO_INVOKE_SUCCESS;
+ 
+ #if TAO_HAS_INTERCEPTORS == 1
+-        if (this->is_forwarded_ ||
++        if (this->forward_status_ == TAO_INVOCATION_FORWARD ||
+             this->response_expected_ == false)
+           {
+-            if (this->is_forwarded_)
++            if (this->forward_status_ == TAO_INVOCATION_FORWARD)
+               this->reply_received (TAO_INVOKE_RESTART);
+ 
+             s = this->receive_other_interception ();
+@@ -175,7 +185,7 @@
+       }
+ #endif  /* TAO_HAS_INTERCEPTORS == 1 */
+ 
+-    if (this->is_forwarded_)
++    if (this->forward_status_ == TAO_INVOCATION_FORWARD)
+       s =  TAO_INVOKE_RESTART;
+ 
+     return s;
+Index: DynamicInterface/DII_Invocation_Adapter.cpp
+===================================================================
+--- DynamicInterface/DII_Invocation_Adapter.cpp	(revision 81213)
++++ DynamicInterface/DII_Invocation_Adapter.cpp	(working copy)
+@@ -136,16 +136,19 @@
+ 
+     Invocation_Status status = synch.remote_invocation (max_wait_time);
+ 
+-    if (status == TAO_INVOKE_RESTART && synch.is_forwarded ())
++    if (status == TAO_INVOKE_RESTART &&
++        (synch.forward_status () == TAO_INVOCATION_FORWARD ||
++         synch.forward_status () == TAO_INVOCATION_FORWARD_PERM))
+       {
+-        effective_target = synch.steal_forwarded_reference ();
+-
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const permanent_forward =
+-          (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (synch.forward_status () == TAO_INVOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const permanent_forward = false;
+ #endif
++
++        effective_target = synch.steal_forwarded_reference ();
++
+         this->object_forwarded (effective_target,
+                                 r.stub (),
+                                 permanent_forward);
+Index: Messaging/Asynch_Invocation_Adapter.cpp
+===================================================================
+--- Messaging/Asynch_Invocation_Adapter.cpp	(revision 81213)
++++ Messaging/Asynch_Invocation_Adapter.cpp	(working copy)
+@@ -192,17 +192,18 @@
+     Invocation_Status const s = asynch.remote_invocation (max_wait_time);
+ 
+     if (s == TAO_INVOKE_RESTART &&
+-        asynch.is_forwarded ())
++        (asynch.forward_status () == TAO_INVOCATION_FORWARD ||
++         asynch.forward_status () == TAO_INVOCATION_FORWARD_PERM))
+       {
+-        effective_target = asynch.steal_forwarded_reference ();
+-
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const permanent_forward =
+-          (asynch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (asynch.forward_status () == TAO_INVOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const permanent_forward = false;
+ #endif
+ 
++        effective_target = asynch.steal_forwarded_reference ();
++
+         this->object_forwarded (effective_target, r.stub (), permanent_forward);
+       }
+ 
+Index: Invocation_Base.inl
+===================================================================
+--- Invocation_Base.inl	(revision 81213)
++++ Invocation_Base.inl	(working copy)
+@@ -22,7 +22,7 @@
+   Invocation_Base::forwarded_reference (CORBA::Object_ptr o)
+   {
+     this->forwarded_to_ = CORBA::Object::_duplicate (o);
+-    this->is_forwarded_ = true;
++    this->forward_status_ = TAO_INVOCATION_FORWARD;
+   }
+ 
+   ACE_INLINE CORBA::Object_ptr
+@@ -34,16 +34,22 @@
+   ACE_INLINE CORBA::Object_ptr
+   Invocation_Base::steal_forwarded_reference (void)
+   {
+-    this->is_forwarded_ = false;
++    this->forward_status_ = TAO_NO_INVOCATION_FORWARD;
+     return this->forwarded_to_._retn ();
+   }
+ 
+-  ACE_INLINE bool
+-  Invocation_Base::is_forwarded (void) const
++  ACE_INLINE Forward_Status
++  Invocation_Base::forward_status (void) const
+   {
+-    return this->is_forwarded_;
++    return this->forward_status_;
+   }
+ 
++  ACE_INLINE void
++  Invocation_Base::forward_status (Forward_Status s)
++  {
++    this->forward_status_ = s;
++  }
++
+   ACE_INLINE CORBA::Boolean
+   Invocation_Base::response_expected (void) const
+   {
+Index: PI/ClientRequestInterceptor_Adapter_Impl.cpp
+===================================================================
+--- PI/ClientRequestInterceptor_Adapter_Impl.cpp	(revision 81213)
++++ PI/ClientRequestInterceptor_Adapter_Impl.cpp	(working copy)
+@@ -276,7 +276,8 @@
+         reply_status = PortableInterceptor::SUCCESSFUL;
+         break;
+       case TAO::TAO_INVOKE_RESTART:
+-        if (invocation_base.is_forwarded ())
++        if (invocation_base.forward_status () == TAO_INVOCATION_FORWARD ||
++            invocation_base.forward_status () == TAO_INVOCATION_FORWARD_PERM)
+           reply_status = PortableInterceptor::LOCATION_FORWARD;
+         else
+           reply_status = PortableInterceptor::TRANSPORT_RETRY;
+Index: Invocation_Adapter.cpp
+===================================================================
+--- Invocation_Adapter.cpp	(revision 81213)
++++ Invocation_Adapter.cpp	(working copy)
+@@ -166,17 +166,19 @@
+ 
+     status = coll_inv.invoke (this->cpb_, strat);
+ 
+-    if (status == TAO_INVOKE_RESTART && coll_inv.is_forwarded ())
++    if (status == TAO_INVOKE_RESTART &&
++        (coll_inv.forward_status () == TAO_INVOCATION_FORWARD ||
++         coll_inv.forward_status () == TAO_INVOCATION_FORWARD_PERM))
+       {
+-        effective_target = coll_inv.steal_forwarded_reference ();
+-
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const is_permanent_forward =
+-          (coll_inv.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (coll_inv.forward_status () == TAO_INVOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const is_permanent_forward = false;
+ #endif
+ 
++        effective_target = coll_inv.steal_forwarded_reference ();
++
+         this->object_forwarded (effective_target, stub, is_permanent_forward);
+       }
+ 
+@@ -302,17 +304,18 @@
+     Invocation_Status const status = synch.remote_twoway (max_wait_time);
+ 
+     if (status == TAO_INVOKE_RESTART &&
+-        synch.is_forwarded ())
++        (synch.forward_status () == TAO_INVOCATION_FORWARD ||
++         synch.forward_status () == TAO_INVOCATION_FORWARD_PERM))
+       {
+-        effective_target = synch.steal_forwarded_reference ();
+-
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const is_permanent_forward =
+-          (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (synch.forward_status () == TAO_INVOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const is_permanent_forward = false;
+ #endif
+ 
++        effective_target = synch.steal_forwarded_reference ();
++
+         this->object_forwarded (effective_target,
+                                 r.stub (),
+                                 is_permanent_forward);
+@@ -331,16 +334,19 @@
+ 
+     Invocation_Status const s = synch.remote_oneway (max_wait_time);
+ 
+-    if (s == TAO_INVOKE_RESTART && synch.is_forwarded ())
++    if (s == TAO_INVOKE_RESTART &&
++        (synch.forward_status () == TAO_INVOCATION_FORWARD ||
++         synch.forward_status () == TAO_INVOCATION_FORWARD_PERM))
+       {
+-        effective_target = synch.steal_forwarded_reference ();
+-
+ #if TAO_HAS_INTERCEPTORS == 1
+         CORBA::Boolean const is_permanent_forward =
+-          (synch.pi_reply_status() == GIOP::LOCATION_FORWARD_PERM);
++          (synch.forward_status () == TAO_INVOCATION_FORWARD_PERM);
+ #else
+         CORBA::Boolean const is_permanent_forward = false;
+ #endif
++
++        effective_target = synch.steal_forwarded_reference ();
++
+         this->object_forwarded (effective_target,
+                                 r.stub (),
+                                 is_permanent_forward);
+Index: Synch_Invocation.cpp
+===================================================================
+--- Synch_Invocation.cpp	(revision 81213)
++++ Synch_Invocation.cpp	(working copy)
+@@ -381,6 +381,9 @@
+ 
+                    throw ::CORBA::INTERNAL (0, CORBA::COMPLETED_NO);
+                 }
++
++              // This is the only place where we set in permanent forward state.
++              this->forward_status_ = TAO_INVOCATION_FORWARD_PERM;
+             }
+ 
+           return s;
