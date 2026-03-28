@@ -1,0 +1,12 @@
+make[1]: Entering directory `/c/ACETAO-2/ACE_wrappers/TAO/orbsvcs/Trading_Service'
+
+GNUmakefile: /c/ACETAO-2/ACE_wrappers/TAO/orbsvcs/Trading_Service/GNUmakefile.Trading_Service
+
+g++ -W -Wall -Wpointer-arith -mcpu=pentiumpro -mthreads -O3 -g -pipe      -I/c/ACETAO-2/ACE_wrappers -I/c/ACETAO-2/ACE_wrappers/TAO -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I/c/ACETAO-2/ACE_wrappers/TAO -I/c/ACETAO-2/ACE_wrappers/TAO/orbsvcs  -c -o .obj/Trading_Server.o Trading_Server.cpp
+g++ -W -Wall -Wpointer-arith -mcpu=pentiumpro -mthreads -O3 -g -pipe      -I/c/ACETAO-2/ACE_wrappers -I/c/ACETAO-2/ACE_wrappers/TAO -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I/c/ACETAO-2/ACE_wrappers/TAO -I/c/ACETAO-2/ACE_wrappers/TAO/orbsvcs  -c -o .obj/Trading_Service.o Trading_Service.cpp
+g++ -W -Wall -Wpointer-arith -mcpu=pentiumpro -mthreads -O3 -g -pipe      -I/c/ACETAO-2/ACE_wrappers -I/c/ACETAO-2/ACE_wrappers/TAO -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__    -I../../.. -I/c/ACETAO-2/ACE_wrappers/TAO -I/c/ACETAO-2/ACE_wrappers/TAO/orbsvcs  -Wl,--enable-auto-import -Wl,-E -L/c/ACETAO-2/ACE_wrappers/ace -L./ -L/c/ACETAO-2/ACE_wrappers/TAO/tao -L../../../lib -o Trading_Service.exe .obj/Trading_Server.o .obj/Trading_Service.o -lTAO_CosTrading_Serv -lTAO_Svc_Utils -lTAO_DynamicAny -lTAO_CosTrading_Skel -lTAO_CosTrading -lTAO_CosNaming -lTAO_Utils -lTAO_PortableServer -lTAO -lACE  -lws2_32 -lmswsock -lwsock32 -lnetapi32 
+d:\MinGW-3.1.0-1\bin\..\lib\gcc-lib\mingw32\3.2.3\..\..\..\..\mingw32\bin\ld.exe: cannot find -lTAO_CosTrading_Serv
+make[1]: *** [Trading_Service.exe] Error 1
+make[1]: Leaving directory `/c/ACETAO-2/ACE_wrappers/TAO/orbsvcs/Trading_Service'
+make: *** [Trading_Service] Error 2
+
