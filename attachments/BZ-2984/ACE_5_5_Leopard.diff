@@ -1,0 +1,40 @@
+Index: src/ACE_wrappers/ace/os_include/os_stdio.h
+===================================================================
+--- src/ACE_wrappers/ace/os_include/os_stdio.h	(revision 3143)
++++ src/ACE_wrappers/ace/os_include/os_stdio.h	(working copy)
+@@ -62,6 +62,9 @@
+ #   define ACE_MAX_USERID 32
+ # else
+ #  define ACE_MAX_USERID L_cuserid
++#  if !defined(L_cuserid)
++#    define L_cuserid       9
++#  endif
+ #endif /* INTEGRITY */
+ 
+ // this is a nasty hack to get around problems with the
+Index: src/ACE_wrappers/ace/OS_NS_stdio.inl
+===================================================================
+--- src/ACE_wrappers/ace/OS_NS_stdio.inl	(revision 3143)
++++ src/ACE_wrappers/ace/OS_NS_stdio.inl	(working copy)
+@@ -555,7 +555,7 @@
+       // Not reentrant/thread-safe, but nothing else can be done if a
+       // zero pointer was passed in as the destination.
+ 
+-#if defined (_POSIX_SOURCE)
++#if defined (_POSIX_SOURCE) && defined(L_cuserid)
+       const size_t ACE_L_cuserid = L_cuserid;
+ #else
+       const size_t ACE_L_cuserid = 9;  // 8 character user ID + NULL
+Index: src/ACE_wrappers/ace/Handle_Set.inl
+===================================================================
+--- src/ACE_wrappers/ace/Handle_Set.inl	(revision 3143)
++++ src/ACE_wrappers/ace/Handle_Set.inl	(working copy)
+@@ -86,7 +86,7 @@
+     && this->size_ > 0;
+ #else
+   return FD_ISSET (handle,
+-                   &this->mask_);
++                   (fd_set*)&this->mask_);
+ #endif /* ACE_HAS_BIG_FD_SET */
+ }
+ 
