@@ -1,0 +1,33 @@
+Index: ace/config-linux-common.h
+===================================================================
+--- ace/config-linux-common.h	(revision 83178)
++++ ace/config-linux-common.h	(working copy)
+@@ -398,6 +398,13 @@
+ 
+ #define ACE_HAS_ICMP_SUPPORT 1
+ 
++// According to man pages Linux uses different (compared to UNIX systems) types
++// for setting IP_MULTICAST_TTL and IPV6_MULTICAST_LOOP / IP_MULTICAST_LOOP
++// in setsockopt/getsockopt.
++#define ACE_HAS_IP_MULTICAST_TTL_AS_INT 1
++#define ACE_HAS_IPV6_MULTICAST_LOOP_AS_BOOL 1
++#define ACE_HAS_IP_MULTICAST_LOOP_AS_INT 1
++
+ #if defined (ACE_LACKS_NETWORKING)
+ # include "ace/config-posix-nonetworking.h"
+ #else
+Index: bin/tao_other_tests.lst
+===================================================================
+--- bin/tao_other_tests.lst	(revision 83178)
++++ bin/tao_other_tests.lst	(working copy)
+@@ -179,6 +179,10 @@
+ TAO/orbsvcs/tests/Bug_2925_Regression/run_test.pl: !ST !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !STATIC !VxWorks !VxWorks_RTP
+ TAO/orbsvcs/tests/Bug_2925_Regression/run_test_ipv6.pl: IPV6 !ST !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !STATIC !VxWorks !VxWorks_RTP
+ TAO/orbsvcs/tests/Bug_2377_Regression/run_test_ipv6.pl: IPV6 !ST !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !STATIC !VxWorks !VxWorks_RTP
++TAO/orbsvcs/tests/Bug_3444_Regression/run_test.pl: !NO_DIOP !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !STATIC !VxWorks !VxWorks_RTP
++TAO/orbsvcs/tests/Bug_3444_Regression/run_test.pl --sciop: SCTP !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !STATIC !VxWorks !VxWorks_RTP
++TAO/orbsvcs/tests/Bug_3444_Regression/run_test_ipv6.pl: !NO_DIOP !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !STATIC !VxWorks !VxWorks_RTP
++TAO/orbsvcs/tests/Bug_3444_Regression/run_test_ipv6.pl --sciop: SCTP !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !STATIC !VxWorks !VxWorks_RTP
+ TAO/examples/PluggableUDP/tests/SimplePerformance/run_test_ipv6.pl: IPV6 !QNX !NO_DIOP !ACE_FOR_TAO
+ TAO/examples/PluggableUDP/tests/SimplePerformance/run_test.pl: !QNX !NO_DIOP !ACE_FOR_TAO
+ TAO/examples/PluggableUDP/tests/Performance/run_test.pl: !QNX !ST !NO_DIOP !ACE_FOR_TAO !CORBA_E_COMPACT !CORBA_E_MICRO
