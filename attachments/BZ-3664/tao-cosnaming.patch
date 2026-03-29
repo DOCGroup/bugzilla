@@ -1,0 +1,13 @@
+Index: rpmbuild/ace-tao-init-suse/tao/tao-cosnaming
+===================================================================
+--- rpmbuild/ace-tao-init-suse/tao/tao-cosnaming        (revision 86246)
++++ rpmbuild/ace-tao-init-suse/tao/tao-cosnaming        (working copy)
+@@ -27,7 +27,7 @@
+ ## ServiceRestart: tao-cosnaming
+ #
+ # Enable debug logging, set to "-ORBDebugLevel 10" to enable.
+-TAO_COSNAMING_DEBUG = ""
++TAO_COSNAMING_DEBUG=""
+
+ ## Type            string
+ ## Default:        "-ORBLogFile /var/log/tao/tao-cosnaming.log"
