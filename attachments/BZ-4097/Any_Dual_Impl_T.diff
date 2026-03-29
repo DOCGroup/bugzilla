@@ -1,0 +1,20 @@
+Index: tao/AnyTypeCode/Any_Dual_Impl_T.cpp
+===================================================================
+--- tao/AnyTypeCode/Any_Dual_Impl_T.cpp	(revision 96785)
++++ tao/AnyTypeCode/Any_Dual_Impl_T.cpp	(working copy)
+@@ -160,6 +160,7 @@
+   ACE_NEW_RETURN (empty_value,
+                   T,
+                   false);
++  auto_ptr<T> empty_value_safety (empty_value);
+   TAO::Any_Dual_Impl_T<T> *replacement = 0;
+   ACE_NEW_RETURN (replacement,
+                   TAO::Any_Dual_Impl_T<T> (destructor,
+@@ -176,6 +177,7 @@
+       _tao_elem = replacement->value_;
+       const_cast<CORBA::Any &> (any).replace (replacement);
+       replacement_safety.release ();
++      empty_value_safety.release ();
+       return true;
+     }
+ 
