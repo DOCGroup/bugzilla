@@ -1,0 +1,175 @@
+6d5
+< #include "ace/CDR_Stream.h"
+12,14d10
+< #include "ace/Auto_Ptr.h"
+< #include "ace/OS_Memory.h"
+< #include "ace/SString.h"
+23,26d18
+< 
+<   this->name_len (0);
+<   this->value_len (0);
+<   this->type_len (0);
+42d33
+< 
+96,103d86
+< void 
+< ACE_Name_Request::reset_pointers(ACE_UINT32 name_length, ACE_UINT32 value_length)
+< {
+<   this->name_ = this->transfer_.data_;
+<   this->value_  = &this->name_[name_length / sizeof (ACE_WCHAR_T)];
+<   this->type_  = (char *)(&this->value_[value_length / sizeof (ACE_WCHAR_T)]); //
+< }
+< 
+268,272c251,253
+<   (void) ACE_OS::memcpy (this->type_,
+<                          c,
+<                          this->type_len());
+<   // ensure string end to safely use ACE_OS::strcpy
+<   this->type_[this->type_len()] = '\0';
+---
+>   ACE_OS::strsncpy (this->type_,
+>                     c,
+>                     sizeof this->type_);
+347,457d327
+< int
+< operator<< (ACE_OutputCDR &cdr,
+<             const ACE_Name_Request &name_request)
+< {
+<   // get the number of characters indipendent of the WCHAR size
+<   ACE_CDR::ULong name_len = name_request.name_len() / sizeof(ACE_WCHAR_T);
+<   ACE_CDR::ULong value_len = name_request.value_len() / sizeof(ACE_WCHAR_T);
+< 
+<   // calculate the size of the whole stream (indipendent of the WCHAR)
+<   ACE_CDR::ULong length = name_request.length() - 
+<      (name_request.name_len() + name_request.value_len()) +
+<      (name_len + value_len);
+< 
+<   cdr << length;
+<   cdr << ACE_CDR::ULong(name_request.msg_type());
+<   cdr << ACE_CDR::ULong(name_request.block_forever());
+< 
+<   ACE_Time_Value timeout = name_request.timeout();
+<   cdr << ACE_CDR::ULongLong(timeout.sec());
+<   cdr << ACE_CDR::ULong(timeout.usec());
+< 
+<   cdr << name_len;
+<   cdr << value_len;
+<   cdr << ACE_CDR::ULong(name_request.type_len());
+< 
+<   // get a real wide string
+<   ACE_NS_WString wname(name_request.name(), name_len);
+<   ACE_NS_WString wvalue(name_request.value(), value_len);
+< 
+<   // convert into interoperable representation
+<   ACE_TString tname(
+<      ACE_TEXT_WCHAR_TO_TCHAR( wname.fast_rep() ),
+<      name_len);
+< 
+<   // use interoperable string representation
+<   ACE_TString tvalue(
+<      ACE_TEXT_WCHAR_TO_TCHAR( wvalue.fast_rep() ),
+<      value_len);
+< 
+<   ACE_CString type(name_request.type(), 
+<      name_request.type_len());
+< 
+<   cdr << tname;
+<   cdr << tvalue;
+<   cdr << type;
+< 
+<   return cdr.good_bit ();
+< }
+< 
+< int
+< operator>> (ACE_InputCDR &cdr,
+<             ACE_Name_Request &name_request)
+< {
+<   // temporary variables
+<   ACE_CDR::ULong len;
+<   ACE_CDR::ULong type;
+<   ACE_CDR::ULong block;
+<   ACE_CDR::ULongLong sec;
+<   ACE_CDR::ULong usec;
+<   ACE_CDR::ULong name_len;
+<   ACE_CDR::ULong value_len;
+<   ACE_CDR::ULong type_len;
+< 
+<   if( (cdr >> len) &&
+<       (cdr >> type) &&
+<       (cdr >> block) &&
+<       (cdr >> sec) &&
+<       (cdr >> usec) &&
+<       (cdr >> name_len) &&
+<       (cdr >> value_len) &&
+<       (cdr >> type_len))
+<   {
+<     //restore the correct length (taking local WCHAR size into account)
+<     ACE_CDR::ULong w_name_len = name_len * sizeof(ACE_WCHAR_T);
+<     ACE_CDR::ULong w_value_len = value_len * sizeof(ACE_WCHAR_T);
+<     ACE_CDR::ULong w_length = len - 
+<        (name_len + value_len) + 
+<        (w_name_len + w_value_len);
+< 
+<     name_request.length(w_length);
+<     name_request.msg_type(type);
+<     name_request.block_forever(block);
+< 
+<     name_request.timeout(ACE_Time_Value(sec, usec));
+< 
+<     // set up internal pointers correctly!
+<     name_request.reset_pointers(w_name_len, w_value_len);
+< 
+<     // set up string sizes
+<     name_request.name_len(w_name_len);
+<     name_request.value_len(w_value_len);
+<     name_request.type_len(type_len);
+< 
+<     ACE_TString tname;
+<     ACE_TString tvalue;
+<     ACE_CString type;
+< 
+<     // read interoperable string representations
+<     cdr >> tname;
+<     cdr >> tvalue;
+<     cdr >> type;
+< 
+<     // convert into WCHAR and copy the strings
+<     name_request.name(ACE_TEXT_ALWAYS_WCHAR(tname.fast_rep()));
+<     name_request.value(ACE_TEXT_ALWAYS_WCHAR(tvalue.fast_rep()));
+<     name_request.type(type.c_str());
+<   }
+< 
+<   return cdr.good_bit ();
+< }
+< 
+671,700d540
+< }
+< 
+< int
+< operator<< (ACE_OutputCDR &cdr,
+<             const ACE_Name_Reply &name_reply)
+< {
+<   cdr << ACE_CDR::ULong(name_reply.length());
+<   cdr << ACE_CDR::Long(name_reply.msg_type());
+<   cdr << ACE_CDR::ULong(name_reply.errnum());
+< 
+<   return cdr.good_bit ();
+< }
+< 
+< int
+< operator>> (ACE_InputCDR &cdr,
+<             ACE_Name_Reply &name_reply)
+< {
+<   ACE_CDR::ULong length;
+<   ACE_CDR::Long type;
+<   ACE_CDR::ULong errnum;
+< 
+<   if( (cdr >> length) &&
+<       (cdr >> type) &&
+<       (cdr >> errnum))
+<   {
+<      name_reply.length(length);
+<      name_reply.msg_type(type);
+<      name_reply.errnum(errnum);
+<   }
+<   return cdr.good_bit ();
