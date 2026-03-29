@@ -1,0 +1,308 @@
+--- Logging_Strategy.h.org	2009-03-16 16:53:44.000000000 +0200
++++ Logging_Strategy.h	2009-03-16 16:51:18.000000000 +0200
+@@ -75,6 +75,10 @@
+  * dynamically linking the @c ACE_Logging_Strategy then you can use
+  * the @c ACE_Dynamic_Service template to get a pointer to the
+  * @c ACE_Logging_Strategy.
++ *
++ * By using the -r option the @c ACE_Logging_Strategy will use a counter
++ * on the log size in @c Log_Msg in order to check if rotation is required.
++ * In this case the @c ACE_Reactor is not used for rotating the logs.
+  */
+ class ACE_Export ACE_Logging_Strategy : public ACE_Service_Object
+ {
+@@ -92,12 +96,19 @@
+   virtual int fini (void);
+ 
+   /**
+-   * Timeout handler which tests logfile size.  If the current logfile
+-   * size exceeds <max_size_>, the current logfile is closed, saved to
+-   * logfile.old, and a new logfile is reopened.
++   * Timeout handler which calls rotate_logs with the current size
++   * log file
+    */
+   virtual int handle_timeout (const ACE_Time_Value& tv,
+                               const void* arg);
++  /**
++   * Tests if current_size  exceeds <max_size_>,
++   * if it does the current logfile is closed, and rotated
++   * according to the arguments in svc.conf file.
++   * Returns 0 if files were succesfully rotated,
++   * 1 if no rotation was needed, -1 in case of error.
++   */
++  virtual int rotate_logs(ulong current_size);
+ 
+   /**
+    * Parse arguments provided in svc.conf file.
+@@ -166,6 +177,10 @@
+   /// is 0, i.e., we do not rotate files by default.
+   bool order_files_;
+ 
++  // If non-0 rotation of logs will be done according to
++  // Log_Msg::current_size counter.
++  bool rotate_with_log_msg_;
++
+   /// This tells us in what file we last wrote. It will be increased
+   /// to enable multiple log files
+   int count_;
+--- Logging_Strategy.cpp.org	2009-03-16 16:53:44.000000000 +0200
++++ Logging_Strategy.cpp	2009-03-16 16:50:25.000000000 +0200
+@@ -154,7 +154,7 @@
+   this->max_size_ = 0;
+ 
+   ACE_Get_Opt get_opt (argc, argv,
+-                       ACE_TEXT ("f:i:k:m:n:N:op:s:t:w"), 0);
++                       ACE_TEXT ("f:i:k:m:n:N:op:rs:t:w"), 0);
+ 
+   for (int c; (c = get_opt ()) != -1; )
+     {
+@@ -204,6 +204,9 @@
+           // Now tokenize the string to setup process log priority
+           this->priorities (temp, ACE_Log_Msg::PROCESS);
+           break;
++	    case 'r':
++	      this->rotate_with_log_msg_ = true;
++	      break;
+         case 's':
+           // Ensure that the OSTREAM flag is set
+           ACE_SET_BITS (this->flags_, ACE_Log_Msg::OSTREAM);
+@@ -237,6 +240,7 @@
+     wipeout_logfile_ (false),
+     fixed_number_ (false),
+     order_files_ (false),
++    rotate_with_log_msg_ (false),
+     count_ (0),
+     max_file_number_ (1), // 2 files by default (max file number + 1)
+     interval_ (ACE_DEFAULT_LOGFILE_POLL_INTERVAL),
+@@ -313,6 +317,12 @@
+   this->log_msg_->priority_mask (process_priority_mask_,
+                                  ACE_Log_Msg::PROCESS);
+ 
++  if (this->rotate_with_log_msg_)
++  {
++	  this->interval_ = 0;
++	  this->log_msg_->rotate_logs(true,this);
++  }
++
+   // Check if any flags were specified. If none were specified, let
+   // the default behavior take effect.
+   if (this->flags_ != 0)
+@@ -407,10 +417,20 @@
+                                       const void *)
+ {
+ #if defined (ACE_LACKS_IOSTREAM_TOTALLY)
+-  if ((size_t) ACE_OS::ftell (this->log_msg_->msg_ostream ()) > this->max_size_)
++  rotate_logs ((size_t) ACE_OS::ftell (this->log_msg_->msg_ostream ()));
+ #else
+-  if ((size_t) this->log_msg_->msg_ostream ()->tellp () > this->max_size_)
++  rotate_logs (this->log_msg_->msg_ostream ()->tellp ());
+ #endif /* ACE_LACKS_IOSTREAM_TOTALLY */
++  return 0;
++}
++
++int ACE_Logging_Strategy::rotate_logs(ulong current_size)
++{
++  if (current_size < this->max_size_)
++    {
++      return 1;
++    }
++  else
+     {
+       // Lock out any other logging.
+       if (this->log_msg_->acquire ())
+--- Log_Msg.h.org	2009-03-16 16:53:44.000000000 +0200
++++ Log_Msg.h	2009-03-16 16:52:15.000000000 +0200
+@@ -144,6 +144,7 @@
+ // Forward declaration
+ class ACE_Thread_Descriptor;
+ class ACE_Log_Record;
++class ACE_Logging_Strategy;
+ 
+ /**
+  * @class ACE_Log_Msg
+@@ -337,6 +338,9 @@
+   /// restarted.
+   bool restart (void) const;
+ 
++  /// Set the field that indicates whether this class requests rotate_logs
++  void rotate_logs(bool r, ACE_Logging_Strategy* l = NULL);
++
+   // = Notice that the following two function is equivalent to
+   //   "void msg_ostream (HANDLE)" and "HANDLE msg_ostream (void)"
+   //   on Windows CE.  There is no <iostream.h> support on CE.
+@@ -622,6 +626,16 @@
+   /// interrupted.
+   bool restart_;
+ 
++  /// Indicates whether we should request rotate logs with ACE_Log_Msg
++  bool rotate_logs_;
++
++  /// the current_size of the log - only used when rotating files
++  /// with ACE_Log_Msg
++  ulong current_size_;
++
++  /// log strategy to use if rotate log with ACE_Log_Msg is requested
++  ACE_Logging_Strategy *log_strategy_;
++
+   /// The ostream where logging messages can be written.
+   ACE_OSTREAM_TYPE *ostream_;
+ 
+--- Log_Msg.cpp.org	2009-03-16 16:53:44.000000000 +0200
++++ Log_Msg.cpp	2009-03-16 16:52:56.000000000 +0200
+@@ -40,6 +40,7 @@
+ #include "ace/Log_Record.h"
+ #include "ace/Recursive_Thread_Mutex.h"
+ #include "ace/Stack_Trace.h"
++#include "ace/Logging_Strategy.h"
+ 
+ #if !defined (__ACE_INLINE__)
+ #include "ace/Log_Msg.inl"
+@@ -652,6 +653,9 @@
+     linenum_ (0),
+     msg_ (0),
+     restart_ (1),  // Restart by default...
++    rotate_logs_(0),
++    current_size_(0),
++    log_strategy_(0),
+     ostream_ (0),
+     ostream_refcount_ (0),
+     msg_callback_ (0),
+@@ -883,6 +887,12 @@
+       // Only set this to cerr if it hasn't already been set.
+       if (this->msg_ostream () == 0)
+         this->msg_ostream (ACE_DEFAULT_LOG_STREAM);
++
++#if defined (ACE_LACKS_IOSTREAM_TOTALLY)
++	  this->current_size_ = ACE_OS::ftell (this->log_msg_->msg_ostream ());
++#else
++	  this->current_size_ = this->msg_ostream ()->tellp ();
++#endif
+     }
+ 
+   if (ACE_BIT_ENABLED (flags,
+@@ -2060,6 +2070,16 @@
+       // buffer (this can be optimized away by changing other code...).
+       log_record.msg_data (this->msg ());
+ 
++      //if the rotate_logs flag is set - do the calculations
++      if (this->rotate_logs_ && this->log_strategy_)
++        {
++          this->current_size_ += log_record.msg_data_len_no_trace();
++          // if the log was rotated reset current size
++          if(this->log_strategy_->rotate_logs(this->current_size_) == 0)
++            {
++              this->current_size_ = log_record.msg_data_len_no_trace();
++            }
++        }
+       // Write the <log_record> to the appropriate location.
+       result = this->log (log_record,
+                           abort_prog);
+--- Log_Msg.inl.org	2009-03-16 16:53:44.000000000 +0200
++++ Log_Msg.inl	2009-03-15 11:58:07.000000000 +0200
+@@ -54,6 +54,17 @@
+ }
+ 
+ ACE_INLINE
++void
++ACE_Log_Msg::rotate_logs(bool r, ACE_Logging_Strategy* l)
++{
++        this->rotate_logs_ = r;
++        if (r == true)
++                this->log_strategy_ = l;
++        else
++                this->log_strategy_ = NULL;
++}
++
++ACE_INLINE
+ int
+ ACE_Log_Msg::errnum (void) const
+ {
+--- Log_Record.h.org	2009-03-16 16:53:44.000000000 +0200
++++ Log_Record.h	2009-03-16 16:53:28.000000000 +0200
+@@ -168,6 +168,10 @@
+   /// a byte for the NUL.
+   size_t msg_data_len (void) const;
+ 
++  /// Get the size of the message data of the <Log_Record>
++  ///  no trace printed
++  size_t msg_data_len_no_trace (void) const;
++
+   /// Dump the state of an object.
+   void dump (void) const;
+ 
+--- Log_Record.inl.org	2009-03-16 16:53:44.000000000 +0200
++++ Log_Record.inl	2009-03-16 17:00:28.000000000 +0200
+@@ -118,4 +118,9 @@
+   return ACE_OS::strlen (this->msg_data_) + 1;
+ }
+ 
++ACE_INLINE size_t
++ACE_Log_Record::msg_data_len_no_trace (void) const
++{
++  return ACE_OS::strlen (this->msg_data_);
++}
+ ACE_END_VERSIONED_NAMESPACE_DECL
+--- /root/workspace/ACE_wrappers.5.6.8/ACE_wrappers/tests/Logging_Strategy_Test.cpp.org	2009-03-14 20:37:03.000000000 +0200
++++ Logging_Strategy_Test.cpp	2009-03-15 12:10:54.000000000 +0200
+@@ -89,6 +89,7 @@
+ static bool order_state = false;
+ static int num_files = 0;
+ static bool wipeout_logfile = false;
++static bool rotate_with_log_msg = false;
+ 
+ // This adapter function runs the Reactor's event loop in a separate
+ // thread of control.
+@@ -323,7 +324,7 @@
+ {
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Specifications:\n")));
+-  ACE_Get_Opt get_opt (argc, argv, ACE_TEXT ("s:i:m:f:N:ow"));
++  ACE_Get_Opt get_opt (argc, argv, ACE_TEXT ("s:i:m:f:N:owr"));
+   int c;
+ 
+   while ((c = get_opt ()) != EOF)
+@@ -371,6 +372,11 @@
+                       ACE_TEXT ("Wipeout logfile activated\n")));
+           wipeout_logfile = true;
+           break;
++        case 'r':
++          ACE_DEBUG ((LM_DEBUG,
++                      ACE_TEXT ("rotate with log_msg activated\n")));
++          rotate_with_log_msg = true;
++	  break;
+         default:
+           ACE_ERROR_RETURN
+             ((LM_ERROR,
+@@ -385,6 +391,7 @@
+               ACE_TEXT ("\t-N: Define the maximum number of log_files.\n")
+               ACE_TEXT ("\t-o: If activated puts the log_files ordered.\n"),
+               ACE_TEXT ("\t-w: If activated cause the logfile to be wiped out,")
++              ACE_TEXT ("\t-r: If activated cause the logfiles to be rotated according to a counter in Log_Msg,")
+               ACE_TEXT (" both on startup and on reconfigure.\n")),
+              -1);
+           /* NOTREACHED */
+@@ -482,9 +489,10 @@
+           ACE_HAS_SVR4_DYNAMIC_LINKING || __hpux) */
+ 
+   // launch a new Thread
+-  if (ACE_Thread_Manager::instance ()->spawn
+-      (ACE_THR_FUNC (run_reactor)) == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
++  if (rotate_with_log_msg == false)
++      if (ACE_Thread_Manager::instance ()->spawn
++        (ACE_THR_FUNC (run_reactor)) == -1)
++         ACE_ERROR_RETURN ((LM_ERROR,
+                        "Spawning Reactor.\n"),
+                       1);
+ 
+@@ -497,8 +505,9 @@
+   // Get the file order
+   order ();
+ 
++  if (rotate_with_log_msg == false)
+   // Wait for the thread to exit before we exit.
+-  ACE_Thread_Manager::instance ()->wait ();
++    ACE_Thread_Manager::instance ()->wait ();
+   ACE_END_TEST;
+   return 0;
+ }
