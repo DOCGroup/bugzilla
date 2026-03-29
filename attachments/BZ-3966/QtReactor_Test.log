@@ -1,0 +1,27 @@
+2011-06-06 14:26:32.791@LM_DEBUG@(1060|416) Starting QtReactor_Test test at 2011-06-06 14:26:32.791625
+2011-06-06 14:26:32.791@LM_INFO@Testing autotest using native reactor
+2011-06-06 14:26:32.838@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:32.838@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:32.838@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:32.838@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:32.838@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:32.838@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:32.838@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:32.838@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:40.822@LM_INFO@Test seems to work with native reactor.
+2011-06-06 14:26:40.822@LM_INFO@Testing QtReactor
+2011-06-06 14:26:40.901@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:40.916@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:40.932@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:40.932@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:40.932@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:40.932@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:40.932@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:40.932@LM_DEBUG@TCPAcceptorHandler::make_svc_handler new TCP server created
+2011-06-06 14:26:40.963@LM_ERROR@TCPAcceptorHandler::make_svc_handler called to many times!
+2011-06-06 14:26:40.963@LM_ERROR@TCPAcceptorHandler::make_svc_handler called to many times!
+2011-06-06 14:26:40.963@LM_ERROR@TCPAcceptorHandler::make_svc_handler called to many times!
+2011-06-06 14:26:40.963@LM_ERROR@TCPAcceptorHandler::make_svc_handler called to many times!
+2011-06-06 14:26:40.963@LM_ERROR@TCPAcceptorHandler::make_svc_handler called to many times!
+2011-06-06 14:26:40.963@LM_ERROR@TCPAcceptorHandler::make_svc_handler called to many times!
+2011-06-06 14:26:40.963@LM_ERROR@TCPAcceptorHandler::make_svc_handler called to many times!
