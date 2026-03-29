@@ -1,0 +1,32 @@
+Index: OS_NS_Thread.cpp
+===================================================================
+--- OS_NS_Thread.cpp	(revision 95769)
++++ OS_NS_Thread.cpp	(working copy)
+@@ -50,15 +50,8 @@
+ void
+ ACE_Thread_ID::to_string (char *thr_string) const
+ {
+-  char format[128]; // Converted format string
+-  char *fp = 0;     // Current format pointer
+-  fp = format;
+-  *fp++ = '%';   // Copy in the %
+-
+ #if defined (ACE_WIN32)
+-  ACE_OS::strcpy (fp, "u");
+-  ACE_OS::sprintf (thr_string,
+-                   format,
++  ACE_OS::sprintf (thr_string, "%u",
+                    static_cast <unsigned> (this->thread_id_));
+ #else
+                   // Yes, this is an ugly C-style cast, but the
+@@ -67,9 +60,7 @@
+                   // type. FreeBSD uses a pointer type, but doesn't
+                   // have a _np function to get an integral type, like
+                   // the OSes above.
+-                  ACE_OS::strcpy (fp, "lu");
+-                  ACE_OS::sprintf (thr_string,
+-                                   format,
++                  ACE_OS::sprintf (thr_string, "%lu",
+                                    (unsigned long) thread_handle_);
+ #endif /* ACE_WIN32 */
+ }
