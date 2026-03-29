@@ -1,0 +1,21 @@
+Index: TAO/tao/IIOP_Connector.cpp
+===================================================================
+--- TAO/tao/IIOP_Connector.cpp	(revision 50)
++++ TAO/tao/IIOP_Connector.cpp	(working copy)
+@@ -585,6 +585,16 @@
+                 iiop_endpoint->port (),
+                 svc_handler->peer ().get_handle ()));
+     }
++  if ( !transport->is_connected() ) {
++    if (TAO_debug_level > 0) {
++      ACE_DEBUG ((LM_DEBUG,
++                  ACE_TEXT ("TAO (%P|%t) - IIOP_Connector::make_connection, ")
++                  ACE_TEXT ("bailing on unconnected connection")
++                   ));
++    }
++    transport->connection_handler()->cancel_pending_connection();
++    return 0;
++  }
+ 
+ #if defined (INDUCE_BUG_2654_C)
+   // This sets up the possibility that a failed connection is detected after we
