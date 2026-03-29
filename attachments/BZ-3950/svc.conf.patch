@@ -1,0 +1,4 @@
+13c13
+< dynamic Name_Server Service_Object * netsvcs:_make_ACE_Name_Acceptor() "main -p 20006"
+---
+> dynamic Name_Server Service_Object * netsvcs:_make_ACE_Name_Acceptor() "-p 20006"
