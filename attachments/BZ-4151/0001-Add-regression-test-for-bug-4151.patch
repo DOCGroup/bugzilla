@@ -1,0 +1,173 @@
+From 19e59e33330a805ead49736c9130d1deec62dc6b Mon Sep 17 00:00:00 2001
+From: Stanislav Ravas <ravas@tind.sk>
+Date: Tue, 7 Jan 2014 12:41:54 +0100
+Subject: [PATCH] Add regression test for bug 4151
+
+After service initialization fails, subsequent stream modules are not loaded at all.
+---
+ ACE_wrappers/tests/Bug_4151_Regression_Test.conf   |  9 ++++
+ ACE_wrappers/tests/Bug_4151_Regression_Test.cpp    | 49 ++++++++++++++++++++++
+ .../tests/Bug_4151_Regression_Test_DLL.cpp         | 47 +++++++++++++++++++++
+ ACE_wrappers/tests/tests.mpc                       | 23 ++++++++++
+ 4 files changed, 128 insertions(+)
+ create mode 100644 ACE_wrappers/tests/Bug_4151_Regression_Test.conf
+ create mode 100644 ACE_wrappers/tests/Bug_4151_Regression_Test.cpp
+ create mode 100644 ACE_wrappers/tests/Bug_4151_Regression_Test_DLL.cpp
+
+diff --git a/ACE_wrappers/tests/Bug_4151_Regression_Test.conf b/ACE_wrappers/tests/Bug_4151_Regression_Test.conf
+new file mode 100644
+index 0000000..fab7236
+--- /dev/null
++++ b/ACE_wrappers/tests/Bug_4151_Regression_Test.conf
+@@ -0,0 +1,9 @@
++dynamic service1 Service_Object *Bug_4151_Regression_Test_DLL:_make_Service() "--fail"
++dynamic service2 Service_Object *Bug_4151_Regression_Test_DLL:_make_Service() ""
++
++stream dynamic Stack STREAM *Bug_4151_Regression_Test_DLL:_make_Stream() active
++{
++	dynamic mod1 Module *Bug_4151_Regression_Test_DLL:_make_Module() ""
++	dynamic mod2 Module *Bug_4151_Regression_Test_DLL:_make_Module() ""
++}
++
+diff --git a/ACE_wrappers/tests/Bug_4151_Regression_Test.cpp b/ACE_wrappers/tests/Bug_4151_Regression_Test.cpp
+new file mode 100644
+index 0000000..5425924
+--- /dev/null
++++ b/ACE_wrappers/tests/Bug_4151_Regression_Test.cpp
+@@ -0,0 +1,49 @@
++
++//=============================================================================
++/**
++ *  @file   Bug_4151_Regression_Test.cpp 
++ *
++ *  Tests stream initialization after previous failed service initializatoin
++ *
++ *  @author Stanislav Ravas <ravas@tind.sk>
++ */
++//=============================================================================
++
++
++#include "test_config.h"
++#include "ace/Init_ACE.h"
++#include "ace/Service_Config.h"
++#include "ace/Log_Msg.h"
++
++int
++run_main (int argc, ACE_TCHAR *argv[])
++{
++    int r = 0;
++
++    ACE::init();
++
++    ACE_START_TEST (ACE_TEXT ("Bug_4151_Regression_Test"));
++
++    ACE_Service_Config::open(argc, argv, ACE_DEFAULT_LOGGER_KEY, 0, 1, 1);
++    ACE_Service_Config::process_file("Bug_4151_Regression_Test.conf");
++
++    bool mod1 = (ACE_Service_Config::instance()->find("mod1") == 0);
++    bool mod2 = (ACE_Service_Config::instance()->find("mod2") == 0); 
++
++    if(!mod1)
++        ACE_ERROR((LM_ERROR, ACE_TEXT("Module mod1 not loaded!\n")));
++
++    if(!mod2)
++        ACE_ERROR((LM_ERROR, ACE_TEXT("Module mod2 not loaded!\n")));
++
++    r = (mod1 && mod2) ? 0 : 1;
++
++    ACE_Service_Config::fini_svcs();
++    ACE_Service_Config::close();
++
++    ACE_END_TEST;
++
++    ACE::fini();
++    return r;
++}
++
+diff --git a/ACE_wrappers/tests/Bug_4151_Regression_Test_DLL.cpp b/ACE_wrappers/tests/Bug_4151_Regression_Test_DLL.cpp
+new file mode 100644
+index 0000000..baeb234
+--- /dev/null
++++ b/ACE_wrappers/tests/Bug_4151_Regression_Test_DLL.cpp
+@@ -0,0 +1,47 @@
++#include "ace/Service_Object.h"
++#include "ace/Stream.h"
++#include "ace/Module.h"
++#include "ace/svc_export.h"
++#include "string"
++
++using namespace std;
++
++class ACE_Svc_Export Service : public ACE_Service_Object {
++public:
++	int init(int argc, char **argv) {
++		if(argc > 0 && !strcmp(argv[0], "--fail")) {
++			ACE_ERROR((LM_NOTICE, "Failing service %@ init\n", this));
++			return -1;
++		}
++		else {
++			ACE_ERROR((LM_NOTICE, "Succeeding service %@ init\n", this));
++			return 0;
++		}
++	}
++
++	int fini() {
++		ACE_ERROR((LM_NOTICE, "Service %@ fini\n", this));
++		return 0;
++	}
++};
++
++ACE_FACTORY_DEFINE(ACE_Svc, Service);
++
++extern "C" ACE_Svc_Export ACE_Stream<ACE_MT_SYNCH> *_make_Stream()
++{
++    return new ACE_Stream<ACE_MT_SYNCH>;
++}
++
++class ACE_Svc_Export Task : public ACE_Task<ACE_MT_SYNCH> {
++public:
++	int init(int argc, char **argv) {
++		ACE_ERROR((LM_NOTICE, "%s task initialized\n", is_reader() ? "reader" : "writer"));
++		return 0;
++	}
++};
++
++extern "C" ACE_Svc_Export ACE_Module<ACE_MT_SYNCH> *_make_Module()
++{
++	return new ACE_Module<ACE_MT_SYNCH>("test-module", new Task, new Task);
++}
++
+diff --git a/ACE_wrappers/tests/tests.mpc b/ACE_wrappers/tests/tests.mpc
+index 7f87269..dcfefb5 100644
+--- a/ACE_wrappers/tests/tests.mpc
++++ b/ACE_wrappers/tests/tests.mpc
+@@ -2052,3 +2052,26 @@ project(Missing_Svc_Conf_Test) : acetest {
+     Missing_Svc_Conf_Test.cpp
+   }
+ }
++
++project(Bug_4151_Regression_Test_DLL) : acelib {
++  libout       = .
++  sharedname   = Bug_4151_Regression_Test_DLL
++
++  Source_Files {
++    Bug_4151_Regression_Test_DLL.cpp
++  }
++  Header_Files {
++  }
++  Resource_Files {
++  }
++}
++
++project(Bug_4151_Regression_Test) : acetest {
++  after  += Bug_4151_Regression_Test_DLL
++  exename = Bug_4151_Regression_Test
++  Source_Files {
++    Bug_4151_Regression_Test.cpp
++  }
++}
++
++
+-- 
+1.7.12.4
+
