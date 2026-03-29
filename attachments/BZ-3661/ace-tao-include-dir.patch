@@ -1,0 +1,84 @@
+--- ACE_wrappers/TAO/TAO_IDL/driver/drv_mcpp_preproc.cpp.ORIG	2009-01-07 12:59:53.000000000 -0800
++++ ACE_wrappers/TAO/TAO_IDL/driver/drv_mcpp_preproc.cpp	2009-04-24 15:26:35.000000000 -0700
+@@ -284,7 +284,7 @@
+               // e.g. "/usr/local/include/tao"
+               // We deal with a case like this below ...
+               DRV_add_include_path (include_path1, TAO_IDL_INCLUDE_DIR, 0);
+-              DRV_add_include_path (include_path2, ".", 0);
++              DRV_add_include_path (include_path2, TAO_IDL_INCLUDE_DIR, "/tao");
+ #else
+               DRV_add_include_path (include_path1, ".", 0);
+ #endif  /* TAO_IDL_INCLUDE_DIR */
+@@ -494,9 +494,13 @@
+         }
+       else
+         {
++#if defined (TAO_IDL_INCLUDE_DIR)
++          DRV_add_include_path (include_path3, TAO_IDL_INCLUDE_DIR, "/orbsvcs");
++#else
+           // If ACE_ROOT isn't defined either, there will already
+           // be a warning from DRV_preproc().
+           DRV_add_include_path (include_path3, ".", 0);
++#endif  /* TAO_IDL_INCLUDE_DIR */
+         }
+     }
+ 
+@@ -531,10 +535,16 @@
+         }
+       else
+         {
++#if defined (TAO_IDL_INCLUDE_DIR)
++          DRV_add_include_path (include_path4, TAO_IDL_INCLUDE_DIR, 0);
++          DRV_add_include_path (include_path5, TAO_IDL_INCLUDE_DIR, "/ciao");
++          DRV_add_include_path (include_path5, TAO_IDL_INCLUDE_DIR, "/ccm");
++#else
+           // If ACE_ROOT isn't defined either, there will already
+           // be a warning from DRV_preproc().
+           DRV_add_include_path (include_path4, ACE_ROOT, ".");
+           DRV_add_include_path (include_path5, ACE_ROOT, ".");
++#endif  /* TAO_IDL_INCLUDE_DIR */
+         }
+     }
+ 
+--- ACE_wrappers/TAO/TAO_IDL/driver/drv_preproc.cpp.ORIG	2009-01-07 12:59:53.000000000 -0800
++++ ACE_wrappers/TAO/TAO_IDL/driver/drv_preproc.cpp	2009-04-24 15:27:17.000000000 -0700
+@@ -293,7 +293,7 @@
+               // e.g. "/usr/local/include/tao"
+               // We deal with a case like this below ...
+               DRV_add_include_path (include_path1, TAO_IDL_INCLUDE_DIR, 0);
+-              DRV_add_include_path (include_path2, ".", 0);
++              DRV_add_include_path (include_path2, TAO_IDL_INCLUDE_DIR, "/tao");
+ #else
+               DRV_add_include_path (include_path1, ".", 0);
+ #endif  /* TAO_IDL_INCLUDE_DIR */
+@@ -507,9 +507,13 @@
+         }
+       else
+         {
++#if defined (TAO_IDL_INCLUDE_DIR)
++          DRV_add_include_path (include_path3, TAO_IDL_INCLUDE_DIR, "/orbsvcs");
++#else
+           // If ACE_ROOT isn't defined either, there will already
+           // be a warning from DRV_preproc().
+           DRV_add_include_path (include_path3, ".", 0);
++#endif  /* TAO_IDL_INCLUDE_DIR */
+         }
+     }
+ 
+@@ -544,10 +548,16 @@
+         }
+       else
+         {
++#if defined (TAO_IDL_INCLUDE_DIR)
++          DRV_add_include_path (include_path4, TAO_IDL_INCLUDE_DIR, 0);
++          DRV_add_include_path (include_path5, TAO_IDL_INCLUDE_DIR, "/ciao");
++          DRV_add_include_path (include_path5, TAO_IDL_INCLUDE_DIR, "/ccm");
++#else
+           // If ACE_ROOT isn't defined either, there will already
+           // be a warning from DRV_preproc().
+           DRV_add_include_path (include_path4, ACE_ROOT, ".");
+           DRV_add_include_path (include_path5, ACE_ROOT, ".");
++#endif  /* TAO_IDL_INCLUDE_DIR */
+         }
+     }
+ 
