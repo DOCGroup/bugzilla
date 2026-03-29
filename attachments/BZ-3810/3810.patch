@@ -1,0 +1,174 @@
+diff -r -u ACE_wrappers/TAO/tao/PortableServer.orig/POA.pidl ACE_wrappers/TAO/tao/PortableServer/POA.pidl
+--- ACE_wrappers/TAO/tao/PortableServer.orig/POA.pidl	2010-01-14 06:14:12.000000000 -0500
++++ ACE_wrappers/TAO/tao/PortableServer/POA.pidl	2010-01-14 06:29:11.000000000 -0500
+@@ -109,8 +109,8 @@
+ #if !defined (TAO_HAS_MINIMUM_POA) && !defined (CORBA_E_COMPACT)
+     exception NoServant {};
+ #endif
+-    exception ObjectAlreadyActive {};
+ #       endif
++    exception ObjectAlreadyActive {};
+     exception ObjectNotActive {};
+     exception ServantAlreadyActive {};
+     exception ServantNotActive {};
+@@ -201,13 +201,11 @@
+       raises (ServantAlreadyActive,
+               WrongPolicy);
+ 
+-#if !defined (CORBA_E_MICRO)
+     void activate_object_with_id (in ObjectId id,
+                                   in Servant p_servant)
+       raises (ServantAlreadyActive,
+               ObjectAlreadyActive,
+               WrongPolicy);
+-#endif
+ 
+     void deactivate_object (in ObjectId oid)
+       raises (ObjectNotActive, WrongPolicy);
+diff -r -u ACE_wrappers/TAO/tao/PortableServer.orig/Root_POA.cpp ACE_wrappers/TAO/tao/PortableServer/Root_POA.cpp
+--- ACE_wrappers/TAO/tao/PortableServer.orig/Root_POA.cpp	2010-01-14 06:14:12.000000000 -0500
++++ ACE_wrappers/TAO/tao/PortableServer/Root_POA.cpp	2010-01-14 06:17:38.000000000 -0500
+@@ -1150,7 +1150,6 @@
+     }
+ }
+ 
+-#if !defined (CORBA_E_MICRO)
+ void
+ TAO_Root_POA::activate_object_with_id (const PortableServer::ObjectId &id,
+                                        PortableServer::Servant servant)
+@@ -1176,9 +1175,7 @@
+         return;
+     }
+ }
+-#endif
+ 
+-#if !defined (CORBA_E_MICRO)
+ void
+ TAO_Root_POA::activate_object_with_id_i (const PortableServer::ObjectId &id,
+                                          PortableServer::Servant servant,
+@@ -1191,7 +1188,6 @@
+                              priority,
+                              wait_occurred_restart_call);
+ }
+-#endif
+ 
+ void
+ TAO_Root_POA::deactivate_all_objects_i (CORBA::Boolean etherealize_objects,
+diff -r -u ACE_wrappers/TAO/tao/PortableServer.orig/Root_POA.h ACE_wrappers/TAO/tao/PortableServer/Root_POA.h
+--- ACE_wrappers/TAO/tao/PortableServer.orig/Root_POA.h	2010-01-14 06:14:12.000000000 -0500
++++ ACE_wrappers/TAO/tao/PortableServer/Root_POA.h	2010-01-14 06:17:24.000000000 -0500
+@@ -217,10 +217,8 @@
+ 
+   PortableServer::ObjectId *activate_object (PortableServer::Servant p_servant);
+ 
+-#if !defined (CORBA_E_MICRO)
+   void activate_object_with_id (const PortableServer::ObjectId &id,
+                                 PortableServer::Servant p_servant);
+-#endif
+ 
+   void deactivate_object (const PortableServer::ObjectId &oid);
+ 
+@@ -551,12 +549,10 @@
+   PortableServer::Servant get_servant_i (void);
+ 
+ protected:
+-#if !defined (CORBA_E_MICRO)
+   void activate_object_with_id_i (const PortableServer::ObjectId &id,
+                                   PortableServer::Servant p_servant,
+                                   CORBA::Short priority,
+                                   bool &wait_occurred_restart_call);
+-#endif
+ 
+   virtual void remove_from_parent_i (void);
+ 
+diff -r -u ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategy.h ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategy.h
+--- ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategy.h	2010-01-14 06:14:12.000000000 -0500
++++ ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategy.h	2010-01-14 06:16:07.000000000 -0500
+@@ -62,13 +62,11 @@
+         CORBA::Short priority,
+         bool &wait_occurred_restart_call) = 0;
+ 
+-#if !defined (CORBA_E_MICRO)
+       virtual void activate_object_with_id (
+         const PortableServer::ObjectId &id,
+         PortableServer::Servant servant,
+         CORBA::Short priority,
+         bool &wait_occurred_restart_call) = 0;
+-#endif
+ 
+       virtual void deactivate_object (const PortableServer::ObjectId &id) = 0;
+ 
+diff -r -u ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategyNonRetain.cpp ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.cpp
+--- ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategyNonRetain.cpp	2010-01-14 06:14:12.000000000 -0500
++++ ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.cpp	2010-01-14 06:16:20.000000000 -0500
+@@ -164,7 +164,6 @@
+       throw PortableServer::POA::WrongPolicy ();
+     }
+ 
+-#if !defined (CORBA_E_MICRO)
+     void
+     ServantRetentionStrategyNonRetain::activate_object_with_id (
+       const PortableServer::ObjectId &/*id*/,
+@@ -174,7 +173,6 @@
+     {
+       throw PortableServer::POA::WrongPolicy ();
+     }
+-#endif
+ 
+     CORBA::Object_ptr
+     ServantRetentionStrategyNonRetain::create_reference (
+diff -r -u ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategyNonRetain.h ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.h
+--- ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategyNonRetain.h	2010-01-14 06:14:12.000000000 -0500
++++ ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.h	2010-01-14 06:16:28.000000000 -0500
+@@ -48,14 +48,12 @@
+                        CORBA::Short priority,
+                        bool &wait_occurred_restart_call);
+ 
+-#if !defined (CORBA_E_MICRO)
+       virtual
+       void
+       activate_object_with_id (const PortableServer::ObjectId &id,
+                                PortableServer::Servant servant,
+                                CORBA::Short priority,
+                                bool &wait_occurred_restart_call);
+-#endif
+ 
+       virtual void deactivate_object (const PortableServer::ObjectId &id);
+ 
+diff -r -u ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategyRetain.cpp ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetain.cpp
+--- ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategyRetain.cpp	2010-01-14 06:14:12.000000000 -0500
++++ ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetain.cpp	2010-01-14 06:16:43.000000000 -0500
+@@ -753,7 +753,6 @@
+       return user_id._retn ();
+     }
+ 
+-#if !defined (CORBA_E_MICRO)
+     void
+     ServantRetentionStrategyRetain::activate_object_with_id (
+       const PortableServer::ObjectId &id,
+@@ -856,7 +855,6 @@
+       // invoke _remove_ref on it the same number of times.
+       servant->_add_ref ();
+     }
+-#endif
+ 
+     CORBA::Object_ptr
+     ServantRetentionStrategyRetain::create_reference (
+diff -r -u ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategyRetain.h ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetain.h
+--- ACE_wrappers/TAO/tao/PortableServer.orig/ServantRetentionStrategyRetain.h	2010-01-14 06:14:12.000000000 -0500
++++ ACE_wrappers/TAO/tao/PortableServer/ServantRetentionStrategyRetain.h	2010-01-14 06:16:51.000000000 -0500
+@@ -51,14 +51,12 @@
+                        CORBA::Short priority,
+                        bool &wait_occurred_restart_call);
+ 
+-#if !defined (CORBA_E_MICRO)
+       virtual
+       void
+       activate_object_with_id (const PortableServer::ObjectId &id,
+                                PortableServer::Servant servant,
+                                CORBA::Short priority,
+                                bool &wait_occurred_restart_call);
+-#endif
+ 
+       void deactivate_object (const PortableServer::ObjectId &id);
+ 
