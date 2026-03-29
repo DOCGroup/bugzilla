@@ -1,0 +1,43 @@
+From a86579db30f452bc1d81dfd66b3d92c58be32e73 Mon Sep 17 00:00:00 2001
+From: Stanislav Ravas <ravas@tind.sk>
+Date: Sun, 5 Jan 2014 18:18:26 +0100
+Subject: [PATCH] svc-conf: Fix stream init after previous failed
+ initializations
+
+When stream was to be loaded after failed service initialization,
+stream init failed.
+---
+ ACE_wrappers/ace/Parse_Node.cpp | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/ACE_wrappers/ace/Parse_Node.cpp b/ACE_wrappers/ace/Parse_Node.cpp
+index 19b5595..2b99ed0 100644
+--- a/ACE_wrappers/ace/Parse_Node.cpp
++++ b/ACE_wrappers/ace/Parse_Node.cpp
+@@ -34,11 +34,13 @@ ACE_Stream_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
+ {
+   ACE_TRACE ("ACE_Stream_Node::apply");
+ 
++  int yyerrno_entry = yyerrno;	// save yyerrno on entry, to have a value to compare with
++
+   const ACE_Service_Type *sst = this->node_->record (config);
+   if (sst == 0)
+     const_cast<ACE_Static_Node *> (this->node_)->apply (config, yyerrno);
+ 
+-  if (yyerrno != 0) return;
++  if (yyerrno != yyerrno_entry) return;
+ 
+   sst = this->node_->record (config);
+   ACE_Stream_Type *st =
+@@ -65,7 +67,7 @@ ACE_Stream_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
+       if (mst == 0)
+         const_cast<ACE_Static_Node *> (module)->apply (config, yyerrno);
+ 
+-      if (yyerrno != 0)
++      if (yyerrno != yyerrno_entry)
+         {
+           if (ACE::debug ())
+             {
+-- 
+1.7.12.4
+
