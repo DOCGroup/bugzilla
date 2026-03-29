@@ -1,0 +1,11 @@
+--- Connection_Handler.cpp.ori	Thu Apr  9 09:24:03 2009
++++ Connection_Handler.cpp	Thu Apr  9 09:25:30 2009
+@@ -452,7 +452,7 @@
+   // We only need to remove the reference from the transport if there
+   // were connections pending at the time that the handler is closed or
+   // the handler is being closed during a new connection.
+-  if (pending || ACE_BIT_DISABLED(flags, CLOSE_DURING_NEW_CONNECTION))
++  if (pending || ACE_BIT_ENABLED(flags, CLOSE_DURING_NEW_CONNECTION))
+     transport->remove_reference ();
+ 
+   return 0;
