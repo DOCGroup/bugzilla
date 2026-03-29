@@ -1,0 +1,13 @@
+Index: tmp/ACE_wrappers/examples/APG/ThreadManagement/Signals.cpp
+===================================================================
+--- tmp.orig/ACE_wrappers/examples/APG/ThreadManagement/Signals.cpp
++++ tmp/ACE_wrappers/examples/APG/ThreadManagement/Signals.cpp
+@@ -74,7 +74,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
+   ACE_OS::sleep (1);
+ 
+   ACE_Thread_Manager::instance () ->
+-    kill_grp (handler.grp_id (), SIGUSR1);
++    kill_task (&handler, SIGUSR1);
+   handler.wait ();
+   return 0;
+ }
