@@ -1,0 +1,19 @@
+project(Module1): acelib {
+    sharedname    = Module1
+ 
+    Source_Files {
+        Foo.cpp
+    }
+}
+
+project(Module2): acelib {
+    sharedname    = Module2
+    dynamicflags += SOME_DEFINE
+
+    after        += Module1
+	
+    Source_Files {
+        Foo.cpp
+    }
+}
+
