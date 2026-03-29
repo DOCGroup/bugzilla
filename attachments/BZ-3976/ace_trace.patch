@@ -1,0 +1,2123 @@
+Index: ace/RB_Tree.inl
+===================================================================
+--- ace/RB_Tree.inl	(revision 94301)
++++ ace/RB_Tree.inl	(working copy)
+@@ -194,8 +194,7 @@
+                                                            const INT_ID &int_id,
+                                                            ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)
+ {
+-  ACE_TRACE ("ACE_RB_Tree::bind (const EXT_ID &ext_id, const INT_ID &int_id, "
+-             "ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
++  ACE_TRACE ("ACE_RB_Tree::bind (const EXT_ID &ext_id, const INT_ID &int_id, ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
+   ACE_WRITE_GUARD_RETURN (ACE_LOCK, ace_mon, this->lock_, -1);
+ 
+   return this->insert_i (ext_id, int_id, entry);
+@@ -238,8 +237,7 @@
+                                                               INT_ID &int_id,
+                                                               ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)
+ {
+-  ACE_TRACE ("ACE_RB_Tree::trybind (const EXT_ID &ext_id, INT_ID &int_id, "
+-             "ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
++  ACE_TRACE ("ACE_RB_Tree::trybind (const EXT_ID &ext_id, INT_ID &int_id, ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
+   ACE_WRITE_GUARD_RETURN (ACE_LOCK, ace_mon, this->lock_, -1);
+ 
+   int result = this->insert_i (ext_id, int_id, entry);
+@@ -290,8 +288,7 @@
+                                                              const INT_ID &int_id,
+                                                              ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)
+ {
+-  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, const INT_ID &int_id, "
+-             "ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
++  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, const INT_ID &int_id, ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
+   ACE_WRITE_GUARD_RETURN (ACE_LOCK, ace_mon, this->lock_, -1);
+ 
+   int result = this->insert_i (ext_id, int_id, entry);
+@@ -318,8 +315,7 @@
+                                                              const INT_ID &int_id,
+                                                              INT_ID &old_int_id)
+ {
+-  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, "
+-             "const INT_ID &int_id, INT_ID &old_int_id)");
++  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, const INT_ID &int_id, INT_ID &old_int_id)");
+   ACE_WRITE_GUARD_RETURN (ACE_LOCK, ace_mon, this->lock_, -1);
+ 
+   ACE_RB_Tree_Node<EXT_ID, INT_ID> *entry;
+@@ -347,8 +343,7 @@
+                                                              INT_ID &old_int_id,
+                                                              ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)
+ {
+-  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, const INT_ID &int_id,"
+-             "INT_ID &old_int_id, ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
++  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, const INT_ID &int_id,INT_ID &old_int_id, ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
+   ACE_WRITE_GUARD_RETURN (ACE_LOCK, ace_mon, this->lock_, -1);
+ 
+   int result = this->insert_i (ext_id, int_id, entry);
+@@ -380,8 +375,7 @@
+                                                              EXT_ID &old_ext_id,
+                                                              INT_ID &old_int_id)
+ {
+-  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, const INT_ID &int_id,"
+-             "EXT_ID &old_ext_id, INT_ID &old_int_id)");
++  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, const INT_ID &int_id,EXT_ID &old_ext_id, INT_ID &old_int_id)");
+   ACE_WRITE_GUARD_RETURN (ACE_LOCK, ace_mon, this->lock_, -1);
+ 
+   ACE_RB_Tree_Node<EXT_ID, INT_ID> *entry;
+@@ -411,9 +405,7 @@
+                                                              INT_ID &old_int_id,
+                                                              ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)
+ {
+-  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, const INT_ID &int_id, "
+-             "EXT_ID &old_ext_id, INT_ID &old_int_id, "
+-             "ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
++  ACE_TRACE ("ACE_RB_Tree::rebind (const EXT_ID &ext_id, const INT_ID &int_id, EXT_ID &old_ext_id, INT_ID &old_int_id, ACE_RB_Tree_Node<EXT_ID, INT_ID> *&entry)");
+   ACE_WRITE_GUARD_RETURN (ACE_LOCK, ace_mon, this->lock_, -1);
+ 
+   int result = this->insert_i (ext_id, int_id, entry);
+Index: ace/Svc_Handler.cpp
+===================================================================
+--- ace/Svc_Handler.cpp	(revision 94301)
++++ ace/Svc_Handler.cpp	(working copy)
+@@ -95,8 +95,7 @@
+ ACE_Svc_Handler<PR_ST_2, ACE_SYNCH_USE>::operator delete (void *p,
+                                          const ACE_nothrow_t&) throw()
+ {
+-  ACE_TRACE
+-    ("ACE_Svc_Handler<PR_ST_2, ACE_SYNCH_USE>::operator delete(nothrow)");
++  ACE_TRACE("ACE_Svc_Handler<PR_ST_2, ACE_SYNCH_USE>::operator delete(nothrow)");
+   ::delete [] static_cast <char *> (p);
+ }
+ #endif /* ACE_LACKS_PLACEMENT_OPERATOR_DELETE */
+Index: examples/APG/Active_Objects/AO.cpp
+===================================================================
+--- examples/APG/Active_Objects/AO.cpp	(revision 94301)
++++ examples/APG/Active_Objects/AO.cpp	(working copy)
+@@ -16,14 +16,13 @@
+ public:
+   HA_ControllerAgent ()
+   {
+-    ACE_TRACE
+-      (ACE_TEXT ("HA_ControllerAgent::HA_ControllerAgent"));
++    ACE_TRACE("HA_ControllerAgent::HA_ControllerAgent");
+     status_result_ = 1;
+   }
+ 
+   int status_update (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("HA_ControllerAgent::status_update"));
++    ACE_TRACE ("HA_ControllerAgent::status_update");
+     ACE_DEBUG ((LM_DEBUG,
+                 ACE_TEXT ("Obtaining a status_update in %t ")
+                 ACE_TEXT ("thread of control\n")));
+@@ -35,7 +34,7 @@
+ private:
+   int next_result_id (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("HA_ControllerAgent::next_cmd_id"));
++    ACE_TRACE ("HA_ControllerAgent::next_cmd_id");
+     return status_result_++;
+   }
+ 
+@@ -50,12 +49,12 @@
+                 ACE_Future<int>& returnVal)
+     : controller_(controller), returnVal_(returnVal)
+   {
+-    ACE_TRACE (ACE_TEXT ("StatusUpdate::StatusUpdate"));
++    ACE_TRACE ("StatusUpdate::StatusUpdate");
+   }
+ 
+   virtual int call (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("StatusUpdate::call"));
++    ACE_TRACE ("StatusUpdate::call");
+ 
+     // status_update with the controller.
+     this->returnVal_.set (this->controller_.status_update ());
+@@ -84,13 +83,13 @@
+ public:
+   Scheduler ()
+   {
+-    ACE_TRACE (ACE_TEXT ("Scheduler::Scheduler"));
++    ACE_TRACE ("Scheduler::Scheduler");
+     this->activate ();
+   }
+ 
+   virtual int svc (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("Scheduler::svc"));
++    ACE_TRACE ("Scheduler::svc");
+ 
+     while (1)
+       {
+@@ -108,7 +107,7 @@
+ 
+   int enqueue (ACE_Method_Request *request)
+   {
+-    ACE_TRACE (ACE_TEXT ("Scheduler::enqueue"));
++    ACE_TRACE ("Scheduler::enqueue");
+     return this->activation_queue_.enqueue (request);
+   }
+ 
+@@ -123,8 +122,7 @@
+ public:
+   ACE_Future<int> status_update (void)
+   {
+-    ACE_TRACE
+-      (ACE_TEXT ("HA_ControllerAgentProxy::status_update"));
++    ACE_TRACE("HA_ControllerAgentProxy::status_update");
+     ACE_Future<int> result;
+ 
+     // Create and enqueue a method request on the scheduler.
+@@ -139,7 +137,7 @@
+   void exit (void)
+   {
+   //FUZZ: enable check_for_lack_ACE_OS
+-    ACE_TRACE (ACE_TEXT ("HA_ControllerAgentProxy::exit"));
++    ACE_TRACE ("HA_ControllerAgentProxy::exit");
+     this->scheduler_.enqueue (new ExitMethod);
+   }
+ 
+Index: examples/APG/Active_Objects/AO2.cpp
+===================================================================
+--- examples/APG/Active_Objects/AO2.cpp	(revision 94301)
++++ examples/APG/Active_Objects/AO2.cpp	(working copy)
+@@ -16,14 +16,13 @@
+ public:
+   HA_ControllerAgent ()
+   {
+-    ACE_TRACE
+-      (ACE_TEXT ("HA_ControllerAgent::HA_ControllerAgent"));
++    ACE_TRACE("HA_ControllerAgent::HA_ControllerAgent");
+     status_result_ = 1;
+   }
+ 
+   int status_update (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("HA_ControllerAgent::status_update"));
++    ACE_TRACE ("HA_ControllerAgent::status_update");
+     ACE_DEBUG ((LM_DEBUG,
+                 ACE_TEXT ("Obtaining a status_update in %t ")
+                 ACE_TEXT ("thread of control\n")));
+@@ -36,7 +35,7 @@
+ private:
+   int next_result_id (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("HA_ControllerAgent::next_cmd_id"));
++    ACE_TRACE ("HA_ControllerAgent::next_cmd_id");
+     return status_result_++;
+   }
+ 
+@@ -50,12 +49,12 @@
+                 ACE_Future<int>& returnVal)
+     : controller_(controller), returnVal_(returnVal)
+   {
+-    ACE_TRACE (ACE_TEXT ("StatusUpdate::StatusUpdate"));
++    ACE_TRACE ("StatusUpdate::StatusUpdate");
+   }
+ 
+   virtual int call (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("StatusUpdate::call"));
++    ACE_TRACE ("StatusUpdate::call");
+ 
+     // status_update with the controller.
+     this->returnVal_.set (this->controller_.status_update ());
+@@ -82,13 +81,13 @@
+ public:
+   Scheduler ()
+   {
+-    ACE_TRACE (ACE_TEXT ("Scheduler::Scheduler"));
++    ACE_TRACE ("Scheduler::Scheduler");
+     this->activate ();
+   }
+ 
+   virtual int svc (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("Scheduler::svc"));
++    ACE_TRACE ("Scheduler::svc");
+ 
+     while (1)
+       {
+@@ -106,7 +105,7 @@
+ 
+   int enqueue (ACE_Method_Request *request)
+   {
+-    ACE_TRACE (ACE_TEXT ("Scheduler::enqueue"));
++    ACE_TRACE ("Scheduler::enqueue");
+     return this->activation_queue_.enqueue (request);
+   }
+ 
+@@ -120,8 +119,7 @@
+ public:
+   ACE_Future<int> status_update (void)
+   {
+-    ACE_TRACE
+-      (ACE_TEXT ("HA_ControllerAgentProxy::status_update"));
++    ACE_TRACE("HA_ControllerAgentProxy::status_update");
+     ACE_Future<int> result;
+ 
+     // Create and enqueue a method request on the scheduler.
+@@ -137,7 +135,7 @@
+   {
+   //FUZZ: enable check_for_lack_ACE_OS
+ 
+-    ACE_TRACE (ACE_TEXT ("HA_ControllerAgentProxy::exit"));
++    ACE_TRACE ("HA_ControllerAgentProxy::exit");
+     this->scheduler_.enqueue (new ExitMethod);
+   }
+ 
+Index: examples/APG/Containers/Allocator.cpp
+===================================================================
+--- examples/APG/Containers/Allocator.cpp	(revision 94301)
++++ examples/APG/Containers/Allocator.cpp	(working copy)
+@@ -20,7 +20,7 @@
+ // Listing 1 code/ch05
+ int StackExample::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("StackUser::run"));
++  ACE_TRACE ("StackUser::run");
+ 
+   ACE_Allocator *allocator = 0;
+   size_t block_size = sizeof(ACE_Node<DataElement>);
+@@ -45,7 +45,7 @@
+ // Listing 2 code/ch05
+ int StackExample::runUnboundedStack (ACE_Allocator* allocator)
+ {
+-  ACE_TRACE (ACE_TEXT ("StackExample::runUnboundedStack"));
++  ACE_TRACE ("StackExample::runUnboundedStack");
+ 
+   // Pass in an allocator during construction.
+   ACE_Unbounded_Stack<DataElement> ustack (allocator);
+Index: examples/APG/Containers/DLList.cpp
+===================================================================
+--- examples/APG/Containers/DLList.cpp	(revision 94301)
++++ examples/APG/Containers/DLList.cpp	(working copy)
+@@ -24,7 +24,7 @@
+ int
+ ListTest::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ListTest::run"));
++  ACE_TRACE ("ListTest::run");
+ 
+   // Create a list and insert 100 elements.
+   MyList list1;
+@@ -67,7 +67,7 @@
+ void
+ ListTest::destroyList (MyList& list)
+ {
+-  ACE_TRACE (ACE_TEXT ("ListTest::destroyList"));
++  ACE_TRACE ("ListTest::destroyList");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Destroying data elements\n")));
+ 
+@@ -85,7 +85,7 @@
+ void
+ ListTest::displayList (MyList& list)
+ {
+-  ACE_TRACE (ACE_TEXT ("ListTest::displayList"));
++  ACE_TRACE ("ListTest::displayList");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Forward iteration\n")));
+   ACE_DLList_Iterator<DataElement> iter (list);
+Index: examples/APG/Containers/Hash_Map.cpp
+===================================================================
+--- examples/APG/Containers/Hash_Map.cpp	(revision 94301)
++++ examples/APG/Containers/Hash_Map.cpp	(working copy)
+@@ -39,7 +39,7 @@
+ // Listing 2 code/ch05
+ Hash_Map_Example::Hash_Map_Example()
+ {
+-  ACE_TRACE (ACE_TEXT ("Hash_Map_Example::Hash_Map_Example"));
++  ACE_TRACE ("Hash_Map_Example::Hash_Map_Example");
+ 
+   map_.open (100);
+ }
+@@ -47,7 +47,7 @@
+ 
+ int Hash_Map_Example::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Hash_Map_Example::run"));
++  ACE_TRACE ("Hash_Map_Example::run");
+ 
+   for (int i = 0; i < 100; i++)
+     {
+@@ -80,7 +80,7 @@
+ 
+ void Hash_Map_Example::iterate_forward (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Hash_Map_Example::iterate_forward"));
++  ACE_TRACE ("Hash_Map_Example::iterate_forward");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Forward Iteration\n")));
+   for (Hash_Map<int, DataElement>::iterator iter = map_.begin ();
+@@ -93,7 +93,7 @@
+ 
+ void Hash_Map_Example::iterate_reverse (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Hash_Map_Example::iterate_reverse"));
++  ACE_TRACE ("Hash_Map_Example::iterate_reverse");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Reverse Iteration\n")));
+   for (Hash_Map<int, DataElement>::reverse_iterator iter = map_.rbegin ();
+@@ -106,7 +106,7 @@
+ 
+ void Hash_Map_Example::remove_all (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Hash_Map_Example::remove_all"));
++  ACE_TRACE ("Hash_Map_Example::remove_all");
+   map_.unbind_all ();
+ }
+ 
+Index: examples/APG/Containers/Hash_Map_Hash.cpp
+===================================================================
+--- examples/APG/Containers/Hash_Map_Hash.cpp	(revision 94301)
++++ examples/APG/Containers/Hash_Map_Hash.cpp	(working copy)
+@@ -40,7 +40,7 @@
+ 
+ int Hash_Map_Example::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Hash_Map_Example::run"));
++  ACE_TRACE ("Hash_Map_Example::run");
+ 
+   for (int i = 0; i < 100; i++)
+     {
+@@ -73,7 +73,7 @@
+ 
+ void Hash_Map_Example::iterate_forward (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Hash_Map_Example::iterate_forward"));
++  ACE_TRACE ("Hash_Map_Example::iterate_forward");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Forward Iteration\n")));
+   for (Hash_Map<KeyType, DataElement>::iterator iter = map_.begin ();
+@@ -86,7 +86,7 @@
+ 
+ void Hash_Map_Example::iterate_reverse (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Hash_Map_Example::iterate_reverse"));
++  ACE_TRACE ("Hash_Map_Example::iterate_reverse");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Reverse Iteration\n")));
+   for (Hash_Map<KeyType, DataElement>::reverse_iterator iter = map_.rbegin ();
+@@ -99,7 +99,7 @@
+ 
+ void Hash_Map_Example::remove_all (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Hash_Map_Example::remove_all"));
++  ACE_TRACE ("Hash_Map_Example::remove_all");
+   map_.unbind_all ();
+ }
+ 
+Index: examples/APG/Containers/Map_Manager.cpp
+===================================================================
+--- examples/APG/Containers/Map_Manager.cpp	(revision 94301)
++++ examples/APG/Containers/Map_Manager.cpp	(working copy)
+@@ -29,7 +29,7 @@
+ // Listing 2 code/ch05
+ int Map_Example::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Map_Example::run"));
++  ACE_TRACE ("Map_Example::run");
+ 
+   // Corresponding KeyType objects are created on the fly.
+   for (int i = 0; i < 100; i++)
+@@ -64,7 +64,7 @@
+ // Listing 3 code/ch05
+ void Map_Example::iterate_forward (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Map_Example::iterate_forward"));
++  ACE_TRACE ("Map_Example::iterate_forward");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Forward iteration\n")));
+   for (ACE_Map_Manager<KeyType,
+@@ -83,7 +83,7 @@
+ 
+ void Map_Example::iterate_reverse (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Map_Example::iterate_reverse"));
++  ACE_TRACE ("Map_Example::iterate_reverse");
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Reverse iteration\n")));
+   for (ACE_Map_Manager<KeyType,
+                        DataElement,
+@@ -101,7 +101,7 @@
+ // Listing 4 code/ch05
+ void Map_Example::remove_all (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Map_Example::remove_all"));
++  ACE_TRACE ("Map_Example::remove_all");
+ 
+   // Note that we can't use the iterators here as they
+   // are invalidated after deletions or insertions.
+Index: examples/APG/Containers/Map_Manager_Specialization.cpp
+===================================================================
+--- examples/APG/Containers/Map_Manager_Specialization.cpp	(revision 94301)
++++ examples/APG/Containers/Map_Manager_Specialization.cpp	(working copy)
+@@ -69,7 +69,7 @@
+ 
+ int Map_Example::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Map_Example::run"));
++  ACE_TRACE ("Map_Example::run");
+ 
+   // Corresponding KeyType objects are created on the fly.
+   for (int i = 0; i < 100; i++)
+@@ -106,7 +106,7 @@
+ 
+ void Map_Example::iterate_forward (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Map_Example::iterate_forward"));
++  ACE_TRACE ("Map_Example::iterate_forward");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Forward iteration\n")));
+   for (ACE_Map_Manager<KeyType, DataElement, ACE_Null_Mutex>::iterator
+@@ -121,7 +121,7 @@
+ 
+ void Map_Example::iterate_reverse (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Map_Example::iterate_reverse"));
++  ACE_TRACE ("Map_Example::iterate_reverse");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Reverse iteration\n")));
+   for (ACE_Map_Manager<KeyType, DataElement, ACE_Null_Mutex>::reverse_iterator
+@@ -136,7 +136,7 @@
+ 
+ void Map_Example::remove_all (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Map_Example::remove_all"));
++  ACE_TRACE ("Map_Example::remove_all");
+ 
+   // Note that we can't use the iterators here
+   // as they are invalidated after deletions
+Index: examples/APG/Containers/Queues.cpp
+===================================================================
+--- examples/APG/Containers/Queues.cpp	(revision 94301)
++++ examples/APG/Containers/Queues.cpp	(working copy)
+@@ -23,7 +23,7 @@
+ 
+ int QueueExample::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("QueueExample::run"));
++  ACE_TRACE ("QueueExample::run");
+ 
+   // Illustrate the queue with elements on the stack.
+   if (this->runStackUnboundedQueue () != 0)
+@@ -49,7 +49,7 @@
+ // Listing 1 code/ch05
+ int QueueExample::runStackUnboundedQueue (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("QueueExample::runStackUnboundedQueue"));
++  ACE_TRACE ("QueueExample::runStackUnboundedQueue");
+ 
+   ACE_Unbounded_Queue<DataElement> queue;
+   DataElement elem1[10];
+@@ -82,7 +82,7 @@
+ // Listing 2 code/ch05
+ int QueueExample::runHeapUnboundedQueue (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("QueueExample::runHeapUnboundedQueue"));
++  ACE_TRACE ("QueueExample::runHeapUnboundedQueue");
+ 
+   ACE_Unbounded_Queue<DataElement*> queue;
+   for (int i = 0; i < 20; i++)
+Index: examples/APG/Containers/RB_Tree.cpp
+===================================================================
+--- examples/APG/Containers/RB_Tree.cpp	(revision 94301)
++++ examples/APG/Containers/RB_Tree.cpp	(working copy)
+@@ -35,7 +35,7 @@
+ // Listing 1 code/ch05
+ int Tree_Example::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Tree_Example::run"));
++  ACE_TRACE ("Tree_Example::run");
+ 
+   DataElement *d  = 0;
+   for (int i = 0; i < 100; i++)
+@@ -75,7 +75,7 @@
+ 
+ void Tree_Example::iterate_forward (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Tree_Example::iterate_forward"));
++  ACE_TRACE ("Tree_Example::iterate_forward");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Forward Iteration:\n")));
+   for (Tree<int, DataElement*>::iterator iter = tree_.begin ();
+@@ -89,7 +89,7 @@
+ 
+ void Tree_Example::iterate_reverse (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Tree_Example::iterate_reverse"));
++  ACE_TRACE ("Tree_Example::iterate_reverse");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Reverse Iteration:\n")));
+   for (Tree<int, DataElement*>::reverse_iterator iter
+@@ -104,7 +104,7 @@
+ 
+ int Tree_Example::remove_all (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Tree_Example::remove_all"));
++  ACE_TRACE ("Tree_Example::remove_all");
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Removing elements\n")));
+ 
+   // Note that we can't use the iterators here as they are
+Index: examples/APG/Containers/RB_Tree_Functors.cpp
+===================================================================
+--- examples/APG/Containers/RB_Tree_Functors.cpp	(revision 94301)
++++ examples/APG/Containers/RB_Tree_Functors.cpp	(working copy)
+@@ -39,7 +39,7 @@
+ 
+ int Tree_Example::run ()
+ {
+-  ACE_TRACE (ACE_TEXT ("Tree_Example::run"));
++  ACE_TRACE ("Tree_Example::run");
+ 
+   DataElement *d  = 0;
+   for (int i = 0; i < 100; i++)
+@@ -82,7 +82,7 @@
+ 
+ void Tree_Example::iterate_forward (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Tree_Example::iterate_forward"));
++  ACE_TRACE ("Tree_Example::iterate_forward");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Forward Iteration\n")));
+   for (Tree<KeyType, DataElement*>::iterator iter = tree_.begin ();
+@@ -95,7 +95,7 @@
+ 
+ void Tree_Example::iterate_reverse (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Tree_Example::iterate_reverse"));
++  ACE_TRACE ("Tree_Example::iterate_reverse");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Reverse Iteration\n")));
+   for (Tree<KeyType, DataElement*>::reverse_iterator iter = tree_.rbegin ();
+@@ -108,7 +108,7 @@
+ 
+ int Tree_Example::remove_all (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Tree_Example::remove_all"));
++  ACE_TRACE ("Tree_Example::remove_all");
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Removing elements\n")));
+   for (int i = 0; i < 100; i++)
+Index: examples/APG/Containers/Sets.cpp
+===================================================================
+--- examples/APG/Containers/Sets.cpp	(revision 94301)
++++ examples/APG/Containers/Sets.cpp	(working copy)
+@@ -21,7 +21,7 @@
+ 
+ int SetExample::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("SetExample::run"));
++  ACE_TRACE ("SetExample::run");
+ 
+   ACE_ASSERT (!this->runBoundedSet ());
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\n# of live objects %d\n"),
+@@ -36,7 +36,7 @@
+ // Listing 1 code/ch05
+ int SetExample::runBoundedSet ()
+ {
+-  ACE_TRACE (ACE_TEXT ("SetExample::runBoundedSet"));
++  ACE_TRACE ("SetExample::runBoundedSet");
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Using a bounded set\n")));
+   ACE_Bounded_Set<DataElement> bset (100);
+ 
+@@ -86,7 +86,7 @@
+ // Listing 2 code/ch05
+ int SetExample::runUnboundedSet ()
+ {
+-  ACE_TRACE (ACE_TEXT ("SetExample::runUnboundedSet"));
++  ACE_TRACE ("SetExample::runUnboundedSet");
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Using an unbounded set.\n")));
+   ACE_Unbounded_Set<DataElement*> uset;
+   for (int m = 0; m < 100; m++)
+Index: examples/APG/Containers/Stacks.cpp
+===================================================================
+--- examples/APG/Containers/Stacks.cpp	(revision 94301)
++++ examples/APG/Containers/Stacks.cpp	(working copy)
+@@ -30,7 +30,7 @@
+ 
+ int StackExample::run (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("StackUser::run"));
++  ACE_TRACE ("StackUser::run");
+ 
+   ACE_ASSERT(!this->runBoundedStack());
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\n# of live objects %d\n"),
+@@ -49,7 +49,7 @@
+ // Listing 1 code/ch05
+ int StackExample::runBoundedStack (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("StackExample::runBoundedStack"));
++  ACE_TRACE ("StackExample::runBoundedStack");
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Using a bounded stack\n")));
+ 
+   ACE_Bounded_Stack<DataElement> bstack1 (100);
+@@ -82,7 +82,7 @@
+ // Listing 2 code/ch05
+ int StackExample::runFixedStack (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("StackExample::runFixedStack"));
++  ACE_TRACE ("StackExample::runFixedStack");
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Using a fixed stack\n")));
+ 
+   ACE_Fixed_Stack<DataElement*, 100> fstack;
+@@ -106,7 +106,7 @@
+ 
+ int StackExample::runUnboundedStack (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("StackExample::runUnboundedStack"));
++  ACE_TRACE ("StackExample::runUnboundedStack");
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Using an unbounded stack\n")));
+ 
+   ACE_Unbounded_Stack<DataElement*> ustack;
+Index: examples/APG/Processes/Process_Manager_Death.cpp
+===================================================================
+--- examples/APG/Processes/Process_Manager_Death.cpp	(revision 94301)
++++ examples/APG/Processes/Process_Manager_Death.cpp	(working copy)
+@@ -12,12 +12,12 @@
+ public:
+   DeathHandler () : count_(0)
+   {
+-    ACE_TRACE (ACE_TEXT ("DeathHandler::DeathHandler"));
++    ACE_TRACE ("DeathHandler::DeathHandler");
+   }
+ 
+   virtual int handle_exit (ACE_Process * process)
+   {
+-    ACE_TRACE (ACE_TEXT ("DeathHandler::handle_exit"));
++    ACE_TRACE ("DeathHandler::handle_exit");
+ 
+     ACE_DEBUG
+       ((LM_DEBUG,
+Index: examples/APG/Processes/Process_Mutex.cpp
+===================================================================
+--- examples/APG/Processes/Process_Mutex.cpp	(revision 94301)
++++ examples/APG/Processes/Process_Mutex.cpp	(working copy)
+@@ -11,12 +11,12 @@
+ public:
+   GResourceUser (ACE_Process_Mutex &mutex) : gmutex_(mutex)
+   {
+-    ACE_TRACE (ACE_TEXT ("GResourceUser::GResourceUser"));
++    ACE_TRACE ("GResourceUser::GResourceUser");
+   }
+ 
+   void run (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("GResourceUser::run"));
++    ACE_TRACE ("GResourceUser::run");
+ 
+     int count = 0;
+     while (count++ < 10)
+Index: examples/APG/Signals/SigAction.cpp
+===================================================================
+--- examples/APG/Signals/SigAction.cpp	(revision 94301)
++++ examples/APG/Signals/SigAction.cpp	(working copy)
+@@ -11,7 +11,7 @@
+ 
+ int ACE_TMAIN (int, ACE_TCHAR *[])
+ {
+-  ACE_TRACE (ACE_TEXT ("::main"));
++  ACE_TRACE ("::main");
+ 
+   ::register_actions ();    // Register actions to happen.
+ 
+@@ -39,7 +39,7 @@
+ // Listing 3 code/ch11
+ static void my_sighandler (int signo)
+ {
+-  ACE_TRACE (ACE_TEXT ("::my_sighandler"));
++  ACE_TRACE ("::my_sighandler");
+ 
+   ACE_OS::kill (ACE_OS::getpid (), SIGUSR1);
+ 
+@@ -57,7 +57,7 @@
+ // Listing 2 code/ch11
+ static void register_actions ()
+ {
+-  ACE_TRACE (ACE_TEXT ("::register_actions"));
++  ACE_TRACE ("::register_actions");
+ 
+   ACE_Sig_Action sa (reinterpret_cast <ACE_SignalHandler> (my_sighandler));
+ 
+Index: examples/APG/Signals/SigHandler.cpp
+===================================================================
+--- examples/APG/Signals/SigHandler.cpp	(revision 94301)
++++ examples/APG/Signals/SigHandler.cpp	(working copy)
+@@ -19,7 +19,7 @@
+                              siginfo_t * = 0,
+                              ucontext_t * = 0)
+   {
+-    ACE_TRACE (ACE_TEXT ("MySignalHandler::handle_signal"));
++    ACE_TRACE ("MySignalHandler::handle_signal");
+ 
+     // Make sure the right handler was called back.
+     ACE_ASSERT (signum == this->signum_);
+Index: examples/APG/Signals/SigHandlers.cpp
+===================================================================
+--- examples/APG/Signals/SigHandlers.cpp	(revision 94301)
++++ examples/APG/Signals/SigHandlers.cpp	(working copy)
+@@ -16,7 +16,7 @@
+ 
+   virtual int handle_signal (int signum, siginfo_t * = 0, ucontext_t * = 0)
+   {
+-    ACE_TRACE (ACE_TEXT ("MySignalHandler::handle_signal"));
++    ACE_TRACE ("MySignalHandler::handle_signal");
+ 
+     // Make sure the right handler was called back..
+     ACE_ASSERT(signum == this->signum_);
+Index: examples/APG/Streams/Answerer.cpp
+===================================================================
+--- examples/APG/Streams/Answerer.cpp	(revision 94301)
++++ examples/APG/Streams/Answerer.cpp	(working copy)
+@@ -24,7 +24,7 @@
+ protected:
+   virtual int process (Message *message)
+   {
+-    ACE_TRACE (ACE_TEXT ("AnswerIncomingCall::process()"));
++    ACE_TRACE ("AnswerIncomingCall::process()");
+ 
+     if (message->recorder ()->answer_call () < 0)
+       ACE_ERROR_RETURN ((LM_ERROR,
+@@ -42,7 +42,7 @@
+ protected:
+   virtual int process (Message *message)
+   {
+-    ACE_TRACE (ACE_TEXT ("GetCallerId::process()"));
++    ACE_TRACE ("GetCallerId::process()");
+ 
+     CallerId *id;
+     id = message->recorder ()->retrieve_callerId ();
+@@ -64,7 +64,7 @@
+ protected:
+   virtual int process (Message *message)
+   {
+-    ACE_TRACE (ACE_TEXT ("PlayOutgoingMessage::process()"));
++    ACE_TRACE ("PlayOutgoingMessage::process()");
+ 
+     ACE_FILE_Addr outgoing_message =
+       this->get_outgoing_message (message);
+@@ -94,7 +94,7 @@
+ protected:
+   virtual int process (Message *message)
+   {
+-    ACE_TRACE (ACE_TEXT ("RecordIncomingMessage::process()"));
++    ACE_TRACE ("RecordIncomingMessage::process()");
+ 
+     ACE_FILE_Addr incoming_message =
+       this->get_incoming_message_queue ();
+@@ -125,7 +125,7 @@
+ protected:
+   virtual int process (Message *message)
+   {
+-    ACE_TRACE (ACE_TEXT ("ReleaseDevice::process()"));
++    ACE_TRACE ("ReleaseDevice::process()");
+     message->recorder ()->release ();
+     return 0;
+   }
+@@ -138,7 +138,7 @@
+ protected:
+   virtual int process (Message *message)
+   {
+-    ACE_TRACE (ACE_TEXT ("ReleaseDevice::process()"));
++    ACE_TRACE ("ReleaseDevice::process()");
+ 
+     ACE_FILE_Addr &incoming = message->addr ();
+     ACE_FILE_Addr addr = this->get_message_destination (message);
+@@ -169,7 +169,7 @@
+ protected:
+   virtual int process (Message *message)
+   {
+-    ACE_TRACE (ACE_TEXT ("SaveMetaData::process()"));
++    ACE_TRACE ("SaveMetaData::process()");
+ 
+     ACE_TString path (message->addr ().get_path_name ());
+     path += ACE_TEXT (".xml");
+@@ -207,7 +207,7 @@
+ protected:
+   virtual int process (Message *message)
+   {
+-    ACE_TRACE (ACE_TEXT ("NotifySomeone::process()"));
++    ACE_TRACE ("NotifySomeone::process()");
+ 
+     // Format an email to tell someone about the
+     // newly received message.
+Index: examples/APG/Streams/CommandStream.cpp
+===================================================================
+--- examples/APG/Streams/CommandStream.cpp	(revision 94301)
++++ examples/APG/Streams/CommandStream.cpp	(working copy)
+@@ -15,7 +15,7 @@
+                          ACE_Module<ACE_MT_SYNCH> *head,
+                          ACE_Module<ACE_MT_SYNCH> *tail)
+ {
+-  ACE_TRACE (ACE_TEXT ("CommandStream::open(peer)"));
++  ACE_TRACE ("CommandStream::open(peer)");
+ 
+   if (this->inherited::open (arg, head, tail) == -1)
+     ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("%p\n"),
+Index: examples/APG/Streams/CommandTask.cpp
+===================================================================
+--- examples/APG/Streams/CommandTask.cpp	(revision 94301)
++++ examples/APG/Streams/CommandTask.cpp	(working copy)
+@@ -26,7 +26,7 @@
+ // Listing 04 code/ch18
+ int CommandTask::process (Command *)
+ {
+-  ACE_TRACE (ACE_TEXT ("CommandTask::process()"));
++  ACE_TRACE ("CommandTask::process()");
+   return Command::RESULT_FAILURE;
+ }
+ // Listing 04
+Index: examples/APG/Streams/EndTask.h
+===================================================================
+--- examples/APG/Streams/EndTask.h	(revision 94301)
++++ examples/APG/Streams/EndTask.h	(working copy)
+@@ -9,7 +9,7 @@
+ protected:
+   virtual int process (Message *)
+   {
+-    ACE_TRACE (ACE_TEXT ("EndTask::process()"));
++    ACE_TRACE ("EndTask::process()");
+     return 0;
+   }
+ 
+Index: examples/APG/ThreadPools/Futures.cpp
+===================================================================
+--- examples/APG/ThreadPools/Futures.cpp	(revision 94301)
++++ examples/APG/ThreadPools/Futures.cpp	(working copy)
+@@ -37,7 +37,7 @@
+ public:
+   virtual int call (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("LongWork::call"));
++    ACE_TRACE ("LongWork::call");
+     ACE_DEBUG
+       ((LM_INFO, ACE_TEXT ("(%t) Attempting long work task\n")));
+     ACE_OS::sleep (1);
+@@ -53,7 +53,7 @@
+ 
+   ACE_Future<ACE_CString*> &future (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("LongWork::future"));
++    ACE_TRACE ("LongWork::future");
+     return result_;
+   }
+ 
+@@ -72,7 +72,7 @@
+ public:
+   virtual int call (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("Exit::call"));
++    ACE_TRACE ("Exit::call");
+     return -1;
+   }
+ };
+@@ -97,7 +97,7 @@
+ 
+   int perform (ACE_Method_Request *req)
+   {
+-    ACE_TRACE (ACE_TEXT ("Worker::perform"));
++    ACE_TRACE ("Worker::perform");
+     return this->queue_.enqueue (req);
+   }
+ 
+@@ -145,18 +145,18 @@
+   Manager ()
+     : shutdown_(0), workers_lock_(), workers_cond_(workers_lock_)
+   {
+-    ACE_TRACE (ACE_TEXT ("Manager::TP"));
++    ACE_TRACE ("Manager::TP");
+   }
+ 
+   int perform (ACE_Method_Request *req)
+   {
+-    ACE_TRACE (ACE_TEXT ("Manager::perform"));
++    ACE_TRACE ("Manager::perform");
+     return this->queue_.enqueue (req);
+   }
+ 
+   int svc (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("Manager::svc"));
++    ACE_TRACE ("Manager::svc");
+ 
+     ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) Manager started\n")));
+ 
+@@ -251,7 +251,7 @@
+ int
+ Manager::shut_down (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Manager::shut_down"));
++  ACE_TRACE ("Manager::shut_down");
+   ACE_Unbounded_Queue<Worker* >::ITERATOR iter = this->workers_.begin ();
+   Worker **worker_ptr = 0;
+   do
+Index: examples/APG/ThreadPools/LF_ThreadPool.cpp
+===================================================================
+--- examples/APG/ThreadPools/LF_ThreadPool.cpp	(revision 94301)
++++ examples/APG/ThreadPools/LF_ThreadPool.cpp	(working copy)
+@@ -48,7 +48,7 @@
+ public:
+   LF_ThreadPool () : shutdown_(0), current_leader_(0)
+   {
+-    ACE_TRACE (ACE_TEXT ("LF_ThreadPool::TP"));
++    ACE_TRACE ("LF_ThreadPool::TP");
+   }
+ 
+   virtual int svc (void);
+@@ -67,13 +67,13 @@
+ 
+   int leader_active (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("LF_ThreadPool::leader_active"));
++    ACE_TRACE ("LF_ThreadPool::leader_active");
+     return this->current_leader_ != 0;
+   }
+ 
+   void leader_active (ACE_thread_t leader)
+   {
+-    ACE_TRACE (ACE_TEXT ("LF_ThreadPool::leader_active"));
++    ACE_TRACE ("LF_ThreadPool::leader_active");
+     this->current_leader_ = leader;
+   }
+ 
+@@ -97,7 +97,7 @@
+ int
+ LF_ThreadPool::svc (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("LF_ThreadPool::svc"));
++  ACE_TRACE ("LF_ThreadPool::svc");
+   while (!done ())
+     {
+       become_leader ();  // Block until this thread is the leader.
+@@ -125,7 +125,7 @@
+ int
+ LF_ThreadPool::become_leader (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("LF_ThreadPool::become_leader"));
++  ACE_TRACE ("LF_ThreadPool::become_leader");
+ 
+   ACE_GUARD_RETURN
+     (ACE_Thread_Mutex, leader_mon, this->leader_lock_, -1);
+@@ -151,7 +151,7 @@
+ Follower*
+ LF_ThreadPool::make_follower (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("LF_ThreadPool::make_follower"));
++  ACE_TRACE ("LF_ThreadPool::make_follower");
+ 
+   ACE_GUARD_RETURN
+     (ACE_Thread_Mutex, follower_mon, this->followers_lock_, 0);
+@@ -165,7 +165,7 @@
+ int
+ LF_ThreadPool::elect_new_leader (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("LF_ThreadPool::elect_new_leader"));
++  ACE_TRACE ("LF_ThreadPool::elect_new_leader");
+ 
+   ACE_GUARD_RETURN
+     (ACE_Thread_Mutex, leader_mon, this->leader_lock_, -1);
+@@ -199,7 +199,7 @@
+ void
+ LF_ThreadPool::process_message (ACE_Message_Block *mb)
+ {
+-  ACE_TRACE (ACE_TEXT ("LF_ThreadPool::process_message"));
++  ACE_TRACE ("LF_ThreadPool::process_message");
+   int msgId;
+   ACE_OS::memcpy (&msgId, mb->rd_ptr (), sizeof(int));
+   mb->release ();
+Index: examples/APG/ThreadPools/Task_ThreadPool.cpp
+===================================================================
+--- examples/APG/ThreadPools/Task_ThreadPool.cpp	(revision 94301)
++++ examples/APG/ThreadPools/Task_ThreadPool.cpp	(working copy)
+@@ -39,7 +39,7 @@
+ private:
+   void process_message (ACE_Message_Block *mb)
+   {
+-    ACE_TRACE (ACE_TEXT ("Workers::process_message"));
++    ACE_TRACE ("Workers::process_message");
+     int msgId;
+     ACE_OS::memcpy (&msgId, mb->rd_ptr (), sizeof(int));
+     mb->release ();
+@@ -62,12 +62,12 @@
+ 
+   Manager () : shutdown_(0)
+   {
+-    ACE_TRACE (ACE_TEXT ("Manager::Manager"));
++    ACE_TRACE ("Manager::Manager");
+   }
+ 
+   int svc (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("Manager::svc"));
++    ACE_TRACE ("Manager::svc");
+ 
+     ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) Manager started\n")));
+ 
+Index: examples/APG/ThreadPools/ThreadPool.cpp
+===================================================================
+--- examples/APG/ThreadPools/ThreadPool.cpp	(revision 94301)
++++ examples/APG/ThreadPools/ThreadPool.cpp	(working copy)
+@@ -65,7 +65,7 @@
+ private:
+   void process_message (ACE_Message_Block *mb)
+   {
+-    ACE_TRACE (ACE_TEXT ("Worker::process_message"));
++    ACE_TRACE ("Worker::process_message");
+     int msgId;
+     ACE_OS::memcpy (&msgId, mb->rd_ptr (), sizeof(int));
+     mb->release ();
+@@ -92,12 +92,12 @@
+   Manager ()
+     : shutdown_(0), workers_lock_(), workers_cond_(workers_lock_)
+   {
+-    ACE_TRACE (ACE_TEXT ("Manager::Manager"));
++    ACE_TRACE ("Manager::Manager");
+   }
+ 
+   int svc (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("Manager::svc"));
++    ACE_TRACE ("Manager::svc");
+ 
+     ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) Manager started\n")));
+ 
+@@ -188,7 +188,7 @@
+ int
+ Manager::shut_down (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Manager::shut_down"));
++  ACE_TRACE ("Manager::shut_down");
+   ACE_Unbounded_Queue<Worker* >::ITERATOR iter =
+     this->workers_.begin ();
+   Worker **worker_ptr = 0;
+Index: examples/APG/Timers/Alarm.cpp
+===================================================================
+--- examples/APG/Timers/Alarm.cpp	(revision 94301)
++++ examples/APG/Timers/Alarm.cpp	(working copy)
+@@ -18,7 +18,7 @@
+   virtual int handle_timeout (const ACE_Time_Value &,
+                               const void *arg)
+   {
+-    ACE_TRACE (ACE_TEXT ("CB::handle_timeout"));
++    ACE_TRACE ("CB::handle_timeout");
+ 
+     const int *val = static_cast<const int*> (arg);
+     ACE_ASSERT ((*val) == id_);
+Index: examples/APG/Timers/CB.cpp
+===================================================================
+--- examples/APG/Timers/CB.cpp	(revision 94301)
++++ examples/APG/Timers/CB.cpp	(working copy)
+@@ -6,14 +6,14 @@
+ 
+ CB::CB () : count_(0)
+ {
+-  ACE_TRACE (ACE_TEXT ("CB::CB"));
++  ACE_TRACE ("CB::CB");
+ }
+ 
+ // Listing 1 code/ch20
+ int CB::handle_timeout (const ACE_Time_Value &,
+                         const void *arg)
+ {
+-  ACE_TRACE (ACE_TEXT ("CB::handle_timeout"));
++  ACE_TRACE ("CB::handle_timeout");
+ 
+   const int *val = static_cast<const int*> (arg);
+   ACE_ASSERT ((*val) == timerID_);
+@@ -51,20 +51,20 @@
+ void
+ CB::setID (long timerID)
+ {
+-  ACE_TRACE (ACE_TEXT ("CB::setID"));
++  ACE_TRACE ("CB::setID");
+   timerID_ = timerID;
+ }
+ 
+ long
+ CB::getID (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("CB::getID"));
++  ACE_TRACE ("CB::getID");
+   return timerID_;
+ }
+ 
+ int
+ CB::handle_close (ACE_HANDLE, ACE_Reactor_Mask)
+ {
+-  ACE_TRACE (ACE_TEXT ("CB::handle_close"));
++  ACE_TRACE ("CB::handle_close");
+   return 0;
+ }
+Index: examples/APG/Timers/PCB.cpp
+===================================================================
+--- examples/APG/Timers/PCB.cpp	(revision 94301)
++++ examples/APG/Timers/PCB.cpp	(working copy)
+@@ -6,7 +6,7 @@
+ 
+ PCB::PCB() : count_(0)
+ {
+-  ACE_TRACE (ACE_TEXT ("PCB::PCB"));
++  ACE_TRACE ("PCB::PCB");
+ }
+ 
+ PCB::~PCB()
+@@ -15,7 +15,7 @@
+ 
+ int PCB::handleEvent (const void *arg)
+ {
+-  ACE_TRACE (ACE_TEXT ("PCB::handle_timeout"));
++  ACE_TRACE ("PCB::handle_timeout");
+ 
+   const int *val = static_cast<const int*> (arg);
+   ACE_ASSERT ((*val) == timerID_);
+@@ -53,27 +53,27 @@
+ void
+ PCB::setID (long timerID)
+ {
+-  ACE_TRACE (ACE_TEXT ("PCB::setID"));
++  ACE_TRACE ("PCB::setID");
+   timerID_ = timerID;
+ }
+ 
+ long
+ PCB::getID (void) const
+ {
+-  ACE_TRACE (ACE_TEXT ("PCB::getID"));
++  ACE_TRACE ("PCB::getID");
+   return timerID_;
+ }
+ 
+ int
+ PCB::handleClose (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("PCB::handle_close"));
++  ACE_TRACE ("PCB::handle_close");
+   return 0;
+ }
+ 
+ int
+ PCB::handleCancel (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("PCB::handleCancel"));
++  ACE_TRACE ("PCB::handleCancel");
+   return 0;
+ }
+Index: examples/APG/Timers/PTimerDispatcher.cpp
+===================================================================
+--- examples/APG/Timers/PTimerDispatcher.cpp	(revision 94301)
++++ examples/APG/Timers/PTimerDispatcher.cpp	(working copy)
+@@ -4,7 +4,7 @@
+ 
+ void PTimer_Dispatcher::wait_for_event (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("PTimer_Dispatcher::wait_for_event"));
++  ACE_TRACE ("PTimer_Dispatcher::wait_for_event");
+ 
+   while (1)
+     {
+@@ -33,7 +33,7 @@
+                              const ACE_Time_Value &abs_time,
+                              const ACE_Time_Value &interval)
+ {
+-  ACE_TRACE (ACE_TEXT ("PTimer_Dispatcher::schedule_timer"));
++  ACE_TRACE ("PTimer_Dispatcher::schedule_timer");
+ 
+   return this->timer_queue_->schedule
+     (cb, arg, abs_time, interval);
+@@ -43,13 +43,13 @@
+ PTimer_Dispatcher::cancel (PCB *cb,
+                            int dont_call_handle_close)
+ {
+-  ACE_TRACE (ACE_TEXT ("PTimer_Dispatcher::cancel"));
++  ACE_TRACE ("PTimer_Dispatcher::cancel");
+   return timer_queue_->cancel (cb, dont_call_handle_close);
+ }
+ 
+ void PTimer_Dispatcher::set (PTimerQueue *timer_queue)
+ {
+-  ACE_TRACE (ACE_TEXT ("PTimer_Dispatcher::set"));
++  ACE_TRACE ("PTimer_Dispatcher::set");
+ 
+   timer_queue_ = timer_queue;
+ }
+@@ -58,7 +58,7 @@
+ PTimer_Dispatcher::reset_interval (long timer_id,
+                                    const ACE_Time_Value &interval)
+ {
+-  ACE_TRACE (ACE_TEXT ("PTimer_Dispatcher::reset_interval"));
++  ACE_TRACE ("PTimer_Dispatcher::reset_interval");
+ 
+   return timer_queue_->reset_interval (timer_id, interval);
+ }
+Index: examples/APG/Timers/Task.cpp
+===================================================================
+--- examples/APG/Timers/Task.cpp	(revision 94301)
++++ examples/APG/Timers/Task.cpp	(working copy)
+@@ -19,7 +19,7 @@
+   virtual int handle_timeout (const ACE_Time_Value &,
+                               const void *arg)
+   {
+-    ACE_TRACE (ACE_TEXT ("CB::handle_timeout"));
++    ACE_TRACE ("CB::handle_timeout");
+ 
+     const int *val = static_cast<const int*> (arg);
+     ACE_ASSERT((*val) == id_);
+Index: examples/APG/Timers/TimerDispatcher.cpp
+===================================================================
+--- examples/APG/Timers/TimerDispatcher.cpp	(revision 94301)
++++ examples/APG/Timers/TimerDispatcher.cpp	(working copy)
+@@ -4,7 +4,7 @@
+ // Listing 1 code/ch20
+ void Timer_Dispatcher::wait_for_event (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Timer_Dispatcher::wait_for_event"));
++  ACE_TRACE ("Timer_Dispatcher::wait_for_event");
+ 
+   while (1)
+     {
+@@ -34,7 +34,7 @@
+                             const ACE_Time_Value &abs_time,
+                             const ACE_Time_Value &interval)
+ {
+-  ACE_TRACE (ACE_TEXT ("Timer_Dispatcher::schedule_timer"));
++  ACE_TRACE ("Timer_Dispatcher::schedule_timer");
+ 
+   return this->timer_queue_->schedule
+     (cb, arg, abs_time, interval);
+@@ -45,14 +45,14 @@
+ Timer_Dispatcher::cancel (ACE_Event_Handler *cb,
+                           int dont_call_handle_close)
+ {
+-  ACE_TRACE (ACE_TEXT ("Timer_Dispatcher::cancel"));
++  ACE_TRACE ("Timer_Dispatcher::cancel");
+   return timer_queue_->cancel (cb, dont_call_handle_close);
+ }
+ // Listing 3
+ // Listing 4 code/ch20
+ void Timer_Dispatcher::set (ACE_Timer_Queue *timer_queue)
+ {
+-  ACE_TRACE (ACE_TEXT ("Timer_Dispatcher::set"));
++  ACE_TRACE ("Timer_Dispatcher::set");
+ 
+   timer_queue_ = timer_queue;
+ }
+@@ -62,7 +62,7 @@
+ Timer_Dispatcher::reset_interval (long timer_id,
+                                   const ACE_Time_Value &interval)
+ {
+-  ACE_TRACE (ACE_TEXT ("Timer_Dispatcher::reset_interval"));
++  ACE_TRACE ("Timer_Dispatcher::reset_interval");
+ 
+   return timer_queue_->reset_interval(timer_id, interval);
+ }
+Index: examples/APG/Timers/Upcall.cpp
+===================================================================
+--- examples/APG/Timers/Upcall.cpp	(revision 94301)
++++ examples/APG/Timers/Upcall.cpp	(working copy)
+@@ -15,7 +15,7 @@
+                         int /* recurring_timer */,
+                         const ACE_Time_Value &)
+ {
+-  ACE_TRACE (ACE_TEXT ("UpcallHandler::timeout"));
++  ACE_TRACE ("UpcallHandler::timeout");
+ 
+   return (*handler).handleEvent (arg);
+ }
+@@ -27,7 +27,7 @@
+ UpcallHandler::cancellation (PTimerQueue &,
+                              PCB *handler)
+ {
+-  ACE_TRACE (ACE_TEXT ("UpcallHandler::cancellation"));
++  ACE_TRACE ("UpcallHandler::cancellation");
+ 
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Handler %d has been cancelled\n"),
+@@ -43,7 +43,7 @@
+                          PCB *handler,
+                          const void *)
+ {
+-  ACE_TRACE (ACE_TEXT ("UpcallHandler::deletion"));
++  ACE_TRACE ("UpcallHandler::deletion");
+ 
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Handler %d has been deleted\n"),
+@@ -61,7 +61,7 @@
+                              PCB *handler,
+                              const void *)
+ {
+-  ACE_TRACE (ACE_TEXT ("UpcallHandler::registration"));
++  ACE_TRACE ("UpcallHandler::registration");
+ 
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Handler %d has been registered.\n"),
+@@ -80,7 +80,7 @@
+                           const ACE_Time_Value &,
+                           const void *&)
+ {
+-  ACE_TRACE (ACE_TEXT ("UpcallHandler::preinvoke"));
++  ACE_TRACE ("UpcallHandler::preinvoke");
+ 
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Handler %d is about to upcalled.\n"),
+@@ -99,7 +99,7 @@
+                            const ACE_Time_Value &,
+                            const void *)
+ {
+-  ACE_TRACE (ACE_TEXT ("UpcallHandler::postinvoke"));
++  ACE_TRACE ("UpcallHandler::postinvoke");
+ 
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Handler %d returned from upcall.\n"),
+@@ -114,7 +114,7 @@
+                             int dont_call,
+                             int &)
+ {
+-  ACE_TRACE (ACE_TEXT ("UpcallHandler::cancel_type"));
++  ACE_TRACE ("UpcallHandler::cancel_type");
+ 
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Handler %d has been cancelled\n"),
+@@ -131,7 +131,7 @@
+                              int dont_call,
+                              int)
+ {
+-  ACE_TRACE (ACE_TEXT ("UpcallHandler::cancel_timer"));
++  ACE_TRACE ("UpcallHandler::cancel_timer");
+ 
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Handler %d has been cancelled\n"),
+Index: examples/Reactor/TP_Reactor/ReadHandler.cpp
+===================================================================
+--- examples/Reactor/TP_Reactor/ReadHandler.cpp	(revision 94301)
++++ examples/Reactor/TP_Reactor/ReadHandler.cpp	(working copy)
+@@ -32,11 +32,11 @@
+ 
+ ReadHandler::ReadHandler() : ACE_Event_Handler(), mStream(), mDataSize(0),
+         mData(0), mCallCounter(0), mInvocationCounter(0) {
+-    ACE_TRACE(ACE_TEXT("ReadHandler::ReadHandler()"));
++    ACE_TRACE("ReadHandler::ReadHandler()");
+ }
+ 
+ ReadHandler::~ReadHandler() {
+-    ACE_TRACE(ACE_TEXT("ReadHandler::~ReadHandler()"));
++    ACE_TRACE("ReadHandler::~ReadHandler()");
+ 
+     if (mStream.close() == -1)
+       ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: Failed to close socket. ")
+@@ -46,17 +46,17 @@
+ }
+ 
+ ACE_SOCK_Stream &ReadHandler::getStream(void) {
+-    ACE_TRACE(ACE_TEXT("ReadHandler::getStream(void)"));
++    ACE_TRACE("ReadHandler::getStream(void)");
+     return mStream;
+ }
+ 
+ ACE_HANDLE ReadHandler::get_handle(void) const {
+-    ACE_TRACE(ACE_TEXT("ReadHandler::get_handle(void)"));
++    ACE_TRACE("ReadHandler::get_handle(void)");
+     return mStream.get_handle();
+ }
+ 
+ int ReadHandler::handle_input(ACE_HANDLE) {
+-    ACE_TRACE(ACE_TEXT("ReadHandler::handle_input(ACE_HANDLE)"));
++    ACE_TRACE("ReadHandler::handle_input(ACE_HANDLE)");
+ 
+     INVOCATION_ENTER();
+ 
+Index: examples/Timer_Queue/Custom_Handler.cpp
+===================================================================
+--- examples/Timer_Queue/Custom_Handler.cpp	(revision 94301)
++++ examples/Timer_Queue/Custom_Handler.cpp	(working copy)
+@@ -57,21 +57,21 @@
+ 
+ int Custom_Handler_Upcall::registration(TTimerQueue& , Custom_Handler* , const void* )
+ {
+-    ACE_TRACE(ACE_TEXT ("registration"));
++    ACE_TRACE("registration");
+ 
+     return 0;
+ }
+ 
+ int Custom_Handler_Upcall::preinvoke(TTimerQueue& , Custom_Handler* , const void* , int , const ACE_Time_Value& , const void*& )
+ {
+-    ACE_TRACE(ACE_TEXT ("preinvoke"));
++    ACE_TRACE("preinvoke");
+ 
+     return 0;
+ }
+ 
+ int Custom_Handler_Upcall::timeout(TTimerQueue& , Custom_Handler* handler, const void* arg, int , const ACE_Time_Value& cur_time)
+ {
+-    ACE_TRACE(ACE_TEXT ("timeout"));
++    ACE_TRACE("timeout");
+ 
+     // Do the actual timer call
+     handler->on_timeout(cur_time, arg);
+@@ -81,28 +81,28 @@
+ 
+ int Custom_Handler_Upcall::postinvoke(TTimerQueue& , Custom_Handler* , const void* , int , const ACE_Time_Value& , const void* )
+ {
+-    ACE_TRACE(ACE_TEXT ("postinvoke"));
++    ACE_TRACE("postinvoke");
+ 
+     return 0;
+ }
+ 
+ int Custom_Handler_Upcall::cancel_type(TTimerQueue& , Custom_Handler* , int , int& )
+ {
+-    ACE_TRACE(ACE_TEXT ("cancel_type"));
++    ACE_TRACE("cancel_type");
+ 
+     return 0;
+ }
+ 
+ int Custom_Handler_Upcall::cancel_timer(TTimerQueue& , Custom_Handler* handler, int , int )
+ {
+-    ACE_TRACE(ACE_TEXT ("cancel_timer"));
++    ACE_TRACE("cancel_timer");
+     delete handler;
+     return 0;
+ }
+ 
+ int Custom_Handler_Upcall::deletion(TTimerQueue& , Custom_Handler* handler, const void* )
+ {
+-    ACE_TRACE(ACE_TEXT ("deletion"));
++    ACE_TRACE("deletion");
+     delete handler;
+     return 0;
+ }
+Index: netsvcs/lib/Name_Handler.cpp
+===================================================================
+--- netsvcs/lib/Name_Handler.cpp	(revision 94301)
++++ netsvcs/lib/Name_Handler.cpp	(working copy)
+@@ -17,7 +17,7 @@
+ int
+ ACE_Name_Acceptor::parse_args (int argc, ACE_TCHAR *argv[])
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Acceptor::parse_args"));
++  ACE_TRACE ("ACE_Name_Acceptor::parse_args");
+ 
+   int service_port = ACE_DEFAULT_SERVER_PORT;
+ 
+@@ -42,7 +42,7 @@
+ int
+ ACE_Name_Acceptor::init (int argc, ACE_TCHAR *argv[])
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Acceptor::init"));
++  ACE_TRACE ("ACE_Name_Acceptor::init");
+ 
+   // Use the options hook to parse the command line arguments and set
+   // options.
+@@ -97,7 +97,7 @@
+ ACE_Name_Handler::ACE_Name_Handler (ACE_Thread_Manager *tm)
+   : ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> (tm)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::ACE_Name_Handler"));
++  ACE_TRACE ("ACE_Name_Handler::ACE_Name_Handler");
+ 
+   // Set up pointers to member functions for the top-level dispatching
+   // of client requests.
+@@ -138,7 +138,7 @@
+ /* VIRTUAL */ int
+ ACE_Name_Handler::open (void * v)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::open"));
++  ACE_TRACE ("ACE_Name_Handler::open");
+ 
+   // Call down to our parent to register ourselves with the Reactor.
+   if (ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>::open (0) == -1)
+@@ -159,7 +159,7 @@
+ ACE_Name_Handler::send_reply (ACE_INT32 status,
+                               ACE_UINT32 err)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::send_reply"));
++  ACE_TRACE ("ACE_Name_Handler::send_reply");
+   void *buf;
+   this->name_reply_.msg_type (status);
+   this->name_reply_.errnum (err);
+@@ -186,7 +186,7 @@
+ /* VIRTUAL */ int
+ ACE_Name_Handler::send_request (ACE_Name_Request &request)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::send_request"));
++  ACE_TRACE ("ACE_Name_Handler::send_request");
+   void *buffer;
+   ssize_t length = request.encode (buffer);
+ 
+@@ -211,7 +211,7 @@
+ /* VIRTUAL */ int
+ ACE_Name_Handler::abandon (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::abandon"));
++  ACE_TRACE ("ACE_Name_Handler::abandon");
+   return this->send_reply (-1, errno);
+ }
+ 
+@@ -220,7 +220,7 @@
+ /* VIRTUAL */ int
+ ACE_Name_Handler::handle_timeout (const ACE_Time_Value &, const void *)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::handle_timeout"));
++  ACE_TRACE ("ACE_Name_Handler::handle_timeout");
+   return this->abandon ();
+ }
+ 
+@@ -229,7 +229,7 @@
+ /* VIRTUAL */ ACE_HANDLE
+ ACE_Name_Handler::get_handle (void) const
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::get_handle"));
++  ACE_TRACE ("ACE_Name_Handler::get_handle");
+   return this->peer ().get_handle ();
+ }
+ 
+@@ -238,7 +238,7 @@
+ /* VIRTUAL */ int
+ ACE_Name_Handler::dispatch (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::dispatch"));
++  ACE_TRACE ("ACE_Name_Handler::dispatch");
+   // Dispatch the appropriate request.
+   int index = this->name_request_.msg_type ();
+ 
+@@ -258,7 +258,7 @@
+ /* VIRTUAL */ int
+ ACE_Name_Handler::recv_request (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::recv_request"));
++  ACE_TRACE ("ACE_Name_Handler::recv_request");
+   // Read the first 4 bytes to get the length of the message This
+   // implementation assumes that the first 4 bytes are the length of
+   // the message.
+@@ -329,7 +329,7 @@
+ /* VIRTUAL */ int
+ ACE_Name_Handler::handle_input (ACE_HANDLE)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::handle_input"));
++  ACE_TRACE ("ACE_Name_Handler::handle_input");
+ 
+   if (this->recv_request () == -1)
+     return -1;
+@@ -340,14 +340,14 @@
+ int
+ ACE_Name_Handler::bind (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::bind"));
++  ACE_TRACE ("ACE_Name_Handler::bind");
+   return this->shared_bind (0);
+ }
+ 
+ int
+ ACE_Name_Handler::rebind (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::rebind"));
++  ACE_TRACE ("ACE_Name_Handler::rebind");
+   int result = this->shared_bind (1);
+   return result == 1 ? 0 : result;
+ }
+@@ -355,7 +355,7 @@
+ int
+ ACE_Name_Handler::shared_bind (int rebind)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::shared_bind"));
++  ACE_TRACE ("ACE_Name_Handler::shared_bind");
+   ACE_NS_WString a_name (this->name_request_.name (),
+                          this->name_request_.name_len () / sizeof (ACE_WCHAR_T));
+   ACE_NS_WString a_value (this->name_request_.value (),
+@@ -392,7 +392,7 @@
+ int
+ ACE_Name_Handler::resolve (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::resolve"));
++  ACE_TRACE ("ACE_Name_Handler::resolve");
+ #if 0
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("request for RESOLVE\n")));
+ #endif /* 0 */
+@@ -425,7 +425,7 @@
+ int
+ ACE_Name_Handler::unbind (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::unbind"));
++  ACE_TRACE ("ACE_Name_Handler::unbind");
+ #if 0
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("request for UNBIND\n")));
+ #endif /* 0 */
+@@ -441,7 +441,7 @@
+ ACE_Name_Request
+ ACE_Name_Handler::name_request (ACE_NS_WString *one_name)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::name_request"));
++  ACE_TRACE ("ACE_Name_Handler::name_request");
+   ACE_Auto_Basic_Array_Ptr<ACE_WCHAR_T> one_name_urep (one_name->rep ());
+   return ACE_Name_Request (ACE_Name_Request::LIST_NAMES,
+                            one_name_urep.get (),
+@@ -453,7 +453,7 @@
+ ACE_Name_Request
+ ACE_Name_Handler::value_request (ACE_NS_WString *one_value)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::value_request"));
++  ACE_TRACE ("ACE_Name_Handler::value_request");
+   ACE_Auto_Basic_Array_Ptr<ACE_WCHAR_T> one_value_urep (one_value->rep ());
+   return ACE_Name_Request (ACE_Name_Request::LIST_VALUES,
+                            0, 0,
+@@ -465,7 +465,7 @@
+ ACE_Name_Request
+ ACE_Name_Handler::type_request (ACE_NS_WString *one_type)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::type_request"));
++  ACE_TRACE ("ACE_Name_Handler::type_request");
+   return ACE_Name_Request (ACE_Name_Request::LIST_TYPES,
+                            0, 0,
+                            0, 0,
+@@ -476,7 +476,7 @@
+ int
+ ACE_Name_Handler::lists (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::lists"));
++  ACE_TRACE ("ACE_Name_Handler::lists");
+ 
+   ACE_PWSTRING_SET set;
+   ACE_NS_WString pattern (this->name_request_.name (),
+@@ -527,7 +527,7 @@
+ int
+ ACE_Name_Handler::lists_entries (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::lists_entries"));
++  ACE_TRACE ("ACE_Name_Handler::lists_entries");
+   ACE_BINDING_SET set;
+   ACE_NS_WString pattern (this->name_request_.name (),
+                           this->name_request_.name_len () / sizeof (ACE_WCHAR_T));
+@@ -627,7 +627,7 @@
+ 
+ ACE_Name_Handler::~ACE_Name_Handler (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::~ACE_Name_Handler"));
++  ACE_TRACE ("ACE_Name_Handler::~ACE_Name_Handler");
+ #if 0
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("closing down Handle  %d\n"),
+               this->get_handle ()));
+Index: netsvcs/lib/Server_Logging_Handler_T.cpp
+===================================================================
+--- netsvcs/lib/Server_Logging_Handler_T.cpp	(revision 94301)
++++ netsvcs/lib/Server_Logging_Handler_T.cpp	(working copy)
+@@ -308,7 +308,7 @@
+ template<class SLH, class LMR, class SST> int
+ ACE_Server_Logging_Acceptor_T<SLH, LMR, SST>::init (int argc, ACE_TCHAR *argv[])
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Server_Logging_Acceptor_T<SLH, LMR, SST>::init"));
++  ACE_TRACE ("ACE_Server_Logging_Acceptor_T<SLH, LMR, SST>::init");
+ 
+   // Use the options hook to parse the command line arguments and set
+   // options.
+@@ -350,7 +350,7 @@
+ template<class SLH, class LMR, class SST> int
+ ACE_Server_Logging_Acceptor_T<SLH, LMR, SST>::parse_args (int argc, ACE_TCHAR *argv[])
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_Server_Logging_Acceptor_T<SLH, LMR, SST>::parse_args"));
++  ACE_TRACE ("ACE_Server_Logging_Acceptor_T<SLH, LMR, SST>::parse_args");
+ 
+   int service_port = ACE_DEFAULT_SERVER_PORT;
+ 
+Index: netsvcs/lib/TS_Clerk_Handler.cpp
+===================================================================
+--- netsvcs/lib/TS_Clerk_Handler.cpp	(revision 94301)
++++ netsvcs/lib/TS_Clerk_Handler.cpp	(working copy)
+@@ -25,7 +25,7 @@
+ void
+ ACE_TS_Clerk_Handler::state (ACE_TS_Clerk_Handler::State state)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::state"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::state");
+   this->state_ = state;
+ }
+ 
+@@ -33,7 +33,7 @@
+ ACE_TS_Clerk_Handler::State
+ ACE_TS_Clerk_Handler::state (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::state"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::state");
+   return this->state_;
+ }
+ 
+@@ -41,7 +41,7 @@
+ void
+ ACE_TS_Clerk_Handler::timeout (long to)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::timeout"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::timeout");
+   if (to > this->max_timeout_)
+     to = this->max_timeout_;
+ 
+@@ -54,7 +54,7 @@
+ long
+ ACE_TS_Clerk_Handler::timeout (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::timeout"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::timeout");
+   long old_timeout = this->timeout_;
+   this->timeout_ *= 2;
+ 
+@@ -76,7 +76,7 @@
+ void
+ ACE_TS_Clerk_Handler::max_timeout (long mto)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::max_timeout"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::max_timeout");
+   this->max_timeout_ = mto;
+ }
+ 
+@@ -84,14 +84,14 @@
+ long
+ ACE_TS_Clerk_Handler::max_timeout (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::max_timeout"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::max_timeout");
+   return this->max_timeout_;
+ }
+ 
+ int
+ ACE_TS_Clerk_Handler::open (void *)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::open"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::open");
+   ACE_INET_Addr server_addr;
+ 
+   // Set connection state as established
+@@ -130,7 +130,7 @@
+ ACE_HANDLE
+ ACE_TS_Clerk_Handler::get_handle (void) const
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::get_handle"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::get_handle");
+   return this->peer().get_handle ();
+ }
+ 
+@@ -138,7 +138,7 @@
+ ACE_TS_Clerk_Handler::handle_close (ACE_HANDLE,
+                                     ACE_Reactor_Mask mask)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::handle_close"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::handle_close");
+   ACE_UNUSED_ARG (mask);
+ 
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%t) shutting down on handle %d\n"),
+@@ -150,7 +150,7 @@
+ int
+ ACE_TS_Clerk_Handler::reinitiate_connection (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::reinitiate_connection"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::reinitiate_connection");
+   // Skip over deactivated descriptors.
+ 
+   // Set state to connecting so that we don't try to send anything
+@@ -175,7 +175,7 @@
+ int
+ ACE_TS_Clerk_Handler::handle_input (ACE_HANDLE)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::handle_input"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::handle_input");
+   // We're getting a time update message from a server
+   ACE_Time_Request reply;
+   if (this->recv_reply (reply) != 0)
+@@ -205,7 +205,7 @@
+ ACE_TS_Clerk_Handler::handle_timeout (const ACE_Time_Value &,
+                                       const void *)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::handle_timeout"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::handle_timeout");
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("(%t) attempting to reconnect to server with timeout = %d\n"),
+               this->timeout_));
+@@ -220,21 +220,21 @@
+ void
+ ACE_TS_Clerk_Handler::remote_addr (ACE_INET_Addr &addr)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::remote_addr"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::remote_addr");
+   this->remote_addr_ = addr;
+ }
+ 
+ ACE_INET_Addr &
+ ACE_TS_Clerk_Handler::remote_addr (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::remote_addr"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::remote_addr");
+   return this->remote_addr_;
+ }
+ 
+ int
+ ACE_TS_Clerk_Handler::recv_reply (ACE_Time_Request &reply)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::recv_reply"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::recv_reply");
+   const int bytes_expected = reply.size ();
+ 
+   // Since Time_Request messages are fixed size, read the entire
+@@ -268,7 +268,7 @@
+ int
+ ACE_TS_Clerk_Handler::send_request (ACE_UINT32 sequence_num, ACE_Time_Info &time_info)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Handler::send_request"));
++  ACE_TRACE ("ACE_TS_Clerk_Handler::send_request");
+   void    *buffer;
+   ssize_t length;
+ 
+@@ -327,7 +327,7 @@
+ void
+ ACE_TS_Clerk_Processor::alloc (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::alloc"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::alloc");
+   ACE_NEW (this->shmem_, ALLOCATOR (this->poolname_));
+ 
+   void *temp = 0;
+@@ -358,14 +358,14 @@
+ ACE_TS_Clerk_Processor::handle_timeout (const ACE_Time_Value &,
+                                         const void *)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::handle_timeout"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::handle_timeout");
+   return this->update_time ();
+ }
+ 
+ int
+ ACE_TS_Clerk_Processor::update_time ()
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::update_time"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::update_time");
+   ACE_UINT32 expected_sequence_num = this->cur_sequence_num_;
+ 
+   // Increment sequence number
+@@ -428,7 +428,7 @@
+ int
+ ACE_TS_Clerk_Processor::fini (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::fini"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::fini");
+ 
+   // Cancel the timer
+   if (this->timer_id_ != -1)
+@@ -460,14 +460,14 @@
+ int
+ ACE_TS_Clerk_Processor::info (ACE_TCHAR **, size_t) const
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::info"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::info");
+   return 0;
+ }
+ 
+ int
+ ACE_TS_Clerk_Processor::init (int argc, ACE_TCHAR *argv[])
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::init"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::init");
+   // Use the options hook to parse the command line arguments and set
+   // options.
+   this->parse_args (argc, argv);
+@@ -505,7 +505,7 @@
+ ACE_TS_Clerk_Processor::initiate_connection (ACE_TS_Clerk_Handler *handler,
+                                              ACE_Synch_Options &synch_options)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::initiate_connection"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::initiate_connection");
+   ACE_TCHAR buf[MAXHOSTNAMELEN + 1];
+ 
+   // Mark ourselves as idle so that the various iterators will ignore
+@@ -564,7 +564,7 @@
+ int
+ ACE_TS_Clerk_Processor::parse_args (int argc, ACE_TCHAR *argv[])
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::parse_args"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::parse_args");
+   ACE_INET_Addr server_addr;
+   ACE_TS_Clerk_Handler *handler;
+ 
+@@ -612,14 +612,14 @@
+ int
+ ACE_TS_Clerk_Processor::suspend (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::suspend"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::suspend");
+   return 0;
+ }
+ 
+ int
+ ACE_TS_Clerk_Processor::resume (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Clerk_Processor::resume"));
++  ACE_TRACE ("ACE_TS_Clerk_Processor::resume");
+   return 0;
+ }
+ 
+Index: netsvcs/lib/TS_Server_Handler.cpp
+===================================================================
+--- netsvcs/lib/TS_Server_Handler.cpp	(revision 94301)
++++ netsvcs/lib/TS_Server_Handler.cpp	(working copy)
+@@ -38,7 +38,7 @@
+ int
+ ACE_TS_Server_Acceptor::init (int argc, ACE_TCHAR *argv[])
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Acceptor::init"));
++  ACE_TRACE ("ACE_TS_Server_Acceptor::init");
+ 
+   // Use the options hook to parse the command line arguments and set
+   // options.
+@@ -87,7 +87,7 @@
+ ACE_TS_Server_Handler::ACE_TS_Server_Handler (ACE_Thread_Manager *tm)
+   : ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> (tm)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::ACE_TS_Server_Handler"));
++  ACE_TRACE ("ACE_TS_Server_Handler::ACE_TS_Server_Handler");
+ }
+ 
+ // Activate this instance of the ACE_TS_Server_Handler (called by the
+@@ -96,7 +96,7 @@
+ /* VIRTUAL */ int
+ ACE_TS_Server_Handler::open (void *)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::open"));
++  ACE_TRACE ("ACE_TS_Server_Handler::open");
+ 
+   ACE_INET_Addr client_addr;
+ 
+@@ -124,7 +124,7 @@
+ /* VIRTUAL */ int
+ ACE_TS_Server_Handler::send_request (ACE_Time_Request &request)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::send_request"));
++  ACE_TRACE ("ACE_TS_Server_Handler::send_request");
+   void *buffer;
+   ssize_t length = request.encode (buffer);
+ 
+@@ -150,7 +150,7 @@
+ /* VIRTUAL */ int
+ ACE_TS_Server_Handler::abandon (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::abandon"));
++  ACE_TRACE ("ACE_TS_Server_Handler::abandon");
+ 
+   // Note we are using the time field to report the errno in case of
+   // failure.
+@@ -162,7 +162,7 @@
+ /* VIRTUAL */ int
+ ACE_TS_Server_Handler::handle_timeout (const ACE_Time_Value &, const void *)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::handle_timeout"));
++  ACE_TRACE ("ACE_TS_Server_Handler::handle_timeout");
+   return this->abandon ();
+ }
+ 
+@@ -171,7 +171,7 @@
+ /* VIRTUAL */ ACE_HANDLE
+ ACE_TS_Server_Handler::get_handle (void) const
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::get_handle"));
++  ACE_TRACE ("ACE_TS_Server_Handler::get_handle");
+   return this->peer ().get_handle ();
+ }
+ 
+@@ -180,7 +180,7 @@
+ /* VIRTUAL */ int
+ ACE_TS_Server_Handler::dispatch (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::dispatch"));
++  ACE_TRACE ("ACE_TS_Server_Handler::dispatch");
+   // Get the system time and then create an ACE_Time_Request
+   time_t t = ACE_OS::time (0);
+   ACE_Time_Request rq (ACE_Time_Request::TIME_UPDATE, t);
+@@ -193,7 +193,7 @@
+ /* VIRTUAL */ int
+ ACE_TS_Server_Handler::recv_request (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::recv_request"));
++  ACE_TRACE ("ACE_TS_Server_Handler::recv_request");
+   ssize_t bytes_expected = this->time_request_.size ();
+ 
+   // Since Time_Request messages are fixed size, read the entire
+@@ -242,7 +242,7 @@
+ /* VIRTUAL */ int
+ ACE_TS_Server_Handler::handle_input (ACE_HANDLE)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::handle_input"));
++  ACE_TRACE ("ACE_TS_Server_Handler::handle_input");
+ 
+   if (this->recv_request () == -1)
+     return -1;
+@@ -252,7 +252,7 @@
+ 
+ ACE_TS_Server_Handler::~ACE_TS_Server_Handler (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("ACE_TS_Server_Handler::~ACE_TS_Server_Handler"));
++  ACE_TRACE ("ACE_TS_Server_Handler::~ACE_TS_Server_Handler");
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("closing down Handle %d\n"),
+               this->get_handle ()));
+Index: tests/Bug_3878_Regression_Test.cpp
+===================================================================
+--- tests/Bug_3878_Regression_Test.cpp	(revision 94301)
++++ tests/Bug_3878_Regression_Test.cpp	(working copy)
+@@ -66,7 +66,7 @@
+ private:
+   void process_message (ACE_Message_Block *mb)
+   {
+-    ACE_TRACE (ACE_TEXT ("Worker::process_message"));
++    ACE_TRACE ("Worker::process_message");
+     int msgId;
+     ACE_OS::memcpy (&msgId, mb->rd_ptr (), sizeof(int));
+     mb->release ();
+@@ -93,12 +93,12 @@
+   Manager ()
+     : shutdown_(0), workers_lock_(), workers_cond_(workers_lock_)
+   {
+-    ACE_TRACE (ACE_TEXT ("Manager::Manager"));
++    ACE_TRACE ("Manager::Manager");
+   }
+ 
+   int svc (void)
+   {
+-    ACE_TRACE (ACE_TEXT ("Manager::svc"));
++    ACE_TRACE ("Manager::svc");
+ 
+     ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) Manager started\n")));
+ 
+@@ -189,7 +189,7 @@
+ int
+ Manager::shut_down (void)
+ {
+-  ACE_TRACE (ACE_TEXT ("Manager::shut_down"));
++  ACE_TRACE ("Manager::shut_down");
+   ACE_Unbounded_Queue<Worker* >::ITERATOR iter =
+     this->workers_.begin ();
+   Worker **worker_ptr = 0;
+Index: tests/Thread_Timer_Queue_Adapter_Test.cpp
+===================================================================
+--- tests/Thread_Timer_Queue_Adapter_Test.cpp	(revision 94301)
++++ tests/Thread_Timer_Queue_Adapter_Test.cpp	(working copy)
+@@ -75,7 +75,7 @@
+                      int /*recurring_timer*/,
+                      const ACE_Time_Value& /*cur_time*/)
+         {
+-            ACE_TRACE(ACE_TEXT ("timeout"));
++            ACE_TRACE("timeout");
+ 
+             return (*p_Handler)(const_cast<void*> (p_vParameter));
+         }
+@@ -97,7 +97,7 @@
+         /// This method is called when a timer is canceled
+         int cancel_timer(TTimerQueue&, ICustomEventHandler* p_Handler, int, int)
+         {
+-            ACE_TRACE(ACE_TEXT ("cancel_timer"));
++            ACE_TRACE("cancel_timer");
+             delete p_Handler;
+             return 0;
+         }
+@@ -106,7 +106,7 @@
+         /// the timer is still contained in it
+         int deletion(TTimerQueue&, ICustomEventHandler* p_Handler, const void*)
+         {
+-            ACE_TRACE(ACE_TEXT ("deletion"));
++            ACE_TRACE("deletion");
+             delete p_Handler;
+             return 0;
+         }
