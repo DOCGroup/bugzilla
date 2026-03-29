@@ -1,0 +1,98 @@
+The code below is a simplified version of what I'm working on.
+I get the same result if the service is dynamic, with the
+necessary changes to the macros and svc.conf file.
+
+====================================================
+
+class ORB_Task : public ACE_Task_Base
+{
+public:
+  void orb (CORBA::ORB_ptr the_orb)
+  {
+    orb_ = the_orb;
+  }
+
+  int svc (void)
+  {
+    ACE_DEBUG ((LM_TRACE, "ORB running\n"));
+    orb_->run ();
+    return 0;
+  }
+
+private:
+  CORBA::ORB_ptr orb_;
+};
+
+class App_Object : public ACE_Service_Object
+{
+public:
+  int init (int argc, ACE_TCHAR *argv[])
+  {
+    orb_ = CORBA::ORB_init (argc, argv);
+    ACE_DEBUG ((LM_TRACE, "ORB created\n"));
+    orb_task_.orb (orb_.in ());
+    orb_task_.activate ();
+    return 0;
+  }
+
+  int fini (void)
+  {
+    orb_->destroy ();
+    ACE_DEBUG ((LM_TRACE, "ORB destroyed\n"));
+    return 0;
+  }
+
+private:
+  CORBA::ORB_var orb_;
+  ORB_Task orb_task_;
+};
+
+int main (int argc, ACE_TCHAR *argv[])
+{
+  int status = ACE_Service_Config::open (argc,
+                                         argv,
+                                         ACE_DEFAULT_LOGGER_KEY,
+                                         0);
+
+  if (status != 0)
+    {
+      ACE_ERROR_RETURN ((LM_ERROR,
+                         "ACE_Service_Config::open failed\n"),
+                        status);
+    }
+
+  ACE_OS::sleep (5);
+
+  /* Without this call, there is a crash.
+
+  status = ACE_Service_Config::close ();
+
+  if (status != 0)
+    {
+      ACE_ERROR_RETURN ((LM_ERROR,
+                         "ACE_Service_Config::close failed\n"),
+                        status);
+    }
+
+  */
+
+  return 0;
+}
+
+ACE_FACTORY_DEFINE (ACE_Local_Service, App_Object)
+
+ACE_STATIC_SVC_DEFINE (App_Object_Service
+                       ACE_TEXT ("App_Object_Service"),
+                       ACE_SVC_OBJ_T,
+                       &ACE_SVC_NAME (App_Object),
+                       ACE_Service_Type::DELETE_THIS |
+                       ACE_Service_Type::DELETE_OBJ,
+                       0)
+
+ACE_STATIC_SVC_REQUIRE (App_Object_Service)
+
+===========================================
+
+svc.conf file:
+
+static App_Object_Service ""
