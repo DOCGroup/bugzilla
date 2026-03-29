@@ -1,0 +1,11 @@
+--- C:\third_party\ace\5.6.8\TAO\tao\TAO_Internal.cpp	Tue Mar 24 07:27:31 2009
++++ C:\third_party\ace\5.6.8\TAO\tao\TAO_Internal_new.cpp	Tue Mar 24 07:00:47 2009
+@@ -767,7 +767,7 @@
+               }
+ 
+             svc_config_argv.add (ACE_TEXT ("-f"));
+-            svc_config_argv.add (current_arg);
++            svc_config_argv.add (current_arg, true);
+           }
+         else
+           {
