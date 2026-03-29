@@ -1,0 +1,36 @@
+  // CIInterface.idl 
+  module api {
+    module directory {
+      // forward declarations
+      struct Advertisement;
+    }; // module directory
+
+    // forward declaration
+    struct ActorDescriptor;
+
+    interface IActor {
+
+      // ERROR: forward declared type may be used only as a sequence element, 
+      // ::api::ActorDescriptor processing CIInterface.idl
+      ActorDescriptor getActorDescriptor();
+
+      // Works fine
+      api::directory::Advertisement getAdvertisement();
+
+      // The following generated that same error in the prior version 1.6.7
+      // but was solved. Apparently the fix introduced a similar but new 
+  // problem.
+      void setAdvertisement(in api::directory::Advertisement adv);
+
+    }; // IActor
+
+    struct ActorDescriptor {
+      string                  ActorCredentials;
+    }; // ActorDescriptor
+
+    module directory {  
+      struct Advertisement {
+        string                Type;
+      }; // Advertisement  
+    }; // module directory
+  }; // module api
