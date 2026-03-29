@@ -1,0 +1,318 @@
+--- D:/projects/ACE_wrappers/tests/Timer_Queue_Test.cpp	Tue Jul 15 21:31:39 2014
++++ C:/Temp/ACE_wrappers/tests/Timer_Queue_Test.cpp	Tue Jul 15 22:18:59 2014
+@@ -337,10 +337,12 @@
+ 
+ static void
+ test_performance (ACE_Timer_Queue *tq,
+                   const ACE_TCHAR *test_name)
+ {
++  ACE_UNUSED_ARG(test_name);
++
+   Example_Handler handler;
+   ACE_Profile_Timer timer;
+   int i;
+   const void *timer_act = 0;
+ 
+@@ -376,11 +378,13 @@
+   ACE_TEST_ASSERT (tq->is_empty () == 0);
+ 
+   timer.stop ();
+ 
+   ACE_Profile_Timer::ACE_Elapsed_Time et;
++
+   timer.elapsed_time (et);
++
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("time to schedule %d timers (total/average usecs): \t\t\t\t\t%.3f / %f\n"),
+               max_iterations,// test_name,
+ 							et.real_time * 1000000.0F,
+ 							(et.real_time / ACE_timer_t(max_iterations)) * 1000000.0F));
+@@ -624,28 +628,28 @@
+ 	ACE_ASSERT(stop != 0);
+ 	stop->msg_type(ACE_Message_Block::MB_STOP);
+ 
+ 	Example_Handler handler;
+ 	ACE_Event_Handler* eh = &handler;
+-	int remaining_timers = 0;
++    int remaining_timers = 0;
+ 
+ 	// Set up a bunch of times TIMER_DISTANCE ms apart.
+ 	ACE_Time_Value *periods = 0;
+ 	ACE_NEW_NORETURN(periods, ACE_Time_Value[max_iterations]);
+ 	ACE_ASSERT(periods != 0);
+ 	for (int i = 0; i < max_iterations; ++i)
+-		periods[i] = ACE_Time_Value(0, i * TIMER_DISTANCE * 1000);
++      periods[i] = ACE_Time_Value(0, i * TIMER_DISTANCE * 1000);
+ 	randomize(periods,
+-						max_iterations,
+-						static_cast<unsigned int>(ACE_OS::time(0L)));
++              max_iterations,
++              static_cast<unsigned int>(ACE_OS::time(0L)));
+ 
+ 	ACE_Time_Value maximum_delay = ACE_Time_Value::zero;
+ 
+ 	Event_Scheduler scheduler(tq,
+-													  &handler,
+-														periods,
+-														&maximum_delay);
++                              &handler,
++                              periods,
++                              &maximum_delay);
+ 
+ 	ACE_Message_Block* mb = stop->duplicate();
+ 	ACE_ASSERT(mb != 0);
+ 	mb->msg_type(ACE_Message_Block::MB_STOP);
+ 
+@@ -661,12 +665,12 @@
+ 	remaining_timers = tq->cancel(eh, 1);
+ 
+ 	timer.stop();
+ 	timer.elapsed_time(elapsed_time);
+ 	ACE_DEBUG((LM_DEBUG,
+-		         ACE_TEXT("brute-force scheduling: %#T --> %d events (real/user/system secs): \t%.3f / %.3f / %.3f\n"),
+-						 &bf_running_time, scheduler.num_scheduled(), elapsed_time.real_time, elapsed_time.user_time, elapsed_time.system_time));
++               ACE_TEXT("brute-force scheduling: %#T --> %d events (real/user/system secs): \t%.3f / %.3f / %.3f\n"),
++               &bf_running_time, scheduler.num_scheduled(), elapsed_time.real_time, elapsed_time.user_time, elapsed_time.system_time));
+ 	ACE_TEST_ASSERT(tq->is_empty());
+ 
+ 	maximum_delay = maximum_interval;
+ 
+ 	mb = stop->duplicate();
+@@ -684,12 +688,12 @@
+ 	remaining_timers = tq->cancel(eh, 1);
+ 
+ 	timer.stop();
+ 	timer.elapsed_time(elapsed_time);
+ 	ACE_DEBUG((LM_DEBUG,
+-         		 ACE_TEXT("random delay scheduling: %#T --> %d events (real/user/system secs): \t\t%.3f / %.3f / %.3f\n"),
+-						 &rd_running_time, scheduler.num_scheduled(), elapsed_time.real_time, elapsed_time.user_time, elapsed_time.system_time));
++               ACE_TEXT("random delay scheduling: %#T --> %d events (real/user/system secs): \t\t%.3f / %.3f / %.3f\n"),
++               &rd_running_time, scheduler.num_scheduled(), elapsed_time.real_time, elapsed_time.user_time, elapsed_time.system_time));
+ 	ACE_ASSERT(tq->is_empty());
+ 
+ 	// clean up
+ 	delete stop;
+ }
+@@ -705,11 +709,11 @@
+   ACE_Time_Value anytime(1);
+   ACE_Bounded_Set<long> timer_ids (max_iterations);
+   long timer_id = -1;
+   bool all_unique = true;
+ 
+-	ACE_Event_Handler* eh = &handler;
++  ACE_Event_Handler* eh = &handler;
+   for (int i = 0; i < 100; ++i)
+     {
+       timer_id = timer_heap.schedule (eh, 0, anytime);
+       if (timer_id == -1)
+         {
+@@ -764,12 +768,12 @@
+ class Timer_Queue_Stack
+ {
+  public:
+   // = Initialization method
+   Timer_Queue_Stack (ACE_Timer_Queue *queue,
+-										 const ACE_TCHAR *name,
+-										 Timer_Queue_Stack *next = 0)
++                     const ACE_TCHAR *name,
++                     Timer_Queue_Stack *next = 0)
+    : queue_ (queue),
+      name_ (name),
+      next_ (next)
+   {}
+   // "Push" a new <queue> on the stack of <queue>s.
+@@ -790,12 +794,12 @@
+   ACE_START_TEST (ACE_TEXT ("Timer_Queue_Test"));
+ 
+ 	bool run_stability_tests = false;
+ 
+ 	ACE_Get_Opt argument_parser(argc,
+-														  argv,
+-														  ACE_TEXT("ahi:lswx"));
++                                argv,
++                                ACE_TEXT("ahi:lswx"));
+ 	int option = 0;
+ 	while ((option = argument_parser()) != EOF)
+ 	{
+ 		switch (option)
+ 		{
+@@ -844,20 +848,20 @@
+ 			}
+    		// error handling
+ 			case '?':
+ 			{
+ 				ACE_DEBUG((LM_ERROR,
+-									 ACE_TEXT("unrecognized option \"%s\", aborting\n"),
+-									 ACE_TEXT(argument_parser.last_option())));
++                           ACE_TEXT ("unrecognized option \"%s\", aborting\n"),
++                           ACE_TEXT(argument_parser.last_option())));
+ 
+ 				return EXIT_FAILURE;
+ 			}
+ 			default:
+ 			{
+ 				ACE_DEBUG((LM_ERROR,
+-									 ACE_TEXT("unrecognized option \"%c\", aborting\n"),
+-									 option));
++                           ACE_TEXT ("unrecognized option \"%c\", aborting\n"),
++                           option));
+ 
+ 				return EXIT_FAILURE;
+ 			}
+ 		} // end SWITCH
+ 	} // end WHILE
+@@ -871,71 +875,42 @@
+   Timer_Queue_Stack *tq_stack = 0;
+ 
+   // Add new Timer_Queue implementations here.  Note that these will
+   // be executed in "reverse order".
+ 
+-	typedef ACE_Timer_Heap_T<ACE_Event_Handler*,
+-													 ACE_Event_Handler_Handle_Timeout_Upcall,
+-													 ACE_SYNCH_RECURSIVE_MUTEX,
+-													 ACE_HR_Time_Policy> timer_heap_hr_type;
+ 	// Timer_Hash
+ 	if (strategies.find(QUEUE_HASH) != strategies.end())
+ 	{
+-		// Timer_Hash (Heap)
+-		ACE_NEW_RETURN(tq_stack,
+-									 Timer_Queue_Stack(new ACE_Timer_Hash_Heap,
+-																		 ACE_TEXT ("ACE_Timer_Hash (Heap)"),
+-																		 tq_stack),
+-									 -1);
+-
+-		// Timer_Hash (heap, high-res timer)
+-		typedef ACE_Timer_Hash_T<ACE_Event_Handler*,
+-			                       ACE_Event_Handler_Handle_Timeout_Upcall,
+-			                       ACE_SYNCH_RECURSIVE_MUTEX,
+-														 timer_heap_hr_type,
+-			                       ACE_HR_Time_Policy> timer_hash_heap_hr_type;
+-		ACE_NEW_RETURN(tq_stack,
+-									 Timer_Queue_Stack(new timer_hash_heap_hr_type,
+-																		 ACE_TEXT("ACE_Timer_Hash (Heap, high-res timer)"),
+-																		 tq_stack),
+-									 -1);
+-
+-		// Timer_Hash (List)
+-		ACE_NEW_RETURN(tq_stack,
+-									 Timer_Queue_Stack (new ACE_Timer_Hash_List,
+-																		  ACE_TEXT ("ACE_Timer_Hash (List)"),
+-																		  tq_stack),
+-									 -1);
+-
+-		// Timer_Hash (Wheel)
+-		ACE_NEW_RETURN(tq_stack,
+-									 Timer_Queue_Stack (new ACE_Timer_Hash_Wheel,
+-																		  ACE_TEXT ("ACE_Timer_Hash (Wheel)"),
+-																		  tq_stack),
+-									 -1);
++        // Timer_Hash (Heap)
++        ACE_NEW_RETURN(tq_stack,
++                       Timer_Queue_Stack(new ACE_Timer_Hash_Heap,
++                                         ACE_TEXT ("ACE_Timer_Hash (Heap)"),
++                                         tq_stack),
++                       -1);
++
++        // Timer_Hash (List)
++        ACE_NEW_RETURN(tq_stack,
++                       Timer_Queue_Stack (new ACE_Timer_Hash_List,
++                                          ACE_TEXT ("ACE_Timer_Hash (List)"),
++                                          tq_stack),
++                       -1);
++
++        // Timer_Hash (Wheel)
++        ACE_NEW_RETURN(tq_stack,
++                       Timer_Queue_Stack (new ACE_Timer_Hash_Wheel,
++                                          ACE_TEXT ("ACE_Timer_Hash (Wheel)"),
++                                          tq_stack),
++                       -1);
+ 	} // end IF
+ 
+   // Timer_List
+ 	if (strategies.find(QUEUE_LIST) != strategies.end())
+-	{
+-		ACE_NEW_RETURN(tq_stack,
+-									 Timer_Queue_Stack(new ACE_Timer_List,
+-																		 ACE_TEXT ("ACE_Timer_List"),
+-																		 tq_stack),
+-									 -1);
+-
+-		// Timer_List, high-res timer
+-		typedef ACE_Timer_List_T<ACE_Event_Handler*,
+-														 ACE_Event_Handler_Handle_Timeout_Upcall,
+-														 ACE_SYNCH_RECURSIVE_MUTEX,
+-														 ACE_HR_Time_Policy> timer_list_hr_type;
+-		ACE_NEW_RETURN(tq_stack,
+-									 Timer_Queue_Stack(new timer_list_hr_type,
+-																		 ACE_TEXT ("ACE_Timer_List (high-res timer)"),
+-																		 tq_stack),
+-									 -1);
+-	} // end IF
++        ACE_NEW_RETURN (tq_stack,
++                        Timer_Queue_Stack (new ACE_Timer_List,
++                                           ACE_TEXT ("ACE_Timer_List"),
++                                           tq_stack),
++                        -1);
+ 
+   // Timer_Wheel
+ 	if (strategies.find(QUEUE_WHEEL) != strategies.end())
+ 	{
+ 		// Timer_Wheel without preallocated memory
+@@ -943,21 +918,10 @@
+ 									 Timer_Queue_Stack(new ACE_Timer_Wheel,
+ 																		 ACE_TEXT ("ACE_Timer_Wheel (non-preallocated)"),
+ 																		 tq_stack),
+ 									 -1);
+ 
+-		// Timer_Wheel without preallocated memory, high-res timer
+-		typedef ACE_Timer_Wheel_T<ACE_Event_Handler*,
+-			                        ACE_Event_Handler_Handle_Timeout_Upcall,
+-			                        ACE_SYNCH_RECURSIVE_MUTEX,
+-			                        ACE_HR_Time_Policy> timer_wheel_hr_type;
+-		ACE_NEW_RETURN(tq_stack,
+-									 Timer_Queue_Stack(new timer_wheel_hr_type,
+-																		 ACE_TEXT ("ACE_Timer_Wheel (non-preallocated, high-res timer)"),
+-																		 tq_stack),
+-									 -1);
+-
+ 		// Timer_Wheel with preallocated memory.
+ 		ACE_NEW_RETURN(tq_stack,
+ 									 Timer_Queue_Stack (new ACE_Timer_Wheel (ACE_DEFAULT_TIMER_WHEEL_SIZE,
+ 																												   ACE_DEFAULT_TIMER_WHEEL_RESOLUTION,
+ 																												   max_iterations),
+@@ -995,10 +959,14 @@
+ 																			 ACE_TEXT ("ACE_Timer_Heap (non-preallocated, high-res timer (deprecated version))"),
+ 																			 tq_stack),
+ 										-1);
+ 
+ 		// new (optimized) version
++		typedef ACE_Timer_Heap_T<ACE_Event_Handler*,
++														 ACE_Event_Handler_Handle_Timeout_Upcall,
++														 ACE_SYNCH_RECURSIVE_MUTEX,
++														 ACE_HR_Time_Policy> timer_heap_hr_type;
+ 		ACE_NEW_RETURN (tq_stack,
+ 										Timer_Queue_Stack (new timer_heap_hr_type,
+ 																			 ACE_TEXT ("ACE_Timer_Heap (non-preallocated, high-res timer)"),
+ 																			 tq_stack),
+ 										-1);
+@@ -1008,10 +976,11 @@
+   ACE_NEW_RETURN (timer_ids,
+                   long[max_iterations],
+                   -1);
+ 
+   Timer_Queue_Stack *tq_ptr = tq_stack;
++
+   while (tq_ptr != 0)
+   {
+     ACE_DEBUG ((LM_DEBUG,
+ 				        ACE_TEXT ("############################# %s #############################\n"),
+                 tq_ptr->name_));
+@@ -1037,6 +1006,6 @@
+ 		test_unique_timer_heap_ids();
+ 	} // end IF
+ 
+   ACE_END_TEST;
+   return 0;
+-}
++}
+\ No newline at end of file
