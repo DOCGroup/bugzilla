@@ -1,0 +1,826 @@
+Index: Object.inl
+===================================================================
+--- Object.inl	(revision 90626)
++++ Object.inl	(working copy)
+@@ -29,32 +29,7 @@
+ }
+ 
+ // ************************************************************
+-// These are in CORBA namespace
+ 
+-ACE_INLINE
+-void
+-CORBA::release (CORBA::Object_ptr obj)
+-{
+-  if (obj)
+-    {
+-      obj->_remove_ref ();
+-    }
+-}
+-
+-ACE_INLINE
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::Object_ptr obj)
+-{
+-  if (obj == 0)
+-    {
+-      return true;
+-    }
+-
+-  return CORBA::Object::is_nil_i (obj);
+-}
+-
+-// ************************************************************
+-
+ // Null pointers represent nil objects.
+ 
+ ACE_INLINE
+Index: AnyTypeCode/AnyTypeCode_methods.h
+===================================================================
+--- AnyTypeCode/AnyTypeCode_methods.h	(revision 90626)
++++ AnyTypeCode/AnyTypeCode_methods.h	(working copy)
+@@ -29,6 +29,7 @@
+ 
+ #include "tao/Basic_Types.h"
+ #include "tao/orbconf.h"
++#include "tao/CORBA_methods.h"
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -42,15 +43,6 @@
+ 
+   class TypeCode;
+   typedef TypeCode *TypeCode_ptr;
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (NamedValue_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (NamedValue_ptr);
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (NVList_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (NVList_ptr );
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (TypeCode_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (TypeCode_ptr);
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: AnyTypeCode/TypeCode.inl
+===================================================================
+--- AnyTypeCode/TypeCode.inl	(revision 90626)
++++ AnyTypeCode/TypeCode.inl	(working copy)
+@@ -4,21 +4,6 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-ACE_INLINE CORBA::Boolean
+-CORBA::is_nil (CORBA::TypeCode_ptr obj)
+-{
+-  return obj == 0;
+-}
+-
+-ACE_INLINE void
+-CORBA::release (CORBA::TypeCode_ptr obj)
+-{
+-  if (obj)
+-    obj->tao_release ();
+-}
+-
+-// --------------------------------------------------------------
+-
+ ACE_INLINE
+ CORBA::TypeCode::TypeCode (CORBA::TCKind k)
+   : kind_ (k)
+Index: AnyTypeCode/NVList.h
+===================================================================
+--- AnyTypeCode/NVList.h	(revision 90626)
++++ AnyTypeCode/NVList.h	(working copy)
+@@ -135,6 +135,22 @@
+     char * name_;
+   };
+ 
++  template<>
++  inline Boolean
++  is_nil (NamedValue_ptr nv)
++  {
++    return nv == 0;
++  }
++  template<>
++  inline void
++  release (NamedValue_ptr nv)
++  {
++    if (nv)
++      {
++        nv->_decr_refcnt ();
++      }
++  }
++
+   // ****************************************************************
+ 
+   typedef TAO_Pseudo_Var_T<NVList> NVList_var;
+@@ -282,6 +298,23 @@
+     /// from the <incoming_> buffer
+     int incoming_flag_;
+   };
++
++  template<>
++  inline Boolean
++  is_nil (NVList_ptr nvl)
++  {
++    return nvl == 0;
++  }
++  template<>
++  inline void
++  release (NVList_ptr nvl)
++  {
++    if (nvl)
++      {
++        nvl->_decr_refcnt ();
++      }
++  }
++
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: AnyTypeCode/NVList.inl
+===================================================================
+--- AnyTypeCode/NVList.inl	(revision 90626)
++++ AnyTypeCode/NVList.inl	(working copy)
+@@ -4,21 +4,6 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-ACE_INLINE CORBA::Boolean
+-CORBA::is_nil (CORBA::NamedValue_ptr nv)
+-{
+-  return nv == 0;
+-}
+-
+-ACE_INLINE void
+-CORBA::release (CORBA::NamedValue_ptr nv)
+-{
+-  if (nv)
+-    nv->_decr_refcnt ();
+-}
+-
+-// *************************************************************
+-
+ ACE_INLINE
+ CORBA::NamedValue::NamedValue (void)
+   : refcount_ (1),
+@@ -67,25 +52,6 @@
+   return 0;
+ }
+ 
+-// *************************************************************
+-
+-ACE_INLINE
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::NVList_ptr nvl)
+-{
+-  return (CORBA::Boolean) (nvl == 0);
+-}
+-
+-ACE_INLINE
+-void
+-CORBA::release (CORBA::NVList_ptr nvl)
+-{
+-  if (nvl)
+-    {
+-      nvl->_decr_refcnt ();
+-    }
+-}
+-
+ // ****************************************************************
+ 
+ ACE_INLINE
+Index: AnyTypeCode/TypeCode.h
+===================================================================
+--- AnyTypeCode/TypeCode.h	(revision 90626)
++++ AnyTypeCode/TypeCode.h	(working copy)
+@@ -492,6 +492,23 @@
+     TCKind const kind_;
+ 
+   };
++
++  template<>
++  inline Boolean
++  is_nil (TypeCode_ptr obj)
++  {
++    return obj == 0;
++  }
++  template<>
++  inline void
++  release (TypeCode_ptr obj)
++  {
++    if (obj)
++      {
++        obj->tao_release ();
++      }
++  }
++
+ }  // End namespace CORBA
+ 
+ 
+Index: DynamicInterface/ExceptionList.h
+===================================================================
+--- DynamicInterface/ExceptionList.h	(revision 90626)
++++ DynamicInterface/ExceptionList.h	(working copy)
+@@ -116,6 +116,23 @@
+     /// Internal list of typecodes.
+     ACE_Unbounded_Queue<CORBA::TypeCode_ptr> tc_list_;
+   };
++
++  template<>
++  inline Boolean
++  is_nil (ExceptionList_ptr x)
++  {
++    return x == 0;
++  }
++  template<>
++  inline void
++  release (ExceptionList_ptr x)
++  {
++    if (x != 0)
++      {
++        x->_decr_refcnt ();
++      }
++  }
++
+ }  // End CORBA namespace
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: DynamicInterface/Server_Request.h
+===================================================================
+--- DynamicInterface/Server_Request.h	(revision 90626)
++++ DynamicInterface/Server_Request.h	(working copy)
+@@ -47,9 +47,6 @@
+   class ServerRequest;
+   typedef ServerRequest *ServerRequest_ptr;
+ 
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (ServerRequest_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (ServerRequest_ptr);
+-
+   typedef TAO_Pseudo_Var_T<ServerRequest> ServerRequest_var;
+   typedef TAO_Pseudo_Out_T<ServerRequest> ServerRequest_out;
+ 
+@@ -166,6 +163,23 @@
+     /// Have we sent a user exception obtained from a gateway?
+     bool sent_gateway_exception_;
+   };
++
++  template<>
++  inline Boolean
++  is_nil (ServerRequest_ptr x)
++  {
++    return x == 0;
++  }
++  template<>
++  inline void
++  release (ServerRequest_ptr x)
++  {
++    if (x != 0)
++      {
++        x->_decr_refcnt ();
++      }
++  }
++
+ } // End CORBA namespace
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: DynamicInterface/Context.h
+===================================================================
+--- DynamicInterface/Context.h	(revision 90626)
++++ DynamicInterface/Context.h	(working copy)
+@@ -115,6 +115,22 @@
+     ACE_Atomic_Op<TAO_SYNCH_MUTEX, CORBA::ULong> refcount_;
+   };
+ 
++  template<>
++  inline Boolean
++  is_nil (Context_ptr x)
++  {
++    return x == 0;
++  }
++  template<>
++  inline void
++  release (Context_ptr x)
++  {
++    if (x != 0)
++      {
++        x->_decr_refcnt ();
++      }
++  }
++
+   /**
+    * @class ContextList
+    *
+@@ -182,6 +198,23 @@
+     /// Internal list of typecodes.
+     ACE_Unbounded_Queue<char *> ctx_list_;
+   };
++
++  template<>
++  inline Boolean
++  is_nil (ContextList_ptr x)
++  {
++    return x == 0;
++  }
++  template<>
++  inline void
++  release (ContextList_ptr x)
++  {
++    if (x != 0)
++      {
++        x->_decr_refcnt ();
++      }
++  }
++
+ } // End CORBA namespace.
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: DynamicInterface/ExceptionList.inl
+===================================================================
+--- DynamicInterface/ExceptionList.inl	(revision 90626)
++++ DynamicInterface/ExceptionList.inl	(working copy)
+@@ -5,25 +5,6 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ ACE_INLINE
+-void
+-CORBA::release (CORBA::ExceptionList_ptr x)
+-{
+-  if (x != 0)
+-    {
+-      x->_decr_refcnt ();
+-    }
+-}
+-
+-ACE_INLINE
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::ExceptionList_ptr x)
+-{
+-  return x == 0;
+-}
+-
+-// ===================================================================
+-
+-ACE_INLINE
+ CORBA::ExceptionList::ExceptionList (void)
+   : ref_count_ (1)
+ {
+Index: DynamicInterface/Request.h
+===================================================================
+--- DynamicInterface/Request.h	(revision 90626)
++++ DynamicInterface/Request.h	(working copy)
+@@ -273,6 +273,23 @@
+     ACE_CString raw_user_exception_;
+ 
+   };
++
++  template<>
++  inline Boolean
++  is_nil (Request_ptr x)
++  {
++    return x == 0;
++  }
++  template<>
++  inline void
++  release (Request_ptr x)
++  {
++    if (x != 0)
++      {
++        x->_decr_refcnt ();
++      }
++  }
++
+ } // End CORBA namespace.
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: DynamicInterface/DII_CORBA_methods.h
+===================================================================
+--- DynamicInterface/DII_CORBA_methods.h	(revision 90626)
++++ DynamicInterface/DII_CORBA_methods.h	(working copy)
+@@ -46,19 +46,6 @@
+ 
+   class Request;
+   typedef Request *Request_ptr;
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (Context_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (Context_ptr);
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (ContextList_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (ContextList_ptr );
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (ExceptionList_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (ExceptionList_ptr);
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (Request_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (Request_ptr);
+-
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: DynamicInterface/Server_Request.inl
+===================================================================
+--- DynamicInterface/Server_Request.inl	(revision 90626)
++++ DynamicInterface/Server_Request.inl	(working copy)
+@@ -4,25 +4,6 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-ACE_INLINE
+-void
+-CORBA::release (CORBA::ServerRequest_ptr x)
+-{
+-  if (x != 0)
+-    {
+-      x->_decr_refcnt ();
+-    }
+-}
+-
+-ACE_INLINE
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::ServerRequest_ptr x)
+-{
+-  return x == 0;
+-}
+-
+-// ===================================================================
+-
+ ACE_INLINE CORBA::ServerRequest_ptr
+ CORBA::ServerRequest::_duplicate (CORBA::ServerRequest_ptr x)
+ {
+Index: DynamicInterface/Context.inl
+===================================================================
+--- DynamicInterface/Context.inl	(revision 90626)
++++ DynamicInterface/Context.inl	(working copy)
+@@ -5,42 +5,6 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ ACE_INLINE
+-void
+-CORBA::release (CORBA::Context_ptr x)
+-{
+-  if (x != 0)
+-    {
+-      x->_decr_refcnt ();
+-    }
+-}
+-
+-ACE_INLINE
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::Context_ptr x)
+-{
+-  return (CORBA::Boolean) (x == 0);
+-}
+-
+-ACE_INLINE
+-void
+-CORBA::release (CORBA::ContextList *x)
+-{
+-  if (x != 0)
+-    {
+-      x->_decr_refcnt ();
+-    }
+-}
+-
+-ACE_INLINE
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::ContextList_ptr x)
+-{
+-  return (CORBA::Boolean) (x == 0);
+-}
+-
+-// ===================================================================
+-
+-ACE_INLINE
+ CORBA::Context_ptr
+ CORBA::Context::_duplicate (CORBA::Context_ptr x)
+ {
+Index: DynamicInterface/Request.inl
+===================================================================
+--- DynamicInterface/Request.inl	(revision 90626)
++++ DynamicInterface/Request.inl	(working copy)
+@@ -4,25 +4,6 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-ACE_INLINE
+-void
+-CORBA::release (CORBA::Request_ptr x)
+-{
+-  if (x != 0)
+-    {
+-      x->_decr_refcnt ();
+-    }
+-}
+-
+-ACE_INLINE
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::Request_ptr x)
+-{
+-  return (CORBA::Boolean) (x == 0);
+-}
+-
+-// ===================================================================
+-
+ ACE_INLINE CORBA::Request_ptr
+ CORBA::Request::_duplicate (CORBA::Request_ptr x)
+ {
+Index: CORBA_methods.h
+===================================================================
+--- CORBA_methods.h	(revision 90626)
++++ CORBA_methods.h	(working copy)
+@@ -65,17 +65,8 @@
+                                       const wchar_t * orb_name);
+ #endif
+ 
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (Environment_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (Environment_ptr);
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (ORB_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (ORB_ptr);
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (Object_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (Object_ptr);
+-
+-  TAO_NAMESPACE_INLINE_FUNCTION Boolean is_nil (Principal_ptr);
+-  TAO_NAMESPACE_INLINE_FUNCTION void release (Principal_ptr);
++  template<typename T> Boolean is_nil (T);
++  template<typename T> void release (T);
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: Environment.h
+===================================================================
+--- Environment.h	(revision 90626)
++++ Environment.h	(working copy)
+@@ -149,6 +149,20 @@
+     /// The previous environment on the "default environment stack".
+     Environment *previous_;
+   };
++
++  template<>
++  inline Boolean
++  is_nil (Environment_ptr env)
++  {
++    return env == 0;
++  }
++  template<>
++  inline void
++  release (Environment_ptr env)
++  {
++    delete env;
++  }
++
+ } // End CORBA namespace
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: ORB.h
+===================================================================
+--- ORB.h	(revision 90626)
++++ ORB.h	(working copy)
+@@ -590,6 +590,23 @@
+     ACE_Time_Value * timeout_;
+ 
+   };
++
++  template<>
++  inline Boolean
++  is_nil (ORB_ptr orb)
++  {
++    return orb == ORB::_nil ();
++  }
++  template<>
++  inline void
++  release (ORB_ptr orb)
++  {
++    if (!is_nil (orb))
++      {
++        orb->_decr_refcnt ();
++      }
++  }
++
+ }  // End namespace CORBA
+ 
+ 
+Index: Object.h
+===================================================================
+--- Object.h	(revision 90626)
++++ Object.h	(working copy)
+@@ -399,6 +399,28 @@
+      */
+     ACE_Lock * object_init_lock_;
+   };
++
++  template<>
++  inline Boolean
++  is_nil (Object_ptr obj)
++  {
++    if (obj == 0)
++      {
++        return true;
++      }
++
++    return Object::is_nil_i (obj);
++  }
++  template<>
++  inline void
++  release (Object_ptr obj)
++  {
++    if (obj)
++      {
++        obj->_remove_ref ();
++      }
++  }
++
+ }   // End CORBA namespace.
+ 
+ namespace TAO
+Index: Principal.h
+===================================================================
+--- Principal.h	(revision 90626)
++++ Principal.h	(working copy)
+@@ -96,6 +96,23 @@
+     /// Reference counter.
+     ACE_Atomic_Op<TAO_SYNCH_MUTEX, unsigned long> refcount_;
+   };
++
++  template<>
++  inline Boolean
++  is_nil (Principal_ptr principal)
++  {
++    return principal == 0;
++  }
++  template<>
++  inline void
++  release (Principal_ptr principal)
++  {
++    if (principal)
++      {
++        principal->_decr_refcnt ();
++      }
++  }
++
+ }  // End CORBA namespace
+ 
+ TAO_Export CORBA::Boolean
+Index: Valuetype/AbstractBase.h
+===================================================================
+--- Valuetype/AbstractBase.h	(revision 90626)
++++ Valuetype/AbstractBase.h	(working copy)
+@@ -157,6 +157,23 @@
+   };
+ 
+   extern TAO_Valuetype_Export TypeCode_ptr const _tc_AbstractBase;
++
++  template<>
++  inline Boolean
++  is_nil (AbstractBase_ptr obj)
++  {
++    return obj == 0;
++  }
++  template<>
++  inline void
++  release (AbstractBase_ptr obj)
++  {
++    if (obj)
++      {
++        obj->_remove_ref ();
++      }
++  }
++
+ }
+ 
+ TAO_Valuetype_Export CORBA::Boolean
+Index: Valuetype/AbstractBase.cpp
+===================================================================
+--- Valuetype/AbstractBase.cpp	(revision 90666)
++++ Valuetype/AbstractBase.cpp	(working copy)
+@@ -21,25 +21,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ // ************************************************************
+-// These are in CORBA namespace
+ 
+-void
+-CORBA::release (CORBA::AbstractBase_ptr obj)
+-{
+-  if (obj)
+-    {
+-      obj->_remove_ref ();
+-    }
+-}
+-
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::AbstractBase_ptr obj)
+-{
+-  return (obj == 0);
+-}
+-
+-// ************************************************************
+-
+ CORBA::AbstractBase::AbstractBase (void)
+   : is_objref_ (false)
+   , concrete_stubobj_ (0)
+Index: Valuetype/Value_CORBA_methods.h
+===================================================================
+--- Valuetype/Value_CORBA_methods.h	(revision 90626)
++++ Valuetype/Value_CORBA_methods.h	(working copy)
+@@ -42,11 +42,6 @@
+ 
+   class AbstractBase;
+   typedef AbstractBase *AbstractBase_ptr;
+-
+-  extern TAO_Valuetype_Export Boolean is_nil (AbstractBase_ptr);
+-  extern TAO_Valuetype_Export void release (AbstractBase_ptr);
+-
+-
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: ORB.inl
+===================================================================
+--- ORB.inl	(revision 90626)
++++ ORB.inl	(working copy)
+@@ -83,21 +83,4 @@
+   return this->orb_core_;
+ }
+ 
+-// ************************************************************
+-// These are in CORBA namespace
+-// ************************************************************
+-
+-ACE_INLINE CORBA::Boolean
+-CORBA::is_nil (CORBA::ORB_ptr obj)
+-{
+-  return obj == CORBA::ORB::_nil ();
+-}
+-
+-ACE_INLINE void
+-CORBA::release (CORBA::ORB_ptr obj)
+-{
+-  if (!CORBA::is_nil (obj))
+-    obj->_decr_refcnt ();
+-}
+-
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: Environment.inl
+===================================================================
+--- Environment.inl	(revision 90626)
++++ Environment.inl	(working copy)
+@@ -8,20 +8,6 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ ACE_INLINE
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::Environment_ptr env)
+-{
+-  return env == 0;
+-}
+-
+-ACE_INLINE
+-void
+-CORBA::release (CORBA::Environment_ptr env)
+-{
+-  delete env;
+-}
+-
+-ACE_INLINE
+ CORBA::Exception *
+ CORBA::Environment::exception (void) const
+ {
+Index: Principal.inl
+===================================================================
+--- Principal.inl	(revision 90626)
++++ Principal.inl	(working copy)
+@@ -5,13 +5,6 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ ACE_INLINE
+-CORBA::Boolean
+-CORBA::is_nil (CORBA::Principal_ptr principal)
+-{
+-  return principal == 0;
+-}
+-
+-ACE_INLINE
+ unsigned long
+ CORBA::Principal::_decr_refcnt (void)
+ {
+@@ -24,16 +17,6 @@
+ }
+ 
+ ACE_INLINE
+-void
+-CORBA::release (CORBA::Principal_ptr principal)
+-{
+-  if (principal)
+-    {
+-      principal->_decr_refcnt ();
+-    }
+-}
+-
+-ACE_INLINE
+ unsigned long
+ CORBA::Principal::_incr_refcnt (void)
+ {
