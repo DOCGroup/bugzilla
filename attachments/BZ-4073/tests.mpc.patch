@@ -1,0 +1,26 @@
+--- tests.mpc.orig	2014-09-03 14:06:47.537079854 -0400
++++ tests.mpc	2014-09-03 14:08:32.876564841 -0400
+@@ -477,6 +477,14 @@
+   }
+ }
+ 
++project(Bug_4073_Regression_Test) : acetest {
++  avoids += ace_for_tao
++  exename = Bug_4073_Regression_Test
++  Source_Files {
++    Bug_4073_Regression_Test.cpp
++  }
++}
++
+ project(Cache Map Manager Test) : acetest {
+   exename = Cache_Map_Manager_Test
+   Source_Files {
+@@ -1433,7 +1441,7 @@
+   }
+ }
+ 
+-project(Reactor Timer Test) : acetest {
++project(Reactor Timer Test 2) : acetest {
+   avoids += ace_for_tao
+   exename = Reactor_Timer_Test
+   Source_Files {
