@@ -1,0 +1,126 @@
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu: Debug
+diff -u2r D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatch_Deferrer.h D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatch_Deferrer.h
+--- D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatch_Deferrer.h	Thu Sep 09 18:21:50 2010
++++ D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatch_Deferrer.h	Mon Mar 26 11:38:36 2012
+@@ -60,5 +60,4 @@
+ 
+  private:
+-  ACE_Deadline_Message_Strategy msg_strat_;
+ 
+   ///Stores the Dispatch_Commands in earliest-release-time order,
+diff -u2r D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatch_Deferrer.inl D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatch_Deferrer.inl
+--- D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatch_Deferrer.inl	Tue Mar 04 21:51:24 2008
++++ D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatch_Deferrer.inl	Mon Mar 26 11:39:07 2012
+@@ -12,5 +12,5 @@
+ Dispatch_Deferrer::Dispatch_Deferrer()
+   : msg_strat_()
+-  , rgq_(this->msg_strat_)
++  , rgq_(*(new ACE_Deadline_Message_Strategy))
+   , timers_()
+   , react_()
+diff -u2r D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatcher_Task.cpp D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatcher_Task.cpp
+--- D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatcher_Task.cpp	Thu Sep 09 01:02:26 2010
++++ D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatcher_Task.cpp	Mon Mar 26 11:38:10 2012
+@@ -28,22 +28,33 @@
+     {
+     case FIFO_DISPATCHING:
+-      ACE_NEW_RETURN (
+-          this->the_queue_,
+-          ACE_Message_Queue<ACE_SYNCH>,
+-          -1);
++      ACE_ALLOCATOR_RETURN(this->the_queue_, 
++                           ACE_Message_Queue_Factory<ACE_SYNCH>::create_static_message_queue (),
++                           -1);
+       break;
+ 
+     case DEADLINE_DISPATCHING:
+-      ACE_NEW_RETURN (
+-          this->the_queue_,
+-          ACE_Dynamic_Message_Queue<ACE_SYNCH> (deadline_msg_strategy_),
+-          -1);
++      ACE_ALLOCATOR_RETURN(this->the_queue_, 
++                           ACE_Message_Queue_Factory<ACE_SYNCH>::create_deadline_message_queue(
++                           ACE_Message_Queue_Base::DEFAULT_HWM,
++                           ACE_Message_Queue_Base::DEFAULT_LWM,
++                           0,
++                           curr_config_info_.reordering_flags_.static_bit_field_mask_,
++                           curr_config_info_.reordering_flags_.static_bit_field_shift_,
++                           curr_config_info_.reordering_flags_.dynamic_priority_max_,
++                           curr_config_info_.reordering_flags_.dynamic_priority_offset_),
++                           -1);
+       break;
+ 
+     case LAXITY_DISPATCHING:
+-      ACE_NEW_RETURN (
+-           this->the_queue_,
+-           ACE_Dynamic_Message_Queue<ACE_SYNCH> (laxity_msg_strategy_),
+-           -1);
++      ACE_ALLOCATOR_RETURN(this->the_queue_, 
++                           ACE_Message_Queue_Factory<ACE_SYNCH>::create_laxity_message_queue(
++                           ACE_Message_Queue_Base::DEFAULT_HWM,
++                           ACE_Message_Queue_Base::DEFAULT_LWM,
++                           0,
++                           curr_config_info_.reordering_flags_.static_bit_field_mask_,
++                           curr_config_info_.reordering_flags_.static_bit_field_shift_,
++                           curr_config_info_.reordering_flags_.dynamic_priority_max_,
++                           curr_config_info_.reordering_flags_.dynamic_priority_offset_),
++                           -1);
+       break;
+ 
+diff -u2r D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatcher_Task.h D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatcher_Task.h
+--- D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatcher_Task.h	Tue Mar 04 21:51:24 2008
++++ D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatcher_Task.h	Mon Mar 26 11:27:01 2012
+@@ -93,6 +93,4 @@
+   ACE_Message_Queue<ACE_SYNCH>* the_queue_;
+ 
+-  ACE_Deadline_Message_Strategy deadline_msg_strategy_;
+-  ACE_Laxity_Message_Strategy laxity_msg_strategy_;
+ };
+ 
+diff -u2r D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatcher_Task.inl D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatcher_Task.inl
+--- D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\Dispatcher_Task.inl	Fri Sep 17 14:52:52 2010
++++ D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\Dispatcher_Task.inl	Mon Mar 26 11:34:42 2012
+@@ -9,13 +9,5 @@
+      curr_config_info_ (config_info),
+      allocator_ (config_info.allocator_),
+-     own_allocator_ (0),
+-     deadline_msg_strategy_ (config_info.reordering_flags_.static_bit_field_mask_,
+-                             config_info.reordering_flags_.static_bit_field_shift_,
+-                             config_info.reordering_flags_.dynamic_priority_max_,
+-                             config_info.reordering_flags_.dynamic_priority_offset_),
+-     laxity_msg_strategy_ (config_info.reordering_flags_.static_bit_field_mask_,
+-                           config_info.reordering_flags_.static_bit_field_shift_,
+-                           config_info.reordering_flags_.dynamic_priority_max_,
+-                           config_info.reordering_flags_.dynamic_priority_offset_)
++     own_allocator_ (0)
+ {
+    this->initialize();
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu: Kokuy.diff
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\DSRT_MIF: Debug
+diff -u2r D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\tests\DSRT_MIF\MIF.cpp D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\DSRT_MIF\MIF.cpp
+--- D:\ACE\Middleware-ACE\Middleware-ACE\ACE\Kokyu\tests\DSRT_MIF\MIF.cpp	Mon Feb 23 15:20:40 2009
++++ D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\DSRT_MIF\MIF.cpp	Mon Mar 26 11:49:04 2012
+@@ -176,5 +176,9 @@
+                         "EC (%P|%t) cannot activate task\n"));
+     }
+-
++  // wait threads to finish
++  mytask1.wait();
++  mytask2.wait();
++  mytask3.wait();
++  
+   disp->shutdown ();
+ 
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\DSRT_MIF: MIF.exe
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\DSRT_MIF: MIF.exe.manifest
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\DSRT_MIF: MIF.exp
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\DSRT_MIF: MIF.lib
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\DSRT_MIF: MIF.pdb
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\EDF: Debug
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\EDF: EDF.exe
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\EDF: EDF.exe.manifest
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\EDF: EDF.pdb
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\FIFO: Debug
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\FIFO: FIFO.exe
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\FIFO: FIFO.exe.manifest
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\Kokyu\tests\FIFO: FIFO.pdb
