@@ -1,0 +1,28 @@
+diff --git a/middleware/DDS/DDS_TAOv2.mwc b/middleware/DDS/DDS_TAOv2.mwc
+index 3aa8524..fecee5f 100644
+--- a/middleware/DDS/DDS_TAOv2.mwc
++++ b/middleware/DDS/DDS_TAOv2.mwc
+@@ -19,7 +19,7 @@ workspace {
+   tools
+   java
+   DevGuideExamples
+-
++  docs
+   exclude {
+     java/jms
+     tools/modeling/tests
+diff --git a/middleware/DDS/docs/schema/install_schema.mpc b/middleware/DDS/docs/schema/install_schema.mpc
+index 62fea81..50495d7 100644
+--- a/middleware/DDS/docs/schema/install_schema.mpc
++++ b/middleware/DDS/docs/schema/install_schema.mpc
+@@ -4,4 +4,8 @@ project(dds_install_schema) : install {
+    InstallData_Files {
+      dds_qos.xsd
+    }
+-}
+\ No newline at end of file
++
++  verbatim (gnuace, macros) {
++     INST_DIR = /dds/docs/schema
++  }
++}
