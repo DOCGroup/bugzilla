@@ -1,0 +1,1841 @@
+Index: tests/Bug_3647_Regression/svc.conf
+===================================================================
+--- tests/Bug_3647_Regression/svc.conf	(revision 0)
++++ tests/Bug_3647_Regression/svc.conf	(revision 85164)
+@@ -0,0 +1,6 @@
++#
++# $Id$
++#
++static Advanced_Resource_Factory "-ORBReactorType select_st -ORBInputCDRAllocator null -ORBConnectionCacheLock null"
++static Server_Strategy_Factory "-ORBPOALock null"
++static Client_Strategy_Factory "-ORBProfileLock null"
+
+Property changes on: tests/Bug_3647_Regression/svc.conf
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/client.cpp
+===================================================================
+--- tests/Bug_3647_Regression/client.cpp	(revision 0)
++++ tests/Bug_3647_Regression/client.cpp	(revision 85172)
+@@ -0,0 +1,147 @@
++// $Id$
++
++#include "TestC.h"
++#include "tao/Strategies/advanced_resource.h"
++#include "tao/Utils/PolicyList_Destroyer.h"
++#include "tao/Messaging/Messaging.h"
++#include "tao/AnyTypeCode/Any.h"
++#include "ace/Get_Opt.h"
++
++ACE_RCSID(Bug_3647_Regression,
++          client,
++          "$Id$")
++
++const ACE_TCHAR *ior = ACE_TEXT ("file://middle.ior");
++bool verbose = true;
++long timeout = 2;
++
++void
++usage(ACE_TCHAR const *cmd,
++      ACE_TCHAR const *msg)
++{
++  ACE_ERROR ((LM_ERROR,
++	      "usage:  %s "
++	      "-v "
++	      "-k <ior> "
++	      "-t timeout "
++	      "\n"
++	      "        %s\n",
++	      cmd, msg));
++}
++
++int
++parse_args (int argc, ACE_TCHAR *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("vk:t:"));
++  int c;
++  ACE_TCHAR const *stimeout = 0;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'v':
++        verbose = true;
++        break;
++
++      case 'k':
++        ior = get_opts.opt_arg ();
++        break;
++
++      case 't':
++        stimeout = get_opts.opt_arg();
++        break;
++
++      case '?':
++      default:
++	usage(argv[0], "unknown argument");
++	return -1;
++      }
++
++  if (stimeout != 0)
++  {
++    ACE_TCHAR *end;
++    long tmp = ACE_OS::strtol(stimeout, &end, 10);
++    if (end == 0 || *end != '\0')
++    {
++      usage(argv[0], "Invalid timeout value");
++      return -1;
++    }
++    timeout = tmp;
++  }
++
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++int
++ACE_TMAIN(int argc, ACE_TCHAR *argv[])
++{
++  try
++    {
++      CORBA::ORB_var orb = CORBA::ORB_init (argc, argv);
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      CORBA::Object_var tmp = orb->string_to_object(ior);
++
++      // one second in TimeT units
++      TimeBase::TimeT const second = 10 * TimeBase::TimeT(1000000);
++
++      CORBA::Any timeout_as_any;
++      timeout_as_any <<= TimeBase::TimeT(timeout * second);
++
++      TAO::Utils::PolicyList_Destroyer plist(1);
++      plist.length(1);
++      plist[0] =
++          orb->create_policy(Messaging::RELATIVE_RT_TIMEOUT_POLICY_TYPE,
++              timeout_as_any);
++
++      tmp = tmp->_set_policy_overrides(plist, CORBA::SET_OVERRIDE);
++
++      Bug_3647_Regression::Middle_var middle =
++          Bug_3647_Regression::Middle::_narrow(tmp.in ());
++
++      if (CORBA::is_nil (middle.in ()))
++        {
++          ACE_ERROR_RETURN ((LM_DEBUG,
++                  "client(%P|%t) - nil "
++                  "Bug_3647_Regression::Middle reference <%s>\n",
++                  ior),
++              1);
++        }
++
++      // Startup the tests ...
++      middle->startup_test();
++
++      ACE_DEBUG ((LM_DEBUG, "client(%P|%t) - test started up\n"));
++
++      int const iterations = 10000;
++      int const interval = iterations / 20;
++      ACE_DEBUG ((LM_DEBUG, "client(%P|%t) - running pings"));
++      for (int i = 0; i != iterations; ++i)
++      {
++        middle->ping();
++        if (i % interval == 0 and i > 0)
++        {
++          ACE_DEBUG((LM_DEBUG, "."));
++        }
++      }
++      ACE_DEBUG ((LM_DEBUG, "done\n"));
++
++      middle->shutdown ();
++      ACE_DEBUG ((LM_DEBUG,
++              "client(%P|%t) - server shutdown request sent\n"));
++
++      orb->destroy ();
++    }
++  catch (const CORBA::Exception& ex)
++    {
++      ACE_DEBUG ((LM_DEBUG,
++              "client"));
++      ex._tao_print_exception ("Exception caught:");
++      return 1;
++    }
++
++  return 0;
++}
+
+Property changes on: tests/Bug_3647_Regression/client.cpp
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/Middle_Impl.cpp
+===================================================================
+--- tests/Bug_3647_Regression/Middle_Impl.cpp	(revision 0)
++++ tests/Bug_3647_Regression/Middle_Impl.cpp	(revision 85172)
+@@ -0,0 +1,99 @@
++#include "Middle_Impl.hpp"
++
++Bug_3647_Regression::Middle_Impl::
++Middle_Impl(
++    Backend_ptr backend,
++    CORBA::ORB_ptr orb,
++    bool verbose,
++    long timeout)
++  : POA_Bug_3647_Regression::Middle()
++  , backend_(Bug_3647_Regression::Backend::_duplicate(backend))
++  , orb_(CORBA::ORB::_duplicate(orb))
++  , verbose_(verbose)
++  , timeout_(timeout)
++{
++}
++
++Bug_3647_Regression::Middle_Impl::
++~Middle_Impl()
++{
++}
++
++void Bug_3647_Regression::Middle_Impl::
++startup_test()
++      THROW_SPEC (CORBA::SystemException)
++{
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Middle_Impl::startup_test(%P|%t) - called\n"));
++  }
++  backend_->startup_test();
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Middle_Impl::startup_test(%P|%t) - backend "
++            "startup call sucessful\n"));
++  }
++  backend_->freeze(10);
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Middle_Impl::startup_test(%P|%t) - backend "
++            "freeze call sucessful\n"));
++  }
++}
++
++void Bug_3647_Regression::Middle_Impl::
++ping()
++      THROW_SPEC (CORBA::SystemException)
++{
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Middle_Impl::ping(%P|%t) - called\n"));
++  }
++  try
++  {
++    Payload p;
++    p.length(1024);
++    backend_->ping(p);
++  }
++  catch(CORBA::TIMEOUT const & ex)
++  {
++    if (verbose_)
++    {
++      ACE_DEBUG ((LM_INFO,
++              "Middle_Impl::ping(%P|%t) - timeout raised\n"));
++    }
++  }
++  catch(CORBA::Exception const & ex)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Middle_Impl::ping(%P|%t) - unexpected exception raised\n"));
++    throw;
++  }
++}
++
++void Bug_3647_Regression::Middle_Impl::
++shutdown()
++      THROW_SPEC (CORBA::SystemException)
++{
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Middle_Impl::shutdown(%P|%t) - called\n"));
++  }
++  backend_->shutdown();
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Middle_Impl::shutdown(%P|%t) - call to backend was completed\n"));
++  }
++  orb_->shutdown (false);
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Middle_Impl::shutdown(%P|%t) - call to ORB was completed\n"));
++  }
++}
+
+Property changes on: tests/Bug_3647_Regression/Middle_Impl.cpp
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/Throw_Spec.h
+===================================================================
+--- tests/Bug_3647_Regression/Throw_Spec.h	(revision 0)
++++ tests/Bug_3647_Regression/Throw_Spec.h	(revision 85164)
+@@ -0,0 +1,12 @@
++#ifndef Bug_3647_Regression_Throw_Spec_hpp
++#define Bug_3647_Regression_Throw_Spec_hpp
++
++#include "ace/Version.h"
++
++#if ACE_MINOR_VERSION >= 6
++# define THROW_SPEC(X) /**/
++#else
++# define THROW_SPEC(X) throw(X)
++#endif // ACE_MINOR_VERSION
++
++#endif // Bug_3647_Regression_Throw_Spec_hpp
+
+Property changes on: tests/Bug_3647_Regression/Throw_Spec.h
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/Middle_Impl.hpp
+===================================================================
+--- tests/Bug_3647_Regression/Middle_Impl.hpp	(revision 0)
++++ tests/Bug_3647_Regression/Middle_Impl.hpp	(revision 85164)
+@@ -0,0 +1,50 @@
++#ifndef Bug_3647_Regression_Middle_Impl_hpp
++#define Bug_3647_Regression_Middle_Impl_hpp
++
++#include "TestS.h"
++#include "Throw_Spec.h"
++
++namespace Bug_3647_Regression
++{
++
++/**
++ * @class Middle
++ *
++ * Implement the Bug_3647_Regression::Middle interface
++ *
++ */
++class Middle_Impl : public POA_Bug_3647_Regression::Middle
++{
++public:
++  Middle_Impl(
++      Backend_ptr backend,
++      CORBA::ORB_ptr orb,
++      bool verbose,
++      long timeout);
++  virtual ~Middle_Impl();
++
++  virtual void startup_test()
++      THROW_SPEC (CORBA::SystemException);
++  virtual void ping()
++      THROW_SPEC (CORBA::SystemException);
++
++  virtual void shutdown()
++      THROW_SPEC (CORBA::SystemException);
++
++private:
++  /// Keep a reference to the backend so we can call it, shutdown, etc.
++  Backend_var backend_;
++
++  /// Keep a reference to the ORB so we can shutdown the application.
++  CORBA::ORB_var orb_;
++
++  /// Use this flag to decide if the program should produce any output.
++  bool verbose_;
++
++  /// Control the freeze time based on the timeout time
++  long timeout_;
++};
++
++} // namespace Bug_3647_Regression
++
++#endif // Bug_3647_Regression_Middle_hpp
+
+Property changes on: tests/Bug_3647_Regression/Middle_Impl.hpp
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/middle_server.cpp
+===================================================================
+--- tests/Bug_3647_Regression/middle_server.cpp	(revision 0)
++++ tests/Bug_3647_Regression/middle_server.cpp	(revision 85164)
+@@ -0,0 +1,221 @@
++// $Id$
++
++#include "Middle_Impl.hpp"
++
++#include "tao/Utils/PolicyList_Destroyer.h"
++#include "tao/Utils/Servant_Var.h"
++#include "tao/Utils/RIR_Narrow.h"
++#include "tao/Strategies/advanced_resource.h"
++#include "tao/Messaging/Messaging.h"
++#include "tao/AnyTypeCode/Any.h"
++#include "ace/Get_Opt.h"
++#include "ace/OS_NS_stdio.h"
++
++ACE_RCSID (Bug_3647_Regression,
++           middle_server,
++           "$Id$")
++
++bool verbose = false;
++const ACE_TCHAR *ior_output_file = ACE_TEXT ("middle.ior");
++const ACE_TCHAR *ior = ACE_TEXT ("file://backend.ior");
++Messaging::SyncScope scope = Messaging::SYNC_NONE;
++long timeout = 2;
++
++void
++usage(ACE_TCHAR const *cmd,
++      ACE_TCHAR const *msg)
++{
++  ACE_ERROR ((LM_ERROR,
++	      "Usage:  %s "
++	      "-v "
++	      "-k <ior> "
++	      "-o <iorfile> "
++	      "-s <NONE|TRANSPORT|SERVER|TARGET|DELAYED> "
++	      "-t timeout "
++	      "\n"
++	      "        %s\n",
++	      cmd, msg));
++}
++
++int
++parse_args (int argc, ACE_TCHAR *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("vo:k:s:t:"));
++  int c;
++  ACE_TCHAR const *sname = "NONE";
++  ACE_TCHAR const *stimeout = 0;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'v':
++        verbose = true;
++        break;
++
++      case 'o':
++        ior_output_file = get_opts.opt_arg ();
++        break;
++
++      case 'k':
++        ior = get_opts.opt_arg ();
++        break;
++
++      case 's':
++        sname = get_opts.opt_arg ();
++        break;
++
++      case 't':
++        stimeout = get_opts.opt_arg();
++        break;
++
++      case '?':
++      default:
++	usage(argv[0], "unknown argument");
++	return -1;
++      }
++
++  if (ACE_OS::strcmp(sname, "NONE") == 0) {
++    scope = Messaging::SYNC_NONE;
++  } else if (ACE_OS::strcmp(sname, "TRANSPORT") == 0) {
++    scope = Messaging::SYNC_WITH_TRANSPORT;
++  } else if (ACE_OS::strcmp(sname, "SERVER") == 0) {
++    scope = Messaging::SYNC_WITH_SERVER;
++  } else if (ACE_OS::strcmp(sname, "TARGET") == 0) {
++    scope = Messaging::SYNC_WITH_TARGET;
++  } else if (ACE_OS::strcmp(sname, "DELAYED") == 0) {
++    scope = TAO::SYNC_DELAYED_BUFFERING;
++  } else {
++    usage(argv[0], "Invalid scope value");
++    return -1;
++  }
++
++  if (stimeout != 0)
++    {
++      ACE_TCHAR *end;
++      long tmp = ACE_OS::strtol(stimeout, &end, 10);
++      if (end == 0 || *end != '\0')
++	{
++	  usage(argv[0], "Invalid timeout value");
++	  return -1;
++	}
++      timeout = tmp;
++    }
++
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++int
++ACE_TMAIN(int argc, ACE_TCHAR *argv[])
++{
++  try
++    {
++      CORBA::ORB_var orb =
++        CORBA::ORB_init (argc, argv);
++
++      CORBA::Object_var poa_object =
++        orb->resolve_initial_references("RootPOA");
++
++      PortableServer::POA_var root_poa =
++        PortableServer::POA::_narrow (poa_object.in ());
++
++      if (CORBA::is_nil (root_poa.in ()))
++      {
++        ACE_ERROR_RETURN ((LM_ERROR,
++                "backend_server(%P|%t) - panic: nil RootPOA\n"),
++            1);
++      }
++
++      PortableServer::POAManager_var poa_manager =
++          root_poa->the_POAManager ();
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      CORBA::Object_var tmp = orb->string_to_object(ior);
++
++      // one second in TimeT units
++      TimeBase::TimeT const second = 10 * TimeBase::TimeT(1000000);
++
++      CORBA::Any timeout_as_any;
++      timeout_as_any <<= TimeBase::TimeT(timeout * second);
++
++      CORBA::Any scope_as_any;
++      scope_as_any <<= scope;
++
++      TAO::Utils::PolicyList_Destroyer plist(1);
++      plist.length(2);
++      plist[0] =
++          orb->create_policy(Messaging::RELATIVE_RT_TIMEOUT_POLICY_TYPE,
++              timeout_as_any);
++      plist[1] =
++          orb->create_policy(Messaging::SYNC_SCOPE_POLICY_TYPE,
++              scope_as_any);
++
++      CORBA::PolicyCurrent_var policy_current =
++          TAO::Utils::RIR_Narrow<CORBA::PolicyCurrent>::narrow(
++               orb.in (),
++               "PolicyCurrent");
++
++      policy_current->set_policy_overrides(
++          plist, CORBA::ADD_OVERRIDE);
++
++      Bug_3647_Regression::Backend_var backend =
++          Bug_3647_Regression::Backend::_narrow(tmp.in ());
++
++      if (CORBA::is_nil (backend.in ()))
++        {
++          ACE_ERROR_RETURN ((LM_DEBUG,
++                  "middle_server(%P|%t) - nil backend reference <%s>\n",
++                  ior),
++              1);
++        }
++
++      using namespace Bug_3647_Regression;
++      TAO::Utils::Servant_Var<Middle_Impl> impl(
++          new Middle_Impl(backend.in(), orb.in(), verbose,
++			  timeout));
++
++      PortableServer::ObjectId_var id =
++          root_poa->activate_object (impl.in());
++
++      CORBA::Object_var object = root_poa->id_to_reference (id.in ());
++
++
++      Bug_3647_Regression::Middle_var middle =
++          Bug_3647_Regression::Middle::_narrow (object.in ());
++
++      CORBA::String_var ior = orb->object_to_string (middle.in ());
++
++      // Output the IOR to the <ior_output_file>
++      FILE *output_file= ACE_OS::fopen (ior_output_file, "w");
++      if (output_file == 0)
++        ACE_ERROR_RETURN ((LM_ERROR,
++                "middle_server(%P|%t) - Cannot open output file "
++                "for writing IOR: %s\n",
++                ior_output_file),
++            1);
++      ACE_OS::fprintf (output_file, "%s", ior.in ());
++      ACE_OS::fclose (output_file);
++
++      poa_manager->activate ();
++
++      orb->run ();
++
++      ACE_DEBUG ((LM_DEBUG,
++              "middle_server(%P|%t) - event loop finished\n"));
++
++      root_poa->destroy (1, 1);
++
++      orb->destroy ();
++    }
++  catch (const CORBA::Exception& ex)
++    {
++      ACE_DEBUG ((LM_DEBUG,
++              "middle_server"));
++      ex._tao_print_exception ("Exception caught:");
++      return 1;
++    }
++
++  return 0;
++}
+
+Property changes on: tests/Bug_3647_Regression/middle_server.cpp
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/Test.idl
+===================================================================
+--- tests/Bug_3647_Regression/Test.idl	(revision 0)
++++ tests/Bug_3647_Regression/Test.idl	(revision 85164)
+@@ -0,0 +1,48 @@
++/**
++ * @namespace Bug_3647_Regression
++ *
++ * Keep the types in this test to its own namespace.
++ *
++ * Keeping each test in its own namespace makes it easier to generate
++ * Doxygen documentation for all the tests.  Also, it makes it clear as to
++ * what types are local vs. coming from the library vs. generated.
++ *
++ */
++
++module Bug_3647_Regression
++{
++  typedef sequence<octet> Payload;
++  
++  interface Backend
++  {
++    /// This operation is called during the startup, to make sure all
++    /// servers are talking to each other and communication has been
++    /// established.
++    void startup_test();
++
++    /// When called this will just consume the data.  The idea is to
++    /// generate network/traffic load.
++    oneway void ping(in Payload the_payload);
++
++    /// When called this will cause the single thread in the server to
++    /// block for the specified number of seconds.
++    oneway void freeze(in unsigned long seconds);
++
++    /// Shutdown the server
++    oneway void shutdown();
++  };
++
++  interface Middle
++  {
++    /// This operation is called during the startup, to make sure all
++    /// servers are talking to each other and communication has been
++    /// established.
++    void startup_test();
++
++    /// When called this operation should return immediately.
++    void ping();
++
++    /// Shutdown the server
++    oneway void shutdown();
++  };
++};
+
+Property changes on: tests/Bug_3647_Regression/Test.idl
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/Backend_Impl.cpp
+===================================================================
+--- tests/Bug_3647_Regression/Backend_Impl.cpp	(revision 0)
++++ tests/Bug_3647_Regression/Backend_Impl.cpp	(revision 85172)
+@@ -0,0 +1,70 @@
++#include "Backend_Impl.hpp"
++#include "ace/OS.h"
++
++Bug_3647_Regression::Backend_Impl::
++Backend_Impl(CORBA::ORB_ptr orb, bool verbose)
++  : POA_Bug_3647_Regression::Backend()
++  , orb_(CORBA::ORB::_duplicate(orb))
++  , verbose_(verbose)
++{
++}
++
++Bug_3647_Regression::Backend_Impl::
++~Backend_Impl()
++{
++}
++
++void Bug_3647_Regression::Backend_Impl::
++startup_test()
++      THROW_SPEC (CORBA::SystemException)
++{
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Backend_Impl::startup_test(%P|%t) - called\n"));
++  }
++}
++
++void Bug_3647_Regression::Backend_Impl::
++ping(Bug_3647_Regression::Payload const & p)
++      THROW_SPEC (CORBA::SystemException)
++{
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Backend_Impl::ping(%P|%t) - called, payload length = %d\n",
++            p.length()));
++  }
++}
++
++void Bug_3647_Regression::Backend_Impl::
++freeze(CORBA::ULong seconds)
++      THROW_SPEC (CORBA::SystemException)
++{
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Backend_Impl::freeze(%P|%t) - called, sleeping for %d seconds\n",
++            seconds));
++  }
++  ACE_OS::sleep(seconds);
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Backend_Impl::sleep(%P|%t) - finished after %d seconds\n",
++            seconds));
++  }
++  shutdown();
++}
++
++void Bug_3647_Regression::Backend_Impl::
++shutdown()
++      THROW_SPEC (CORBA::SystemException)
++{
++  if (verbose_)
++  {
++    ACE_DEBUG ((LM_INFO,
++            "Backend_Impl::shutdown(%P|%t) - called\n"));
++  }
++  orb_->shutdown (false);
++}
+
+Property changes on: tests/Bug_3647_Regression/Backend_Impl.cpp
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/run_test.pl
+===================================================================
+--- tests/Bug_3647_Regression/run_test.pl	(revision 0)
++++ tests/Bug_3647_Regression/run_test.pl	(revision 85172)
+@@ -0,0 +1,149 @@
++eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
++     & eval 'exec perl -S $0 $argv:q'
++     if 0;
++
++# $Id$
++# -*- perl -*-
++
++use lib "$ENV{ACE_ROOT}/bin";
++use PerlACE::TestTarget;
++use strict;
++
++my $verbose = '';
++my $mode = 'DELAYED';
++
++foreach my $i (@ARGV) {
++  if ($i eq '-verbose') {
++    $verbose = ' -v';
++  } elsif ($i eq '-none') {
++    $mode = 'NONE';
++  } elsif ($i eq '-delayed') {
++    $mode = 'DELAYED';
++  } elsif ($i eq '-transport') {
++    # In this mode, the test is *expected* to fail.  We only run it
++    # like this to verify that the test is a good test (i.e. it
++    # detects failures.)  Same comment applies for SERVER and TARGET
++    # modes.
++    $mode = 'TRANSPORT';
++  } elsif ($i eq '-server') {
++    $mode = 'SERVER';
++  } elsif ($i eq '-target') {
++    $mode = 'TARGET';
++  }
++}
++
++my $backend = PerlACE::TestTarget::create_target(1)
++  or die "Create target 1 failed\n";
++my $middle = PerlACE::TestTarget::create_target(2)
++  or die "Create target 2 failed\n";
++my $client = PerlACE::TestTarget::create_target(3)
++  or die "Create target 3 failed\n";
++
++my $backend_ior = "backend.ior";
++my $middle_ior = "middle.ior";
++
++my $backend_iorfile = $backend->LocalFile ($backend_ior);
++my $middle_in_iorfile = $middle->LocalFile ($backend_ior);
++my $middle_out_iorfile = $middle->LocalFile ($middle_ior);
++my $client_in_iorfile = $client->LocalFile ($middle_ior);
++
++$backend->DeleteFile($backend_ior);
++$middle->DeleteFile($backend_ior);
++$middle->DeleteFile($middle_ior);
++$client->DeleteFile($middle_ior);
++
++my $BE =
++  $backend->CreateProcess ("backend_server",
++			   " -o $backend_iorfile"
++			   . $verbose);
++my $MD =
++  $middle->CreateProcess (#"/usr/bin/strace"," -o md.strace.txt ./middle_server".
++			  "middle_server",
++			  " -s $mode -t 5 "
++			  ." -o $middle_out_iorfile"
++			  . $verbose
++			  . " -k file://$middle_in_iorfile");
++my $CL = $client->CreateProcess ("client",
++				 " -k file://$client_in_iorfile"
++				 ." -t 1 "
++				 .$verbose);
++my $be_status = $BE->Spawn ();
++if ($be_status != 0) {
++    print STDERR "ERROR: server returned $be_status\n";
++    exit 1;
++}
++
++if ($backend->WaitForFileTimed ($backend_ior,
++				$backend->ProcessStartWaitInterval()) == -1) {
++    print STDERR "ERROR: cannot find file <$backend_iorfile>\n";
++    $BE->Kill (); $BE->TimedWait (1);
++    exit 1;
++}
++
++if ($backend->GetFile ($backend_ior) == -1) {
++    print STDERR "ERROR: cannot retrieve file <$backend_iorfile>\n";
++    $BE->Kill (); $BE->TimedWait (1);
++    exit 1;
++}
++
++if ($middle->PutFile ($backend_ior) == -1) {
++    print STDERR "ERROR: cannot set file <$middle_in_iorfile>\n";
++    $BE->Kill (); $BE->TimedWait (1);
++    exit 1;
++}
++
++my $md_status = $MD->Spawn ();
++if ($md_status != 0) {
++    print STDERR "ERROR: server returned $md_status\n";
++    $BE->Kill (); $BE->TimedWait (1);
++    exit 1;
++}
++
++if ($middle->WaitForFileTimed ($middle_ior,
++			       $middle->ProcessStartWaitInterval()) == -1) {
++    print STDERR "ERROR: cannot find file <$middle_in_iorfile>\n";
++    $MD->Kill (); $MD->TimedWait (1);
++    $BE->Kill (); $BE->TimedWait (1);
++    exit 1;
++}
++
++if ($middle->GetFile ($middle_ior) == -1) {
++    print STDERR "ERROR: cannot retrieve file <$middle_out_iorfile>\n";
++    $MD->Kill (); $MD->TimedWait (1);
++    $BE->Kill (); $BE->TimedWait (1);
++    exit 1;
++}
++
++if ($client->PutFile ($middle_ior) == -1) {
++    print STDERR "ERROR: cannot set file <$client_in_iorfile>\n";
++    $MD->Kill (); $MD->TimedWait (1);
++    $BE->Kill (); $BE->TimedWait (1);
++    exit 1;
++}
++
++my $status = 0;
++my $client_status =
++  $CL->SpawnWaitKill ($client->ProcessStartWaitInterval());
++if ($client_status != 0) {
++    print STDERR "ERROR: client returned $client_status\n";
++    $status = 1;
++}
++
++$md_status = $MD->WaitKill ($middle->ProcessStopWaitInterval());
++if ($md_status != 0) {
++    print STDERR "ERROR: middle returned $md_status\n";
++    $status = 1;
++}
++
++$be_status = $BE->WaitKill ($backend->ProcessStopWaitInterval());
++if ($be_status != 0) {
++    print STDERR "ERROR: backend returned $be_status\n";
++    $status = 1;
++}
++
++$backend->DeleteFile($backend_ior);
++$middle->DeleteFile($backend_ior);
++$middle->DeleteFile($middle_ior);
++$client->DeleteFile($middle_ior);
++
++exit $status;
+
+Property changes on: tests/Bug_3647_Regression/run_test.pl
+___________________________________________________________________
+Added: svn:executable
+   + *
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/README
+===================================================================
+--- tests/Bug_3647_Regression/README	(revision 0)
++++ tests/Bug_3647_Regression/README	(revision 85164)
+@@ -0,0 +1,32 @@
++/**
++
++@page Bug_3647_Regression Test README File
++
++This test demonstrates the problem described in bugzilla entry #3647.
++
++In this test we have three participants:
++
++A) A back-end server that will inconveniently block in the middle of
++   its work 
++B) A middle-tier server that is trying to communicate with the back
++   end server using SYNC_WITH_TRANSPORT oneway calls, with timeouts.
++C) A client application that is sending twoway calls to the
++   middle-tier server.
++
++The expectaton is that when the back-end server completely blocks, the
++middle-tier server will continue to operate normally.  That is, the
++oneway calls to the back-end server will block it, the timeouts will
++expire, but the recursive loop will be available to respond to any
++incoming requests from the client application.
++
++What we observe is that the middle-tier application blocks, but not in
++the event loop as it should, but while checking if the socket is ready
++for output.
++  
++To run the test use the run_test.pl script:
++
++$ ./run_test.pl
++
++the script returns 0 if the test was successful, non-zero otherwise.
++
++*/
+
+Property changes on: tests/Bug_3647_Regression/README
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/Bug_3647_Regression.mpc
+===================================================================
+--- tests/Bug_3647_Regression/Bug_3647_Regression.mpc	(revision 0)
++++ tests/Bug_3647_Regression/Bug_3647_Regression.mpc	(revision 85164)
+@@ -0,0 +1,52 @@
++// -*- MPC -*-
++// $Id$
++
++project(*idl): taoidldefaults, strategies {
++  IDL_Files {
++    Test.idl
++  }
++  custom_only = 1
++}
++
++project(*Backend): taoserver, utils, strategies {
++  after += *idl
++  Source_Files {
++    Backend_Impl.cpp
++    backend_server.cpp
++  }
++  Source_Files {
++    TestC.cpp
++    TestS.cpp
++  }
++  IDL_Files {
++  }
++  exename = backend_server
++}
++
++project(*Middle): taoserver, messaging, utils, strategies {
++  after += *idl
++  Source_Files {
++    Middle_Impl.cpp
++    middle_server.cpp
++  }
++  Source_Files {
++    TestC.cpp
++    TestS.cpp
++  }
++  IDL_Files {
++  }
++  exename = middle_server
++}
++
++project(*Client): taoclient, messaging, utils, strategies {
++  after += *idl
++  Source_Files {
++    client.cpp
++  }
++  Source_Files {
++    TestC.cpp
++  }
++  IDL_Files {
++  }
++}
++
+
+Property changes on: tests/Bug_3647_Regression/Bug_3647_Regression.mpc
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/backend_server.cpp
+===================================================================
+--- tests/Bug_3647_Regression/backend_server.cpp	(revision 0)
++++ tests/Bug_3647_Regression/backend_server.cpp	(revision 85164)
+@@ -0,0 +1,120 @@
++// $Id$
++
++#include "Backend_Impl.hpp"
++
++#include "tao/Strategies/advanced_resource.h"
++
++#include "tao/Utils/Servant_Var.h"
++#include "ace/Get_Opt.h"
++#include "ace/OS_NS_stdio.h"
++
++ACE_RCSID (Bug_3647_Regression,
++           backend_server,
++           "$Id$")
++
++const ACE_TCHAR *ior_output_file = ACE_TEXT ("backend.ior");
++bool verbose = false;
++
++int
++parse_args (int argc, ACE_TCHAR *argv[])
++{
++  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("vo:"));
++  int c;
++
++  while ((c = get_opts ()) != -1)
++    switch (c)
++      {
++      case 'o':
++        ior_output_file = get_opts.opt_arg ();
++        break;
++
++      case 'v':
++        verbose = true;
++        break;
++
++      case '?':
++      default:
++        ACE_ERROR_RETURN ((LM_ERROR,
++                           "usage:  %s "
++                           "-o <iorfile>"
++                           "\n",
++                           argv [0]),
++                          -1);
++      }
++  // Indicates sucessful parsing of the command line
++  return 0;
++}
++
++int
++ACE_TMAIN(int argc, ACE_TCHAR *argv[])
++{
++  try
++    {
++      CORBA::ORB_var orb =
++        CORBA::ORB_init (argc, argv);
++
++      CORBA::Object_var poa_object =
++        orb->resolve_initial_references("RootPOA");
++
++      PortableServer::POA_var root_poa =
++        PortableServer::POA::_narrow (poa_object.in ());
++
++      if (CORBA::is_nil (root_poa.in ()))
++      {
++        ACE_ERROR_RETURN ((LM_ERROR,
++                "backend_server(%P|%t) - panic: nil RootPOA\n"),
++            1);
++      }
++
++      PortableServer::POAManager_var poa_manager = root_poa->the_POAManager ();
++
++      if (parse_args (argc, argv) != 0)
++        return 1;
++
++      using namespace Bug_3647_Regression;
++      TAO::Utils::Servant_Var<Backend_Impl> impl(
++          new Backend_Impl(orb.in(), verbose));
++
++      PortableServer::ObjectId_var id =
++          root_poa->activate_object (impl.in());
++
++      CORBA::Object_var object = root_poa->id_to_reference (id.in ());
++
++      Bug_3647_Regression::Backend_var backend =
++          Bug_3647_Regression::Backend::_narrow (object.in ());
++
++      CORBA::String_var ior = orb->object_to_string (backend.in ());
++
++      // Output the IOR to the <ior_output_file>
++      FILE *output_file= ACE_OS::fopen (ior_output_file, "w");
++      if (output_file == 0)
++      {
++        ACE_ERROR_RETURN ((LM_ERROR,
++                "backend_server(%P|%) - cannot open output file "
++                "for writing IOR: %s\n",
++                ior_output_file),
++            1);
++      }
++      ACE_OS::fprintf (output_file, "%s", ior.in ());
++      ACE_OS::fclose (output_file);
++
++      poa_manager->activate ();
++
++      orb->run ();
++
++      ACE_DEBUG ((LM_DEBUG, "backend_server(%P|%t) - event loop finished\n"));
++
++      root_poa->destroy (1, 1);
++
++      orb->destroy ();
++    }
++  catch (const CORBA::Exception& ex)
++    {
++      ACE_DEBUG ((LM_DEBUG,
++              "backend_server"));
++      ex._tao_print_exception ("Exception caught:");
++      return 1;
++    }
++
++  return 0;
++}
+
+Property changes on: tests/Bug_3647_Regression/backend_server.cpp
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: tests/Bug_3647_Regression/Backend_Impl.hpp
+===================================================================
+--- tests/Bug_3647_Regression/Backend_Impl.hpp	(revision 0)
++++ tests/Bug_3647_Regression/Backend_Impl.hpp	(revision 85164)
+@@ -0,0 +1,42 @@
++#ifndef Bug_3647_Regression_Backend_Impl_hpp
++#define Bug_3647_Regression_Backend_Impl_hpp
++
++#include "TestS.h"
++#include "Throw_Spec.h"
++
++namespace Bug_3647_Regression
++{
++
++/**
++ * @class Backend
++ *
++ * Implement the Bug_3647_Regression::Backend interface
++ *
++ */
++class Backend_Impl : public POA_Bug_3647_Regression::Backend
++{
++public:
++  Backend_Impl(CORBA::ORB_ptr orb, bool verbose);
++  virtual ~Backend_Impl();
++
++  virtual void startup_test()
++      THROW_SPEC (CORBA::SystemException);
++  virtual void ping(Bug_3647_Regression::Payload const & the_payload)
++      THROW_SPEC (CORBA::SystemException);
++  virtual void freeze(CORBA::ULong seconds)
++      THROW_SPEC (CORBA::SystemException);
++
++  virtual void shutdown()
++      THROW_SPEC (CORBA::SystemException);
++
++private:
++  /// Keep a reference to the ORB so we can shutdown the application.
++  CORBA::ORB_var orb_;
++
++  /// Use this flag to decide if the program should produce any output.
++  bool verbose_;
++};
++
++} // namespace Bug_3647_Regression
++
++#endif // Bug_3647_Regression_Backend_hpp
+
+Property changes on: tests/Bug_3647_Regression/Backend_Impl.hpp
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: bin/tao_orb_tests.lst
+===================================================================
+--- bin/tao_orb_tests.lst	(revision 85163)
++++ bin/tao_orb_tests.lst	(working copy)
+@@ -157,6 +157,7 @@
+ TAO/tests/Bug_3630_Regression/run_test.pl: !FIXED_BUGS_ONLY
+ TAO/tests/Bug_3632_Regression/run_test.pl:
+ TAO/tests/Bug_3636_Regression/run_test.pl: !FIXED_BUGS_ONLY
++TAO/tests/Bug_3647_Regression/run_test.pl:
+ TAO/tests/DIOP/run_test.pl: !ST !NO_DIOP !ACE_FOR_TAO !CORBA_E_MICRO !LabVIEW_RT !WinCE !FUZZ
+ TAO/tests/DIOP/run_test_ipv6.pl: IPV6 !ST !NO_DIOP !ACE_FOR_TAO !CORBA_E_MICRO !LabVIEW_RT !WinCE !FUZZ
+ TAO/tests/RTCORBA/Activate_Object_Multiple_ORBs/run_test.pl: !MINIMUM !CORBA_E_COMPACT !CORBA_E_MICRO !ST
+Index: tao/Transport.h
+===================================================================
+--- tao/Transport.h	(revision 85163)
++++ tao/Transport.h	(working copy)
+@@ -30,6 +30,7 @@
+ #include "tao/Message_Semantics.h"
+ #include "ace/Time_Value.h"
+ #include "ace/Basic_Stats.h"
++#include "ace/Copy_Disabled.h"
+ 
+ struct iovec;
+ 
+@@ -68,6 +69,80 @@
+     /// Transport-level statistics. Initially introduced to support
+     /// the "Transport Current" functionality.
+     class Stats;
++
++  /**
++   * @struct Drain_Constraints
++   *
++   * @brief Encapsulate the flushing control parameters.
++   *
++   * At several points, the ORB needs to flush data from a transport to the
++   * underlying I/O mechanisms.  How this data is flushed depends on the
++   * context where the request is made, the ORB configuration and the
++   * application level policies in effect.
++   *
++   * Some examples:
++   * 
++   * # When idle, the ORB will want to send data on any socket that has
++   *   space available.  In this case, the queue must be drained on 
++   *   a best-effort basis, without any blocking.
++   * # If the ORB is configured to handle nested upcalls, any two-way
++   *   request should block and push data to the underlying socket as fast
++   *   as possible.
++   * # In the same use-case, but now with a timeout policy in
++   *   effect, the ORB will need to send the data use I/O operations with
++   *   timeouts (as implemented by ACE::sendv()
++   * # When the ORB is configured to support nested upcalls, any two-way,
++   *   reliable oneway or similar should wait using the reactor or
++   *   Leader-Follower implementation.  While still respecting the timeout
++   *   policies.
++   *
++   * Instead of sprinkling if() statements throughput the critical path
++   * trying to determine how the I/O operations should be performed, we
++   * pass the information encapsulated in this class.  The caller into the
++   * Transport object determines the right parameters to use, and the
++   * Transport object simply obeys those instructions.
++   */
++  class Drain_Constraints : private ACE_Copy_Disabled
++  {
++  public:
++    /// Default constructor
++    Drain_Constraints()
++      : timeout_(0)
++      , block_on_io_(false)
++    {
++    }
++
++    /// Constructor
++    Drain_Constraints(
++        ACE_Time_Value const * timeout,
++        bool block_on_io)
++      : timeout_(timeout)
++      , block_on_io_(block_on_io)
++    {
++    }
++
++    /**
++     * If true, then the ORB should block on I/O operations instead of
++     * using non-blocking I/O.
++     */
++    bool block_on_io() const
++    {
++      return block_on_io_;
++    }
++
++    /**
++     * The maximum time to block on I/O operations (or nested loops) based
++     * on the current timeout policies.
++     */
++    ACE_Time_Value const * timeout() const
++    {
++      return timeout_;
++    }
++
++  private:
++    ACE_Time_Value const * timeout_;
++    bool block_on_io_;
++  };
+   }
+ }
+ 
+@@ -243,7 +318,7 @@
+  * https://svn.dre.vanderbilt.edu/viewvc/Middleware/trunk/TAO/docs/pluggable_protocols/index.html?revision=HEAD
+  *
+  */
+-class TAO_Export TAO_Transport
++class TAO_Export TAO_Transport : private ACE_Copy_Disabled
+ {
+ public:
+ 
+@@ -290,7 +365,7 @@
+   TAO_Wait_Strategy *wait_strategy (void) const;
+ 
+   /// Callback method to reactively drain the outgoing data queue
+-  int handle_output (ACE_Time_Value *max_wait_time);
++  int handle_output (TAO::Transport::Drain_Constraints const & c);
+ 
+   /// Get the bidirectional flag
+   int bidirectional_flag (void) const;
+@@ -411,7 +486,7 @@
+   virtual ssize_t send (iovec *iov,
+                         int iovcnt,
+                         size_t &bytes_transferred,
+-                        const ACE_Time_Value *timeout = 0) = 0;
++                        ACE_Time_Value const * timeout) = 0;
+ 
+ #if TAO_HAS_SENDFILE == 1
+   /// Send data through zero-copy write mechanism, if available.
+@@ -428,7 +503,7 @@
+                             iovec * iov,
+                             int iovcnt,
+                             size_t &bytes_transferred,
+-                            ACE_Time_Value const * timeout = 0);
++      TAO::Transport::Drain_Constraints const & dc);
+ #endif  /* TAO_HAS_SENDFILE==1 */
+ 
+ 
+@@ -708,7 +783,14 @@
+                             ACE_Time_Value *max_wait_time,
+                             TAO_Stub* stub);
+ 
+-  /// Send a message block chain,
++  /**
++   * This is a very specialized interface to send a simple chain of
++   * messages through the Transport.  The only place we use this interface
++   * is in GIOP_Message_Base.cpp, to send error messages (i.e., an
++   * indication that we received a malformed GIOP message,) and to close
++   * the connection.
++   *
++   */
+   int send_message_block_chain (const ACE_Message_Block *message_block,
+                                 size_t &bytes_transferred,
+                                 ACE_Time_Value *max_wait_time = 0);
+@@ -716,7 +798,8 @@
+   /// Send a message block chain, assuming the lock is held
+   int send_message_block_chain_i (const ACE_Message_Block *message_block,
+                                   size_t &bytes_transferred,
+-                                  ACE_Time_Value *max_wait_time);
++                                  TAO::Transport::Drain_Constraints const & dc);
++
+   /// Cache management
+   int purge_entry (void);
+ 
+@@ -801,10 +884,10 @@
+    * Returns 0 if there is more data to send, -1 if there was an error
+    * and 1 if the message was completely sent.
+    */
+-  int drain_queue (ACE_Time_Value *max_wait_time);
++  int drain_queue (TAO::Transport::Drain_Constraints const & dc);
+ 
+   /// Implement drain_queue() assuming the lock is held
+-  int drain_queue_i (ACE_Time_Value *max_wait_time);
++  int drain_queue_i (TAO::Transport::Drain_Constraints const & dc);
+ 
+   /// Check if there are messages pending in the queue
+   /**
+@@ -816,7 +899,8 @@
+   bool queue_is_empty_i (void) const;
+ 
+   /// A helper routine used in drain_queue_i()
+-  int drain_queue_helper (int &iovcnt, iovec iov[], ACE_Time_Value *max_wait_time);
++  int drain_queue_helper (int &iovcnt, iovec iov[],
++      TAO::Transport::Drain_Constraints const & dc);
+ 
+   /// These classes need privileged access to:
+   /// - schedule_output_i()
+@@ -928,10 +1012,35 @@
+   /// partial_message_ data member.
+   void allocate_partial_message_block (void);
+ 
+-  // Disallow copying and assignment.
+-  TAO_Transport (const TAO_Transport&);
+-  void operator= (const TAO_Transport&);
++  /**
++   * @brief Re-factor computation of I/O timeouts based on operation
++   * timeouts.
++   * Depending on the wait strategy, we need to timeout I/O operations or
++   * not.  For example, if we are using a non-blocking strategy, we want
++   * to pass 0 to all I/O operations, and rely on the ACE_NONBLOCK
++   * settings on the underlying sockets.  However, for blocking strategies
++   * we want to pass the operation timeouts, to respect the application
++   * level policies.
++   *
++   * This function was introduced as part of the fixes for bug 3647.
++   */
++  ACE_Time_Value const *io_timeout(
++      TAO::Transport::Drain_Constraints const & dc) const;
+ 
++  /**
++   * Return true if blocking I/O should be used for sending synchronous
++   * (two-way, reliable oneways, etc.) messages.  This is determined based
++   * on the current flushing and waiting strategies.
++   */
++  bool using_blocking_io_for_synch_messages() const;
++  
++  /**
++   * Return true if blocking I/O should be used for sending asynchronous
++   * (AMI calls, non-blocking oneways, responses to operations, etc.)
++   * messages.  This is determined based on the current flushing strategy.
++   */
++  bool using_blocking_io_for_asynch_messages() const;
++  
+   /*
+    * Specialization hook to add concrete private methods from
+    * TAO's protocol implementation onto the base Transport class
+Index: tao/GIOP_Message_Base.cpp
+===================================================================
+--- tao/GIOP_Message_Base.cpp	(revision 85163)
++++ tao/GIOP_Message_Base.cpp	(working copy)
+@@ -1437,25 +1437,6 @@
+                       TAO_GIOP_MESSAGE_HEADER_LEN);
+     }
+ 
+-#if 0
+-  // @@CJC I don't think we need this check b/c the transport's send()
+-  // will simply return -1.  However, I guess we could create something
+-  // like TAO_Tranport::is_closed() that returns whether the connection
+-  // is already closed.  The problem with that, however, is that it's
+-  // entirely possible that is_closed() could return TRUE, and then the
+-  // transport could get closed down btw. the time it gets called and the
+-  // time that the send actually occurs.
+-  ACE_HANDLE which = transport->handle ();
+-  if (which == ACE_INVALID_HANDLE)
+-    {
+-      if (TAO_debug_level > 0)
+-        ACE_DEBUG ((LM_DEBUG,
+-           ACE_TEXT ("TAO (%P|%t) TAO_GIOP_Message_Base::send_close_connection -")
+-           ACE_TEXT (" connection already closed\n")));
+-      return;
+-    }
+-#endif
+-
+   ACE_Data_Block data_block (TAO_GIOP_MESSAGE_HEADER_LEN,
+                              ACE_Message_Block::MB_DATA,
+                              close_message,
+Index: tao/Block_Flushing_Strategy.cpp
+===================================================================
+--- tao/Block_Flushing_Strategy.cpp	(revision 85163)
++++ tao/Block_Flushing_Strategy.cpp	(working copy)
+@@ -27,19 +27,23 @@
+ {
+   while (!msg->all_data_sent ())
+     {
+-      if (transport->handle_output (max_wait_time) == -1)
++      TAO::Transport::Drain_Constraints dc(
++          max_wait_time, true);
++      if (transport->handle_output (dc) == -1)
+         return -1;
+     }
+   return 0;
+ }
+ 
+ int
+-TAO_Block_Flushing_Strategy::flush_transport (TAO_Transport *transport
+-                                              , ACE_Time_Value *max_wait_time)
++TAO_Block_Flushing_Strategy::flush_transport (TAO_Transport *transport,
++                                              ACE_Time_Value *max_wait_time)
+ {
+   while (!transport->queue_is_empty ())
+     {
+-      if (transport->handle_output (max_wait_time) == -1)
++      TAO::Transport::Drain_Constraints dc(
++          max_wait_time, true);
++      if (transport->handle_output (dc) == -1)
+         return -1;
+     }
+   return 0;
+Index: tao/Connection_Handler.cpp
+===================================================================
+--- tao/Connection_Handler.cpp	(revision 85163)
++++ tao/Connection_Handler.cpp	(working copy)
+@@ -206,7 +206,9 @@
+       return return_value;
+     }
+ 
+-  return_value = this->transport ()->handle_output (0);
++  // The default constraints are to never block.
++  TAO::Transport::Drain_Constraints dc;
++  return_value = this->transport ()->handle_output (dc);
+ 
+   this->pos_io_hook (return_value);
+ 
+Index: tao/Transport.cpp
+===================================================================
+--- tao/Transport.cpp	(revision 85163)
++++ tao/Transport.cpp	(working copy)
+@@ -401,7 +401,7 @@
+                          iovec * iov,
+                          int iovcnt,
+                          size_t &bytes_transferred,
+-                         ACE_Time_Value const * timeout)
++                         TAO::Transport::Drain_Constraints const & dc)
+ {
+   // Concrete pluggable transport doesn't implement sendfile().
+   // Fallback on TAO_Transport::send().
+@@ -410,7 +410,8 @@
+   //    implementation to this base class method, and leave any TCP
+   //    specific configuration out of this base class method.
+   //      -Ossama
+-  return this->send (iov, iovcnt, bytes_transferred, timeout);
++  return this->send (iov, iovcnt, bytes_transferred,
++                     this->io_timeout (dc));
+ }
+ #endif  /* TAO_HAS_SENDFILE==1 */
+ 
+@@ -521,19 +522,23 @@
+  *
+  */
+ int
+-TAO_Transport::handle_output (ACE_Time_Value *max_wait_time)
++TAO_Transport::handle_output (TAO::Transport::Drain_Constraints const & dc)
+ {
+   if (TAO_debug_level > 3)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("TAO (%P|%t) - Transport[%d]::handle_output\n"),
+-                  this->id ()));
++                  ACE_TEXT ("TAO (%P|%t) - Transport[%d]::handle_output"
++                            " - block_on_io=%d, timeout=%d.%06d\n"),
++                  this->id (),
++              dc.block_on_io(),
++              dc.timeout() ? dc.timeout()->sec() : -1,
++              dc.timeout() ? dc.timeout()->usec() : -1 ));
+     }
+ 
+   // The flushing strategy (potentially via the Reactor) wants to send
+   // more data, first check if there is a current message that needs
+   // more sending...
+-  int const retval = this->drain_queue (max_wait_time);
++  int const retval = this->drain_queue (dc);
+ 
+   if (TAO_debug_level > 3)
+     {
+@@ -566,15 +571,18 @@
+ {
+   ACE_GUARD_RETURN (ACE_Lock, ace_mon, *this->handler_lock_, -1);
+ 
++  TAO::Transport::Drain_Constraints dc(
++      max_wait_time, true);
++
+   return this->send_message_block_chain_i (mb,
+                                            bytes_transferred,
+-                                           max_wait_time);
++                                           dc);
+ }
+ 
+ int
+ TAO_Transport::send_message_block_chain_i (const ACE_Message_Block *mb,
+                                            size_t &bytes_transferred,
+-                                           ACE_Time_Value *max_wait_time)
++                                           TAO::Transport::Drain_Constraints const & dc)
+ {
+   size_t const total_length = mb->total_length ();
+ 
+@@ -584,7 +592,7 @@
+ 
+   synch_message.push_back (this->head_, this->tail_);
+ 
+-  int const n = this->drain_queue_i (max_wait_time);
++  int const n = this->drain_queue_i (dc);
+ 
+   if (n == -1)
+     {
+@@ -769,7 +777,10 @@
+ TAO_Transport::send_synch_message_helper_i (TAO_Synch_Queued_Message &synch_message,
+                                             ACE_Time_Value * max_wait_time)
+ {
+-  int const n = this->drain_queue_i (max_wait_time);
++  TAO::Transport::Drain_Constraints dc(
++      max_wait_time, this->using_blocking_io_for_synch_messages());
++  
++  int const n = this->drain_queue_i (dc);
+ 
+   if (n == -1)
+     {
+@@ -890,10 +901,10 @@
+ }
+ 
+ int
+-TAO_Transport::drain_queue (ACE_Time_Value *max_wait_time)
++TAO_Transport::drain_queue (TAO::Transport::Drain_Constraints const & dc)
+ {
+   ACE_GUARD_RETURN (ACE_Lock, ace_mon, *this->handler_lock_, -1);
+-  int const retval = this->drain_queue_i (max_wait_time);
++  int const retval = this->drain_queue_i (dc);
+ 
+   if (retval == 1)
+     {
+@@ -911,10 +922,10 @@
+ }
+ 
+ int
+-TAO_Transport::drain_queue_helper (int &iovcnt, iovec iov[], ACE_Time_Value *max_wait_time)
++TAO_Transport::drain_queue_helper (int &iovcnt, iovec iov[],
++    TAO::Transport::Drain_Constraints const & dc)
+ {
+   size_t byte_count = 0;
+-  ACE_Countdown_Time countdown (max_wait_time);
+ 
+   // ... send the message ...
+   ssize_t retval = -1;
+@@ -924,10 +935,12 @@
+     retval = this->sendfile (this->mmap_allocator_,
+                              iov,
+                              iovcnt,
+-                             byte_count);
++                             byte_count,
++                             dc);
+   else
+ #endif  /* TAO_HAS_SENDFILE==1 */
+-    retval = this->send (iov, iovcnt, byte_count, max_wait_time);
++    retval = this->send (iov, iovcnt, byte_count,
++                         this->io_timeout (dc));
+ 
+   if (TAO_debug_level == 5)
+     {
+@@ -988,7 +1001,7 @@
+ }
+ 
+ int
+-TAO_Transport::drain_queue_i (ACE_Time_Value *max_wait_time)
++TAO_Transport::drain_queue_i (TAO::Transport::Drain_Constraints const & dc)
+ {
+   // This is the vector used to send data, it must be declared outside
+   // the loop because after the loop there may still be data to be
+@@ -1039,8 +1052,7 @@
+       // IOV_MAX elements ...
+       if (iovcnt == ACE_IOV_MAX)
+         {
+-          int const retval = this->drain_queue_helper (iovcnt, iov,
+-                                                       max_wait_time);
++          int const retval = this->drain_queue_helper (iovcnt, iov, dc);
+ 
+           now = ACE_High_Res_Timer::gettimeofday_hr ();
+ 
+@@ -1067,7 +1079,7 @@
+ 
+   if (iovcnt != 0)
+     {
+-      int const retval = this->drain_queue_helper (iovcnt, iov, max_wait_time);
++      int const retval = this->drain_queue_helper (iovcnt, iov, dc);
+ 
+       if (TAO_debug_level > 4)
+         {
+@@ -1345,6 +1357,9 @@
+   bool partially_sent = false;
+   bool timeout_encountered = false;
+ 
++  TAO::Transport::Drain_Constraints dc(
++      max_wait_time, this->using_blocking_io_for_asynch_messages());
++
+   if (try_sending_first)
+     {
+       ssize_t n = 0;
+@@ -1367,7 +1382,7 @@
+       // code I will re-visit this decision
+       n = this->send_message_block_chain_i (message_block,
+                                             byte_count,
+-                                            max_wait_time);
++                                            dc);
+ 
+       if (n == -1)
+         {
+@@ -2755,6 +2770,37 @@
+ {
+ }
+ 
++ACE_Time_Value const *
++TAO_Transport::io_timeout(
++    TAO::Transport::Drain_Constraints const & dc) const
++{
++  if (dc.block_on_io())
++  {
++    return dc.timeout();
++  }
++  if (this->wait_strategy()->can_process_upcalls())
++  {
++    return 0;
++  }
++  return dc.timeout();
++}
++
++bool
++TAO_Transport::using_blocking_io_for_synch_messages() const
++{
++  if (this->wait_strategy()->can_process_upcalls())
++  {
++    return false;
++  }
++  return true;
++}
++
++bool
++TAO_Transport::using_blocking_io_for_asynch_messages() const
++{
++  return false;
++}
++
+ /*
+  * Hook to add concrete implementations from the derived class onto
+  * TAO's transport.
+Index: ChangeLog
+===================================================================
+--- ChangeLog	(revision 85163)
++++ ChangeLog	(working copy)
+@@ -1,3 +1,92 @@
++Sat Apr 25 11:31:50 UTC 2009  Carlos O'Ryan  <coryan@atdesk.com>
++
++        * tao/Transport.h:
++        * tao/Transport.cpp:
++        * tao/GIOP_Message_Base.cpp:
++        * tao/Block_Flushing_Strategy.cpp:
++        * tao/Connection_Handler.cpp:
++          Seemingly completed the fixes for 3647.
++          Fundamentally, the calls to sendv() need to use a timeout
++          parameter when called with the blocking flushing strategy or
++          with the read-write waiting strategy *and* when there is a
++          timeout.
++          Unfortunately, the point(s) where we call sendv() does not have
++          enough context to determine if the parameter is needed.
++          I changed the Transport class to pass a little struct with both
++          the timeout value and flag to indicate if using blocking I/O
++          calls was desired.
++          The caller makes the determination and passes the parameter into
++          the Transport object, for example, the Block_Flushing_Strategy
++          certainly wants to use blocking I/O calls.
++          Several interface in TAO_Transport changed, and so did its
++          callers.
++
++        * tests/Bug_3647_Regression/client.cpp:
++        * tests/Bug_3647_Regression/Middle_Impl.cpp:
++        * tests/Bug_3647_Regression/Backend_Impl.cpp:
++        * tests/Bug_3647_Regression/run_test.pl:
++          Fine-tune the test so it would pass all the time.  The default
++          parameters showed the problem before the changes, but then
++          failed due to a timeout during shutdown.
++          Also expanded run_test.pl to test with SYNC_NONE vs. other
++          policies.  It was important to me to verify that the test
++          continues to fail with SYNC_WITH_SERVER, so my "fine tuning" did
++          not hide real errors.
++
++Fri Apr 24 13:57:18 UTC 2009  Carlos O'Ryan  <coryan@atdesk.com>
++
++        * tao/Transport.h:
++        * tao/Transport.cpp:
++          First attempt at fixing bug 3647.
++          The ORB is blocking in ACE::sendv(), because we are passing a
++          timeout parameter which results in blocking for the prescribed
++          timeout period on select().  But on a select() call with only
++          one socket!
++          What we want to achieve is pass the timeout parameter when we
++          are using the blocking configurations of the ORB, such as RW
++          waiting strategies.
++          This fix, changes the way the timeout parameter to sendv() calls
++          is computed, by looking at the wait_strategy.
++          Unfortunately, this missed the blocking flushing strategies,
++          where we want to block too!  The Oneway_Send_Timeout tests
++          caught this.
++          So more work is needed, but I want to save the work first.
++
++Fri Apr 24 13:46:38 UTC 2009  Carlos O'Ryan  <coryan@atdesk.com>
++
++        * tests/Bug_3647_Regression:
++        * tests/Bug_3647_Regression/Bug_3647_Regression.mpc:
++        * tests/Bug_3647_Regression/run_test.pl:
++        * tests/Bug_3647_Regression/README:
++        * tests/Bug_3647_Regression/svc.conf:
++        * tests/Bug_3647_Regression/Test.idl:
++        * tests/Bug_3647_Regression/Throw_Spec.h:
++          Add a regression test for bug #3647.  The test consists of three
++          processeses:
++
++        * tests/Bug_3647_Regression/Backend_Impl.hpp:
++        * tests/Bug_3647_Regression/Backend_Impl.cpp:
++        * tests/Bug_3647_Regression/backend_server.cpp:
++          The backend server receives oneway calls.  On request, it calls
++          sleep for a long period of time to block its I/O on particular
++          sockets.
++
++        * tests/Bug_3647_Regression/Middle_Impl.hpp:
++        * tests/Bug_3647_Regression/Middle_Impl.cpp:
++        * tests/Bug_3647_Regression/middle_server.cpp:
++          A middle tier server, which never calls sleep, but because of
++          bug 3647 it blocks trying to make calls on the backend server,
++          though it should not.
++
++        * tests/Bug_3647_Regression/client.cpp:
++          The client coordinates the work.  It setups connections between
++          all the servers and makes calls on the middle tier server.  It
++          expects the middle tier server to be always available, but it
++          did not before the fixes.
++
++        * bin/tao_orb_tests.lst:
++          Add Bug_3647_Regression to the list.
++
+ Fri Apr 24 12:03:37 UTC 2009  Johnny Willemsen  <jwillemsen@remedy.nl>
+ 
+         * orbsvcs/tests/start_services:
