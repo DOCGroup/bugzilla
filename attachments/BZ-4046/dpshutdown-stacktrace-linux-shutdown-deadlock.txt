@@ -1,0 +1,60 @@
+Thread 4 (Thread 0x7f89a808d700 (LWP 9263)):
+#0  0x00007f89a816cd23 in select () from /lib/x86_64-linux-gnu/libc.so.6
+#1  0x00007f89aaeb3856 in ACE_OS::select (width=4, rfds=0x1fed238, wfds=0x0, efds=0x0, timeout=0x0) at /home/harrisb/projects/dds/ACE_wrappers/ace/OS_NS_sys_select.inl:45
+#2  0x00007f89aa312a8e in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::wait_for_multiple_events (this=0x1fed1f0, dispatch_set=..., max_wait_time=0x0) at /home/harrisb/projects/dds/ACE_wrappers/ace/Select_Reactor_T.cpp:1100
+#3  0x00007f89aa31484c in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i (this=0x1fed1f0, max_wait_time=0x0) at /home/harrisb/projects/dds/ACE_wrappers/ace/Select_Reactor_T.cpp:1441
+#4  0x00007f89aa31038e in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events (this=0x1fed1f0, max_wait_time=0x0) at /home/harrisb/projects/dds/ACE_wrappers/ace/Select_Reactor_T.cpp:1420
+#5  0x00007f89a933bb28 in ACE_Reactor::run_reactor_event_loop (this=0x1fedde0, eh=0) at Reactor.cpp:224
+#6  0x00007f89aa2fa9ac in OpenDDS::DCPS::Service_Participant::ReactorTask::svc (this=0x1fec598) at DCPS/Service_Participant.cpp:200
+#7  0x00007f89a93505c5 in ACE_Task_Base::svc_run (args=0x1fec598) at Task.cpp:275
+#8  0x00007f89a9350af6 in ACE_Thread_Adapter::invoke_i (this=0x1fee110) at Thread_Adapter.cpp:149
+#9  0x00007f89a9350a32 in ACE_Thread_Adapter::invoke (this=0x1fee110) at Thread_Adapter.cpp:98
+#10 0x00007f89a92d062d in ace_thread_adapter (args=0x1fee110) at Base_Thread_Adapter.cpp:124
+#11 0x00007f89a8dd2d8c in start_thread () from /lib/x86_64-linux-gnu/libpthread.so.0
+#12 0x00007f89a8174c2d in clone () from /lib/x86_64-linux-gnu/libc.so.6
+#13 0x0000000000000000 in ?? ()
+
+Thread 3 (Thread 0x7f89a50b1700 (LWP 9267)):
+#0  0x00007f89a8dda7c4 in __lll_lock_wait () from /lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00007f89a8dd55b4 in _L_lock_944 () from /lib/x86_64-linux-gnu/libpthread.so.0
+#2  0x00007f89a8dd53ca in pthread_mutex_lock () from /lib/x86_64-linux-gnu/libpthread.so.0
+#3  0x00007f89a9318d1b in ACE_OS::mutex_lock (m=0x7f89a0007b58) at OS_NS_Thread.cpp:2022
+#4  0x00007f89ab47f52a in ?? ()
+#5  0x00007f89a50b0400 in ?? ()
+#6  0x00007f89a0007b58 in ?? ()
+#7  0x00007f89a50b02e0 in ?? ()
+#8  0x00007f89ab47f55e in ?? ()
+#9  0x00007f89a50b0330 in ?? ()
+#10 0x00007f89a0007b58 in ?? ()
+#11 0x00007f89a50b0350 in ?? ()
+#12 0x00007f89aa40f4a8 in OpenDDS::DCPS::TransportClient::MultiReservLock::action_fwd (this=0x7f89a0007b58, function=&virtual table offset 140229225843994, this adjustment 140229156209664, undo=&virtual table offset 140229263384320, this adjustment 9707368) at DCPS/transport/framework/TransportClient.cpp:457
+Backtrace stopped: previous frame inner to this frame (corrupt stack?)
+
+Thread 2 (Thread 0x7f89a4860700 (LWP 9268)):
+#0  0x00007f89a8dd7f2b in pthread_cond_timedwait@@GLIBC_2.3.2 () from /lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00007f89ab1c2300 in ACE_OS::cond_timedwait (cv=0x7f89a000b218, external_mutex=0x7f89a000b1e8, timeout=0x7f89a485f6d0) at /home/harrisb/projects/dds/ACE_wrappers/ace/OS_NS_Thread.inl:361
+#2  0x00007f89ab1c971a in ACE_Condition<ACE_Thread_Mutex>::wait (this=0x7f89a000b218, mutex=..., abstime=0x7f89a485f760) at /home/harrisb/projects/dds/ACE_wrappers/ace/Condition_T.cpp:106
+#3  0x00007f89ab1c5671 in ACE_Condition<ACE_Thread_Mutex>::wait (this=0x7f89a000b218, abstime=0x7f89a485f760) at /home/harrisb/projects/dds/ACE_wrappers/ace/Condition_T.cpp:118
+#4  0x00007f89ab1bb8e6 in OpenDDS::DCPS::RtpsUdpDataLink::wait_for_handshake (this=0x7f89a000ac70, local_id=..., remote_id=...) at RtpsUdpDataLink.cpp:276
+#5  0x00007f89ab1d88f6 in OpenDDS::DCPS::RtpsUdpTransport::connect_datalink_i (this=0x7f89a0007b40, local_id=..., remote_id=..., remote_data=..., remote_reliable=true, attribs=...) at RtpsUdpTransport.cpp:104
+#6  0x00007f89aa3fada7 in OpenDDS::DCPS::TransportImpl::find_connect_i (this=0x7f89a0007b40, local_id=..., remote_association=..., attribs=..., active=true, connect=true) at DCPS/transport/framework/TransportImpl.cpp:205
+#7  0x00007f89aa3faf4a in OpenDDS::DCPS::TransportImpl::connect_datalink (this=0x7f89a0007b40, local_id=..., remote_association=..., attribs=...) at DCPS/transport/framework/TransportImpl.cpp:234
+#8  0x00007f89aa40dd6f in OpenDDS::DCPS::TransportClient::associate (this=0x204e948, data=..., active=true) at DCPS/transport/framework/TransportClient.cpp:180
+#9  0x00007f89aaed1c3c in OpenDDS::RTPS::Sedp::Writer::assoc (this=0x204e940, subscription=...) at Sedp.cpp:1939
+#10 0x00007f89aaeca2fd in OpenDDS::RTPS::Sedp::Task::svc_i (this=0x204e4f0, ppdata=0x204e110) at Sedp.cpp:514
+#11 0x00007f89aaed3ec4 in OpenDDS::RTPS::Sedp::Task::svc (this=0x204e4f0) at Sedp.cpp:2401
+#12 0x00007f89a93505c5 in ACE_Task_Base::svc_run (args=0x204e4f0) at Task.cpp:275
+#13 0x00007f89a9350af6 in ACE_Thread_Adapter::invoke_i (this=0x7f89a0000910) at Thread_Adapter.cpp:149
+#14 0x00007f89a9350a32 in ACE_Thread_Adapter::invoke (this=0x7f89a0000910) at Thread_Adapter.cpp:98
+#15 0x00007f89a92d062d in ace_thread_adapter (args=0x7f89a0000910) at Base_Thread_Adapter.cpp:124
+#16 0x00007f89a8dd2d8c in start_thread () from /lib/x86_64-linux-gnu/libpthread.so.0
+#17 0x00007f89a8174c2d in clone () from /lib/x86_64-linux-gnu/libc.so.6
+#18 0x0000000000000000 in ?? ()
+
+Thread 1 (Thread 0x7f89ab8c8740 (LWP 9262)):
+#0  0x00007f89a8dda7c4 in __lll_lock_wait () from /lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00007f89a8dd55b4 in _L_lock_944 () from /lib/x86_64-linux-gnu/libpthread.so.0
+#2  0x00007f89a8dd53ca in pthread_mutex_lock () from /lib/x86_64-linux-gnu/libpthread.so.0
+#3  0x00007f89a9318d1b in ACE_OS::mutex_lock (m=0x204e820) at OS_NS_Thread.cpp:2022
+#4  0x00007f89ab47f52a in ?? ()
+#5  0x0000000000000000 in ?? ()
