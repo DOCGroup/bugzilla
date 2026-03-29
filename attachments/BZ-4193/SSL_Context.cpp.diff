@@ -1,0 +1,63 @@
+*** SSL_Context.cpp.0	2015-01-17 15:50:55.103891760 +0100
+--- SSL_Context.cpp	2015-01-17 16:03:57.229950890 +0100
+***************
+*** 663,668 ****
+--- 663,720 ----
+    return 0;
+  }
+  
++ int 
++ ACE_SSL_Context::ec_params(const char *named_curve)
++ {
++ // We need at least OpenSSL 0.9.8 for EC_KEY_new_by_curve_name
++ #if OPENSSL_VERSION_NUMBER >= 0x0090800fL
++ 
++   EC_KEY *ecdh = 0;
++   int nid      = 0;
++   int status   = 0;
++ 
++   if(!named_curve)
++     return -1;
++ 
++   ec_params_ = named_curve;
++ 
++   nid = ::OBJ_sn2nid(ec_params_.c_str());
++   if (nid == 0)
++   {
++      return -1;
++   }
++ 
++   ecdh = ::EC_KEY_new_by_curve_name(nid);
++   if (ecdh == NULL)
++   {
++      return -1;
++   }
++ 
++   if(::SSL_CTX_set_tmp_ecdh(context(), ecdh) == 1)
++   {
++      ::SSL_CTX_set_options(context(), SSL_OP_SINGLE_ECDH_USE);
++   }
++   else
++     status = -1;
++   
++   ::EC_KEY_free(ecdh);
++   ecdh = 0;
++   
++   status = 0;
++   return status; 
++ #else
++   
++   errno = ENOTSUP;
++   return -1;
++ #endif
++ }
++ 
++ const char *
++ ACE_SSL_Context::ec_params_name () const
++ {
++  return ec_params_.c_str();
++ }
++ 
+  // ****************************************************************
+  ACE_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Unmanaged_Singleton, ACE_SSL_Context, ACE_SYNCH_MUTEX)
+  
