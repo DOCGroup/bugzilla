@@ -1,0 +1,46 @@
+diff -u ace-6.3.3.orig/ace/OS_NS_stdlib.h ace-6.3.3.mine/ace/OS_NS_stdlib.h
+--- ace-6.3.3.orig/ace/OS_NS_stdlib.h	2015-09-17 09:55:18 +0200
++++ ace-6.3.3.mine/ace/OS_NS_stdlib.h	2015-12-03 12:26:26 +0100
+@@ -33,6 +33,10 @@
+ #endif
+ #define ACE_EXPORT_MACRO ACE_Export
+ 
++#if defined (WIN_PTHREADS_H)
++    #undef rand_r
++#endif
++
+ // We need this for MVS... as well as Linux, etc...
+ // On Windows, we explicitly set this up as __cdecl so it's correct even
+ // if building with another calling convention, such as __stdcall.
+diff -u ace-6.3.3.orig/ace/OS_NS_string.h ace-6.3.3.mine/ace/OS_NS_string.h
+--- ace-6.3.3.orig/ace/OS_NS_string.h	2015-09-17 09:55:18 +0200
++++ ace-6.3.3.mine/ace/OS_NS_string.h	2015-12-03 12:27:22 +0100
+@@ -32,6 +32,11 @@
+ #endif
+ #define ACE_EXPORT_MACRO ACE_Export
+ 
++#if defined (WIN_PTHREADS_H)
++    #undef rand_r
++    #undef strtok_r
++#endif
++
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ namespace ACE_OS {
+diff -u ace-6.3.3.orig/ace/OS_NS_time.h ace-6.3.3.mine/ace/OS_NS_time.h
+--- ace-6.3.3.orig/ace/OS_NS_time.h	2015-09-17 09:55:18 +0200
++++ ace-6.3.3.mine/ace/OS_NS_time.h	2015-12-03 12:26:43 +0100
+@@ -34,6 +34,13 @@
+ #endif
+ #define ACE_EXPORT_MACRO ACE_Export
+ 
++#if defined (WIN_PTHREADS_H)
++    #undef asctime_r
++    #undef ctime_r
++    #undef gmtime_r
++    #undef localtime_r
++#endif
++
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ // Type-safe, and unsigned.
