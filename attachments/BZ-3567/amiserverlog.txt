@@ -1,0 +1,45 @@
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Connection_Handler[3988]::handle_input, handle = 3988/3988, retval = 0
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Connection_Handler[4092]::handle_input, handle = 4092/-1
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4092]::handle_input
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4092]::process_queue_head, 5 enqueued
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4092]::process_queue_head, the size of the queue is [4]
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4092]::process_queue_head, notify reactor
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4092]::notify_reactor, notify to Reactor
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4092]::process_parsed_messages, entering (missing data == 0)
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 16 data bytes, my endian, not compressed, Type Reply[13]
+Feb 10 15:52:56.151 2009@LM_DEBUG@GIOP message - HEXDUMP 28 bytes
+47 49 4f 50 01 02 01 01  10 00 00 00 0d 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  0e 00 00 00               ............
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - TAO_Muxed_TMS::dispatch_reply, id = 13
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO_Messaging (1180|3536) - Asynch_Reply_Dispatcher::dispatch_reply status = 0
+Feb 10 15:52:56.151 2009@LM_DEBUG@ACE (1180|3536) SCG:<ctor=0535F6C0> - config=028BFD48 repo=028BFE10 superceded by repo=028BFE10
+Feb 10 15:52:56.151 2009@LM_DEBUG@ACE (1180|3536) SCG:<dtor=0535F6C0> - new repo=028BFE10
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Connection_Handler[4092]::handle_input, handle = 4092/-1, retval = 0
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Connection_Handler[4008]::handle_input, handle = 4008/4008
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4008]::handle_input
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4008]::process_queue_head, 0 enqueued
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4008]::handle_input_parse_data, enter
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4008]::handle_input_parse_data, read 140 bytes
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::parse_message_header_i
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_version_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_byte_order_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::parse_message_header_i
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_version_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_byte_order_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::parse_message_header_i
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_version_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_byte_order_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::parse_message_header_i
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_version_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_byte_order_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::parse_message_header_i
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_version_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_State::get_byte_order_info
+Feb 10 15:52:56.151 2009@LM_DEBUG@TAO (1180|3536) - Transport[4008]::handle_input_parse_data, notify reactor
+Feb 10 15:52:56.166 2009@LM_DEBUG@TAO (1180|3536) - Transport[4008]::notify_reactor, notify to Reactor
+Feb 10 15:52:56.166 2009@LM_DEBUG@TAO (1180|3536) - Transport[4008]::process_parsed_messages, entering (missing data == 0)
+Feb 10 15:52:56.166 2009@LM_DEBUG@TAO (1180|3536) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 16 data bytes, my endian, not compressed, Type Reply[5]
+Feb 10 15:52:56.166 2009@LM_DEBUG@GIOP message - HEXDUMP 28 bytes
+47 49 4f 50 01 02 01 01  10 00 00 00 05 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  0f 00 00 00               ............
+
