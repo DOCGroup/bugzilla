@@ -1,0 +1,35 @@
+--- /tmp/ACE_wrappers/ace/QtReactor/QtReactor.cpp	2008-09-16 19:35:44.000000000 +1000
++++ ACE_wrappers/ace/QtReactor/QtReactor.cpp	2009-04-06 18:37:33.000000000 +1000
+@@ -271,22 +271,12 @@
+   if ((result = ACE_Select_Reactor::bit_ops (handle, mask, handle_set, ops)) == -1)
+     return -1;
+ 
+-  // disable or enable the notifiers based on handle_set and mask
+-  int enableFlag = -1;
+-  if (&handle_set == &this->suspend_set_)
+-    enableFlag = 0;
+-  else if (&handle_set == &this->wait_set_)
+-    enableFlag = 1;
+-  else
+-    // We have no work to do here, so just return
+-    return result;
+-
+   switch (ops)
+     {
+     case ACE_Reactor::SET_MASK:
+     case ACE_Reactor::ADD_MASK:
+       // Enable or disable notifiers based on the specified masks
+-      if (this->set_enable_flag_by_mask (enableFlag, handle, mask) == -1)
++      if (this->set_enable_flag_by_mask (1, handle, mask) == -1)
+         {
+           // We can't just return -1 here because we'll have half-changed things.
+           // So, we need to restore the old handle_set, then return -1.
+@@ -296,7 +286,7 @@
+       break;
+ 
+     case ACE_Reactor::CLR_MASK:
+-      if (this->set_enable_flag_by_mask (!enableFlag, handle, mask) == -1)
++      if (this->set_enable_flag_by_mask (0, handle, mask) == -1)
+         {
+           handle_set = preserved_handle_set;
+           return -1;
