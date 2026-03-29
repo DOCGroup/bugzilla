@@ -1,0 +1,117 @@
+>Debug.ListCallStack /ShowValues /AllThreads
+Callstack for Thread 1 (Thread Id: 4948 (0x1354)):
+ Index  Function
+--------------------------------------------------------------------------------
+*1      ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify(ACE_Event_Handler * eh=0x00000000, unsigned long mask=4, ACE_Time_Value * timeout=0x0018e5b4) 
+ 2      ACEd.dll!ACE_Reactor_Token_T<ACE_Token>::sleep_hook() 
+ 3      ACEd.dll!ACE_Token::shared_acquire(void (void *)* sleep_hook_func=0x00000000, void * arg=0x00000000, ACE_Time_Value * timeout=0x00000000, ACE_Token::ACE_Token_Op_Type op_type=WRITE_TOKEN) 
+ 4      ACEd.dll!ACE_Token::acquire(ACE_Time_Value * timeout=0x00000000) 
+ 5      ACEd.dll!ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire() 
+ 6      ACEd.dll!ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >(ACE_Reactor_Token_T<ACE_Token> & l={...}) 
+ 7      ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::close() 
+ 8      ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::~ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >() 
+ 9      OpenDDS_Dcpsd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::`scalar deleting destructor'() 
+ 10     ACEd.dll!ACE_Reactor::~ACE_Reactor() 
+ 11     OpenDDS_Dcpsd.dll!ACE_Reactor::`scalar deleting destructor'() 
+ 12     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::Service_Participant::~Service_Participant() 
+ 13     OpenDDS_Dcpsd.dll!ACE_Singleton<OpenDDS::DCPS::Service_Participant,ACE_Thread_Mutex>::~ACE_Singleton<OpenDDS::DCPS::Service_Participant,ACE_Thread_Mutex>() 
+ 14     OpenDDS_Dcpsd.dll!ACE_Singleton<OpenDDS::DCPS::Service_Participant,ACE_Thread_Mutex>::`scalar deleting destructor'() 
+ 15     OpenDDS_Dcpsd.dll!ACE_Singleton<OpenDDS::DCPS::Service_Participant,ACE_Thread_Mutex>::cleanup(void * __formal=0x00000000) 
+ 16     ACEd.dll!ace_cleanup_destroyer(ACE_Cleanup * object=0x00632520, void * param=0x00000000) 
+ 17     ACEd.dll!ACE_OS_Exit_Info::call_hooks() 
+ 18     ACEd.dll!ACE_Object_Manager::fini() 
+ 19     ACEd.dll!ACE::fini() 
+ 20     ACEd.dll!ACE_Main_Base::~ACE_Main_Base() 
+ 21     publisher.exe!ACE_Main::~ACE_Main() 
+ 22     publisher.exe!main(int argc=1, char * * argv=0x00630990) 
+ 23     publisher.exe!__tmainCRTStartup() 
+ 24     publisher.exe!mainCRTStartup() 
+ 25     kernel32.dll!758aed6c() 
+ 26     [Frames below may be incorrect and/or missing, no symbols loaded for kernel32.dll]
+ 27     ntdll.dll!7708377b() 
+ 28     ntdll.dll!7708374e() 
+
+Callstack for Thread 2 (Thread Id: 4844 (0x12ec)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a04() 
+ 4      ntdll.dll!7704fe39() 
+ 5      kernel32.dll!758aed6c() 
+ 6      ntdll.dll!7708377b() 
+ 7      ntdll.dll!7708374e() 
+
+Callstack for Thread 3 (Thread Id: 1124 (0x464)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      ntdll.dll!77052278() 
+ 5      ntdll.dll!7705215c() 
+ 6      ACEd.dll!ACE_OS::thread_mutex_lock(_RTL_CRITICAL_SECTION * m=0x0063f1ec) 
+ 7      ACEd.dll!ACE_Thread_Mutex::acquire() 
+ 8      ACEd.dll!ACE_Token::ACE_Token_Queue_Entry::wait(ACE_Time_Value * timeout=0x00000000, ACE_Thread_Mutex & lock={...}) 
+ 9      ACEd.dll!ACE_Token::renew(int requeue_position=-1, ACE_Time_Value * timeout=0x00000000) 
+ 10     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::renew() 
+ 11     ACEd.dll!ACE_Select_Reactor_Notify::handle_input(void * handle=0x000001e0) 
+ 12     ACEd.dll!ACE_Select_Reactor_Notify::dispatch_notifications(int & number_of_active_handles=0, ACE_Handle_Set & rd_mask={...}) 
+ 13     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_notification_handlers(ACE_Select_Reactor_Handle_Set & dispatch_set={...}, int & number_of_active_handles=0, int & number_of_handlers_dispatched=0) 
+ 14     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch(int active_handle_count=0, ACE_Select_Reactor_Handle_Set & dispatch_set={...}) 
+ 15     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i(ACE_Time_Value * max_wait_time=0x00000000) 
+ 16     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value * max_wait_time=0x00000000) 
+ 17     ACEd.dll!ACE_Reactor::run_reactor_event_loop(int (ACE_Reactor *)* eh=0x00000000) 
+ 18     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::Service_Participant::ReactorTask::svc() 
+ 19     ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00632560) 
+ 20     ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 21     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 22     ACEd.dll!ace_thread_adapter(void * args=0x00643ae0) 
+ 23     msvcr100d.dll!_callthreadstartex() 
+ 24     msvcr100d.dll!_threadstartex(void * ptd=0x0064cc88) 
+ 25     kernel32.dll!758aed6c() 
+ 26     ntdll.dll!7708377b() 
+ 27     ntdll.dll!7708374e() 
+
+Callstack for Thread 4 (Thread Id: 4556 (0x11cc)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      mswsock.dll!74c217cd() 
+ 5      mswsock.dll!74c26d30() 
+ 6      ws2_32.dll!771e2f7d() 
+ 7      ws2_32.dll!771e6a28() 
+ 8      ACEd.dll!ACE_OS::select(int width=0, fd_set * rfds=0x00661e58, fd_set * wfds=0x00000000, fd_set * efds=0x00000000, const ACE_Time_Value * timeout=0x00000000) 
+ 9      ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::wait_for_multiple_events(ACE_Select_Reactor_Handle_Set & dispatch_set={...}, ACE_Time_Value * max_wait_time=0x00000000) 
+ 10     ACEd.dll!ACE_TP_Reactor::get_event_for_dispatching(ACE_Time_Value * max_wait_time=0x00000000) 
+ 11     ACEd.dll!ACE_TP_Reactor::dispatch_i(ACE_Time_Value * max_wait_time=0x00000000, ACE_TP_Token_Guard & guard={...}) 
+ 12     ACEd.dll!ACE_TP_Reactor::handle_events(ACE_Time_Value * max_wait_time=0x00000000) 
+ 13     ACEd.dll!ACE_Reactor::handle_events(ACE_Time_Value * max_wait_time=0x00000000) 
+ 14     TAOd.dll!TAO_ORB_Core::run(ACE_Time_Value * tv=0x00000000, int perform_work=0) 
+ 15     TAOd.dll!CORBA::ORB::run(ACE_Time_Value * tv=0x00000000) 
+ 16     TAOd.dll!CORBA::ORB::run() 
+ 17     OpenDDS_InfoRepoDiscoveryd.dll!OpenDDS::DCPS::InfoRepoDiscovery::OrbRunner::svc() 
+ 18     ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00644fe0) 
+ 19     ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 20     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 21     ACEd.dll!ace_thread_adapter(void * args=0x0066a000) 
+ 22     msvcr100d.dll!_callthreadstartex() 
+ 23     msvcr100d.dll!_threadstartex(void * ptd=0x0066a2c8) 
+ 24     kernel32.dll!758aed6c() 
+ 25     ntdll.dll!7708377b() 
+ 26     ntdll.dll!7708374e() 
+
+Callstack for Thread 5 (Thread Id: 512 (0x200)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!770663a4() 
+ 4      mswsock.dll!74c2635c() 
+ 5      kernel32.dll!758aed6c() 
+ 6      ntdll.dll!7708377b() 
+ 7      ntdll.dll!7708374e() 
+ 8      mswsock.dll!74c262ee() 
+ 9      mswsock.dll!74c262ee() 
