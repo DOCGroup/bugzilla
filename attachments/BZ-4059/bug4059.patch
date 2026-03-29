@@ -1,0 +1,45 @@
+Index: Stub.inl
+===================================================================
+--- Stub.inl	(revision 2064)
++++ Stub.inl	(working copy)
+@@ -248,6 +248,12 @@
+   return this->forward_profiles_;
+ }
+ 
++ACE_INLINE TAO_MProfile *
++TAO_Stub::forward_profiles (void)
++{
++  return this->forward_profiles_;
++}
++
+ ACE_INLINE CORBA::Boolean
+ TAO_Stub::is_collocated (void) const
+ {
+Index: Stub.h
+===================================================================
+--- Stub.h	(revision 2064)
++++ Stub.h	(working copy)
+@@ -144,6 +144,9 @@
+   /// Obtain a pointer to the forwarded profile set
+   const TAO_MProfile *forward_profiles (void) const;
+ 
++  /// Obtain a pointer to the forwarded profile set
++  TAO_MProfile *forward_profiles (void);
++
+   /// True if permanent location forward occured, in this case the lock must be set and the
+ 
+   // Manage forward and base profiles.
+Index: RTCORBA/RT_Invocation_Endpoint_Selectors.cpp
+===================================================================
+--- RTCORBA/RT_Invocation_Endpoint_Selectors.cpp	(revision 2064)
++++ RTCORBA/RT_Invocation_Endpoint_Selectors.cpp	(working copy)
+@@ -97,7 +97,8 @@
+     {
+       // Find the profiles that match the current protocol.
+       TAO_Profile *profile = 0;
+-      TAO_MProfile &mprofile = r.stub ()->base_profiles ();
++      TAO_MProfile &mprofile = (r.stub ()->forward_profiles() == 0) ? 
++	r.stub ()->base_profiles () : *r.stub ()->forward_profiles();
+ 
+       for (TAO_PHandle i = 0;
+            i < mprofile.profile_count ();
