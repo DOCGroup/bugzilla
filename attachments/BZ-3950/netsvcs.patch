@@ -1,0 +1,267 @@
+diff -upr netsvcs//lib/Name_Handler.cpp ../modified-ace-6.0.1/netsvcs//lib/Name_Handler.cpp
+--- netsvcs//lib/Name_Handler.cpp	2010-09-08 11:49:47.000000000 -0700
++++ ../modified-ace-6.0.1/netsvcs//lib/Name_Handler.cpp	2011-03-03 02:26:55.676584040 -0800
+@@ -7,6 +7,7 @@
+ #include "Name_Handler.h"
+ #include "ace/Signal.h"
+ #include "ace/OS_NS_string.h"
++#include "ace/CDR_Stream.h"
+ 
+ // Simple macro that does bitwise AND -- useful in table lookup
+ #define ACE_TABLE_MAP(INDEX, MASK) (INDEX & MASK)
+@@ -160,48 +161,71 @@ ACE_Name_Handler::send_reply (ACE_INT32
+                               ACE_UINT32 err)
+ {
+   ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::send_reply"));
+-  void *buf;
++
++  // set corresponding reply values
+   this->name_reply_.msg_type (status);
+   this->name_reply_.errnum (err);
+ 
+-  this->name_reply_.init ();
+-  int len = this->name_reply_.encode (buf);
++  // ensure correct internal length
++  this->name_reply_.init();
+ 
+-  if (len == -1)
+-    return -1;
++  ACE_OutputCDR out(
++      ACE_CDR::MAX_ALIGNMENT 
++      + 4 // for storing the byte order
++      + this->name_reply_.length() // length created by init()
++    );
++
++  // write out stream
++  out << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER);
++  out << this->name_reply_;
+ 
+-  ssize_t n = this->peer ().send (buf, len);
++  // send reply message
++  ssize_t n = this->peer ().send (out.begin()->rd_ptr(), out.length());
+ 
+-  if (n != len)
++  if (n != ssize_t(out.length()))
++  {
+     ACE_ERROR_RETURN ((LM_ERROR,
+                        ACE_TEXT ("%p\n, expected len = %d, actual len = %d"),
+                        ACE_TEXT ("send failed"),
+-                       len,
++                       out.length(),
+                        n),
+                       -1);
+-  else
++  } else {
+     return 0;
++  }
+ }
+ 
+ /* VIRTUAL */ int
+ ACE_Name_Handler::send_request (ACE_Name_Request &request)
+ {
+   ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::send_request"));
+-  void *buffer;
+-  ssize_t length = request.encode (buffer);
+ 
+-  if (length == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("%p\n"),
+-                       ACE_TEXT ("encode failed")),
+-                      -1);
+-  // Transmit request via a blocking send.
++  ACE_OutputCDR header(ACE_CDR::MAX_ALIGNMENT + 8);
+ 
+-  if (this->peer ().send_n (buffer, length) != length)
++  // ensure enough buffer size (to prevent internal resize)
++  ACE_OutputCDR payload(request.length() + ACE_CDR::DEFAULT_BUFSIZE);
++  payload << request;
++
++  ACE_CDR::ULong p_size = payload.length();
++
++  header << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER);
++  header << p_size;
++
++  iovec iov[2];
++  iov[0].iov_base = header.begin ()->rd_ptr ();
++  iov[0].iov_len  = 8;
++  iov[1].iov_base = payload.begin ()->rd_ptr ();
++  iov[1].iov_len  = p_size;
++
++  // send message vector
++  if (this->peer_.sendv_n (iov, 2) == -1)
++  {
+     ACE_ERROR_RETURN ((LM_ERROR,
+                        ACE_TEXT ("%p\n"),
+                        ACE_TEXT ("send_n failed")),
+                       -1);
++  }
++
+   return 0;
+ }
+ 
+@@ -259,65 +283,89 @@ ACE_Name_Handler::dispatch (void)
+ ACE_Name_Handler::recv_request (void)
+ {
+   ACE_TRACE (ACE_TEXT ("ACE_Name_Handler::recv_request"));
+-  // Read the first 4 bytes to get the length of the message This
+-  // implementation assumes that the first 4 bytes are the length of
+-  // the message.
+-  ssize_t n = this->peer ().recv ((void *) &this->name_request_,
+-                                  sizeof (ACE_UINT32));
++
++  ACE_Message_Block *header = 0;
++  ACE_CDR::Boolean byte_order;
++
++  //create new MessageBlock for header data
++  ACE_NEW_RETURN (header,
++    ACE_Message_Block (ACE_DEFAULT_CDR_BUFSIZE),
++    -1);
++
++  //set pointer under auto_ptr control
++  auto_ptr <ACE_Message_Block> header_ap (header);
++
++  // Align the Message Block for a CDR stream
++  ACE_CDR::mb_align (header_ap.get());
++
++  // receive header data from peer-stream
++  ssize_t n = this->peer_.recv (header_ap->wr_ptr(), 8);
++
+   switch (n)
+     {
+     case -1:
+-      /* FALLTHROUGH */
++      // FALLTHROUGH
+       ACE_DEBUG ((LM_DEBUG,
+-                  ACE_TEXT ("****************** recv_request returned -1\n")));
++                  ACE_TEXT ("****************** recv_reply returned -1\n")));
+     default:
+       ACE_ERROR ((LM_ERROR,
+                   ACE_TEXT ("%p got %d bytes, expected %d bytes\n"),
+                   ACE_TEXT ("recv failed"),
+                   n,
+-                  sizeof (ACE_UINT32)));
+-      /* FALLTHROUGH */
++                  8));
++      // FALLTHROUGH
+     case 0:
+-      // We've shutdown unexpectedly, let's abandon the connection.
+-      this->abandon ();
++      // We've shutdown unexpectedly
+       return -1;
+-      /* NOTREACHED */
+-    case sizeof (ACE_UINT32):
++      // NOTREACHED
++    case 8:
+       {
+-        // Transform the length into host byte order.
+-        ssize_t length = ACE_NTOHL (this->name_request_.length ());
++        header_ap->wr_ptr (8);
++
++        // Create a CDR stream to parse the header.
++        ACE_InputCDR header_cdr (header_ap.get());
++
++        // Extract the byte-order and use helper methods to disambiguate
++        // octet, booleans, and chars.
++        header_cdr >> ACE_InputCDR::to_boolean (byte_order);
++        header_cdr.reset_byte_order (byte_order);
++
++        ACE_CDR::ULong payload_size;
++        header_cdr >> payload_size;
+ 
+         // Do a sanity check on the length of the message.
+-        if (length > (ssize_t) sizeof this->name_request_)
++        if (payload_size > (ssize_t) sizeof this->name_request_)
+           {
+             ACE_ERROR ((LM_ERROR,
+                         ACE_TEXT ("length %d too long\n"),
+-                        length));
++                        payload_size));
+             return this->abandon ();
+           }
+ 
++        ACE_Message_Block *payload;
++        ACE_NEW_RETURN(payload, ACE_Message_Block(payload_size), -1);
++        auto_ptr <ACE_Message_Block> payload_ap(payload);
++
++        ACE_CDR::mb_align(payload);
++
+         // Receive the rest of the request message.
+         // @@ beware of blocking read!!!.
+-        n = this->peer ().recv ((void *) (((char *) &this->name_request_)
+-                                        + sizeof (ACE_UINT32)),
+-                                length - sizeof (ACE_UINT32));
++        n = this->peer_.recv (payload_ap.get()->wr_ptr(),
++                              payload_size);
+ 
+         // Subtract off the size of the part we skipped over...
+-        if (n != (length - (ssize_t) sizeof (ACE_UINT32)))
+-          {
+-            ACE_ERROR ((LM_ERROR, ACE_TEXT ("%p expected %d, got %d\n"),
+-                       ACE_TEXT ("invalid length"), length, n));
+-            return this->abandon ();
+-          }
+-
+-        // Decode the request into host byte order.
+-        if (this->name_request_.decode () == -1)
+-          {
+-            ACE_ERROR ((LM_ERROR,
+-                        ACE_TEXT ("%p\n"),
+-                        ACE_TEXT ("decode failed")));
+-            return this->abandon ();
+-          }
++        if (n != ssize_t(payload_size))
++        {
++          ACE_ERROR ((LM_ERROR, ACE_TEXT ("%p expected %d, got %d\n"),
++             ACE_TEXT ("invalid length"), payload_size, n));
++          return this->abandon ();
++        }
++
++        payload->wr_ptr(payload_size);
++        // get payload with correct byte order
++        ACE_InputCDR payload_cdr(payload, byte_order);
++        // extract reply object
++        payload_cdr >> this->name_request_;
+       }
+     }
+   return 0;
+@@ -360,6 +408,10 @@ ACE_Name_Handler::shared_bind (int rebin
+                          this->name_request_.name_len () / sizeof (ACE_WCHAR_T));
+   ACE_NS_WString a_value (this->name_request_.value (),
+                           this->name_request_.value_len () / sizeof (ACE_WCHAR_T));
++
++  ACE_CString type(this->name_request_.type(), 
++     this->name_request_.type_len());
++
+   int result;
+   if (rebind == 0)
+     {
+@@ -369,7 +421,7 @@ ACE_Name_Handler::shared_bind (int rebin
+ #endif /* 0 */
+       result = this->naming_context ()->bind (a_name,
+                                                   a_value,
+-                                                  this->name_request_.type ());
++                                                  type.c_str());
+     }
+   else
+     {
+@@ -379,7 +431,7 @@ ACE_Name_Handler::shared_bind (int rebin
+ #endif /* 0 */
+       result = this->naming_context ()->rebind (a_name,
+                                                     a_value,
+-                                                    this->name_request_.type ());
++                                                    type.c_str());
+       if (result == 1)
+         result = 0;
+     }
+diff -upr netsvcs//servers/svc.conf ../modified-ace-6.0.1/netsvcs//servers/svc.conf
+--- netsvcs//servers/svc.conf	2008-03-04 06:51:23.000000000 -0800
++++ ../modified-ace-6.0.1/netsvcs//servers/svc.conf	2011-03-03 02:27:06.060583985 -0800
+@@ -10,7 +10,7 @@
+ 
+ dynamic Logger Service_Object * ACE:_make_ACE_Logging_Strategy() "-w -s foobar -f STDERR|OSTREAM|VERBOSE"
+ dynamic Time_Service Service_Object * netsvcs:_make_ACE_TS_Server_Acceptor() "-p 20222"
+-dynamic Name_Server Service_Object * netsvcs:_make_ACE_Name_Acceptor() "-p 20006"
++dynamic Name_Server Service_Object * netsvcs:_make_ACE_Name_Acceptor() "main -p 20006"
+ # This service is disabled by default -- only enable it ACE is compiled with ACE_HAS_TOKENS_LIBRARY.
+ # dynamic Token_Service Service_Object * netsvcs:_make_ACE_Token_Acceptor() "-p 20202"
+ dynamic Server_Logging_Service Service_Object * netsvcs:_make_ACE_Server_Logging_Acceptor() active "-p 20009"
