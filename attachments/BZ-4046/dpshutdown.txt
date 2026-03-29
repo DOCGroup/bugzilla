@@ -1,0 +1,422 @@
+
+^C
+johnny@m4500jw:~/ACE/OpenDDS/tests/DCPS/DpShutdown> ./run_test.pl debug
+././dpshutdown -DCPSDebugLevel 10  
+(16010|140233075169056) NOTICE: not using file configuration - no configuration file specified.
+(16010|140233075169056) NOTICE: Service_Participant::intializeScheduling() - no scheduling policy specified, not setting policy.
+(16010|140233075169056) Service_Participant::set_repo_domain: Domain[ 11] = Repo[ DEFAULT_RTPS].
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 10160
+(16010|140233075169056) WARNING: Could not find FQDN. Using "127.0.0.1" as fully qualified hostname, please correct system configuration.
+(16010|140233075169056) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 698d20 with 20 chunks
+(16010|140233075169056) DataReaderImpl::enable Cached_Allocator_With_Overflow 699210 with 20 chunks
+(16010|140233075169056) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(16010|140233075169056) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 69c030 with 20 chunks
+(16010|140233075169056) DataReaderImpl::enable Cached_Allocator_With_Overflow 69cf20 with 20 chunks
+(16010|140233075169056) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(16010|140233075169056) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 69fd40 with 20 chunks
+(16010|140233075169056) DataReaderImpl::enable Cached_Allocator_With_Overflow 6a14f0 with 20 chunks
+(16010|140233075169056) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(16010|140233075169056) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6a4310 with 20 chunks
+(16010|140233075169056) DataReaderImpl::enable Cached_Allocator_With_Overflow 6a5840 with 20 chunks
+(16010|140233075169056) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+Created participant 1 with instance handle 2
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 10162
+(16010|140233075169056) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6ecdd0 with 20 chunks
+(16010|140233075169056) DataReaderImpl::enable Cached_Allocator_With_Overflow 6ed2c0 with 20 chunks
+(16010|140233075169056) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(16010|140233075169056) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f00e0 with 20 chunks
+(16010|140233075169056) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f0fd0 with 20 chunks
+(16010|140233075169056) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(16010|140233075169056) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f3df0 with 20 chunks
+(16010|140233075169056) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f55a0 with 20 chunks
+(16010|140233075169056) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(16010|140233075169056) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f83c0 with 20 chunks
+(16010|140233075169056) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f98f0 with 20 chunks
+(16010|140233075169056) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+Created participant 2 with instance handle 2
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233014306560) Spdp::data_received - 01030026.b9c860dc.3e8a0000.000001c1(d8950b1c) discovered 01030026.b9c860dc.3e8a0001.000001c1(e5f522ac) lease 300s
+(16010|140233075169056) MessageDataWriterImpl::enable_specific is unbounded data - allocate from heap
+(16010|140233014306560) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) MessageDataWriterImpl::enable_specific-mb Cached_Allocator_With_Overflow 6fd610 with 200 chunks
+(16010|140233075169056) MessageDataWriterImpl::enable_specific-db Cached_Allocator_With_Overflow 701550 with 20 chunks
+(16010|140233014306560) ConditionImpl::signal_all()
+(16010|140233014306560) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(16010|140233014306560) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16010|140233014306560) ConditionImpl::signal_all()
+(16010|140233075169056) WriteDataContainer sample_list_element_allocator 702518 with 20 chunks
+(16010|140233005913856) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3e8a0000.000003c7(3c0ccab) <--> with remote publication  01030026.b9c860dc.3e8a0001.000003c2(4eca1194).
+(16010|140233014306560) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(16010|140233075169056) WriteDataContainer transport_send_element_allocator 702590 with 20 chunks
+(16010|140233014306560) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16010|140233075169056) DataWriterImpl::enable-mb Cached_Allocator_With_Overflow 706fd0 with 20 chunks
+(16010|140233075169056) DataWriterImpl::enable-db Cached_Allocator_With_Overflow 70af10 with 20 chunks
+(16010|140233075169056) DataWriterImpl::enable-header Cached_Allocator_With_Overflow 70b660 with 20 chunks
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Sedp::write_publication_data - not currently associated, dropping msg.
+(16010|140233075169056) Sedp::add_publication - calling match_endpoints
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) ERROR: DomainParticipantFactoryImpl::delete_participant: the participant 01030026.b9c860dc.3e8a0000.000001c1(d8950b1c) is not empty.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16010|140233075169056) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+^C
+johnny@m4500jw:~/ACE/OpenDDS/tests/DCPS/DpShutdown> ./run_test.pl debug
+././dpshutdown -DCPSDebugLevel 10  
+(16035|139791637649184) NOTICE: not using file configuration - no configuration file specified.
+(16035|139791637649184) NOTICE: Service_Participant::intializeScheduling() - no scheduling policy specified, not setting policy.
+(16035|139791637649184) Service_Participant::set_repo_domain: Domain[ 11] = Repo[ DEFAULT_RTPS].
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 10160
+(16035|139791637649184) WARNING: Could not find FQDN. Using "127.0.0.1" as fully qualified hostname, please correct system configuration.
+(16035|139791637649184) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 698d20 with 20 chunks
+(16035|139791637649184) DataReaderImpl::enable Cached_Allocator_With_Overflow 699210 with 20 chunks
+(16035|139791637649184) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(16035|139791637649184) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 69c030 with 20 chunks
+(16035|139791637649184) DataReaderImpl::enable Cached_Allocator_With_Overflow 69cf20 with 20 chunks
+(16035|139791637649184) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(16035|139791637649184) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 69fd40 with 20 chunks
+(16035|139791637649184) DataReaderImpl::enable Cached_Allocator_With_Overflow 6a14f0 with 20 chunks
+(16035|139791637649184) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(16035|139791637649184) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6a4310 with 20 chunks
+(16035|139791637649184) DataReaderImpl::enable Cached_Allocator_With_Overflow 6a5840 with 20 chunks
+(16035|139791637649184) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+Created participant 1 with instance handle 2
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 10162
+(16035|139791637649184) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6ecdd0 with 20 chunks
+(16035|139791637649184) DataReaderImpl::enable Cached_Allocator_With_Overflow 6ed2c0 with 20 chunks
+(16035|139791637649184) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(16035|139791637649184) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f00e0 with 20 chunks
+(16035|139791637649184) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f0fd0 with 20 chunks
+(16035|139791637649184) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(16035|139791637649184) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f3df0 with 20 chunks
+(16035|139791637649184) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f55a0 with 20 chunks
+(16035|139791637649184) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(16035|139791637649184) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f83c0 with 20 chunks
+(16035|139791637649184) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f98f0 with 20 chunks
+(16035|139791637649184) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+Created participant 2 with instance handle 2
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) MessageDataWriterImpl::enable_specific is unbounded data - allocate from heap
+(16035|139791576786688) Spdp::data_received - 01030026.b9c860dc.3ea30001.000001c1(bfd05ee3) discovered 01030026.b9c860dc.3ea30000.000001c1(82b07753) lease 300s
+(16035|139791637649184) MessageDataWriterImpl::enable_specific-mb Cached_Allocator_With_Overflow 6fd610 with 200 chunks
+(16035|139791637649184) MessageDataWriterImpl::enable_specific-db Cached_Allocator_With_Overflow 701550 with 20 chunks
+(16035|139791637649184) WriteDataContainer sample_list_element_allocator 702518 with 20 chunks
+(16035|139791637649184) WriteDataContainer transport_send_element_allocator 702590 with 20 chunks
+(16035|139791637649184) DataWriterImpl::enable-mb Cached_Allocator_With_Overflow 706fd0 with 20 chunks
+(16035|139791637649184) DataWriterImpl::enable-db Cached_Allocator_With_Overflow 70af10 with 20 chunks
+(16035|139791576786688) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) DataWriterImpl::enable-header Cached_Allocator_With_Overflow 70b660 with 20 chunks
+(16035|139791576786688) ConditionImpl::signal_all()
+(16035|139791576786688) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(16035|139791576786688) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16035|139791576786688) ConditionImpl::signal_all()
+(16035|139791576786688) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(16035|139791576786688) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16035|139791536658176) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3ea30001.000003c7(64859954) <--> with remote publication  01030026.b9c860dc.3ea30000.000003c2(298f446b).
+(16035|139791576786688) Spdp::data_received - 01030026.b9c860dc.3ea30000.000001c1(82b07753) discovered 01030026.b9c860dc.3ea30001.000001c1(bfd05ee3) lease 300s
+(16035|139791576786688) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791576786688) ConditionImpl::signal_all()
+(16035|139791576786688) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(16035|139791576786688) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16035|139791568393984) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3ea30000.000003c7(59e5b0e4) <--> with remote publication  01030026.b9c860dc.3ea30001.000003c2(14ef6ddb).
+(16035|139791576786688) ConditionImpl::signal_all()
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791576786688) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(16035|139791576786688) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16035|139791637649184) Sedp::write_publication_data - not currently associated, dropping msg.
+(16035|139791637649184) Sedp::add_publication - calling match_endpoints
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) ERROR: DomainParticipantFactoryImpl::delete_participant: the participant 01030026.b9c860dc.3ea30000.000001c1(82b07753) is not empty.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791637649184) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16035|139791536658176) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.3ea30001.000003c2(14ef6ddb) <--> with remote subscription 01030026.b9c860dc.3ea30000.000003c7(59e5b0e4).
+(16035|139791568393984) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.3ea30000.000003c2(298f446b) <--> with remote subscription 01030026.b9c860dc.3ea30001.000003c7(64859954).
+(16035|139791536658176) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3ea30001.000004c7(2bc40f93) <--> with remote publication  01030026.b9c860dc.3ea30000.000004c2(66ced2ac).
+(16035|139791568393984) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3ea30000.000004c7(16a42623) <--> with remote publication  01030026.b9c860dc.3ea30001.000004c2(5baefb1c).
+(16035|139791568393984) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.3ea30000.000004c2(66ced2ac) <--> with remote subscription 01030026.b9c860dc.3ea30001.000004c7(2bc40f93).
+(16035|139791536658176) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.3ea30001.000004c2(5baefb1c) <--> with remote subscription 01030026.b9c860dc.3ea30000.000004c7(16a42623).
+(16035|139791637649184) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ea30000.000003c2(298f446b) <--> with remote 01030026.b9c860dc.3ea30001.000003c7(64859954).
+(16035|139791637649184) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ea30000.000003c7(59e5b0e4) <--> with remote 01030026.b9c860dc.3ea30001.000003c2(14ef6ddb).
+(16035|139791637649184) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ea30000.000004c2(66ced2ac) <--> with remote 01030026.b9c860dc.3ea30001.000004c7(2bc40f93).
+(16035|139791637649184) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ea30000.000004c7(16a42623) <--> with remote 01030026.b9c860dc.3ea30001.000004c2(5baefb1c).
+(16035|139791637649184) SubscriberImpl::lookup_datareader, The datareader(topic_name=DCPSParticipant) is not found
+(16035|139791637649184) Spdp::remove_discovered_participant - erasing 01030026.b9c860dc.3ea30001.000001c1(bfd05ee3)
+(16035|139791576786688) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ea30001.000003c2(14ef6ddb) <--> with remote 01030026.b9c860dc.3ea30000.000003c7(59e5b0e4).
+(16035|139791576786688) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ea30001.000003c7(64859954) <--> with remote 01030026.b9c860dc.3ea30000.000003c2(298f446b).
+(16035|139791576786688) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ea30001.000004c2(5baefb1c) <--> with remote 01030026.b9c860dc.3ea30000.000004c7(16a42623).
+Shuting down tsp with one participant still registered
+(16035|139791576786688) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ea30001.000004c7(2bc40f93) <--> with remote 01030026.b9c860dc.3ea30000.000004c2(66ced2ac).
+(16035|139791576786688) ConditionImpl::signal_all()
+(16035|139791576786688) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(16035|139791576786688) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16035|139791576786688) ConditionImpl::signal_all()
+(16035|139791576786688) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(16035|139791576786688) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16035|139791576786688) Spdp::remove_discovered_participant - erasing 01030026.b9c860dc.3ea30000.000001c1(82b07753)
+ACE_ASSERT: file DCPS/Service_Participant.cpp, line 212 assertion failed for '!CORBA::is_nil(orb_.in())'.Aborting...
+test PASSED.
+johnny@m4500jw:~/ACE/OpenDDS/tests/DCPS/DpShutdown> ./run_test.pl debug
+././dpshutdown -DCPSDebugLevel 10  
+(16060|139889198958368) NOTICE: not using file configuration - no configuration file specified.
+(16060|139889198958368) NOTICE: Service_Participant::intializeScheduling() - no scheduling policy specified, not setting policy.
+(16060|139889198958368) Service_Participant::set_repo_domain: Domain[ 11] = Repo[ DEFAULT_RTPS].
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 10160
+(16060|139889198958368) WARNING: Could not find FQDN. Using "127.0.0.1" as fully qualified hostname, please correct system configuration.
+(16060|139889198958368) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 698d20 with 20 chunks
+(16060|139889198958368) DataReaderImpl::enable Cached_Allocator_With_Overflow 699210 with 20 chunks
+(16060|139889198958368) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(16060|139889198958368) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 69c030 with 20 chunks
+(16060|139889198958368) DataReaderImpl::enable Cached_Allocator_With_Overflow 69cf20 with 20 chunks
+(16060|139889198958368) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(16060|139889198958368) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 69fd40 with 20 chunks
+(16060|139889198958368) DataReaderImpl::enable Cached_Allocator_With_Overflow 6a14f0 with 20 chunks
+(16060|139889198958368) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(16060|139889198958368) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6a4310 with 20 chunks
+(16060|139889198958368) DataReaderImpl::enable Cached_Allocator_With_Overflow 6a5840 with 20 chunks
+(16060|139889198958368) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+Created participant 1 with instance handle 2
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 10162
+(16060|139889198958368) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6ecdd0 with 20 chunks
+(16060|139889198958368) DataReaderImpl::enable Cached_Allocator_With_Overflow 6ed2c0 with 20 chunks
+(16060|139889198958368) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(16060|139889198958368) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f00e0 with 20 chunks
+(16060|139889198958368) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f0fd0 with 20 chunks
+(16060|139889198958368) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(16060|139889198958368) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f3df0 with 20 chunks
+(16060|139889198958368) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f55a0 with 20 chunks
+(16060|139889198958368) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(16060|139889198958368) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f83c0 with 20 chunks
+(16060|139889198958368) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f98f0 with 20 chunks
+(16060|139889198958368) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+Created participant 2 with instance handle 2
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) MessageDataWriterImpl::enable_specific is unbounded data - allocate from heap
+(16060|139889138095872) Spdp::data_received - 01030026.b9c860dc.3ebc0000.000001c1(13269b74) discovered 01030026.b9c860dc.3ebc0001.000001c1(2e46b2c4) lease 300s
+(16060|139889198958368) MessageDataWriterImpl::enable_specific-mb Cached_Allocator_With_Overflow 6fd610 with 200 chunks
+(16060|139889198958368) MessageDataWriterImpl::enable_specific-db Cached_Allocator_With_Overflow 701550 with 20 chunks
+(16060|139889198958368) WriteDataContainer sample_list_element_allocator 702518 with 20 chunks
+(16060|139889138095872) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889129703168) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3ebc0000.000003c7(c8735cc3) <--> with remote publication  01030026.b9c860dc.3ebc0001.000003c2(857981fc).
+(16060|139889198958368) WriteDataContainer transport_send_element_allocator 702590 with 20 chunks
+(16060|139889198958368) DataWriterImpl::enable-mb Cached_Allocator_With_Overflow 706fd0 with 20 chunks
+(16060|139889198958368) DataWriterImpl::enable-db Cached_Allocator_With_Overflow 70af10 with 20 chunks
+(16060|139889198958368) DataWriterImpl::enable-header Cached_Allocator_With_Overflow 70b660 with 20 chunks
+(16060|139889138095872) ConditionImpl::signal_all()
+(16060|139889138095872) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(16060|139889138095872) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16060|139889138095872) ConditionImpl::signal_all()
+(16060|139889138095872) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(16060|139889138095872) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Sedp::write_publication_data - not currently associated, dropping msg.
+(16060|139889198958368) Sedp::add_publication - calling match_endpoints
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) ERROR: DomainParticipantFactoryImpl::delete_participant: the participant 01030026.b9c860dc.3ebc0000.000001c1(13269b74) is not empty.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16060|139889198958368) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+^C
+johnny@m4500jw:~/ACE/OpenDDS/tests/DCPS/DpShutdown> ./run_test.pl debug
+././dpshutdown -DCPSDebugLevel 10  
+(16085|139906573244192) NOTICE: not using file configuration - no configuration file specified.
+(16085|139906573244192) NOTICE: Service_Participant::intializeScheduling() - no scheduling policy specified, not setting policy.
+(16085|139906573244192) Service_Participant::set_repo_domain: Domain[ 11] = Repo[ DEFAULT_RTPS].
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 10160
+(16085|139906573244192) WARNING: Could not find FQDN. Using "127.0.0.1" as fully qualified hostname, please correct system configuration.
+(16085|139906573244192) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 698d20 with 20 chunks
+(16085|139906573244192) DataReaderImpl::enable Cached_Allocator_With_Overflow 699210 with 20 chunks
+(16085|139906573244192) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(16085|139906573244192) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 69c030 with 20 chunks
+(16085|139906573244192) DataReaderImpl::enable Cached_Allocator_With_Overflow 69cf20 with 20 chunks
+(16085|139906573244192) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(16085|139906573244192) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 69fd40 with 20 chunks
+(16085|139906573244192) DataReaderImpl::enable Cached_Allocator_With_Overflow 6a14f0 with 20 chunks
+(16085|139906573244192) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(16085|139906573244192) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6a4310 with 20 chunks
+(16085|139906573244192) DataReaderImpl::enable Cached_Allocator_With_Overflow 6a5840 with 20 chunks
+(16085|139906573244192) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+Created participant 1 with instance handle 2
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 10162
+(16085|139906573244192) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6ecdd0 with 20 chunks
+(16085|139906573244192) DataReaderImpl::enable Cached_Allocator_With_Overflow 6ed2c0 with 20 chunks
+(16085|139906573244192) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(16085|139906573244192) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f00e0 with 20 chunks
+(16085|139906573244192) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f0fd0 with 20 chunks
+(16085|139906573244192) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(16085|139906573244192) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f3df0 with 20 chunks
+(16085|139906573244192) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f55a0 with 20 chunks
+(16085|139906573244192) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(16085|139906573244192) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 6f83c0 with 20 chunks
+(16085|139906573244192) DataReaderImpl::enable Cached_Allocator_With_Overflow 6f98f0 with 20 chunks
+(16085|139906573244192) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+Created participant 2 with instance handle 2
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906512381696) Spdp::data_received - 01030026.b9c860dc.3ed50001.000001c1(3068bbf2) discovered 01030026.b9c860dc.3ed50000.000001c1(d089242) lease 300s
+(16085|139906573244192) MessageDataWriterImpl::enable_specific is unbounded data - allocate from heap
+(16085|139906573244192) MessageDataWriterImpl::enable_specific-mb Cached_Allocator_With_Overflow 6fd610 with 200 chunks
+(16085|139906573244192) MessageDataWriterImpl::enable_specific-db Cached_Allocator_With_Overflow 701550 with 20 chunks
+(16085|139906573244192) WriteDataContainer sample_list_element_allocator 702518 with 20 chunks
+(16085|139906573244192) WriteDataContainer transport_send_element_allocator 702590 with 20 chunks
+(16085|139906512381696) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) DataWriterImpl::enable-mb Cached_Allocator_With_Overflow 706fd0 with 20 chunks
+(16085|139906573244192) DataWriterImpl::enable-db Cached_Allocator_With_Overflow 70af10 with 20 chunks
+(16085|139906573244192) DataWriterImpl::enable-header Cached_Allocator_With_Overflow 70b660 with 20 chunks
+(16085|139906512381696) ConditionImpl::signal_all()
+(16085|139906512381696) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(16085|139906512381696) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16085|139906512381696) ConditionImpl::signal_all()
+(16085|139906512381696) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(16085|139906512381696) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16085|139906269570816) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3ed50001.000003c7(eb3d7c45) <--> with remote publication  01030026.b9c860dc.3ed50000.000003c2(a637a17a).
+(16085|139906512381696) Spdp::data_received - 01030026.b9c860dc.3ed50000.000001c1(d089242) discovered 01030026.b9c860dc.3ed50001.000001c1(3068bbf2) lease 300s
+(16085|139906512381696) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906512381696) ConditionImpl::signal_all()
+(16085|139906512381696) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(16085|139906503988992) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3ed50000.000003c7(d65d55f5) <--> with remote publication  01030026.b9c860dc.3ed50001.000003c2(9b5788ca).
+(16085|139906512381696) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16085|139906573244192) Sedp::write_publication_data - not currently associated, dropping msg.
+(16085|139906512381696) ConditionImpl::signal_all()
+(16085|139906573244192) Sedp::add_publication - calling match_endpoints
+(16085|139906512381696) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(16085|139906512381696) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) ERROR: DomainParticipantFactoryImpl::delete_participant: the participant 01030026.b9c860dc.3ed50000.000001c1(d089242) is not empty.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906573244192) Service_Participant::get_discovery: returning repository for domain 11, repo DEFAULT_RTPS.
+(16085|139906269570816) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.3ed50001.000003c2(9b5788ca) <--> with remote subscription 01030026.b9c860dc.3ed50000.000003c7(d65d55f5).
+(16085|139906503988992) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.3ed50000.000003c2(a637a17a) <--> with remote subscription 01030026.b9c860dc.3ed50001.000003c7(eb3d7c45).
+(16085|139906269570816) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3ed50001.000004c7(a47cea82) <--> with remote publication  01030026.b9c860dc.3ed50000.000004c2(e97637bd).
+(16085|139906503988992) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.3ed50000.000004c7(991cc332) <--> with remote publication  01030026.b9c860dc.3ed50001.000004c2(d4161e0d).
+(16085|139906503988992) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.3ed50000.000004c2(e97637bd) <--> with remote subscription 01030026.b9c860dc.3ed50001.000004c7(a47cea82).
+(16085|139906269570816) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.3ed50001.000004c2(d4161e0d) <--> with remote subscription 01030026.b9c860dc.3ed50000.000004c7(991cc332).
+(16085|139906573244192) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ed50000.000003c2(a637a17a) <--> with remote 01030026.b9c860dc.3ed50001.000003c7(eb3d7c45).
+(16085|139906573244192) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ed50000.000003c7(d65d55f5) <--> with remote 01030026.b9c860dc.3ed50001.000003c2(9b5788ca).
+(16085|139906573244192) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ed50000.000004c2(e97637bd) <--> with remote 01030026.b9c860dc.3ed50001.000004c7(a47cea82).
+(16085|139906573244192) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ed50000.000004c7(991cc332) <--> with remote 01030026.b9c860dc.3ed50001.000004c2(d4161e0d).
+(16085|139906573244192) SubscriberImpl::lookup_datareader, The datareader(topic_name=DCPSParticipant) is not found
+(16085|139906573244192) Spdp::remove_discovered_participant - erasing 01030026.b9c860dc.3ed50001.000001c1(3068bbf2)
+(16085|139906512381696) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ed50001.000003c2(9b5788ca) <--> with remote 01030026.b9c860dc.3ed50000.000003c7(d65d55f5).
+(16085|139906512381696) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ed50001.000003c7(eb3d7c45) <--> with remote 01030026.b9c860dc.3ed50000.000003c2(a637a17a).
+Shuting down tsp with one participant still registered
+(16085|139906512381696) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ed50001.000004c2(d4161e0d) <--> with remote 01030026.b9c860dc.3ed50000.000004c7(991cc332).
+(16085|139906512381696) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.3ed50001.000004c7(a47cea82) <--> with remote 01030026.b9c860dc.3ed50000.000004c2(e97637bd).
+(16085|139906512381696) ConditionImpl::signal_all()
+(16085|139906512381696) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(16085|139906512381696) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16085|139906512381696) ConditionImpl::signal_all()
+(16085|139906512381696) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(16085|139906512381696) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(16085|139906512381696) Spdp::remove_discovered_participant - erasing 01030026.b9c860dc.3ed50000.000001c1(d089242)
+ACE_ASSERT: file DCPS/Service_Participant.cpp, line 212 assertion failed for '!CORBA::is_nil(orb_.in())'.Aborting...
+test PASSED.
+johnny@m4500jw:~/ACE/OpenDDS/tests/DCPS/DpShutdown> cd ..
+johnny@m4500jw:~/ACE/OpenDDS/tests/DCPS> cd ..
+johnny@m4500jw:~/ACE/OpenDDS/tests> cd ..
+johnny@m4500jw:~/ACE/OpenDDS> svn up
+cle.pl
+U    ChangeLog
+Updated to revision 5670.
+johnny@m4500jw:~/ACE/OpenDDS> cle.pl
+WARNING: The following files are unknown to the revision control system:
+patch.txt
+contrib/wrapper/.swp.DDSWrapper_OpenDDS.mpc
+tests/DCPS/TopicReuse/tpreuse
+tests/DCPS/TopicReuse/MessengerTypeSupportImpl.cpp
+tests/DCPS/TopicReuse/MessengerTypeSupport.idl
+tests/DCPS/TopicReuse/MessengerTypeSupportImpl.h
+dds/DCPS/QOS_XML_Handler/Utils.cpp
+dds/DCPS/QOS_XML_Handler/.DataReaderQos_Handler.h.rej.kate-swp
+dds/DCPS/QOS_XML_Handler/Utils.h
+dds/DCPS/transport/simpleTCP
+examples/DCPS/ishapes/run.sh
+
+You are now ready to edit the ChangeLog.
+johnny@m4500jw:~/ACE/OpenDDS> svn up
+
