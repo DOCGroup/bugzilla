@@ -1,0 +1,13 @@
+--- Dev_Poll_Reactor.cpp	2012-04-10 08:59:16.818987000 +0100
++++ ACE_wrappers/ace/Dev_Poll_Reactor.cpp	2012-02-14 22:59:17.000000000 +0000
+@@ -1931,7 +1931,9 @@
+ int
+ ACE_Dev_Poll_Reactor::resumable_handler (void)
+ {
+-  return 1;
++  // @@ Is this correct?
++
++  return 0;
+ }
+ 
+ bool
