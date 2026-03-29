@@ -1,0 +1,80 @@
+Index: Bounded_Array_Sequence_T.h
+===================================================================
+--- Bounded_Array_Sequence_T.h	(revision 85014)
++++ Bounded_Array_Sequence_T.h	(working copy)
+@@ -53,7 +53,10 @@
+     return impl_.length();
+   }
+   inline void length(CORBA::ULong length) {
+-    impl_.length(length);
++    if (MAX >= length)
++      {
++        impl_.length(length);
++      }
+   }
+   inline value_type const & operator[](CORBA::ULong i) const {
+     return impl_[i];
+Index: Bounded_Basic_String_Sequence_T.h
+===================================================================
+--- Bounded_Basic_String_Sequence_T.h	(revision 85014)
++++ Bounded_Basic_String_Sequence_T.h	(working copy)
+@@ -65,7 +65,10 @@
+   /// @copydoc details::generic_sequence::length
+   inline void length(CORBA::ULong length) {
+     implementation_type::range::check_length(length, MAX);
+-    impl_.length(length);
++    if (MAX >= length)
++      {
++        impl_.length(length);
++      }
+   }
+   /// @copydoc details::generic_sequence::operator[]
+   inline const_element_type operator[](CORBA::ULong i) const {
+Index: Bounded_Object_Reference_Sequence_T.h
+===================================================================
+--- Bounded_Object_Reference_Sequence_T.h	(revision 85014)
++++ Bounded_Object_Reference_Sequence_T.h	(working copy)
+@@ -67,7 +67,10 @@
+   /// @copydoc details::generic_sequence::length
+   inline void length(CORBA::ULong length) {
+     implementation_type::range::check_length(length, MAX);
+-    impl_.length(length);
++    if (MAX >= length)
++      {
++        impl_.length(length);
++      }
+   }
+   /// @copydoc details::generic_sequence::operator[]
+   inline const_element_type operator[](CORBA::ULong i) const {
+Index: Bounded_Value_Sequence_T.h
+===================================================================
+--- Bounded_Value_Sequence_T.h	(revision 85014)
++++ Bounded_Value_Sequence_T.h	(working copy)
+@@ -60,7 +60,10 @@
+   /// @copydoc details::generic_sequence::length
+   inline void length(CORBA::ULong length) {
+     implementation_type::range::check_length(length, MAX);
+-    impl_.length(length);
++    if (MAX >= length)
++      {
++        impl_.length(length);
++      }
+   }
+   /// @copydoc details::generic_sequence::operator[]
+   inline value_type const & operator[](CORBA::ULong i) const {
+Index: Valuetype/Bounded_Valuetype_Sequence_T.h
+===================================================================
+--- Valuetype/Bounded_Valuetype_Sequence_T.h	(revision 85014)
++++ Valuetype/Bounded_Valuetype_Sequence_T.h	(working copy)
+@@ -61,7 +61,10 @@
+ 
+   inline void length(CORBA::ULong length) {
+     implementation_type::range::check_length(length, MAX);
+-    impl_.length(length);
++    if (MAX >= length)
++      {
++        impl_.length(length);
++      }
+   }
+   inline value_type const & operator[](CORBA::ULong i) const {
+     return impl_[i];
