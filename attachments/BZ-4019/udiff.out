@@ -1,0 +1,11 @@
+--- latest	2012-05-11 17:01:34.335761000 +0100
++++ new	2012-05-11 17:03:36.769898000 +0100
+@@ -2379,7 +2379,7 @@
+           // automatically - we may not know about it yet. If that's the
+           // case, a mod operation will fail with ENOENT. Retry it as
+           // an add.
+-          if (op == EPOLL_CTL_MOD && errno == ENOENT &&
++          if (op != EPOLL_CTL_MOD || errno != ENOENT ||
+               ::epoll_ctl (this->poll_fd_, EPOLL_CTL_ADD, handle, &epev) == -1)
+             return -1;
+         }
