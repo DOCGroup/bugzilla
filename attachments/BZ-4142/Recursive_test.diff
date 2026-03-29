@@ -1,0 +1,47 @@
+diff -ruN Recursive.orig/client.cpp Recursive/client.cpp
+--- Recursive.orig/client.cpp	2010-09-08 15:44:26.000000000 +0200
++++ Recursive/client.cpp	2013-10-31 10:25:46.014976155 +0100
+@@ -214,6 +214,19 @@
+   ::perform_invocation<Test::RecursiveUnion2> (hello,
+                                                the_any);
+ 
++  Test::RecursiveUnion3 foo3;
++  foo3.a (test_long);
++
++  the_any <<= foo3;
++
++  int n;
++  for (n=0; n < 200; ++n)
++  {
++    ::perform_invocation<Test::RecursiveUnion3> (hello,
++        the_any);
++  }
++
++
+   // Recursive member case.
+   Test::RecursiveUnionSeq seq;
+   seq.length (2);
+diff -ruN Recursive.orig/Test.idl Recursive/Test.idl
+--- Recursive.orig/Test.idl	2013-10-31 10:21:46.048838093 +0100
++++ Recursive/Test.idl	2013-10-31 10:18:26.765843958 +0100
+@@ -71,6 +71,20 @@
+     long i;
+   };
+ 
++  struct RecursiveStruct3;
++  typedef sequence<RecursiveStruct3> RecursiveStructSeq3;
++
++  union RecursiveUnion3 switch(short)
++  {
++          case 0: short a;
++          case 1: RecursiveStructSeq3 b;
++          case 2: RecursiveStructSeq3 c;
++  };
++  struct RecursiveStruct3 
++  {
++          RecursiveUnion3 uni;
++  };
++
+   union RecursiveUnionNoDefault;
+   typedef sequence<RecursiveUnionNoDefault> RecursiveUnionSeqNoDefault;
+ 
