@@ -1,0 +1,1925 @@
+johnny@m4700jw:~/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer> ./run_test.pl -manual
+>>> /home/johnny/ACE/master/atcd/TAO/orbsvcs/ImplRepo_Service/./tao_imr_locator -d 10 orbobjrefstyle url -t 5 -o /home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/implrepo.ior -ORBdebuglevel 10
+TAO (31283|140657605842752) - Did not find default svc.conf
+TAO (31283|140657605842752) - Completed initializing the process-wide service context
+TAO (31283|140657605842752) - Default ORB services initialization begins
+TAO (31283|140657605842752) - ORBInitializer_Registry::register_orb_initializer 0 @0x14c4b30
+TAO (31283|140657605842752) - ORBInitializer_Registry::register_orb_initializer 1 @0x14c31b0
+TAO (31283|140657605842752) - ORBInitializer_Registry::register_orb_initializer 2 @0x14c4bb0
+TAO (31283|140657605842752) - Default ORB services initialization completed
+TAO (31283|140657605842752) - We are the default ORB ...
+TAO (31283|140657605842752) - Initializing the orb-specific services
+TAO (31283|140657605842752) - Setting primary connection timeout hook
+TAO (31283|140657605842752) - TAO_Time_Policy_Manager: loaded time policy strategy 'TAO_SYSTEM_TIME_POLICY'
+TAO (31283|140657605842752) - Default_Resource_Factory - codeset manager=0x14df0e0
+TAO (31283|140657605842752) - Codeset_Manager_i::init_ccs, Loaded Codeset translator <UTF8_Latin1_Factory>, ncs = 00010001 tcs = 05010001
+TAO (31283|140657605842752) - UTF16_BOM_Translator: forceBE 0
+TAO (31283|140657605842752) - Loaded default protocol <IIOP_Factory>
+TAO (31283|140657605842752) - Created new ORB <TAO_ImR_Locator>
+TAO (31283|140657605842752) - IIOP_Acceptor::open_i, listening on: <192.168.192.113:55990>
+TAO (31283|140657605842752) - IIOP_Acceptor::open_i, listening on: <10.2.0.199:55990>
+TAO (31283|140657605842752) - IIOP_Acceptor::open_i, listening on: <192.168.122.1:55990>
+TAO (31283|140657605842752) - IIOP_Acceptor::open_i, listening on: <10.9.0.18:55990>
+ImR_Adapter::init with default servant
+TAO (31283|140657605842752) - TAO_Unique_Id_Strategy::bind_using_user_id: type=IDL:ImplementationRepository/Locator:1.0, id=0x496d706c5265706f5f536572766963
+TAO (31283|140657605842752) - Stub::base_profiles, acquired profile lock this = 0x150a700
+report_ior <IOR:010000002900000049444c3a496d706c656d656e746174696f6e5265706f7369746f72792f4c6f6361746f723a312e300000000004000000000000009800000001010200100000003139322e3136382e3139322e31313300b6da00004400000014010f004e5550000000210000000001000000526f6f74504f4100496d706c5265706f5f53657276696365000000000001000000496d706c5265706f5f5365727669636502000000000000000800000001414f20004f415401000000180000000175736501000100010000000100010509010100000000000000000094000000010102000b00000031302e322e302e313939002eb6da33004400000014010f004e5550000000210000000001000000526f6f74504f4100496d706c5265706f5f53657276696365000000000001000000496d706c5265706f5f5365727669636502000000000000000800000001000000004f415401000000180000000100000001000100010000000100010509010100000000000000000094000000010102000e0000003139322e3136382e3132322e3100b6da4400000014010f004e5550000000210000000001000000526f6f74504f4100496d706c5265706f5f53657276696365000000000001000000496d706c5265706f5f5365727669636502000000000000000800000001000000004f415401000000180000000100000001000100010000000100010509010100000000000000000090000000010102000a00000031302e392e302e313800b6da4400000014010f004e5550000000210000000001000000526f6f74504f4100496d706c5265706f5f53657276696365000000000001000000496d706c5265706f5f5365727669636502000000000000000800000001000000004f41540100000018000000010000000100010001000000010001050901010000000000>
+Implementation Repository: Running
+        Ping Interval : 10000ms
+        Startup Timeout : 5s
+        Persistence : Disabled
+        Multicast : Disabled
+        Debug : 10
+        Locked : False
+
+>>> /home/johnny/ACE/master/atcd/TAO/orbsvcs/ImplRepo_Service/./tao_imr_activator -d 10 orbobjrefstyle url -o /home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/activator.ior -ORBInitRef ImplRepoService=file:///home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/implrepo.ior -ORBdebuglevel 10
+TAO (31284|140632198408000) - Did not find default svc.conf
+TAO (31284|140632198408000) - Completed initializing the process-wide service context
+TAO (31284|140632198408000) - Default ORB services initialization begins
+TAO (31284|140632198408000) - ORBInitializer_Registry::register_orb_initializer 0 @0x12cd500
+TAO (31284|140632198408000) - ORBInitializer_Registry::register_orb_initializer 1 @0x12cbb80
+TAO (31284|140632198408000) - Default ORB services initialization completed
+TAO (31284|140632198408000) - We are the default ORB ...
+TAO (31284|140632198408000) - Initializing the orb-specific services
+TAO (31284|140632198408000) - Setting primary connection timeout hook
+TAO (31284|140632198408000) - TAO_Time_Policy_Manager: loaded time policy strategy 'TAO_SYSTEM_TIME_POLICY'
+TAO (31284|140632198408000) - Default_Resource_Factory - codeset manager=0x12e7930
+TAO (31284|140632198408000) - Codeset_Manager_i::init_ccs, Loaded Codeset translator <UTF8_Latin1_Factory>, ncs = 00010001 tcs = 05010001
+TAO (31284|140632198408000) - UTF16_BOM_Translator: forceBE 0
+TAO (31284|140632198408000) - Loaded default protocol <IIOP_Factory>
+TAO (31284|140632198408000) - Created new ORB <TAO_ImR_Activator>
+TAO (31284|140632198408000) - IIOP_Acceptor::open_i, listening on: <192.168.192.113:41165>
+TAO (31284|140632198408000) - IIOP_Acceptor::open_i, listening on: <10.2.0.199:41165>
+TAO (31284|140632198408000) - IIOP_Acceptor::open_i, listening on: <192.168.122.1:41165>
+TAO (31284|140632198408000) - IIOP_Acceptor::open_i, listening on: <10.9.0.18:41165>
+TAO (31284|140632198408000) - TAO_Unique_Id_Strategy::bind_using_user_id: type=IDL:ImplementationRepository/ActivatorExt:1.0, id=0x496d525f416374697661746f
+TAO (31284|140632198408000) - Stub::base_profiles, acquired profile lock this = 0x1312dc0
+ImR Activator: Starting m4700jw
+ImR Activator: Contacting ImplRepoService...
+TAO (31284|140632198408000) - Stub::base_profiles, acquired profile lock this = 0x13259f0
+ImR Activator: ImplRepoService ior=<IOR:010000002900000049444c3a496d706c656d656e746174696f6e5265706f7369746f72792f4c6f6361746f723a312e300000000004000000000000009800000001010200100000003139322e3136382e3139322e31313300b6da00004400000014010f004e5550000000210000000001000000526f6f74504f4100496d706c5265706f5f53657276696365000000000001000000496d706c5265706f5f5365727669636502000000000000000800000001414f20004f415401000000180000000175736501000100010000000100010509010100000000000000000094000000010102000b00000031302e322e302e313939002eb6da33004400000014010f004e5550000000210000000001000000526f6f74504f4100496d706c5265706f5f53657276696365000000000001000000496d706c5265706f5f5365727669636502000000000000000800000001000000004f415401000000180000000100000001000100010000000100010509010100000000000000000094000000010102000e0000003139322e3136382e3132322e3100b6da4400000014010f004e5550000000210000000001000000526f6f74504f4100496d706c5265706f5f53657276696365000000000001000000496d706c5265706f5f5365727669636502000000000000000800000001000000004f415401000000180000000100000001000100010000000100010509010100000000000000000090000000010102000a00000031302e392e302e313800b6da4400000014010f004e5550000000210000000001000000526f6f74504f4100496d706c5265706f5f53657276696365000000000001000000496d706c5265706f5f5365727669636502000000000000000800000001000000004f41540100000018000000010000000100010001000000010001050901010000000000>
+TAO (31284|140632198408000) - Invocation_Adapter::invoke_i, making a TAO_CS_REMOTE_STRATEGY invocation
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (31284|140632198408000) - IIOP_Connector::begin_connection, to <192.168.192.113:55990> which should block
+TAO (31284|140632198408000) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31284|140632198408000) - IIOP_Connection_Handler[20068752]::IIOP_Connection_Handler, this=0x1324240
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [20068752], Connection not complete.
+TAO (31284|140632198408000) - Cache_IntId_T::Cache_IntId_T, this=0x7fff07683c70 Transport[20068752] is not connected
+TAO (31284|140632198408000) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[20068752] IntId=0x7fff07683c70
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i, Transport[20068752] @ hash:index{-1062626521:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i: Success Transport[20068752] @ hash:index{-1062626521:0}. Cache size is [1]
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[20068752]
+TAO (31284|140632198408000) - Leader_Follower[20068752]::wait_for_event, Becoming client leader.
+TAO (31284|140632198408000) - Leader_Follower[20068752]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22062608]::IIOP_Connection_Handler, this=0x14f6590
+TAO (31284|140632198408000) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:58988>
+TAO (31284|140632198408000) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:55990> on 8
+TAO (31284|140632198408000) - Transport::post_open, tport id changed from 20068752 to 8
+TAO (31283|140657605842752) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::mark_connected, true Transport[8]
+TAO (31284|140632198408000) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[8] IntId=0x1324150
+TAO (31284|140632198408000) - TAO_LF_CH_Event[8]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31284|140632198408000) - Leader_Follower[20068752]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:55990>
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [8], wait done result = 1
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:58988> on 6
+TAO (31284|140632198408000) - IIOP_Connector::make_connection, new connected connection to <192.168.192.113:55990> on Transport[8]
+TAO (31283|140657605842752) - Transport::post_open, tport id changed from 22062608 to 6
+TAO (31284|140632198408000) - Transport[8]::register_handler
+TAO (31283|140657605842752) - Transport[6]::post_open, cache_map_entry_ is 0
+TAO (31284|140632198408000) - Transport[8]::register_handler - registering event handler with reactor
+TAO (31283|140657605842752) - TAO_LF_CH_Event[6]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31284|140632198408000) - Transport_Connector::connect, opening Transport[8] in TAO_CLIENT_ROLE
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::is_entry_available_i[8], true, state is ENTRY_IDLE_AND_PURGABLE
+TAO (31284|140632198408000) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[8] IntId=0x1324150
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::find_i, Found available Transport[8] @hash:index {-1062626521:0}
+TAO (31284|140632198408000) - Transport_Connector::connect, got an existing connected Transport[8] in role TAO_CLIENT_ROLE
+TAO (31284|140632198408000) - Codeset_Manager_i::set_tcs, setting char translator (00010001)
+TAO (31284|140632198408000) - Codeset_Manager_i::set_tcs, setting wchar translator (00010109)
+TAO (31284|140632198408000) - Muxed_TMS[8]::request_id, <1>
+TAO (31284|140632198408000) - Codeset_Manager_i::generate_service_context, using tcs_c <ISO8859_1> (00010001), tcs_w <UTF-16> (00010109)
+TAO (31284|140632198408000) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 808 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 820 bytes
+47 49 4f 50 01 02 01 00  28 03 00 00 01 00 00 00   GIOP....(.......
+03 00 00 00 00 00 b6 da  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+13 00 00 00 72 65 67 69  73 74 65 72 5f 61 63 74   ....register_act
+69 76 61 74 6f 72 00 00  01 00 00 00 01 00 00 00   ivator..........
+0c 00 00 00 01 3e 20 28  01 00 01 00 09 01 01 00   .....> (........
+08 00 00 00 6d 34 37 30  30 6a 77 00 2e 00 00 00   ....m4700jw.....
+49 44 4c 3a 49 6d 70 6c  65 6d 65 6e 74 61 74 69   IDL:Implementati
+6f 6e 52 65 70 6f 73 69  74 6f 72 79 2f 41 63 74   onRepository/Act
+69 76 61 74 6f 72 45 78  74 3a 31 2e 30 00 00 00   ivatorExt:1.0...
+04 00 00 00 00 00 00 00  94 00 00 00 01 01 02 00   ................
+10 00 00 00 31 39 32 2e  31 36 38 2e 31 39 32 2e   ....192.168.192.
+31 31 33 00 cd a0 00 00  3e 00 00 00 14 01 0f 00   113.....>.......
+4e 55 50 00 00 00 1e 00  00 00 00 01 00 00 00 52   NUP............R
+6f 6f 74 50 4f 41 00 49  6d 52 5f 41 63 74 69 76   ootPOA.ImR_Activ
+61 74 6f 72 00 00 00 00  00 01 00 00 00 49 6d 52   ator.........ImR
+5f 41 63 74 69 76 61 74  6f 72 00 00 02 00 00 00   _Activator......
+00 00 00 00 08 00 00 00  01 00 00 00 00 4f 41 54   .............OAT
+01 00 00 00 18 00 00 00  01 00 00 00 01 00 01 00   ................
+01 00 00 00 01 00 01 05  09 01 01 00 00 00 00 00   ................
+00 00 00 00 90 00 00 00  01 01 02 00 0b 00 00 00   ................
+31 30 2e 32 2e 30 2e 31  39 39 00 2e cd a0 33 00   10.2.0.199....3.
+3e 00 00 00 14 01 0f 00  4e 55 50 00 00 00 1e 00   >.......NUP.....
+00 00 00 01 00 00 00 52  6f 6f 74 50 4f 41 00 49   .......RootPOA.I
+6d 52 5f 41 63 74 69 76  61 74 6f 72 00 00 00 00   mR_Activator....
+00 01 00 00 00 49 6d 52  5f 41 63 74 69 76 61 74   .....ImR_Activat
+6f 72 61 74 02 00 00 00  00 00 00 00 08 00 00 00   orat............
+01 00 00 00 00 4f 41 54  01 00 00 00 18 00 00 00   .....OAT........
+01 00 00 00 01 00 01 00  01 00 00 00 01 00 01 05   ................
+09 01 01 00 00 00 00 00  00 00 00 00 90 00 00 00   ................
+01 01 02 00 0e 00 00 00  31 39 32 2e 31 36 38 2e   ........192.168.
+31 32 32 2e 31 00 cd a0  3e 00 00 00 14 01 0f 00   122.1...>.......
+4e 55 50 00 00 00 1e 00  00 00 00 01 00 00 00 52   NUP............R
+6f 6f 74 50 4f 41 00 49  6d 52 5f 41 63 74 69 76   ootPOA.ImR_Activ
+61 74 6f 72 00 00 00 00  00 01 00 00 00 49 6d 52   ator.........ImR
+5f 41 63 74 69 76 61 74  6f 72 00 00 02 00 00 00   _Activator......
+00 00 00 00 08 00 00 00  01 00 00 00 00 4f 41 54   .............OAT
+01 00 00 00 18 00 00 00  01 00 00 00 01 00 01 00   ................
+01 00 00 00 01 00 01 05  09 01 01 00 00 00 00 00   ................
+00 00 00 00 8c 00 00 00  01 01 02 00 0a 00 00 00   ................
+31 30 2e 39 2e 30 2e 31  38 00 cd a0 3e 00 00 00   10.9.0.18...>...
+14 01 0f 00 4e 55 50 00  00 00 1e 00 00 00 00 01   ....NUP.........
+00 00 00 52 6f 6f 74 50  4f 41 00 49 6d 52 5f 41   ...RootPOA.ImR_A
+63 74 69 76 61 74 6f 72  00 00 00 00 00 01 00 00   ctivator........
+00 49 6d 52 5f 41 63 74  69 76 61 74 6f 72 61 74   .ImR_Activatorat
+02 00 00 00 00 00 00 00  08 00 00 00 01 00 00 00   ................
+00 4f 41 54 01 00 00 00  18 00 00 00 01 00 00 00   .OAT............
+01 00 01 00 01 00 00 00  01 00 01 05 09 01 01 00   ................
+00 00 00 00                                        ....            
+TAO (31284|140632198408000) - Transport[8]::drain_queue_helper, sending 3 buffers
+TAO (31284|140632198408000) - Transport[8]::drain_queue_helper, buffer 0/3 has 376 bytes
+TAO - Transport[8]::drain_queue_helper (0/376) - HEXDUMP 376 bytes
+47 49 4f 50 01 02 01 00  28 03 00 00 01 00 00 00   GIOP....(.......
+03 00 00 00 00 00 b6 da  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+13 00 00 00 72 65 67 69  73 74 65 72 5f 61 63 74   ....register_act
+69 76 61 74 6f 72 00 00  01 00 00 00 01 00 00 00   ivator..........
+0c 00 00 00 01 3e 20 28  01 00 01 00 09 01 01 00   .....> (........
+08 00 00 00 6d 34 37 30  30 6a 77 00 2e 00 00 00   ....m4700jw.....
+49 44 4c 3a 49 6d 70 6c  65 6d 65 6e 74 61 74 69   IDL:Implementati
+6f 6e 52 65 70 6f 73 69  74 6f 72 79 2f 41 63 74   onRepository/Act
+69 76 61 74 6f 72 45 78  74 3a 31 2e 30 00 00 00   ivatorExt:1.0...
+04 00 00 00 00 00 00 00  94 00 00 00 01 01 02 00   ................
+10 00 00 00 31 39 32 2e  31 36 38 2e 31 39 32 2e   ....192.168.192.
+31 31 33 00 cd a0 00 00  3e 00 00 00 14 01 0f 00   113.....>.......
+4e 55 50 00 00 00 1e 00  00 00 00 01 00 00 00 52   NUP............R
+6f 6f 74 50 4f 41 00 49  6d 52 5f 41 63 74 69 76   ootPOA.ImR_Activ
+61 74 6f 72 00 00 00 00  00 01 00 00 00 49 6d 52   ator.........ImR
+5f 41 63 74 69 76 61 74  6f 72 00 00 02 00 00 00   _Activator......
+00 00 00 00 08 00 00 00  01 00 00 00 00 4f 41 54   .............OAT
+01 00 00 00 18 00 00 00  01 00 00 00 01 00 01 00   ................
+01 00 00 00 01 00 01 05  09 01 01 00 00 00 00 00   ................
+00 00 00 00 90 00 00 00                            ........        
+TAO (31284|140632198408000) - Transport[8]::drain_queue_helper, buffer 1/3 has 144 bytes
+TAO - Transport[8]::drain_queue_helper (0/144) - HEXDUMP 144 bytes
+01 01 02 00 0b 00 00 00  31 30 2e 32 2e 30 2e 31   ........10.2.0.1
+39 39 00 2e cd a0 33 00  3e 00 00 00 14 01 0f 00   99....3.>.......
+4e 55 50 00 00 00 1e 00  00 00 00 01 00 00 00 52   NUP............R
+6f 6f 74 50 4f 41 00 49  6d 52 5f 41 63 74 69 76   ootPOA.ImR_Activ
+61 74 6f 72 00 00 00 00  00 01 00 00 00 49 6d 52   ator.........ImR
+5f 41 63 74 69 76 61 74  6f 72 61 74 02 00 00 00   _Activatorat....
+00 00 00 00 08 00 00 00  01 00 00 00 00 4f 41 54   .............OAT
+01 00 00 00 18 00 00 00  01 00 00 00 01 00 01 00   ................
+01 00 00 00 01 00 01 05  09 01 01 00 00 00 00 00   ................
+TAO (31284|140632198408000) - Transport[8]::drain_queue_helper, buffer 2/3 has 300 bytes
+TAO - Transport[8]::drain_queue_helper (0/300) - HEXDUMP 300 bytes
+00 00 00 00 90 00 00 00  01 01 02 00 0e 00 00 00   ................
+31 39 32 2e 31 36 38 2e  31 32 32 2e 31 00 cd a0   192.168.122.1...
+3e 00 00 00 14 01 0f 00  4e 55 50 00 00 00 1e 00   >.......NUP.....
+00 00 00 01 00 00 00 52  6f 6f 74 50 4f 41 00 49   .......RootPOA.I
+6d 52 5f 41 63 74 69 76  61 74 6f 72 00 00 00 00   mR_Activator....
+00 01 00 00 00 49 6d 52  5f 41 63 74 69 76 61 74   .....ImR_Activat
+6f 72 00 00 02 00 00 00  00 00 00 00 08 00 00 00   or..............
+01 00 00 00 00 4f 41 54  01 00 00 00 18 00 00 00   .....OAT........
+01 00 00 00 01 00 01 00  01 00 00 00 01 00 01 05   ................
+09 01 01 00 00 00 00 00  00 00 00 00 8c 00 00 00   ................
+01 01 02 00 0a 00 00 00  31 30 2e 39 2e 30 2e 31   ........10.9.0.1
+38 00 cd a0 3e 00 00 00  14 01 0f 00 4e 55 50 00   8...>.......NUP.
+00 00 1e 00 00 00 00 01  00 00 00 52 6f 6f 74 50   ...........RootP
+4f 41 00 49 6d 52 5f 41  63 74 69 76 61 74 6f 72   OA.ImR_Activator
+00 00 00 00 00 01 00 00  00 49 6d 52 5f 41 63 74   .........ImR_Act
+69 76 61 74 6f 72 61 74  02 00 00 00 00 00 00 00   ivatorat........
+08 00 00 00 01 00 00 00  00 4f 41 54 01 00 00 00   .........OAT....
+18 00 00 00 01 00 00 00  01 00 01 00 01 00 00 00   ................
+01 00 01 05 09 01 01 00  00 00 00 00               ............    
+TAO (31284|140632198408000) - Transport[8]::drain_queue_helper, end of data
+TAO (31284|140632198408000) - Transport[8]::cleanup_queue, byte_count = 820
+TAO (31284|140632198408000) - Transport[8]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31284|140632198408000) - Transport[8]::drain_queue_helper, byte_count = 820, head_is_empty = 1
+TAO (31284|140632198408000) - Transport[8]::drain_queue_i, helper retval = 1
+TAO (31284|140632198408000) - Transport[8]::make_idle
+TAO (31284|140632198408000) - Cache_IntId_T::recycle_state, ENTRY_BUSY->ENTRY_IDLE_AND_PURGABLE Transport[8] IntId=0x1324150
+TAO (31284|140632198408000) - Leader_Follower[8]::wait_for_event, Becoming client leader.
+TAO (31284|140632198408000) - Leader_Follower[8]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - IIOP_Endpoint::set, cannot determine hostname: Success
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5800 Transport[6] is connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_IDLE_AND_PURGABLE Transport[6] IntId=0x7fff30ef5800
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[6] @ hash:index{-1062623523:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[6] @ hash:index{-1062623523:0}. Cache size is [1]
+TAO (31283|140657605842752) - Transport[6]::register_handler
+TAO (31283|140657605842752) - Transport[6]::register_handler - registering event handler with reactor
+TAO (31283|140657605842752) - Connection_Handler[6]::handle_input_internal, handle = 6/6
+TAO (31283|140657605842752) - Transport[6]::handle_input
+TAO (31283|140657605842752) - Transport[6]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[6]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[6]::handle_input_parse_data, read 820 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[6]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[6] recv GIOP message v1.2, 808 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 820 bytes
+47 49 4f 50 01 02 01 00  28 03 00 00 01 00 00 00   GIOP....(.......
+03 00 00 00 00 00 b6 da  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+13 00 00 00 72 65 67 69  73 74 65 72 5f 61 63 74   ....register_act
+69 76 61 74 6f 72 00 00  01 00 00 00 01 00 00 00   ivator..........
+0c 00 00 00 01 3e 20 28  01 00 01 00 09 01 01 00   .....> (........
+08 00 00 00 6d 34 37 30  30 6a 77 00 2e 00 00 00   ....m4700jw.....
+49 44 4c 3a 49 6d 70 6c  65 6d 65 6e 74 61 74 69   IDL:Implementati
+6f 6e 52 65 70 6f 73 69  74 6f 72 79 2f 41 63 74   onRepository/Act
+69 76 61 74 6f 72 45 78  74 3a 31 2e 30 00 00 00   ivatorExt:1.0...
+04 00 00 00 00 00 00 00  94 00 00 00 01 01 02 00   ................
+10 00 00 00 31 39 32 2e  31 36 38 2e 31 39 32 2e   ....192.168.192.
+31 31 33 00 cd a0 00 00  3e 00 00 00 14 01 0f 00   113.....>.......
+4e 55 50 00 00 00 1e 00  00 00 00 01 00 00 00 52   NUP............R
+6f 6f 74 50 4f 41 00 49  6d 52 5f 41 63 74 69 76   ootPOA.ImR_Activ
+61 74 6f 72 00 00 00 00  00 01 00 00 00 49 6d 52   ator.........ImR
+5f 41 63 74 69 76 61 74  6f 72 00 00 02 00 00 00   _Activator......
+00 00 00 00 08 00 00 00  01 00 00 00 00 4f 41 54   .............OAT
+01 00 00 00 18 00 00 00  01 00 00 00 01 00 01 00   ................
+01 00 00 00 01 00 01 05  09 01 01 00 00 00 00 00   ................
+00 00 00 00 90 00 00 00  01 01 02 00 0b 00 00 00   ................
+31 30 2e 32 2e 30 2e 31  39 39 00 2e cd a0 33 00   10.2.0.199....3.
+3e 00 00 00 14 01 0f 00  4e 55 50 00 00 00 1e 00   >.......NUP.....
+00 00 00 01 00 00 00 52  6f 6f 74 50 4f 41 00 49   .......RootPOA.I
+6d 52 5f 41 63 74 69 76  61 74 6f 72 00 00 00 00   mR_Activator....
+00 01 00 00 00 49 6d 52  5f 41 63 74 69 76 61 74   .....ImR_Activat
+6f 72 61 74 02 00 00 00  00 00 00 00 08 00 00 00   orat............
+01 00 00 00 00 4f 41 54  01 00 00 00 18 00 00 00   .....OAT........
+01 00 00 00 01 00 01 00  01 00 00 00 01 00 01 05   ................
+09 01 01 00 00 00 00 00  00 00 00 00 90 00 00 00   ................
+01 01 02 00 0e 00 00 00  31 39 32 2e 31 36 38 2e   ........192.168.
+31 32 32 2e 31 00 cd a0  3e 00 00 00 14 01 0f 00   122.1...>.......
+4e 55 50 00 00 00 1e 00  00 00 00 01 00 00 00 52   NUP............R
+6f 6f 74 50 4f 41 00 49  6d 52 5f 41 63 74 69 76   ootPOA.ImR_Activ
+61 74 6f 72 00 00 00 00  00 01 00 00 00 49 6d 52   ator.........ImR
+5f 41 63 74 69 76 61 74  6f 72 00 00 02 00 00 00   _Activator......
+00 00 00 00 08 00 00 00  01 00 00 00 00 4f 41 54   .............OAT
+01 00 00 00 18 00 00 00  01 00 00 00 01 00 01 00   ................
+01 00 00 00 01 00 01 05  09 01 01 00 00 00 00 00   ................
+00 00 00 00 8c 00 00 00  01 01 02 00 0a 00 00 00   ................
+31 30 2e 39 2e 30 2e 31  38 00 cd a0 3e 00 00 00   10.9.0.18...>...
+14 01 0f 00 4e 55 50 00  00 00 1e 00 00 00 00 01   ....NUP.........
+00 00 00 52 6f 6f 74 50  4f 41 00 49 6d 52 5f 41   ...RootPOA.ImR_A
+63 74 69 76 61 74 6f 72  00 00 00 00 00 01 00 00   ctivator........
+00 49 6d 52 5f 41 63 74  69 76 61 74 6f 72 61 74   .ImR_Activatorat
+02 00 00 00 00 00 00 00  08 00 00 00 01 00 00 00   ................
+00 4f 41 54 01 00 00 00  18 00 00 00 01 00 00 00   .OAT............
+01 00 01 00 01 00 00 00  01 00 01 05 09 01 01 00   ................
+00 00 00 00                                        ....            
+TAO (31283|140657605842752) - Codeset_Manager_i::process_service_context, using tcsc <ISO8859_1> (00010001), tcsw <UTF-16> (00010109)
+TAO (31283|140657605842752) - Stub::base_profiles, acquired profile lock this = 0x1546c60
+ImR: Activator registered for m4700jw.
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 16 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 28 bytes
+47 49 4f 50 01 02 01 01  10 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  67 25 1d 51               ........g%.Q    
+TAO (31283|140657605842752) - Transport[6]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[6]::drain_queue_helper, buffer 0/1 has 28 bytes
+TAO - Transport[6]::drain_queue_helper (0/28) - HEXDUMP 28 bytes
+47 49 4f 50 01 02 01 01  10 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  67 25 1d 51               ........g%.Q    
+TAO (31283|140657605842752) - Transport[6]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[6]::cleanup_queue, byte_count = 28
+TAO (31284|140632198408000) - Connection_Handler[8]::handle_input_internal, handle = 8/8
+TAO (31283|140657605842752) - Transport[6]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[6]::drain_queue_helper, byte_count = 28, head_is_empty = 1
+TAO (31284|140632198408000) - Transport[8]::handle_input
+TAO (31283|140657605842752) - Transport[6]::drain_queue_i, helper retval = 1
+TAO (31284|140632198408000) - Transport[8]::process_queue_head, 0 enqueued
+TAO (31284|140632198408000) - Transport[8]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Connection_Handler[6]::handle_input_internal, handle = 6/6, retval = 0
+TAO (31284|140632198408000) - Transport[8]::handle_input_parse_data, read 28 bytes
+TAO (31284|140632198408000) - GIOP_Message_State::parse_message_header_i
+TAO (31284|140632198408000) - GIOP_Message_State::get_version_info
+TAO (31284|140632198408000) - GIOP_Message_State::get_byte_order_info
+TAO (31284|140632198408000) - Transport[8]::process_parsed_messages, entering (missing data == 0)
+TAO (31284|140632198408000) - GIOP_Message_Base::dump_msg, Transport[8] recv GIOP message v1.2, 16 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 28 bytes
+47 49 4f 50 01 02 01 01  10 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  67 25 1d 51               ........g%.Q    
+TAO (31284|140632198408000) - TAO_Muxed_TMS::dispatch_reply, id = 1
+TAO (31284|140632198408000) - Connection_Handler[8]::handle_input_internal, handle = 8/8, retval = 0
+TAO (31284|140632198408000) - Leader_Follower[8]::wait_for_event, (leader) exit reactor event loop
+ImR Activator: Registered with ImR.
+ImR Activator: The Activator IOR is: <IOR:010000002e00000049444c3a496d706c656d656e746174696f6e5265706f7369746f72792f416374697661746f724578743a312e3000000004000000000000009400000001010200100000003139322e3136382e3139322e31313300cda000003e00000014010f004e55500000001e0000000001000000526f6f74504f4100496d525f416374697661746f72000000000001000000496d525f416374697661746f72000002000000000000000800000001000000004f415401000000180000000100000001000100010000000100010509010100000000000000000090000000010102000b00000031302e322e302e313939002ecda033003e00000014010f004e55500000001e0000000001000000526f6f74504f4100496d525f416374697661746f72000000000001000000496d525f416374697661746f72617402000000000000000800000001000000004f415401000000180000000100000001000100010000000100010509010100000000000000000090000000010102000e0000003139322e3136382e3132322e3100cda03e00000014010f004e55500000001e0000000001000000526f6f74504f4100496d525f416374697661746f72000000000001000000496d525f416374697661746f72617402000000000000000800000001000000004f41540100000018000000010000000100010001000000010001050901010000000000000000008c000000010102000a00000031302e392e302e313800cda03e00000014010f004e55500000001e0000000001000000526f6f74504f4100496d525f416374697661746f72000000000001000000496d525f416374697661746f72000002000000000000000800000001000000004f41540100000018000000010000000100010001000000010001050901010000000000>
+>>> /home/johnny/ACE/master/atcd/ACE/bin/./tao_imr -ORBInitRef ImplRepoService=file:///home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/implrepo.ior add MessengerService -a MANUAL -c "/home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/././MessengerServer -orbobjrefstyle url -ORBUseIMR 1 -ORBInitRef ImplRepoService=file:///home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/implrepo.ior" 
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 1, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [1]
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22311008]::IIOP_Connection_Handler, this=0x1546dc0
+TAO (31283|140657605842752) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:55990>
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:49559> on 7
+TAO (31283|140657605842752) - Transport::post_open, tport id changed from 22311008 to 7
+TAO (31283|140657605842752) - Transport[7]::post_open, cache_map_entry_ is 0
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31283|140657605842752) - IIOP_Endpoint::set, cannot determine hostname: Success
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5800 Transport[7] is connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_IDLE_AND_PURGABLE Transport[7] IntId=0x7fff30ef5800
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[7] @ hash:index{-1062632952:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[7] @ hash:index{-1062632952:0}. Cache size is [2]
+TAO (31283|140657605842752) - Transport[7]::register_handler
+TAO (31283|140657605842752) - Transport[7]::register_handler - registering event handler with reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 188 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 176 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 188 bytes
+47 49 4f 50 01 02 01 00  b0 00 00 00 01 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+06 00 00 00 5f 69 73 5f  61 00 00 00 01 00 00 00   ...._is_a.......
+01 00 00 00 0c 00 00 00  01 00 00 00 01 00 01 00   ................
+09 01 01 00 00 00 00 00  30 00 00 00 49 44 4c 3a   ........0...IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 41 64 6d 69 6e 69 73   pository/Adminis
+74 72 61 74 69 6f 6e 3a  31 2e 30 00               tration:1.0.    
+TAO (31283|140657605842752) - Codeset_Manager_i::process_service_context, using tcsc <ISO8859_1> (00010001), tcsw <UTF-16> (00010109)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 13 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/1 has 25 bytes
+TAO - Transport[7]::drain_queue_helper (0/25) - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 25
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 25, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 133 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 121 data bytes, my endian, Type Request[2]
+GIOP message - HEXDUMP 133 bytes
+47 49 4f 50 01 02 01 00  79 00 00 00 02 00 00 00   GIOP....y.......
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+05 00 00 00 66 69 6e 64  00 00 00 00 00 00 00 00   ....find........
+11 00 00 00 4d 65 73 73  65 6e 67 65 72 53 65 72   ....MessengerSer
+76 69 63 65 00                                     vice.           
+get_active_server could not find MessengerService
+get_active_server could not find JACORB:MessengerService
+ImR: Cannot find server <MessengerService>
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 68 data bytes, my endian, Type Reply[2]
+GIOP message - HEXDUMP 80 bytes
+47 49 4f 50 01 02 01 01  44 00 00 00 02 00 00 00   GIOP....D.......
+00 00 00 00 00 00 00 00  01 00 00 00 00 00 00 00   ................
+01 00 00 00 00 7f 00 00  00 00 00 00 01 00 00 00   ................
+00 ae 56 01 00 00 00 00  01 00 00 00 00 00 00 00   ..V.............
+37 34 35 30 01 00 00 00  00 00 95 62 35 66 34 31   7450.......b5f41
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/1 has 80 bytes
+TAO - Transport[7]::drain_queue_helper (0/80) - HEXDUMP 80 bytes
+47 49 4f 50 01 02 01 01  44 00 00 00 02 00 00 00   GIOP....D.......
+00 00 00 00 00 00 00 00  01 00 00 00 00 00 00 00   ................
+01 00 00 00 00 7f 00 00  00 00 00 00 01 00 00 00   ................
+00 ae 56 01 00 00 00 00  01 00 00 00 00 00 00 00   ..V.............
+37 34 35 30 01 00 00 00  00 00 95 62 35 66 34 31   7450.......b5f41
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 80
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 80, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+Updating Server <MessengerService> with default activator of <m4700jw>.
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 432 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 420 data bytes, my endian, Type Request[3]
+GIOP message - HEXDUMP 432 bytes
+47 49 4f 50 01 02 01 00  a4 01 00 00 03 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+15 00 00 00 61 64 64 5f  6f 72 5f 75 70 64 61 74   ....add_or_updat
+65 5f 73 65 72 76 65 72  00 6e 67 65 00 00 00 00   e_server.nge....
+11 00 00 00 4d 65 73 73  65 6e 67 65 72 53 65 72   ....MessengerSer
+76 69 63 65 00 6d 65 6e  f1 00 00 00 2f 68 6f 6d   vice.men..../hom
+65 2f 6a 6f 68 6e 6e 79  2f 41 43 45 2f 6d 61 73   e/johnny/ACE/mas
+74 65 72 2f 61 74 63 64  2f 54 41 4f 2f 6f 72 62   ter/atcd/TAO/orb
+73 76 63 73 2f 74 65 73  74 73 2f 49 6d 70 6c 52   svcs/tests/ImplR
+65 70 6f 2f 52 65 73 74  61 72 74 53 65 72 76 65   epo/RestartServe
+72 2f 2e 2f 2e 2f 4d 65  73 73 65 6e 67 65 72 53   r/././MessengerS
+65 72 76 65 72 20 2d 6f  72 62 6f 62 6a 72 65 66   erver -orbobjref
+73 74 79 6c 65 20 75 72  6c 20 2d 4f 52 42 55 73   style url -ORBUs
+65 49 4d 52 20 31 20 2d  4f 52 42 49 6e 69 74 52   eIMR 1 -ORBInitR
+65 66 20 49 6d 70 6c 52  65 70 6f 53 65 72 76 69   ef ImplRepoServi
+63 65 3d 66 69 6c 65 3a  2f 2f 2f 68 6f 6d 65 2f   ce=file:///home/
+6a 6f 68 6e 6e 79 2f 41  43 45 2f 6d 61 73 74 65   johnny/ACE/maste
+72 2f 61 74 63 64 2f 54  41 4f 2f 6f 72 62 73 76   r/atcd/TAO/orbsv
+63 73 2f 74 65 73 74 73  2f 49 6d 70 6c 52 65 70   cs/tests/ImplRep
+6f 2f 52 65 73 74 61 72  74 53 65 72 76 65 72 2f   o/RestartServer/
+69 6d 70 6c 72 65 70 6f  2e 69 6f 72 00 00 00 00   implrepo.ior....
+00 00 00 00 01 00 00 00  00 00 00 00 01 00 00 00   ................
+08 00 00 00 6d 34 37 30  30 6a 77 00 01 00 00 00   ....m4700jw.....
+ImR: Add/Update server <MessengerService>.
+get_active_server could not find MessengerService
+get_active_server could not find JACORB:MessengerService
+ImR: Adding server <MessengerService>.
+ImR: Server: MessengerService
+        Activator: m4700jw
+        Command Line: /home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/././MessengerServer -orbobjrefstyle url -ORBUseIMR 1 -ORBInitRef ImplRepoService=file:///home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/implrepo.ior
+        Working Directory: 
+        Activation: MANUAL
+        Start Limit: 1
+
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 12 data bytes, my endian, Type Reply[3]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 03 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/1 has 24 bytes
+TAO - Transport[7]::drain_queue_helper (0/24) - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 03 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+Successfully registered <MessengerService>.
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 24
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 24, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input, error parsing incoming message
+TAO (31283|140657605842752) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = -1
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[7]::pre_close
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::mark_connected, false Transport[7]
+TAO (31283|140657605842752) - Transport[7]::purge_entry, entry is 0x1547370
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, removing from the reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, cancel all timers
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh end
+TAO (31283|140657605842752) - IIOP_Connection_Handler[7]::~IIOP_Connection_Handler, this=0x1546dc0, transport=0x1547060
+TAO (31283|140657605842752) - Transport[7]::~Transport
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+Manually starting MessengerService
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 1, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [1]
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22311008]::IIOP_Connection_Handler, this=0x1546dc0
+TAO (31283|140657605842752) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:55990>
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:33786> on 7
+TAO (31283|140657605842752) - Transport::post_open, tport id changed from 22311008 to 7
+TAO (31283|140657605842752) - Transport[7]::post_open, cache_map_entry_ is 0
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31283|140657605842752) - IIOP_Endpoint::set, cannot determine hostname: Success
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5800 Transport[7] is connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_IDLE_AND_PURGABLE Transport[7] IntId=0x7fff30ef5800
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[7] @ hash:index{-1062648725:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[7] @ hash:index{-1062648725:0}. Cache size is [2]
+TAO (31283|140657605842752) - Transport[7]::register_handler
+TAO (31283|140657605842752) - Transport[7]::register_handler - registering event handler with reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 188 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 176 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 188 bytes
+47 49 4f 50 01 02 01 00  b0 00 00 00 01 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+06 00 00 00 5f 69 73 5f  61 00 00 00 01 00 00 00   ...._is_a.......
+01 00 00 00 0c 00 00 00  01 00 00 00 01 00 01 00   ................
+09 01 01 00 00 00 00 00  30 00 00 00 49 44 4c 3a   ........0...IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 41 64 6d 69 6e 69 73   pository/Adminis
+74 72 61 74 69 6f 6e 3a  31 2e 30 00               tration:1.0.    
+TAO (31283|140657605842752) - Codeset_Manager_i::process_service_context, using tcsc <ISO8859_1> (00010001), tcsw <UTF-16> (00010109)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 13 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/1 has 25 bytes
+TAO - Transport[7]::drain_queue_helper (0/25) - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 25
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 25, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 141 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 129 data bytes, my endian, Type Request[2]
+GIOP message - HEXDUMP 141 bytes
+47 49 4f 50 01 02 01 00  81 00 00 00 02 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+10 00 00 00 61 63 74 69  76 61 74 65 5f 73 65 72   ....activate_ser
+76 65 72 00 00 00 00 00  11 00 00 00 4d 65 73 73   ver.........Mess
+65 6e 67 65 72 53 65 72  76 69 63 65 00            engerService.   
+ImR: Manually activating server <MessengerService>
+(31283|140657605842752) AsyncAccessManager(0x156b000)::ctor server = MessengerService
+(31283|140657605842752) AsyncAccessManager(0x156b000)::add_interest status = INIT
+(31283|140657605842752) AsyncAccessManager::send_start_request, manual_start_ 1
+TAO (31283|140657605842752) - TAO_System_Id_With_Unique_Id_Strategy::bind_using_system_id: type=IDL:ImplementationRepository/AMI_ActivatorHandler:1.0, id=0x010000
+TAO (31283|140657605842752) - Stub::base_profiles, acquired profile lock this = 0x1574c10
+TAO_Messaging (31283|140657605842752) - Asynch_Invocation_Adapter::invoke
+TAO (31283|140657605842752) - Invocation_Adapter::invoke_i, making a TAO_CS_REMOTE_STRATEGY invocation
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 2, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [2]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <192.168.192.113:41165> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22536400]::IIOP_Connection_Handler, this=0x1575ed0
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22536400], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef3cb0 Transport[22536400] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22536400] IntId=0x7fff30ef3cb0
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22536400] @ hash:index{-1062641346:0}
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::fill_set_i, current_size = 1, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22536400] @ hash:index{-1062641346:0}. Cache size is [3]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22536400]
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::purge, Cache size after purging is [1]
+TAO (31283|140657605842752) - Leader_Follower[22536400]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22536400]::wait_for_event, (leader) enter reactor event loop
+TAO (31284|140632198408000) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:48066>
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:41165> on 8
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19694256]::IIOP_Connection_Handler, this=0x12eb810
+TAO (31283|140657605842752) - Transport::post_open, tport id changed from 22536400 to 8
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::mark_connected, true Transport[8]
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[8] IntId=0x157e890
+TAO (31283|140657605842752) - TAO_LF_CH_Event[8]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31284|140632198408000) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (31283|140657605842752) - Leader_Follower[22536400]::wait_for_event, (leader) exit reactor event loop
+TAO (31284|140632198408000) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:41165>
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [8], wait done result = 1
+TAO (31284|140632198408000) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:48066> on 9
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, new connected connection to <192.168.192.113:41165> on Transport[8]
+TAO (31284|140632198408000) - Transport::post_open, tport id changed from 19694256 to 9
+TAO (31283|140657605842752) - Transport[8]::register_handler
+TAO (31284|140632198408000) - Transport[9]::post_open, cache_map_entry_ is 0
+TAO (31283|140657605842752) - Transport[8]::register_handler - registering event handler with reactor
+TAO (31284|140632198408000) - TAO_LF_CH_Event[9]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31283|140657605842752) - Transport_Connector::connect, opening Transport[8] in TAO_CLIENT_ROLE
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::is_entry_available_i[8], true, state is ENTRY_IDLE_AND_PURGABLE
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[8] IntId=0x157e890
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::find_i, Found available Transport[8] @hash:index {-1062641346:0}
+TAO (31283|140657605842752) - Transport_Connector::connect, got an existing connected Transport[8] in role TAO_CLIENT_ROLE
+TAO (31283|140657605842752) - Codeset_Manager_i::set_tcs, setting char translator (00010001)
+TAO (31283|140657605842752) - Codeset_Manager_i::set_tcs, setting wchar translator (00010109)
+TAO (31283|140657605842752) - Muxed_TMS[8]::request_id, <1>
+TAO (31283|140657605842752) - Codeset_Manager_i::generate_service_context, using tcs_c <ISO8859_1> (00010001), tcs_w <UTF-16> (00010109)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 412 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 424 bytes
+47 49 4f 50 01 02 01 00  9c 01 00 00 01 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  3e 00 00 00 14 01 0f 00   ........>.......
+4e 55 50 00 00 00 1e 00  00 00 00 01 00 00 00 52   NUP............R
+6f 6f 74 50 4f 41 00 49  6d 52 5f 41 63 74 69 76   ootPOA.ImR_Activ
+61 74 6f 72 00 00 00 00  00 01 00 00 00 49 6d 52   ator.........ImR
+5f 41 63 74 69 76 61 74  6f 72 21 00 0d 00 00 00   _Activator!.....
+73 74 61 72 74 5f 73 65  72 76 65 72 00 70 6c 52   start_server.plR
+01 00 00 00 01 00 00 00  0c 00 00 00 01 41 4f 20   .............AO 
+01 00 01 00 09 01 01 00  15 00 00 00 01 02 03 04   ................
+4d 65 73 73 65 6e 67 65  72 53 65 72 76 69 63 65   MessengerService
+00 00 00 00 f1 00 00 00  2f 68 6f 6d 65 2f 6a 6f   ......../home/jo
+68 6e 6e 79 2f 41 43 45  2f 6d 61 73 74 65 72 2f   hnny/ACE/master/
+61 74 63 64 2f 54 41 4f  2f 6f 72 62 73 76 63 73   atcd/TAO/orbsvcs
+2f 74 65 73 74 73 2f 49  6d 70 6c 52 65 70 6f 2f   /tests/ImplRepo/
+52 65 73 74 61 72 74 53  65 72 76 65 72 2f 2e 2f   RestartServer/./
+2e 2f 4d 65 73 73 65 6e  67 65 72 53 65 72 76 65   ./MessengerServe
+72 20 2d 6f 72 62 6f 62  6a 72 65 66 73 74 79 6c   r -orbobjrefstyl
+65 20 75 72 6c 20 2d 4f  52 42 55 73 65 49 4d 52   e url -ORBUseIMR
+20 31 20 2d 4f 52 42 49  6e 69 74 52 65 66 20 49    1 -ORBInitRef I
+6d 70 6c 52 65 70 6f 53  65 72 76 69 63 65 3d 66   mplRepoService=f
+69 6c 65 3a 2f 2f 2f 68  6f 6d 65 2f 6a 6f 68 6e   ile:///home/john
+6e 79 2f 41 43 45 2f 6d  61 73 74 65 72 2f 61 74   ny/ACE/master/at
+63 64 2f 54 41 4f 2f 6f  72 62 73 76 63 73 2f 74   cd/TAO/orbsvcs/t
+65 73 74 73 2f 49 6d 70  6c 52 65 70 6f 2f 52 65   ests/ImplRepo/Re
+73 74 61 72 74 53 65 72  76 65 72 2f 69 6d 70 6c   startServer/impl
+72 65 70 6f 2e 69 6f 72  00 00 00 00 01 00 00 00   repo.ior........
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Transport[8]::send_asynchronous_message_i, trying to send the message (ml = 424)
+TAO (31283|140657605842752) - Transport[8]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[8]::drain_queue_helper, buffer 0/1 has 424 bytes
+TAO - Transport[8]::drain_queue_helper (0/424) - HEXDUMP 424 bytes
+47 49 4f 50 01 02 01 00  9c 01 00 00 01 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  3e 00 00 00 14 01 0f 00   ........>.......
+4e 55 50 00 00 00 1e 00  00 00 00 01 00 00 00 52   NUP............R
+6f 6f 74 50 4f 41 00 49  6d 52 5f 41 63 74 69 76   ootPOA.ImR_Activ
+61 74 6f 72 00 00 00 00  00 01 00 00 00 49 6d 52   ator.........ImR
+5f 41 63 74 69 76 61 74  6f 72 21 00 0d 00 00 00   _Activator!.....
+73 74 61 72 74 5f 73 65  72 76 65 72 00 70 6c 52   start_server.plR
+01 00 00 00 01 00 00 00  0c 00 00 00 01 41 4f 20   .............AO 
+01 00 01 00 09 01 01 00  15 00 00 00 01 02 03 04   ................
+4d 65 73 73 65 6e 67 65  72 53 65 72 76 69 63 65   MessengerService
+00 00 00 00 f1 00 00 00  2f 68 6f 6d 65 2f 6a 6f   ......../home/jo
+68 6e 6e 79 2f 41 43 45  2f 6d 61 73 74 65 72 2f   hnny/ACE/master/
+61 74 63 64 2f 54 41 4f  2f 6f 72 62 73 76 63 73   atcd/TAO/orbsvcs
+2f 74 65 73 74 73 2f 49  6d 70 6c 52 65 70 6f 2f   /tests/ImplRepo/
+52 65 73 74 61 72 74 53  65 72 76 65 72 2f 2e 2f   RestartServer/./
+2e 2f 4d 65 73 73 65 6e  67 65 72 53 65 72 76 65   ./MessengerServe
+72 20 2d 6f 72 62 6f 62  6a 72 65 66 73 74 79 6c   r -orbobjrefstyl
+65 20 75 72 6c 20 2d 4f  52 42 55 73 65 49 4d 52   e url -ORBUseIMR
+20 31 20 2d 4f 52 42 49  6e 69 74 52 65 66 20 49    1 -ORBInitRef I
+6d 70 6c 52 65 70 6f 53  65 72 76 69 63 65 3d 66   mplRepoService=f
+69 6c 65 3a 2f 2f 2f 68  6f 6d 65 2f 6a 6f 68 6e   ile:///home/john
+6e 79 2f 41 43 45 2f 6d  61 73 74 65 72 2f 61 74   ny/ACE/master/at
+63 64 2f 54 41 4f 2f 6f  72 62 73 76 63 73 2f 74   cd/TAO/orbsvcs/t
+65 73 74 73 2f 49 6d 70  6c 52 65 70 6f 2f 52 65   ests/ImplRepo/Re
+73 74 61 72 74 53 65 72  76 65 72 2f 69 6d 70 6c   startServer/impl
+72 65 70 6f 2e 69 6f 72  00 00 00 00 01 00 00 00   repo.ior........
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Transport[8]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[8]::cleanup_queue, byte_count = 424
+TAO (31283|140657605842752) - Transport[8]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[8]::drain_queue_helper, byte_count = 424, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[8]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Transport[8]::make_idle
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_BUSY->ENTRY_IDLE_AND_PURGABLE Transport[8] IntId=0x157e890
+LiveListener::remove_ref, MessengerService, count = 0
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+TAO (31284|140632198408000) - IIOP_Endpoint::set, cannot determine hostname: Success
+TAO (31284|140632198408000) - Cache_IntId_T::Cache_IntId_T, this=0x7fff076840c0 Transport[9] is connected
+TAO (31284|140632198408000) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_IDLE_AND_PURGABLE Transport[9] IntId=0x7fff076840c0
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i, Transport[9] @ hash:index{-1062634445:0}
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i: Success Transport[9] @ hash:index{-1062634445:0}. Cache size is [2]
+TAO (31284|140632198408000) - Transport[9]::register_handler
+TAO (31284|140632198408000) - Transport[9]::register_handler - registering event handler with reactor
+TAO (31284|140632198408000) - Connection_Handler[9]::handle_input_internal, handle = 9/9
+TAO (31284|140632198408000) - Transport[9]::handle_input
+TAO (31284|140632198408000) - Transport[9]::process_queue_head, 0 enqueued
+TAO (31284|140632198408000) - Transport[9]::handle_input_parse_data, enter
+TAO (31284|140632198408000) - Transport[9]::handle_input_parse_data, read 424 bytes
+TAO (31284|140632198408000) - GIOP_Message_State::parse_message_header_i
+TAO (31284|140632198408000) - GIOP_Message_State::get_version_info
+TAO (31284|140632198408000) - GIOP_Message_State::get_byte_order_info
+TAO (31284|140632198408000) - Transport[9]::process_parsed_messages, entering (missing data == 0)
+TAO (31284|140632198408000) - GIOP_Message_Base::dump_msg, Transport[9] recv GIOP message v1.2, 412 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 424 bytes
+47 49 4f 50 01 02 01 00  9c 01 00 00 01 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  3e 00 00 00 14 01 0f 00   ........>.......
+4e 55 50 00 00 00 1e 00  00 00 00 01 00 00 00 52   NUP............R
+6f 6f 74 50 4f 41 00 49  6d 52 5f 41 63 74 69 76   ootPOA.ImR_Activ
+61 74 6f 72 00 00 00 00  00 01 00 00 00 49 6d 52   ator.........ImR
+5f 41 63 74 69 76 61 74  6f 72 21 00 0d 00 00 00   _Activator!.....
+73 74 61 72 74 5f 73 65  72 76 65 72 00 70 6c 52   start_server.plR
+01 00 00 00 01 00 00 00  0c 00 00 00 01 41 4f 20   .............AO 
+01 00 01 00 09 01 01 00  15 00 00 00 01 02 03 04   ................
+4d 65 73 73 65 6e 67 65  72 53 65 72 76 69 63 65   MessengerService
+00 00 00 00 f1 00 00 00  2f 68 6f 6d 65 2f 6a 6f   ......../home/jo
+68 6e 6e 79 2f 41 43 45  2f 6d 61 73 74 65 72 2f   hnny/ACE/master/
+61 74 63 64 2f 54 41 4f  2f 6f 72 62 73 76 63 73   atcd/TAO/orbsvcs
+2f 74 65 73 74 73 2f 49  6d 70 6c 52 65 70 6f 2f   /tests/ImplRepo/
+52 65 73 74 61 72 74 53  65 72 76 65 72 2f 2e 2f   RestartServer/./
+2e 2f 4d 65 73 73 65 6e  67 65 72 53 65 72 76 65   ./MessengerServe
+72 20 2d 6f 72 62 6f 62  6a 72 65 66 73 74 79 6c   r -orbobjrefstyl
+65 20 75 72 6c 20 2d 4f  52 42 55 73 65 49 4d 52   e url -ORBUseIMR
+20 31 20 2d 4f 52 42 49  6e 69 74 52 65 66 20 49    1 -ORBInitRef I
+6d 70 6c 52 65 70 6f 53  65 72 76 69 63 65 3d 66   mplRepoService=f
+69 6c 65 3a 2f 2f 2f 68  6f 6d 65 2f 6a 6f 68 6e   ile:///home/john
+6e 79 2f 41 43 45 2f 6d  61 73 74 65 72 2f 61 74   ny/ACE/master/at
+63 64 2f 54 41 4f 2f 6f  72 62 73 76 63 73 2f 74   cd/TAO/orbsvcs/t
+65 73 74 73 2f 49 6d 70  6c 52 65 70 6f 2f 52 65   ests/ImplRepo/Re
+73 74 61 72 74 53 65 72  76 65 72 2f 69 6d 70 6c   startServer/impl
+72 65 70 6f 2e 69 6f 72  00 00 00 00 01 00 00 00   repo.ior........
+00 00 00 00 00 00 00 00                            ........        
+TAO (31284|140632198408000) - Codeset_Manager_i::process_service_context, using tcsc <ISO8859_1> (00010001), tcsw <UTF-16> (00010109)
+ImR Activator: Starting unique server <MessengerService>...
+        command line : len=240 </home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/././MessengerServer -orbobjrefstyle url -ORBUseIMR 1 -ORBInitRef ImplRepoService=file:///home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/implrepo.ior>
+        directory : <>
+ImR Activator: register death handler for process 31287
+ImR Activator: Successfully started <MessengerService>, pid=31287
+TAO (31284|140632198408000) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 12 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31284|140632198408000) - Transport[9]::drain_queue_helper, sending 1 buffers
+TAO (31284|140632198408000) - Transport[9]::drain_queue_helper, buffer 0/1 has 24 bytes
+TAO - Transport[9]::drain_queue_helper (0/24) - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Connection_Handler[8]::handle_input_internal, handle = 8/8
+TAO (31284|140632198408000) - Transport[9]::drain_queue_helper, end of data
+TAO (31284|140632198408000) - Transport[9]::cleanup_queue, byte_count = 24
+TAO (31283|140657605842752) - Transport[8]::handle_input
+TAO (31283|140657605842752) - Transport[8]::process_queue_head, 0 enqueued
+TAO (31284|140632198408000) - Transport[9]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[8]::handle_input_parse_data, enter
+TAO (31284|140632198408000) - Transport[9]::drain_queue_helper, byte_count = 24, head_is_empty = 1
+TAO (31284|140632198408000) - Transport[9]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Transport[8]::handle_input_parse_data, read 24 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31284|140632198408000) - Connection_Handler[9]::handle_input_internal, handle = 9/9, retval = 0
+TAO (31283|140657605842752) - Transport[8]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[8] recv GIOP message v1.2, 12 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - TAO_Muxed_TMS::dispatch_reply, id = 1
+TAO_Messaging (31283|140657605842752) - Asynch_Reply_Dispatcher::dispatch_reply status = 0
+TAO (31283|140657605842752) - Invocation_Adapter::invoke_i, making a TAO_CS_THRU_POA_STRATEGY invocation
+TAO (31283|140657605842752) - TAO_Unique_Id_Strategy::unbind_using_user_id: id=0x010000
+TAO (31283|140657605842752) - Connection_Handler[8]::handle_input_internal, handle = 8/8, retval = 0
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [3]
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22498096]::IIOP_Connection_Handler, this=0x1574940
+TAO (31283|140657605842752) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:55990>
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:57282> on 9
+TAO (31283|140657605842752) - Transport::post_open, tport id changed from 22498096 to 9
+TAO (31283|140657605842752) - Transport[9]::post_open, cache_map_entry_ is 0
+TAO (31283|140657605842752) - TAO_LF_CH_Event[9]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31283|140657605842752) - IIOP_Endpoint::set, cannot determine hostname: Success
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5800 Transport[9] is connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_IDLE_AND_PURGABLE Transport[9] IntId=0x7fff30ef5800
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[9] @ hash:index{-1062625229:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[9] @ hash:index{-1062625229:0}. Cache size is [4]
+TAO (31283|140657605842752) - Transport[9]::register_handler
+TAO (31283|140657605842752) - Transport[9]::register_handler - registering event handler with reactor
+TAO (31283|140657605842752) - Connection_Handler[9]::handle_input_internal, handle = 9/9
+TAO (31283|140657605842752) - Transport[9]::handle_input
+TAO (31283|140657605842752) - Transport[9]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[9]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[9]::handle_input_parse_data, read 188 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[9]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[9] recv GIOP message v1.2, 176 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 188 bytes
+47 49 4f 50 01 02 01 00  b0 00 00 00 01 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+06 00 00 00 5f 69 73 5f  61 00 00 00 01 00 00 00   ...._is_a.......
+01 00 00 00 0c 00 00 00  01 00 00 00 01 00 01 00   ................
+09 01 01 00 00 00 00 00  30 00 00 00 49 44 4c 3a   ........0...IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 41 64 6d 69 6e 69 73   pository/Adminis
+74 72 61 74 69 6f 6e 3a  31 2e 30 00               tration:1.0.    
+TAO (31283|140657605842752) - Codeset_Manager_i::process_service_context, using tcsc <ISO8859_1> (00010001), tcsw <UTF-16> (00010109)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 13 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[9]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[9]::drain_queue_helper, buffer 0/1 has 25 bytes
+TAO - Transport[9]::drain_queue_helper (0/25) - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[9]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue, byte_count = 25
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[9]::drain_queue_helper, byte_count = 25, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[9]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[9]::handle_input_internal, handle = 9/9, retval = 0
+TAO (31283|140657605842752) - Connection_Handler[9]::handle_input_internal, handle = 9/9
+TAO (31283|140657605842752) - Transport[9]::handle_input
+TAO (31283|140657605842752) - Transport[9]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[9]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[9]::handle_input_parse_data, read 720 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[9]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[9] recv GIOP message v1.2, 708 data bytes, my endian, Type Request[2]
+GIOP message - HEXDUMP 720 bytes
+47 49 4f 50 01 02 01 00  c4 02 00 00 02 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+12 00 00 00 73 65 72 76  65 72 5f 69 73 5f 72 75   ....server_is_ru
+6e 6e 69 6e 67 00 00 00  00 00 00 00 01 00 01 00   nning...........
+11 00 00 00 4d 65 73 73  65 6e 67 65 72 53 65 72   ....MessengerSer
+76 69 63 65 00 6d 65 6e  29 00 00 00 63 6f 72 62   vice.men)...corb
+61 6c 6f 63 3a 69 69 6f  70 3a 31 2e 32 40 31 39   aloc:iiop:1.2@19
+32 2e 31 36 38 2e 31 39  32 2e 31 31 33 3a 35 30   2.168.192.113:50
+31 33 36 2f 00 00 00 00  2e 00 00 00 49 44 4c 3a   136/........IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 53 65 72 76 65 72 4f   pository/ServerO
+62 6a 65 63 74 3a 31 2e  30 00 00 00 04 00 00 00   bject:1.0.......
+00 00 00 00 70 00 00 00  01 01 02 00 10 00 00 00   ....p...........
+31 39 32 2e 31 36 38 2e  31 39 32 2e 31 31 33 00   192.168.192.113.
+d8 c3 00 00 1b 00 00 00  14 01 0f 00 52 53 54 f1   ............RST.
+1b 4e 54 02 ef 04 00 00  00 00 00 01 00 00 00 01   .NT.............
+00 00 00 00 02 00 00 00  00 00 00 00 08 00 00 00   ................
+01 00 00 00 00 4f 41 54  01 00 00 00 18 00 00 00   .....OAT........
+01 00 00 00 01 00 01 00  01 00 00 00 01 00 01 05   ................
+09 01 01 00 00 00 00 00  00 00 00 00 6c 00 00 00   ............l...
+01 01 02 00 0b 00 00 00  31 30 2e 32 2e 30 2e 31   ........10.2.0.1
+39 39 00 2e d8 c3 33 00  1b 00 00 00 14 01 0f 00   99....3.........
+52 53 54 f1 1b 4e 54 02  ef 04 00 00 00 00 00 01   RST..NT.........
+00 00 00 01 00 00 00 01  02 00 00 00 00 00 00 00   ................
+08 00 00 00 01 00 00 00  00 4f 41 54 01 00 00 00   .........OAT....
+18 00 00 00 01 00 00 00  01 00 01 00 01 00 00 00   ................
+01 00 01 05 09 01 01 00  00 00 00 00 00 00 00 00   ................
+6c 00 00 00 01 01 02 00  0e 00 00 00 31 39 32 2e   l...........192.
+31 36 38 2e 31 32 32 2e  31 00 d8 c3 1b 00 00 00   168.122.1.......
+14 01 0f 00 52 53 54 f1  1b 4e 54 02 ef 04 00 00   ....RST..NT.....
+00 00 00 01 00 00 00 01  00 00 00 01 02 00 00 00   ................
+00 00 00 00 08 00 00 00  01 00 00 00 00 4f 41 54   .............OAT
+01 00 00 00 18 00 00 00  01 00 00 00 01 00 01 00   ................
+01 00 00 00 01 00 01 05  09 01 01 00 00 00 00 00   ................
+00 00 00 00 68 00 00 00  01 01 02 00 0a 00 00 00   ....h...........
+31 30 2e 39 2e 30 2e 31  38 00 d8 c3 1b 00 00 00   10.9.0.18.......
+14 01 0f 00 52 53 54 f1  1b 4e 54 02 ef 04 00 00   ....RST..NT.....
+00 00 00 01 00 00 00 01  00 00 00 00 02 00 00 00   ................
+00 00 00 00 08 00 00 00  01 00 00 00 00 4f 41 54   .............OAT
+01 00 00 00 18 00 00 00  01 00 00 00 01 00 01 00   ................
+01 00 00 00 01 00 01 05  09 01 01 00 00 00 00 00   ................
+TAO (31283|140657605842752) - Stub::base_profiles, acquired profile lock this = 0x1588120
+ImR: Server MessengerService is running at corbaloc:iiop:1.2@192.168.192.113:50136/.
+ImR: Server MessengerService callback at IOR:010000002e00000049444c3a496d706c656d656e746174696f6e5265706f7369746f72792f5365727665724f626a6563743a312e3000000004000000000000007000000001010200100000003139322e3136382e3139322e31313300d8c350011b00000014010f00525354f11b4e5402ef04000000000001000000010000003902000000000000000800000001000000004f41540100000018000000010000000100010001000000010001050901010000000000000000006c000000010102000b00000031302e322e302e313939002ed8c333001b00000014010f00525354f11b4e5402ef04000000000001000000010000000102000000000000000800000001000000004f41540100000018000000010000000100010001000000010001050901010000000000000000006c000000010102000e0000003139322e3136382e3132322e3100d8c31b00000014010f00525354f11b4e5402ef04000000000001000000010000000102000000000000000800000001000000004f415401000000180000000100000001000100010000000100010509010100000000000000000068000000010102000a00000031302e392e302e313800d8c31b00000014010f00525354f11b4e5402ef04000000000001000000010000000102000000000000000800000001000000004f41540100000018000000010000000100010001000000010001050901010000000000.
+TAO (31283|140657605842752) - Stub::base_profiles, acquired profile lock this = 0x1588ba0
+(31283|140657605842752) LiveEntry::ctor server = MessengerService, may_ping = 1
+(31283|140657605842752) ImR_Locator_i::send_start_request aam is not nil
+(31283|140657605842752) AsyncAccessManager::server_is_running
+LiveListener::add_ref, MessengerService, count = 2
+LiveListener::add_ref, MessengerService, count = 3
+LiveListener::remove_ref, MessengerService, count = 2
+(31283|140657605842752) LiveCheck::schedule_ping (101), delay = 0,0
+LiveListener::remove_ref, MessengerService, count = 1
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 12 data bytes, my endian, Type Reply[2]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 02 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Transport[9]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[9]::drain_queue_helper, buffer 0/1 has 24 bytes
+TAO - Transport[9]::drain_queue_helper (0/24) - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 02 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Transport[9]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue, byte_count = 24
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[9]::drain_queue_helper, byte_count = 24, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[9]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[9]::handle_input_internal, handle = 9/9, retval = 0
+(31283|140657605842752) LiveCheck::handle_timeout(101), running = 1
+TAO (31283|140657605842752) - TAO_System_Id_With_Unique_Id_Strategy::bind_using_system_id: type=IDL:ImplementationRepository/AMI_ServerObjectHandler:1.0, id=0x020000
+TAO (31283|140657605842752) - Stub::base_profiles, acquired profile lock this = 0x15898d0
+TAO_Messaging (31283|140657605842752) - Asynch_Invocation_Adapter::invoke
+TAO (31283|140657605842752) - Request timeout is 1000 milliseconds
+TAO (31283|140657605842752) - Invocation_Adapter::invoke_i, making a TAO_CS_REMOTE_STRATEGY invocation
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 4, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [4]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <192.168.192.113:50136> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22617472]::IIOP_Connection_Handler, this=0x1589c00
+Messenger server ready.
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22617472], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5190 Transport[22617472] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22617472] IntId=0x7fff30ef5190
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22617472] @ hash:index{-1062632375:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22617472] @ hash:index{-1062632375:0}. Cache size is [5]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22617472]
+TAO (31283|140657605842752) - Leader_Follower[22617472]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22617472]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:50871>
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:50136> on 10
+TAO (31283|140657605842752) - Transport::post_open, tport id changed from 22617472 to 10
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::mark_connected, true Transport[10]
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[10] IntId=0x1592580
+TAO (31283|140657605842752) - TAO_LF_CH_Event[10]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31283|140657605842752) - Leader_Follower[22617472]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [10], wait done result = 1
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, new connected connection to <192.168.192.113:50136> on Transport[10]
+TAO (31283|140657605842752) - Transport[10]::register_handler
+TAO (31283|140657605842752) - Transport[10]::register_handler - registering event handler with reactor
+TAO (31283|140657605842752) - Transport_Connector::connect, opening Transport[10] in TAO_CLIENT_ROLE
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::is_entry_available_i[10], true, state is ENTRY_IDLE_AND_PURGABLE
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[10] IntId=0x1592580
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::find_i, Found available Transport[10] @hash:index {-1062632375:0}
+TAO (31283|140657605842752) - Transport_Connector::connect, got an existing connected Transport[10] in role TAO_CLIENT_ROLE
+TAO (31283|140657605842752) - Codeset_Manager_i::set_tcs, setting char translator (00010001)
+TAO (31283|140657605842752) - Codeset_Manager_i::set_tcs, setting wchar translator (00010109)
+TAO (31283|140657605842752) - Muxed_TMS[10]::request_id, <1>
+TAO (31283|140657605842752) - Request timeout is 1000 milliseconds
+TAO (31283|140657605842752) - Codeset_Manager_i::generate_service_context, using tcs_c <ISO8859_1> (00010001), tcs_w <UTF-16> (00010109)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 80 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 92 bytes
+47 49 4f 50 01 02 01 00  50 00 00 00 01 00 00 00   GIOP....P.......
+03 00 00 00 00 00 00 00  1b 00 00 00 14 01 0f 00   ................
+52 53 54 f1 1b 4e 54 02  ef 04 00 00 00 00 00 01   RST..NT.........
+00 00 00 01 00 00 00 00  05 00 00 00 70 69 6e 67   ............ping
+00 00 00 00 01 00 00 00  01 00 00 00 0c 00 00 00   ................
+01 3e 20 28 01 00 01 00  09 01 01 00               .> (........    
+TAO (31283|140657605842752) - Transport[10]::send_asynchronous_message_i, trying to send the message (ml = 92)
+TAO (31283|140657605842752) - Transport[10]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[10]::drain_queue_helper, buffer 0/1 has 92 bytes
+TAO - Transport[10]::drain_queue_helper (0/92) - HEXDUMP 92 bytes
+47 49 4f 50 01 02 01 00  50 00 00 00 01 00 00 00   GIOP....P.......
+03 00 00 00 00 00 00 00  1b 00 00 00 14 01 0f 00   ................
+52 53 54 f1 1b 4e 54 02  ef 04 00 00 00 00 00 01   RST..NT.........
+00 00 00 01 00 00 00 00  05 00 00 00 70 69 6e 67   ............ping
+00 00 00 00 01 00 00 00  01 00 00 00 0c 00 00 00   ................
+01 3e 20 28 01 00 01 00  09 01 01 00               .> (........    
+TAO (31283|140657605842752) - Transport[10]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[10]::cleanup_queue, byte_count = 92
+TAO (31283|140657605842752) - Transport[10]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[10]::drain_queue_helper, byte_count = 92, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[10]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Transport[10]::make_idle
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_BUSY->ENTRY_IDLE_AND_PURGABLE Transport[10] IntId=0x1592580
+(31283|140657605842752) LiveEntry::do_ping, sendc_ping returned OK
+(31283|140657605842752) LiveCheck::handle_timeout(101), ping sent
+(31283|140657605842752) LC_TimeoutGuard(101)::dtor,no pending timeouts requested
+TAO (31283|140657605842752) - Connection_Handler[10]::handle_input_internal, handle = 10/10
+TAO (31283|140657605842752) - Transport[10]::handle_input
+TAO (31283|140657605842752) - Transport[10]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[10]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[10]::handle_input_parse_data, read 24 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[10]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[10] recv GIOP message v1.2, 12 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - TAO_Muxed_TMS::dispatch_reply, id = 1
+TAO_Messaging (31283|140657605842752) - Asynch_Reply_Dispatcher::dispatch_reply status = 0
+TAO (31283|140657605842752) - Invocation_Adapter::invoke_i, making a TAO_CS_THRU_POA_STRATEGY invocation
+(31283|140657605842752) PingReceiver::ping received from MessengerService
+(31283|140657605842752) AsyncAccessManager::ping_replied ALIVE, this status WAIT_FOR_ALIVE
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 12 data bytes, my endian, Type Reply[2]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 02 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/1 has 24 bytes
+TAO - Transport[7]::drain_queue_helper (0/24) - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 02 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 24
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 24, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+LiveListener::add_ref, MessengerService, count = 2
+LiveListener::add_ref, MessengerService, count = 3
+LiveListener::add_ref, MessengerService, count = 4
+LiveListener::remove_ref, MessengerService, count = 3
+LiveListener::remove_ref, MessengerService, count = 2
+LiveListener::remove_ref, MessengerService, count = 1
+LiveListener::remove_ref, MessengerService, count = 0
+Successfully Activated server <MessengerService>
+TAO (31283|140657605842752) - TAO_Unique_Id_Strategy::unbind_using_user_id: id=0x020000
+TAO (31283|140657605842752) - Connection_Handler[10]::handle_input_internal, handle = 10/10, retval = 0
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input, error parsing incoming message
+TAO (31283|140657605842752) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = -1
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[7]::pre_close
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::mark_connected, false Transport[7]
+TAO (31283|140657605842752) - Transport[7]::purge_entry, entry is 0x156b2b0
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, removing from the reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, cancel all timers
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh end
+TAO (31283|140657605842752) - IIOP_Connection_Handler[7]::~IIOP_Connection_Handler, this=0x1546dc0, transport=0x1547060
+TAO (31283|140657605842752) - Transport[7]::~Transport
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+>>> /home/johnny/ACE/master/atcd/ACE/bin/./tao_imr -ORBInitRef ImplRepoService=file:///home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/implrepo.ior ior MessengerService -f /home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/Messenger.ior 
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 4, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [4]
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22577952]::IIOP_Connection_Handler, this=0x1546dc0
+TAO (31283|140657605842752) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:55990>
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:60124> on 7
+TAO (31283|140657605842752) - Transport::post_open, tport id changed from 22577952 to 7
+TAO (31283|140657605842752) - Transport[7]::post_open, cache_map_entry_ is 0
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31283|140657605842752) - IIOP_Endpoint::set, cannot determine hostname: Success
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5800 Transport[7] is connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_IDLE_AND_PURGABLE Transport[7] IntId=0x7fff30ef5800
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[7] @ hash:index{-1062622387:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[7] @ hash:index{-1062622387:0}. Cache size is [5]
+TAO (31283|140657605842752) - Transport[7]::register_handler
+TAO (31283|140657605842752) - Transport[7]::register_handler - registering event handler with reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 188 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 176 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 188 bytes
+47 49 4f 50 01 02 01 00  b0 00 00 00 01 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+06 00 00 00 5f 69 73 5f  61 00 00 00 01 00 00 00   ...._is_a.......
+01 00 00 00 0c 00 00 00  01 00 00 00 01 00 01 00   ................
+09 01 01 00 00 00 00 00  30 00 00 00 49 44 4c 3a   ........0...IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 41 64 6d 69 6e 69 73   pository/Adminis
+74 72 61 74 69 6f 6e 3a  31 2e 30 00               tration:1.0.    
+TAO (31283|140657605842752) - Codeset_Manager_i::process_service_context, using tcsc <ISO8859_1> (00010001), tcsw <UTF-16> (00010109)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 13 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/1 has 25 bytes
+TAO - Transport[7]::drain_queue_helper (0/25) - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 25
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 25, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+corbaloc:iiop:1.2@192.168.192.113:55990/MessengerService
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input, error parsing incoming message
+TAO (31283|140657605842752) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = -1
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[7]::pre_close
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::mark_connected, false Transport[7]
+TAO (31283|140657605842752) - Transport[7]::purge_entry, entry is 0x1588120
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, removing from the reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, cancel all timers
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh end
+TAO (31283|140657605842752) - IIOP_Connection_Handler[7]::~IIOP_Connection_Handler, this=0x1546dc0, transport=0x1588320
+TAO (31283|140657605842752) - Transport[7]::~Transport
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+>>> ././MessengerClient -k file:///home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/Messenger.ior -ORBForwardOnReplyClosedLimit 20 -ORBForwardDelay 500 -ORBSvcConf /home/johnny/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer/client.conf -ORBdebuglevel 0 -d 10 -t 2 -s 1
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 4, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [4]
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22577952]::IIOP_Connection_Handler, this=0x1546dc0
+TAO (31283|140657605842752) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:55990>
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:52597> on 7
+TAO (31283|140657605842752) - Transport::post_open, tport id changed from 22577952 to 7
+TAO (31283|140657605842752) - Transport[7]::post_open, cache_map_entry_ is 0
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31283|140657605842752) - IIOP_Endpoint::set, cannot determine hostname: Success
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5800 Transport[7] is connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_IDLE_AND_PURGABLE Transport[7] IntId=0x7fff30ef5800
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[7] @ hash:index{-1062629914:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[7] @ hash:index{-1062629914:0}. Cache size is [5]
+TAO (31283|140657605842752) - Transport[7]::register_handler
+TAO (31283|140657605842752) - Transport[7]::register_handler - registering event handler with reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 102 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 90 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 102 bytes
+47 49 4f 50 01 02 01 00  5a 00 00 00 01 00 00 00   GIOP....Z.......
+03 00 00 00 00 00 00 00  10 00 00 00 4d 65 73 73   ............Mess
+65 6e 67 65 72 53 65 72  76 69 63 65 06 00 00 00   engerService....
+5f 69 73 5f 61 00 00 00  01 00 00 00 01 00 00 00   _is_a...........
+0c 00 00 00 01 00 00 00  01 00 01 00 09 01 01 00   ................
+12 00 00 00 49 44 4c 3a  4d 65 73 73 65 6e 67 65   ....IDL:Messenge
+72 3a 31 2e 30 00                                  r:1.0.          
+TAO (31283|140657605842752) - Codeset_Manager_i::process_service_context, using tcsc <ISO8859_1> (00010001), tcsw <UTF-16> (00010109)
+(31283|140657605842752) AsyncAccessManager(0x156b000)::add_interest status = SERVER_READY
+TAO (31283|140657605842752) - Stub::base_profiles, acquired profile lock this = 0x1588880
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 84 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 96 bytes
+47 49 4f 50 01 02 01 01  54 00 00 00 01 00 00 00   GIOP....T.......
+03 00 00 00 00 00 00 00  01 00 00 00 00 00 00 00   ................
+01 00 00 00 00 00 00 00  34 00 00 00 01 01 02 00   ........4.......
+10 00 00 00 31 39 32 2e  31 36 38 2e 31 39 32 2e   ....192.168.192.
+31 31 33 00 d8 c3 00 00  10 00 00 00 4d 65 73 73   113.........Mess
+65 6e 67 65 72 53 65 72  76 69 63 65 00 00 00 00   engerService....
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 2 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/2 has 44 bytes
+TAO - Transport[7]::drain_queue_helper (0/44) - HEXDUMP 44 bytes
+47 49 4f 50 01 02 01 01  54 00 00 00 01 00 00 00   GIOP....T.......
+03 00 00 00 00 00 00 00  01 00 00 00 00 00 00 00   ................
+01 00 00 00 00 00 00 00  34 00 00 00               ........4...    
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 1/2 has 52 bytes
+TAO - Transport[7]::drain_queue_helper (0/52) - HEXDUMP 52 bytes
+01 01 02 00 10 00 00 00  31 39 32 2e 31 36 38 2e   ........192.168.
+31 39 32 2e 31 31 33 00  d8 c3 00 00 10 00 00 00   192.113.........
+4d 65 73 73 65 6e 67 65  72 53 65 72 76 69 63 65   MessengerService
+00 00 00 00                                        ....            
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 96
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 96, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+(31290|140571156600640) - Sending message <0> to server
+Message count: 0
+Message from: TAO User
+Subject:      Test 1
+Message:      Hello!
+(31290|140571156600640) - Successfully received response for message <0> to server
+(31287|140446074423040| 11:18:25.553797) Terminator::svc() Sleeping 2 seconds before aborting
+TAO (31283|140657605842752) - Connection_Handler[9]::handle_input_internal, handle = 9/9
+TAO (31283|140657605842752) - Transport[9]::handle_input
+TAO (31283|140657605842752) - Transport[9]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[9]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[9]::handle_input, error parsing incoming message
+TAO (31283|140657605842752) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+TAO (31283|140657605842752) - Connection_Handler[9]::handle_input_internal, handle = 9/9, retval = -1
+TAO (31283|140657605842752) - Connection_Handler[9]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[9]::pre_close
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::mark_connected, false Transport[9]
+TAO (31283|140657605842752) - Transport[9]::purge_entry, entry is 0x156afa0
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+Process 31287 exited with exit code 0
+TAO (31283|140657605842752) - Connection_Handler[9]::close_connection_eh, removing from the reactor
+TAO (31283|140657605842752) - Connection_Handler[9]::close_connection_eh, cancel all timers
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - TAO_LF_CH_Event[9]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Connection_Handler[9]::close_connection_eh end
+TAO (31283|140657605842752) - IIOP_Connection_Handler[9]::~IIOP_Connection_Handler, this=0x1574940, transport=0x1574b30
+TAO (31283|140657605842752) - Transport[9]::~Transport
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[9]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Connection_Handler[10]::handle_input_internal, handle = 10/10
+TAO (31283|140657605842752) - Transport[10]::handle_input
+TAO (31283|140657605842752) - Transport[10]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[10]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[10]::handle_input, error parsing incoming message
+TAO (31283|140657605842752) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+TAO (31283|140657605842752) - Connection_Handler[10]::handle_input_internal, handle = 10/10, retval = -1
+TAO (31283|140657605842752) - Connection_Handler[10]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[10]::pre_close
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::mark_connected, false Transport[10]
+TAO (31283|140657605842752) - Transport[10]::purge_entry, entry is 0x1592570
+TAO (31283|140657605842752) - Transport[10]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[10]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Connection_Handler[10]::close_connection_eh, removing from the reactor
+TAO (31283|140657605842752) - Connection_Handler[10]::close_connection_eh, cancel all timers
+TAO (31283|140657605842752) - Transport[10]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[10]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - TAO_LF_CH_Event[10]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Connection_Handler[10]::close_connection_eh end
+TAO (31283|140657605842752) - IIOP_Connection_Handler[10]::~IIOP_Connection_Handler, this=0x1589c00, transport=0x1591d80
+TAO (31283|140657605842752) - Transport[10]::~Transport
+TAO (31283|140657605842752) - Transport[10]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[10]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+(31290|140571156600640) - Sending message <1> to server
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 111 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 99 data bytes, my endian, Type Request[2]
+GIOP message - HEXDUMP 111 bytes
+47 49 4f 50 01 02 01 00  63 00 00 00 02 00 00 00   GIOP....c.......
+03 00 00 00 00 00 00 00  10 00 00 00 4d 65 73 73   ............Mess
+65 6e 67 65 72 53 65 72  76 69 63 65 0d 00 00 00   engerService....
+73 65 6e 64 5f 6d 65 73  73 61 67 65 00 00 00 00   send_message....
+00 00 00 00 01 00 00 00  09 00 00 00 54 41 4f 20   ............TAO 
+55 73 65 72 00 44 4c 3a  07 00 00 00 54 65 73 74   User.DL:....Test
+20 31 00 2e 07 00 00 00  48 65 6c 6c 6f 21 00       1......Hello!. 
+(31283|140657605842752) AsyncAccessManager(0x156b000)::add_interest status = SERVER_READY
+LiveListener::add_ref, MessengerService, count = 2
+LiveListener::add_ref, MessengerService, count = 3
+LiveListener::remove_ref, MessengerService, count = 2
+(31283|140657605842752) LiveCheck::schedule_ping (102), delay = 0,0
+LiveListener::remove_ref, MessengerService, count = 1
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+(31283|140657605842752) LiveCheck::handle_timeout(102), running = 1
+TAO (31283|140657605842752) - TAO_System_Id_With_Unique_Id_Strategy::bind_using_system_id: type=IDL:ImplementationRepository/AMI_ServerObjectHandler:1.0, id=0x030000
+TAO (31283|140657605842752) - Stub::base_profiles, acquired profile lock this = 0x156ae50
+TAO_Messaging (31283|140657605842752) - Asynch_Invocation_Adapter::invoke
+TAO (31283|140657605842752) - Request timeout is 1000 milliseconds
+TAO (31283|140657605842752) - Invocation_Adapter::invoke_i, making a TAO_CS_REMOTE_STRATEGY invocation
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [3]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <192.168.192.113:50136> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22614832]::IIOP_Connection_Handler, this=0x157e9a0
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5190 Transport[22614832] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22614832] IntId=0x7fff30ef5190
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22614832] @ hash:index{-1062632375:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22614832] @ hash:index{-1062632375:0}. Cache size is [4]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22614832]
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - TAO_LF_CH_Event[22614832]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Transport[22614832]::purge_entry, entry is 0x15919a0
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], wait done result = -1
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31283|140657605842752) - Transport[22614832]::purge_entry, entry is (nil)
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, connection to <192.168.192.113:50136> failed (errno: Transport endpoint is not connected)
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, connection to <192.168.192.113:50136> completed unsuccessfully
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22614832]::~IIOP_Connection_Handler, this=0x157e9a0, transport=0x1591330
+TAO (31283|140657605842752) - Transport[22614832]::~Transport
+TAO (31283|140657605842752) - Transport[22614832]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[22614832]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Transport_Connector::connect, make_connection failed
+TAO (31283|140657605842752) - Stub::next_profile_retry, acquired profile lock this = 0x1588ba0
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [3]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <10.2.0.199:50136> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22614832]::IIOP_Connection_Handler, this=0x157e9a0
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5190 Transport[22614832] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22614832] IntId=0x7fff30ef5190
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22614832] @ hash:index{167953567:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22614832] @ hash:index{167953567:0}. Cache size is [4]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22614832]
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - TAO_LF_CH_Event[22614832]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Transport[22614832]::purge_entry, entry is 0x15919c0
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], wait done result = -1
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31283|140657605842752) - Transport[22614832]::purge_entry, entry is (nil)
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, connection to <10.2.0.199:50136> failed (errno: Transport endpoint is not connected)
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, connection to <10.2.0.199:50136> completed unsuccessfully
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22614832]::~IIOP_Connection_Handler, this=0x157e9a0, transport=0x1591330
+TAO (31283|140657605842752) - Transport[22614832]::~Transport
+TAO (31283|140657605842752) - Transport[22614832]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[22614832]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Transport_Connector::connect, make_connection failed
+TAO (31283|140657605842752) - Stub::next_profile_retry, acquired profile lock this = 0x1588ba0
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [3]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <192.168.122.1:50136> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22614832]::IIOP_Connection_Handler, this=0x157e9a0
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5190 Transport[22614832] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22614832] IntId=0x7fff30ef5190
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22614832] @ hash:index{-1062650407:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22614832] @ hash:index{-1062650407:0}. Cache size is [4]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22614832]
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - TAO_LF_CH_Event[22614832]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Transport[22614832]::purge_entry, entry is 0x15919c0
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], wait done result = -1
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31283|140657605842752) - Transport[22614832]::purge_entry, entry is (nil)
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, connection to <192.168.122.1:50136> failed (errno: Transport endpoint is not connected)
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, connection to <192.168.122.1:50136> completed unsuccessfully
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22614832]::~IIOP_Connection_Handler, this=0x157e9a0, transport=0x1591330
+TAO (31283|140657605842752) - Transport[22614832]::~Transport
+TAO (31283|140657605842752) - Transport[22614832]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[22614832]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Transport_Connector::connect, make_connection failed
+TAO (31283|140657605842752) - Stub::next_profile_retry, acquired profile lock this = 0x1588ba0
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [3]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <10.9.0.18:50136> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22614832]::IIOP_Connection_Handler, this=0x157e9a0
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5190 Transport[22614832] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22614832] IntId=0x7fff30ef5190
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22614832] @ hash:index{168412138:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22614832] @ hash:index{168412138:0}. Cache size is [4]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22614832]
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - TAO_LF_CH_Event[22614832]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Transport[22614832]::purge_entry, entry is 0x15919c0
+TAO (31283|140657605842752) - Leader_Follower[22614832]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], wait done result = -1
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22614832], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31283|140657605842752) - Transport[22614832]::purge_entry, entry is (nil)
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, connection to <10.9.0.18:50136> failed (errno: Transport endpoint is not connected)
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, connection to <10.9.0.18:50136> completed unsuccessfully
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22614832]::~IIOP_Connection_Handler, this=0x157e9a0, transport=0x1591330
+TAO (31283|140657605842752) - Transport[22614832]::~Transport
+TAO (31283|140657605842752) - Transport[22614832]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[22614832]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Transport_Connector::connect, make_connection failed
+TAO (31283|140657605842752) - Stub::next_profile_retry, acquired profile lock this = 0x1588ba0
+(31283|140657605842752) LiveEntry::do_ping, sendc_ping threw TRANSIENT
+(31283|140657605842752) AsyncAccessManager::ping_replied DEAD, this status WAIT_FOR_PING
+(31283|140657605842752) AsyncAccessManager::ping_replied pid = 0, Not trying to restart server because it has activation mode MANUL
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 56 data bytes, my endian, Type Reply[2]
+GIOP message - HEXDUMP 68 bytes
+47 49 4f 50 01 02 01 01  38 00 00 00 02 00 00 00   GIOP....8.......
+02 00 00 00 00 00 00 00  20 00 00 00 49 44 4c 3a   ........ ...IDL:
+6f 6d 67 2e 6f 72 67 2f  43 4f 52 42 41 2f 54 52   omg.org/CORBA/TR
+41 4e 53 49 45 4e 54 3a  31 2e 30 00 00 06 41 54   ANSIENT:1.0...AT
+01 00 00 00                                        ....            
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/1 has 68 bytes
+TAO - Transport[7]::drain_queue_helper (0/68) - HEXDUMP 68 bytes
+47 49 4f 50 01 02 01 01  38 00 00 00 02 00 00 00   GIOP....8.......
+02 00 00 00 00 00 00 00  20 00 00 00 49 44 4c 3a   ........ ...IDL:
+6f 6d 67 2e 6f 72 67 2f  43 4f 52 42 41 2f 54 52   omg.org/CORBA/TR
+41 4e 53 49 45 4e 54 3a  31 2e 30 00 00 06 41 54   ANSIENT:1.0...AT
+01 00 00 00                                        ....            
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 68
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 68, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+(31283|140657605842752) AsyncAccessManager(0x156b000)::final_state removing this from map, server = MessengerService
+LiveListener::add_ref, MessengerService, count = 2
+LiveListener::add_ref, MessengerService, count = 3
+LiveListener::add_ref, MessengerService, count = 4
+LiveListener::remove_ref, MessengerService, count = 3
+LiveListener::remove_ref, MessengerService, count = 2
+LiveListener::remove_ref, MessengerService, count = 1
+LiveListener::remove_ref, MessengerService, count = 0
+(31283|140657605842752) LiveCheck::handle_timeout(102), ping sent
+(31283|140657605842752) LC_TimeoutGuard(102)::dtor,no pending timeouts requested
+(31290|140571156600640) - <2> Messages where send to the server, <1> succeeded
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input, error parsing incoming message
+TAO (31283|140657605842752) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = -1
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[7]::pre_close
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::mark_connected, false Transport[7]
+TAO (31283|140657605842752) - Transport[7]::purge_entry, entry is 0x1588120
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, removing from the reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, cancel all timers
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh end
+TAO (31283|140657605842752) - IIOP_Connection_Handler[7]::~IIOP_Connection_Handler, this=0x1546dc0, transport=0x1588320
+TAO (31283|140657605842752) - Transport[7]::~Transport
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 2, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [2]
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22577952]::IIOP_Connection_Handler, this=0x1546dc0
+TAO (31283|140657605842752) - Concurrency_Strategy::activate_svc_handler, opened as TAO_SERVER_ROLE
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, The local addr is <192.168.192.113:55990>
+TAO (31283|140657605842752) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.192.113:51721> on 7
+TAO (31283|140657605842752) - Transport::post_open, tport id changed from 22577952 to 7
+TAO (31283|140657605842752) - Transport[7]::post_open, cache_map_entry_ is 0
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (31283|140657605842752) - IIOP_Endpoint::set, cannot determine hostname: Success
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef5800 Transport[7] is connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_IDLE_AND_PURGABLE Transport[7] IntId=0x7fff30ef5800
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[7] @ hash:index{-1062630790:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[7] @ hash:index{-1062630790:0}. Cache size is [3]
+TAO (31283|140657605842752) - Transport[7]::register_handler
+TAO (31283|140657605842752) - Transport[7]::register_handler - registering event handler with reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 188 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 176 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 188 bytes
+47 49 4f 50 01 02 01 00  b0 00 00 00 01 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+06 00 00 00 5f 69 73 5f  61 00 00 00 01 00 00 00   ...._is_a.......
+01 00 00 00 0c 00 00 00  01 00 00 00 01 00 01 00   ................
+09 01 01 00 00 00 00 00  30 00 00 00 49 44 4c 3a   ........0...IDL:
+49 6d 70 6c 65 6d 65 6e  74 61 74 69 6f 6e 52 65   ImplementationRe
+70 6f 73 69 74 6f 72 79  2f 41 64 6d 69 6e 69 73   pository/Adminis
+74 72 61 74 69 6f 6e 3a  31 2e 30 00               tration:1.0.    
+TAO (31283|140657605842752) - Codeset_Manager_i::process_service_context, using tcsc <ISO8859_1> (00010001), tcsw <UTF-16> (00010109)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 13 data bytes, my endian, Type Reply[1]
+GIOP message - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/1 has 25 bytes
+TAO - Transport[7]::drain_queue_helper (0/25) - HEXDUMP 25 bytes
+47 49 4f 50 01 02 01 01  0d 00 00 00 01 00 00 00   GIOP............
+00 00 00 00 00 00 00 00  01                        .........       
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 25
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 25, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, read 141 bytes
+TAO (31283|140657605842752) - GIOP_Message_State::parse_message_header_i
+TAO (31283|140657605842752) - GIOP_Message_State::get_version_info
+TAO (31283|140657605842752) - GIOP_Message_State::get_byte_order_info
+TAO (31283|140657605842752) - Transport[7]::process_parsed_messages, entering (missing data == 0)
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, Transport[7] recv GIOP message v1.2, 129 data bytes, my endian, Type Request[2]
+GIOP message - HEXDUMP 141 bytes
+47 49 4f 50 01 02 01 00  81 00 00 00 02 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  44 00 00 00 14 01 0f 00   ........D.......
+4e 55 50 00 00 00 21 00  00 00 00 01 00 00 00 52   NUP...!........R
+6f 6f 74 50 4f 41 00 49  6d 70 6c 52 65 70 6f 5f   ootPOA.ImplRepo_
+53 65 72 76 69 63 65 00  00 00 00 00 01 00 00 00   Service.........
+49 6d 70 6c 52 65 70 6f  5f 53 65 72 76 69 63 65   ImplRepo_Service
+10 00 00 00 73 68 75 74  64 6f 77 6e 5f 73 65 72   ....shutdown_ser
+76 65 72 00 00 00 00 00  11 00 00 00 4d 65 73 73   ver.........Mess
+65 6e 67 65 72 53 65 72  76 69 63 65 00            engerService.   
+ImR: Shutting down server <MessengerService>.
+TAO (31283|140657605842752) - Stub::base_profiles, acquired profile lock this = 0x1547060
+TAO (31283|140657605842752) - Request timeout is 5000 milliseconds
+TAO (31283|140657605842752) - Invocation_Adapter::invoke_i, making a TAO_CS_REMOTE_STRATEGY invocation
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [3]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <192.168.192.113:50136> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22497600]::IIOP_Connection_Handler, this=0x1547180
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef3e80 Transport[22497600] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22497600] IntId=0x7fff30ef3e80
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22497600] @ hash:index{-1062632375:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22497600] @ hash:index{-1062632375:0}. Cache size is [4]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22497600]
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - TAO_LF_CH_Event[22497600]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Transport[22497600]::purge_entry, entry is 0x1574c90
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], wait done result = -1
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31283|140657605842752) - Transport[22497600]::purge_entry, entry is (nil)
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, connection to <192.168.192.113:50136> failed (errno: Transport endpoint is not connected)
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, connection to <192.168.192.113:50136> completed unsuccessfully
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22497600]::~IIOP_Connection_Handler, this=0x1547180, transport=0x1574940
+TAO (31283|140657605842752) - Transport[22497600]::~Transport
+TAO (31283|140657605842752) - Transport[22497600]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[22497600]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Transport_Connector::connect, make_connection failed
+TAO (31283|140657605842752) - Stub::next_profile_retry, acquired profile lock this = 0x1547060
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [3]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <10.2.0.199:50136> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22497600]::IIOP_Connection_Handler, this=0x1547180
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef3e80 Transport[22497600] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22497600] IntId=0x7fff30ef3e80
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22497600] @ hash:index{167953567:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22497600] @ hash:index{167953567:0}. Cache size is [4]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22497600]
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - TAO_LF_CH_Event[22497600]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Transport[22497600]::purge_entry, entry is 0x1574c90
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], wait done result = -1
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31283|140657605842752) - Transport[22497600]::purge_entry, entry is (nil)
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, connection to <10.2.0.199:50136> failed (errno: Transport endpoint is not connected)
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, connection to <10.2.0.199:50136> completed unsuccessfully
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22497600]::~IIOP_Connection_Handler, this=0x1547180, transport=0x1574940
+TAO (31283|140657605842752) - Transport[22497600]::~Transport
+TAO (31283|140657605842752) - Transport[22497600]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[22497600]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Transport_Connector::connect, make_connection failed
+TAO (31283|140657605842752) - Stub::next_profile_retry, acquired profile lock this = 0x1547060
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [3]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <192.168.122.1:50136> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22497600]::IIOP_Connection_Handler, this=0x1547180
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef3e80 Transport[22497600] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22497600] IntId=0x7fff30ef3e80
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22497600] @ hash:index{-1062650407:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22497600] @ hash:index{-1062650407:0}. Cache size is [4]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22497600]
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - TAO_LF_CH_Event[22497600]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Transport[22497600]::purge_entry, entry is 0x1574c90
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], wait done result = -1
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31283|140657605842752) - Transport[22497600]::purge_entry, entry is (nil)
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, connection to <192.168.122.1:50136> failed (errno: Transport endpoint is not connected)
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, connection to <192.168.122.1:50136> completed unsuccessfully
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22497600]::~IIOP_Connection_Handler, this=0x1547180, transport=0x1574940
+TAO (31283|140657605842752) - Transport[22497600]::~Transport
+TAO (31283|140657605842752) - Transport[22497600]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[22497600]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Transport_Connector::connect, make_connection failed
+TAO (31283|140657605842752) - Stub::next_profile_retry, acquired profile lock this = 0x1547060
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::purge, Cache size after purging is [3]
+TAO (31283|140657605842752) - IIOP_Connector::begin_connection, to <10.9.0.18:50136> which should block
+TAO (31283|140657605842752) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22497600]::IIOP_Connection_Handler, this=0x1547180
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], Connection not complete.
+TAO (31283|140657605842752) - Cache_IntId_T::Cache_IntId_T, this=0x7fff30ef3e80 Transport[22497600] is not connected
+TAO (31283|140657605842752) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[22497600] IntId=0x7fff30ef3e80
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i, Transport[22497600] @ hash:index{168412138:0}
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::bind_i: Success Transport[22497600] @ hash:index{168412138:0}. Cache size is [4]
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[22497600]
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, Becoming client leader.
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, (leader) enter reactor event loop
+TAO (31283|140657605842752) - TAO_LF_CH_Event[22497600]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Transport[22497600]::purge_entry, entry is 0x1574c90
+TAO (31283|140657605842752) - Leader_Follower[22497600]::wait_for_event, (leader) exit reactor event loop
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], wait done result = -1
+TAO (31283|140657605842752) - Transport_Connector::wait_for_connection_completion, transport [22497600], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31283|140657605842752) - Transport[22497600]::purge_entry, entry is (nil)
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31283|140657605842752) - IIOP_Connector::complete_connection, connection to <10.9.0.18:50136> failed (errno: Transport endpoint is not connected)
+TAO (31283|140657605842752) - IIOP_Connector::make_connection, connection to <10.9.0.18:50136> completed unsuccessfully
+TAO (31283|140657605842752) - IIOP_Connection_Handler[22497600]::~IIOP_Connection_Handler, this=0x1547180, transport=0x1574940
+TAO (31283|140657605842752) - Transport[22497600]::~Transport
+TAO (31283|140657605842752) - Transport[22497600]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[22497600]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Transport_Connector::connect, make_connection failed
+TAO (31283|140657605842752) - Stub::next_profile_retry, acquired profile lock this = 0x1547060
+ImR: Exception while shutting down <MessengerService>
+TAO (31283|140657605842752) - GIOP_Message_Base::dump_msg, send GIOP message v1.2, 12 data bytes, my endian, Type Reply[2]
+GIOP message - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 02 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, sending 1 buffers
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, buffer 0/1 has 24 bytes
+TAO - Transport[7]::drain_queue_helper (0/24) - HEXDUMP 24 bytes
+47 49 4f 50 01 02 01 01  0c 00 00 00 02 00 00 00   GIOP............
+00 00 00 00 00 00 00 00                            ........        
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, end of data
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, byte_count = 24
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+TAO (31283|140657605842752) - Transport[7]::drain_queue_helper, byte_count = 24, head_is_empty = 1
+TAO (31283|140657605842752) - Transport[7]::drain_queue_i, helper retval = 1
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = 0
+Successfully shut down server <MessengerService>
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7
+TAO (31283|140657605842752) - Transport[7]::handle_input
+TAO (31283|140657605842752) - Transport[7]::process_queue_head, 0 enqueued
+TAO (31283|140657605842752) - Transport[7]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Transport[7]::handle_input, error parsing incoming message
+TAO (31283|140657605842752) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+TAO (31283|140657605842752) - Connection_Handler[7]::handle_input_internal, handle = 7/7, retval = -1
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[7]::pre_close
+TAO (31283|140657605842752) - Transport_Cache_Manager_T::mark_connected, false Transport[7]
+TAO (31283|140657605842752) - Transport[7]::purge_entry, entry is 0x156afa0
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, removing from the reactor
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh, cancel all timers
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - TAO_LF_CH_Event[7]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Connection_Handler[7]::close_connection_eh end
+TAO (31283|140657605842752) - IIOP_Connection_Handler[7]::~IIOP_Connection_Handler, this=0x1546dc0, transport=0x1588320
+TAO (31283|140657605842752) - Transport[7]::~Transport
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[7]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+INFO: /home/johnny/ACE/master/atcd/TAO/orbsvcs/ImplRepo_Service/tao_imr_locator being killed.
+TAO (31283|140657605842752) - TAO_Unique_Id_Strategy::unbind_using_user_id: id=0x496d706c5265706f5f536572766963
+TAO (31283|140657605842752) - TAO_Unique_Id_Strategy::unbind_using_user_id: id=0x030000
+TAO (31283|140657605842752) - Connection_Handler[6]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[6]::pre_close
+TAO (31283|140657605842752) - Transport[6]::purge_entry, entry is (nil)
+TAO (31283|140657605842752) - Transport[6]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[6]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Connection_Handler[6]::close_connection_eh, removing from the reactor
+TAO (31283|140657605842752) - Connection_Handler[6]::close_connection_eh, cancel all timers
+TAO (31283|140657605842752) - Transport[6]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[6]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - TAO_LF_CH_Event[6]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Connection_Handler[6]::close_connection_eh end
+TAO (31283|140657605842752) - IIOP_Connection_Handler[6]::~IIOP_Connection_Handler, this=0x14f6590, transport=0x150a610
+TAO (31283|140657605842752) - Transport[6]::~Transport
+TAO (31283|140657605842752) - Transport[6]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[6]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31283|140657605842752) - Connection_Handler[8]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[8]::pre_close
+TAO (31283|140657605842752) - Transport[8]::purge_entry, entry is (nil)
+TAO (31284|140632198408000) - Connection_Handler[8]::handle_input_internal, handle = 8/8
+TAO (31283|140657605842752) - Transport[8]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[8]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Transport[8]::handle_input
+TAO (31283|140657605842752) - Connection_Handler[8]::close_connection_eh, removing from the reactor
+TAO (31284|140632198408000) - Transport[8]::process_queue_head, 0 enqueued
+TAO (31284|140632198408000) - Transport[8]::handle_input_parse_data, enter
+TAO (31283|140657605842752) - Connection_Handler[8]::close_connection_eh, cancel all timers
+TAO (31283|140657605842752) - Transport[8]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[8]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Transport[8]::handle_input, error parsing incoming message
+TAO (31284|140632198408000) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+TAO (31283|140657605842752) - TAO_LF_CH_Event[8]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31284|140632198408000) - Connection_Handler[8]::handle_input_internal, handle = 8/8, retval = -1
+TAO (31283|140657605842752) - Connection_Handler[8]::close_connection_eh end
+TAO (31283|140657605842752) - IIOP_Connection_Handler[8]::~IIOP_Connection_Handler, this=0x1575ed0, transport=0x157e0d0
+TAO (31284|140632198408000) - Connection_Handler[8]::close_connection_eh, purging entry from cache
+TAO (31283|140657605842752) - Transport[8]::~Transport
+TAO (31284|140632198408000) - Transport[8]::pre_close
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::mark_connected, false Transport[8]
+TAO (31283|140657605842752) - Transport[8]::cleanup_queue_i, cleaning up complete queue
+TAO (31283|140657605842752) - Transport[8]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Transport[8]::purge_entry, entry is 0x1324140
+TAO (31284|140632198408000) - Transport[8]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[8]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Connection_Handler[8]::close_connection_eh, removing from the reactor
+TAO (31284|140632198408000) - Connection_Handler[8]::close_connection_eh, cancel all timers
+TAO (31284|140632198408000) - Transport[8]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[8]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - TAO_LF_CH_Event[8]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+ImR: Shutting down...
+TAO (31284|140632198408000) - Connection_Handler[8]::close_connection_eh end
+CORBA::ORB::destroy() called on ORB <TAO_ImR_Locator>.
+TAO (31284|140632198408000) - IIOP_Connection_Handler[8]::~IIOP_Connection_Handler, this=0x1324240, transport=0x1323990
+ImR: Shut down successfully.
+TAO (31284|140632198408000) - Transport[8]::~Transport
+TAO (31284|140632198408000) - Transport[8]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[8]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Connection_Handler[9]::handle_input_internal, handle = 9/9
+TAO (31284|140632198408000) - Transport[9]::handle_input
+TAO (31284|140632198408000) - Transport[9]::process_queue_head, 0 enqueued
+TAO (31284|140632198408000) - Transport[9]::handle_input_parse_data, enter
+TAO (31284|140632198408000) - Transport[9]::handle_input, error parsing incoming message
+TAO (31284|140632198408000) - Resume_Handle::handle_input_return_value_hook, handle_input returning -1, so handle is not resumed.
+(31283|140657605842752) AsyncAccessManager(0x156b000)::dtor server = MessengerService
+TAO (31284|140632198408000) - Connection_Handler[9]::handle_input_internal, handle = 9/9, retval = -1
+TAO (31284|140632198408000) - Connection_Handler[9]::close_connection_eh, purging entry from cache
+TAO (31284|140632198408000) - Transport[9]::pre_close
+(31283|140657605842752) PingReceiver::cancel server = MessengerService
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::mark_connected, false Transport[9]
+TAO (31284|140632198408000) - Transport[9]::purge_entry, entry is 0x13124d0
+TAO (31284|140632198408000) - Transport[9]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[9]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Connection_Handler[9]::close_connection_eh, removing from the reactor
+(31283|140657605842752) PingReceiver::cancel caught BAD_INV_ORDER
+TAO (31284|140632198408000) - Connection_Handler[9]::close_connection_eh, cancel all timers
+TAO (31284|140632198408000) - Transport[9]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[9]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - TAO_LF_CH_Event[9]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (31283|140657605842752) - Destroying ORB <TAO_ImR_Locator>
+TAO (31284|140632198408000) - Connection_Handler[9]::close_connection_eh end
+TAO (31284|140632198408000) - IIOP_Connection_Handler[9]::~IIOP_Connection_Handler, this=0x12eb810, transport=0x12c82b0
+TAO (31284|140632198408000) - Transport[9]::~Transport
+TAO (31284|140632198408000) - Transport[9]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[9]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+INFO: /home/johnny/ACE/master/atcd/TAO/orbsvcs/ImplRepo_Service/tao_imr_activator being killed.
+TAO (31284|140632198408000) - Invocation_Adapter::invoke_i, making a TAO_CS_REMOTE_STRATEGY invocation
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (31284|140632198408000) - IIOP_Connector::begin_connection, to <192.168.192.113:55990> which should block
+TAO (31284|140632198408000) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19694256]::IIOP_Connection_Handler, this=0x12eb810
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], Connection not complete.
+TAO (31284|140632198408000) - Cache_IntId_T::Cache_IntId_T, this=0x7fff07683540 Transport[19694256] is not connected
+TAO (31284|140632198408000) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[19694256] IntId=0x7fff07683540
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i, Transport[19694256] @ hash:index{-1062626521:0}
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i: Success Transport[19694256] @ hash:index{-1062626521:0}. Cache size is [1]
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[19694256]
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, Becoming client leader.
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, (leader) enter reactor event loop
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::fill_set_i, current_size = 1, cache_maximum = 512
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::purge, Cache size after purging is [1]
+TAO (31284|140632198408000) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19625856]::IIOP_Connection_Handler, this=0x1324240
+TAO (31284|140632198408000) - TAO_LF_CH_Event[19625856]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31284|140632198408000) - Transport[19625856]::purge_entry, entry is (nil)
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19625856]::~IIOP_Connection_Handler, this=0x1324240, transport=0x12b7780
+TAO (31284|140632198408000) - Transport[19625856]::~Transport
+TAO (31284|140632198408000) - Transport[19625856]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[19625856]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - TAO_LF_CH_Event[19694256]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31284|140632198408000) - Transport[19694256]::purge_entry, entry is 0x1324140
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, (leader) exit reactor event loop
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], wait done result = -1
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31284|140632198408000) - Transport[19694256]::purge_entry, entry is (nil)
+TAO (31284|140632198408000) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31284|140632198408000) - IIOP_Connector::complete_connection, connection to <192.168.192.113:55990> failed (errno: Transport endpoint is not connected)
+TAO (31284|140632198408000) - IIOP_Connector::make_connection, connection to <192.168.192.113:55990> completed unsuccessfully
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19694256]::~IIOP_Connection_Handler, this=0x12eb810, transport=0x12c82b0
+TAO (31284|140632198408000) - Transport[19694256]::~Transport
+TAO (31284|140632198408000) - Transport[19694256]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[19694256]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Transport_Connector::connect, make_connection failed
+TAO (31284|140632198408000) - Stub::next_profile_retry, acquired profile lock this = 0x13259f0
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (31284|140632198408000) - IIOP_Connector::begin_connection, to <10.2.0.199:55990> which should block
+TAO (31284|140632198408000) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19694256]::IIOP_Connection_Handler, this=0x12eb810
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], Connection not complete.
+TAO (31284|140632198408000) - Cache_IntId_T::Cache_IntId_T, this=0x7fff07683540 Transport[19694256] is not connected
+TAO (31284|140632198408000) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[19694256] IntId=0x7fff07683540
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i, Transport[19694256] @ hash:index{167959421:0}
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i: Success Transport[19694256] @ hash:index{167959421:0}. Cache size is [1]
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[19694256]
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, Becoming client leader.
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, (leader) enter reactor event loop
+TAO (31284|140632198408000) - TAO_LF_CH_Event[19694256]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31284|140632198408000) - Transport[19694256]::purge_entry, entry is 0x12c8420
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, (leader) exit reactor event loop
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], wait done result = -1
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31284|140632198408000) - Transport[19694256]::purge_entry, entry is (nil)
+TAO (31284|140632198408000) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31284|140632198408000) - IIOP_Connector::complete_connection, connection to <10.2.0.199:55990> failed (errno: Transport endpoint is not connected)
+TAO (31284|140632198408000) - IIOP_Connector::make_connection, connection to <10.2.0.199:55990> completed unsuccessfully
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19694256]::~IIOP_Connection_Handler, this=0x12eb810, transport=0x12c82b0
+TAO (31284|140632198408000) - Transport[19694256]::~Transport
+TAO (31284|140632198408000) - Transport[19694256]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[19694256]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Transport_Connector::connect, make_connection failed
+TAO (31284|140632198408000) - Stub::next_profile_retry, acquired profile lock this = 0x13259f0
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (31284|140632198408000) - IIOP_Connector::begin_connection, to <192.168.122.1:55990> which should block
+TAO (31284|140632198408000) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19694256]::IIOP_Connection_Handler, this=0x12eb810
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], Connection not complete.
+TAO (31284|140632198408000) - Cache_IntId_T::Cache_IntId_T, this=0x7fff07683540 Transport[19694256] is not connected
+TAO (31284|140632198408000) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[19694256] IntId=0x7fff07683540
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i, Transport[19694256] @ hash:index{-1062644553:0}
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i: Success Transport[19694256] @ hash:index{-1062644553:0}. Cache size is [1]
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[19694256]
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, Becoming client leader.
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, (leader) enter reactor event loop
+TAO (31284|140632198408000) - TAO_LF_CH_Event[19694256]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31284|140632198408000) - Transport[19694256]::purge_entry, entry is 0x12c8420
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, (leader) exit reactor event loop
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], wait done result = -1
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31284|140632198408000) - Transport[19694256]::purge_entry, entry is (nil)
+TAO (31284|140632198408000) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31284|140632198408000) - IIOP_Connector::complete_connection, connection to <192.168.122.1:55990> failed (errno: Transport endpoint is not connected)
+TAO (31284|140632198408000) - IIOP_Connector::make_connection, connection to <192.168.122.1:55990> completed unsuccessfully
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19694256]::~IIOP_Connection_Handler, this=0x12eb810, transport=0x12c82b0
+TAO (31284|140632198408000) - Transport[19694256]::~Transport
+TAO (31284|140632198408000) - Transport[19694256]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[19694256]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Transport_Connector::connect, make_connection failed
+TAO (31284|140632198408000) - Stub::next_profile_retry, acquired profile lock this = 0x13259f0
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (31284|140632198408000) - IIOP_Connector::begin_connection, to <10.9.0.18:55990> which should block
+TAO (31284|140632198408000) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19694256]::IIOP_Connection_Handler, this=0x12eb810
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], Connection not complete.
+TAO (31284|140632198408000) - Cache_IntId_T::Cache_IntId_T, this=0x7fff07683540 Transport[19694256] is not connected
+TAO (31284|140632198408000) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[19694256] IntId=0x7fff07683540
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i, Transport[19694256] @ hash:index{168417992:0}
+TAO (31284|140632198408000) - Transport_Cache_Manager_T::bind_i: Success Transport[19694256] @ hash:index{168417992:0}. Cache size is [1]
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[19694256]
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, Becoming client leader.
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, (leader) enter reactor event loop
+TAO (31284|140632198408000) - TAO_LF_CH_Event[19694256]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_CONNECTION_CLOSED
+TAO (31284|140632198408000) - Transport[19694256]::purge_entry, entry is 0x12c8420
+TAO (31284|140632198408000) - Leader_Follower[19694256]::wait_for_event, (leader) exit reactor event loop
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], wait done result = -1
+TAO (31284|140632198408000) - Transport_Connector::wait_for_connection_completion, transport [19694256], wait for completion failed (107) : Transport endpoint is not connected
+TAO (31284|140632198408000) - Transport[19694256]::purge_entry, entry is (nil)
+TAO (31284|140632198408000) - IIOP_Connector::complete_connection, wait for completion failed for 1 pending connect
+TAO (31284|140632198408000) - IIOP_Connector::complete_connection, connection to <10.9.0.18:55990> failed (errno: Transport endpoint is not connected)
+TAO (31284|140632198408000) - IIOP_Connector::make_connection, connection to <10.9.0.18:55990> completed unsuccessfully
+TAO (31284|140632198408000) - IIOP_Connection_Handler[19694256]::~IIOP_Connection_Handler, this=0x12eb810, transport=0x12c82b0
+TAO (31284|140632198408000) - Transport[19694256]::~Transport
+TAO (31284|140632198408000) - Transport[19694256]::cleanup_queue_i, cleaning up complete queue
+TAO (31284|140632198408000) - Transport[19694256]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (31284|140632198408000) - Transport_Connector::connect, make_connection failed
+TAO (31284|140632198408000) - Stub::next_profile_retry, acquired profile lock this = 0x13259f0
+TAO (31284|140632198408000) - TAO_Unique_Id_Strategy::unbind_using_user_id: id=0x496d525f416374697661746f
+ImR Activator: Shutting down...
+CORBA::ORB::destroy() called on ORB <TAO_ImR_Activator>.
+TAO (31284|140632198408000) - Destroying ORB <TAO_ImR_Activator>
+ImR Activator: Shut down successfully.
+johnny@m4700jw:~/ACE/master/atcd/TAO/orbsvcs/tests/ImplRepo/RestartServer> 
