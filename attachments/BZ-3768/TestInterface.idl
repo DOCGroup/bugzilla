@@ -1,0 +1,7 @@
+interface Test1 {
+  void call1();
+  void call2();
+};
+interface Test2 {
+  void call(in Test1 test);
+};
