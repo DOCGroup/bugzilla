@@ -1,0 +1,942 @@
+TAO (65536|3225511280) - Completed initializing the process-wide service context
+TAO (65536|3225511280) - Default ORB services initialization begins
+TAO (65536|3225511280) - Default ORB services initialization completed
+TAO (65536|3225511280) - We are the default ORB ...
+TAO (65536|3225511280) - Initializing the orb-specific services
+TAO (65536|3225511280) - Default_Resource_Factory - unable to create codeset manager.
+TAO (65536|3225511280) - ORB_Core: Codeset Manager not available
+TAO (65536|3225511280) - Loaded default protocol <IIOP_Factory>
+TAO (65536|3225511280) - Created new ORB <>
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069356976] ctor, this=c042a6c0
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069356976], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069356976] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069356976] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069356976] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069356976] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069356976]
+TAO (65536|3225511280) - Leader_Follower[-1069356976]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069356976 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c043207c
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069356976]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c043207c
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069343328] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069343328], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069343328] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069343328] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069343328] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069343328] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069343328]
+TAO (65536|3225511280) - Leader_Follower[-1069343328]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069343328 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069343328]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069342016] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069342016], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069342016] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069342016] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069342016] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069342016] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069342016]
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069342016 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069343392] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069343392], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069343392] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069343392] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069343392] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069343392] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069343392]
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069343392 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069342016] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069342016], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069342016] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069342016] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069342016] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069342016] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069342016]
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069342016 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069343392] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069343392], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069343392] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069343392] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069343392] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069343392] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069343392]
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069343392 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069342016] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069342016], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069342016] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069342016] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069342016] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069342016] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069342016]
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069342016 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069343392] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069343392], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069343392] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069343392] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069343392] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069343392] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069343392]
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069343392 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069342016] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069342016], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069342016] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069342016] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069342016] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069342016] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069342016]
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069342016 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069343392] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069343392], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069343392] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069343392] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069343392] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069343392] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069343392]
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069343392 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069342016] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069342016], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069342016] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069342016] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069342016] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069342016] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069342016]
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069342016 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069343392] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069343392], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069343392] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069343392] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069343392] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069343392] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069343392]
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069343392 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069342016] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069342016], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069342016] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069342016] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069342016] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069342016] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069342016]
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069342016 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069343392] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069343392], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069343392] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069343392] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069343392] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069343392] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069343392]
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069343392 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069343392]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to <HCD5220_c1s3.n2:2001> which should block
+TAO (65536|3225511280) - TAO_LF_CH_Event[0]::state_changed_i, state LFS_IDLE->LFS_CONNECTION_WAIT
+TAO (65536|3225511280) - IIOP_Connection_Handler[-1069342016] ctor, this=c0432030
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [-1069342016], Connection not complete.
+TAO (65536|3225511280) - Cache_IntId_T::Cache_IntId_T, this=c0414330 Transport[-1069342016] is not connected
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_UNKNOWN->ENTRY_CONNECTING Transport[-1069342016] IntId=c0414330
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i, Transport[-1069342016] @ hash:index{-1408218576:0}
+TAO (65536|3225511280) - Transport_Cache_Manager_T::bind_i: Success Transport[-1069342016] @ hash:index{-1408218576:0}. Cache size is [1]
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, going to wait for connection completion on transport[-1069342016]
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) enter reactor event loop
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, The local addr is <172.16.66.94:0>
+TAO (65536|3225511280) - IIOP_Connection_Handler::open, IIOP connection to peer <172.16.66.95:2001> on 3
+TAO (65536|3225511280) - Transport::post_open, tport id changed from -1069342016 to 3
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, true Transport[3]
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_CONNECTING->ENTRY_IDLE_AND_PURGABLE Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_CONNECTION_WAIT->LFS_SUCCESS
+TAO (65536|3225511280) - Leader_Follower[-1069342016]::wait_for_event, (leader) exit reactor event loop
+TAO (65536|3225511280) - Transport_Connector::wait_for_connection_completion, transport [3], wait done result = 1
+TAO (65536|3225511280) - IIOP_Connector::make_connection, new connected connection to <HCD5220_c1s3.n2:2001> on Transport[3]
+TAO (65536|3225511280) - Transport[3]::register_handler
+TAO (65536|3225511280) - Transport_Connector::connect, opening Transport[3] in TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Transport_Cache_Manager_T::is_entry_available_i[3], true state is ENTRY_IDLE_AND_PURGABLE
+TAO (65536|3225511280) - Cache_IntId_T::recycle_state, ENTRY_IDLE_AND_PURGABLE->ENTRY_BUSY Transport[3] IntId=c042e6dc
+TAO (65536|3225511280) - Transport_Cache_Manager_T::find_i, Found available Transport[3] @hash:index {-1408218576:0}
+TAO (65536|3225511280) - Transport_Connector::connect, got an existing connected Transport[3] in role TAO_CLIENT_ROLE
+TAO (65536|3225511280) - Muxed_TMS[3]::request_id, <1>
+TAO (65536|3225511280) - GIOP_Message_Base::dump_msg, send GIOP message v1.0, 88 data bytes, my endian, Type Request[1]
+GIOP message - HEXDUMP 100 bytes
+47 49 4f 50 01 00 00 00  00 00 00 58 00 00 00 00   GIOP.......X....
+00 00 00 01 01 9c 00 00  00 00 00 0b 4e 61 6d 65   ............Name
+53 65 72 76 69 63 65 ff  00 00 00 06 5f 69 73 5f   Service....._is_
+61 00 16 70 00 00 00 00  00 00 00 28 49 44 4c 3a   a..p.......(IDL:
+6f 6d 67 2e 6f 72 67 2f  43 6f 73 4e 61 6d 69 6e   omg.org/CosNamin
+67 2f 4e 61 6d 69 6e 67  43 6f 6e 74 65 78 74 3a   g/NamingContext:
+31 2e 30 00                                        1.0.
+TAO (65536|3225511280) - IIOP_Transport[3]::send, send failure (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_helper, error during send() (errno: 61) - error #061
+TAO (65536|3225511280) - Transport[3]::drain_queue_i, helper retval = -1
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport_Cache_Manager_T::mark_connected, false Transport[3]
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, removing from the reactor
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, cancel all timers
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - TAO_LF_CH_Event[3]::state_changed_i, state LFS_SUCCESS->LFS_CONNECTION_CLOSED
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - IIOP_Transport[3]::send_message, write failure - error #061
+TAO (65536|3225511280) - Remote_Invocation::send_message, failure while sending message
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh, purging entry from cache
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Connection_Handler[3]::close_connection_eh
+TAO (65536|3225511280) - Transport[3]::make_idle
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, cleaning up complete queue
+TAO (65536|3225511280) - Transport[3]::cleanup_queue_i, discarded 0 messages, 0 bytes.
+TAO (65536|3225511280) - Invocation_Adapter::invoke_i, handling forwarded locations
+TAO (65536|3225511280) - Transport_Cache_Manager_T::fill_set_i, current_size = 0, cache_maximum = 64
+TAO (65536|3225511280) - Transport_Cache_Manager_T::purge, Cache size after purging is [0]
+TAO (65536|3225511280) - IIOP_Connector::begin_connection, to Target Name: vxTarget
