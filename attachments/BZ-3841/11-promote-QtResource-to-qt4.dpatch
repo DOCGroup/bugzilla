@@ -1,0 +1,17 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 11-promote-QtResource-to-qt4.dpatch by Marek Brudka <mbrudka@aster.pl>
+##
+## DP: Moves QtResources dependencies from qt3 to qt4 [should be added to the upstream] 
+
+@DPATCH@
+--- ACE_wrappers.orig/TAO/tao/QtResource.mpc	2009-03-05 11:23:08.000000000 +0100
++++ ACE_wrappers/TAO/tao/QtResource.mpc	2010-03-26 11:19:13.000000000 +0100
+@@ -1,7 +1,7 @@
+ //  -*- MPC -*- now wouldn't this be cool...
+ // $Id: QtResource.mpc 84718 2009-03-05 10:23:08Z johnnyw $
+ 
+-project(TAO_QtResource) : acelib, taolib, install, tao_output, taodefaults, ace_qtreactor, taoidldefaults {
++project(TAO_QtResource) : acelib, taolib, install, tao_output, taodefaults, ace_qt4reactor, taoidldefaults {
+ 
+   sharedname   = TAO_QtResource
+   dynamicflags += TAO_QTRESOURCE_BUILD_DLL
