@@ -1,0 +1,78 @@
++++ ACE_wrappers/ace/Log_Msg.cpp	Tue Jul 07 13:48:50 2009
+@@ -932,6 +932,7 @@
+  *   'X': print as a hex number
+  *   'w': print a wide character
+  *   'W': print out a wide character string.
++ *   'V': print a single character signifying the severity of the message
+  *   'z': print an ACE_OS::WChar character
+  *   'Z': print an ACE_OS::WChar character string
+  *   ':': print a time_t value as an integral number
+@@ -1368,6 +1369,68 @@
+                     this_len = ACE_OS::sprintf
+                       (bp, format,
+                        ACE_Log_Record::priority_name (log_priority));
++                  ACE_UPDATE_COUNT (bspace, this_len);
++                  break;
++                  
++                  case 'V': // print a single character signifying the severity of the message                            
++#if !defined (ACE_WIN32) && defined (ACE_USES_WCHAR)
++                  ACE_OS::strcpy (fp, ACE_TEXT ("C"));
++#else
++                  ACE_OS::strcpy (fp, ACE_TEXT ("c"));
++#endif
++
++                  // Below is an optimized (binary search based)
++                  // version of the following simple piece of code:
++                  // 
++                  // log_priority == LM_SHUTDOWN  ? 'S' :   // Shutdown
++                  // log_priority == LM_TRACE     ? 'T' :   // Trace
++                  // log_priority == LM_DEBUG     ? 'D' :   // Debug
++                  // log_priority == LM_INFO      ? 'I' :   // Info
++                  // log_priority == LM_NOTICE    ? 'N' :   // Notice
++                  // log_priority == LM_WARNING   ? 'W' :   // Warning
++                  // log_priority == LM_STARTUP   ? 'U' :   // Startup
++                  // log_priority == LM_ERROR     ? 'E' :   // Error
++                  // log_priority == LM_CRITICAL  ? 'C' :   // Critical
++                  // log_priority == LM_ALERT     ? 'A' :   // Alert
++                  // log_priority == LM_EMERGENCY ? '!' :   // Emergency
++                  //                               '?'      // Unknown
++
++                  if (can_check)
++                    this_len = ACE_OS::snprintf
++                      (bp, bspace, format, 
++                       (log_priority <= LM_WARNING) ? 
++                       (log_priority <= LM_DEBUG) ? 
++                       (log_priority <= LM_TRACE) ? 
++                       (log_priority == LM_SHUTDOWN) ?
++                       'S' : 'T' : 'D' : 
++                       (log_priority <= LM_NOTICE) ?
++                       (log_priority == LM_INFO) ?
++                       'I' : 'N' : 'W' :
++                       (log_priority <= LM_STARTUP) ?
++                       (log_priority <= LM_CRITICAL) ?
++                       (log_priority == LM_ERROR) ?
++                       'E' : 'C' : 'U' :
++                       (log_priority <= LM_EMERGENCY) ?
++                       (log_priority == LM_ALERT) ?
++                       'A' : '!' : '?');
++                  else
++                    this_len = ACE_OS::sprintf
++                      (bp, format, 
++                       (log_priority <= LM_WARNING) ? 
++                       (log_priority <= LM_DEBUG) ? 
++                       (log_priority <= LM_TRACE) ? 
++                       (log_priority == LM_SHUTDOWN) ?
++                       'S' : 'T' : 'D' : 
++                       (log_priority <= LM_NOTICE) ?
++                       (log_priority == LM_INFO) ?
++                       'I' : 'N' : 'W' :
++                       (log_priority <= LM_STARTUP) ?
++                       (log_priority <= LM_CRITICAL) ?
++                       (log_priority == LM_ERROR) ?
++                       'E' : 'C' : 'U' :
++                       (log_priority <= LM_EMERGENCY) ?
++                       (log_priority == LM_ALERT) ?
++                       'A' : '!' : '?');
+                   ACE_UPDATE_COUNT (bspace, this_len);
+                   break;
+ 
