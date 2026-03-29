@@ -1,0 +1,18 @@
+Run:
+
+1) run server:
+./server
+
+It only creates a "server.ior" file.
+
+2) run client:
+
+./client
+
+It will read IOR from server.ior, start 2 threads and 2 timers in ORB's reactor.
+
+timer1 fires after 2 sec, and sleeps for 10 seconds.
+timer2 fires after 3 sec, and tries to contact the server using server.ior
+
+instead of reporting CORBA::TRANSIENT, it reports CORBA::TIMEOUT.
+
