@@ -1,0 +1,25 @@
+--- e:/ACE_wrappers_5_8_2/ASNMP/agent/main.cpp	Tue Mar 04 15:51:24 2008
++++ v:/devel/ACE_wrappers_5_8_2/ASNMP/agent/main.cpp	Mon Sep 20 15:01:08 2010
+@@ -6,6 +6,7 @@
+ #include "ace/config-all.h"
+ #include "snmp_agent.h"
+ #include "ace/ACE.h"
++#include "ace/Argv_Type_Converter.h"
+ 
+ ACE_RCSID(agent, main, "$Id: main.cpp 80826 2008-03-04 14:51:23Z wotte $")
+ 
+@@ -14,8 +15,13 @@
+ {
+   ACE::init ();
+   snmp_agent the_agent;
+-
++  
++#ifdef ACE_USES_WCHAR
++  ACE_Argv_Type_Converter arg_converter(argc, argv);
++  if (the_agent.set_args(argc, arg_converter.get_ASCII_argv()))
++#else
+   if (the_agent.set_args(argc, argv))
++#endif
+     return 1;
+ 
+   if (!the_agent.valid()) {
