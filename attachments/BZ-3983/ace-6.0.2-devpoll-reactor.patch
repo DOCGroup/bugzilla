@@ -1,0 +1,72 @@
+Index: build/ACE_wrappers/ace/Dev_Poll_Reactor.cpp
+===================================================================
+--- build.orig/ACE_wrappers/ace/Dev_Poll_Reactor.cpp	2010-10-11 11:58:35.000000000 +0000
++++ build/ACE_wrappers/ace/Dev_Poll_Reactor.cpp	2011-06-15 11:39:13.593198320 +0000
+@@ -1265,24 +1265,24 @@
+       if (revents == 0)
+         ++pfds;
+ #else
+-      // With epoll, events are registered with oneshot, so the handle is
+-      // effectively suspended; future calls to epoll_wait() will select
+-      // the next event, so they're not managed here.
+-      // The hitch to this is that the notify handler is always registered
+-      // WITHOUT oneshot and is never suspended/resumed. This avoids endless
+-      // notify loops caused by the notify handler requiring a resumption
+-      // which requires the token, which requires a notify, etc. described
+-      // in Bugzilla 3714. So, never suspend the notify handler.
+-
+-      bool reactor_resumes_eh = false;
+-      if (eh != this->notify_handler_)
+-        {
+-          info->suspended = true;
+-
+-          reactor_resumes_eh =
+-            eh->resume_handler () ==
+-            ACE_Event_Handler::ACE_REACTOR_RESUMES_HANDLER;
+-        }
++//      // With epoll, events are registered with oneshot, so the handle is
++//      // effectively suspended; future calls to epoll_wait() will select
++//      // the next event, so they're not managed here.
++//      // The hitch to this is that the notify handler is always registered
++//      // WITHOUT oneshot and is never suspended/resumed. This avoids endless
++//      // notify loops caused by the notify handler requiring a resumption
++//      // which requires the token, which requires a notify, etc. described
++//      // in Bugzilla 3714. So, never suspend the notify handler.
++//
++//      bool reactor_resumes_eh = false;
++//      if (eh != this->notify_handler_)
++//        {
++//          info->suspended = true;
++//
++//          reactor_resumes_eh =
++//            eh->resume_handler () ==
++//            ACE_Event_Handler::ACE_REACTOR_RESUMES_HANDLER;
++//        }
+ #endif /* ACE_HAS_DEV_POLL */
+ 
+       int status = 0;   // gets callback status, below.
+@@ -1334,8 +1334,23 @@
+ #ifdef ACE_HAS_EVENT_POLL
+             // epoll-based effectively suspends handlers around the upcall.
+             // If the handler must be resumed, add it to the list.
+-            if (reactor_resumes_eh)
++//            if (reactor_resumes_eh)
++            if ( eh->resume_handler () == ACE_Event_Handler::ACE_REACTOR_RESUMES_HANDLER )
+               {
++            	// With epoll, events are registered with oneshot, so the handle is
++            	// effectively suspended; future calls to epoll_wait() will select
++            	// the next event, so they're not managed here.
++            	// The hitch to this is that the notify handler is always registered
++            	// WITHOUT oneshot and is never suspended/resumed. This avoids endless
++            	// notify loops caused by the notify handler requiring a resumption
++            	// which requires the token, which requires a notify, etc. described
++            	// in Bugzilla 3714. So, never suspend the notify handler.
++
++            	if ( info->controlled == true )
++            	{
++            		info->suspended = true;
++            	}
++
+                 ACE_GUARD_RETURN (ACE_SYNCH_MUTEX,
+                                   grd,
+                                   this->to_be_resumed_lock_,
