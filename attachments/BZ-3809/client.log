@@ -1,0 +1,170 @@
+==7331== Memcheck, a memory error detector.
+==7331== Copyright (C) 2002-2008, and GNU GPL'd, by Julian Seward et al.
+==7331== Using LibVEX rev 1884, a library for dynamic binary translation.
+==7331== Copyright (C) 2004-2008, and GNU GPL'd, by OpenWorks LLP.
+==7331== Using valgrind-3.4.1, a dynamic binary instrumentation framework.
+==7331== Copyright (C) 2000-2008, and GNU GPL'd, by Julian Seward et al.
+==7331== 
+==7331== My PID = 7331, parent PID = 7330.  Prog and args are:
+==7331==    ./client
+==7331== 
+--7331-- 
+--7331-- Command line
+--7331--    ./client
+--7331-- Startup, with flags:
+--7331--    --tool=memcheck
+--7331--    --leak-check=full
+--7331--    --log-file=client.log
+--7331--    -v
+--7331--    --track-origins=yes
+--7331--    --workaround-gcc296-bugs=yes
+--7331-- Contents of /proc/version:
+--7331--   Linux version 2.6.27.41-170.2.117.fc10.x86_64 (mockbuild@x86-4.fedora.phx.redhat.com) (gcc version 4.3.2 20081105 (Red Hat 4.3.2-7) (GCC) ) #1 SMP Thu Dec 10 10:36:29 EST 2009
+--7331-- Arch and hwcaps: AMD64, amd64-sse2
+--7331-- Page sizes: currently 4096, max supported 4096
+--7331-- Valgrind library directory: /usr/local/lib/valgrind
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/examples/xatmi/fooapp/client (0x400000)
+--7331-- Reading syms from /usr/local/lib/valgrind/amd64-linux/memcheck (0x38000000)
+--7331--    object doesn't have a dynamic symbol table
+--7331-- Reading syms from /lib64/ld-2.9.so (0x351ba00000)
+--7331-- Reading suppressions file: /usr/local/lib/valgrind/default.supp
+--7331-- Reading syms from /usr/local/lib/valgrind/amd64-linux/vgpreload_core.so (0x4802000)
+--7331-- Reading syms from /usr/local/lib/valgrind/amd64-linux/vgpreload_memcheck.so (0x4a03000)
+--7331-- REDIR: 0x351ba17d30 (index) redirected to 0x4a07b40 (index)
+--7331-- REDIR: 0x351ba17ee0 (strcmp) redirected to 0x4a08100 (strcmp)
+--7331-- REDIR: 0x351ba17ff0 (strlen) redirected to 0x4a07e00 (strlen)
+--7331-- Reading syms from /lib64/libexpat.so.1.5.2 (0x35bf000000)
+--7331--    object doesn't have a symbol table
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_CosNaming.so.1.7.1 (0x4c24000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_AnyTypeCode.so.1.7.1 (0x4e50000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO.so.1.7.1 (0x50e9000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_PortableServer.so.1.7.1 (0x5448000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libACE.so.5.7.1 (0x5737000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_PI.so.1.7.1 (0x5acf000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_CodecFactory.so.1.7.1 (0x5d13000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_IORInterceptor.so.1.7.1 (0x5f28000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_ObjRefTemplate.so.1.7.1 (0x6138000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_Valuetype.so.1.7.1 (0x634f000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_PI_Server.so.1.7.1 (0x6561000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/liblog4cxx.so (0x677a000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libatmibroker-idl.so (0x6c2a000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libatmibroker-core.so (0x6f6c000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libatmibroker-tx.so (0x71ba000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libatmibroker-xatmi.so (0x7410000)
+--7331-- Reading syms from /lib64/libgcc_s-4.3.2-20081105.so.1 (0x352b400000)
+--7331--    object doesn't have a symbol table
+--7331-- Reading syms from /lib64/libc-2.9.so (0x351ce00000)
+--7331-- Reading syms from /usr/lib64/libstdc++.so.6.0.10 (0x352c400000)
+--7331--    object doesn't have a symbol table
+--7331-- Reading syms from /lib64/libdl-2.9.so (0x351d600000)
+--7331-- Reading syms from /lib64/libpthread-2.9.so (0x351da00000)
+--7331-- Reading syms from /lib64/librt-2.9.so (0x351ea00000)
+--7331-- Reading syms from /lib64/libm-2.9.so (0x351d200000)
+--7331-- Reading syms from /usr/lib64/libaprutil-1.so.0.3.9 (0x35bd800000)
+--7331--    object doesn't have a symbol table
+--7331-- Reading syms from /usr/lib64/libapr-1.so.0.3.9 (0x3ca3a00000)
+--7331--    object doesn't have a symbol table
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_IDL_BE.so.1.7.1 (0x766a000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libTAO_IDL_FE.so.1.7.1 (0x7b0f000)
+--7331-- Reading syms from /home/tom/blacktie/dist/blacktie-2.0-MR2-SNAPSHOT/lib/libxerces-c-3.0.so (0x7e00000)
+--7331-- Reading syms from /lib64/libuuid.so.1.2 (0x319b400000)
+--7331--    object doesn't have a symbol table
+--7331-- Reading syms from /lib64/libcrypt-2.9.so (0x352d800000)
+--7331-- Reading syms from /lib64/libdb-4.7.so (0x3533000000)
+--7331--    object doesn't have a symbol table
+--7331-- Reading syms from /lib64/libnsl-2.9.so (0x351c600000)
+--7331-- REDIR: 0x351ce81310 (rindex) redirected to 0x4a079a0 (rindex)
+--7331-- REDIR: 0x351ce80e40 (strlen) redirected to 0x4a07dc0 (strlen)
+--7331-- REDIR: 0x352c4c4280 (operator new(unsigned long, std::nothrow_t const&)) redirected to 0x4a06ce0 (operator new(unsigned long, std::nothrow_t const&))
+--7331-- REDIR: 0x351ce7c9a0 (malloc) redirected to 0x4a07580 (malloc)
+--7331-- REDIR: 0x351ce82ba0 (memmove) redirected to 0x4a08cb0 (memmove)
+--7331-- REDIR: 0x351ce7a410 (free) redirected to 0x4a06280 (free)
+--7331-- REDIR: 0x352c4c4320 (operator new[](unsigned long)) redirected to 0x4a06800 (operator new[](unsigned long))
+--7331-- REDIR: 0x352c4c4350 (operator new[](unsigned long, std::nothrow_t const&)) redirected to 0x4a065a0 (operator new[](unsigned long, std::nothrow_t const&))
+--7331-- REDIR: 0x351ce7c600 (calloc) redirected to 0x4a05350 (calloc)
+--7331-- REDIR: 0x352c4c41d0 (operator new(unsigned long)) redirected to 0x4a06f40 (operator new(unsigned long))
+--7331-- REDIR: 0x351ce808f0 (strcpy) redirected to 0x4a07e20 (strcpy)
+--7331-- REDIR: 0x351ce808b0 (strcmp) redirected to 0x4a080a0 (strcmp)
+--7331-- REDIR: 0x351ce841d0 (memcpy) redirected to 0x4a08210 (memcpy)
+--7331-- REDIR: 0x352c4c29b0 (operator delete[](void*)) redirected to 0x4a05780 (operator delete[](void*))
+--7331-- REDIR: 0x352c4c2970 (operator delete(void*)) redirected to 0x4a05d80 (operator delete(void*))
+--7331-- REDIR: 0xffffffffff600000 (???) redirected to 0x3803e293 (vgPlain_amd64_linux_REDIR_FOR_vgettimeofday)
+--7331-- REDIR: 0x351ce80700 (index) redirected to 0x4a07ac0 (index)
+--7331-- REDIR: 0x351ce82d60 (memset) redirected to 0x4a08c40 (memset)
+--7331-- REDIR: 0x351ce811b0 (strncpy) redirected to 0x4a07ef0 (strncpy)
+--7331-- REDIR: 0x351ba187f0 (stpcpy) redirected to 0x4a08b70 (stpcpy)
+--7331-- REDIR: 0x351ce810e0 (strncmp) redirected to 0x4a08020 (strncmp)
+--7331-- REDIR: 0x351ce82500 (memchr) redirected to 0x4a081c0 (memchr)
+--7331-- REDIR: 0x351ce86f10 (strchrnul) redirected to 0x4a08d10 (strchrnul)
+--7331-- REDIR: 0x351ce83890 (mempcpy) redirected to 0x4a08d70 (mempcpy)
+--7331-- REDIR: 0x351ce83ea0 (stpcpy) redirected to 0x4a089d0 (stpcpy)
+--7331-- Reading syms from /lib64/libnss_files-2.9.so (0x871a000)
+--7331-- REDIR: 0x351ce86df0 (rawmemchr) redirected to 0x4a08d50 (rawmemchr)
+--7331-- Discarding syms at 0x871c040-0x8723bd8 in /lib64/libnss_files-2.9.so due to munmap()
+==7331== 
+==7331== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 4 from 1)
+--7331-- 
+--7331-- supp:      4 dl-hack3-cond-1
+==7331== malloc/free: in use at exit: 2,937 bytes in 35 blocks.
+==7331== malloc/free: 8,027 allocs, 7,992 frees, 4,164,311 bytes allocated.
+==7331== 
+==7331== searching for pointers to 35 not-freed blocks.
+==7331== checked 2,413,208 bytes.
+==7331== 
+==7331== 1,728 bytes in 27 blocks are definitely lost in loss record 9 of 9
+==7331==    at 0x4A06DAC: operator new(unsigned long, std::nothrow_t const&) (vg_replace_malloc.c:250)
+==7331==    by 0x51BB1B6: ACE_TSS<TAO_ORB_Core_TSS_Resources>::make_TSS_TYPE() const (TSS_T.cpp:60)
+==7331==    by 0x519AAF9: ACE_TSS<TAO_ORB_Core_TSS_Resources>::ts_get() const (TSS_T.cpp:218)
+==7331==    by 0x5199BF2: TAO_Leader_Follower::set_client_thread() (TSS_T.cpp:53)
+==7331==    by 0x5199EFB: TAO_Leader_Follower::wait_for_event(TAO_LF_Event*, TAO_Transport*, ACE_Time_Value*) (Leader_Follower.inl:205)
+==7331==    by 0x519BDC4: TAO_LF_Connect_Strategy::wait_i(TAO_LF_Event*, TAO_Transport*, ACE_Time_Value*) (LF_Connect_Strategy.cpp:54)
+==7331==    by 0x51F14FF: TAO_Connector::wait_for_connection_completion(TAO::Profile_Transport_Resolver*, TAO_Transport_Descriptor_Interface&, TAO_Transport*&, ACE_Time_Value*) (Transport_Connector.cpp:794)
+==7331==    by 0x5187ACE: TAO_IIOP_Connector::complete_connection(int, TAO_Transport_Descriptor_Interface&, TAO_IIOP_Connection_Handler**&, TAO_IIOP_Endpoint**, unsigned int, TAO::Profile_Transport_Resolver*, TAO_LF_Multi_Event*, ACE_Time_Value*) (IIOP_Connector.cpp:464)
+==7331==    by 0x5187E1E: TAO_IIOP_Connector::make_connection(TAO::Profile_Transport_Resolver*, TAO_Transport_Descriptor_Interface&, ACE_Time_Value*) (IIOP_Connector.cpp:230)
+==7331==    by 0x51F0CAB: TAO_Connector::connect(TAO::Profile_Transport_Resolver*, TAO_Transport_Descriptor_Interface*, ACE_Time_Value*) (Transport_Connector.cpp:669)
+==7331==    by 0x51C9AD1: TAO::Profile_Transport_Resolver::try_connect_i(TAO_Transport_Descriptor_Interface*, ACE_Time_Value*, bool) (Profile_Transport_Resolver.cpp:175)
+==7331==    by 0x51939FA: TAO_Default_Endpoint_Selector::select_endpoint(TAO::Profile_Transport_Resolver*, ACE_Time_Value*) (Invocation_Endpoint_Selectors.cpp:70)
+==7331== 
+==7331== LEAK SUMMARY:
+==7331==    definitely lost: 1,728 bytes in 27 blocks.
+==7331==      possibly lost: 0 bytes in 0 blocks.
+==7331==    still reachable: 1,209 bytes in 8 blocks.
+==7331==         suppressed: 0 bytes in 0 blocks.
+==7331== Reachable blocks (those to which a pointer was found) are not shown.
+==7331== To see them, rerun with: --leak-check=full --show-reachable=yes
+--7331--  memcheck: sanity checks: 161 cheap, 8 expensive
+--7331--  memcheck: auxmaps: 548 auxmap entries (35072k, 34M) in use
+--7331--  memcheck: auxmaps_L1: 534834 searches, 5100195 cmps, ratio 95:10
+--7331--  memcheck: auxmaps_L2: 15230 searches, 548 nodes
+--7331--  memcheck: SMs: n_issued      = 143 (2288k, 2M)
+--7331--  memcheck: SMs: n_deissued    = 0 (0k, 0M)
+--7331--  memcheck: SMs: max_noaccess  = 524287 (8388592k, 8191M)
+--7331--  memcheck: SMs: max_undefined = 0 (0k, 0M)
+--7331--  memcheck: SMs: max_defined   = 1459 (23344k, 22M)
+--7331--  memcheck: SMs: max_non_DSM   = 143 (2288k, 2M)
+--7331--  memcheck: max sec V bit nodes:    1 (0k, 0M)
+--7331--  memcheck: set_sec_vbits8 calls: 1 (new: 1, updates: 0)
+--7331--  memcheck: max shadow mem size:   6432k, 6M
+--7331--  ocacheL1:   91,953,308 refs      3,313,369 misses (59 lossage)
+--7331--  ocacheL1:   87,972,851 at 0        667,088 at 1
+--7331--  ocacheL1:            0 at 2+     3,318,581 move-fwds
+--7331--  ocacheL1:  100,663,296 sizeB    67,108,864 useful
+--7331--  ocacheL2:    4,529,654 refs      3,313,310 misses
+--7331--  ocacheL2:           59 max nodes        59 curr nodes
+--7331--  niacache:    1,140,327 refs        117,765 misses
+--7331-- translate:            fast SP updates identified: 35,011 ( 86.8%)
+--7331-- translate:   generic_known SP updates identified: 3,000 (  7.4%)
+--7331-- translate: generic_unknown SP updates identified: 2,312 (  5.7%)
+--7331--     tt/tc: 106,560 tt lookups requiring 153,074 probes
+--7331--     tt/tc: 106,560 fast-cache updates, 6 flushes
+--7331--  transtab: new        28,650 (655,667 -> 14,756,790; ratio 225:10) [0 scs]
+--7331--  transtab: dumped     0 (0 -> ??)
+--7331--  transtab: discarded  119 (2,363 -> ??)
+--7331-- scheduler: 16,181,754 jumps (bb entries).
+--7331-- scheduler: 161/97,155 major/minor sched events.
+--7331--    sanity: 162 cheap, 8 expensive checks.
+--7331--    exectx: 49,157 lists, 42,703 contexts (avg 0 per list)
+--7331--    exectx: 163,525 searches, 161,292 full compares (986 per 1000)
+--7331--    exectx: 54 cmp2, 6 cmp4, 0 cmpAll
+--7331--  errormgr: 13 supplist searches, 738 comparisons during search
+--7331--  errormgr: 4 errlist searches, 6 comparisons during search
