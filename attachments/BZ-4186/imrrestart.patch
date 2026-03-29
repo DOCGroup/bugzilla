@@ -1,0 +1,163 @@
+diff --git a/TAO/orbsvcs/ImplRepo_Service/AsyncAccessManager.cpp b/TAO/orbsvcs/ImplRepo_Service/AsyncAccessManager.cpp
+index 81ec358..4f1c618 100644
+--- a/TAO/orbsvcs/ImplRepo_Service/AsyncAccessManager.cpp
++++ b/TAO/orbsvcs/ImplRepo_Service/AsyncAccessManager.cpp
+@@ -27,7 +27,7 @@ AsyncAccessManager::AsyncAccessManager (UpdateableServerInfo &info,
+   if (ImR_Locator_i::debug () > 4)
+     {
+       ORBSVCS_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("(%P|%t) AsyncAccessManager(%@)::ctor server = %s\n"),
++                      ACE_TEXT ("(%P|%t) AsyncAccessManager(%@)::ctor server = %C\n"),
+                       this, info->ping_id ()));
+     }
+ }
+@@ -37,7 +37,7 @@ AsyncAccessManager::~AsyncAccessManager (void)
+   if (ImR_Locator_i::debug () > 4)
+     {
+       ORBSVCS_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("(%P|%t) AsyncAccessManager(%@)::dtor server = %s\n"),
++                      ACE_TEXT ("(%P|%t) AsyncAccessManager(%@)::dtor server = %C\n"),
+                       this, info_->ping_id ()));
+     }
+ }
+@@ -383,10 +383,32 @@ AsyncAccessManager::ping_replied (LiveStatus server)
+                 this->status (ImplementationRepository::AAM_WAIT_FOR_DEATH);
+                 return;
+               }
+-            if (this->send_start_request ())
+-              {
+-                return;
+-              }
++            // Only start the server when it is not set to manual when we
++            // detect a dead
++            if (!this->info_->is_mode (ImplementationRepository::MANUAL))
++            {
++              if (ImR_Locator_i::debug () > 4)
++                {
++                  ORBSVCS_DEBUG ((LM_DEBUG,
++                                  ACE_TEXT ("(%P|%t) AsyncAccessManager::ping_replied pid = %d,")
++                                  ACE_TEXT (" trying to restart server\n"),
++                                  this->info_->pid));
++                }
++              if (this->send_start_request ())
++                {
++                  return;
++                }
++            }
++            else
++            {
++              if (ImR_Locator_i::debug () > 4)
++                {
++                  ORBSVCS_DEBUG ((LM_DEBUG,
++                                  ACE_TEXT ("(%P|%t) AsyncAccessManager::ping_replied pid = %d,")
++                                  ACE_TEXT (" Not trying to restart server because it has activation mode MANUL\n"),
++                                  this->info_->pid));
++                }
++            }
+           }
+         else
+           {
+@@ -406,7 +428,8 @@ AsyncAccessManager::send_start_request (void)
+   if (ImR_Locator_i::debug () > 4)
+     {
+       ORBSVCS_DEBUG ((LM_DEBUG,
+-                      ACE_TEXT ("(%P|%t) AsyncAccessManager::send_start_request\n")));
++                      ACE_TEXT ("(%P|%t) AsyncAccessManager::send_start_request, manual_start_ %d\n"),
++                      this->manual_start_));
+     }
+ 
+   if (this->info_->is_mode (ImplementationRepository::MANUAL) &&
+diff --git a/TAO/orbsvcs/ImplRepo_Service/ImR_Locator_i.cpp b/TAO/orbsvcs/ImplRepo_Service/ImR_Locator_i.cpp
+index 7bbafb8..b56f8c9 100644
+--- a/TAO/orbsvcs/ImplRepo_Service/ImR_Locator_i.cpp
++++ b/TAO/orbsvcs/ImplRepo_Service/ImR_Locator_i.cpp
+@@ -455,12 +455,12 @@ ImR_Locator_i::remote_access_update (const char *name,
+       if (info.null ())
+         {
+           if (debug_ > 0)
+-            ORBSVCS_DEBUG ((LM_DEBUG, ACE_TEXT ("ImR: remote_acccess %C unregistered.\n"),
++            ORBSVCS_DEBUG ((LM_DEBUG, ACE_TEXT ("ImR: remote_acccess <%C> unregistered.\n"),
+                             name));
+           return;
+         }
+-      AsyncAccessManager *aam_raw;
+-      ACE_NEW (aam_raw, AsyncAccessManager (info, true, *this));
++      AsyncAccessManager *aam_raw = 0;
++      ACE_NEW (aam_raw, AsyncAccessManager (info, false, *this));
+       aam = aam_raw;
+       this->aam_set_.insert_tail (aam);
+     }
+@@ -1114,7 +1114,7 @@ ImR_Locator_i::server_is_running
+       this->pinger_.add_server (si->ping_id (), this->ping_external_, srvobj.in());
+ 
+       AsyncAccessManager *aam_raw;
+-      ACE_NEW (aam_raw, AsyncAccessManager (info, true, *this));
++      ACE_NEW (aam_raw, AsyncAccessManager (info, false, *this));
+       AsyncAccessManager_ptr aam (aam_raw);
+       aam->started_running ();
+       this->aam_set_.insert (aam);
+@@ -1148,8 +1148,8 @@ ImR_Locator_i::server_is_running
+             }
+           if (!info->is_mode(ImplementationRepository::PER_CLIENT))
+             {
+-              AsyncAccessManager *aam_raw;
+-              ACE_NEW (aam_raw, AsyncAccessManager (info, true, *this));
++              AsyncAccessManager *aam_raw = 0;
++              ACE_NEW (aam_raw, AsyncAccessManager (info, false, *this));
+               AsyncAccessManager_ptr aam (aam_raw);
+               aam->started_running ();
+               this->aam_set_.insert (aam);
+diff --git a/TAO/orbsvcs/ImplRepo_Service/tao_imr_i.cpp b/TAO/orbsvcs/ImplRepo_Service/tao_imr_i.cpp
+index 8f984bc..9503b0b 100644
+--- a/TAO/orbsvcs/ImplRepo_Service/tao_imr_i.cpp
++++ b/TAO/orbsvcs/ImplRepo_Service/tao_imr_i.cpp
+@@ -131,8 +131,8 @@ TAO_IMR_i::print_usage (void)
+     "  where command is one of the following:\n"
+     "    start         Start a server through the ImR\n"
+     "    add           Add an entry to the ImR\n"
+-    "    autostart Activates all AUTO_START servers\n"
+-    "    ior       Creates a simplified IOR\n"
++    "    autostart     Activates all AUTO_START servers\n"
++    "    ior           Creates a simplified IOR\n"
+     "    list          List the entries in the ImR\n"
+     "    remove        Remove an entry from the ImR\n"
+     "    shutdown      Shut down a server through the ImR\n"
+diff --git a/TAO/orbsvcs/tests/ImplRepo/RestartServer/run_test.pl b/TAO/orbsvcs/tests/ImplRepo/RestartServer/run_test.pl
+index 4c23629..b5dae7f 100755
+--- a/TAO/orbsvcs/tests/ImplRepo/RestartServer/run_test.pl
++++ b/TAO/orbsvcs/tests/ImplRepo/RestartServer/run_test.pl
+@@ -81,20 +81,20 @@ $si->DeleteFile ($messenger_ior);
+ 
+ # Note : We don't actually use SVR, but we need a way to get the
+ #        path to the -ExeSubDir
+-$SVR = $imr->CreateProcess ("MessengerServer", "-ORBdebuglevel $debug_level");
++$SVR = $imr->CreateProcess ("MessengerServer", "");
+ my $server = $SVR->Executable ();
+ my $srv_server = $imr->LocalFile ($server);
+ 
+-$IR = $imr->CreateProcess ($implrepo_server, "-d 1 ".
++$IR = $imr->CreateProcess ($implrepo_server, "-d 10 ".
+                                                "orbobjrefstyle url ".
+                                                "-t 5 ".
+-                                               "-o $imr_imriorfile");
++                                               "-o $imr_imriorfile -ORBdebuglevel 10");
+ print ">>> " . $IR->CommandLine() . "\n";
+ 
+-$ACT = $act->CreateProcess ($imr_activator, "-d 1 ".
++$ACT = $act->CreateProcess ($imr_activator, "-d 10 ".
+                                                "orbobjrefstyle url ".
+                                                "-o $act_actiorfile ".
+-                                               "-ORBInitRef ImplRepoService=file://$act_imriorfile");
++                                               "-ORBInitRef ImplRepoService=file://$act_imriorfile -ORBdebuglevel 10");
+ 
+ $TI = $ti->CreateProcess ($tao_imr,
+                           "-ORBInitRef ImplRepoService=file://$ti_imriorfile ".
+@@ -108,7 +108,7 @@ $SI = $si->CreateProcess ($tao_imr, "-ORBInitRef ImplRepoService=file://$si_imri
+ 
+ $C1 = $c1->CreateProcess ("MessengerClient", "-k file://$c1_srviorfile ".
+         "-ORBForwardOnReplyClosedLimit 20 -ORBForwardDelay 500 ".
+-        "-ORBSvcConf $c1_conffile -ORBdebuglevel $debug_level ".
++        "-ORBSvcConf $c1_conffile -ORBdebuglevel 0 ".
+         "-d $seconds_between_requests -t $number_tries -s $number_succeed");
+ 
+ $SDN = $sdn->CreateProcess ("$tao_imr", "-ORBInitRef ImplRepoService=file://$sdn_imriorfile ".
