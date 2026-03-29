@@ -1,0 +1,112 @@
+Index: TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.cpp
+===================================================================
+--- TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.cpp	(revision 48)
++++ TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.cpp	(working copy)
+@@ -285,6 +285,12 @@
+       return ::PortableServer::NON_RETAIN;
+     }
+ 
++    TAO_Active_Object_Map *
++    ServantRetentionStrategyNonRetain::get_active_object_map() const
++    {
++      return 0;
++    }
++
+   }
+ }
+ 
+Index: TAO/tao/PortableServer/ServantRetentionStrategyRetain.cpp
+===================================================================
+--- TAO/tao/PortableServer/ServantRetentionStrategyRetain.cpp	(revision 48)
++++ TAO/tao/PortableServer/ServantRetentionStrategyRetain.cpp	(working copy)
+@@ -979,6 +979,12 @@
+       return ::PortableServer::RETAIN;
+     }
+ 
++    TAO_Active_Object_Map *
++    ServantRetentionStrategyRetain::get_active_object_map() const
++    {
++      return this->active_object_map_.get();
++    }
++
+   }
+ }
+ 
+Index: TAO/tao/PortableServer/ServantRetentionStrategy.h
+===================================================================
+--- TAO/tao/PortableServer/ServantRetentionStrategy.h	(revision 48)
++++ TAO/tao/PortableServer/ServantRetentionStrategy.h	(working copy)
+@@ -117,6 +117,8 @@
+         PortableServer::Servant servant) = 0;
+ 
+       virtual ::PortableServer::ServantRetentionPolicyValue type() const = 0;
++
++      virtual TAO_Active_Object_Map * get_active_object_map() const = 0;
+     };
+   }
+ }
+Index: TAO/tao/PortableServer/ServantRetentionStrategyRetain.h
+===================================================================
+--- TAO/tao/PortableServer/ServantRetentionStrategyRetain.h	(revision 48)
++++ TAO/tao/PortableServer/ServantRetentionStrategyRetain.h	(working copy)
+@@ -140,6 +140,9 @@
+       virtual int unbind_using_user_id (
+         const PortableServer::ObjectId &user_id);
+ 
++      TAO_Active_Object_Map *
++      get_active_object_map() const;
++
+     private:
+       auto_ptr<TAO_Active_Object_Map> active_object_map_;
+       CORBA::ULong waiting_servant_deactivation_;
+Index: TAO/tao/PortableServer/Root_POA.cpp
+===================================================================
+--- TAO/tao/PortableServer/Root_POA.cpp	(revision 48)
++++ TAO/tao/PortableServer/Root_POA.cpp	(working copy)
+@@ -2730,4 +2730,11 @@
+ {
+ }
+ 
++TAO_Active_Object_Map *
++TAO_Root_POA::get_active_object_map() const
++{
++  return this->active_policy_strategies_.servant_retention_strategy()->
++    get_active_object_map();
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: TAO/tao/PortableServer/Root_POA.h
+===================================================================
+--- TAO/tao/PortableServer/Root_POA.h	(revision 48)
++++ TAO/tao/PortableServer/Root_POA.h	(working copy)
+@@ -78,6 +78,7 @@
+ class TAO_Acceptor_Registry;
+ class TAO_IORInfo;
+ class TAO_Regular_POA;
++class TAO_Active_Object_Map;
+ 
+ namespace PortableInterceptor
+ {
+@@ -126,6 +127,9 @@
+ 
+   typedef ACE_CString String;
+ 
++  TAO_Active_Object_Map *
++  get_active_object_map() const;
++
+ #if !defined (CORBA_E_MICRO)
+   PortableServer::POA_ptr create_POA (
+       const char *adapter_name,
+Index: TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.h
+===================================================================
+--- TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.h	(revision 48)
++++ TAO/tao/PortableServer/ServantRetentionStrategyNonRetain.h	(working copy)
+@@ -122,6 +122,8 @@
+ 
+         virtual ::PortableServer::ServantRetentionPolicyValue type() const;
+ 
++      virtual TAO_Active_Object_Map * get_active_object_map() const;
++
+     protected:
+       TAO_Root_POA *poa_;
+     };
