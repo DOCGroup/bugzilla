@@ -1,0 +1,48 @@
+--- C:/Users/Yomi/Desktop/Codecs_Test_1.cpp	周六 五月 29 08:50:27 2010
++++ C:/Users/Yomi/Desktop/Codecs_Test.cpp	周六 五月 29 08:49:18 2010
+@@ -34,15 +34,13 @@
+ int
+ encode_decode_stream (const ACE_Byte* stream, size_t length)
+ {
+-  size_t encode_len = 0;
+-
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Input stream = %C\n"),
+               stream));
+-
+-  ACE_Byte* encodeBuf = ACE_Base64::encode (stream, length,
+-                                            &encode_len);
+-  if (encodeBuf == 0)
++  size_t encodeBufSize = length * 2;
++  ACE_Auto_Basic_Array_Ptr<ACE_Byte> encodeBuf(new ACE_Byte[encodeBufSize]);
++  int encode_len = ACE_Base64::encode (encodeBuf.get(), encodeBufSize, stream, length);
++  if (encode_len < 0)
+     {
+       ACE_ERROR ((LM_ERROR, ACE_TEXT ("Error in encoding stream\n")));
+       return -1;
+@@ -52,21 +50,17 @@
+               ACE_TEXT ("Base64 encoded stream = %C\n"),
+               encodeBuf));
+ 
++  size_t decodeBufSize = encodeBufSize;
++  ACE_Auto_Basic_Array_Ptr<ACE_Byte> decodeBuf(new ACE_Byte[decodeBufSize]);
++  int decode_len = ACE_Base64::decode (decodeBuf.get(), decodeBufSize, encodeBuf.get());
+ 
+-  ACE_Auto_Basic_Array_Ptr<ACE_Byte> cleanup_encodeBuf (encodeBuf);
+-
+-  size_t decode_len = 0;
+-  ACE_Byte* decodeBuf = ACE_Base64::decode (encodeBuf, &decode_len);
+-
+-  if (decodeBuf == 0)
++  if (decode_len < 0)
+     {
+       ACE_ERROR ((LM_ERROR,
+                   ACE_TEXT ("Error in decoding encoded stream\n")));
+       return -1;
+     }
+ 
+-  ACE_Auto_Basic_Array_Ptr<ACE_Byte> cleanup_decodeBuf (decodeBuf);
+-
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("Decoded Base64 encoded stream = %C\n"),
+               decodeBuf));
