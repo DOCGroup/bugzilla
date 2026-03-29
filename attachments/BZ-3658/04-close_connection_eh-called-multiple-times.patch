@@ -1,0 +1,60 @@
+Index: TAO/tao/Connection_Handler.cpp
+===================================================================
+--- TAO/tao/Connection_Handler.cpp	(revision 50)
++++ TAO/tao/Connection_Handler.cpp	(working copy)
+@@ -28,7 +28,8 @@
+   : orb_core_ (orb_core),
+     transport_ (0),
+     connection_pending_ (false),
+-    is_closed_ (false)
++    is_closed_ (false),
++    close_connection_eh_calls_ (0)
+ {
+   // @todo: We need to have a distinct option/ method in the resource
+   // factory for this and TAO_Transport.
+@@ -305,6 +306,27 @@
+   // Save the ID for debugging messages
+   ACE_HANDLE const handle = eh->get_handle ();
+ 
++  ACE_GUARD_REACTION (TAO_SYNCH_MUTEX,
++                      guard,
++                      this->cceh_mutex_,
++                      ACE_UNEXPECTED(;));
++  ++close_connection_eh_calls_;
++  if ( close_connection_eh_calls_ > 1 )
++  {
++    if (TAO_debug_level > 0) {
++      ACE_DEBUG  ((LM_DEBUG,
++                   "TAO (%P|%t) - Connection_Handler[%d]::"
++                   "close_connection_eh called %d times on same handler"
++                   ";is_closed=%d\n",
++                   handle,
++                   close_connection_eh_calls_,
++                   is_closed_
++                    ));
++    }
++    return 0;
++  }
++  guard.release();
++
+   size_t const id = this->transport ()->id ();
+   if (TAO_debug_level)
+     {
+Index: TAO/tao/Connection_Handler.h
+===================================================================
+--- TAO/tao/Connection_Handler.h	(revision 50)
++++ TAO/tao/Connection_Handler.h	(working copy)
+@@ -216,6 +216,13 @@
+   /// This is distinct from the leader-follower state so it cannot be reset.
+   bool is_closed_;
+ 
++  /**
++     number of times that close_connection_eh has been called.  Used
++     to prevent crashes when close_connection_eh is called multiple
++     times on the same connection handler.
++   */
++  TAO_SYNCH_MUTEX cceh_mutex_;
++  size_t close_connection_eh_calls_;
+   /*
+    * Hook to add instance members from derived class
+    * onto base Connection_Handler class. Any further
