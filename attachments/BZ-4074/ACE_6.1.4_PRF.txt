@@ -1,0 +1,61 @@
+    ACE VERSION: 6.1.4
+
+    HOST MACHINE and OPERATING SYSTEM:
+
+Gentoo x86_64. GCC info:
+
+Using built-in specs.
+COLLECT_GCC=/usr/x86_64-pc-linux-gnu/gcc-bin/4.5.4/gcc
+COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-pc-linux-gnu/4.5.4/lto-wrapper
+Target: x86_64-pc-linux-gnu
+Configured with: /var/tmp/portage/sys-devel/gcc-4.5.4/work/gcc-4.5.4/configure --prefix=/usr --bindir=/usr/x86_64-pc-linux-gnu/gcc-bin/4.5.4 --includedir=/usr/lib/gcc/x86_64-pc-linux-gnu/4.5.4/include --datadir=/usr/share/gcc-data/x86_64-pc-linux-gnu/4.5.4 --mandir=/usr/share/gcc-data/x86_64-pc-linux-gnu/4.5.4/man --infodir=/usr/share/gcc-data/x86_64-pc-linux-gnu/4.5.4/info --with-gxx-include-dir=/usr/lib/gcc/x86_64-pc-linux-gnu/4.5.4/include/g++-v4 --host=x86_64-pc-linux-gnu --build=x86_64-pc-linux-gnu --disable-altivec --disable-fixed-point --without-ppl --without-cloog --enable-lto --enable-nls --without-included-gettext --with-system-zlib --enable-obsolete --disable-werror --enable-secureplt --enable-multilib --enable-libmudflap --disable-libssp --enable-libgomp --with-python-dir=/share/gcc-data/x86_64-pc-linux-gnu/4.5.4/python --enable-checking=release --disable-libgcj --enable-languages=c,c++,fortran --enable-shared --enable-threads=posix --enable-__cxa_atexit --enable-clocale=gnu --enable-targets=all --with-bugurl=http://bugs.gentoo.org/ --with-pkgversion='Gentoo 4.5.4 p1.0, pie-0.4.7'
+Thread model: posix
+gcc version 4.5.4 (Gentoo 4.5.4 p1.0, pie-0.4.7)
+
+    THE $ACE_ROOT/ace/config.h FILE [if you use a link to a platform-
+    specific file, simply state which one]:
+
+Using config-linux.h
+
+    THE $ACE_ROOT/include/makeinclude/platform_macros.GNU FILE [if you
+    use a link to a platform-specific file, simply state which one
+    (unless this isn't used in this case, e.g., with Microsoft Visual
+    C++)]:
+
+Using platform_linux.GNU
+
+    CONTENTS OF $ACE_ROOT/bin/MakeProjectCreator/config/default.features
+    (used by MPC when you generate your own makefiles):
+
+I did not generate my own makefiles.
+
+    SYNOPSIS:
+
+Compilation problems against ACE 6.1.4. 6.1.2 works fine.
+
+    DESCRIPTION:
+
+Compile output from EMANE:
+
+/bin/sh ../../libtool  --tag=CXX   --mode=compile g++ -DPACKAGE_NAME=\"emane\" -DPACKAGE_TARNAME=\"emane\" -DPACKAGE_VERSION=\"0.7.4\" -DPACKAGE_STRING=\"emane\ 0.7.4\" -DPACKAGE_BUGREPORT=\"labs\ at\ cengen\ dot\ com\" -DPACKAGE_URL=\"\" -DPACKAGE=\"emane\" -DVERSION=\"0.7.4\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DHAVE_RAND_R_SEED_PASS_BY_PTR=/\*\*/ -D__BYTE_ORDER=__LITTLE_ENDIAN -D__LITTLE_ENDIAN=1234 -D__BIG_ENDIAN=4321 -I. -I../../include     -W -Wall -O2 -MT libemane_la-concreteeventagentmanager.lo -MD -MP -MF .deps/libemane_la-concreteeventagentmanager.Tpo -c -o libemane_la-concreteeventagentmanager.lo `test -f 'concreteeventagentmanager.cc' || echo './'`concreteeventagentmanager.cc
+libtool: compile:  g++ -DPACKAGE_NAME=\"emane\" -DPACKAGE_TARNAME=\"emane\" -DPACKAGE_VERSION=\"0.7.4\" "-DPACKAGE_STRING=\"emane 0.7.4\"" "-DPACKAGE_BUGREPORT=\"labs at cengen dot com\"" -DPACKAGE_URL=\"\" -DPACKAGE=\"emane\" -DVERSION=\"0.7.4\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" "-DHAVE_RAND_R_SEED_PASS_BY_PTR=/**/" -D__BYTE_ORDER=__LITTLE_ENDIAN -D__LITTLE_ENDIAN=1234 -D__BIG_ENDIAN=4321 -I. -I../../include -W -Wall -O2 -MT libemane_la-concreteeventagentmanager.lo -MD -MP -MF .deps/libemane_la-concreteeventagentmanager.Tpo -c concreteeventagentmanager.cc  -fPIC -DPIC -o .libs/libemane_la-concreteeventagentmanager.o
+In file included from /usr/local/include/ace/Thread_Manager.h:25:0,
+                 from /usr/local/include/ace/Task.h:23,
+                 from /usr/local/include/ace/Timer_Queue_Adapters.h:18,
+                 from timerservice.h:43,
+                 from concreteeventagentmanager.cc:38:
+/usr/local/include/ace/Condition_Thread_Mutex.h:55:18: error: specialization of 'ACE_Condition<ACE_Thread_Mutex>' after instantiation
+/usr/local/include/ace/Condition_Thread_Mutex.h:55:18: error: redefinition of 'class ACE_Condition<ACE_Thread_Mutex>'
+/usr/local/include/ace/Synch_Traits.h:38:30: error: previous definition of 'class ACE_Condition<ACE_Thread_Mutex>'
+In file included from /usr/local/include/ace/Condition_Thread_Mutex.h:140:0,
+                 from /usr/local/include/ace/Thread_Manager.h:25,
+                 from /usr/local/include/ace/Task.h:23,
+                 from /usr/local/include/ace/Timer_Queue_Adapters.h:18,
+                 from timerservice.h:43,
+                 from concreteeventagentmanager.cc:38:
+/usr/local/include/ace/Condition_Thread_Mutex.inl:8:1: error: specializing member 'ACE_Condition<ACE_Thread_Mutex>::remove' requires 'template<>' syntax
+
+
+    REPEAT BY:
+
+Compile ACE 6.1.4, then compile EMANE against it.
