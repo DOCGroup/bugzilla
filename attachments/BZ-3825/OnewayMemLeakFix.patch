@@ -1,0 +1,16 @@
+Index: ACE_wrappers/TAO/tao/Synch_Queued_Message.cpp
+===================================================================
+--- ACE_wrappers/TAO/tao/Synch_Queued_Message.cpp	(revision 1)
++++ ACE_wrappers/TAO/tao/Synch_Queued_Message.cpp	(working copy)
+@@ -27,7 +27,10 @@
+ 
+ TAO_Synch_Queued_Message::~TAO_Synch_Queued_Message (void)
+ {
+-
++  if ((this->own_contents_) && (this->contents_))
++    {
++      ACE_Message_Block::release (this->contents_);
++    }
+ }
+ 
+ const ACE_Message_Block *
