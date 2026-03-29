@@ -1,0 +1,15 @@
+Program terminated with signal 11, Segmentation fault.
+#0  memcpy () at ../sysdeps/x86_64/memcpy.S:533
+#1  0x00007f8c7195525b in std::basic_streambuf<char, std::char_traits<char> >::xsputn(char const*, long) () from /usr/lib/libstdc++.so.6
+#2  0x00007f8c7194b3b5 in std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long) () from /usr/lib/libstdc++.so.6
+#3  0x00007f8c7304b7a6 in operator<< <std::char_traits<char> > (this=0x7f8c60561920, host_name=0x0, verbose_flag=4, s=...) at /usr/include/c++/4.4/ostream:510
+#4  ACE_6_0_1::ACE_Log_Record::print (this=0x7f8c60561920, host_name=0x0, verbose_flag=4, s=...) at Log_Record.cpp:387
+#5  0x00007f8c73048b44 in ACE_6_0_1::ACE_Log_Msg::log (this=0xef43b0, log_record=..., suppress_stderr=0) at Log_Msg.cpp:2309
+#6  0x00007f8c73048f17 in ACE_6_0_1::ACE_Log_Msg::log (this=<value optimized out>, format_str=0x7f8c730ab59b "", log_priority=<value optimized out>,
+argp=0x7f8c605619f0)
+    at Log_Msg.cpp:2160
+#7  0x00007f8c7304a25b in ACE_6_0_1::ACE_Log_Msg::log (this=0x7f8c58258fb0,
+log_priority=<value optimized out>, format_str=0x210 <Address 0x210 out of bounds>) at Log_Msg.cpp:938
+#8  0x00007f8c7309bf77 in ACE_Trace (this=0x7f8c60561b40, n=<value optimized out>, line=185, file=0x7f8c68bfa3b0 "My_Svc.cpp") at Trace.cpp:96
+#9  0x00007f8c68b83f0a in mpathix::vm::My_Svc::handle_timeout (this=0x10a4f90, pv=0x0) at My_Svc.cpp:185
+
