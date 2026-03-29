@@ -1,0 +1,214 @@
+73,77c73,77
+<           ACE_TString msg (ACE_TEXT ("Cannot locate DLL: '"));
+<           msg += ACE_TString (active_info->path ());
+<           msg += ACE_TString (ACE_TEXT ("' for entity '"));
+<           msg += ACE_TString (active_info->name ());
+<           msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>           ACE_CString msg (ACE_TEXT ("Cannot locate DLL: '"));
+>           msg += ACE_CString (ACE_TEXT (active_info->path ()));
+>           msg += ACE_CString (ACE_TEXT ("' for entity '"));
+>           msg += ACE_CString (ACE_TEXT (active_info->name ()));
+>           msg += ACE_CString (ACE_TEXT ("'\n"));
+93,97c93,97
+<           ACE_TString msg (ACE_TEXT ("Cannot locate init function: '"));
+<           msg += ACE_TString (active_info->init_func ());
+<           msg += ACE_TString (ACE_TEXT ("' for entity '"));
+<           msg += ACE_TString (active_info->name ());
+<           msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>           ACE_CString msg (ACE_TEXT ("Cannot locate init function: '"));
+>           msg += ACE_CString (ACE_TEXT (active_info->init_func ()));
+>           msg += ACE_CString (ACE_TEXT ("' for entity '"));
+>           msg += ACE_CString (ACE_TEXT (active_info->name ()));
+>           msg += ACE_CString (ACE_TEXT ("'\n"));
+125,128c125,128
+<               ACE_TString msg (ACE_TEXT ("Expecting Stream type in stream header"));
+<               msg += ACE_TString (ACE_TEXT (" for entity '"));
+<               msg += ACE_TString (active_info->name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Expecting Stream type in stream header"));
+>               msg += ACE_CString (ACE_TEXT (" for entity '"));
+>               msg += ACE_CString (ACE_TEXT (active_info->name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
+163,166c163,166
+<                   ACE_TString msg (ACE_TEXT ("Error initializing module"));
+<                   msg += ACE_TString (ACE_TEXT (" for entity '"));
+<                   msg += ACE_TString (active_info->name ());
+<                   msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>                   ACE_CString msg (ACE_TEXT ("Error initializing module"));
+>                   msg += ACE_CString (ACE_TEXT (" for entity '"));
+>                   msg += ACE_CString (ACE_TEXT (active_info->name ()));
+>                   msg += ACE_CString (ACE_TEXT ("'\n"));
+195,198c195,198
+<                   ACE_TString msg (ACE_TEXT ("Failed to initialize dynamic service"));
+<                   msg += ACE_TString (ACE_TEXT (" for entity '"));
+<                   msg += ACE_TString (active_info->name ());
+<                   msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>                   ACE_CString msg (ACE_TEXT ("Failed to initialize dynamic service"));
+>                   msg += ACE_CString (ACE_TEXT (" for entity '"));
+>                   msg += ACE_CString (ACE_TEXT (active_info->name ()));
+>                   msg += ACE_CString (ACE_TEXT ("'\n"));
+231,234c231,234
+<                   ACE_TString msg (ACE_TEXT ("Failed to initialize static service"));
+<                   msg += ACE_TString (ACE_TEXT (" for entity '"));
+<                   msg += ACE_TString (this->parsed_info_.name ());
+<                   msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>                   ACE_CString msg (ACE_TEXT ("Failed to initialize static service"));
+>                   msg += ACE_CString (ACE_TEXT (" for entity '"));
+>                   msg += ACE_CString (ACE_TEXT (this->parsed_info_.name ()));
+>                   msg += ACE_CString (ACE_TEXT ("'\n"));
+337,339c337,339
+<           ACE_TString msg (ACE_TEXT ("Cannot find stream '"));
+<           msg += ACE_TString (this->stream_info_.name ());
+<           msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>           ACE_CString msg (ACE_TEXT ("Cannot find stream '"));
+>           msg += ACE_CString (ACE_TEXT (this->stream_info_.name ()));
+>           msg += ACE_CString (ACE_TEXT ("'\n"));
+375,377c375,377
+<               ACE_TString msg (ACE_TEXT ("Can't locate module '"));
+<               msg += ACE_TString (this->parsed_info_.name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Can't locate module '"));
+>               msg += ACE_CString (ACE_TEXT (this->parsed_info_.name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
+391,394c391,394
+<               ACE_TString msg (ACE_TEXT ("Resume failed"));
+<               msg += ACE_TString (ACE_TEXT (" for entity '"));
+<               msg += ACE_TString (this->parsed_info_.name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Resume failed"));
+>               msg += ACE_CString (ACE_TEXT (" for entity '"));
+>               msg += ACE_CString (ACE_TEXT (this->parsed_info_.name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
+416,418c416,418
+<               ACE_TString msg (ACE_TEXT ("Can't locate module '"));
+<               msg += ACE_TString (this->parsed_info_.name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Can't locate module '"));
+>               msg += ACE_CString (ACE_TEXT (this->parsed_info_.name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
+432,435c432,435
+<               ACE_TString msg (ACE_TEXT ("Suspend failed"));
+<               msg += ACE_TString (ACE_TEXT (" for entity '"));
+<               msg += ACE_TString (this->parsed_info_.name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Suspend failed"));
+>               msg += ACE_CString (ACE_TEXT (" for entity '"));
+>               msg += ACE_CString (ACE_TEXT (this->parsed_info_.name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
+457,459c457,459
+<               ACE_TString msg (ACE_TEXT ("Can't locate module '"));
+<               msg += ACE_TString (this->parsed_info_.name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Can't locate module '"));
+>               msg += ACE_CString (ACE_TEXT (this->parsed_info_.name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
+473,476c473,476
+<               ACE_TString msg (ACE_TEXT ("Remove failed"));
+<               msg += ACE_TString (ACE_TEXT (" for entity '"));
+<               msg += ACE_TString (this->parsed_info_.name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Remove failed"));
+>               msg += ACE_CString (ACE_TEXT (" for entity '"));
+>               msg += ACE_CString (ACE_TEXT (this->parsed_info_.name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
+577,581c577,581
+<             ACE_TString msg (ACE_TEXT ("Invalid stream attribute '"));
+<             msg += ACE_TString (alist->getQName (i));
+<             msg += ACE_TString (ACE_TEXT ("' for entity '"));
+<             msg += ACE_TString (this->stream_info_.name ());
+<             msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>             ACE_CString msg (ACE_TEXT ("Invalid stream attribute '"));
+>             msg += ACE_CString (ACE_TEXT (alist->getQName (i)));
+>             msg += ACE_CString (ACE_TEXT ("' for entity '"));
+>             msg += ACE_CString (ACE_TEXT (this->stream_info_.name ()));
+>             msg += ACE_CString (ACE_TEXT ("'\n"));
+603,608c603,608
+<             ACE_TString msg (ACE_TEXT ("Invalid attribute '"));
+<             msg += ACE_TString (alist->getQName (i));
+<             msg += ACE_TString (ACE_TEXT ("', expecting 'id'"));
+<             msg += ACE_TString (ACE_TEXT (" for entity '"));
+<             msg += ACE_TString (this->parsed_info_.name ());
+<             msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>             ACE_CString msg (ACE_TEXT ("Invalid attribute '"));
+>             msg += ACE_CString (ACE_TEXT (alist->getQName (i)));
+>             msg += ACE_CString (ACE_TEXT ("', expecting 'id'"));
+>             msg += ACE_CString (ACE_TEXT (" for entity '"));
+>             msg += ACE_CString (ACE_TEXT (this->parsed_info_.name ()));
+>             msg += ACE_CString (ACE_TEXT ("'\n"));
+644,649c644,649
+<                   ACE_TString msg (ACE_TEXT ("Invalid attribute value '"));
+<                   msg += ACE_TString (alist->getQName (i));
+<                   msg += ACE_TString (ACE_TEXT ("', expecting 'active' or 'inactive'"));
+<                   msg += ACE_TString (ACE_TEXT (" for entity '"));
+<                   msg += ACE_TString (info->name ());
+<                   msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>                   ACE_CString msg (ACE_TEXT ("Invalid attribute value '"));
+>                   msg += ACE_CString (ACE_TEXT (alist->getQName (i)));
+>                   msg += ACE_CString (ACE_TEXT ("', expecting 'active' or 'inactive'"));
+>                   msg += ACE_CString (ACE_TEXT (" for entity '"));
+>                   msg += ACE_CString (ACE_TEXT (info->name ()));
+>                   msg += ACE_CString (ACE_TEXT ("'\n"));
+672,676c672,676
+<                   ACE_TString msg (ACE_TEXT ("Invalid Service_Object attribute value'"));
+<                   msg += ACE_TString (alist->getQName (i));
+<                   msg += ACE_TString (ACE_TEXT ("' for entity '"));
+<                   msg += ACE_TString (info->name ());
+<                   msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>                   ACE_CString msg (ACE_TEXT ("Invalid Service_Object attribute value'"));
+>                   msg += ACE_CString (ACE_TEXT (alist->getQName (i)));
+>                   msg += ACE_CString (ACE_TEXT ("' for entity '"));
+>                   msg += ACE_CString (ACE_TEXT (info->name ()));
+>                   msg += ACE_CString (ACE_TEXT ("'\n"));
+685,689c685,689
+<               ACE_TString msg (ACE_TEXT ("Invalid attribute'"));
+<               msg += ACE_TString (alist->getQName (i));
+<               msg += ACE_TString (ACE_TEXT ("' for entity '"));
+<               msg += ACE_TString (info->name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Invalid attribute'"));
+>               msg += ACE_CString (ACE_TEXT (alist->getQName (i)));
+>               msg += ACE_CString (ACE_TEXT ("' for entity '"));
+>               msg += ACE_CString (ACE_TEXT (info->name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
+723,727c723,727
+<               ACE_TString msg (ACE_TEXT ("Invalid initializer attribute'"));
+<               msg += ACE_TString (alist->getQName (i));
+<               msg += ACE_TString (ACE_TEXT ("' for entity '"));
+<               msg += ACE_TString (info->name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Invalid initializer attribute'"));
+>               msg += ACE_CString (ACE_TEXT (alist->getQName (i)));
+>               msg += ACE_CString (ACE_TEXT ("' for entity '"));
+>               msg += ACE_CString (ACE_TEXT (info->name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
+757,761c757,761
+<               ACE_TString msg (ACE_TEXT ("Invalid static attribute '"));
+<               msg += ACE_TString (alist->getQName (i));
+<               msg += ACE_TString (ACE_TEXT ("' for entity '"));
+<               msg += ACE_TString (info->name ());
+<               msg += ACE_TString (ACE_TEXT ("'\n"));
+---
+>               ACE_CString msg (ACE_TEXT ("Invalid static attribute '"));
+>               msg += ACE_CString (ACE_TEXT (alist->getQName (i)));
+>               msg += ACE_CString (ACE_TEXT ("' for entity '"));
+>               msg += ACE_CString (ACE_TEXT (info->name ()));
+>               msg += ACE_CString (ACE_TEXT ("'\n"));
