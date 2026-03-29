@@ -1,0 +1,1247 @@
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/orbsvcs/Trader/Constraint_Visitors.cpp ACE_wrappers/TAO/orbsvcs/orbsvcs/Trader/Constraint_Visitors.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/orbsvcs/Trader/Constraint_Visitors.cpp	2013-03-01 12:32:01.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/orbsvcs/Trader/Constraint_Visitors.cpp	2013-03-01 13:14:59.000000000 +0100
+@@ -753,8 +753,8 @@
+   int return_value = 0;
+   try
+     {
+-      const char* value = dyn_any.get_string ();
+-      return_value = (ACE_OS::strcmp (value, element) == 0);
++      CORBA::String_var value = dyn_any.get_string ();
++      return_value = (ACE_OS::strcmp (value.in(), element) == 0);
+     }
+   catch (const CORBA::Exception&){}
+   return return_value;
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/orbsvcs/Trader/Offer_Iterators.cpp ACE_wrappers/TAO/orbsvcs/orbsvcs/Trader/Offer_Iterators.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/orbsvcs/Trader/Offer_Iterators.cpp	2013-03-01 12:32:01.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/orbsvcs/Trader/Offer_Iterators.cpp	2013-03-01 15:21:46.000000000 +0100
+@@ -234,45 +234,24 @@
+ TAO_Offer_Id_Iterator::next_n (CORBA::ULong n,
+                                CosTrading::OfferIdSeq_out _ids)
+ {
+-  // Calculate the number of Ids to be returned in this.
++  // Calculate the number of Ids to be returned.
+   CORBA::ULong items_left = static_cast<CORBA::ULong> (this->ids_.size());
+   int difference = items_left - n;
+   CORBA::ULong returnable_items = (difference >= 0) ? n : items_left;
+   CORBA::Boolean return_value = (CORBA::Boolean) (difference > 0);
+ 
+-  if (returnable_items == 0)
+-    ACE_NEW_RETURN (_ids,
+-                    CosTrading::OfferIdSeq,
+-                    return_value);
+-  else
+-    {
+-      // Allocate space for the returned OfferIds.
+-      CosTrading::OfferId* id_buf =
+-        CosTrading::OfferIdSeq::allocbuf (returnable_items);
+-
+-      if (id_buf != 0)
+-        {
+-          // Copy in those ids!
+-          for (CORBA::ULong i = 0; i < returnable_items; i++)
+-            {
+-              CosTrading::OfferId offer_id = 0;
++  // Allocate result sequence.
++  ACE_NEW_RETURN (_ids,
++                  CosTrading::OfferIdSeq,
++                  (items_left > 0));
++  _ids->length(returnable_items);                  
+ 
+-              this->ids_.dequeue_head (offer_id);
+-              id_buf[i] = offer_id;
+-            }
+-
+-          // Place them into an OfferIdSeq.
+-          ACE_NEW_RETURN (_ids,
+-                          CosTrading::OfferIdSeq (returnable_items,
+-                                                  returnable_items,
+-                                                  id_buf,
+-                                                  1),
+-                          return_value);
+-        }
+-      else
+-        ACE_NEW_RETURN (_ids,
+-                        CosTrading::OfferIdSeq,
+-                        return_value);
++  // Transfer OfferIds chunk.
++  for (CORBA::ULong i = 0; i < returnable_items; i++)
++    {
++      CosTrading::OfferId offer_id = 0;
++      this->ids_.dequeue_head (offer_id);
++      (*_ids)[i] = offer_id;
+     }
+ 
+   // Return true only if there are items left to be returned in
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/orbsvcs/Trader/Service_Type_Repository.cpp ACE_wrappers/TAO/orbsvcs/orbsvcs/Trader/Service_Type_Repository.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/orbsvcs/Trader/Service_Type_Repository.cpp	2013-03-01 12:32:01.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/orbsvcs/Trader/Service_Type_Repository.cpp	2013-03-01 15:19:16.000000000 +0100
+@@ -155,15 +155,16 @@
+ {
+   ACE_READ_GUARD_THROW_EX (ACE_Lock, ace_mon, *this->lock_, CORBA::INTERNAL ());
+ 
+-  CORBA::ULong i = 0;
+-  CORBA::ULong length = static_cast<CORBA::ULong> (this->type_map_.current_size ());
+-  CosTrading::ServiceTypeName *types =
+-    CosTradingRepos::ServiceTypeRepository::ServiceTypeNameSeq::allocbuf (length);
+-
+-  if (types == 0)
+-    return 0;
+-
++  CORBA::ULong found = 0;
++  // Initial allocate a result seq for maximum expected results.
++  CosTradingRepos::ServiceTypeRepository::ServiceTypeNameSeq_var types;
++  ACE_NEW_RETURN ( types
++                  ,CosTradingRepos::ServiceTypeRepository::ServiceTypeNameSeq
++                  ,0);
++  types->length(this->type_map_.current_size ());                
++  
+   int all = which_types._d () == CosTradingRepos::ServiceTypeRepository::all;
++  // FIXME: && (which_types.all_ () == true) ?
+ 
+   CosTradingRepos::ServiceTypeRepository::IncarnationNumber num =
+     which_types.incarnation ();
+@@ -178,21 +179,13 @@
+       if (all
+           || num < type_info->type_struct_.incarnation)
+       {
+-        CORBA::string_free( types[i] ); 
+-        types[i++] = CORBA::string_dup (type_name);
++        (*types)[found++] = CORBA::string_dup (type_name);
+       };
+     }
+ 
+-  CosTradingRepos::ServiceTypeRepository::ServiceTypeNameSeq *tmp = 0;
+-
+-  ACE_NEW_RETURN (tmp,
+-                  CosTradingRepos::ServiceTypeRepository::
+-                  ServiceTypeNameSeq (length,
+-                                      i,
+-                                      types,
+-                                      1),
+-                  0);
+-  return tmp;
++  // Truncate to results we have found.
++  types->length(found);
++  return types._retn();
+ }
+ 
+ CosTradingRepos::ServiceTypeRepository::TypeStruct *
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/tests/Trading/colocated_test.cpp ACE_wrappers/TAO/orbsvcs/tests/Trading/colocated_test.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/tests/Trading/colocated_test.cpp	2013-03-01 12:31:40.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/tests/Trading/colocated_test.cpp	2013-03-01 18:16:19.000000000 +0100
+@@ -9,98 +9,136 @@
+ #include "orbsvcs/Trader/Trader.h"
+ #include "orbsvcs/Trader/Service_Type_Repository.h"
+ 
+-void
++int
+ parse_args (int argc, ACE_TCHAR *argv[],
+             CORBA::Boolean& verbose)
+ {
+-  int opt;
+-  ACE_Get_Opt get_opt (argc, argv, ACE_TEXT("fq"));
+-
+   verbose = 1;
+-  while ((opt = get_opt ()) != EOF)
++  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("qh"));
++  for (int opt; (opt = get_opts()) != -1;)
++  {
++    switch (opt)
+     {
+-      if (opt == 'q')
++      case 'q':
+         verbose = 0;
++        break;
++
++      case 'h':
++      ACE_DEBUG ((LM_INFO,
++                  ACE_TEXT("\nUsage: colocated_test <options>\n"
++                  "Test both the trader's exporter and importer roles.\n"
++                  "The options are:\n"
++                  "-quiet or -q   (optional) Run the tests in quiet mode, don't show the query and\n"
++                  "                          list results.\n"
++                  "-h             (optional) Show this help.\n"
++                  "\n"
++                  "This test uses an embedded trading service.\n"
++                  "If you want to test with an external trading server or test federated traders\n"
++                  "then use the other tests:\n"
++                  " - 'export_test' (needs running 'Trading_Service')\n"
++                  " - 'import_test'\n"
++                  "See also TAO/docs/releasenotes/trader.html.\n\n"
++                  ) ));
++        return -1;
+     }
++  }
++  return 0;
+ }
+ 
+ int
+ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+ {
++int failure = 0;
++
+   try
+     {
+-      TAO_ORB_Manager orb_manager;
+-      orb_manager.init (argc, argv);
+-
+       // Command line argument interpretation.
+       CORBA::Boolean verbose = 0;
+-      ::parse_args (argc, argv, verbose);
+-
+-      // Initialize ORB.
+-      CORBA::ORB_var orb = orb_manager.orb ();
+-
+-      // Create a Service Type Repository and a Trader Object.
+-      TAO_Service_Type_Repository type_repos;
+-      auto_ptr<TAO_Trader_Factory::TAO_TRADER> trader (TAO_Trader_Factory::create_trader (argc, argv));
+-      TAO_Support_Attributes_i& sup_attr = trader->support_attributes ();
+-      TAO_Trading_Components_i& trd_comp = trader->trading_components ();
+-
+-      // Set the service type repository
+-      sup_attr.type_repos (type_repos._this ());
+-
+-      // Run the Service Type Exporter tests
+-      ACE_DEBUG ((LM_DEBUG, "*** Running the Service Type Exporter tests.\n"));
+-      TAO_Service_Type_Exporter type_exporter
+-        (CosTrading::Lookup::_duplicate (trd_comp.lookup_if ()),
+-         verbose);
+-
+-      type_exporter.remove_all_types ();
+-
+-      type_exporter.add_all_types ();
+-
+-      type_exporter.list_all_types ();
+-
+-      type_exporter.describe_all_types ();
++      if (parse_args (argc, argv, verbose) != 0)
++        return 1;
+ 
+-      type_exporter.fully_describe_all_types ();
+-
+-      // Run the Offer Exporter tests
+-      ACE_DEBUG ((LM_DEBUG, "*** Running the Offer Exporter tests.\n"));
+-      TAO_Offer_Exporter offer_exporter
+-        (CosTrading::Lookup::_duplicate (trd_comp.lookup_if ()),
+-         verbose);
+-
+-      offer_exporter.withdraw_offers ();
+-
+-      offer_exporter.export_offers ();
+-
+-      offer_exporter.describe_offers ();
+-
+-      offer_exporter.modify_offers ();
+-
+-      offer_exporter.describe_offers ();
+-
+-      offer_exporter.withdraw_offers_using_constraints ();
+-
+-      offer_exporter.describe_offers ();
+-
+-      offer_exporter.withdraw_offers ();
+-
+-      offer_exporter.export_offers ();
+-
+-      offer_exporter.describe_offers ();
+-
+-      // Run the Offer Importer tests
+-      ACE_DEBUG ((LM_DEBUG, "*** Running the Offer Importer tests.\n"));
+-      TAO_Offer_Importer offer_importer
+-        (CosTrading::Lookup::_duplicate (trd_comp.lookup_if ()), verbose);
++      ACE_DEBUG ((LM_DEBUG, "*** Initialize ORB and POA manager.\n"));
++      TAO_ORB_Manager orb_manager;
++      orb_manager.init (argc, argv);
+ 
+-      offer_importer.perform_queries ();
++      //-------------------------------------------------------------------------
++      ACE_DEBUG ((LM_DEBUG, "*** Setup an embedded TradingService.\n"));
++      // Create a Service Type Repository and a Trader Object so the test can 
++      // run without an external trading service.
++      // Start of Trading service scope.
++      {
++        TAO_Service_Type_Repository type_repos;
++        auto_ptr<TAO_Trader_Factory::TAO_TRADER> trader (TAO_Trader_Factory::create_trader (argc, argv));
++        TAO_Support_Attributes_i& sup_attr = trader->support_attributes ();
++        TAO_Trading_Components_i& trd_comp = trader->trading_components ();
++  
++        // Set the service type repository
++        sup_attr.type_repos (type_repos._this ());
++  
++        CosTrading::Lookup_var lookup_if = CosTrading::Lookup::_duplicate(
++            trd_comp.lookup_if());
++
++        // Run the POA manager.
++        orb_manager.activate_poa_manager();
++        
++        // Run the Service Type Exporter tests.
++        ACE_DEBUG ((LM_DEBUG, "*** Running the Service Type Exporter tests.\n"));
++        TAO_Service_Type_Exporter type_exporter(lookup_if.in(), verbose);
++  
++        type_exporter.remove_all_types ();
++  
++        type_exporter.add_all_types ();
++  
++        type_exporter.list_all_types ();
++  
++        type_exporter.describe_all_types ();
++  
++        type_exporter.fully_describe_all_types ();
++  
++        // Run the Offer Exporter tests.
++        ACE_DEBUG ((LM_DEBUG, "*** Running the Offer Exporter tests.\n"));
++        TAO_Offer_Exporter offer_exporter(lookup_if.in(), verbose);
++  
++        offer_exporter.withdraw_offers ();
++  
++        offer_exporter.export_offers ();
++  
++        offer_exporter.describe_offers ();
++  
++        offer_exporter.modify_offers ();
++  
++        offer_exporter.describe_offers ();
++  
++        offer_exporter.withdraw_offers_using_constraints ();
++  
++        offer_exporter.describe_offers ();
++  
++        offer_exporter.withdraw_offers ();
++  
++        offer_exporter.export_offers ();
++  
++        offer_exporter.describe_offers ();
++  
++        // Run the Offer Importer tests.
++        ACE_DEBUG ((LM_DEBUG, "*** Running the Offer Importer tests.\n"));
++        TAO_Offer_Importer offer_importer(lookup_if.in(), verbose);
++  
++        offer_importer.perform_queries ();
++  
++      }; // End of Trading service scope. 
++      //-----------------------------------------------------------------------
++      ACE_DEBUG ((LM_DEBUG, "*** Shutting down.\n"));
++      orb_manager.fini();
+     }
+-  catch (const CORBA::Exception&)
++  catch (const CORBA::Exception& exp)
+     {
+-      ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "Trader Export Tests Failed"), -1);
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, Trader colocated test exception caught: %s, %d, %s\n")
++                          , exp._name()
++                          , exp._rep_id()
++                          , exp._info().c_str() 
++                          ));
++      failure = 1;
+     }
+ 
+-  return 0;
++  return failure;
+ }
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/tests/Trading/export_test.cpp ACE_wrappers/TAO/orbsvcs/tests/Trading/export_test.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/tests/Trading/export_test.cpp	2013-03-01 12:31:40.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/tests/Trading/export_test.cpp	2013-03-01 18:17:02.000000000 +0100
+@@ -12,28 +12,36 @@
+ const ACE_TCHAR *done_file = ACE_TEXT("export_test_ready");
+ 
+ int
+-parse_args_spec (int argc, ACE_TCHAR *argv[])
++parse_args_spec (int argc, ACE_TCHAR *argv[], int help)
+ {
+-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("d:"));
+-  int c;
+-
+-  while ((c = get_opts ()) != -1)
+-    switch (c)
++  if (help!=0)
++  {
++    ACE_DEBUG ((LM_INFO,
++                ACE_TEXT("\nUsage: export_test <options>\n"
++                "Test the trader's exporter role, the options are:\n"
++                "-ORBInitRef <orb_options> E.g. '-ORBInitRef TradingService=iiop://localhost:8901/TradingService'\n"
++                "-quiet or -q              (optional) Run the tests in quiet mode, don't show the query and list results.\n"
++                "-federate or -f           (optional) Setup for federated trader tests.\n"   
++                "-iorfile or -i            (optional) Get TradingService reference through IOR instead of resolve.\n"   
++                "-d <done_file>            (optional) Filename for signalling that we are ready for serving dynamic properties (for import_test).\n"
++                "\n"
++                "This test needs an external TradingServer running, example:\n"
++                "   Trading_Service -ORBEndpoint iiop://:8901 -TSdumpior trading.ior\n"
++                "See also TAO/docs/releasenotes/trader.html.\n\n"
++                ) ));
++    return -1;           
++  }
++  else
++  {
++    ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("d:"));
++    for (int opt; (opt = get_opts()) != -1;)
++    {
++      if (opt == 'd')
+       {
+-      case 'd':
+-          done_file = get_opts.opt_arg ();
+-                  break;
+-
+-      case '?':
+-      default:
+-             ACE_ERROR_RETURN ((LM_ERROR,
+-                                     "usage:  %s "
+-                                     "-d <done_file> "
+-                                     "\n",
+-                                     argv [0]),
+-                                    -1);
+-
+-      }
++        done_file = get_opts.opt_arg ();
++      };
++    };
++  };
+   return 0;
+ }
+ 
+@@ -41,21 +49,25 @@
+ int
+ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+ {
++int failure = 0;
++
+   try
+     {
++      int help=(argc<=1);
++
+       TAO_ORB_Manager orb_manager;
+       orb_manager.init (argc, argv);
+ 
+-      // Command line argument interpretation.
+-      TT_Parse_Args parse_args (argc, argv);
++      // Command line argument parser for use with comlex pearl tests.
++      if (parse_args_spec (argc, argv, help) != 0)
++        return 1;
+ 
+-      //Command line argument parser for
+-      if (parse_args_spec (argc, argv) != 0)
+-          return 1;
++      // Command line argument parser for the trading tests.
++      TT_Parse_Args parse_args (argc, argv);
+ 
+       // Init the orb and bootstrap to the trading service.
+       CORBA::ORB_var orb = orb_manager.orb ();
+-      ACE_DEBUG ((LM_ERROR, "*** Bootstrap to the Lookup interface.\n"));
++      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("*** Bootstrap to the Lookup interface.\n")));
+ 
+       char* ior = parse_args.ior ();
+       CORBA::Object_var trading_obj = (ior == 0) ?
+@@ -64,18 +76,17 @@
+ 
+       if (CORBA::is_nil (trading_obj.in ()))
+         ACE_ERROR_RETURN ((LM_ERROR,
+-                           " (%P|%t) Unable to bootstrap to the Trading Service.\n"),
+-                           -1);
++                           ACE_TEXT("ERROR, Trader Export Test was unable to bootstrap to the Trading Service!\n")),
++                           1);
+ 
+       // Narrow the lookup interface.
+-      ACE_DEBUG ((LM_DEBUG, "*** Narrowing the lookup interface.\n"));
++      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("*** Narrowing the lookup interface.\n")));
+       CosTrading::Lookup_var lookup_if =
+         CosTrading::Lookup::_narrow (trading_obj.in ());
+ 
+-      // Run the Service Type Exporter tests
+-      ACE_DEBUG ((LM_DEBUG, "*** Running the Service Type Exporter tests.\n"));
+-      TAO_Service_Type_Exporter type_exporter (lookup_if.in (),
+-                                               ! parse_args.quiet ());
++      // Run the Service Type Exporter tests.
++      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("*** Running the Service Type Exporter tests.\n")));
++      TAO_Service_Type_Exporter type_exporter (lookup_if.in (), ! parse_args.quiet ());
+ 
+       type_exporter.remove_all_types ();
+ 
+@@ -95,11 +106,11 @@
+       type_exporter.describe_all_types ();
+ 
+       type_exporter.fully_describe_all_types ();
++                                        
++      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("*** Service Type Exporter tests complete.\n")));
+ 
+-      ACE_DEBUG ((LM_DEBUG, "*** Service Type Exporter tests complete.\n"));
+-
+-      // Run the Offer Exporter tests
+-      ACE_DEBUG ((LM_DEBUG, "*** Running the Offer Exporter tests.\n"));
++      // Run the Offer Exporter tests.
++      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("*** Running the Offer Exporter tests.\n")));
+       TAO_Offer_Exporter offer_exporter (lookup_if.in (), ! parse_args.quiet ());
+ 
+       // = Test series.
+@@ -129,9 +140,11 @@
+ 
+       offer_exporter.describe_offers ();
+ 
+-      ACE_DEBUG ((LM_DEBUG, "*** Offer Exporter tests complete.\n"));
+-      ACE_DEBUG ((LM_DEBUG, "*** Now serving dynamic properties.\n"));
+-
++      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("*** Offer Exporter tests complete.\n")));
++      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("*** Now serving dynamic properties.\n")));
++      
++      // Next file can flag other external apps that we now arrived at serving
++      // dynamic properties.
+       size_t offset = 0;
+       ACE_TCHAR file[1024];
+       ACE_OS::strcpy(file, argv[0]);
+@@ -147,15 +160,20 @@
+         ACE_OS::fclose (ready_file);
+       }
+       else {
+-        ACE_DEBUG ((LM_WARNING, "Unable to open %s for output.\n", file));
++        ACE_DEBUG ((LM_WARNING, ACE_TEXT("Unable to open %s for output.\n"), file));
+       }
+ 
+       orb_manager.run ();
+     }
+-  catch (const CORBA::Exception&)
++  catch (const CORBA::Exception& exp)
+     {
+-      ACE_ERROR_RETURN ((LM_ERROR, "Trader Export Tests Failed\n"), -1);
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, Trader Export Test exception caught: %s, %d, %s\n")
++                          , exp._name()
++                          , exp._rep_id()
++                          , exp._info().c_str() 
++                          ));
++      failure = 1;
+     }
+ 
+-  return 0;
++  return failure;
+ }
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/tests/Trading/import_test.cpp ACE_wrappers/TAO/orbsvcs/tests/Trading/import_test.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/tests/Trading/import_test.cpp	2013-03-01 12:31:40.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/tests/Trading/import_test.cpp	2013-03-01 09:26:38.000000000 +0100
+@@ -8,17 +8,34 @@
+ int
+ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+ {
++int failure = 0;
++
+   try
+     {
++      if (argc<=1)
++      {
++        ACE_DEBUG ((LM_INFO,
++                    ACE_TEXT("\nUsage: import_test <options>\n"
++                    "Test the trader's importer role, the options are:\n"
++                    "-ORBInitRef <orb_options> E.g. '-ORBInitRef TradingService=file://trading.ior'\n"
++                    "-quiet or -q              (optional) Run the tests in quiet mode, don't show the query and list results.\n"
++                    "-federate or -f           (optional) Perform federated trader tests.\n"   
++                    "-iorfile or -i            (optional) Get TradingService reference through IOR instead of resolve.\n"   
++                    "\n"
++                    "This test needs the 'export_test' running so the trader has the right offers.\n"
++                    "See also TAO/docs/releasenotes/trader.html.\n\n"
++                    ) ));
++        return 1;           
++      };
+       TAO_ORB_Manager orb_manager;
+       orb_manager.init (argc, argv);
+ 
+-      // Command line argument interpretation.
++      // Command line argument parser.
+       TT_Parse_Args parse_args (argc, argv);
+ 
+       // Initialize the ORB and bootstrap to the Lookup interface.
+       CORBA::ORB_var orb = orb_manager.orb ();
+-      ACE_DEBUG ((LM_ERROR, "*** Bootstrap to the Lookup interface.\n"));
++      ACE_DEBUG ((LM_DEBUG, "*** Bootstrap to the Lookup interface.\n"));
+       char* ior = parse_args.ior ();
+       CORBA::Object_var trading_obj = (ior == 0) ?
+         orb->resolve_initial_references ("TradingService") :
+@@ -26,15 +43,15 @@
+ 
+       if (CORBA::is_nil (trading_obj.in ()))
+         ACE_ERROR_RETURN ((LM_ERROR,
+-                           " (%P|%t) Unable to initialize the Trading Service.\n"),
+-                          -1);
++                           ACE_TEXT("ERROR, Trader Import Test was unable to bootstrap to the Trading Service!\n")),
++                           1);
+ 
+       // Narrow the lookup interface.
+       ACE_DEBUG ((LM_DEBUG, "*** Narrowing the lookup interface.\n"));
+       CosTrading::Lookup_var lookup_if =
+         CosTrading::Lookup::_narrow (trading_obj.in ());
+ 
+-      // Run the Offer Importer tests
++      // Run the Offer Importer tests.
+       ACE_DEBUG ((LM_DEBUG, "*** Running the Offer Importer tests.\n"));
+       TAO_Offer_Importer offer_importer (lookup_if.in (), ! parse_args.quiet ());
+ 
+@@ -45,10 +62,15 @@
+           offer_importer.perform_directed_queries ();
+         }
+     }
+-  catch (const CORBA::Exception&)
++  catch (const CORBA::Exception& exp)
+     {
+-      ACE_ERROR_RETURN ((LM_ERROR, "Trader Import Tests Failed.\n"), -1);
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, Trader Import Test exception caught: %s, %d, %s\n")
++                          , exp._name()
++                          , exp._rep_id()
++                          , exp._info().c_str() 
++                          ));
++      failure = 1;
+     }
+ 
+-  return 0;
++  return failure;
+ }
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/tests/Trading/Offer_Exporter.cpp ACE_wrappers/TAO/orbsvcs/tests/Trading/Offer_Exporter.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/tests/Trading/Offer_Exporter.cpp	2013-03-01 12:31:40.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/tests/Trading/Offer_Exporter.cpp	2013-02-28 16:11:32.000000000 +0100
+@@ -5,7 +5,6 @@
+ #include "ace/OS_NS_stdio.h"
+ 
+ 
+-
+ TAO_Offer_Exporter::
+ TAO_Offer_Exporter (CosTrading::Lookup_ptr lookup_if,
+                     CORBA::Boolean verbose)
+@@ -34,6 +33,7 @@
+ {
+   ACE_DEBUG ((LM_DEBUG, "*** TAO_Offer_Exporter::Exporting offers.\n"));
+ 
++  // Set the PROPERTY_NAMES - TRADER_NAME.
+   for (int i = 0; i < NUM_OFFERS; i++)
+     {
+       this->props_plotters_[i][4].value <<= "Default";
+@@ -51,10 +51,9 @@
+     {
+       for (int i = 0; i < NUM_OFFERS; i++)
+         {
+-          CORBA::Object_ptr offer_obj= this->plotter_[i]._this ();
+-
++          TAO_Trader_Test::Plotter_var pPlotter= this->plotter_[i]._this ();
+           CosTrading::OfferId_var offer_id =
+-            reg->_cxx_export (offer_obj,
++            reg->_cxx_export (pPlotter.in(),
+                               TT_Info::INTERFACE_NAMES[1],
+                               this->props_plotters_[i]);
+ 
+@@ -63,9 +62,8 @@
+               ACE_DEBUG ((LM_DEBUG, "Registered offer id: %C.\n", offer_id.in ()));
+             }
+ 
+-          offer_obj = this->printer_[i]._this ();
+-
+-          offer_id = reg->_cxx_export (offer_obj,
++          TAO_Trader_Test::Printer_var pPrinter = this->printer_[i]._this ();
++          offer_id = reg->_cxx_export (pPrinter.in(),
+                                        TT_Info::INTERFACE_NAMES[2],
+                                        this->props_printers_[i]);
+ 
+@@ -74,9 +72,8 @@
+               ACE_DEBUG ((LM_DEBUG, "Registered offer id: %C.\n", offer_id.in ()));
+             }
+ 
+-          offer_obj = this->fs_[i]._this ();
+-
+-          offer_id = reg->_cxx_export (offer_obj,
++          TAO_Trader_Test::File_System_var pFileSystem = this->fs_[i]._this ();
++          offer_id = reg->_cxx_export (pFileSystem.in(),
+                                        TT_Info::INTERFACE_NAMES[3],
+                                        this->props_fs_[i]);
+ 
+@@ -86,10 +83,9 @@
+             }
+         }
+     }
+-  catch (const CORBA::Exception& ex)
++  catch (const CORBA::Exception& )
+     {
+-      ex._tao_print_exception (
+-        "TAO_Offer_Exporter::export_offers");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Offer_Exporter::export_to exception caught!\n")));
+       throw;
+     }
+ }
+@@ -133,6 +129,7 @@
+           CosTrading::Link::LinkInfo_var link_info =
+             link_if->describe_link (link_name_seq[i]);
+ 
++          // Set the PROPERTY_NAMES - TRADER_NAME.
+           for (int j = 0; j < NUM_OFFERS; j++)
+             {
+               this->props_plotters_[j][4].value <<= link_name_seq[i];
+@@ -150,7 +147,8 @@
+         }
+       catch (const CORBA::Exception&)
+         {
+-          // @@ IGNORE??
++          ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Offer_Exporter::export_offers_to_all exception caught!\n")));
++          throw;
+         }
+     }
+ }
+@@ -176,10 +174,9 @@
+             }
+         }
+     }
+-  catch (const CORBA::Exception& ex)
++  catch (const CORBA::Exception&)
+     {
+-      ex._tao_print_exception (
+-        "TAO_Offer_Exporter::withdraw_offers");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Offer_Exporter::withdraw_offers exception caught!\n")));
+       throw;
+     }
+ }
+@@ -216,10 +213,9 @@
+             }
+         }
+     }
+-  catch (const CORBA::Exception& ex)
++  catch (const CORBA::Exception& )
+     {
+-      ex._tao_print_exception (
+-        "TAO_Offer_Exporter::describe_offers");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Offer_Exporter::describe_offers exception caught!\n")));
+       throw;
+     }
+ }
+@@ -255,10 +251,9 @@
+             }
+         }
+     }
+-  catch (const CORBA::Exception& ex)
++  catch (const CORBA::Exception& )
+     {
+-      ex._tao_print_exception (
+-        "TAO_Offer_Exporter::modify_offers");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Offer_Exporter::modify_offers exception caught!\n")));
+       throw;
+     }
+ }
+@@ -289,10 +284,9 @@
+         withdraw_using_constraint (TT_Info::INTERFACE_NAMES[TT_Info::FILESYSTEM],
+                                    constraint);
+     }
+-  catch (const CORBA::Exception& ex)
++  catch (const CORBA::Exception& )
+     {
+-      ex._tao_print_exception (
+-        "TAO_Offer_Exporter::withdraw_using_constraint");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Offer_Exporter::withdraw_offers_using_constraints exception caught!\n")));
+       throw;
+     }
+ }
+@@ -303,36 +297,36 @@
+   if (this->verbose_)
+     ACE_DEBUG ((LM_DEBUG, "TAO_Offer_Exporter::Grabbing all offer ids.\n"));
+ 
+-  CosTrading::OfferIdSeq *offer_id_seq;
++  CosTrading::OfferIdSeq_var offer_id_seq_result;
+   try
+     {
+       CORBA::ULong length = NUM_OFFERS;
+-      CosTrading::OfferIdIterator_ptr offer_id_iter;
++      CosTrading::OfferIdIterator_var offer_id_iter;
+ 
+       this->admin_->list_offers (NUM_OFFERS,
+-                                 CosTrading::OfferIdSeq_out (offer_id_seq),
+-                                 CosTrading::OfferIdIterator_out (offer_id_iter));
++                                 offer_id_seq_result.out(),
++                                 offer_id_iter.out());
+ 
+-      if ((! CORBA::is_nil (offer_id_iter)) && offer_id_seq != 0)
++      // We might already have seq results but may have to process additional 
++      // iterator result fragments.
++      if (!CORBA::is_nil (offer_id_iter.in()))
+         {
++          CosTrading::OfferIdSeq_var offer_id_seq_remaining;
+           CORBA::Boolean any_left = 0;
+-          CosTrading::OfferIdSeq *id_seq;
+-          CosTrading::OfferIdIterator_var offer_id_iter_var (offer_id_iter);
+-
+           do
+             {
+               any_left =
+                 offer_id_iter->next_n (length,
+-                                       CosTrading::OfferIdSeq_out (id_seq));
++                                       offer_id_seq_remaining.out());
+ 
+-              int offers = id_seq->length ();
+-              int old_length = offer_id_seq->length ();
+-              offer_id_seq->length (old_length + offers);
++              // Grow our result sequence with the remaining fragments.
++              int offers = offer_id_seq_remaining->length ();
++              int old_length = offer_id_seq_result->length ();
++              offer_id_seq_result->length (old_length + offers);
+ 
+               for (int i = 0; i < offers; i++)
+-                (*offer_id_seq)[i + old_length] = (*id_seq)[i];
++                offer_id_seq_result[i + old_length] = offer_id_seq_remaining[i];
+ 
+-              delete id_seq;
+             }
+           while (any_left);
+ 
+@@ -342,23 +336,24 @@
+       if (this->verbose_)
+         {
+           ACE_DEBUG ((LM_DEBUG, "The following offer ids are registered:\n"));
+-          for (int len = offer_id_seq->length (), j = 0; j < len; j++)
+-            ACE_DEBUG ((LM_DEBUG, "Offer Id: %C\n", (const char *)(*offer_id_seq)[j]));
++          for (unsigned int i=0; i<offer_id_seq_result->length(); i++)
++            ACE_DEBUG ((LM_DEBUG, "Offer Id: %C\n", offer_id_seq_result[i].in()));
+         }
+     }
+-  catch (const CORBA::Exception& ex)
++  catch (const CORBA::Exception& )
+     {
+-      ex._tao_print_exception ("TAO_Offer_Exporter::grab_offerids");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Offer_Exporter::grab_offerids exception caught!\n")));
+       throw;
+     }
+   // @@ redundant.
+ 
+-  return offer_id_seq;
++  return offer_id_seq_result._retn();
+ }
+ 
+ void
+ TAO_Offer_Exporter::create_offers (void)
+ {
++  ACE_DEBUG ((LM_DEBUG, "*** TAO_Offer_Exporter::Creating offers.\n"));
+   const int QUEUE_SIZE = 4;
+ 
+   int counter = 0, i = 0;
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/tests/Trading/Offer_Importer.cpp ACE_wrappers/TAO/orbsvcs/tests/Trading/Offer_Importer.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/tests/Trading/Offer_Importer.cpp	2013-03-01 12:31:40.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/tests/Trading/Offer_Importer.cpp	2013-03-01 09:16:43.000000000 +0100
+@@ -22,7 +22,6 @@
+   policies.match_card (16*NUM_OFFERS);
+   policies.return_card (16*NUM_OFFERS);
+   policies.link_follow_rule (CosTrading::always);
+-
+   this->perform_queries_with_policies (policies);
+ }
+ 
+@@ -94,14 +93,14 @@
+         }
+       else
+         {
+-          ACE_DEBUG ((LM_DEBUG, "This test requires a complete"
+-                      " graph of three traders.\n"));
++          ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, This test requires a complete graph of three traders!\n")));
++          throw CORBA::BAD_INV_ORDER(); // Let outside world know we can't continue this way.
+         }
+     }
+   else
+     {
+-      ACE_DEBUG ((LM_DEBUG, "This test requires a complete"
+-                  " graph of three traders.\n"));
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, This test requires a complete graph of three traders!\n")));
++      throw CORBA::BAD_INV_ORDER(); // Let outside world know we can't continue this way.
+     }
+ }
+ 
+@@ -125,57 +124,78 @@
+ 
+       CosTrading::PropertyNameSeq prop_name_seq (4, 4, props, 0);
+       desired_props.prop_names (prop_name_seq);
+-
++      
+       for (int i = 0; i < TT_Info::NUM_QUERIES; i++)
+         {
+           ACE_DEBUG ((LM_DEBUG, "\n"));
+           ACE_DEBUG ((LM_DEBUG, "*** Performing query for %C.\n", TT_Info::QUERIES[i][0]));
+           ACE_DEBUG ((LM_DEBUG, "*** Query: %C\n", TT_Info::QUERIES[i][1]));
+           ACE_DEBUG ((LM_DEBUG, "*** Preferences: %C\n", TT_Info::QUERIES[i][2]));
+-          CosTrading::OfferSeq *offer_seq_ptr = 0;
+-          CosTrading::OfferIterator_ptr offer_iterator_ptr = 0;
+-          CosTrading::PolicyNameSeq *limits_applied_ptr = 0;
+-
+-          CosTrading::OfferSeq_out offer_seq_out (offer_seq_ptr);
+-          CosTrading::OfferIterator_out offer_iterator_out (offer_iterator_ptr);
+-          CosTrading::PolicyNameSeq_out limits_applied_out (limits_applied_ptr);
++          CosTrading::OfferSeq_var      offer_seq;
++          CosTrading::OfferIterator_var offer_iterator;
++          CosTrading::PolicyNameSeq_var limits_applied;
++
++          // Test with different how_many amount, both should work.
++          // Initially try to get this amount in the sequence.
++          CORBA::ULong how_many = 8;
++          if (i&0x0001) 
++          {
++            how_many=0; // 0: Don't retrieve in offers but all in iterator.
++          };
+ 
+           this->lookup_->query (TT_Info::QUERIES[i][0],
+                                 TT_Info::QUERIES[i][1],
+                                 TT_Info::QUERIES[i][2],
+                                 policies.policy_seq (),
+                                 desired_props,
+-                                8,
+-                                offer_seq_out,
+-                                offer_iterator_out,
+-                                limits_applied_out);
+-
+-          CosTrading::OfferSeq_var offer_seq (offer_seq_ptr);
+-          CosTrading::OfferIterator_var offer_iterator (offer_iterator_ptr);
+-          CosTrading::PolicyNameSeq_var limits_applied (limits_applied_ptr);
+-
+-          CORBA::ULong total = (offer_seq_ptr == 0 ? 0 :
+-                                offer_seq_ptr->length ()) +
+-                               (offer_iterator_ptr == 0 ? 0 :
+-                                offer_iterator_ptr->max_left ());
++                                how_many,
++                                offer_seq.out(),
++                                offer_iterator.out(),
++                                limits_applied.out());
++
++          CORBA::ULong seqlen = (offer_seq.ptr() == 0 ? 0 :
++                                 offer_seq->length ());
++          CORBA::ULong itrlen = (CORBA::is_nil(offer_iterator.in()) ? 0 :
++                                 offer_iterator->max_left ());
++          CORBA::ULong total = seqlen + itrlen;
+           CORBA::ULong expected = ACE_OS::atoi (TT_Info::QUERIES[i][3]);
+-          if (total != expected)
+-            ACE_ERROR ((LM_ERROR,
+-                        "ERROR: Expected %d for query %d, but got %d\n",
+-                        expected, i, total));
+ 
++          if (total != expected)
++          {
++            ACE_ERROR ((LM_ERROR
++                        ,"ERROR: Expected %d for query %d, got seq(%d) + itr(%d) = %d\n"
++                        ,expected
++                        ,i
++                        ,seqlen
++                        ,itrlen                              
++                        ,total
++                        ));
++            throw CORBA::TRANSIENT(); // Try again later?
++          }
++          else if (this->verbose_)
++          {
++            ACE_DEBUG ((LM_DEBUG
++                        ,"Expected %d for query %d, got seq(%d) + itr(%d) = %d\n"
++                        ,expected
++                        ,i
++                        ,seqlen
++                        ,itrlen                              
++                        ,total
++                        ));
++          };
++          
+           if (this->verbose_)
+             {
+               ACE_DEBUG ((LM_DEBUG, "*** Results:\n\n"));
+-              this->display_results (*offer_seq_ptr,
+-                                     offer_iterator_ptr);
++              this->display_results (*offer_seq.ptr(),
++                                     offer_iterator.in());
+ 
+-              if (limits_applied_out->length () > 0)
++              if (limits_applied->length () > 0)
+                 ACE_DEBUG ((LM_DEBUG, "*** Limits Applied:\n\n"));
+ 
+-              for (int length = limits_applied_out->length (), j = 0; j < length; j++)
++              for (int length = limits_applied->length (), j = 0; j < length; j++)
+                 {
+-                  const char *policy_name = (*limits_applied_ptr)[j];
++                  const char *policy_name = (*limits_applied.ptr())[j];
+                   ACE_DEBUG ((LM_DEBUG, "%C\n",
+                               static_cast<const char*> (policy_name)));
+                 }
+@@ -184,8 +204,7 @@
+     }
+   catch (const CORBA::Exception& ex)
+     {
+-      ex._tao_print_exception (
+-        "TAO_Offer_Importer::perform_queries");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Offer_Importer::perform_queries_with_policies exception caught!\n")));
+       throw;
+     }
+ }
+@@ -196,13 +215,14 @@
+ {
+   try
+     {
+-      CORBA::ULong length = 0, i = 0;
+       ACE_DEBUG ((LM_DEBUG, "------------------------------\n"));
+       ACE_DEBUG ((LM_DEBUG, "Offers in the sequence:\n"));
+       ACE_DEBUG ((LM_DEBUG, "------------------------------\n"));
+-      for (length = offer_seq.length (), i = 0; i < length; i++)
++      for (CORBA::ULong i = 0; i < offer_seq.length (); i++)
+         {
+           // Call back to the exported object.
++          // FIXME: shouldn't this be done in a separate 'verify_results' method? 
++          //        (confirm () now skipped in quiet mode)
+           TAO_Trader_Test::Remote_Output_var remote_output =
+             TAO_Trader_Test::Remote_Output::_narrow (offer_seq[i].reference.in ());
+ 
+@@ -216,27 +236,28 @@
+       ACE_DEBUG ((LM_DEBUG, "------------------------------\n"));
+       if (! CORBA::is_nil (offer_iterator))
+         {
+-          length = offer_seq.length ();
+           CORBA::Boolean any_left = 0;
+-
+           do
+             {
+-              CosTrading::OfferSeq *iter_offers_ptr;
+-              CosTrading::OfferSeq_out iter_offers_out (iter_offers_ptr);
+-
+-              any_left = offer_iterator->next_n (length,
+-                                                 iter_offers_out);
+-
+-              CosTrading::OfferSeq_var iter_offers (iter_offers_ptr);
+-              for (length = iter_offers->length (), i = 0; i < length; i++)
++              CosTrading::OfferSeq_var offers;
++              // Use of iterator->max_left() to get all iterator results is not 
++              // recommended? (see p.879 Advanced CORBA programming book) 
++              // Howmany to process is a choice between next_n call 'dispatch
++              // costs' and 'larges results marshalling bandwidth costs'.
++              CORBA::ULong how_many = 100; 
++              any_left = offer_iterator->next_n (how_many, offers.out());
++              
++              for (CORBA::ULong i = 0; i < offers->length (); i++)
+                 {
+                   // Call back to the exported object.
++                  // FIXME: shouldn't this be done in a separate 'verify_results' method? 
++                  //        (confirm () now skipped in quiet mode)
+                   TAO_Trader_Test::Remote_Output_var remote_output =
+-                    TAO_Trader_Test::Remote_Output::_narrow (offer_seq[i].reference.in ());
++                    TAO_Trader_Test::Remote_Output::_narrow ((*offers)[i].reference.in ());
+ 
+                   remote_output->confirm ();
+ 
+-                  CosTrading::PropertySeq& props = iter_offers[i].properties;
++                  CosTrading::PropertySeq& props = (*offers)[i].properties;
+                   TT_Info::dump_properties (props, 1);
+ 
+                   ACE_DEBUG ((LM_DEBUG, "------------------------------\n"));
+@@ -249,8 +270,7 @@
+     }
+   catch (const CORBA::Exception& ex)
+     {
+-      ex._tao_print_exception (
+-        "TAO_Offer_Importer::display_results");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Offer_Importer::display_results exception caught!\n")));
+       throw;
+     }
+ }
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/tests/Trading/Service_Type_Exporter.cpp ACE_wrappers/TAO/orbsvcs/tests/Trading/Service_Type_Exporter.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/tests/Trading/Service_Type_Exporter.cpp	2013-03-01 12:31:40.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/tests/Trading/Service_Type_Exporter.cpp	2013-03-01 15:31:58.000000000 +0100
+@@ -20,6 +20,17 @@
+   this->create_types ();
+ }
+ 
++TAO_Service_Type_Exporter::~TAO_Service_Type_Exporter (void)
++{
++  try
++  {
++    this->remove_all_types ();
++  }
++  catch (const CORBA::Exception& exp)
++  {
++  };
++}
++
+ void
+ TAO_Service_Type_Exporter::remove_all_types (void)
+ {
+@@ -34,17 +45,18 @@
+         }
+       catch (const CosTrading::UnknownServiceType& excp)
+         {
++          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("Expected TAO_Service_Type_Exporter::remove_all_types exception caught: \"UnknownServiceType\"\n")));
+           if (this->verbose_)
+             {
+               if (excp.type.in () != 0)
+                 ACE_DEBUG ((LM_DEBUG, "Service type not yet registered: %C\n", excp.type.in ()));
+             }
+-
++          // Don't throw, it's part of the test.
+         }
+-      catch (const CORBA::Exception& ex)
++      catch (const CORBA::Exception& )
+         {
+-          ex._tao_print_exception (
+-            "TAO_Service_Type_Exporter::remove_all_types");
++          ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::remove_all_types exception caught!\n")));
++          throw;
+         }
+     }
+ }
+@@ -93,12 +105,12 @@
+             CosTradingRepos::ServiceTypeRepository::_narrow (remote_repos.in ());
+ 
+         }
+-      catch (const CORBA::Exception&)
++      catch (const CORBA::Exception& )
+         {
+-          // @@ Seth, Ignore all these exceptions?
++          ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::add_all_types_to_all exception caught: %s, %d, %s\n")));
++          throw;                    
+         }
+ 
+-      // @@ Seth, But this one?
+       this->add_all_types_to (str);
+     }
+ }
+@@ -119,35 +131,31 @@
+       catch (
+         const CosTradingRepos::ServiceTypeRepository::ServiceTypeExists& ste)
+         {
+-          ste._tao_print_exception (
+-            "TAO_Service_Type_Exporter::add_all_types");
+-
++          ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::add_all_types_to exception caught: \"ServiceTypeExists\"\n")));
+           if (ste.name.in () != 0)
+-            ACE_DEBUG ((LM_DEBUG, "Invalid name: %C\n", ste.name.in ()));
++            ACE_ERROR ((LM_ERROR, "Name: %C\n", ste.name.in ()));
++          throw;
+         }
+       catch (const CosTrading::IllegalPropertyName& excp)
+         {
+-          excp._tao_print_exception (
+-            "TAO_Service_Type_Exporter::add_all_types");
+-
++          ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::add_all_types_to exception caught: \"IllegalPropertyName\"\n")));
+           if (excp.name.in () != 0)
+-            ACE_DEBUG ((LM_DEBUG, "Invalid name: %C\n", excp.name.in ()));
++            ACE_ERROR ((LM_ERROR, "Name: %C\n", excp.name.in ()));
++          throw;
+         }
+       catch (
+         const CosTradingRepos::ServiceTypeRepository::ValueTypeRedefinition& vtr)
+         {
+-          vtr._tao_print_exception (
+-            "TAO_Service_Type_Exporter::add_all_types");
+-
++          ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::add_all_types_to exception caught: \"ValueTypeRedefinition\"\n")));
+           if (vtr.type_1.in () != 0)
+-            ACE_DEBUG ((LM_DEBUG, "Type One: %C\n", vtr.type_2.in ()));
++            ACE_ERROR ((LM_ERROR, "Type One: %C\n", vtr.type_2.in ()));
+           if (vtr.type_2.in () != 0)
+-            ACE_DEBUG ((LM_DEBUG, "Type Two: %C\n", vtr.type_2.in ()));
++            ACE_ERROR ((LM_ERROR, "Type Two: %C\n", vtr.type_2.in ()));
++          throw;
+         }
+-      catch (const CORBA::Exception& ex)
++      catch (const CORBA::Exception& )
+         {
+-          ex._tao_print_exception (
+-            "TAO_Service_Type_Exporter::add_all_types");
++          ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::add_all_types_to exception caught!\n")));
+           throw;
+         }
+     }
+@@ -166,21 +174,29 @@
+       CosTradingRepos::ServiceTypeRepository::ServiceTypeNameSeq_var type_names =
+         this->repos_->list_types (sst);
+ 
+-      CORBA::ULong l = type_names->length ();
+-      for (CORBA::ULong i = 0; i != l; ++i)
+-        {
+-          CORBA::ULong index = l - 1 - i;
+-          if (this->verbose_)
+-            {
+-              ACE_DEBUG ((LM_DEBUG, "type name: %C\n",
+-                          static_cast<const char *> (type_names[index])));
+-            }
+-        }
++      if (type_names.ptr()!=0)
++      {
++        CORBA::ULong l = type_names->length ();
++        for (CORBA::ULong i = 0; i != l; ++i)
++          {
++            CORBA::ULong index = l - 1 - i;
++            if (this->verbose_)
++              {
++                ACE_DEBUG ((LM_DEBUG, "type name: %C\n",
++                            static_cast<const char *> (type_names[index])));
++              }
++          }
++      }
++      else
++      {
++        ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::add_all_types_to got list_types nil ptr!\n")));
++        throw CORBA::TRANSIENT(); // Try again later?
++      };
+     }
+-  catch (const CORBA::Exception& ex)
++  catch (const CORBA::Exception&)
+     {
+-      ex._tao_print_exception ("TAO_Service_Type_Exporter::list_all_types");
+-      throw;
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::add_all_types_to exception caught!\n")));
++      throw;                    
+     }
+ }
+ 
+@@ -204,10 +220,9 @@
+             }
+         }
+     }
+-  catch (const CORBA::Exception& ex)
++  catch (const CORBA::Exception& )
+     {
+-      ex._tao_print_exception (
+-        "TAO_Service_Type_Exporter::describe_all_types");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::describe_all_types exception caught!\n")));
+       throw;
+     }
+ }
+@@ -232,10 +247,9 @@
+             }
+         }
+     }
+-  catch (const CORBA::Exception& ex)
++  catch (const CORBA::Exception& )
+     {
+-      ex._tao_print_exception (
+-        "TAO_Service_Type_Exporter::fully_describe_all_types");
++      ACE_ERROR ((LM_ERROR, ACE_TEXT("ERROR, TAO_Service_Type_Exporter::fully_describe_all_types exception caught!\n")));
+       throw;
+     }
+ }
+@@ -283,7 +297,7 @@
+   this->type_structs_[TT_Info::REMOTE_IO].props[0].mode       =
+     CosTradingRepos::ServiceTypeRepository::PROP_MANDATORY_READONLY;
+   this->type_structs_[TT_Info::REMOTE_IO].props[1].name       =
+-    TT_Info::REMOTE_IO_PROPERTY_NAMES[TT_Info::LOCATION];
++    TT_Info::REMOTE_IO_PROPERTY_NAMES[TT_Info::LOCATION] ;
+   this->type_structs_[TT_Info::REMOTE_IO].props[1].value_type =
+     CORBA::TypeCode::_duplicate (CORBA::_tc_string);
+   this->type_structs_[TT_Info::REMOTE_IO].props[1].mode       =
+@@ -312,7 +326,6 @@
+     CORBA::TypeCode::_duplicate (CORBA::_tc_string);
+   this->type_structs_[TT_Info::REMOTE_IO].props[5].mode       =
+     CosTradingRepos::ServiceTypeRepository::PROP_NORMAL;
+-
+   this->type_structs_[TT_Info::REMOTE_IO].if_name =
+     ro._interface_repository_id ();
+ 
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/tests/Trading/Service_Type_Exporter.h ACE_wrappers/TAO/orbsvcs/tests/Trading/Service_Type_Exporter.h
+--- ACE_wrappers.org/TAO/orbsvcs/tests/Trading/Service_Type_Exporter.h	2013-03-01 12:31:40.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/tests/Trading/Service_Type_Exporter.h	2013-02-28 14:49:21.000000000 +0100
+@@ -26,6 +26,8 @@
+   TAO_Service_Type_Exporter (CosTrading::Lookup_ptr lookup_if,
+                              CORBA::Boolean verbose);
+ 
++  ~TAO_Service_Type_Exporter (void);
++
+   void remove_all_types (void);
+   // Remove all service types from the trading service instance.
+ 
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/tests/Trading/TT_Info.cpp ACE_wrappers/TAO/orbsvcs/tests/Trading/TT_Info.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/tests/Trading/TT_Info.cpp	2013-03-01 12:31:40.000000000 +0100
++++ ACE_wrappers/TAO/orbsvcs/tests/Trading/TT_Info.cpp	2013-03-01 09:37:29.000000000 +0100
+@@ -247,7 +247,7 @@
+                 }
+               else if ((*value) >>= float_val)
+                 {
+-                  ACE_DEBUG ((LM_DEBUG, "%f\n", long_val));
++                  ACE_DEBUG ((LM_DEBUG, "%f\n", float_val));
+                 }
+               else if ((*value) >>= double_val)
+                 {
