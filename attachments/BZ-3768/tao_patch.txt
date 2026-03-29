@@ -1,0 +1,86 @@
+--- Leader_Follower.inl.old	2009-02-17 08:04:16.000000000 +0000
++++ Leader_Follower.inl	2009-11-26 13:03:24.046875000 +0000
+@@ -132,10 +132,21 @@
+ {
+   TAO_ORB_Core_TSS_Resources *tss = this->get_tss_resources ();
+ 
+-  if (tss->event_loop_thread_ > 0)
++  ACE_ASSERT(tss->client_leader_thread_ == 0 || tss->client_leader_thread_ == 1);
++
++  if (tss->event_loop_thread_ > 0 || tss->client_leader_thread_ > 0)
+     {
+       ACE_GUARD (TAO_SYNCH_MUTEX, ace_mon, this->lock ());
+-      this->reset_event_loop_thread_i (tss);
++      if(tss->event_loop_thread_ > 0) 
++        {
++          ACE_ASSERT(tss->client_leader_thread_ == 0);
++          this->reset_event_loop_thread_i (tss);
++        }
++      else 
++        {
++          ACE_ASSERT(tss->client_leader_thread_ > 0);
++          this->reset_client_leader_thread();
++        }
+ 
+       this->elect_new_leader ();
+     }
+@@ -160,9 +171,13 @@
+ TAO_Leader_Follower::reset_client_leader_thread (void)
+ {
+   TAO_ORB_Core_TSS_Resources *tss = this->get_tss_resources ();
+-  --tss->client_leader_thread_;
+-  --this->leaders_;
+-  --this->client_thread_is_leader_;
++  ACE_ASSERT(tss->client_leader_thread_ == 0 || tss->client_leader_thread_ == 1);
++  if(tss->client_leader_thread_ > 0) 
++    {
++      --tss->client_leader_thread_;
++      --this->leaders_;
++      --this->client_thread_is_leader_;
++    }
+ }
+ 
+ ACE_INLINE int
+--- Leader_Follower.cpp.old	2009-05-20 05:07:56.000000000 +0100
++++ Leader_Follower.cpp	2009-11-26 13:06:12.656250000 +0000
+@@ -216,6 +216,7 @@
+       t_id = transport->id ();
+     }
+ 
++  while (event->keep_waiting())
+   {
+     // Calls this->set_client_thread () on construction and
+     // this->reset_client_thread () on destruction.
+@@ -386,6 +387,7 @@
+     // the leader.
+     TAO_LF_Client_Leader_Thread_Helper client_leader_thread_helper (*this);
+     ACE_UNUSED_ARG (client_leader_thread_helper);
++    TAO_ORB_Core_TSS_Resources *tss = this->get_tss_resources ();
+ 
+     {
+       ACE_GUARD_RETURN (ACE_Reverse_Lock<TAO_SYNCH_MUTEX>, rev_mon,
+@@ -420,6 +422,24 @@
+           if (result == -1)
+             break;
+ 
++          // If we have lost the leader then become follower
++          if (tss->client_leader_thread_ == 0)
++            break;
++
++          // If there are event loop threads waiting let them take over
++          // so we are no longer single threaded
++          if (event->keep_waiting())
++            {
++              ACE_GUARD_RETURN (TAO_SYNCH_MUTEX, ace_mon, this->lock (), -1);
++
++              if(this->event_loop_threads_waiting_)
++                {
++                  this->reset_client_leader_thread();
++                  this->event_loop_threads_condition_.broadcast ();
++                  break;
++                }
++            }
++
+           // Otherwise, keep going...
+         }
+ 
