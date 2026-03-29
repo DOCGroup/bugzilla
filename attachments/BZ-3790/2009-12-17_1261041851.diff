@@ -1,0 +1,15 @@
+Index: ORB_Core.cpp
+===================================================================
+--- ORB_Core.cpp	(revision 88052)
++++ ORB_Core.cpp	(working copy)
+@@ -2085,6 +2085,10 @@
+     {
+       retval = collocated_orb_core.get ()->adapter_registry ().initialize_collocated_object (stub);
+     }
++  else
++    {
++      stub->is_collocated (0);
++    }
+ 
+   return retval;
+ }
