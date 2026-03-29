@@ -1,0 +1,647 @@
+C:\ACE\latest\ACE_wrappers\TAO\orbsvcs\tests\Notify\Bug_3663_Regression>perl run_test.pl
+
+
+==== Running bug 3663 regression test
+ACE (6788|9564) SG::init_svc_conf_file_queue - this=02672470, repo=02672518
+ACE (6788|9564) SG::ctor - this = 02672470, pss = 00000000
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_Codeset, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [0], name=TAO_Codeset (new) (type=02500B60, object=02500B18, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - TAO_Codeset
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=00000000 => 00000000
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_ORB_Core_Static_Resources, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [1], name=TAO_ORB_Core_Static_Resources (new) (type=02500C38, object=0267FCD8, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - TAO_ORB_Core_Static_Resources
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - AnyTypeCode_Adapter, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [2], name=AnyTypeCode_Adapter (new) (type=02500CC8, object=02500C80, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - AnyTypeCode_Adapter
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_NVList_Adapter, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [3], name=TAO_NVList_Adapter (new) (type=02500D58, object=02500D10, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - TAO_NVList_Adapter
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_Acceptor_Filter_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [4], name=TAO_Acceptor_Filter_Factory (new) (type=02500DE8, object=02500DA0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - TAO_Acceptor_Filter_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - IdAssignmentStrategySystem, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [5], name=IdAssignmentStrategySystem (new) (type=02500F50, object=02500F08, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - IdAssignmentStrategySystem
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - IdAssignmentStrategyUser, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [6], name=IdAssignmentStrategyUser (new) (type=025010B8, object=02501070, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - IdAssignmentStrategyUser
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - IdUniquenessStrategyMultiple, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [7], name=IdUniquenessStrategyMultiple (new) (type=02501220, object=025011D8, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - IdUniquenessStrategyMultiple
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - IdUniquenessStrategyUnique, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [8], name=IdUniquenessStrategyUnique (new) (type=02501268, object=025053E0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - IdUniquenessStrategyUnique
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - IdUniquenessStrategyUniqueFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [9], name=IdUniquenessStrategyUniqueFactory (new) (type=025013D0, object=02501388, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - IdUniquenessStrategyUniqueFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ImplicitActivationStrategyExplicit, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [10], name=ImplicitActivationStrategyExplicit (new) (type=02501460, object=02501418, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ImplicitActivationStrategyExplicit
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ImplicitActivationStrategyImplicit, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [11], name=ImplicitActivationStrategyImplicit (new) (type=025014F0, object=025014A8, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ImplicitActivationStrategyImplicit
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ThreadStrategyFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [12], name=ThreadStrategyFactory (new) (type=02501580, object=02501538, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ThreadStrategyFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ThreadStrategySingleFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [13], name=ThreadStrategySingleFactory (new) (type=025016E8, object=025016A0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ThreadStrategySingleFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - LifespanStrategyFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [14], name=LifespanStrategyFactory (new) (type=025061A0, object=02506158, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - LifespanStrategyFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - LifespanStrategyPersistentFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [15], name=LifespanStrategyPersistentFactory (new) (type=02506308, object=025062C0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - LifespanStrategyPersistentFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - LifespanStrategyTransientFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [16], name=LifespanStrategyTransientFactory (new) (type=02506398, object=02506350, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - LifespanStrategyTransientFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - IdAssignmentStrategyFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [17], name=IdAssignmentStrategyFactory (new) (type=02506428, object=025063E0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - IdAssignmentStrategyFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - IdUniquenessStrategyFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [18], name=IdUniquenessStrategyFactory (new) (type=02506590, object=02506548, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - IdUniquenessStrategyFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ImplicitActivationStrategyFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [19], name=ImplicitActivationStrategyFactory (new) (type=025066F8, object=025066B0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ImplicitActivationStrategyFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - RequestProcessingStrategyFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [20], name=RequestProcessingStrategyFactory (new) (type=02506788, object=02506740, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - RequestProcessingStrategyFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - RequestProcessingStrategyAOMOnlyFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [21], name=RequestProcessingStrategyAOMOnlyFactory (new) (type=02506818, object=025067D0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - RequestProcessingStrategyAOMOnlyFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - RequestProcessingStrategyDefaultServantFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [22], name=RequestProcessingStrategyDefaultServantFactory (new) (type=025068A8, object=02506860, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - RequestProcessingStrategyDefaultServantFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - RequestProcessingStrategyServantActivatorFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [23], name=RequestProcessingStrategyServantActivatorFactory (new) (type=02506938, object=025068F0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - RequestProcessingStrategyServantActivatorFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - RequestProcessingStrategyServantLocatorFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [24], name=RequestProcessingStrategyServantLocatorFactory (new) (type=025069C8, object=02506980, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - RequestProcessingStrategyServantLocatorFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ServantRetentionStrategyFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [25], name=ServantRetentionStrategyFactory (new) (type=02506A58, object=02506A10, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ServantRetentionStrategyFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ServantRetentionStrategyRetainFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [26], name=ServantRetentionStrategyRetainFactory (new) (type=02506AE8, object=02506AA0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ServantRetentionStrategyRetainFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ServantRetentionStrategyNonRetainFactory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [27], name=ServantRetentionStrategyNonRetainFactory (new) (type=02506B78, object=02506B30, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ServantRetentionStrategyNonRetainFactory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ThreadStrategyORBControl, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [28], name=ThreadStrategyORBControl (new) (type=02506C08, object=02506BC0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ThreadStrategyORBControl
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ThreadStrategySingle, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [29], name=ThreadStrategySingle (new) (type=02506D28, object=02504028, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ThreadStrategySingle
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_POA_Current_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [30], name=TAO_POA_Current_Factory (new) (type=02506E90, object=02506E48, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - TAO_POA_Current_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_Object_Adapter_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [31], name=TAO_Object_Adapter_Factory (new) (type=02506FF8, object=02506FB0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - TAO_Object_Adapter_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_Network_Priority_Hook, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [32], name=TAO_Network_Priority_Hook (new) (type=025099A0, object=02509958, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - TAO_Network_Priority_Hook
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Concrete_Valuetype_Adapter_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [33], name=Concrete_Valuetype_Adapter_Factory (new) (type=02509AC0, object=02500BF0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Concrete_Valuetype_Adapter_Factory
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - DynamicAny_Loader, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [34], name=DynamicAny_Loader (new) (type=02509B50, object=02509B08, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - DynamicAny_Loader
+(6788|9564) main - entered
+(6788|9564) main - cycle 1 ...
+(6788|9564) loadunloadcycle - loading
+ACE (6788|9564) SG::process_directive, repo=02672518 - dynamic testDllOrb Service_Object * bug3663:_make_DllORB() "testDllOrb -ORBDebugLevel 0 -ORBId testDllOrb
+ -ORBDottedDecimalAddresses 1"
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - dynamic testDllOrb Service_Object * bug3663:_make_DllORB() "testDllOrb -ORBDebugLevel 0 -ORBId testDll
+Orb -ORBDottedDecimalAddresses 1"
+ACE (6788|9564) - SCG:<ctor=0041F768> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SG::initialize - repo=02672518, name=testDllOrb - looking up in the repo
+ACE (6788|9564) STDG::<ctor>, repo=02672518, name=testDllOrb - begining at [35]
+ACE (6788|9564) LN::open_dll - path=bug3663
+ACE (6788|9564) DLL_Handle::open ("bug3663d.dll", 0x0) -> succeeded: The operation completed successfully.
+
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=1
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=2
+ACE (6788|9564) - SCG:<ctor=0041ECBC> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Codeset type=02500B60 => 02500B18
+ACE (6788|9564) SG::process_directive, repo=02672518 - remove TAO_Codeset
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - remove TAO_Codeset
+ACE (6788|9564) - SCG:<ctor=0041EB00> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SR::remove_i - repo=02672518 [0], name=TAO_Codeset (removed) (type=0267FB20, active=0)
+ACE (6788|9564) ST::fini - destroying name=TAO_Codeset, dll=(null)
+ACE (6788|9564) Remove_Node::apply - did remove on TAO_Codeset, error = 0
+ACE (6788|9564) SCG:<dtor=0041EB00> - new repo=02672518
+ACE (6788|9564) SG::process_directive, repo=02672518 - dynamic TAO_Codeset Service_Object * TAO_Codeset:_make_TAO_Codeset_Manager_Factory() ""
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - dynamic TAO_Codeset Service_Object * TAO_Codeset:_make_TAO_Codeset_Manager_Factory() ""
+ACE (6788|9564) - SCG:<ctor=0041EB00> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SG::initialize - repo=02672518, name=TAO_Codeset - looking up in the repo
+ACE (6788|9564) STDG::<ctor>, repo=02672518, name=TAO_Codeset - begining at [35]
+ACE (6788|9564) LN::open_dll - path=TAO_Codeset
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - UTF8_Latin1_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [35], name=UTF8_Latin1_Factory (new) (type=02500B60, object=02509224, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - UTF8_Latin1_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - UTF16_BOM_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [36], name=UTF16_BOM_Factory (new) (type=02500B18, object=02507F44, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - UTF16_BOM_Factory
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Codeset type=00000000 => 00000000
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_Codeset, dll=<null>, force=1
+ACE (6788|9564) SR::insert - repo=02672518 [37], name=TAO_Codeset (new) (type=02509FD0, object=02509F88, active=0)
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Codeset type=02509FD0 => 02509F88
+ACE (6788|9564) DLL_Handle::open ("TAO_Codesetd.dll", 0x0) -> succeeded: The operation completed successfully.
+
+ACE (6788|9564) DLL_Handle::open - TAO_Codeset (1727070208), refcount=1
+ACE (6788|9564) DLL_Handle::open - TAO_Codeset (1727070208), refcount=2
+ACE (6788|9564) SR::insert - repo=02672518 [37], name=TAO_Codeset (replacing) (type=0250A060, object=0250A018, active=1)
+ACE (6788|9564) ST::fini - destroying name=TAO_Codeset, dll=(null)
+ACE (6788|9564) STDG::<dtor>, repo=02672518 [37], name=TAO_Codeset - updating dependents [35 - 38)
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (6788|9564) SR::relocate_i - repo=02672518 [35]: trying name=UTF8_Latin1_Factory, handle: 0 -> 1727070208
+ACE (6788|9564) SR::relocate_i - repo=02672518 [35]: relocating name=UTF8_Latin1_Factory, handle: 0 -> 1727070208
+ACE (6788|9564) DLL_Handle::open - TAO_Codeset (1727070208), refcount=3
+ACE (6788|9564) SR::relocate_i - repo=02672518 [36]: trying name=UTF16_BOM_Factory, handle: 0 -> 1727070208
+ACE (6788|9564) SR::relocate_i - repo=02672518 [36]: relocating name=UTF16_BOM_Factory, handle: 0 -> 1727070208
+ACE (6788|9564) DLL_Handle::open - TAO_Codeset (1727070208), refcount=4
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 4
+ACE (6788|9564) SR::relocate_i - repo=02672518 [37]: trying name=TAO_Codeset, handle: 1727070208 -> 1727070208
+ACE (6788|9564) STDG::<dtor>, repo=02672518 [37], name=TAO_Codeset - loaded (type=02509360, impl=0250A060, object=0250A018, active=1)
+ACE (6788|9564) Dynamic_Node::apply - Did dynamic on TAO_Codeset (yyerrno=0)
+ACE (6788|9564) DLL_Handle::close - TAO_Codeset (handle=1727070208, refcount=3)
+ACE (6788|9564) SCG:<dtor=0041EB00> - new repo=02672518
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Codeset type=0250A060 => 0250A018
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Resource_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [38], name=Resource_Factory (new) (type=02509FD0, object=02512030, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Resource_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Client_Strategy_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [39], name=Client_Strategy_Factory (new) (type=02509F88, object=025120F8, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Client_Strategy_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Server_Strategy_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [40], name=Server_Strategy_Factory (new) (type=0250A180, object=02512960, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Server_Strategy_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - IIOP_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [41], name=IIOP_Factory (new) (type=0250A2A0, object=025093B0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - IIOP_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - MCAST_Parser, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [42], name=MCAST_Parser (new) (type=0250A2E8, object=02512A00, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - MCAST_Parser
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - CORBANAME_Parser, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [43], name=CORBANAME_Parser (new) (type=0250A378, object=0250A330, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - CORBANAME_Parser
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - CORBALOC_Parser, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [44], name=CORBALOC_Parser (new) (type=0250A408, object=0250A3C0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - CORBALOC_Parser
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - FILE_Parser, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [45], name=FILE_Parser (new) (type=0250A498, object=0250A450, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - FILE_Parser
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - DLL_Parser, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [46], name=DLL_Parser (new) (type=0250A528, object=0250A4E0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - DLL_Parser
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - HTTP_Parser, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [47], name=HTTP_Parser (new) (type=0250A5B8, object=0250A570, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - HTTP_Parser
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Default_Stub_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [48], name=Default_Stub_Factory (new) (type=0250A648, object=0250A600, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Default_Stub_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Default_Endpoint_Selector_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [49], name=Default_Endpoint_Selector_Factory (new) (type=0250A768, object=02509680, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Default_Endpoint_Selector_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Default_Thread_Lane_Resources_Manager_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [50], name=Default_Thread_Lane_Resources_Manager_Factory (new) (type=0250A7F8, object=0250A7B0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Default_Thread_Lane_Resources_Manager_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Default_Collocation_Resolver, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [51], name=Default_Collocation_Resolver (new) (type=0250A888, object=0250A840, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Default_Collocation_Resolver
+ACE (6788|9564) SG::init_svc_conf_file_queue - this=02672470, repo=02672518
+ACE (6788|9564) SG::open_i - this=02672470, opened=0, loadstatics=0
+ACE (6788|9564) SG::init_svc_conf_file_queue - this=02672470, repo=02672518
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ACE_Naming_Context, dll=<null>, force=1
+ACE (6788|9564) SR::insert - repo=02672518 [52], name=ACE_Naming_Context (new) (type=02515510, object=02515260, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ACE_Naming_Context
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_CosNotify_Service, dll=<null>, force=1
+ACE (6788|9564) SR::insert - repo=02672518 [53], name=TAO_CosNotify_Service (new) (type=02515558, object=02513C08, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - TAO_CosNotify_Service
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Notify_Default_Event_Manager_Objects_Factory, dll=<null>, force=1
+ACE (6788|9564) SR::insert - repo=02672518 [54], name=Notify_Default_Event_Manager_Objects_Factory (new) (type=02515678, object=02513CA8, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Notify_Default_Event_Manager_Objects_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ACE_Service_Manager, dll=<null>, force=1
+ACE (6788|9564) SR::insert - repo=02672518 [55], name=ACE_Service_Manager (new) (type=025156C0, object=02507E90, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ACE_Service_Manager
+ACE (6788|9564) DSB::instance, repo=02672518, name=PI_Server_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=BiDirGIOP_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=ZIOP_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=Messaging_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=RT_ORB_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=RTScheduler_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=CSD_Framework_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=EndpointPolicy_Initializer type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=DiffservPolicy_Initializer type=00000000 => 00000000
+ACE (6788|9564) SCG:<dtor=0041ECBC> - new repo=02672518
+ACE (6788|9564) - SCG:<ctor=0041EDD0> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) DSB::instance, repo=02672518, name=ORBInitializer_Registry type=00000000 => 00000000
+ACE (6788|9564) SG::process_directive, repo=02672518 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (6788|9564) - SCG:<ctor=0041EC2C> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SG::initialize - repo=02672518, name=ORBInitializer_Registry - looking up in the repo
+ACE (6788|9564) STDG::<ctor>, repo=02672518, name=ORBInitializer_Registry - begining at [56]
+ACE (6788|9564) LN::open_dll - path=TAO_PI
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - CodecFactory_Loader, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [56], name=CodecFactory_Loader (new) (type=02515990, object=02515948, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - CodecFactory_Loader
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - PolicyFactory_Loader, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [57], name=PolicyFactory_Loader (new) (type=02515A20, object=025159D8, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - PolicyFactory_Loader
+ACE (6788|9564) DLL_Handle::open ("TAO_PId.dll", 0x0) -> succeeded: The operation completed successfully.
+
+ACE (6788|9564) DLL_Handle::open - TAO_PI (1705115648), refcount=1
+ACE (6788|9564) DLL_Handle::open - TAO_PI (1705115648), refcount=2
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - ClientRequestInterceptor_Adapter_Factory, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [58], name=ClientRequestInterceptor_Adapter_Factory (new) (type=02515C60, object=02515C18, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - ClientRequestInterceptor_Adapter_Factory
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - PICurrent_Loader, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [59], name=PICurrent_Loader (new) (type=02515CF0, object=02515CA8, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - PICurrent_Loader
+ACE (6788|9564) SR::insert - repo=02672518 [60], name=ORBInitializer_Registry (new) (type=02515B40, object=0251EFA0, active=1)
+ACE (6788|9564) STDG::<dtor>, repo=02672518 [60], name=ORBInitializer_Registry - updating dependents [56 - 61)
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (6788|9564) SR::relocate_i - repo=02672518 [56]: trying name=CodecFactory_Loader, handle: 0 -> 1705115648
+ACE (6788|9564) SR::relocate_i - repo=02672518 [56]: relocating name=CodecFactory_Loader, handle: 0 -> 1705115648
+ACE (6788|9564) DLL_Handle::open - TAO_PI (1705115648), refcount=3
+ACE (6788|9564) SR::relocate_i - repo=02672518 [57]: trying name=PolicyFactory_Loader, handle: 0 -> 1705115648
+ACE (6788|9564) SR::relocate_i - repo=02672518 [57]: relocating name=PolicyFactory_Loader, handle: 0 -> 1705115648
+ACE (6788|9564) DLL_Handle::open - TAO_PI (1705115648), refcount=4
+ACE (6788|9564) SR::relocate_i - repo=02672518 [58]: trying name=ClientRequestInterceptor_Adapter_Factory, handle: 0 -> 1705115648
+ACE (6788|9564) SR::relocate_i - repo=02672518 [58]: relocating name=ClientRequestInterceptor_Adapter_Factory, handle: 0 -> 1705115648
+ACE (6788|9564) DLL_Handle::open - TAO_PI (1705115648), refcount=5
+ACE (6788|9564) SR::relocate_i - repo=02672518 [59]: trying name=PICurrent_Loader, handle: 0 -> 1705115648
+ACE (6788|9564) SR::relocate_i - repo=02672518 [59]: relocating name=PICurrent_Loader, handle: 0 -> 1705115648
+ACE (6788|9564) DLL_Handle::open - TAO_PI (1705115648), refcount=6
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 6
+ACE (6788|9564) SR::relocate_i - repo=02672518 [60]: trying name=ORBInitializer_Registry, handle: 1705115648 -> 1705115648
+ACE (6788|9564) STDG::<dtor>, repo=02672518 [60], name=ORBInitializer_Registry - loaded (type=02513FC8, impl=02515B40, object=0251EFA0, active=1)
+ACE (6788|9564) Dynamic_Node::apply - Did dynamic on ORBInitializer_Registry (yyerrno=0)
+ACE (6788|9564) DLL_Handle::close - TAO_PI (handle=1705115648, refcount=5)
+ACE (6788|9564) SCG:<dtor=0041EC2C> - new repo=02672518
+ACE (6788|9564) DSB::instance, repo=02672518, name=ORBInitializer_Registry type=02515B40 => 0251EFA0
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=Resource_Factory type=02509FD0 => 02512030
+ACE (6788|9564) DSB::instance, repo=02672518, name=DLL_Parser type=0250A528 => 0250A4E0
+ACE (6788|9564) DSB::instance, repo=02672518, name=FILE_Parser type=0250A498 => 0250A450
+ACE (6788|9564) DSB::instance, repo=02672518, name=CORBALOC_Parser type=0250A408 => 0250A3C0
+ACE (6788|9564) DSB::instance, repo=02672518, name=CORBANAME_Parser type=0250A378 => 0250A330
+ACE (6788|9564) DSB::instance, repo=02672518, name=MCAST_Parser type=0250A2E8 => 02512A00
+ACE (6788|9564) DSB::instance, repo=02672518, name=HTTP_Parser type=0250A5B8 => 0250A570
+ACE (6788|9564) DSB::instance, repo=02672518, name=Default_Thread_Lane_Resources_Manager_Factory type=0250A7F8 => 0250A7B0
+ACE (6788|9564) DSB::instance, repo=02672518, name=Server_Strategy_Factory type=0250A180 => 02512960
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Codeset type=0250A060 => 0250A018
+ACE (6788|9564) DSB::instance, repo=02672518, name=UTF8_Latin1_Factory type=02500B60 => 02509224
+ACE (6788|9564) DSB::instance, repo=02672518, name=UTF16_BOM_Factory type=02500B18 => 02507F44
+ACE (6788|9564) DSB::instance, repo=02672518, name=IIOP_Factory type=0250A2A0 => 025093B0
+ACE (6788|9564) DSB::instance, repo=02672518, name=Protocols_Hooks type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Object_Adapter_Factory type=02506FF8 => 02506FB0
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=Network_Priority_Protocols_Hooks type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=FT_ClientService_Activate type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=PolicyFactory_Loader type=02515A20 => 025159D8
+ACE (6788|9564) SCG:<dtor=0041EDD0> - new repo=02672518
+ACE (6788|9564) - SCG:<ctor=0041EDA8> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Object_Adapter_Factory type=02506FF8 => 02506FB0
+ACE (6788|9564) DSB::instance, repo=02672518, name=BiDirGIOP_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=BiDirGIOP_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Acceptor_Filter_Factory type=02500DE8 => 02500DA0
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Network_Priority_Hook type=025099A0 => 02509958
+ACE (6788|9564) DSB::instance, repo=02672518, name=ThreadStrategyFactory type=02501580 => 02501538
+ACE (6788|9564) DSB::instance, repo=02672518, name=ThreadStrategyORBControl type=02506C08 => 02506BC0
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdAssignmentStrategyFactory type=02506428 => 025063E0
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdAssignmentStrategySystem type=02500F50 => 02500F08
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdUniquenessStrategyFactory type=02506590 => 02506548
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdUniquenessStrategyUniqueFactory type=025013D0 => 02501388
+ACE (6788|9564) DSB::instance, repo=02672518, name=ServantRetentionStrategyFactory type=02506A58 => 02506A10
+ACE (6788|9564) DSB::instance, repo=02672518, name=ServantRetentionStrategyRetainFactory type=02506AE8 => 02506AA0
+ACE (6788|9564) DSB::instance, repo=02672518, name=RequestProcessingStrategyFactory type=02506788 => 02506740
+ACE (6788|9564) DSB::instance, repo=02672518, name=RequestProcessingStrategyAOMOnlyFactory type=02506818 => 025067D0
+ACE (6788|9564) DSB::instance, repo=02672518, name=LifespanStrategyFactory type=025061A0 => 02506158
+ACE (6788|9564) DSB::instance, repo=02672518, name=LifespanStrategyTransientFactory type=02506398 => 02506350
+ACE (6788|9564) DSB::instance, repo=02672518, name=ImplicitActivationStrategyFactory type=025066F8 => 025066B0
+ACE (6788|9564) DSB::instance, repo=02672518, name=ImplicitActivationStrategyImplicit type=025014F0 => 025014A8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=IORInterceptor_Adapter_Factory type=00000000 => 00000000
+ACE (6788|9564) SCG:<dtor=0041EDA8> - new repo=02672518
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=IORInterceptor_Adapter_Factory type=00000000 => 00000000
+ACE (6788|6320) - SCG:<ctor=02CFF808> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SR::insert - repo=02672518 [61], name=testDllOrb (new) (type=02509D00, object=02511E10, active=1)
+ACE (6788|9564) STDG::<dtor>, repo=02672518 [61], name=testDllOrb - updating dependents [35 - 62)
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 2
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 3
+ACE (6788|9564) SR::relocate_i - repo=02672518 [35]: trying name=UTF8_Latin1_Factory, handle: 1727070208 -> 1734737920
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 3
+ACE (6788|9564) SR::relocate_i - repo=02672518 [36]: trying name=UTF16_BOM_Factory, handle: 1727070208 -> 1734737920
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 3
+ACE (6788|9564) SR::relocate_i - repo=02672518 [37]: trying name=TAO_Codeset, handle: 1727070208 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [38]: trying name=Resource_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [38]: relocating name=Resource_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=3
+ACE (6788|9564) SR::relocate_i - repo=02672518 [39]: trying name=Client_Strategy_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [39]: relocating name=Client_Strategy_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=4
+ACE (6788|9564) SR::relocate_i - repo=02672518 [40]: trying name=Server_Strategy_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [40]: relocating name=Server_Strategy_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=5
+ACE (6788|9564) SR::relocate_i - repo=02672518 [41]: trying name=IIOP_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [41]: relocating name=IIOP_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=6
+ACE (6788|9564) SR::relocate_i - repo=02672518 [42]: trying name=MCAST_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [42]: relocating name=MCAST_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=7
+ACE (6788|9564) SR::relocate_i - repo=02672518 [43]: trying name=CORBANAME_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [43]: relocating name=CORBANAME_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=8
+ACE (6788|9564) SR::relocate_i - repo=02672518 [44]: trying name=CORBALOC_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [44]: relocating name=CORBALOC_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=9
+ACE (6788|9564) SR::relocate_i - repo=02672518 [45]: trying name=FILE_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [45]: relocating name=FILE_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=10
+ACE (6788|9564) SR::relocate_i - repo=02672518 [46]: trying name=DLL_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [46]: relocating name=DLL_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=11
+ACE (6788|9564) SR::relocate_i - repo=02672518 [47]: trying name=HTTP_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [47]: relocating name=HTTP_Parser, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=12
+ACE (6788|9564) SR::relocate_i - repo=02672518 [48]: trying name=Default_Stub_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [48]: relocating name=Default_Stub_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=13
+ACE (6788|9564) SR::relocate_i - repo=02672518 [49]: trying name=Default_Endpoint_Selector_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [49]: relocating name=Default_Endpoint_Selector_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=14
+ACE (6788|9564) SR::relocate_i - repo=02672518 [50]: trying name=Default_Thread_Lane_Resources_Manager_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [50]: relocating name=Default_Thread_Lane_Resources_Manager_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=15
+ACE (6788|9564) SR::relocate_i - repo=02672518 [51]: trying name=Default_Collocation_Resolver, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [51]: relocating name=Default_Collocation_Resolver, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=16
+ACE (6788|9564) SR::relocate_i - repo=02672518 [52]: trying name=ACE_Naming_Context, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [52]: relocating name=ACE_Naming_Context, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=17
+ACE (6788|9564) SR::relocate_i - repo=02672518 [53]: trying name=TAO_CosNotify_Service, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [53]: relocating name=TAO_CosNotify_Service, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=18
+ACE (6788|9564) SR::relocate_i - repo=02672518 [54]: trying name=Notify_Default_Event_Manager_Objects_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [54]: relocating name=Notify_Default_Event_Manager_Objects_Factory, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=19
+ACE (6788|9564) SR::relocate_i - repo=02672518 [55]: trying name=ACE_Service_Manager, handle: 0 -> 1734737920
+ACE (6788|9564) SR::relocate_i - repo=02672518 [55]: relocating name=ACE_Service_Manager, handle: 0 -> 1734737920
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=20
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 5
+ACE (6788|9564) SR::relocate_i - repo=02672518 [56]: trying name=CodecFactory_Loader, handle: 1705115648 -> 1734737920
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 5
+ACE (6788|9564) SR::relocate_i - repo=02672518 [57]: trying name=PolicyFactory_Loader, handle: 1705115648 -> 1734737920
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 5
+ACE (6788|9564) SR::relocate_i - repo=02672518 [58]: trying name=ClientRequestInterceptor_Adapter_Factory, handle: 1705115648 -> 1734737920
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 5
+ACE (6788|9564) SR::relocate_i - repo=02672518 [59]: trying name=PICurrent_Loader, handle: 1705115648 -> 1734737920
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 5
+ACE (6788|9564) SR::relocate_i - repo=02672518 [60]: trying name=ORBInitializer_Registry, handle: 1705115648 -> 1734737920
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 20
+ACE (6788|9564) SR::relocate_i - repo=02672518 [61]: trying name=testDllOrb, handle: 1734737920 -> 1734737920
+ACE (6788|9564) STDG::<dtor>, repo=02672518 [61], name=testDllOrb - loaded (type=02509090, impl=02509D00, object=02511E10, active=1)
+ACE (6788|9564) Dynamic_Node::apply - Did dynamic on testDllOrb (yyerrno=0)
+ACE (6788|9564) DLL_Handle::close - bug3663 (handle=1734737920, refcount=19)
+ACE (6788|9564) SCG:<dtor=0041F768> - new repo=02672518
+(6788|9564) loadunloadcycle - loading ORB done
+ACE (6788|9564) DSB::instance, repo=02672518, name=testDllOrb type=02509D00 => 02511E10
+(6788|9564) loadunloadcycle - v_orb OK
+(6788|9564) loadunloadcycle - v_poa OK
+(6788|9564) loadunloadcycle - v_rootPOA OK
+ACE (6788|9564) SG::process_directive, repo=02672518 - dynamic testNotifyService Service_Object * TAO_Notify_Service:_make_TAO_Notify_Service_Driver_INCORRECT()
+ "-NoNameSvc -RunThreads 0"
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - dynamic testNotifyService Service_Object * TAO_Notify_Service:_make_TAO_Notify_Service_Driver_INCORREC
+T() "-NoNameSvc -RunThreads 0"
+ACE (6788|9564) - SCG:<ctor=0041F768> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SG::initialize - repo=02672518, name=testNotifyService - looking up in the repo
+ACE (6788|9564) STDG::<ctor>, repo=02672518, name=testNotifyService - begining at [62]
+ACE (6788|9564) LN::open_dll - path=TAO_Notify_Service
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - AMI_Arguments_Converter, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [62], name=AMI_Arguments_Converter (new) (type=02516128, object=02515FC0, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - AMI_Arguments_Converter
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - Messaging_Loader, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [63], name=Messaging_Loader (new) (type=02516290, object=02516248, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - Messaging_Loader
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) SG::process_directive_i, repo=02672518 - TAO_IORTable, dll=<null>, force=0
+ACE (6788|9564) SR::insert - repo=02672518 [64], name=TAO_IORTable (new) (type=02516320, object=025162D8, active=0)
+ACE (6788|9564) SG::add_processed_static_svc, repo=02672518 - TAO_IORTable
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DLL_Handle::open ("TAO_Notify_Serviced.dll", 0x0) -> succeeded: The operation completed successfully.
+
+ACE (6788|9564) DLL_Handle::open - TAO_Notify_Service (1718747136), refcount=1
+ACE (6788|9564) DLL_Handle::symbol ("_make_TAO_Notify_Service_Driver_INCORRECT")  failed with "The operation completed successfully.
+".
+DLL::symbol failed for function _make_TAO_Notify_Service_Driver_INCORRECT: The operation completed successfully.
+
+ACE (6788|9564) Unable to create service object for testNotifyService
+ACE (6788|9564) STDG::<dtor> - Failed (-1) to find testNotifyService -> 00000000
+ACE (6788|9564) Dynamic_Node::apply - Did dynamic on testNotifyService (yyerrno=1)
+ACE (6788|9564) DLL_Handle::close - TAO_Notify_Service (handle=1718747136, refcount=0)
+ACE (6788|9564) DLL_Handle::close: Unloading TAO_Notify_Service (handle=1718747136)
+ACE (6788|9564) SCG:<dtor=0041F768> - new repo=02672518
+(6788|9564) loadunloadcycle - loading NotifyService done
+ACE (6788|9564) DSB::instance, repo=02672518, name=testNotifyService type=00000000 => 00000000
+(6788|9564) loadunloadcycle - unloading
+(6788|9564) loadunloadcycle - unloading NotifyService ...
+ACE (6788|9564) SG::process_directive, repo=02672518 - remove testNotifyService
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - remove testNotifyService
+ACE (6788|9564) - SCG:<ctor=0041F768> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) Remove_Node::apply - did remove on testNotifyService, error = 1
+ACE (6788|9564) SCG:<dtor=0041F768> - new repo=02672518
+(6788|9564) loadunloadcycle - unloading NotifyService done
+(6788|9564) loadunloadcycle - unloading ORB ...
+ACE (6788|9564) SG::process_directive, repo=02672518 - remove testDllOrb
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - remove testDllOrb
+ACE (6788|9564) - SCG:<ctor=0041F768> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SR::remove_i - repo=02672518 [61], name=testDllOrb (removed) (type=02509090, active=1)
+ACE (6788|9564) ST::fini - destroying name=testDllOrb, dll=bug3663
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=IORInterceptor_Adapter_Factory type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=ORT_Adapter_Factory type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=LifespanStrategyTransientFactory type=02506398 => 02506350
+ACE (6788|9564) DSB::instance, repo=02672518, name=RequestProcessingStrategyAOMOnlyFactory type=02506818 => 025067D0
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdUniquenessStrategyUniqueFactory type=025013D0 => 02501388
+ACE (6788|9564) DSB::instance, repo=02672518, name=ServantRetentionStrategyRetainFactory type=02506AE8 => 02506AA0
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=IORInterceptor_Adapter_Factory type=00000000 => 00000000
+ACE (6788|6320) SCG:<dtor=02CFF808> - new repo=02672518
+ACE (6788|9564) DLL_Handle::close - bug3663 (handle=1734737920, refcount=18)
+ACE (6788|9564) Remove_Node::apply - did remove on testDllOrb, error = 0
+ACE (6788|9564) SCG:<dtor=0041F768> - new repo=02672518
+(6788|9564) loadunloadcycle - unloading ORB done
+(6788|9564) main - cycle 1 done
+(6788|9564) main - cycle 2 ...
+(6788|9564) loadunloadcycle - loading
+ACE (6788|9564) SG::process_directive, repo=02672518 - dynamic testDllOrb Service_Object * bug3663:_make_DllORB() "testDllOrb -ORBDebugLevel 0 -ORBId testDllOrb
+ -ORBDottedDecimalAddresses 1"
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - dynamic testDllOrb Service_Object * bug3663:_make_DllORB() "testDllOrb -ORBDebugLevel 0 -ORBId testDll
+Orb -ORBDottedDecimalAddresses 1"
+ACE (6788|9564) - SCG:<ctor=0041F768> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SG::initialize - repo=02672518, name=testDllOrb - looking up in the repo
+ACE (6788|9564) STDG::<ctor>, repo=02672518, name=testDllOrb - begining at [65]
+ACE (6788|9564) LN::open_dll - path=bug3663
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=19
+ACE (6788|9564) DLL_Handle::open - bug3663 (1734737920), refcount=20
+ACE (6788|9564) - SCG:<ctor=0041EDD0> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) DSB::instance, repo=02672518, name=ORBInitializer_Registry type=02515B40 => 0251EFA0
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=Resource_Factory type=02509FD0 => 02512030
+ACE (6788|9564) DSB::instance, repo=02672518, name=DLL_Parser type=0250A528 => 0250A4E0
+ACE (6788|9564) DSB::instance, repo=02672518, name=FILE_Parser type=0250A498 => 0250A450
+ACE (6788|9564) DSB::instance, repo=02672518, name=CORBALOC_Parser type=0250A408 => 0250A3C0
+ACE (6788|9564) DSB::instance, repo=02672518, name=CORBANAME_Parser type=0250A378 => 0250A330
+ACE (6788|9564) DSB::instance, repo=02672518, name=MCAST_Parser type=0250A2E8 => 02512A00
+ACE (6788|9564) DSB::instance, repo=02672518, name=HTTP_Parser type=0250A5B8 => 0250A570
+ACE (6788|9564) DSB::instance, repo=02672518, name=Default_Thread_Lane_Resources_Manager_Factory type=0250A7F8 => 0250A7B0
+ACE (6788|9564) DSB::instance, repo=02672518, name=Server_Strategy_Factory type=0250A180 => 02512960
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Codeset type=0250A060 => 0250A018
+ACE (6788|9564) DSB::instance, repo=02672518, name=UTF8_Latin1_Factory type=02500B60 => 02509224
+ACE (6788|9564) DSB::instance, repo=02672518, name=UTF16_BOM_Factory type=02500B18 => 02507F44
+ACE (6788|9564) DSB::instance, repo=02672518, name=IIOP_Factory type=0250A2A0 => 025093B0
+ACE (6788|9564) DSB::instance, repo=02672518, name=Protocols_Hooks type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Object_Adapter_Factory type=02506FF8 => 02506FB0
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=Network_Priority_Protocols_Hooks type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=FT_ClientService_Activate type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=PolicyFactory_Loader type=02515A20 => 025159D8
+ACE (6788|9564) SCG:<dtor=0041EDD0> - new repo=02672518
+ACE (6788|9564) - SCG:<ctor=0041EDA8> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Object_Adapter_Factory type=02506FF8 => 02506FB0
+ACE (6788|9564) DSB::instance, repo=02672518, name=BiDirGIOP_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=BiDirGIOP_Loader type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Acceptor_Filter_Factory type=02500DE8 => 02500DA0
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_Network_Priority_Hook type=025099A0 => 02509958
+ACE (6788|9564) DSB::instance, repo=02672518, name=ThreadStrategyFactory type=02501580 => 02501538
+ACE (6788|9564) DSB::instance, repo=02672518, name=ThreadStrategyORBControl type=02506C08 => 02506BC0
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdAssignmentStrategyFactory type=02506428 => 025063E0
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdAssignmentStrategySystem type=02500F50 => 02500F08
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdUniquenessStrategyFactory type=02506590 => 02506548
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdUniquenessStrategyUniqueFactory type=025013D0 => 02501388
+ACE (6788|9564) DSB::instance, repo=02672518, name=ServantRetentionStrategyFactory type=02506A58 => 02506A10
+ACE (6788|9564) DSB::instance, repo=02672518, name=ServantRetentionStrategyRetainFactory type=02506AE8 => 02506AA0
+ACE (6788|9564) DSB::instance, repo=02672518, name=RequestProcessingStrategyFactory type=02506788 => 02506740
+ACE (6788|9564) DSB::instance, repo=02672518, name=RequestProcessingStrategyAOMOnlyFactory type=02506818 => 025067D0
+ACE (6788|9564) DSB::instance, repo=02672518, name=LifespanStrategyFactory type=025061A0 => 02506158
+ACE (6788|9564) DSB::instance, repo=02672518, name=LifespanStrategyTransientFactory type=02506398 => 02506350
+ACE (6788|9564) DSB::instance, repo=02672518, name=ImplicitActivationStrategyFactory type=025066F8 => 025066B0
+ACE (6788|9564) DSB::instance, repo=02672518, name=ImplicitActivationStrategyImplicit type=025014F0 => 025014A8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=IORInterceptor_Adapter_Factory type=00000000 => 00000000
+ACE (6788|9564) SCG:<dtor=0041EDA8> - new repo=02672518
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=IORInterceptor_Adapter_Factory type=00000000 => 00000000
+ACE (6788|9856) - SCG:<ctor=02D1FDB4> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SR::insert - repo=02672518 [65], name=testDllOrb (new) (type=02515EA0, object=02511E10, active=1)
+ACE (6788|9564) STDG::<dtor>, repo=02672518 [65], name=testDllOrb - updating dependents [65 - 66)
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 20
+ACE (6788|9564) ACE_DLL_Handle::get_handle: post call: handle valid, refcount 20
+ACE (6788|9564) SR::relocate_i - repo=02672518 [65]: trying name=testDllOrb, handle: 1734737920 -> 1734737920
+ACE (6788|9564) STDG::<dtor>, repo=02672518 [65], name=testDllOrb - loaded (type=02513D98, impl=02515EA0, object=02511E10, active=1)
+ACE (6788|9564) Dynamic_Node::apply - Did dynamic on testDllOrb (yyerrno=0)
+ACE (6788|9564) DLL_Handle::close - bug3663 (handle=1734737920, refcount=19)
+ACE (6788|9564) SCG:<dtor=0041F768> - new repo=02672518
+(6788|9564) loadunloadcycle - loading ORB done
+ACE (6788|9564) DSB::instance, repo=02672518, name=testDllOrb type=02515EA0 => 02511E10
+(6788|9564) loadunloadcycle - v_orb OK
+(6788|9564) loadunloadcycle - v_poa OK
+(6788|9564) loadunloadcycle - v_rootPOA OK
+ACE (6788|9564) SG::process_directive, repo=02672518 - dynamic testNotifyService Service_Object * TAO_Notify_Service:_make_TAO_Notify_Service_Driver_INCORRECT()
+ "-NoNameSvc -RunThreads 0"
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - dynamic testNotifyService Service_Object * TAO_Notify_Service:_make_TAO_Notify_Service_Driver_INCORREC
+T() "-NoNameSvc -RunThreads 0"
+ACE (6788|9564) - SCG:<ctor=0041F768> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SG::initialize - repo=02672518, name=testNotifyService - looking up in the repo
+ACE (6788|9564) STDG::<ctor>, repo=02672518, name=testNotifyService - begining at [66]
+ACE (6788|9564) LN::open_dll - path=TAO_Notify_Service
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DLL_Handle::open ("TAO_Notify_Serviced.dll", 0x0) -> succeeded: The operation completed successfully.
+
+ACE (6788|9564) DLL_Handle::open - TAO_Notify_Service (1717633024), refcount=1
+ACE (6788|9564) DLL_Handle::symbol ("_make_TAO_Notify_Service_Driver_INCORRECT")  failed with "The operation completed successfully.
+".
+DLL::symbol failed for function _make_TAO_Notify_Service_Driver_INCORRECT: The operation completed successfully.
+
+ACE (6788|9564) Unable to create service object for testNotifyService
+ACE (6788|9564) STDG::<dtor> - Failed (-1) to find testNotifyService -> 00000000
+ACE (6788|9564) Dynamic_Node::apply - Did dynamic on testNotifyService (yyerrno=1)
+ACE (6788|9564) DLL_Handle::close - TAO_Notify_Service (handle=1717633024, refcount=0)
+ACE (6788|9564) DLL_Handle::close: Unloading TAO_Notify_Service (handle=1717633024)
+ACE (6788|9564) SCG:<dtor=0041F768> - new repo=02672518
+(6788|9564) loadunloadcycle - loading NotifyService done
+ACE (6788|9564) DSB::instance, repo=02672518, name=testNotifyService type=00000000 => 00000000
+(6788|9564) loadunloadcycle - unloading
+(6788|9564) loadunloadcycle - unloading NotifyService ...
+ACE (6788|9564) SG::process_directive, repo=02672518 - remove testNotifyService
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - remove testNotifyService
+ACE (6788|9564) - SCG:<ctor=0041F768> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) Remove_Node::apply - did remove on testNotifyService, error = 1
+ACE (6788|9564) SCG:<dtor=0041F768> - new repo=02672518
+(6788|9564) loadunloadcycle - unloading NotifyService done
+(6788|9564) loadunloadcycle - unloading ORB ...
+ACE (6788|9564) SG::process_directive, repo=02672518 - remove testDllOrb
+ACE (6788|9564) SG::process_directives_i, repo=02672518 - remove testDllOrb
+ACE (6788|9564) - SCG:<ctor=0041F768> - config=02672470 repo=02672518 superceded by repo=02672518
+ACE (6788|9564) SR::remove_i - repo=02672518 [65], name=testDllOrb (removed) (type=02513D98, active=1)
+ACE (6788|9564) ST::fini - destroying name=testDllOrb, dll=bug3663
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=IORInterceptor_Adapter_Factory type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=ORT_Adapter_Factory type=00000000 => 00000000
+ACE (6788|9564) DSB::instance, repo=02672518, name=LifespanStrategyTransientFactory type=02506398 => 02506350
+ACE (6788|9564) DSB::instance, repo=02672518, name=RequestProcessingStrategyAOMOnlyFactory type=02506818 => 025067D0
+ACE (6788|9564) DSB::instance, repo=02672518, name=IdUniquenessStrategyUniqueFactory type=025013D0 => 02501388
+ACE (6788|9564) DSB::instance, repo=02672518, name=ServantRetentionStrategyRetainFactory type=02506AE8 => 02506AA0
+ACE (6788|9564) DSB::instance, repo=02672518, name=TAO_ORB_Core_Static_Resources type=02500C38 => 0267FCD8
+ACE (6788|9564) DSB::instance, repo=02672518, name=IORInterceptor_Adapter_Factory type=00000000 => 00000000
+ACE (6788|9856) SCG:<dtor=02D1FDB4> - new repo=02672518
+ACE (6788|9564) DLL_Handle::close - bug3663 (handle=1734737920, refcount=18)
+ACE (6788|9564) Remove_Node::apply - did remove on testDllOrb, error = 0
+ACE (6788|9564) SCG:<dtor=0041F768> - new repo=02672518
+(6788|9564) loadunloadcycle - unloading ORB done
+(6788|9564) main - cycle 2 done
+(6788|9564) main - leaving
+ACE (6788|9564) SR::fini, repo=02672518 [65] -> 0
+ACE (6788|9564) SR::fini, repo=02672518 [64], name=TAO_IORTable, type=02516320, object=025162D8, active=0
+ACE (6788|9564) ST::fini - destroying name=TAO_IORTable, dll=(null)
+ERROR: Bug_3663_Regression returned 3221225477
