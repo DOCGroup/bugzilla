@@ -1,0 +1,163 @@
+Index: ACE/ace/OS_NS_dirent.h
+===================================================================
+--- ACE/ace/OS_NS_dirent.h	(revision 85431)
++++ ACE/ace/OS_NS_dirent.h	(working copy)
+@@ -40,7 +40,10 @@
+ // uses void*, that's handled internal to the ACE_OS::scandir() wrapper using
+ // the ACE_SCANDIR_OS_COMPARATOR.
+ extern "C" {
+-#if defined (ACE_SCANDIR_CMP_USES_VOIDPTR)
++#if defined (ACE_SCANDIR_CMP_USES_CONST_DIRECT)
++  typedef int (*ACE_SCANDIR_OS_COMPARATOR)(ACE_DIRENT const **f1,
++					   ACE_DIRENT const **f2);
++#elif defined (ACE_SCANDIR_CMP_USES_VOIDPTR)
+   typedef int (*ACE_SCANDIR_OS_COMPARATOR)(void *f1, void *f2);
+ #elif defined (ACE_SCANDIR_CMP_USES_CONST_VOIDPTR)
+   typedef int (*ACE_SCANDIR_OS_COMPARATOR)(const void *f1, const void *f2);
+Index: ACE/ace/config-linux-common.h
+===================================================================
+--- ACE/ace/config-linux-common.h	(revision 85431)
++++ ACE/ace/config-linux-common.h	(working copy)
+@@ -318,8 +318,12 @@
+ 
+ // Platform supplies scandir()
+ #define ACE_HAS_SCANDIR
++#if (__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 10)
+ // Although the scandir man page says otherwise, this setting is correct.
+ #define ACE_SCANDIR_CMP_USES_CONST_VOIDPTR
++#else
++#define ACE_SCANDIR_CMP_USES_CONST_DIRENT
++#endif
+ 
+ // A conflict appears when including both <ucontext.h> and
+ // <sys/procfs.h> with recent glibc headers.
+
+Property changes on: ACE/debianbuild/libace-5.6.8.docs
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libtao-1.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-htbp-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-tkreactor-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-flreactor-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libtao-qtresource-1.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-tmcast-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libtao-1.6.8.docs
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-xtreactor-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-foxreactor-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libtao-orbsvcs-1.6.8.NEWS
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libtao-xtresource-1.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libtao-foxresource-1.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libacexml-5.6.8.docs
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libtao-orbsvcs-1.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libkokyu-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libacexml-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-rmcast-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libkokyu-5.6.8.docs
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libtao-flresource-1.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-ssl-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libace-qtreactor-5.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/debianbuild/libtao-tkresource-1.6.8.install
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/bin/split-cpp.pl
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
+
+Property changes on: ACE/rpmbuild/ace-tao-ciao.spec
+___________________________________________________________________
+Deleted: svn:mergeinfo
+
