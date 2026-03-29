@@ -1,0 +1,110 @@
+////////////////////////////////////////////////////////////////////////////////
+// SSL_Context.h.diff
+*** SSL_Context.h.0     2013-02-16 22:54:39.000000000 +0100
+--- SSL_Context.h       2014-11-29 18:28:10.024361716 +0100
+***************
+*** 367,372 ****
+--- 367,385 ----
+    int dh_params_file_type () const;
+    //@}
+  
++   /**
++    * Setting EC group parameter (curve name) into context.
++    * named_curve - EC curve name as reported by
++    * OpenSSL command:
++    * $ openssl ecparam -list_curves
++    */
++   int ec_params(const char *named_curve);
++   
++   /**
++    * Get current EC curve name
++    */
++   const char *ec_params_name () const;
++ 
+  private:
+    /// Verify if the context has been initialized or not.
+    void check_context (void);
+***************
+*** 401,406 ****
+--- 414,423 ----
+  
+    /// count of successful CA load attempts
+    int have_ca_;
++   
++   /// EC curve name
++   ACE_CString ec_params_;
++ 
+  
+  #ifdef ACE_HAS_THREADS
+    /// Array of mutexes used internally by OpenSSL when the SSL
+
+
+////////////////////////////////////////////////////////////////////////////////
+// SSL_Context.cpp.diff
+*** SSL_Context.cpp.0   2014-04-11 23:35:27.000000000 +0200
+--- SSL_Context.cpp     2014-11-29 18:28:12.587361935 +0100
+***************
+*** 663,668 ****
+--- 663,723 ----
+    return 0;
+  }
+  
++ int 
++ ACE_SSL_Context::ec_params(const char *named_curve)
++ {
++   EC_KEY *ecdh = 0;
++   int nid      = 0;
++   int status   = 0;
++ 
++ // We need at least OpenSSL 0.9.8 for EC_KEY_new_by_curve_name
++ #if OPENSSL_VERSION_NUMBER >= 0x0090800fL
++ 
++   if(!named_curve)
++     return -1;
++ 
++   ec_params_ = named_curve;
++ 
++   nid = ::OBJ_sn2nid(ec_params_.c_str());
++   if (nid == 0)
++   {
++      return -1;
++   }
++ 
++   ecdh = ::EC_KEY_new_by_curve_name(nid);
++   if (ecdh == NULL)
++   {
++      return -1;
++   }
++ 
++   if(::SSL_CTX_set_tmp_ecdh(context(), ecdh) == 1)
++   {
++      ::SSL_CTX_set_options(context(), SSL_OP_SINGLE_ECDH_USE);
++   }
++   else
++     status = -1;
++   
++   ::EC_KEY_free(ecdh);
++   ecdh = 0;
++   
++   status = 0;
++   
++ #else
++   
++   errno = ENOTSUP;
++   return -1;
++   
++ #endif
++  
++  return status;
++ }
++ 
++ const char *
++ ACE_SSL_Context::ec_params_name () const
++ {
++  return ec_params_.c_str();
++ }
++ 
+  // ****************************************************************
+  ACE_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Unmanaged_Singleton, ACE_SSL_Context, ACE_SYNCH_MUTEX)
+  
+
