@@ -1,0 +1,48 @@
+--- INET_Addr_Test.cpp	2009-08-20 19:22:00.000000000 -0500
++++ INET_Addr_Test.cpp.new	2009-08-21 10:47:13.000000000 -0500
+@@ -60,6 +60,12 @@
+   bool loopback;
+ };
+ 
++struct Multicast_Address
++{
++  const char *addr_;
++  bool is_multicast_;
++};
++
+ int run_main (int argc, ACE_TCHAR *argv[])
+ {
+   ACE_UNUSED_ARG (argc);
+@@ -259,6 +265,32 @@
+       status = 1;
+     }
+ 
++  // Test is_multicast()
++  Multicast_Address mcast_addresses[] =
++    {
++      { "223.0.0.5:23006", false },
++      { "224.0.0.0:23006", true },
++      { "224.0.0.1:23006", true },
++      { "239.255.255.255:23006", true },
++      { "240.0.0.0:23006", false },
++      { "2.0.0.224", false },
++      { NULL, false }
++    };
++
++  for (int i = 0; mcast_addresses[i].addr_; ++i)
++    {
++      ACE_INET_Addr addr (mcast_addresses[i].addr_);
++
++      if (addr.is_multicast () != mcast_addresses[i].is_multicast_)
++        {
++          ACE_ERROR ((LM_ERROR,
++                      ACE_TEXT ("ACE_INET_Addr::is_multicast() for ")
++                      ACE_TEXT ("\"%s\" incorrectly returned %d\n"),
++                      (int)addr.is_multicast ()));
++          status = 1;
++        }
++    }
++
+   ACE_END_TEST;
+ 
+   return status;
