@@ -1,0 +1,336 @@
+Index: PI_Server/PI_Server_Loader.cpp
+===================================================================
+--- PI_Server/PI_Server_Loader.cpp	(revision 87229)
++++ PI_Server/PI_Server_Loader.cpp	(working copy)
+@@ -15,6 +15,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ TAO_PI_Server_Loader::TAO_PI_Server_Loader (void)
++  : initialized_ (false)
+ {
+ }
+ 
+@@ -27,13 +28,11 @@
+ {
+   ACE_TRACE ("TAO_PI_Server_Loader::init");
+ 
+-  static bool initialized = false;
+-
+   // Only allow initialization once.
+-  if (initialized)
++  if (this->initialized_)
+     return 0;
+ 
+-  initialized = true;
++  this->initialized_ = true;
+ 
+   // Register the ORB initializer.
+   try
+Index: PI_Server/PI_Server_Loader.h
+===================================================================
+--- PI_Server/PI_Server_Loader.h	(revision 87229)
++++ PI_Server/PI_Server_Loader.h	(working copy)
+@@ -36,6 +36,10 @@
+ 
+   /// Initialize the PI_Server loader hooks.
+   virtual int init (int argc, ACE_TCHAR* []);
++
++private:
++  /// Set to true after init is called.
++  bool initialized_;
+ };
+ 
+ 
+Index: Messaging/Messaging_Loader.h
+===================================================================
+--- Messaging/Messaging_Loader.h	(revision 87229)
++++ Messaging/Messaging_Loader.h	(working copy)
+@@ -38,6 +38,10 @@
+ 
+   /// Initialize the Messaging loader hooks.
+   virtual int init (int argc, ACE_TCHAR* []);
++
++private:
++  /// Set to true after init is called.
++  bool initialized_;
+ };
+ 
+ 
+Index: Messaging/Messaging_Loader.cpp
+===================================================================
+--- Messaging/Messaging_Loader.cpp	(revision 87229)
++++ Messaging/Messaging_Loader.cpp	(working copy)
+@@ -15,6 +15,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ TAO_Messaging_Loader::TAO_Messaging_Loader (void)
++  : initialized_ (false)
+ {
+ }
+ 
+@@ -28,12 +29,11 @@
+ {
+   ACE_TRACE ("TAO_Messaging_Loader::init");
+ 
+-  static bool called_once = false;
+-
+-  if (called_once == true)
++  if (this->initialized_)
+     return 0;
+-  called_once = true;
+ 
++  this->initialized_ = true;
++
+   PortableInterceptor::ORBInitializer_ptr temp_orb_initializer =
+     PortableInterceptor::ORBInitializer::_nil ();
+   PortableInterceptor::ORBInitializer_var orb_initializer;
+Index: BiDir_GIOP/BiDirGIOP.cpp
+===================================================================
+--- BiDir_GIOP/BiDirGIOP.cpp	(revision 87229)
++++ BiDir_GIOP/BiDirGIOP.cpp	(working copy)
+@@ -12,10 +12,8 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-// Set the flag to zero to start with
+-bool TAO_BiDirGIOP_Loader::is_activated_ = false;
+-
+ TAO_BiDirGIOP_Loader::TAO_BiDirGIOP_Loader (void)
++  : initialized_ (false)
+ {
+ }
+ 
+@@ -26,7 +24,7 @@
+ int
+ TAO_BiDirGIOP_Loader::init (int, ACE_TCHAR* [])
+ {
+-  if (TAO_BiDirGIOP_Loader::is_activated_ == false && TAO_DEF_GIOP_MINOR >= 2)
++  if (!this->initialized_ && TAO_DEF_GIOP_MINOR >= 2)
+     {
+       PortableInterceptor::ORBInitializer_ptr tmp_orb_initializer =
+         PortableInterceptor::ORBInitializer::_nil ();
+@@ -48,7 +46,7 @@
+           PortableInterceptor::register_orb_initializer (
+             bidir_orb_initializer.in ());
+ 
+-          TAO_BiDirGIOP_Loader::is_activated_ = true;
++          this->initialized_ = true;
+         }
+       catch (const ::CORBA::Exception& ex)
+         {
+Index: BiDir_GIOP/BiDirGIOP.h
+===================================================================
+--- BiDir_GIOP/BiDirGIOP.h	(revision 87229)
++++ BiDir_GIOP/BiDirGIOP.h	(working copy)
+@@ -61,7 +61,7 @@
+ 
+   /// Flag to indicate whether the BiDirGIOP library has been
+   /// activated.
+-  static bool is_activated_;
++  bool initialized_;
+ };
+ 
+ static bool
+Index: RTScheduling/RTScheduler_Loader.cpp
+===================================================================
+--- RTScheduling/RTScheduler_Loader.cpp	(revision 87229)
++++ RTScheduling/RTScheduler_Loader.cpp	(working copy)
+@@ -13,6 +13,11 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
++TAO_RTScheduler_Loader::TAO_RTScheduler_Loader (void)
++  : initialized_ (false)
++{
++}
++
+ TAO_RTScheduler_Loader::~TAO_RTScheduler_Loader (void)
+ {
+ }
+@@ -26,13 +31,11 @@
+     ACE_DEBUG ((LM_DEBUG,
+                 "In RTScheduler_Loader::init\n"));
+ 
+-  static bool initialized = false;
+-
+   // Only allow initialization once.
+-  if (initialized)
++  if (this->initialized_)
+     return 0;
+ 
+-  initialized = true;
++  this->initialized_ = true;
+ 
+   // Register the ORB initializer.
+   try
+Index: RTScheduling/RTScheduler_Loader.h
+===================================================================
+--- RTScheduling/RTScheduler_Loader.h	(revision 87229)
++++ RTScheduling/RTScheduler_Loader.h	(working copy)
+@@ -33,11 +33,18 @@
+ class TAO_RTScheduler_Export TAO_RTScheduler_Loader : public ACE_Service_Object
+ {
+ public:
++  /// Constructor.
++  TAO_RTScheduler_Loader (void);
++
+   /// Destructor.
+   virtual ~TAO_RTScheduler_Loader (void);
+ 
+   /// Initialize the RTScheduler loader hooks.
+   virtual int init (int argc, ACE_TCHAR* []);
++
++private:
++  /// Set to true after init is called.
++  bool initialized_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: ZIOP/ZIOP.cpp
+===================================================================
+--- ZIOP/ZIOP.cpp	(revision 87229)
++++ ZIOP/ZIOP.cpp	(working copy)
+@@ -14,10 +14,8 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-// Set the flag to zero to start with
+-bool TAO_ZIOP_Loader::is_activated_ = false;
+-
+ TAO_ZIOP_Loader::TAO_ZIOP_Loader (void)
++  : initialized_ (false)
+ {
+ }
+ 
+@@ -29,7 +27,7 @@
+ TAO_ZIOP_Loader::init (int, ACE_TCHAR* [])
+ {
+ #if defined (TAO_HAS_CORBA_MESSAGING) && TAO_HAS_CORBA_MESSAGING != 0
+-  if (TAO_ZIOP_Loader::is_activated_ == false && TAO_DEF_GIOP_MINOR >= 2)
++  if (!this->initialized_ && TAO_DEF_GIOP_MINOR >= 2)
+     {
+       PortableInterceptor::ORBInitializer_ptr tmp_orb_initializer =
+         PortableInterceptor::ORBInitializer::_nil ();
+@@ -51,7 +49,7 @@
+           PortableInterceptor::register_orb_initializer (
+             ziop_orb_initializer.in ());
+ 
+-          TAO_ZIOP_Loader::is_activated_ = true;
++          this->initialized_ = true;
+         }
+       catch (const ::CORBA::Exception& ex)
+         {
+Index: ZIOP/ZIOP.h
+===================================================================
+--- ZIOP/ZIOP.h	(revision 87229)
++++ ZIOP/ZIOP.h	(working copy)
+@@ -66,9 +66,8 @@
+ 
+ private:
+ 
+-  /// Flag to indicate whether the ZIOP library has been
+-  /// activated.
+-  static bool is_activated_;
++  /// Set to true after init is called.
++  bool initialized_;
+ 
+   /// dump a ZIOP datablock after (de)compression
+   void dump_msg (const char *type,  const u_char *ptr,
+Index: CSD_Framework/CSD_Framework_Loader.cpp
+===================================================================
+--- CSD_Framework/CSD_Framework_Loader.cpp	(revision 87229)
++++ CSD_Framework/CSD_Framework_Loader.cpp	(working copy)
+@@ -16,6 +16,7 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ TAO_CSD_Framework_Loader::TAO_CSD_Framework_Loader (void)
++  : initialized_ (false)
+ {
+ }
+ 
+@@ -43,13 +44,11 @@
+ {
+   ACE_TRACE ("TAO_CSD_Framework_Loader::init");
+ 
+-  static bool initialized = false;
+-
+   // Only allow initialization once.
+-  if (initialized)
++  if (this->initialized_)
+     return 0;
+ 
+-  initialized = true;
++  this->initialized_ = true;
+ 
+   // Register the ORB initializer.
+   try
+Index: CSD_Framework/CSD_Framework_Loader.h
+===================================================================
+--- CSD_Framework/CSD_Framework_Loader.h	(revision 87229)
++++ CSD_Framework/CSD_Framework_Loader.h	(working copy)
+@@ -50,6 +50,10 @@
+ 
+   /// Initialize the PI_Server loader hooks.
+   virtual int init (int argc, ACE_TCHAR* []);
++
++private:
++  /// Set to true after init is called.
++  bool initialized_;
+ };
+ 
+ 
+Index: RTCORBA/RT_ORB_Loader.h
+===================================================================
+--- RTCORBA/RT_ORB_Loader.h	(revision 87229)
++++ RTCORBA/RT_ORB_Loader.h	(working copy)
+@@ -37,11 +37,18 @@
+ {
+ public:
+ 
++  /// Constructor.
++  TAO_RT_ORB_Loader (void);
++
+   /// Destructor.
+   virtual ~TAO_RT_ORB_Loader (void);
+ 
+   /// Initialize the RT ORB loader hooks.
+   virtual int init (int argc, ACE_TCHAR* []);
++
++private:
++  /// Set to true after init is called.
++  bool initialized_;
+ };
+ 
+ 
+Index: RTCORBA/RT_ORB_Loader.cpp
+===================================================================
+--- RTCORBA/RT_ORB_Loader.cpp	(revision 87229)
++++ RTCORBA/RT_ORB_Loader.cpp	(working copy)
+@@ -17,6 +17,11 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
++TAO_RT_ORB_Loader::TAO_RT_ORB_Loader (void)
++  : initialized_ (false)
++{
++}
++
+ TAO_RT_ORB_Loader::~TAO_RT_ORB_Loader (void)
+ {
+ }
+@@ -26,13 +31,11 @@
+ {
+   ACE_TRACE ("TAO_RT_ORB_Loader::init");
+ 
+-  static bool initialized = false;
+-
+   // Only allow initialization once.
+-  if (initialized)
++  if (this->initialized_)
+     return 0;
+ 
+-  initialized = true;
++  this->initialized_ = true;
+ 
+   // Set defaults.
+   int priority_mapping_type =
