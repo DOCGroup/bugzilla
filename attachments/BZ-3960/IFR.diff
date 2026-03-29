@@ -1,0 +1,56 @@
+diff old/ACE_wrappers/TAO/orbsvcs/tests/InterfaceRepo/IFR_Inheritance_Test/IFR_Inheritance_Test.idl new/ACE_wrappers/TAO/orbsvcs/tests/InterfaceRepo/IFR_Inheritance_Test/IFR_Inheritance_Test.idl
+30a31,53
+> 
+>   interface Base1 {
+>     void m();
+>     readonly attribute long a;
+>   };
+>   interface Base2 {
+>   };
+>   interface Intermediate1 : Base1 {
+>   };
+>   interface Intermediate2 : Base2 {
+>   };
+>   interface Intermediate3 : Base1, Base2 {
+>   };
+>   interface Intermediate4 : Base2, Base1 {
+>   };
+>   interface Child1 : Intermediate1 {
+>   };
+>   interface Child2 : Intermediate2 {
+>   };
+>   interface Child3 : Intermediate3 {
+>   };
+>   interface Child4 : Intermediate4 {
+>   };
+diff old/ACE_wrappers/TAO/orbsvcs/tests/InterfaceRepo/IFR_Inheritance_Test/run_test.pl new/ACE_wrappers/TAO/orbsvcs/tests/InterfaceRepo/IFR_Inheritance_Test/run_test.pl
+36a37,50
+> $isa{"Base1::m"}                     = "operation";
+> $isa{"Intermediate1::m"}             = "operation";
+> $isa{"Intermediate3::m"}             = "operation";
+> $isa{"Intermediate4::m"}             = "operation";
+> $isa{"Child1::m"}                    = "operation";
+> $isa{"Child3::m"}                    = "operation";
+> $isa{"Child4::m"}                    = "operation";
+> $isa{"Base1::a"}                     = "attribute";
+> $isa{"Intermediate1::a"}             = "attribute";
+> $isa{"Intermediate3::a"}             = "attribute";
+> $isa{"Intermediate4::a"}             = "attribute";
+> $isa{"Child1::a"}                    = "attribute";
+> $isa{"Child3::a"}                    = "attribute";
+> $isa{"Child4::a"}                    = "attribute";
+52a67,80
+> $got{"Base1::m"}                     = 13;
+> $got{"Intermediate1::m"}             = 13;
+> $got{"Intermediate3::m"}             = 13;
+> $got{"Intermediate4::m"}             = 13;
+> $got{"Child1::m"}                    = 13;
+> $got{"Child3::m"}                    = 13;
+> $got{"Child4::m"}                    = 13;
+> $got{"Base1::a"}                     = 13;
+> $got{"Intermediate1::a"}             = 13;
+> $got{"Intermediate3::a"}             = 13;
+> $got{"Intermediate4::a"}             = 13;
+> $got{"Child1::a"}                    = 13;
+> $got{"Child3::a"}                    = 13;
+> $got{"Child4::a"}                    = 13;
