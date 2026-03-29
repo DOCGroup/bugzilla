@@ -1,0 +1,80 @@
+--- Barrier_Test - orininal.cpp	2011-03-24 13:16:05 +0000
++++ Barrier_Test.cpp	2012-11-13 12:48:41 +0000
+@@ -76,12 +76,40 @@
+   return 0;
+ }
+ 
++struct Multi_Args
++{
++public:
++  Multi_Args(ACE_Barrier *barrier, long i)
++      : barrier_(barrier)
++      , i_(i)
++  {
++  }
++  ACE_Barrier *barrier_;
++  long i_;
++};
++
++static void *
++wait_multi(void *arguments)
++{
++  Multi_Args *arg= (Multi_Args*)arguments;
++  ACE_DEBUG((LM_DEBUG,"Thread (%t) Created to do some work: %d\n", arg->i_));
++
++  //Work
++  
++  //Let the barrier know we are done.
++  ACE_DEBUG((LM_DEBUG,"Thread (%t) is exiting \n"));
++  arg->barrier_->wait();
++  delete arg;
++  return 0;
++}
++
++
+ #endif /* ACE_HAS_THREADS */
+ 
+ int
+ run_main (int, ACE_TCHAR *[])
+ {
+-  ACE_START_TEST (ACE_TEXT ("Barrier_Test"));
++  //ACE_START_TEST (ACE_TEXT ("Barrier_Test"));
+ 
+ #if defined (ACE_HAS_THREADS)
+   int n_threads = ACE_MAX_THREADS;
+@@ -125,11 +153,34 @@
+   shut_barrier.shutdown ();
+   ACE_Thread_Manager::instance ()->wait ();
+ 
++  // Now test ACE_Barrier with multiple threads
++  // with their own parameters.
++
++  // Create barrier for multiple threads.
++  ACE_Barrier multi_barrier(n_threads);
++
++  // Create threads with their parameters.
++  std::auto_ptr<Multi_Args *> array_of_args(new Multi_Args *[n_threads]);
++  for (int i = 0; i != n_threads; i++)
++    array_of_args.get()[i] = new Multi_Args(&multi_barrier, i);
++
++  //Spawn n_threads threads
++  for(int i=0; i<n_threads; i++)
++    if(ACE_Thread::spawn(
++        (ACE_THR_FUNC)wait_multi,
++        (void*)array_of_args.get()[i],
++        THR_DETACHED|THR_NEW_LWP)==-1)
++      ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("%p\n"), ACE_TEXT ("spawn_n")), 1);
++  
++  // Wait for all the other threads to let the main thread
++  // know that they are done using hte barrier
++  multi_barrier.wait();
++
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("test done\n")));
+ #else
+   ACE_ERROR ((LM_INFO,
+               ACE_TEXT ("threads not supported on this platform\n")));
+ #endif /* ACE_HAS_THREADS */
+-  ACE_END_TEST;
++  //ACE_END_TEST;
+   return 0;
+ }
