@@ -1,0 +1,369 @@
+    ACE VERSION: 5.7.0  (the same code and bug are present in 5.7.4 as well)
+
+    HOST MACHINE and OPERATING SYSTEM:
+        Windows XP Pro Version 2002 SP3
+
+    TARGET MACHINE and OPERATING SYSTEM: Same
+    COMPILER NAME AND VERSION (AND PATCHLEVEL): Visual Studio 2008
+     version 9.0.21022.8 RTM, MS .NET Framework 3.5 SP1
+
+    THE $ACE_ROOT/ace/config.h FILE: ace/config-win32.h
+
+
+    BUILD METHOD USED: ace_v9.sln
+
+ 
+    AREA/CLASS/EXAMPLE AFFECTED:
+ACE_Asynch_Write_File with serial port
+The ACE tests pass, but applications using this class fail with serial ports.
+
+
+    SYNOPSIS:
+ACE_Asynch_Write_File doesn't work with serial ports
+under Win32 due to use of ACE_Asynch_Write_Stream::shared_write(),
+which calls WSASend(), which only works with sockets.
+
+    DESCRIPTION:
+When used on Win32 with a serial port device (COM1),
+ACE_Asynch_Write_File::write() calls ACE_Asynch_Write_Stream::shared_write(),
+which in turn calls WSASend(). WSASend, quite reasonably, returns WSAENOTSOCK
+when called with a serial port handle. ACE_Asynch_Read_File::read() is OK.
+
+    REPEAT BY:
+The example code that follows attempts to send and receive serial data
+using ACE_Asynch_Write_File and ACE_Asynch_Read_File. The asynchronous writes
+at line 215 in handle_time_out() print "Y" for success, "N" for failure.
+Tracing the write() call reveals the inappropriate use of WSASend() in
+WIN32_Asynch_IO.cpp. The writes fail.
+
+After patching WIN32_Asynch_IO.cpp per the listed workaround, the example
+works correctly, and can be used as a guide to successful async serial-port
+operation with the Proactor.
+
+//////////////////////////////////////////////////////////////////
+
+// This sample application integrates asynch COM port
+// read/write operations with the Proactor, using an ACE_DEV_Connector,
+// ACE_TTY_IO, ACE_Asynch_Read_File, ACE_Asynch_Write_File in an ACE_Handler.
+// The program sets up asynch read and write on COM1, and sends
+// out 16-character bursts of data at timed intervals. If a loopback
+// connector is plugged into COM1 (pin 2 --> pin 3), the data will come
+// back in on the receive handler and be received by handle_read_stream().
+
+#include <stdio.h>
+#include <tchar.h>
+#include "ace/OS_NS_stdio.h"
+#include "ace/OS_NS_unistd.h"
+#include "ace/OS_NS_errno.h"
+#include "ace/OS_NS_string.h"
+#include "ace/OS_NS_sys_time.h"
+#include "ace/DEV_Connector.h"
+#include "ace/TTY_IO.h"
+#include "ace/Proactor.h"
+#include "ace/Asynch_Connector.h"
+#include "ace/Time_Value.h"
+
+
+// How long are our fake serial I/O frames?
+#define SERIAL_FRAME_SIZE 16
+
+class SerialIOHandler : public ACE_Handler
+{
+public:
+   int Connect(char *pszSerialPortName, ACE_TTY_IO::Serial_Params
+               &sSerialParams);
+
+   // This method will be called when an asynchronous read
+   // completes on a file.
+   virtual void handle_read_file
+      (const ACE_Asynch_Read_File::Result &result);
+
+   // This method will be called when an asynchronous write
+   // completes on a file.
+   virtual void handle_write_file
+      (const ACE_Asynch_Write_File::Result &result);
+
+   // Callback hook invoked by the Proactor's Timer_Queue.
+   virtual void handle_time_out(const ACE_Time_Value &tv, const void *arg);
+
+   // Our I/O objects; they're public so others can access them
+   ACE_Asynch_Read_File reader_;
+   ACE_Asynch_Write_File writer_;
+private:
+   ACE_TTY_IO peer_;
+   ACE_DEV_Connector connector_;
+};
+
+// Fake data buffer for the frames
+char byFramePayload[16] =
+{0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b,
+0x3c, 0x3d, 0x3e, 0x00};
+
+
+//***************************************************************************
+//
+//    Method:          Connect
+//
+//    Description:   Establishes connection, primes read process
+//
+// Inputs:        port name, port parameter block
+//
+// Returns:       none
+//
+//***************************************************************************
+
+int SerialIOHandler::Connect(char *pszSerialPortName,
+                             ACE_TTY_IO::Serial_Params &sSerialPortParams)
+{
+   int nResult = 0;
+  
+   if(connector_.connect(peer_,
+                          ACE_DEV_Addr( pszSerialPortName ),
+                          0, //timeout
+                          ACE_Addr::sap_any,
+                          0, //reuse
+                          O_RDWR | FILE_FLAG_OVERLAPPED) != 0)
+   {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("%p\n"),
+                  ACE_TEXT("SerialIOHandler connect")));
+      nResult = -1;
+   }
+   else // device connected successfully
+   {
+      // Set our I/O handle to that of the peer_ object handling our connection
+      handle(peer_.get_handle());
+
+      if(peer_.control(ACE_TTY_IO::SETPARAMS, &sSerialPortParams) != 0)
+      {
+         ACE_ERROR((LM_ERROR, ACE_TEXT("%p control\n"), pszSerialPortName));
+         nResult = -1;
+      }
+      else
+      {
+         if(writer_.open(*this) != 0 ||
+            reader_.open(*this) != 0)
+         {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("%p\n"),
+                        ACE_TEXT("SerialIOHandler reader or writer open")));
+            nResult = -1;
+         }
+         else // reader and writer opened successfully
+         {
+            // Allocate a new message block and initiate a read operation on it
+            // to prime the asynchronous read pipeline
+            // The message block is sized for the largest message we expect
+            ACE_Message_Block *psMsg;
+            ACE_NEW_NORETURN(psMsg, ACE_Message_Block(SERIAL_FRAME_SIZE));
+            if(reader_.read(*psMsg, psMsg->space()) != 0)
+            {
+               ACE_ERROR((LM_ERROR, ACE_TEXT("%p\n"),
+                           ACE_TEXT("SerialIOHandler begin read")));
+               psMsg->release();
+               nResult = -1;
+            }
+            // If read worked, psMsg is now controlled by Proactor framework.
+         }
+      }
+   }
+   return nResult;
+}
+
+//***************************************************************************
+//
+//    Method:          handle_read_file
+//
+//    Description:   Callback used when a read completes
+//
+// Inputs:        read file result structure containing message block
+//
+// Returns:       none
+//
+//***************************************************************************
+void SerialIOHandler::handle_read_file
+(const ACE_Asynch_Read_File::Result &result)
+{
+   ACE_Message_Block &psMsg = result.message_block();
+   // If the read failed, queue up another one using the same message block
+   if(!result.success() || result.bytes_transferred() == 0)
+   {
+      printf("SerialIOHandler receive timeout.\n");
+      reader_.read(psMsg, psMsg.space());
+   }
+   else
+   {
+      // We have a message block with some read data in it. Send it onward
+      printf("SerialIOHandler received %d bytes of data\n",
+             result.bytes_transferred());
+
+      // TODO: Process this data in some meaningful way
+
+      // Release the message block when we're done with it
+      psMsg.release();
+
+      // Our processing is done; prime the read process again
+      ACE_Message_Block *psNew_mb;
+      ACE_NEW_NORETURN(psNew_mb, ACE_Message_Block(SERIAL_FRAME_SIZE));
+      reader_.read(*psNew_mb, psNew_mb->space());
+   }
+}
+
+//***************************************************************************
+//
+//    Method:          handle_write_file
+//
+//    Description:   Callback used when a write completes
+//
+// Inputs:        write file result structure containing message block
+//
+// Returns:       none
+//
+//***************************************************************************
+void SerialIOHandler::handle_write_file
+(const ACE_Asynch_Write_File::Result &result)
+{
+   // When the write completes, we get the message block. It's been sent,
+   // so we just deallocate it.
+   result.message_block().release();
+}
+
+//***************************************************************************
+//
+//    Method:          handle_time_out
+//
+//    Description:   Hook method called when a timer expires
+//
+// Inputs:        time value, completion token passed to timer at scheduling
+//                The token tells us which timer we're handling
+//
+// Returns:       none
+//
+//***************************************************************************
+void SerialIOHandler::handle_time_out(const ACE_Time_Value &tv,
+                                      const void *act)
+{
+   // In our example, we send a bunch of data every time the timer expires
+   ACE_Message_Block *psNew_mb;
+   ACE_NEW_NORETURN(psNew_mb, ACE_Message_Block(SERIAL_FRAME_SIZE));
+   psNew_mb->copy(byFramePayload,16);
+
+   // queue up a write operation, give visual feedback on  success or failure.
+  if (this->writer_.write(*psNew_mb, psNew_mb->length()) == 0)
+   {
+      printf("Y"); // success
+   }
+   else
+   {
+      printf("N"); // failure
+   }; 
+}
+
+
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+{
+   SerialIOHandler sSerialIOHandler;
+   // declare and initialize the serial port parameters
+   ACE_TTY_IO::Serial_Params sSerialPortParams;
+   sSerialPortParams.baudrate = 115200;
+   sSerialPortParams.xonlim = 0;
+   sSerialPortParams.xofflim = 0;
+   sSerialPortParams.readmincharacters = 0;
+   sSerialPortParams.readtimeoutmsec = 1000; // 1 second
+   sSerialPortParams.paritymode = "none";
+   sSerialPortParams.ctsenb = false;
+   sSerialPortParams.rtsenb = 0;
+   sSerialPortParams.xinenb = false;
+   sSerialPortParams.xoutenb = false;
+   sSerialPortParams.modem = false;
+   sSerialPortParams.rcvenb = true;
+   sSerialPortParams.dsrenb = false;
+   sSerialPortParams.dtrdisable = false;
+   sSerialPortParams.databits = 8;
+   sSerialPortParams.stopbits = 1;
+
+
+   // Initialize the serial port handler  
+
+   if(0 != sSerialIOHandler.Connect("COM1",sSerialPortParams))
+   {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%p\n"),
+                         ACE_TEXT("sSerialIOHandler connect")), 1);
+   };
+
+   printf(" Serial I/O Handler connected.\n");
+
+   // start the repeating timer for data transmission
+
+   ACE_Time_Value sRepeatTime(0,500000); // 0.5 second time interval
+   ACE_Proactor::instance()->schedule_repeating_timer(sSerialIOHandler,
+                                                      (void *)(100),
+                                                      sRepeatTime);
+
+   // Run the Proactor
+   ACE_Proactor::instance()->proactor_run_event_loop();
+
+   return 0;
+};
+//////////////////////////////////////////////////////////////////
+
+
+    SAMPLE FIX/WORKAROUND:
+Replace the call to shared_write() at line 1706 of WIN32_Asynch_IO.cpp
+with the following code to correct the problem (this substitutes
+a WriteFile() call for the WSASend() call):
+
+/* BEGIN SH DEBUG PATCH 20090903
+  int return_val = this->shared_write (result);
+ */
+  // This code adapted from the NON-Winsock2 version of shared_write().
+  int return_val = 0;
+  u_long bytes_written;
+  if (result->bytes_to_write () > MAXDWORD)
+    {
+      errno = ERANGE;
+      return_val = -1;
+    }
+  else
+  {
+     DWORD bytes_to_write = static_cast<DWORD> (result->bytes_to_write ());
+
+     result->set_error (0); // Clear error before starting IO.
+
+     // Initiate the write.
+     int initiate_result = 0;
+     initiate_result = ::WriteFile (result->handle (),
+                                    result->message_block ().rd_ptr (),
+                                    bytes_to_write,
+                                    &bytes_written,
+                                    result);
+     if (initiate_result)
+     // original was (initiate_result == 1), Windows doc just says NONZERO
+     {
+       // Immediate success: the OVERLAPPED will still get queued.
+       return_val = 0;
+     }
+     else
+     {
+        // If initiate failed, check for a bad error.
+        ACE_OS::set_errno_to_last_error ();
+        switch (errno)
+          {
+          case ERROR_IO_PENDING:
+            // The IO will complete proactively: the OVERLAPPED will still
+            // get queued.
+            return_val =  0;
+            break;
+
+          default:
+            // Something else went wrong: the OVERLAPPED will not get
+            // queued.
+
+            if (ACE::debug ())
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("%p\n"),
+                          ACE_TEXT ("Initiating write")));
+               return_val = -1;
+          };// end switch(errno)
+     };// end else initiate_result != 1
+  };// end else result->bytes_to_write () <= MAXDWORD
+//END SH DEBUG PATCH 20090903
+
