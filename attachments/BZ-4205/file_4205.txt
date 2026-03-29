@@ -1,0 +1,20 @@
+diff --git a/ACE/ace/Log_Msg.cpp b/ACE/ace/Log_Msg.cpp
+index df31f6e..bf1a4e8 100644
+--- a/ACE/ace/Log_Msg.cpp
++++ b/ACE/ace/Log_Msg.cpp
+@@ -1147,11 +1147,14 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
+                 case '8':
+                 case '9':
+                 case '.':
+-                case 'L':
+                 case 'h':
+                   *fp++ = *format_str;
+                   done = false;
+                   break;
++                case 'L':
++                  *fp++ = 'l';
++                  done = false;
++                  break;
+ 
+                 case '*':
+                   wp = va_arg (argp, int);
