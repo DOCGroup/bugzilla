@@ -1,0 +1,23 @@
+Index: ciao/Deployment/Handlers/Connection_Handler.cpp
+===================================================================
+--- ciao/Deployment/Handlers/Connection_Handler.cpp	(版本 96670)
++++ ciao/Deployment/Handlers/Connection_Handler.cpp	(工作副本)
+@@ -80,9 +80,15 @@
+                     switch (conn.internalEndpoint[i].kind)
+                       {
+                       case ::Deployment::Facet:
+-                        ref =
+-                          comp->provide_facet (conn.internalEndpoint[i].portName.in ());
+-                        (*out) <<= ref.in ();
++                        if (ACE_OS::strcmp (conn.internalEndpoint[i].portName.in (), "supports") == 0 )
++                          {
++                            (*out) <<= comp;
++                          }
++                        else
++                          {
++                            ref = comp->provide_facet (conn.internalEndpoint[i].portName.in ());
++                            (*out) <<= ref.in ();
++                          }
+                         break;
+ #if !defined (CCM_NOEVENT)
+                       case ::Deployment::EventConsumer:
