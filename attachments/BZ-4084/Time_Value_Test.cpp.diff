@@ -1,0 +1,77 @@
+Index: tests/Time_Value_Test.cpp
+===================================================================
+--- tests/Time_Value_Test.cpp	(revision 96664)
++++ tests/Time_Value_Test.cpp	(working copy)
+@@ -24,6 +24,7 @@
+ #ifdef ACE_HAS_CPP98_IOSTREAMS
+ #include <sstream>
+ #endif
++#include <iostream>
+ 
+ int
+ run_main (int, ACE_TCHAR *[])
+@@ -130,6 +131,64 @@
+                 ACE_TEXT ("set_msec test failed: %d usecs should be 555000\n"),
+                 msec_test3.usec ()));
+ 
++  // Test set(double)
++  // check precision
++  {
++    ACE_Time_Value t;
++    ACE_Time_Value r(0, 1);
++    ACE_Time_Value delta;
++    
++    double d = 1;
++    time_t i = 1;
++    
++    // rounding has to work within these bounds
++    double m = (2L << (DBL_MANT_DIG - 1)) / ACE_ONE_SECOND_IN_USECS;
++    while (d < m) {
++      t.set(d + 0.000001);
++      r.sec(i);
++      r.usec(1);
++      
++      // 32 bit architecture need to leave early, here
++      if (t.sec() == ACE_Numeric_Limits<time_t>::max())
++        break;
++      
++      delta = t - r;
++      
++      if (delta.usec() != 0) {
++        ACE_ERROR ((LM_ERROR,
++                    ACE_TEXT ("set(double) test failed: delta.usec() should be 0, but is %d\n"),
++                    delta.usec ()));
++      }
++      
++      t.set(-d - 0.000001);
++      r.sec(-i);
++      r.usec(-1);
++      
++      delta = t - r;
++      
++      if (delta.usec() != 0) {
++        ACE_ERROR ((LM_ERROR,
++                    ACE_TEXT ("set(-double) test failed: delta.usec() should be 0, but is %d\n"),
++                    delta.usec ()));
++      }
++      
++      d *= 10.;
++      i *= 10;
++    }
++
++    // check for saturation
++    t.set( (double) ACE_Numeric_Limits<time_t>::max() );
++    ACE_TEST_ASSERT(t.sec() ==  ACE_Numeric_Limits<time_t>::max());
++    t.set( (double) ACE_Numeric_Limits<time_t>::max() * 2. );
++    ACE_TEST_ASSERT(t.sec() ==  ACE_Numeric_Limits<time_t>::max());
++    t.set( ((double) ACE_Numeric_Limits<time_t>::min()) );
++    ACE_TEST_ASSERT(t.sec() == ACE_Numeric_Limits<time_t>::min());
++    t.set( (double) ACE_Numeric_Limits<time_t>::min() * 2. );
++    ACE_TEST_ASSERT(t.sec() ==  ACE_Numeric_Limits<time_t>::min());
++  }
++
++
++
+ #ifdef ACE_HAS_CPP98_IOSTREAMS
+   std::ostringstream ost;
+   ost << ACE_Time_Value(1);
