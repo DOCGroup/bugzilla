@@ -1,0 +1,15 @@
+--- ACE+TAO/ACE_wrappers/TAO/tao/DiffServPolicy/DiffServ_Protocols_Hooks.h	2013-09-04 13:52:00.548267565 -0400
++++ ACE+TAO/ACE_wrappers/TAO/tao/DiffServPolicy/DiffServ_Protocols_Hooks.h.orig	2013-09-04 13:51:51.589267589 -0400
+@@ -10,11 +10,11 @@
+  *          Johnny Willemsen <jwillemsen@remedy.nl>
+  */
+ // ===================================================================
+ 
+ #ifndef TAO_DIFFSERV_PROTOCOLS_HOOKS_H
+-#define TAO_DIFFSERV_PROTOCOLS_HOOKS_H
++#define TAO_DIFFSERVT_PROTOCOLS_HOOKS_H
+ 
+ #include /**/ "ace/pre.h"
+ 
+ #include "tao/orbconf.h"
+ 
