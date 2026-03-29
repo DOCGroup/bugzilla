@@ -1,0 +1,15 @@
+--- ACE+TAO/ACE_wrappers/TAO/tao/Strategies/Optimized_Connection_Endpoint_Selector.h	2013-09-04 13:58:59.959267296 -0400
++++ ACE+TAO/ACE_wrappers/TAO/tao/Strategies/Optimized_Connection_Endpoint_Selector.h.orig	2013-09-04 13:58:51.376267286 -0400
+@@ -13,11 +13,11 @@
+  */
+ //=============================================================================
+ 
+ 
+ #ifndef TAO_OPTIMIZED_CONNECTION_ENDPOINT_SELECTOR_H
+-#define TAO_OPTIMIZED_CONNECTION_ENDPOINT_SELECTOR_H
++#define TAO_OPTIMIZED_ENDPOINT_SELECTOR_H
+ 
+ #include /**/ "ace/pre.h"
+ 
+ #include "tao/corbafwd.h"
+ 
