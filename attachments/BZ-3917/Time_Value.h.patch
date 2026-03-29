@@ -1,0 +1,11 @@
+--- Time_Value.h.orig	2010-10-18 10:39:12.000000000 -0400
++++ Time_Value.h	2010-10-18 14:47:11.000000000 -0400
+@@ -194,7 +194,7 @@
+   operator timeval () const;
+ 
+   /// Returns a pointer to the object as a timeval.
+-  operator const timeval *() const;
++  const timeval * get_timeval_p() const;
+ 
+ # if defined (ACE_WIN32)
+   /// Returns the value of the object as a Win32 FILETIME.
