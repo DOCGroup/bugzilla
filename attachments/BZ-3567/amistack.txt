@@ -1,0 +1,131 @@
+request id is on transport 4008
+dispatch_reply is on transport 4180
+        ntdll.dll!7c90eb94()
+        [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+        ntdll.dll!7c90e9c0()
+        ntdll.dll!7c91901b()
+        ACEd.dll!ACE_Utils::Truncator<__int64,long>::operator()(__int64 val=241411500384052212)  Line 426       C++
+        ACEd.dll!ACE_Utils::truncate_cast<long,__int64>(__int64 val=366450921927206188)  Line 509       C++
+        ACEd.dll!ACE_Countdown_Time::stop()  Line 57    C++
+        TAOd.dll!ACE_Lock_Adapter<ACE_Recursive_Thread_Mutex>::acquire()  Line 48       C++
+        TAOd.dll!ACE_Guard<ACE_Lock>::acquire()  Line 12        C++
+        TAOd.dll!ACE_Guard<ACE_Lock>::ACE_Guard<ACE_Lock>(ACE_Lock & l={...})  Line 39  C++
+        TAOd.dll!TAO_Muxed_TMS::request_id()  Line 41   C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke_remote_i(TAO_Stub * stub=0x02ec39c0, TAO_Operation_Details & details={...}, TAO_Pseudo_Var_T<CORBA::Object> & effective_target={...}, ACE_Time_Value * & max_wait_time=0x0515e52c)  Line 257   C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke_i(TAO_Stub * stub=0x02ec39c0, TAO_Operation_Details & details={...})  Line 91  C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke(TAO::Exception_Data * ex_data=0x00000000, unsigned long ex_count=0)  Line 50   C++
+        TAO_Messagingd.dll!TAO::Asynch_Invocation_Adapter::invoke(Messaging::ReplyHandler * reply_handler_ptr=0x02e899bc, void (TAO_InputCDR &, Messaging::ReplyHandler *, unsigned int)* const & reply_handler_stub=0x031a0540)  Line 106      C++
+        GCECorbaServerd.dll!GNSS::MdbFileRemoteI::sendc_WriteFile(GNSS::AMI_MdbFileRemoteIHandler * ami_handler=0x02e89980, int ulActionSeqId=21, const GNSS::MdbFileRemoteI::ByteBuffer & soBuffer={...})  Line 683    C++
+        GCECorbaServerd.dll!GSC::WriteActionC::Send(GNSS::AMI_MdbFileRemoteIHandler * poReplyHandler=0x02e89980, GNSS::MdbFileRemoteI * poStub=0x02ec31c0)  Line 662    C++
+        GCECorbaServerd.dll!GSC::MdbFileProxyC::SendAction(BSS::UTI::SmartPointerC<GSC::CacheEntryC> spCacheEntry={...})  Line 142      C++
+        GCECorbaServerd.dll!GSC::MdbFileProxyC::SendNextActions()  Line 107     C++
+>       GCECorbaServerd.dll!GSC::MdbFileProxyC::WriteFile(int ami_return_val=19)  Line 411      C++
+        GCECorbaServerd.dll!POA_GNSS::WriteFile_AMI_MdbFileRemoteIHandler::execute()  Line 2303 C++
+        TAO_PortableServerd.dll!TAO::Upcall_Wrapper::upcall(TAO_ServerRequest & server_request={...}, TAO::Argument * const * args=0x0515e90c, unsigned int nargs=2, TAO::Upcall_Command & command={...})  Line 113     C++
+        GCECorbaServerd.dll!POA_GNSS::AMI_MdbFileRemoteIHandler::WriteFile_skel(TAO_ServerRequest & server_request={...}, void * __formal=0x0515ea1c, void * servant=0x0340b6c0)  Line 2356     C++
+        TAO_PortableServerd.dll!TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest & req={...}, void * servant_upcall=0x0515ea1c, void * derived_this=0x0340b6c0)  Line 223 C++
+        GCECorbaServerd.dll!POA_GNSS::AMI_MdbFileRemoteIHandler::_dispatch(TAO_ServerRequest & req={...}, void * servant_upcall=0x0515ea1c)  Line 3015  C++
+        TAO_PortableServerd.dll!TAO_Object_Adapter::do_dispatch(TAO_ServerRequest & req={...}, TAO::Portable_Server::Servant_Upcall & upcall={...})  Line 1220  C++
+        TAO_PortableServerd.dll!TAO_Object_Adapter::dispatch_servant(const TAO::ObjectKey & key={...}, TAO_ServerRequest & req={...}, TAO_Pseudo_Out_T<CORBA::Object> forward_to={...})  Line 374       C++
+        TAO_PortableServerd.dll!TAO_Object_Adapter::dispatch(TAO::ObjectKey & key={...}, TAO_ServerRequest & request={...}, TAO_Pseudo_Out_T<CORBA::Object> forward_to={...})  Line 787 C++
+        TAOd.dll!TAO_Adapter_Registry::dispatch(TAO::ObjectKey & key={...}, TAO_ServerRequest & request={...}, TAO_Pseudo_Out_T<CORBA::Object> forward_to={...})  Line 114      C++
+        TAOd.dll!TAO_Request_Dispatcher::dispatch(TAO_ORB_Core * orb_core=0x02db5508, TAO_ServerRequest & request={...}, TAO_Pseudo_Out_T<CORBA::Object> forward_to={...})  Line 26     C++
+        TAOd.dll!TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker * cpb=0x0000dead, TAO::Collocation_Strategy strat=TAO_CS_THRU_POA_STRATEGY)  Line 79  C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub * stub=0x02e8a350, TAO_Operation_Details & details={...}, TAO_Pseudo_Var_T<CORBA::Object> & effective_target={...}, TAO::Collocation_Strategy strat=TAO_CS_THRU_POA_STRATEGY)  Line 167  C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke_i(TAO_Stub * stub=0x02e8a350, TAO_Operation_Details & details={...})  Line 104 C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke(TAO::Exception_Data * ex_data=0x00000000, unsigned long ex_count=0)  Line 50   C++
+        GCECorbaServerd.dll!GNSS::AMI_MdbFileRemoteIHandler::WriteFile(int ami_return_val=19)  Line 1506        C++
+        GCECorbaServerd.dll!GNSS::AMI_MdbFileRemoteIHandler::WriteFile_reply_stub(TAO_InputCDR & _tao_in={...}, Messaging::ReplyHandler * _tao_reply_handler=0x02e899bc, unsigned int reply_status=0)  Line 1535        C++
+        TAO_Messagingd.dll!TAO_Asynch_Reply_Dispatcher::dispatch_reply(TAO_Pluggable_Reply_Params & params={...})  Line 132     C++
+        TAOd.dll!TAO_Muxed_TMS::dispatch_reply(TAO_Pluggable_Reply_Params & params={...})  Line 143     C++
+        TAOd.dll!TAO_GIOP_Message_Base::process_reply_message(TAO_Pluggable_Reply_Params & params={...}, TAO_Queued_Data * qd=0x0515f5fc)  Line 747     C++
+        TAOd.dll!TAO_Transport::process_parsed_messages(TAO_Queued_Data * qd=0x0515f5fc, TAO_Resume_Handle & rh={...})  Line 2413       C++
+        TAOd.dll!TAO_Transport::handle_input_parse_data(TAO_Resume_Handle & rh={...}, ACE_Time_Value * max_wait_time=0x00000000)  Line 2321     C++
+        TAOd.dll!TAO_Transport::handle_input(TAO_Resume_Handle & rh={...}, ACE_Time_Value * max_wait_time=0x00000000)  Line 1654        C++
+        TAOd.dll!TAO_Connection_Handler::handle_input_internal(void * h=0x00001054, ACE_Event_Handler * eh=0x02ec4a00)  Line 274        C++
+        TAOd.dll!TAO_Connection_Handler::handle_input_eh(void * h=0x00001054, ACE_Event_Handler * eh=0x02ec4a00)  Line 233      C++
+        TAOd.dll!TAO_IIOP_Connection_Handler::handle_input(void * h=0x00001054)  Line 388       C++
+        ACEd.dll!ACE_TP_Reactor::dispatch_socket_event(ACE_EH_Dispatch_Info & dispatch_info={...})  Line 575    C++
+        ACEd.dll!ACE_TP_Reactor::handle_socket_events(int & event_count=0, ACE_TP_Token_Guard & guard={...})  Line 445  C++
+        ACEd.dll!ACE_TP_Reactor::dispatch_i(ACE_Time_Value * max_wait_time=0x0515fe64, ACE_TP_Token_Guard & guard={...})  Line 244      C++
+        ACEd.dll!ACE_TP_Reactor::handle_events(ACE_Time_Value * max_wait_time=0x0515fe64)  Line 173     C++
+        ACEd.dll!ACE_Reactor::handle_events(ACE_Time_Value * max_wait_time=0x0515fe64)  Line 188        C++
+        TAOd.dll!TAO_ORB_Core::run(ACE_Time_Value * tv=0x0515fe64, int perform_work=0)  Line 2190       C++
+        TAOd.dll!CORBA::ORB::run(ACE_Time_Value * tv=0x0515fe64)  Line 195      C++
+        TAOd.dll!CORBA::ORB::run(ACE_Time_Value & tv={...})  Line 187   C++
+        GCECorbaServerd.dll!ORB::OrbC::svc()  Line 778  C++
+        ACEd.dll!ACE_Task_Base::svc_run(void * args=0x0340b0fc)  Line 275       C++
+        ACEd.dll!ACE_Thread_Adapter::invoke_i()  Line 149       C++
+        ACEd.dll!ACE_Thread_Adapter::invoke()  Line 98  C++
+        ACEd.dll!ace_thread_adapter(void * args=0x02e4c260)  Line 124   C++
+        msvcr80d.dll!_callthreadstartex()  Line 348     C
+        msvcr80d.dll!_threadstartex(void * ptd=0x02e4dbd0)  Line 331    C
+        kernel32.dll!7c80b683()
+        ntdll.dll!7c949d18()
+
+
+dispatch_reply is one transport 4008
+request_id is on transport 4180
+        ntdll.dll!7c90eb94()
+        [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+        ntdll.dll!7c90e9c0()
+        ntdll.dll!7c91901b()
+>       ACEd.dll!ACE_Utils::Truncator<__int64,long>::operator()(__int64 val=241411500385102136)  Line 426       C++
+        ACEd.dll!ACE_Utils::truncate_cast<long,__int64>(__int64 val=370960311171541616)  Line 509       C++
+        ACEd.dll!ACE_Countdown_Time::stop()  Line 57    C++
+        TAOd.dll!ACE_Lock_Adapter<ACE_Recursive_Thread_Mutex>::acquire()  Line 48       C++
+        TAOd.dll!ACE_Guard<ACE_Lock>::acquire()  Line 12        C++
+        TAOd.dll!ACE_Guard<ACE_Lock>::ACE_Guard<ACE_Lock>(ACE_Lock & l={...})  Line 39  C++
+        TAOd.dll!TAO_Muxed_TMS::request_id()  Line 41   C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke_remote_i(TAO_Stub * stub=0x02ec39c0, TAO_Operation_Details & details={...}, TAO_Pseudo_Var_T<CORBA::Object> & effective_target={...}, ACE_Time_Value * & max_wait_time=0x0525ea70)  Line 257   C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke_i(TAO_Stub * stub=0x02ec39c0, TAO_Operation_Details & details={...})  Line 91  C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke(TAO::Exception_Data * ex_data=0x00000000, unsigned long ex_count=0)  Line 50   C++
+        TAO_Messagingd.dll!TAO::Asynch_Invocation_Adapter::invoke(Messaging::ReplyHandler * reply_handler_ptr=0x02e899bc, void (TAO_InputCDR &, Messaging::ReplyHandler *, unsigned int)* const & reply_handler_stub=0x031a0540)  Line 106      C++
+        GCECorbaServerd.dll!GNSS::MdbFileRemoteI::sendc_WriteFile(GNSS::AMI_MdbFileRemoteIHandler * ami_handler=0x02e89980, int ulActionSeqId=22, const GNSS::MdbFileRemoteI::ByteBuffer & soBuffer={...})  Line 683    C++
+        GCECorbaServerd.dll!GSC::WriteActionC::Send(GNSS::AMI_MdbFileRemoteIHandler * poReplyHandler=0x02e89980, GNSS::MdbFileRemoteI * poStub=0x02ec31c0)  Line 662    C++
+        GCECorbaServerd.dll!GSC::MdbFileProxyC::SendAction(BSS::UTI::SmartPointerC<GSC::CacheEntryC> spCacheEntry={...})  Line 142      C++
+        GCECorbaServerd.dll!GSC::MdbFileProxyC::SendNextActions()  Line 107     C++
+        GCECorbaServerd.dll!GSC::MdbFileProxyC::WriteFile(int ami_return_val=14)  Line 411      C++
+        GCECorbaServerd.dll!POA_GNSS::WriteFile_AMI_MdbFileRemoteIHandler::execute()  Line 2303 C++
+        TAO_PortableServerd.dll!TAO::Upcall_Wrapper::upcall(TAO_ServerRequest & server_request={...}, TAO::Argument * const * args=0x0525ee50, unsigned int nargs=2, TAO::Upcall_Command & command={...})  Line 113     C++
+        GCECorbaServerd.dll!POA_GNSS::AMI_MdbFileRemoteIHandler::WriteFile_skel(TAO_ServerRequest & server_request={...}, void * __formal=0x0525ef60, void * servant=0x0340b6c0)  Line 2356     C++
+        TAO_PortableServerd.dll!TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest & req={...}, void * servant_upcall=0x0525ef60, void * derived_this=0x0340b6c0)  Line 223 C++
+        GCECorbaServerd.dll!POA_GNSS::AMI_MdbFileRemoteIHandler::_dispatch(TAO_ServerRequest & req={...}, void * servant_upcall=0x0525ef60)  Line 3015  C++
+        TAO_PortableServerd.dll!TAO_Object_Adapter::do_dispatch(TAO_ServerRequest & req={...}, TAO::Portable_Server::Servant_Upcall & upcall={...})  Line 1220  C++
+        TAO_PortableServerd.dll!TAO_Object_Adapter::dispatch_servant(const TAO::ObjectKey & key={...}, TAO_ServerRequest & req={...}, TAO_Pseudo_Out_T<CORBA::Object> forward_to={...})  Line 374       C++
+        TAO_PortableServerd.dll!TAO_Object_Adapter::dispatch(TAO::ObjectKey & key={...}, TAO_ServerRequest & request={...}, TAO_Pseudo_Out_T<CORBA::Object> forward_to={...})  Line 787 C++
+        TAOd.dll!TAO_Adapter_Registry::dispatch(TAO::ObjectKey & key={...}, TAO_ServerRequest & request={...}, TAO_Pseudo_Out_T<CORBA::Object> forward_to={...})  Line 114      C++
+        TAOd.dll!TAO_Request_Dispatcher::dispatch(TAO_ORB_Core * orb_core=0x02db5508, TAO_ServerRequest & request={...}, TAO_Pseudo_Out_T<CORBA::Object> forward_to={...})  Line 26     C++
+        TAOd.dll!TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker * cpb=0x0000dead, TAO::Collocation_Strategy strat=TAO_CS_THRU_POA_STRATEGY)  Line 79  C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub * stub=0x02e8a350, TAO_Operation_Details & details={...}, TAO_Pseudo_Var_T<CORBA::Object> & effective_target={...}, TAO::Collocation_Strategy strat=TAO_CS_THRU_POA_STRATEGY)  Line 167  C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke_i(TAO_Stub * stub=0x02e8a350, TAO_Operation_Details & details={...})  Line 104 C++
+        TAOd.dll!TAO::Invocation_Adapter::invoke(TAO::Exception_Data * ex_data=0x00000000, unsigned long ex_count=0)  Line 50   C++
+        GCECorbaServerd.dll!GNSS::AMI_MdbFileRemoteIHandler::WriteFile(int ami_return_val=14)  Line 1506        C++
+        GCECorbaServerd.dll!GNSS::AMI_MdbFileRemoteIHandler::WriteFile_reply_stub(TAO_InputCDR & _tao_in={...}, Messaging::ReplyHandler * _tao_reply_handler=0x02e899bc, unsigned int reply_status=0)  Line 1535        C++
+        TAO_Messagingd.dll!TAO_Asynch_Reply_Dispatcher::dispatch_reply(TAO_Pluggable_Reply_Params & params={...})  Line 132     C++
+T        TAOd.dll!TAO_Muxed_TMS::dispatch_reply(TAO_Pluggable_Reply_Params & params={...})  Line 143
+        TAOd.dll!TAO_GIOP_Message_Base::process_reply_message(TAO_Pluggable_Reply_Params & params={...}, TAO_Queued_Data * qd=0x02e5fde8)  Line 747     C++
+        TAOd.dll!TAO_Transport::process_parsed_messages(TAO_Queued_Data * qd=0x02e5fde8, TAO_Resume_Handle & rh={...})  Line 2413       C++
+        TAOd.dll!TAO_Transport::process_queue_head(TAO_Resume_Handle & rh={...})  Line 2531     C++
+        TAOd.dll!TAO_Transport::handle_input(TAO_Resume_Handle & rh={...}, ACE_Time_Value * max_wait_time=0x00000000)  Line 1608        C++
+        TAOd.dll!TAO_Connection_Handler::handle_input_internal(void * h=0xffffffff, ACE_Event_Handler * eh=0x02edd260)  Line 274        C++
+        TAOd.dll!TAO_Connection_Handler::handle_input_eh(void * h=0xffffffff, ACE_Event_Handler * eh=0x02edd260)  Line 233      C++
+        TAOd.dll!TAO_IIOP_Connection_Handler::handle_input(void * h=0xffffffff)  Line 388       C++
+        ACEd.dll!ACE_Select_Reactor_Notify::dispatch_notify(ACE_Notification_Buffer & buffer={...})  Line 837   C++
+        ACEd.dll!ACE_TP_Reactor::handle_notify_events(int & __formal=2, ACE_TP_Token_Guard & guard={...})  Line 381     C++
+        ACEd.dll!ACE_TP_Reactor::dispatch_i(ACE_Time_Value * max_wait_time=0x0525fe70, ACE_TP_Token_Guard & guard={...})  Line 233      C++
+        ACEd.dll!ACE_TP_Reactor::handle_events(ACE_Time_Value * max_wait_time=0x0525fe70)  Line 173     C++
+        ACEd.dll!ACE_Reactor::handle_events(ACE_Time_Value * max_wait_time=0x0525fe70)  Line 188        C++
+        TAOd.dll!TAO_ORB_Core::run(ACE_Time_Value * tv=0x0525fe70, int perform_work=0)  Line 2190       C++
+        TAOd.dll!CORBA::ORB::run(ACE_Time_Value * tv=0x0525fe70)  Line 195      C++
+        TAOd.dll!CORBA::ORB::run(ACE_Time_Value & tv={...})  Line 187   C++
+        GCECorbaServerd.dll!ORB::OrbWorkerThread::svc()  Line 865       C++
+        ACEd.dll!ACE_Task_Base::svc_run(void * args=0x0340b14c)  Line 275       C++
+        ACEd.dll!ACE_Thread_Adapter::invoke_i()  Line 149       C++
+        ACEd.dll!ACE_Thread_Adapter::invoke()  Line 98  C++
+        ACEd.dll!ace_thread_adapter(void * args=0x02e4c3b0)  Line 124   C++
+        msvcr80d.dll!_callthreadstartex()  Line 348     C
+        msvcr80d.dll!_threadstartex(void * ptd=0x02e4f0b0)  Line 331    C
+        kernel32.dll!7c80b683()
+        ntdll.dll!7c949d18()
+
