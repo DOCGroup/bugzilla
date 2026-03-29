@@ -1,0 +1,72 @@
+Index: AbstractBase.h
+===================================================================
+--- AbstractBase.h	(revision 91180)
++++ AbstractBase.h	(working copy)
+@@ -145,6 +145,9 @@
+ 
+   private:
+ 
++    /// Number of outstanding references to this object.
++    TAO_Configurable_Refcount refcount_;
++
+     TAO_Stub *concrete_stubobj_;
+     CORBA::Boolean is_collocated_;
+     TAO_Abstract_ServantBase *servant_;
+Index: AbstractBase.cpp
+===================================================================
+--- AbstractBase.cpp	(revision 91180)
++++ AbstractBase.cpp	(working copy)
+@@ -61,6 +61,10 @@
+   if (rhs.concrete_stubobj_ != 0)
+     {
+       rhs.concrete_stubobj_->_incr_refcnt ();
++
++      this->refcount_ =
++        this->concrete_stubobj_->orb_core ()->
++          resource_factory ()->create_corba_object_refcount ();
+     }
+ 
+   if (!CORBA::is_nil (rhs.equivalent_obj_.in ()))
+@@ -88,16 +92,14 @@
+ 
+       this->equivalent_obj_ =
+         stub->orb_core ()->create_object (stub);
++
++      this->refcount_ =
++        stub->orb_core ()->resource_factory ()->create_corba_object_refcount ();
+     }
+-
+ }
+ 
+ CORBA::AbstractBase::~AbstractBase (void)
+ {
+-  if (this->concrete_stubobj_ != 0)
+-    {
+-      this->concrete_stubobj_->_decr_refcnt ();
+-    }
+ }
+ 
+ CORBA::AbstractBase_ptr
+@@ -116,17 +118,19 @@
+   return obj;
+ }
+ 
+-// These are non-pure virtual no-ops so we can instantiate the
+-// class in the CDR extraction operator. The actual management
+-// of the refcount will always be done in the derived class.
+ void
+ CORBA::AbstractBase::_add_ref (void)
+ {
++  this->refcount_.increment ();
+ }
+ 
+ void
+ CORBA::AbstractBase::_remove_ref (void)
+ {
++  if (this->refcount_.decrement () != 0)
++    return;
++
++  delete this;
+ }
+ 
+ void
