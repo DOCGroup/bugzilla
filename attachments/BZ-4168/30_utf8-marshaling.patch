@@ -1,0 +1,67 @@
+Porposed fix for:
+ http://bugzilla.dre.vanderbilt.edu/show_bug.cgi?id=4168
+diff -ru ACE_wrappers/TAO/tao/CDR.cpp ACE_wrappers.patched/TAO/tao/CDR.cpp
+--- ACE_wrappers/TAO/tao/Codeset/UTF8_Latin1_Translator.cpp	2008-11-28 06:09:38.000000000 -0500
++++ ACE_wrappers.patched/TAO/tao/Codeset/UTF8_Latin1_Translator.cpp	2014-05-29 17:59:16.842220092 -0400
+@@ -105,6 +105,7 @@
+       if (incr > 0)
+         return 1;
+       delete [] x;
++      errno = ERANGE;
+     }
+   else if (len == 0)
+     {
+diff -ru ACE_wrappers/TAO/tao/DynamicInterface/DII_Arguments_Converter_Impl.cpp ACE_wrappers.patched/TAO/tao/DynamicInterface/DII_Arguments_Converter_Impl.cpp
+--- ACE_wrappers/TAO/tao/DynamicInterface/DII_Arguments_Converter_Impl.cpp	2010-09-13 14:13:11.000000000 -0400
++++ ACE_wrappers.patched/TAO/tao/DynamicInterface/DII_Arguments_Converter_Impl.cpp	2014-05-29 15:40:34.226415231 -0400
+@@ -98,7 +98,7 @@
+     {
+       if (!(args[j]->marshal (output)))
+         {
+-          TAO_OutputCDR::throw_skel_exception (errno);
++          TAO_OutputCDR::throw_skel_exception (errno ? errno : EPROTO);
+         }
+     }
+   TAO_InputCDR input (output);
+diff -ru ACE_wrappers/TAO/tao/Messaging/AMI_Arguments_Converter_Impl.cpp ACE_wrappers.patched/TAO/tao/Messaging/AMI_Arguments_Converter_Impl.cpp
+--- ACE_wrappers/TAO/tao/Messaging/AMI_Arguments_Converter_Impl.cpp	2010-09-13 14:13:11.000000000 -0400
++++ ACE_wrappers.patched/TAO/tao/Messaging/AMI_Arguments_Converter_Impl.cpp	2014-05-29 15:40:40.974388178 -0400
+@@ -30,7 +30,7 @@
+     {
+       if (!(args[j]->demarshal (input)))
+         {
+-          TAO_InputCDR::throw_skel_exception (errno);
++          TAO_InputCDR::throw_skel_exception (errno ? errno : EPROTO);
+         }
+     }
+ 
+@@ -70,7 +70,7 @@
+         {
+           if (!(args[j]->marshal (output)))
+             {
+-              TAO_OutputCDR::throw_skel_exception (errno);
++              TAO_OutputCDR::throw_skel_exception (errno ? errno : EPROTO);
+             }
+         }
+       TAO_InputCDR input (output);
+diff -ru ACE_wrappers/TAO/tao/PortableServer/Upcall_Wrapper.cpp ACE_wrappers.patched/TAO/tao/PortableServer/Upcall_Wrapper.cpp
+--- ACE_wrappers/TAO/tao/PortableServer/Upcall_Wrapper.cpp	2011-11-17 05:11:20.000000000 -0500
++++ ACE_wrappers.patched/TAO/tao/PortableServer/Upcall_Wrapper.cpp	2014-05-29 16:08:09.851983795 -0400
+@@ -233,7 +233,7 @@
+       {
+         if (!(*i)->demarshal (cdr))
+           {
+-            TAO_InputCDR::throw_skel_exception (errno);
++            TAO_InputCDR::throw_skel_exception (errno ? errno : EPROTO);
+           }
+       }
+ 
+@@ -259,7 +259,7 @@
+       {
+         if (!(*i)->marshal (cdr))
+           {
+-            TAO_OutputCDR::throw_skel_exception (errno);
++            TAO_OutputCDR::throw_skel_exception (errno ? errno : EPROTO);
+           }
+       }
+ 
