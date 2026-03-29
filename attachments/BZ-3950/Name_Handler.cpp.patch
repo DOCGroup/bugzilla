@@ -1,0 +1,212 @@
+10d9
+< #include "ace/CDR_Stream.h"
+164,165c163
+< 
+<   // set corresponding reply values
+---
+>   void *buf;
+169,170c167,168
+<   // ensure correct internal length
+<   this->name_reply_.init();
+---
+>   this->name_reply_.init ();
+>   int len = this->name_reply_.encode (buf);
+172,180c170,171
+<   ACE_OutputCDR out(
+<       ACE_CDR::MAX_ALIGNMENT 
+<       + 4 // for storing the byte order
+<       + this->name_reply_.length() // length created by init()
+<     );
+< 
+<   // write out stream
+<   out << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER);
+<   out << this->name_reply_;
+---
+>   if (len == -1)
+>     return -1;
+182,183c173
+<   // send reply message
+<   ssize_t n = this->peer ().send (out.begin()->rd_ptr(), out.length());
+---
+>   ssize_t n = this->peer ().send (buf, len);
+185,186c175
+<   if (n != ssize_t(out.length()))
+<   {
+---
+>   if (n != len)
+190c179
+<                        out.length(),
+---
+>                        len,
+193c182
+<   } else {
+---
+>   else
+195d183
+<   }
+201a190,191
+>   void *buffer;
+>   ssize_t length = request.encode (buffer);
+203c193,198
+<   ACE_OutputCDR header(ACE_CDR::MAX_ALIGNMENT + 8);
+---
+>   if (length == -1)
+>     ACE_ERROR_RETURN ((LM_ERROR,
+>                        ACE_TEXT ("%p\n"),
+>                        ACE_TEXT ("encode failed")),
+>                       -1);
+>   // Transmit request via a blocking send.
+205,222c200
+<   // ensure enough buffer size (to prevent internal resize)
+<   ACE_OutputCDR payload(request.length() + ACE_CDR::DEFAULT_BUFSIZE);
+<   payload << request;
+< 
+<   ACE_CDR::ULong p_size = payload.length();
+< 
+<   header << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER);
+<   header << p_size;
+< 
+<   iovec iov[2];
+<   iov[0].iov_base = header.begin ()->rd_ptr ();
+<   iov[0].iov_len  = 8;
+<   iov[1].iov_base = payload.begin ()->rd_ptr ();
+<   iov[1].iov_len  = p_size;
+< 
+<   // send message vector
+<   if (this->peer_.sendv_n (iov, 2) == -1)
+<   {
+---
+>   if (this->peer ().send_n (buffer, length) != length)
+227,228d204
+<   }
+< 
+286,303c262,266
+< 
+<   ACE_Message_Block *header = 0;
+<   ACE_CDR::Boolean byte_order;
+< 
+<   //create new MessageBlock for header data
+<   ACE_NEW_RETURN (header,
+<     ACE_Message_Block (ACE_DEFAULT_CDR_BUFSIZE),
+<     -1);
+< 
+<   //set pointer under auto_ptr control
+<   auto_ptr <ACE_Message_Block> header_ap (header);
+< 
+<   // Align the Message Block for a CDR stream
+<   ACE_CDR::mb_align (header_ap.get());
+< 
+<   // receive header data from peer-stream
+<   ssize_t n = this->peer_.recv (header_ap->wr_ptr(), 8);
+< 
+---
+>   // Read the first 4 bytes to get the length of the message This
+>   // implementation assumes that the first 4 bytes are the length of
+>   // the message.
+>   ssize_t n = this->peer ().recv ((void *) &this->name_request_,
+>                                   sizeof (ACE_UINT32));
+307c270
+<       // FALLTHROUGH
+---
+>       /* FALLTHROUGH */
+309c272
+<                   ACE_TEXT ("****************** recv_reply returned -1\n")));
+---
+>                   ACE_TEXT ("****************** recv_request returned -1\n")));
+315,316c278,279
+<                   8));
+<       // FALLTHROUGH
+---
+>                   sizeof (ACE_UINT32)));
+>       /* FALLTHROUGH */
+318c281,282
+<       // We've shutdown unexpectedly
+---
+>       // We've shutdown unexpectedly, let's abandon the connection.
+>       this->abandon ();
+320,321c284,285
+<       // NOTREACHED
+<     case 8:
+---
+>       /* NOTREACHED */
+>     case sizeof (ACE_UINT32):
+323,334c287,288
+<         header_ap->wr_ptr (8);
+< 
+<         // Create a CDR stream to parse the header.
+<         ACE_InputCDR header_cdr (header_ap.get());
+< 
+<         // Extract the byte-order and use helper methods to disambiguate
+<         // octet, booleans, and chars.
+<         header_cdr >> ACE_InputCDR::to_boolean (byte_order);
+<         header_cdr.reset_byte_order (byte_order);
+< 
+<         ACE_CDR::ULong payload_size;
+<         header_cdr >> payload_size;
+---
+>         // Transform the length into host byte order.
+>         ssize_t length = ACE_NTOHL (this->name_request_.length ());
+337c291
+<         if (payload_size > (ssize_t) sizeof this->name_request_)
+---
+>         if (length > (ssize_t) sizeof this->name_request_)
+341c295
+<                         payload_size));
+---
+>                         length));
+345,350d298
+<         ACE_Message_Block *payload;
+<         ACE_NEW_RETURN(payload, ACE_Message_Block(payload_size), -1);
+<         auto_ptr <ACE_Message_Block> payload_ap(payload);
+< 
+<         ACE_CDR::mb_align(payload);
+< 
+353,354c301,303
+<         n = this->peer_.recv (payload_ap.get()->wr_ptr(),
+<                               payload_size);
+---
+>         n = this->peer ().recv ((void *) (((char *) &this->name_request_)
+>                                         + sizeof (ACE_UINT32)),
+>                                 length - sizeof (ACE_UINT32));
+357,368c306,320
+<         if (n != ssize_t(payload_size))
+<         {
+<           ACE_ERROR ((LM_ERROR, ACE_TEXT ("%p expected %d, got %d\n"),
+<              ACE_TEXT ("invalid length"), payload_size, n));
+<           return this->abandon ();
+<         }
+< 
+<         payload->wr_ptr(payload_size);
+<         // get payload with correct byte order
+<         ACE_InputCDR payload_cdr(payload, byte_order);
+<         // extract reply object
+<         payload_cdr >> this->name_request_;
+---
+>         if (n != (length - (ssize_t) sizeof (ACE_UINT32)))
+>           {
+>             ACE_ERROR ((LM_ERROR, ACE_TEXT ("%p expected %d, got %d\n"),
+>                        ACE_TEXT ("invalid length"), length, n));
+>             return this->abandon ();
+>           }
+> 
+>         // Decode the request into host byte order.
+>         if (this->name_request_.decode () == -1)
+>           {
+>             ACE_ERROR ((LM_ERROR,
+>                         ACE_TEXT ("%p\n"),
+>                         ACE_TEXT ("decode failed")));
+>             return this->abandon ();
+>           }
+411,414d362
+< 
+<   ACE_CString type(this->name_request_.type(), 
+<      this->name_request_.type_len());
+< 
+424c372
+<                                                   type.c_str());
+---
+>                                                   this->name_request_.type ());
+434c382
+<                                                     type.c_str());
+---
+>                                                     this->name_request_.type ());
