@@ -1,0 +1,19 @@
+--- D:\ACE\Middleware-ACE\Middleware-ACE\ACE\tests\Dynamic_Priority_Test.cpp	Thu Mar 24 20:16:06 2011
++++ D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\tests\Dynamic_Priority_Test.cpp	Mon Mar 26 12:43:02 2012
+@@ -50,4 +50,5 @@
+ #include "ace/High_Res_Timer.h"
+ #include "ace/Sched_Params.h"
++#include "ace/OS_NS_string.h"
+ 
+ #if defined (VXWORKS)
+@@ -741,4 +742,10 @@
+                   send_order,
+                   deadline_receipt_order);
++  // Test flush method
++  test_queue->enqueue_tail(new ACE_Message_Block(128));
++  test_queue->enqueue_tail(new ACE_Message_Block(128));
++  test_queue->flush();
++  // This call should produce GPF, if flush_i not fixed
++  test_queue->enqueue_tail(new ACE_Message_Block(128));
+   delete test_queue;
+ 
