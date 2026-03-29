@@ -1,0 +1,40 @@
+Index: TAO/tao/SystemException.cpp
+===================================================================
+--- TAO/tao/SystemException.cpp	(revision 48)
++++ TAO/tao/SystemException.cpp	(working copy)
+@@ -238,7 +238,7 @@
+ 
+   ACE_CString info = "system exception, ID '";
+   info += this->_rep_id ();
+-  info += "'\n";
++  info += "'; ";
+ 
+   CORBA::ULong const VMCID = this->minor () & 0xFFFFF000u;
+ 
+@@ -395,7 +395,7 @@
+       ACE_OS::sprintf (buffer,
+                        "TAO exception, "
+                        "minor code = %x (%s; %s), "
+-                       "completed = %s\n",
++                       "completed = %s; ",
+                        minor_code,
+                        location,
+                        errno_indication,
+@@ -424,7 +424,7 @@
+       ACE_OS::sprintf (buffer,
+                        "OMG minor code (%d), "
+                        "described as '%s', "
+-                       "completed = %s\n",
++                       "completed = %s; ",
+                        minor_code,
+                        minor_description,
+                        (completed () == CORBA::COMPLETED_YES) ? "YES" :
+@@ -439,7 +439,7 @@
+       char buffer[BUFSIZ];
+       ACE_OS::sprintf (buffer,
+                        "Unknown vendor minor code id (%x), "
+-                       "minor code = %x, completed = %s\n",
++                       "minor code = %x, completed = %s; ",
+                        VMCID,
+                        this->minor (),  // Use the raw minor code
+                        (completed () == CORBA::COMPLETED_YES) ? "YES" :
