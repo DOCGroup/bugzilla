@@ -1,0 +1,41 @@
+megaman:/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello > make
+make[1]: Entering directory `/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello'
+touch .depend.Hello_Idl
+make[1]: Leaving directory `/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello'
+make[1]: Entering directory `/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello'
+
+GNUmakefile: /opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello/GNUmakefile.Hello_Idl MAKEFLAGS=w
+
+../../../bin/tao_idl -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h -I../.. -Sa -St -Sp Test.idl
+make[1]: Leaving directory `/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello'
+make[1]: Entering directory `/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello'
+touch .depend.Hello_Client
+make[1]: Leaving directory `/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello'
+make[1]: Entering directory `/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello'
+
+GNUmakefile: /opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello/GNUmakefile.Hello_Client MAKEFLAGS=w
+
+g++ -W -Wall -Wpointer-arith -m32  -O3 -pipe -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE -DACE_HAS_CUSTOM_EXPORT_MACROS=0  -DNDEBUG  -I/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers -DACE_NDEBUG -DACE_USE_RCSID=0 -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I../../.. -I../.. -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS  -c  -o .obj/client.o client.cpp
+g++ -W -Wall -Wpointer-arith -m32  -O3 -pipe -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE -DACE_HAS_CUSTOM_EXPORT_MACROS=0  -DNDEBUG  -I/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers -DACE_NDEBUG -DACE_USE_RCSID=0 -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I../../.. -I../.. -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS  -c  -o .obj/TestC.o TestC.cpp
+g++ -W -Wall -Wpointer-arith -m32  -O3 -pipe -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE -DACE_HAS_CUSTOM_EXPORT_MACROS=0  -DNDEBUG  -I/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers -DACE_NDEBUG -DACE_USE_RCSID=0 -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I../../.. -I../.. -DACE_AS_STATIC_LIBS -DTAO_AS_STATIC_LIBS  -Xlinker -M -Xlinker -Map -Xlinker \client.map -m32 -L/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/lib -L. -L./ -L../../../lib -L../../../lib/ -o client .obj/client.o .obj/TestC.o -lTAO -lACE -ldl -lpthread -lrt
+.obj/TestC.o: In function `Test::Hello::shutdown()':
+TestC.cpp:(.text+0x2b5): undefined reference to `vtable for TAO::RetArgument'
+TestC.cpp:(.text+0x316): undefined reference to `vtable for TAO::RetArgument'
+TestC.cpp:(.text+0x344): undefined reference to `vtable for TAO::RetArgument'
+.obj/TestC.o: In function `Test::Hello::get_string()':
+TestC.cpp:(.text+0x5b3): undefined reference to `vtable for TAO::RetArgument'
+TestC.cpp:(.text+0x5da): undefined reference to `vtable for TAO::RetArgument'
+.obj/TestC.o:TestC.cpp:(.text._ZN3TAO24Ret_UB_String_Argument_TINS_10String_varIcEENS_37Any_Insert_Policy_AnyTypeCode_AdapterIPKcEEED0Ev[TAO::Ret_UB_String_Argument_T<TAO::String_var<char>, TAO::Any_Insert_Policy_AnyTypeCode_Adapter<char const*> >::~Ret_UB_String_Argument_T()]+0x22): more undefined references to `vtable for TAO::RetArgument' follow
+.obj/TestC.o:(.rodata._ZTVN4Test5HelloE[vtable for Test::Hello]+0xb4): undefined reference to `CORBA::Object::_get_interface()'
+.obj/TestC.o:(.rodata._ZTVN4Test5HelloE[vtable for Test::Hello]+0xb8): undefined reference to `CORBA::Object::_get_component()'
+.obj/TestC.o:(.rodata._ZTVN4Test5HelloE[vtable for Test::Hello]+0xc0): undefined reference to `CORBA::Object::_create_request(CORBA::Context*, char const*, CORBA::NVList*, CORBA::NamedValue*, CORBA::Request*&, unsigned int)'
+.obj/TestC.o:(.rodata._ZTVN4Test5HelloE[vtable for Test::Hello]+0xc4): undefined reference to `CORBA::Object::_create_request(CORBA::Context*, char const*, CORBA::NVList*, CORBA::NamedValue*, CORBA::ExceptionList*, CORBA::ContextList*, CORBA::Request*&, unsigned int)'
+.obj/TestC.o:(.rodata._ZTVN4Test5HelloE[vtable for Test::Hello]+0xc8): undefined reference to `CORBA::Object::_request(char const*)'
+.obj/TestC.o:(.rodata._ZTVN3TAO24Ret_UB_String_Argument_TINS_10String_varIcEENS_37Any_Insert_Policy_AnyTypeCode_AdapterIPKcEEEE[vtable for TAO::Ret_UB_String_Argument_T<TAO::String_var<char>, TAO::Any_Insert_Policy_AnyTypeCode_Adapter<char const*> >]+0x20): undefined reference to `TAO::RetArgument::mode() const'
+.obj/TestC.o:(.rodata._ZTIN3TAO24Ret_UB_String_Argument_TINS_10String_varIcEENS_37Any_Insert_Policy_AnyTypeCode_AdapterIPKcEEEE[typeinfo for TAO::Ret_UB_String_Argument_T<TAO::String_var<char>, TAO::Any_Insert_Policy_AnyTypeCode_Adapter<char const*> >]+0x8): undefined reference to `typeinfo for TAO::RetArgument'
+collect2: ld returned 1 exit status
+make[1]: *** [client] Error 1
+make[1]: Leaving directory `/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello'
+make: *** [Hello_Client] Error 2
+(reverse-i-search)`mw': perl ../bin/mwc.pl -type gnuace TAO_ACE.mwc
+megaman:/opt/local/TAO/5.7.5/linux-x86-micro/ACE_wrappers/TAO/tests/Hello >
