@@ -1,0 +1,92 @@
+#0  0x60000000c01a6d70:0 in _lwp_kill+0x30 ()
+   from /usr/lib/hpux32/libpthread.so.1
+#1  0x60000000c0112ef0:0 in pthread_kill+0x8d0 ()
+   from /usr/lib/hpux32/libpthread.so.1
+#2  0x60000000c02ab900:0 in raise+0xe0 () from /usr/lib/hpux32/libc.so.1
+#3  0x60000000c03bc1b0:0 in abort+0x170 () from /usr/lib/hpux32/libc.so.1
+#4  0x60000000c25ef680:0 in fnc_fork_abort_child+0x2b0 ()
+   from /fnsw/lib/shobj/libSysV.sl
+#5  0x60000000c25d4110:0 in shm_catch_segv+0x670 ()
+   from /fnsw/lib/shobj/libSysV.sl
+#6  <signal handler called>
+#7  0x60000000c0358ed0:0 in real_free+0x390 () from /usr/lib/hpux32/libc.so.1
+#8  0x60000000c0365780:0 in free+0x180 () from /usr/lib/hpux32/libc.so.1
+#9  0x60000000c09432f0:0 in operator delete[](void*)+0x50 ()
+   from /usr/lib/hpux32/libCsup.so.1
+#10 0x60000000c0943650:0 in __cxa_vec_delete2+0x90 ()
+   from /usr/lib/hpux32/libCsup.so.1
+#11 0x60000000c0943570:0 in __cxa_vec_delete+0x30 ()
+   from /usr/lib/hpux32/libCsup.so.1
+#12 0x60000000d1d5f8d0:0 in XXXXXX::ArrayValue::~ArrayValue()+0x3a0 ()
+   from My_Server.sl
+#13 0x60000000d174a060:0 in XXXXXX::ArrayValue::~ArrayValue()+0xa0 ()
+   from My_Server.sl
+---Type <return> to continue, or q <return> to quit---
+#14 0x60000000d19dcc10:0 in operator>>(TAO_InputCDR&,XXXXXX::FValue&)
+   +0x600 () from My_Server.sl
+#15 0x60000000d19e8110:0 in operator>>(TAO_InputCDR&,XXXXXX::Field&)
+   +0x310 () from My_Server.sl
+#16 0x60000000d19ea080:0 in TAO::demarshal_sequence<TAO_InputCDR,XXXXXX::Field>(TAO_InputCDR&,TAO::unbounded_value_sequence<XXXXXX::Field>&)
+   +0x460 () from My_Server.sl
+#17 0x60000000d19e9b10:0 in operator>>(TAO_InputCDR&,XXXXXX::FieldArray&)+0x100 () from My_Server.sl
+#18 0x60000000d1ea6f00:0 in TAO::In_Var_Size_SArgument_T<XXXXXX::FieldArray,TAO::Any_Insert_Policy_Stream<XXXXXX::FieldArray> >::demarshal(TAO_InputCDR&)+0xc0 () from My_Server.sl
+#19 0x60000000cc52f1a0:0 in TAO::Upcall_Wrapper::pre_upcall(TAO_InputCDR&,TAO::Argument* const*,unsigned long)+0xd0 ()
+   from Req_libs/libTAO_PortableServer.so
+#20 0x60000000cc52d980:0 in TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&,TAO::Argument* const*,unsigned long,TAO::Upcall_Command&,void*,CORBA::TypeCode* const*,unsigned int)+0x260 ()
+   from Req_libs/libTAO_PortableServer.so
+#21 0x60000000d1e6c3c0:0 in POA_XXXXXX::Server_IDL::orb_rpc_saveNewStepElement_skel(TAO_ServerRequest&,void*,void*)+0x580 ()
+   from My_Server.sl
+#22 0x60000000cc53e5d0:0 in TAO_ServantBase::synchronous_upcall_dispatch(TAO_Ser---Type <return> to continue, or q <return> to quit---
+verRequest&,void*,void*)+0x3b0 ()
+   from Req_libs/libTAO_PortableServer.so
+#23 0x60000000d1e9d030:0 in POA_XXXXXX::Server_IDL::_dispatch(TAO_ServerRequest&,void*)+0x1e0 () from My_Server.sl
+#24 0x60000000cc550ac0:0 in TAO_Object_Adapter::do_dispatch(TAO_ServerRequest&,TAO::Portable_Server::Servant_Upcall&)+0xb0 ()
+   from Req_libs/libTAO_PortableServer.so
+#25 0x60000000cc56ee80:0 in TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&,TAO_ServerRequest&,TAO_Pseudo_Out_T<CORBA::Object>)+0x2b0 ()
+   from Req_libs/libTAO_PortableServer.so
+#26 0x60000000cc54f650:0 in TAO_Object_Adapter::dispatch(TAO::ObjectKey&,TAO_ServerRequest&,TAO_Pseudo_Out_T<CORBA::Object>)+0x320 ()
+   from Req_libs/libTAO_PortableServer.so
+#27 0x60000000cbbe3bd0:0 in TAO_Adapter_Registry::dispatch(TAO::ObjectKey&,TAO_ServerRequest&,TAO_Pseudo_Out_T<CORBA::Object>)+0x130 ()
+   from Req_libs/libTAO.so
+#28 0x60000000cbe86930:0 in TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*,TAO_ServerRequest&,TAO_Pseudo_Out_T<CORBA::Object>)+0x100 ()
+   from Req_libs/libTAO.so
+#29 0x60000000cbc860a0:0 in TAO_GIOP_Message_Base::process_request(TAO_Transport*,TAO_InputCDR&,TAO_OutputCDR&,TAO_GIOP_Message_Generator_Parser*)+0x440 ()
+   from Req_libs/libTAO.so
+#30 0x60000000cbc84f80:0 in TAO_GIOP_Message_Base::process_request_message(TAO_T---Type <return> to continue, or q <return> to quit---
+ransport*,TAO_Queued_Data*)+0x960 () from Req_libs/libTAO.so
+#31 0x60000000cbf3ce60:0 in TAO_Transport::process_parsed_messages(TAO_Queued_Data*,TAO_Resume_Handle&)+0x500 () from Req_libs/libTAO.so
+#32 0x60000000cbf3aaf0:0 in TAO_Transport::handle_input_parse_data(TAO_Resume_Handle&,ACE_Time_Value*)+0x26f0 () from Req_libs/libTAO.so
+#33 0x60000000cbf2cb80:0 in TAO_Transport::handle_input(TAO_Resume_Handle&,ACE_Time_Value*)+0x670 () from Req_libs/libTAO.so
+#34 0x60000000cbc0d590:0 in TAO_Connection_Handler::handle_input_internal(int,ACE_Event_Handler*)+0x460 () from Req_libs/libTAO.so
+#35 0x60000000cbc0ce20:0 in TAO_Connection_Handler::handle_input_eh(int,ACE_Event_Handler*)+0x2a0 () from Req_libs/libTAO.so
+#36 0x60000000cbceadd0:0 in TAO_IIOP_Connection_Handler::handle_input(int)
+   +0x60 () from Req_libs/libTAO.so
+#37 0x60000000cb9c4b10:0 in ACE_TP_Reactor::dispatch_socket_event(ACE_EH_Dispatch_Info&)+0x220 () from Req_libs/libACE.so
+#38 0x60000000cb9c3910:0 in ACE_TP_Reactor::handle_socket_events(int&,ACE_TP_Token_Guard&)+0x310 () from Req_libs/libACE.so
+#39 0x60000000cb9c2540:0 in ACE_TP_Reactor::dispatch_i(ACE_Time_Value*,ACE_TP_Token_Guard&)+0x210 () from Req_libs/libACE.so
+#40 0x60000000cb9bfad0:0 in ACE_TP_Reactor::handle_events(ACE_Time_Value*)
+   +0x2b0 () from Req_libs/libACE.so
+#41 0x60000000cb8fefb0:0 in ACE_Reactor::handle_events(ACE_Time_Value*)+0x90 ()
+   from Req_libs/libACE.so
+#42 0x60000000cbe056a0:0 in TAO_ORB_Core::run(ACE_Time_Value*,int)+0x690 ()
+   from Req_libs/libTAO.so
+#43 0x60000000cbde0c20:0 in CORBA::ORB::run(ACE_Time_Value*)+0x90 ()
+   from Req_libs/libTAO.so
+#44 0x60000000cbde0b20:0 in CORBA::ORB::run()+0x40 ()
+   from Req_libs/libTAO.so
+#45 0x60000000d1679fd0:0 in MyWorker::svc()+0xb0 ()
+   from My_Server.sl
+#46 0x60000000cb97f640:0 in ACE_Task_Base::svc_run(void*)+0xd0 ()
+   from Req_libs/libACE.so
+#47 0x60000000cb9829d0:0 in ACE_Thread_Adapter::invoke_i()+0x180 ()
+   from Req_libs/libACE.so
+#48 0x60000000cb982450:0 in ACE_Thread_Adapter::invoke()+0x210 ()
+   from Req_libs/libACE.so
+#49 0x60000000cb6bc0a0:0 in ace_thread_adapter+0x60 ()
+   from Req_libs/libACE.so
+#50 0x60000000c00da6e0:0 in __pthread_bound_body+0x190 ()
+   from /usr/lib/hpux32/libpthread.so.1
+
+   
+   
+   
