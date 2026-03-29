@@ -1,0 +1,23 @@
+Index: TAO/tao/Transport.cpp
+===================================================================
+--- TAO/tao/Transport.cpp	(revision 50)
++++ TAO/tao/Transport.cpp	(working copy)
+@@ -378,8 +378,6 @@
+ 
+   ACE_Reactor * const r = this->orb_core_->reactor ();
+ 
+-  // @@note: This should be okay since the register handler call will
+-  // not make a nested call into the transport.
+   ACE_GUARD_REACTION (ACE_Lock,
+                     ace_mon,
+                     *this->handler_lock_,
+@@ -501,6 +499,9 @@
+                   this->id (),entry));
+     }
+   
++  if (!entry) {
++    return 0;
++  }
+   return this->transport_cache_manager ().purge_entry (entry);
+ }
+ 
