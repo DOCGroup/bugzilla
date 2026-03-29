@@ -1,0 +1,154 @@
+Index: TAO/tao/PortableServer/Active_Object_Map.cpp
+===================================================================
+--- TAO/tao/PortableServer/Active_Object_Map.cpp	(revision 49)
++++ TAO/tao/PortableServer/Active_Object_Map.cpp	(working copy)
+@@ -11,6 +11,8 @@
+ 
+ #include "ace/Auto_Ptr.h"
+ #include "ace/CORBA_macros.h"
++#include "TAO/tao/debug.h"
++#include "PortableServer_Functions.h"
+ 
+ ACE_RCSID(PortableServer,
+           Active_Object_Map,
+@@ -21,6 +23,24 @@
+ /* static */
+ size_t TAO_Active_Object_Map::system_id_size_ = 0;
+ 
++#include <iomanip>
++#include <string>
++#include <sstream>
++
++static
++std::string
++hexstring(const char* s, size_t l)
++{
++  using namespace std;
++  ostringstream os;
++  os << "0x";
++  while (l--) {
++    os << hex << setw(2) << setfill('0') << (unsigned long)(unsigned char)(*s);
++    ++s;
++  }
++  return os.str();
++}
++
+ void
+ TAO_Active_Object_Map::set_system_id_size (
+   const TAO_Server_Strategy_Factory::Active_Object_Map_Creation_Parameters &creation_parameters)
+@@ -492,6 +512,18 @@
+         }
+     }
+ 
++  if (TAO_debug_level > 1)
++  {
++    CORBA::String_var idstr( PortableServer::ObjectId_to_string(user_id) );
++    std::string s( hexstring( idstr.in(), user_id.length() ) );
++    
++    ACE_ERROR ((LM_ERROR,
++                "TAO_Unique_Id_Strategy::bind_using_user_id: type=%s, id=%s\n",
++                servant->_repository_id(),
++                s.c_str()
++                ));
++  }
++
+   return result;
+ }
+ 
+@@ -504,6 +536,18 @@
+                                                                entry);
+   if (result == 0)
+     {
++      if (TAO_debug_level > 1)
++      {
++        CORBA::String_var idstr(
++          PortableServer::ObjectId_to_string(entry->user_id_) );
++        std::string s( hexstring( idstr.in(), entry->user_id_.length() ) );
++        
++        ACE_ERROR ((LM_ERROR,
++                    "TAO_Unique_Id_Strategy::unbind_using_user_id: id=%s\n",
++                    s.c_str()
++                    ));
++      }
++
+       if (entry->servant_ != 0)
+         {
+           result =
+@@ -658,6 +702,18 @@
+         }
+     }
+ 
++  if (TAO_debug_level > 1)
++  {
++    CORBA::String_var idstr( PortableServer::ObjectId_to_string(user_id) );
++    std::string s( hexstring( idstr.in(), user_id.length() ) );
++    
++    ACE_ERROR ((LM_ERROR,
++                "TAO_Multiple_Id_Strategy::bind_using_user_id: type=%s, id=%s\n",
++                servant->_repository_id(),
++                s.c_str()
++                ));
++  }
++  
+   return result;
+ }
+ 
+@@ -670,6 +726,18 @@
+                                                                entry);
+   if (result == 0)
+     {
++      if (TAO_debug_level > 1)
++      {
++        CORBA::String_var idstr(
++          PortableServer::ObjectId_to_string(entry->user_id_) );
++        std::string s( hexstring( idstr.in(), entry->user_id_.length() ) );
++        
++        ACE_ERROR ((LM_ERROR,
++                    "TAO_Multiple_Id_Strategy::unbind_using_user_id: id=%s\n",
++                    s.c_str()
++                    ));
++      }
++  
+       result = this->active_object_map_->id_hint_strategy_->unbind (*entry);
+ 
+       if (result == 0)
+@@ -925,6 +993,19 @@
+       delete entry;
+     }
+ 
++  if (TAO_debug_level > 1)
++  {
++    CORBA::String_var idstr(
++      PortableServer::ObjectId_to_string(entry->user_id_) );
++    std::string s( hexstring( idstr.in(), entry->user_id_.length() ) );
++    
++    ACE_ERROR ((LM_ERROR,
++                "TAO_System_Id_With_Unique_Id_Strategy::bind_using_system_id: type=%s, id=%s\n",
++                servant->_repository_id(),
++                s.c_str()
++                ));
++  }
++  
+   return result;
+ }
+ 
+@@ -964,6 +1045,19 @@
+       delete entry;
+     }
+ 
++  if (TAO_debug_level > 1)
++  {
++    CORBA::String_var idstr(
++      PortableServer::ObjectId_to_string(entry->user_id_) );
++    std::string s( hexstring( idstr.in(), entry->user_id_.length() ) );
++    
++    ACE_ERROR ((LM_ERROR,
++                "TAO_System_Id_With_Multiple_Id_Strategy::bind_using_system_id: type=%s, id=%s\n",
++                servant->_repository_id(),
++                s.c_str()
++                 ));
++  }
++  
+   return result;
+ }
+ #endif
