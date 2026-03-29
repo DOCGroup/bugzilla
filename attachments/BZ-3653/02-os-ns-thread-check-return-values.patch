@@ -1,0 +1,711 @@
+Index: ace/OS_NS_Thread.cpp
+===================================================================
+--- ace/OS_NS_Thread.cpp	(revision 48)
++++ ace/OS_NS_Thread.cpp	(working copy)
+@@ -711,7 +711,8 @@
+ 
+   // scope the guard
+   {
+-    ACE_Guard<ACE_Thread_Mutex> guard (*mutex_);
++    ACE_GUARD_REACTION(ACE_Thread_Mutex, guard, *mutex_, ACE_UNEXPECTED(;));
++
+     if (ptr_ != 0)
+       {
+         if (ACE_BIT_ENABLED (flags_, FLAG_DELETING))
+@@ -1151,7 +1152,12 @@
+ 
+   // This is needed to ensure that <waiters_> and <was_broadcast_> are
+   // consistent relative to each other.
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++      != 0)
++    {
++      return -1;
++    }
++
+   int have_waiters = 0;
+ 
+   if (cv->waiters_ > 0)
+@@ -1163,8 +1169,18 @@
+       cv->was_broadcast_ = 1;
+       have_waiters = 1;
+     }
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
++
++  if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++      != 0)
++    {
++      // We hold the waiters_lock and can't release it.
++      // There is no way the caller could recover from this.
++      ACE_ASSERT (false);
++      return -1;
++    }
++
+   int result = 0;
++
+   if (have_waiters)
+     {
+       // Wake up all the waiters.
+@@ -1199,8 +1215,17 @@
+ #   elif defined (ACE_VXWORKS)
+   ACE_OS::sema_destroy (&cv->waiters_done_);
+ #   endif /* ACE_VXWORKS */
+-  ACE_OS::thread_mutex_destroy (&cv->waiters_lock_);
+-  return ACE_OS::sema_destroy (&cv->sema_);
++
++  int result = 0;
++
++  if (ACE_OS::thread_mutex_destroy (&cv->waiters_lock_) != 0)
++    result = -1;
++
++  if (ACE_OS::sema_destroy (&cv->sema_) != 0)
++    result = -1;
++
++  return result;
++
+ # else
+   ACE_UNUSED_ARG (cv);
+   ACE_NOTSUP_RETURN (-1);
+@@ -1298,10 +1323,23 @@
+   // lost wakeup bug...  This is needed to ensure that the <waiters_>
+   // value is not in an inconsistent internal state while being
+   // updated by another thread.
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++      != 0)
++    {
++      return -1;
++    }
++
+   bool have_waiters = cv->waiters_ > 0;
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
+ 
++  if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++      != 0)
++    {
++      // We hold the waiters_lock and can't release it.
++      // There is no way the caller could recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
++
+   if (have_waiters)
+     return ACE_OS::sema_post (&cv->sema_);
+   else
+@@ -1318,29 +1356,56 @@
+ {
+   ACE_OS_TRACE ("ACE_OS::cond_wait");
+ # if defined (ACE_HAS_THREADS)
++
+   // Prevent race conditions on the <waiters_> count.
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  {
++    if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++        != 0)
++      {
++        return -1;
++      }
++
+   ++cv->waiters_;
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
+ 
++    if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++        != 0)
++      {
++        // We hold the waiters_lock and can't release it.
++        // There is no way the caller could recover from this.
++        ACE_ASSERT(false);
++        return -1;
++      }
++  }
++
+   int result = 0;
+ 
+ #   if defined (ACE_HAS_SIGNAL_OBJECT_AND_WAIT)
+   if (external_mutex->type_ == USYNC_PROCESS)
++    {
+     // This call will automatically release the mutex and wait on the semaphore.
+-    ACE_WIN32CALL (ACE_ADAPT_RETVAL (::SignalObjectAndWait (external_mutex->proc_mutex_,
++      int adapted_result
++        = ACE_ADAPT_RETVAL (::SignalObjectAndWait (external_mutex->proc_mutex_,
+                                                             cv->sema_, INFINITE, FALSE),
+-                                     result),
+-                   int, -1, result);
++                            result);
++      ACE_WIN32CALL (adapted_result, int, -1, result);
++      if (adapted_result != 0)
++        return adapted_result;
++    }
+   else
+ #   endif /* ACE_HAS_SIGNAL_OBJECT_AND_WAIT */
+     {
+-      // We keep the lock held just long enough to increment the count of
+-      // waiters by one.  Note that we can't keep it held across the call
+-      // to ACE_OS::sema_wait() since that will deadlock other calls to
+-      // ACE_OS::cond_signal().
+-      if (ACE_OS::mutex_unlock (external_mutex) != 0)
++      // We keep the external_mutex held just long enough to increment the
++      // count of waiters by one.  Note that we can't keep it held across
++      // the call to ACE_OS::sema_wait() since that will deadlock other
++      // calls to ACE_OS::cond_signal().
++      if (ACE_OS::mutex_unlock (external_mutex)
++          != 0)
++        {
++          // If we return now, the waiters_ count will be wrong.
++          // There is no way the caller could recover from this.
++          ACE_ASSERT(false);
+         return -1;
++        }
+ 
+       // Wait to be awakened by a ACE_OS::cond_signal() or
+       // ACE_OS::cond_broadcast().
+@@ -1348,16 +1413,30 @@
+     }
+ 
+   // Reacquire lock to avoid race conditions on the <waiters_> count.
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++      != 0)
++    {
++      // If we return now, the waiters_ count will be wrong.
++      // There is no way the caller could recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
+ 
+-  // We're ready to return, so there's one less waiter.
++  // We're ready to return, so there's one fewer waiter.
+   --cv->waiters_;
+ 
+   bool const last_waiter = cv->was_broadcast_ && cv->waiters_ == 0;
+ 
+   // Release the lock so that other collaborating threads can make
+   // progress.
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++      != 0)
++    {
++      // We hold the waiters_lock and can't release it.
++      // There is no way the caller could recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
+ 
+   if (result == -1)
+     // Bad things happened, so let's just return below.
+@@ -1366,20 +1445,28 @@
+   else if (external_mutex->type_ == USYNC_PROCESS)
+     {
+       if (last_waiter)
+-
++        {
+         // This call atomically signals the <waiters_done_> event and
+         // waits until it can acquire the mutex.  This is important to
+         // prevent unfairness.
+-        ACE_WIN32CALL (ACE_ADAPT_RETVAL (::SignalObjectAndWait (cv->waiters_done_,
++          int adapted_result
++            = ACE_ADAPT_RETVAL (::SignalObjectAndWait (cv->waiters_done_,
+                                                                 external_mutex->proc_mutex_,
+                                                                 INFINITE, FALSE),
+-                                         result),
+-                       int, -1, result);
++                                result);
++          ACE_WIN32CALL (adapted_result, int, -1, result);
++          if (adapted_result != 0)
++            return adapted_result;
++        }
+       else
++        {
+         // We must always regain the <external_mutex>, even when
+         // errors occur because that's the guarantee that we give to
+         // our callers.
+-        ACE_OS::mutex_lock (external_mutex);
++          if (ACE_OS::mutex_lock (external_mutex)
++              != 0)
++            return -1;
++        }
+ 
+       return result;
+       /* NOTREACHED */
+@@ -1396,7 +1483,11 @@
+ 
+   // We must always regain the <external_mutex>, even when errors
+   // occur because that's the guarantee that we give to our callers.
+-  ACE_OS::mutex_lock (external_mutex);
++  if (ACE_OS::mutex_lock (external_mutex)
++      != 0)
++    {
++      return -1;
++    }
+ 
+   return result;
+ # else
+@@ -1419,10 +1510,23 @@
+ #   if defined (ACE_HAS_WTHREADS) || defined (ACE_VXWORKS)
+ 
+   // Prevent race conditions on the <waiters_> count.
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++      != 0)
++    {
++      return -1;
++    }
++
+   ++cv->waiters_;
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
+ 
++  if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++      != 0)
++    {
++      // We hold the waiters_lock and can't release it.
++      // There is no way the caller could recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
++
+   int result = 0;
+   ACE_Errno_Guard error (errno, 0);
+   int msec_timeout = 0;
+@@ -1451,12 +1555,16 @@
+   else
+ #     endif /* ACE_HAS_SIGNAL_OBJECT_AND_WAIT */
+     {
+-      // We keep the lock held just long enough to increment the count
++      // We keep the external_mutex held just long enough to increment the
++      // count
+       // of waiters by one.  Note that we can't keep it held across
+       // the call to WaitForSingleObject since that will deadlock
+       // other calls to ACE_OS::cond_signal().
+       if (ACE_OS::mutex_unlock (external_mutex) != 0)
++        {
++          error = EINVAL;
+         return -1;
++        }
+ 
+       // Wait to be awakened by a ACE_OS::signal() or
+       // ACE_OS::broadcast().
+@@ -1478,12 +1586,27 @@
+     }
+ 
+   // Reacquire lock to avoid race conditions.
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++      != 0)
++    {
++      // If we were to return now, the waiters count would be wrong.
++      // There is no way the caller can recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
++
+   --cv->waiters_;
+ 
+   bool const last_waiter = cv->was_broadcast_ && cv->waiters_ == 0;
+ 
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++      != 0)
++    {
++      // Can't release the internal waiters_lock.
++      // There is no way the caller can recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
+ 
+ #     if defined (ACE_WIN32)
+   if (result != WAIT_OBJECT_0)
+@@ -1522,19 +1645,28 @@
+   if (external_mutex->type_ == USYNC_PROCESS)
+     {
+       if (last_waiter)
++        {
+         // This call atomically signals the <waiters_done_> event and
+         // waits until it can acquire the mutex.  This is important to
+         // prevent unfairness.
+-        ACE_WIN32CALL (ACE_ADAPT_RETVAL (::SignalObjectAndWait (cv->waiters_done_,
++          int adapted_result
++            = ACE_ADAPT_RETVAL (::SignalObjectAndWait (cv->waiters_done_,
+                                                                 external_mutex->proc_mutex_,
+                                                                 INFINITE, FALSE),
+-                                         result),
+-                       int, -1, result);
++                                result);
++          ACE_WIN32CALL (adapted_result, int, -1, result);
++          if (adapted_result != 0)
++            return adapted_result;
++        }
+       else
++        {
+         // We must always regain the <external_Mutex>, even when
+         // errors occur because that's the guarantee that we give to
+         // our callers.
+-        ACE_OS::mutex_lock (external_mutex);
++          if (ACE_OS::mutex_lock (external_mutex)
++              != 0)
++            return -1;
++        }
+ 
+       return result;
+       /* NOTREACHED */
+@@ -1544,16 +1676,25 @@
+   // if" statement since the caller may have timed out and hence the
+   // result would have been -1 above.
+   if (last_waiter)
++    {
+     // Release the signaler/broadcaster if we're the last waiter.
+ #     if defined (ACE_WIN32)
+-    ACE_OS::event_signal (&cv->waiters_done_);
++      if (ACE_OS::event_signal (&cv->waiters_done_) != 0)
+ #     else
+-    ACE_OS::sema_post (&cv->waiters_done_);
++      if (ACE_OS::sema_post (&cv->waiters_done_) != 0)
+ #     endif /* ACE_WIN32 */
++        {
++          return -1;
++        }
++    }
+ 
+   // We must always regain the <external_mutex>, even when errors
+   // occur because that's the guarantee that we give to our callers.
+-  ACE_OS::mutex_lock (external_mutex);
++  if (ACE_OS::mutex_lock (external_mutex)
++      != 0)
++    {
++      return -1;
++    }
+ 
+   return result;
+ #   endif /* ACE_HAS_WTHREADS || ACE_HAS_VXWORKS */
+@@ -1607,10 +1748,23 @@
+   return result;
+ #else
+   // Prevent race conditions on the <waiters_> count.
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++      != 0)
++    {
++      return -1;
++    }
++
+   ++cv->waiters_;
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
+ 
++  if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++      != 0)
++    {
++      // If we were to return now, the internal waiters count would be wrong.
++      // There is no way for the caller to recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
++
+   int result = 0;
+   int error = 0;
+   int msec_timeout = 0;
+@@ -1633,7 +1787,12 @@
+   // to WaitForSingleObject since that will deadlock other calls to
+   // ACE_OS::cond_signal().
+   if (ACE_OS::thread_mutex_unlock (external_mutex) != 0)
++    {
++      // If we were to return now, the internal waiters count would be wrong.
++      // There is no way for the caller to recover from this.
++      ACE_ASSERT(false);
+     return -1;
++    }
+ 
+   // Wait to be awakened by a ACE_OS::signal() or ACE_OS::broadcast().
+ #     if defined (ACE_USES_WINCE_SEMA_SIMULATION)
+@@ -1648,13 +1807,27 @@
+ #     endif /* ACE_USES_WINCE_SEMA_SIMULATION */
+ 
+   // Reacquire lock to avoid race conditions.
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++      != 0)
++    {
++      // If we were to return now, the internal waiters count would be wrong.
++      // There is no way for the caller to recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
+ 
+   --cv->waiters_;
+ 
+   bool const last_waiter = cv->was_broadcast_ && cv->waiters_ == 0;
+ 
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++      != 0)
++    {
++      // We can't release the internal waiters lock.
++      // There is no way for the caller to recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
+ 
+   if (result != WAIT_OBJECT_0)
+     {
+@@ -1672,12 +1845,28 @@
+ 
+   if (last_waiter)
+     // Release the signaler/broadcaster if we're the last waiter.
+-    ACE_OS::event_signal (&cv->waiters_done_);
++    {
++      if (ACE_OS::event_signal (&cv->waiters_done_)
++          != 0)
++        return -1;
++    }
+ 
+   // We must always regain the <external_mutex>, even when errors
+   // occur because that's the guarantee that we give to our callers.
+-  ACE_OS::thread_mutex_lock (external_mutex);
++  if (ACE_OS::thread_mutex_lock (external_mutex)
++      != 0)
++    {
++      return -1;
++    }
++
++  if (error)
++    {
++      /* This assignment must only be done if error != 0,
++       *   since writing 0 to errno violates the POSIX specification.
++       */
+   errno = error;
++    }
++
+   return result;
+ #   endif
+ #   else
+@@ -1696,10 +1885,22 @@
+   ACE_OSCALL_RETURN (ACE_ADAPT_RETVAL (::SleepConditionVariableCS (cv, external_mutex, INFINITE), result),
+                      int, -1);
+ #else
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++      != 0)
++    {
++      return -1;
++    }
+   ++cv->waiters_;
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
+ 
++  if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++      != 0)
++    {
++      // If we were to return now, the internal waiters count would be wrong.
++      // There is no way for the caller to recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
++
+   int result = 0;
+   int error = 0;
+ 
+@@ -1724,13 +1925,27 @@
+ #     endif /* ACE_USES_WINCE_SEMA_SIMULATION */
+ 
+   // Reacquire lock to avoid race conditions.
+-  ACE_OS::thread_mutex_lock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_)
++      != 0)
++    {
++      // If we were to return now, the internal waiters count would be wrong.
++      // There is no way for the caller to recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
+ 
+   cv->waiters_--;
+ 
+   bool const last_waiter = cv->was_broadcast_ && cv->waiters_ == 0;
+ 
+-  ACE_OS::thread_mutex_unlock (&cv->waiters_lock_);
++  if (ACE_OS::thread_mutex_unlock (&cv->waiters_lock_)
++      != 0)
++    {
++      // We can't release the internal waiters lock.
++      // There is no way for the caller to recover from this.
++      ACE_ASSERT(false);
++      return -1;
++    }
+ 
+   if (result != WAIT_OBJECT_0)
+     {
+@@ -1746,14 +1961,31 @@
+     }
+   else if (last_waiter)
+     // Release the signaler/broadcaster if we're the last waiter.
+-    ACE_OS::event_signal (&cv->waiters_done_);
++    {
++      if (ACE_OS::event_signal (&cv->waiters_done_)
++          != 0)
++        {
++          return -1;
++        }
++    }
+ 
+   // We must always regain the <external_mutex>, even when errors
+   // occur because that's the guarantee that we give to our callers.
+-  ACE_OS::thread_mutex_lock (external_mutex);
++  if (ACE_OS::thread_mutex_lock (external_mutex)
++      != 0)
++    {
++      return -1;
++    }
+ 
+   // Reset errno in case mutex_lock() also fails...
++  if (error)
++    {
++      /* This assignment must only be done if error != 0,
++       *   since writing 0 to errno violates the POSIX specification.
++       */
+   errno = error;
++    }
++
+   return result;
+ #endif
+ #   else
+@@ -2330,7 +2562,11 @@
+ #if defined (ACE_HAS_THREADS)
+ # if defined (ACE_HAS_PTHREADS)
+   ACE_mutex_t *p_lock = (ACE_mutex_t *) mutex;
+-  ACE_OS::mutex_unlock (p_lock);
++  if (ACE_OS::mutex_unlock (p_lock)
++      != 0)
++    {
++      ACE_ASSERT(false);
++    }
+ # else
+   ACE_UNUSED_ARG (mutex);
+ # endif /* ACE_HAS_PTHREADS */
+@@ -2387,14 +2623,17 @@
+ # if (defined (ACE_HAS_PTHREADS) && defined (_POSIX_THREAD_PROCESS_SHARED) && !defined (ACE_LACKS_CONDATTR_PSHARED)) || \
+     (!defined (ACE_USES_FIFO_SEM) && \
+       (!defined (ACE_HAS_POSIX_SEM) || !defined (ACE_HAS_POSIX_SEM_TIMEOUT) || defined (ACE_LACKS_NAMED_POSIX_SEM)))
+-              // Now fix event to manual reset, raise signal and broadcast
+-              // until is's possible to destroy the condition.
++      // now fix event to manual reset, raise signal and broadcast until it's
++      // possible to destroy the condition
+               event->eventdata_->manual_reset_ = 1;
+               while ((r2 = ACE_OS::cond_destroy (&event->eventdata_->condition_)) == -1
+                      && errno == EBUSY)
+                 {
+                   event->eventdata_->is_signaled_ = 1;
+-                  ACE_OS::cond_broadcast (&event->eventdata_->condition_);
++        if (ACE_OS::cond_broadcast (&event->eventdata_->condition_) != 0)
++          {
++            return -1;
++          }
+                   ACE_OS::thr_yield ();
+                 }
+ # else
+@@ -2446,14 +2685,17 @@
+ # if (defined (ACE_HAS_PTHREADS) && defined (_POSIX_THREAD_PROCESS_SHARED) && !defined (ACE_LACKS_CONDATTR_PSHARED)) || \
+     (!defined (ACE_USES_FIFO_SEM) && \
+       (!defined (ACE_HAS_POSIX_SEM) || !defined (ACE_HAS_POSIX_SEM_TIMEOUT) || defined (ACE_LACKS_NAMED_POSIX_SEM)))
+-          // Now fix event to manual reset, raise signal and broadcast until
+-          // it's possible to destroy the condition.
++    // now fix event to manual reset, raise signal and broadcast until is's
++    // possible to destroy the condition
+           event->eventdata_->manual_reset_ = 1;
+           while ((r2 = ACE_OS::cond_destroy (&event->eventdata_->condition_)) == -1
+                  && errno == EBUSY)
+             {
+               event->eventdata_->is_signaled_ = 1;
+-              ACE_OS::cond_broadcast (&event->eventdata_->condition_);
++      if (ACE_OS::cond_broadcast (&event->eventdata_->condition_) != 0)
++        {
++          return -1;
++        }
+               ACE_OS::thr_yield ();
+             }
+ # else
+@@ -2812,9 +3054,11 @@
+         (!defined (ACE_LACKS_MUTEXATTR_PSHARED) || !defined (ACE_LACKS_CONDATTR_PSHARED))) || \
+      (!defined (ACE_USES_FIFO_SEM) && \
+         (!defined (ACE_HAS_POSIX_SEM) || !defined (ACE_HAS_POSIX_SEM_TIMEOUT) || defined (ACE_LACKS_NAMED_POSIX_SEM)))
+-    ACE_OS::mutex_unlock (&event->eventdata_->lock_);
++    if (ACE_OS::mutex_unlock (&event->eventdata_->lock_) != 0)
++      return -1;
+ # else
+-    ACE_OS::sema_post (&event->lock_);
++    if (ACE_OS::sema_post (&event->lock_) != 0)
++      return -1;
+ # endif
+     if (result == -1)
+       // Reset errno in case mutex_unlock() also fails...
+@@ -2856,9 +3100,11 @@
+         (!defined (ACE_LACKS_MUTEXATTR_PSHARED) || !defined (ACE_LACKS_CONDATTR_PSHARED))) || \
+      (!defined (ACE_USES_FIFO_SEM) && \
+         (!defined (ACE_HAS_POSIX_SEM) || !defined (ACE_HAS_POSIX_SEM_TIMEOUT) || defined (ACE_LACKS_NAMED_POSIX_SEM)))
+-    ACE_OS::mutex_unlock (&event->eventdata_->lock_);
++    if (ACE_OS::mutex_unlock (&event->eventdata_->lock_) != 0)
++      return -1;
+ # else
+-    ACE_OS::sema_post (&event->lock_);
++    if (ACE_OS::sema_post (&event->lock_) != 0)
++      return -1;
+ # endif
+   }
+   else
+@@ -2940,9 +3186,11 @@
+         (!defined (ACE_LACKS_MUTEXATTR_PSHARED) || !defined (ACE_LACKS_CONDATTR_PSHARED))) || \
+      (!defined (ACE_USES_FIFO_SEM) && \
+         (!defined (ACE_HAS_POSIX_SEM) || !defined (ACE_HAS_POSIX_SEM_TIMEOUT) || defined (ACE_LACKS_NAMED_POSIX_SEM)))
+-    ACE_OS::mutex_unlock (&event->eventdata_->lock_);
++    if (ACE_OS::mutex_unlock (&event->eventdata_->lock_) != 0)
++      return -1;
+ # else
+-    ACE_OS::sema_post (&event->lock_);
++    if (ACE_OS::sema_post (&event->lock_) != 0)
++      return -1;
+ # endif
+ 
+     if (result == -1)
+@@ -3138,9 +3386,11 @@
+         (!defined (ACE_LACKS_MUTEXATTR_PSHARED) || !defined (ACE_LACKS_CONDATTR_PSHARED))) || \
+      (!defined (ACE_USES_FIFO_SEM) && \
+         (!defined (ACE_HAS_POSIX_SEM) || !defined (ACE_HAS_POSIX_SEM_TIMEOUT) || defined (ACE_LACKS_NAMED_POSIX_SEM)))
+-      ACE_OS::mutex_unlock (&event->eventdata_->lock_);
++    if (ACE_OS::mutex_unlock (&event->eventdata_->lock_) != 0)
++      return -1;
+ # else
+-      ACE_OS::sema_post (&event->lock_);
++    if (ACE_OS::sema_post (&event->lock_) != 0)
++      return -1;
+ # endif
+ 
+       if (result == -1)
+@@ -3280,9 +3530,11 @@
+         (!defined (ACE_LACKS_MUTEXATTR_PSHARED) || !defined (ACE_LACKS_CONDATTR_PSHARED))) || \
+      (!defined (ACE_USES_FIFO_SEM) && \
+         (!defined (ACE_HAS_POSIX_SEM) || !defined (ACE_HAS_POSIX_SEM_TIMEOUT) || defined (ACE_LACKS_NAMED_POSIX_SEM)))
+-      ACE_OS::mutex_unlock (&event->eventdata_->lock_);
++    if (ACE_OS::mutex_unlock (&event->eventdata_->lock_) != 0)
++      return -1;
+ # else
+-      ACE_OS::sema_post (&event->lock_);
++    if (ACE_OS::sema_post (&event->lock_) != 0)
++      return -1;
+ # endif
+ 
+       if (result == -1)
+@@ -3433,10 +3685,14 @@
+     {
+       // Save/restore errno.
+       ACE_Errno_Guard error (errno);
+-      ACE_OS::mutex_destroy (&rw->lock_);
+-      ACE_OS::cond_destroy (&rw->waiting_readers_);
+-      ACE_OS::cond_destroy (&rw->waiting_writers_);
+-      ACE_OS::cond_destroy (&rw->waiting_important_writer_);
++
++      /* We're about to return -1 anyway, so
++       * no need to check return values of these clean-up calls:
++       */
++      (void)ACE_OS::mutex_destroy (&rw->lock_);
++      (void)ACE_OS::cond_destroy (&rw->waiting_readers_);
++      (void)ACE_OS::cond_destroy (&rw->waiting_writers_);
++      (void)ACE_OS::cond_destroy (&rw->waiting_important_writer_);
+     }
+   return result;
+ # else
