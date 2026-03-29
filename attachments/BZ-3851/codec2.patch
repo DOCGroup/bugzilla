@@ -1,0 +1,16 @@
+Index: Codecs.cpp
+===================================================================
+--- Codecs.cpp	(revision 626)
++++ Codecs.cpp	(working copy)
+@@ -207,10 +207,8 @@
+     }
+ 
+   if (errors)
+-    {
+-      delete[] result;
+       return -1;
+-    }
++
+   result[pos] = 0;
+   *output_len = pos;
+   return 0;
