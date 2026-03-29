@@ -1,0 +1,62 @@
+*** SSLIOP_Factory.cpp.0        2014-04-15 18:31:07.000000000 +0200
+--- SSLIOP_Factory.cpp  2014-11-29 00:51:04.592344311 +0100
+***************
+*** 120,125 ****
+--- 120,127 ----
+    CORBA::String_var ca_file;
+    CORBA::String_var ca_dir;
+    ACE_TCHAR *rand_path = 0;
++   
++   ACE_CString ec_param;
+  
+    int certificate_type = -1;
+    int private_key_type = -1;
+***************
+*** 302,307 ****
+--- 304,319 ----
+          }
+  
+        else if (ACE_OS::strcasecmp (argv[curarg],
++                                    ACE_TEXT("-SSLECparams")) == 0)
++         {
++           curarg++;
++           if (curarg < argc)
++             {
++               ec_param = argv[curarg];
++             }
++         }
++ 
++       else if (ACE_OS::strcasecmp (argv[curarg],
+                                     ACE_TEXT("-SSLCAfile")) == 0)
+          {
+            curarg++;
+***************
+*** 484,489 ****
+--- 496,522 ----
+          }
+      }
+  
++   if(ec_param.length() > 0)
++   {
++    if(ssl_ctx -> ec_params(ec_param.c_str()) != 0)
++    {
++      ORBSVCS_ERROR ((LM_ERROR,
++                     ACE_TEXT ("(%P|%t) SSLIOP_Factory: ")
++                     ACE_TEXT ("unable to set ")
++                     ACE_TEXT ("EC group <%C>\n"),
++                     ec_param.c_str() ));
++       return -1;
++     }
++     else
++     {
++           if (TAO_debug_level > 0)
++             ORBSVCS_DEBUG ((LM_INFO,
++                             ACE_TEXT ("(%P|%t) SSLIOP loaded ")
++                             ACE_TEXT ("EC group: %C\n"),
++                             ec_param.c_str()));
++     }
++   }
++ 
+    // The certificate must be set before the private key since the
+    // ACE_SSL_Context attempts to check the private key for
+    // consistency.  That check requires the certificate to be available
