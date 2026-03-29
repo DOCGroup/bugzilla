@@ -1,0 +1,202 @@
+Index: tao/IIOP_Endpoint.h
+===================================================================
+--- tao/IIOP_Endpoint.h	(revision 85567)
++++ tao/IIOP_Endpoint.h	(working copy)
+@@ -175,16 +175,20 @@
+ 
+   /// Generate preferred interfaces from the options passed in by the
+   /// user.
+-  CORBA::ULong preferred_interfaces (const char* csvPreferred, bool enforce);
++  CORBA::ULong preferred_interfaces (const char *csvPreferred,
++                                     bool enforce,
++                                     TAO_IIOP_Profile &profile);
+ 
+   /// Chain a new duplicate of ourself with the specified
+   /// local preferred interface.
+-  TAO_IIOP_Endpoint* add_local_endpoint(TAO_IIOP_Endpoint* ep, const char* local);
++  TAO_IIOP_Endpoint *add_local_endpoint(TAO_IIOP_Endpoint *ep,
++                                        const char *local,
++                                        TAO_IIOP_Profile &profile);
+ 
+   /// Canonical copy constructor
+   /**
+    * In private section to prevent clients from invoking this
+-   * accidentally. Clients should only use duplicate () to make a depp
++   * accidentally. Clients should only use duplicate () to make a deep
+    * copy
+    */
+   TAO_IIOP_Endpoint (const TAO_IIOP_Endpoint &);
+Index: tao/IIOP_Profile.cpp
+===================================================================
+--- tao/IIOP_Profile.cpp	(revision 85567)
++++ tao/IIOP_Profile.cpp	(working copy)
+@@ -58,6 +58,7 @@
+                  version),
+     endpoint_ (addr,
+                orb_core->orb_params ()->use_dotted_decimal_addresses ()),
++    last_endpoint_ (&this->endpoint_),
+     count_ (1)
+ {
+ }
+@@ -73,6 +74,7 @@
+                  object_key,
+                  version),
+     endpoint_ (host, port, addr),
++    last_endpoint_ (&this->endpoint_),
+     count_ (1)
+ {
+ }
+@@ -83,6 +85,7 @@
+                  TAO_GIOP_Message_Version (TAO_DEF_GIOP_MAJOR,
+                                            TAO_DEF_GIOP_MINOR)),
+     endpoint_ (),
++    last_endpoint_ (&this->endpoint_),
+     count_ (1)
+ {
+ }
+@@ -118,7 +121,7 @@
+       const char* csv = this->orb_core()->orb_params()->preferred_interfaces();
+       bool const enforce =
+         this->orb_core()->orb_params()->enforce_pref_interfaces();
+-      this->count_ += this->endpoint_.preferred_interfaces(csv, enforce);
++      this->count_ += this->endpoint_.preferred_interfaces(csv, enforce, *this);
+ 
+       return 1;
+     }
+@@ -394,8 +397,8 @@
+ void
+ TAO_IIOP_Profile::add_endpoint (TAO_IIOP_Endpoint *endp)
+ {
+-  endp->next_ = this->endpoint_.next_;
+-  this->endpoint_.next_ = endp;
++  this->last_endpoint_->next_ = endp;
++  this->last_endpoint_ = endp;
+ 
+   ++this->count_;
+ }
+@@ -416,27 +419,35 @@
+           // since the assignment operator does not copy the next_
+           // pointer, we must do it by hand
+           this->endpoint_.next_ = n->next_;
++          if (this->last_endpoint_ == n)
++            {
++              this->last_endpoint_ = &this->endpoint_;
++            }
+           delete n;
+         }
+       return;
+     }
+ 
+-  TAO_IIOP_Endpoint* last = &this->endpoint_;
++  TAO_IIOP_Endpoint* prev = &this->endpoint_;
+   TAO_IIOP_Endpoint* cur = this->endpoint_.next_;
+ 
+   while (cur != 0)
+   {
+     if (cur == endp)
+       break;
+-    last = cur;
++    prev = cur;
+     cur = cur->next_;
+   }
+ 
+   if (cur != 0)
+   {
+-    last->next_ = cur->next_;
++    prev->next_ = cur->next_;
+     cur->next_ = 0;
+     --this->count_;
++    if (this->last_endpoint_ == cur)
++      {
++        this->last_endpoint_ = prev;
++      }
+     delete cur;
+   }
+ }
+Index: tao/IIOP_Profile.h
+===================================================================
+--- tao/IIOP_Profile.h	(revision 85567)
++++ tao/IIOP_Profile.h	(working copy)
+@@ -72,7 +72,7 @@
+ 
+   /**
+    * Add @a endp to this profile's list of endpoints (it is inserted
+-   * next to the head of the list).  This profiles takes ownership of
++   * at the end of the list).  This profiles takes ownership of
+    * @a endp.
+    */
+   void add_endpoint (TAO_IIOP_Endpoint *endp);
+@@ -184,6 +184,9 @@
+ 
+   TAO_IIOP_Endpoint endpoint_;
+ 
++  /// For efficient insertion at the end of the list
++  TAO_IIOP_Endpoint *last_endpoint_;
++
+   /// Number of endpoints in the list headed by <endpoint_>.
+   CORBA::ULong count_;
+ 
+Index: tao/IIOP_Endpoint.cpp
+===================================================================
+--- tao/IIOP_Endpoint.cpp	(revision 85567)
++++ tao/IIOP_Endpoint.cpp	(working copy)
+@@ -11,6 +11,7 @@
+ #include "tao/IOPC.h"
+ #include "tao/debug.h"
+ #include "tao/ORB_Core.h"
++#include "tao/IIOP_Profile.h"
+ 
+ #include "ace/Log_Msg.h"
+ #include "ace/Guard_T.h"
+@@ -411,14 +412,16 @@
+   return "";
+ }
+ 
+-TAO_IIOP_Endpoint*
+-TAO_IIOP_Endpoint::add_local_endpoint(TAO_IIOP_Endpoint* ep, const char* local)
++TAO_IIOP_Endpoint *
++TAO_IIOP_Endpoint::add_local_endpoint(TAO_IIOP_Endpoint *ep,
++                                      const char *local,
++                                      TAO_IIOP_Profile &profile)
+ {
+-  TAO_Endpoint* tmp = ep->duplicate();
+-  ep->next_ = static_cast<TAO_IIOP_Endpoint*>(tmp);
+-  ep->next_->is_encodable_ = true;
+-  ep->next_->preferred_path_.host = CORBA::string_dup(local);
+-  return ep->next_;
++  TAO_IIOP_Endpoint *tmp = static_cast<TAO_IIOP_Endpoint *> (ep->duplicate ());
++  tmp->is_encodable_ = true;
++  tmp->preferred_path_.host = local;
++  profile.add_endpoint (tmp);
++  return tmp;
+ }
+ 
+ static void
+@@ -519,7 +522,9 @@
+ }
+ 
+ CORBA::ULong
+-TAO_IIOP_Endpoint::preferred_interfaces (const char* csv, bool enforce)
++TAO_IIOP_Endpoint::preferred_interfaces (const char *csv,
++                                         bool enforce,
++                                         TAO_IIOP_Profile &profile)
+ {
+   ACE_Vector<ACE_CString> preferred;
+   find_preferred_interfaces(this->host_.in(), csv, preferred);
+@@ -531,14 +536,14 @@
+     TAO_IIOP_Endpoint* ep = this;
+     for (size_t i = 1; i < count; ++i)
+     {
+-      ep = add_local_endpoint(ep, preferred[i].c_str());
++      ep = add_local_endpoint(ep, preferred[i].c_str(), profile);
+     }
+ 
+     // If we're not enforcing the preferred interfaces, then we can just add
+     // a new non-preferred endpoint to the end with a default local addr.
+     if (! enforce)
+     {
+-      ep = add_local_endpoint(ep, "");
++      ep = add_local_endpoint(ep, "", profile);
+     }
+     else
+     {
