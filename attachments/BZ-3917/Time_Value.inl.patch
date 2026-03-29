@@ -1,0 +1,11 @@
+--- Time_Value.inl.orig	2010-10-18 10:39:25.000000000 -0400
++++ Time_Value.inl	2010-10-18 14:48:49.000000000 -0400
+@@ -40,7 +40,7 @@
+ }
+ 
+ ACE_INLINE
+-ACE_Time_Value::operator const timeval * () const
++const timeval * ACE_Time_Value::get_timeval_p () const
+ {
+   // ACE_OS_TRACE ("ACE_Time_Value::operator const timeval *");
+ #if defined (ACE_HAS_TIME_T_LONG_MISMATCH)
