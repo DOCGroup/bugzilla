@@ -1,0 +1,4 @@
+interface CorbaSimple
+{
+	long hello(in long i);
+};
