@@ -1,0 +1,537 @@
+diff -upr ace//Name_Proxy.cpp ../modified-ace-6.0.1/ace//Name_Proxy.cpp
+--- ace//Name_Proxy.cpp	2010-08-05 02:04:31.000000000 -0700
++++ ../modified-ace-6.0.1/ace//Name_Proxy.cpp	2011-03-03 02:27:26.440584000 -0800
+@@ -4,6 +4,8 @@
+ #include "ace/Log_Msg.h"
+ #include "ace/os_include/arpa/os_inet.h"
+ 
++#include "ace/CDR_Stream.h"
++#include "ace/Auto_Ptr.h"
+ 
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+@@ -76,64 +78,111 @@ int
+ ACE_Name_Proxy::request_reply (ACE_Name_Request &request)
+ {
+   ACE_TRACE ("ACE_Name_Proxy::request_reply");
+-  void *buffer;
+-  ssize_t length = request.encode (buffer);
+ 
+-  if (length == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("%p\n"),
+-                       ACE_TEXT ("encode failed")),
+-                      -1);
+-
+-  // Transmit request via a blocking send.
++  ACE_OutputCDR header(ACE_CDR::MAX_ALIGNMENT + 8);
+ 
+-  if (this->peer_.send_n (buffer, length) != length)
++  // ensure enough buffer size (to prevent internal resize)
++  ACE_OutputCDR payload(request.length() + ACE_CDR::DEFAULT_BUFSIZE);
++  payload << request;
++
++  ACE_CDR::ULong p_size = payload.length();
++
++  header << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER);
++  header << p_size;
++
++  iovec iov[2];
++  iov[0].iov_base = header.begin ()->rd_ptr ();
++  iov[0].iov_len  = 8;
++  iov[1].iov_base = payload.begin ()->rd_ptr ();
++  iov[1].iov_len  = p_size;
++
++  // send header message
++  if (this->peer_.sendv_n (iov, 2) == -1)
++  {
+     ACE_ERROR_RETURN ((LM_ERROR,
+                        ACE_TEXT ("%p\n"),
+                        ACE_TEXT ("send_n failed")),
+                       -1);
++  }
+   else
++  {
++    ACE_Name_Reply reply;
++    // reply is initialized to its size per default
++    ACE_CDR::ULong reply_size = 4 // for storing byte order 
++       + reply.length(); // the size of the reply object
++    
++    ACE_CDR::Boolean byte_order;
++
++    //create new MessageBlock for header data
++    ACE_Message_Block *reply_msg = 0;
++    ACE_NEW_RETURN (reply_msg,
++      ACE_Message_Block(ACE_DEFAULT_CDR_BUFSIZE),
++      -1);
++
++    // set pointer under auto_ptr control
++    auto_ptr <ACE_Message_Block> reply_msg_ap (reply_msg);
++
++    // Align the Message Block for a CDR stream
++    ACE_CDR::mb_align (reply_msg_ap.get());
++
++    // Receive reply via blocking read.
++    if (this->peer_.recv_n (reply_msg_ap->wr_ptr(),
++                            reply_size) == -1)
+     {
+-      ACE_Name_Reply reply;
++      ACE_ERROR_RETURN ((LM_ERROR,
++                         ACE_TEXT ("%p\n"),
++                         ACE_TEXT ("recv failed")),
++                        -1);
++    }
++    else 
++    {
++      reply_msg_ap->wr_ptr(reply_size);
++
++      ACE_InputCDR input(reply_msg_ap.get());
+ 
+-      // Receive reply via blocking read.
++      input >> ACE_InputCDR::to_boolean (byte_order);
++      input.reset_byte_order(byte_order);
++
++      // read the reply object
++      input >> reply;
+ 
+-      if (this->peer_.recv_n (&reply,
+-                              sizeof reply) == -1)
+-        ACE_ERROR_RETURN ((LM_ERROR,
+-                           ACE_TEXT ("%p\n"),
+-                           ACE_TEXT ("recv failed")),
+-                          -1);
+-      else if (reply.decode () == -1)
+-        ACE_ERROR_RETURN ((LM_ERROR,
+-                           ACE_TEXT ("%p\n"),
+-                           ACE_TEXT ("decode failed")),
+-                          -1);
+       errno = int (reply.errnum ());
+       return reply.status ();
+     }
++  } // end if(peer.sendv_n(iov,2) == -1)
+ }
+ 
+ int
+ ACE_Name_Proxy::send_request (ACE_Name_Request &request)
+ {
+   ACE_TRACE ("ACE_Name_Proxy::send_request");
+-  void *buffer;
+-  ssize_t length = request.encode (buffer);
+ 
+-  if (length == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR,
+-                       ACE_TEXT ("%p\n"),
+-                       ACE_TEXT ("encode failed")),
+-                      -1);
++  ACE_OutputCDR header(ACE_CDR::MAX_ALIGNMENT + 8);
+ 
+-  // Transmit request via a blocking send.
+-
+-  else if (this->peer_.send_n (buffer, length) != length)
++  // ensure enough buffer size (to prevent internal resize)
++  ACE_OutputCDR payload(request.length() + ACE_CDR::DEFAULT_BUFSIZE);
++  payload << request;
++
++  ACE_CDR::ULong p_size = payload.length();
++
++  header << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER);
++  header << p_size;
++
++  iovec iov[2];
++  iov[0].iov_base = header.begin ()->rd_ptr ();
++  iov[0].iov_len  = 8;
++  iov[1].iov_base = payload.begin ()->rd_ptr ();
++  iov[1].iov_len  = p_size;
++
++  // send message vector
++  if (this->peer_.sendv_n (iov, 2) == -1)
++  {
+     ACE_ERROR_RETURN ((LM_ERROR,
+                        ACE_TEXT ("%p\n"),
+                        ACE_TEXT ("send_n failed")),
+                       -1);
++  }
++
+   return 0;
+ }
+ 
+@@ -141,10 +190,23 @@ int
+ ACE_Name_Proxy::recv_reply (ACE_Name_Request &reply)
+ {
+   ACE_TRACE ("ACE_Name_Proxy::recv_reply");
+-  // Read the first 4 bytes to get the length of the message This
+-  // implementation assumes that the first 4 bytes are the length of
+-  // the message.
+-  ssize_t n = this->peer_.recv ((void *) &reply, sizeof (ACE_UINT32));
++
++  ACE_Message_Block *header = 0;
++  ACE_CDR::Boolean byte_order;
++
++  //create new MessageBlock for header data
++  ACE_NEW_RETURN (header,
++    ACE_Message_Block (ACE_DEFAULT_CDR_BUFSIZE),
++    -1);
++
++  //set pointer under auto_ptr control
++  auto_ptr <ACE_Message_Block> header_ap (header);
++
++  // Align the Message Block for a CDR stream
++  ACE_CDR::mb_align (header_ap.get());
++
++  // receive header data from peer-stream
++  ssize_t n = this->peer_.recv (header_ap->wr_ptr(), 8);
+ 
+   switch (n)
+     {
+@@ -157,42 +219,54 @@ ACE_Name_Proxy::recv_reply (ACE_Name_Req
+                   ACE_TEXT ("%p got %d bytes, expected %d bytes\n"),
+                   ACE_TEXT ("recv failed"),
+                   n,
+-                  sizeof (ACE_UINT32)));
++                  8));
+       // FALLTHROUGH
+     case 0:
+       // We've shutdown unexpectedly
+       return -1;
+       // NOTREACHED
+-    case sizeof (ACE_UINT32):
++    case 8:
+       {
+-        // Transform the length into host byte order.
+-        ssize_t length = ACE_NTOHL (reply.length ());
++        header_ap->wr_ptr (8);
++
++        // Create a CDR stream to parse the header.
++        ACE_InputCDR header_cdr (header_ap.get());
++
++        // Extract the byte-order and use helper methods to disambiguate
++        // octet, booleans, and chars.
++        header_cdr >> ACE_InputCDR::to_boolean (byte_order);
++        header_cdr.reset_byte_order (byte_order);
++
++        ACE_CDR::ULong payload_size;
++        header_cdr >> payload_size;
++
++        ACE_Message_Block *payload;
++        ACE_NEW_RETURN(payload, ACE_Message_Block(payload_size), -1);
++        auto_ptr <ACE_Message_Block> payload_ap(payload);
++
++        ACE_CDR::mb_align(payload);
+ 
+         // Receive the rest of the request message.
+         // @@ beware of blocking read!!!.
+-        n = this->peer_.recv ((void *) (((char *) &reply)
+-                                        + sizeof (ACE_UINT32)),
+-                              length - sizeof (ACE_UINT32));
++        n = this->peer_.recv (payload_ap.get()->wr_ptr(),
++                              payload_size);
+ 
+         // Subtract off the size of the part we skipped over...
+-        if (n != ssize_t (length - sizeof (ACE_UINT32)))
++        if (n != ssize_t(payload_size))
+           {
+             ACE_ERROR ((LM_ERROR,
+                         ACE_TEXT ("%p expected %d, got %d\n"),
+                         ACE_TEXT ("invalid length"),
+-                        length,
++                        payload_size,
+                         n));
+             return -1;
+           }
+ 
+-        // Decode the request into host byte order.
+-        if (reply.decode () == -1)
+-          {
+-            ACE_ERROR ((LM_ERROR,
+-                        ACE_TEXT ("%p\n"),
+-                        ACE_TEXT ("decode failed")));
+-            return -1;
+-          }
++        payload->wr_ptr(payload_size);
++        // get payload with correct byte order
++        ACE_InputCDR payload_cdr(payload, byte_order);
++        // extract reply object
++        payload_cdr >> reply;
+       }
+     }
+   return 0;
+diff -upr ace//Name_Request_Reply.cpp ../modified-ace-6.0.1/ace//Name_Request_Reply.cpp
+--- ace//Name_Request_Reply.cpp	2010-08-16 06:03:34.000000000 -0700
++++ ../modified-ace-6.0.1/ace//Name_Request_Reply.cpp	2011-03-03 02:27:26.440584000 -0800
+@@ -3,11 +3,15 @@
+ #include "ace/Name_Request_Reply.h"
+ #include "ace/Basic_Types.h"
+ #include "ace/CDR_Base.h"
++#include "ace/CDR_Stream.h"
+ #include "ace/Log_Msg.h"
+ #include "ace/Time_Value.h"
+ #include "ace/Truncate.h"
+ #include "ace/OS_NS_string.h"
+ #include "ace/os_include/arpa/os_inet.h"
++#include "ace/Auto_Ptr.h"
++#include "ace/OS_Memory.h"
++#include "ace/SString.h"
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+@@ -16,6 +20,10 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ ACE_Name_Request::ACE_Name_Request (void)
+ {
+   ACE_TRACE ("ACE_Name_Request::ACE_Name_Request");
++
++  this->name_len (0);
++  this->value_len (0);
++  this->type_len (0);
+ }
+ 
+ // Create a ACE_Name_Request message.
+@@ -31,6 +39,7 @@ ACE_Name_Request::ACE_Name_Request (
+   ACE_Time_Value *timeout) // Max time waiting for request.
+ {
+   ACE_TRACE ("ACE_Name_Request::ACE_Name_Request");
++
+   this->msg_type (t);
+   this->name_len (name_length);
+   this->value_len (value_length);
+@@ -84,6 +93,14 @@ ACE_Name_Request::init (void)
+   this->length (sizeof this->transfer_);
+ }
+ 
++void 
++ACE_Name_Request::reset_pointers(ACE_UINT32 name_length, ACE_UINT32 value_length)
++{
++  this->name_ = this->transfer_.data_;
++  this->value_  = &this->name_[name_length / sizeof (ACE_WCHAR_T)];
++  this->type_  = (char *)(&this->value_[value_length / sizeof (ACE_WCHAR_T)]); //
++}
++
+ // = Set/get the length of the encoded/decoded message.
+ 
+ ACE_UINT32
+@@ -248,9 +265,11 @@ void
+ ACE_Name_Request::type (const char *c)
+ {
+   ACE_TRACE ("ACE_Name_Request::type");
+-  ACE_OS::strsncpy (this->type_,
+-                    c,
+-                    sizeof this->type_);
++  (void) ACE_OS::memcpy (this->type_,
++                         c,
++                         this->type_len());
++  // ensure string end to safely use ACE_OS::strcpy
++  this->type_[this->type_len()] = '\0';
+ }
+ 
+ // Encode the transfer buffer into network byte order so that it can
+@@ -325,6 +344,117 @@ ACE_Name_Request::decode (void)
+   return 0;
+ }
+ 
++int
++operator<< (ACE_OutputCDR &cdr,
++            const ACE_Name_Request &name_request)
++{
++  // get the number of characters indipendent of the WCHAR size
++  ACE_CDR::ULong name_len = name_request.name_len() / sizeof(ACE_WCHAR_T);
++  ACE_CDR::ULong value_len = name_request.value_len() / sizeof(ACE_WCHAR_T);
++
++  // calculate the size of the whole stream (indipendent of the WCHAR)
++  ACE_CDR::ULong length = name_request.length() - 
++     (name_request.name_len() + name_request.value_len()) +
++     (name_len + value_len);
++
++  cdr << length;
++  cdr << ACE_CDR::ULong(name_request.msg_type());
++  cdr << ACE_CDR::ULong(name_request.block_forever());
++
++  ACE_Time_Value timeout = name_request.timeout();
++  cdr << ACE_CDR::ULongLong(timeout.sec());
++  cdr << ACE_CDR::ULong(timeout.usec());
++
++  cdr << name_len;
++  cdr << value_len;
++  cdr << ACE_CDR::ULong(name_request.type_len());
++
++  // get a real wide string
++  ACE_NS_WString wname(name_request.name(), name_len);
++  ACE_NS_WString wvalue(name_request.value(), value_len);
++
++  // convert into interoperable representation
++  ACE_TString tname(
++     ACE_TEXT_WCHAR_TO_TCHAR( wname.fast_rep() ),
++     name_len);
++
++  // use interoperable string representation
++  ACE_TString tvalue(
++     ACE_TEXT_WCHAR_TO_TCHAR( wvalue.fast_rep() ),
++     value_len);
++
++  ACE_CString type(name_request.type(), 
++     name_request.type_len());
++
++  cdr << tname;
++  cdr << tvalue;
++  cdr << type;
++
++  return cdr.good_bit ();
++}
++
++int
++operator>> (ACE_InputCDR &cdr,
++            ACE_Name_Request &name_request)
++{
++  // temporary variables
++  ACE_CDR::ULong len;
++  ACE_CDR::ULong type;
++  ACE_CDR::ULong block;
++  ACE_CDR::ULongLong sec;
++  ACE_CDR::ULong usec;
++  ACE_CDR::ULong name_len;
++  ACE_CDR::ULong value_len;
++  ACE_CDR::ULong type_len;
++
++  if( (cdr >> len) &&
++      (cdr >> type) &&
++      (cdr >> block) &&
++      (cdr >> sec) &&
++      (cdr >> usec) &&
++      (cdr >> name_len) &&
++      (cdr >> value_len) &&
++      (cdr >> type_len))
++  {
++    //restore the correct length (taking local WCHAR size into account)
++    ACE_CDR::ULong w_name_len = name_len * sizeof(ACE_WCHAR_T);
++    ACE_CDR::ULong w_value_len = value_len * sizeof(ACE_WCHAR_T);
++    ACE_CDR::ULong w_length = len - 
++       (name_len + value_len) + 
++       (w_name_len + w_value_len);
++
++    name_request.length(w_length);
++    name_request.msg_type(type);
++    name_request.block_forever(block);
++
++    name_request.timeout(ACE_Time_Value(sec, usec));
++
++    // set up internal pointers correctly!
++    name_request.reset_pointers(w_name_len, w_value_len);
++
++    // set up string sizes
++    name_request.name_len(w_name_len);
++    name_request.value_len(w_value_len);
++    name_request.type_len(type_len);
++
++    ACE_TString tname;
++    ACE_TString tvalue;
++    ACE_CString type;
++
++    // read interoperable string representations
++    cdr >> tname;
++    cdr >> tvalue;
++    cdr >> type;
++
++    // convert into WCHAR and copy the strings
++    name_request.name(ACE_TEXT_ALWAYS_WCHAR(tname.fast_rep()));
++    name_request.value(ACE_TEXT_ALWAYS_WCHAR(tvalue.fast_rep()));
++    name_request.type(type.c_str());
++  }
++
++  return cdr.good_bit ();
++}
++
+ // Print out the current values of the ACE_Name_Request.
+ 
+ void
+@@ -540,6 +670,36 @@ ACE_Name_Reply::decode (void)
+   return 0;
+ }
+ 
++int
++operator<< (ACE_OutputCDR &cdr,
++            const ACE_Name_Reply &name_reply)
++{
++  cdr << ACE_CDR::ULong(name_reply.length());
++  cdr << ACE_CDR::Long(name_reply.msg_type());
++  cdr << ACE_CDR::ULong(name_reply.errnum());
++
++  return cdr.good_bit ();
++}
++
++int
++operator>> (ACE_InputCDR &cdr,
++            ACE_Name_Reply &name_reply)
++{
++  ACE_CDR::ULong length;
++  ACE_CDR::Long type;
++  ACE_CDR::ULong errnum;
++
++  if( (cdr >> length) &&
++      (cdr >> type) &&
++      (cdr >> errnum))
++  {
++     name_reply.length(length);
++     name_reply.msg_type(type);
++     name_reply.errnum(errnum);
++  }
++  return cdr.good_bit ();
++}
++
+ // Print out current values of the ACE_Name_Reply object.
+ 
+ void
+diff -upr ace//Name_Request_Reply.h ../modified-ace-6.0.1/ace//Name_Request_Reply.h
+--- ace//Name_Request_Reply.h	2009-02-03 11:46:05.000000000 -0800
++++ ../modified-ace-6.0.1/ace//Name_Request_Reply.h	2011-03-03 02:27:42.148583995 -0800
+@@ -21,12 +21,16 @@
+ 
+ #include /**/ "ace/pre.h"
+ 
+-#include "ace/Basic_Types.h"
++#include /**/ "ace/ACE_export.h"
+ 
+ #if !defined (ACE_LACKS_PRAGMA_ONCE)
+ # pragma once
+ #endif /* ACE_LACKS_PRAGMA_ONCE */
+ 
++#include "ace/Default_Constants.h"
++#include "ace/Basic_Types.h"
++#include "ace/iosfwd.h"
++
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ class ACE_Time_Value;
+@@ -85,6 +89,9 @@ public:
+   /// before a request is sent.
+   void init (void);
+ 
++  /// helper method to set up internal name, value and type pointers
++  void reset_pointers(ACE_UINT32 name_length, ACE_UINT32 value_length);
++
+   // = Set/get the length of the encoded/decoded message.
+   ACE_UINT32 length (void) const;
+   void length (ACE_UINT32);
+@@ -185,6 +192,14 @@ private:
+   char *type_;
+ };
+ 
++// Forward decls.
++class ACE_InputCDR;
++class ACE_OutputCDR;
++
++// iostream operators for ACE_Name_Request.
++ACE_Export int operator>> (ACE_InputCDR &cdr, ACE_Name_Request &name_request);
++ACE_Export int operator<< (ACE_OutputCDR &cdr, const ACE_Name_Request &name_request);
++
+ /**
+  * @class ACE_Name_Reply
+  *
+@@ -258,6 +273,10 @@ private:
+   Transfer transfer_;
+ };
+ 
++// iostream operators for ACE_Name_Reply.
++ACE_Export int operator>> (ACE_InputCDR &cdr, ACE_Name_Reply &name_reply);
++ACE_Export int operator<< (ACE_OutputCDR &cdr, const ACE_Name_Reply &name_reply);
++
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
+ #include /**/ "ace/post.h"
