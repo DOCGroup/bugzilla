@@ -1,0 +1,14 @@
+Index: tao/PortableServer/Root_POA.cpp
+===================================================================
+--- tao/PortableServer/Root_POA.cpp	(revision 92005)
++++ tao/PortableServer/Root_POA.cpp	(working copy)
+@@ -2007,6 +2007,9 @@
+ 
+       obj = this->orb_core_.orb ()->string_to_object (ior.c_str ());
+ 
++      // type_id info is not in the corbaloc, so set it here
++      obj->_stubobj()->type_id = type_id;
++
+       return obj;
+     }
+ 
