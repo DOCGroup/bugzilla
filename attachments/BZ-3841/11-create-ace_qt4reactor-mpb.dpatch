@@ -1,0 +1,17 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 11-create-ace_qt4reactor-mpb.dpatch by Marek Brudka <mbrudka@aster.pl>
+##
+## DP: Creates ace_qt4reactor.mpb [should be added to the upstream] 
+
+@DPATCH@
+--- ACE_wrappers.orig/bin/MakeProjectCreator/config/ace_qt4reactor.mpb	1970-01-01 01:00:00.000000000 +0100
++++ ACE_wrappers/bin/MakeProjectCreator/config/ace_qt4reactor.mpb	2010-03-26 11:20:33.000000000 +0100
+@@ -0,0 +1,8 @@
++// -*- MPC -*-
++// $Id: ace_qtreactor.mpb 82419 2008-07-25 14:09:36Z johnnyw $
++
++project : acelib, ace_qt4 {
++  requires += ace_qt4reactor
++  after    += ACE_QtReactor
++  libs     += ACE_QtReactor
++}
