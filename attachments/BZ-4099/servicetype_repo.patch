@@ -1,0 +1,14 @@
+diff -Naur ACE_wrappers.org/TAO/orbsvcs/orbsvcs/Trader/Service_Type_Repository.cpp ACE_wrappers/TAO/orbsvcs/orbsvcs/Trader/Service_Type_Repository.cpp
+--- ACE_wrappers.org/TAO/orbsvcs/orbsvcs/Trader/Service_Type_Repository.cpp	2013-02-20 17:01:34.184146669 +0100
++++ ACE_wrappers/TAO/orbsvcs/orbsvcs/Trader/Service_Type_Repository.cpp	2013-02-20 17:05:28.116495154 +0100
+@@ -177,7 +177,10 @@
+ 
+       if (all
+           || num < type_info->type_struct_.incarnation)
++      {
++        CORBA::string_free( types[iNdx] ); 
+         types[i++] = CORBA::string_dup (type_name);
++      };
+     }
+ 
+   CosTradingRepos::ServiceTypeRepository::ServiceTypeNameSeq *tmp = 0;
