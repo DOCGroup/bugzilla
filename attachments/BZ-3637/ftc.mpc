@@ -1,0 +1,30 @@
+
+project(*IDL): taoidldefaults {
+  IDL_Files {
+    CorbaSimple.idl
+  }
+  custom_only = 1
+}
+
+project(*server): taoserver, iortable {
+  exename = server
+  after += *IDL
+  Source_Files {
+    CorbaSimpleC.cpp
+    CorbaSimpleS.cpp
+    server.cpp
+  }
+  IDL_Files {
+  }
+}
+
+project(*client): taoclient {
+  exename = client
+  after += *IDL
+  Source_Files {
+    CorbaSimpleC.cpp
+    client.cpp
+  }
+  IDL_Files {
+  }
+}
