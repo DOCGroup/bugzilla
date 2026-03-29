@@ -1,0 +1,664 @@
+Index: tao/Connection_Handler.h
+===================================================================
+--- tao/Connection_Handler.h	(revision 85793)
++++ tao/Connection_Handler.h	(working copy)
+@@ -136,6 +136,8 @@
+   /// Release the OS resources related to this handler.
+   virtual int release_os_resources (void);
+ 
++  virtual int handle_write_ready (const ACE_Time_Value *timeout);
++
+   /*
+    * Hook to add public methods from concrete connection handler
+    * implementation onto the base connection handler.
+Index: tao/Transport.h
+===================================================================
+--- tao/Transport.h	(revision 85793)
++++ tao/Transport.h	(working copy)
+@@ -364,8 +364,35 @@
+    */
+   TAO_Wait_Strategy *wait_strategy (void) const;
+ 
++  enum Drain_Result_Enum
++    {
++      DR_ERROR = -1,
++      DR_OK = 0,
++      DR_QUEUE_EMPTY = 1, // used internally, not returned from drain_queue()
++      DR_WOULDBLOCK = 2
++    };
++
++  /// The handle_output and drain_queue* functions return objects of this
++  /// struct instead of the enum value directly so the compiler will catch
++  /// any uses that assign the return value to an int.
++  struct Drain_Result
++  {
++    Drain_Result (Drain_Result_Enum dre) : dre_(dre) {}
++    Drain_Result_Enum dre_;
++
++    bool operator== (Drain_Result rhs) const
++    {
++      return this->dre_ == rhs.dre_;
++    }
++
++    bool operator!= (Drain_Result rhs) const
++    {
++      return this->dre_ != rhs.dre_;
++    }
++  };
++
+   /// Callback method to reactively drain the outgoing data queue
+-  int handle_output (TAO::Transport::Drain_Constraints const & c);
++  Drain_Result handle_output (TAO::Transport::Drain_Constraints const & c);
+ 
+   /// Get the bidirectional flag
+   int bidirectional_flag (void) const;
+@@ -895,14 +922,11 @@
+   /**
+    * As the outgoing data is drained this method is invoked to send as
+    * much of the current message as possible.
+-   *
+-   * Returns 0 if there is more data to send, -1 if there was an error
+-   * and 1 if the message was completely sent.
+    */
+-  int drain_queue (TAO::Transport::Drain_Constraints const & dc);
++  Drain_Result drain_queue (TAO::Transport::Drain_Constraints const & dc);
+ 
+   /// Implement drain_queue() assuming the lock is held
+-  int drain_queue_i (TAO::Transport::Drain_Constraints const & dc);
++  Drain_Result drain_queue_i (TAO::Transport::Drain_Constraints const & dc);
+ 
+   /// Check if there are messages pending in the queue
+   /**
+@@ -914,7 +938,7 @@
+   bool queue_is_empty_i (void) const;
+ 
+   /// A helper routine used in drain_queue_i()
+-  int drain_queue_helper (int &iovcnt, iovec iov[],
++  Drain_Result drain_queue_helper (int &iovcnt, iovec iov[],
+       TAO::Transport::Drain_Constraints const & dc);
+ 
+   /// These classes need privileged access to:
+Index: tao/Block_Flushing_Strategy.cpp
+===================================================================
+--- tao/Block_Flushing_Strategy.cpp	(revision 85793)
++++ tao/Block_Flushing_Strategy.cpp	(working copy)
+@@ -3,6 +3,8 @@
+ #include "tao/Block_Flushing_Strategy.h"
+ #include "tao/Transport.h"
+ #include "tao/Queued_Message.h"
++#include "tao/Connection_Handler.h"
++#include "ace/Countdown_Time.h"
+ 
+ ACE_RCSID(tao, Block_Flushing_Strategy, "$Id$")
+ 
+@@ -21,15 +23,37 @@
+ }
+ 
+ int
++TAO_Block_Flushing_Strategy::call_handle_output (TAO_Transport *transport,
++    const TAO::Transport::Drain_Constraints &dc)
++{
++  switch (transport->handle_output (dc).dre_)
++    {
++    case TAO_Transport::DR_ERROR: return -1;
++    case TAO_Transport::DR_QUEUE_EMPTY: // won't happen, fall-through anyway
++    case TAO_Transport::DR_OK: return 0;
++    case TAO_Transport::DR_WOULDBLOCK:
++      {
++        ACE_Countdown_Time counter (dc.timeout ());
++        TAO_Connection_Handler &ch = *transport->connection_handler ();
++        if (ch.handle_write_ready (dc.timeout ()) == -1)
++          {
++            return -1;
++          }
++        return 0;
++      }
++    }
++  return 0;
++}
++
++int
+ TAO_Block_Flushing_Strategy::flush_message (TAO_Transport *transport,
+                                             TAO_Queued_Message *msg,
+                                             ACE_Time_Value *max_wait_time)
+ {
++  TAO::Transport::Drain_Constraints dc (max_wait_time, true);
+   while (!msg->all_data_sent ())
+     {
+-      TAO::Transport::Drain_Constraints dc(
+-          max_wait_time, true);
+-      if (transport->handle_output (dc) == -1)
++      if (this->call_handle_output (transport, dc) == -1)
+         return -1;
+     }
+   return 0;
+@@ -39,11 +63,10 @@
+ TAO_Block_Flushing_Strategy::flush_transport (TAO_Transport *transport,
+                                               ACE_Time_Value *max_wait_time)
+ {
++  TAO::Transport::Drain_Constraints dc (max_wait_time, true);
+   while (!transport->queue_is_empty ())
+     {
+-      TAO::Transport::Drain_Constraints dc(
+-          max_wait_time, true);
+-      if (transport->handle_output (dc) == -1)
++      if (this->call_handle_output (transport, dc) == -1)
+         return -1;
+     }
+   return 0;
+Index: tao/IIOP_Connection_Handler.cpp
+===================================================================
+--- tao/IIOP_Connection_Handler.cpp	(revision 85793)
++++ tao/IIOP_Connection_Handler.cpp	(working copy)
+@@ -668,6 +668,13 @@
+     }
+ }
+ 
++int
++TAO_IIOP_Connection_Handler::handle_write_ready (const ACE_Time_Value *timeout)
++{
++  return ACE::handle_write_ready (this->peer ().get_handle (), timeout);
++}
++
++
+ //@@ CONNECTION_HANDLER_SPL_COPY_HOOK_END
+ /*
+  * End copy hook
+Index: tao/Connection_Handler.cpp
+===================================================================
+--- tao/Connection_Handler.cpp	(revision 85793)
++++ tao/Connection_Handler.cpp	(working copy)
+@@ -208,7 +208,8 @@
+ 
+   // The default constraints are to never block.
+   TAO::Transport::Drain_Constraints dc;
+-  return_value = this->transport ()->handle_output (dc);
++  return_value =
++    (this->transport ()->handle_output (dc) == TAO_Transport::DR_OK) ? 0 : -1;
+ 
+   this->pos_io_hook (return_value);
+ 
+Index: tao/Strategies/SHMIOP_Connection_Handler.h
+===================================================================
+--- tao/Strategies/SHMIOP_Connection_Handler.h	(revision 85793)
++++ tao/Strategies/SHMIOP_Connection_Handler.h	(working copy)
+@@ -93,6 +93,7 @@
+    * @name TAO_Connection Handler overloads
+    */
+   virtual int release_os_resources (void);
++  virtual int handle_write_ready (const ACE_Time_Value *timeout);
+   //@}
+ 
+ private:
+Index: tao/Strategies/UIOP_Connection_Handler.cpp
+===================================================================
+--- tao/Strategies/UIOP_Connection_Handler.cpp	(revision 85793)
++++ tao/Strategies/UIOP_Connection_Handler.cpp	(working copy)
+@@ -238,6 +238,12 @@
+   return cache.cache_transport (&prop, this->transport ());
+ }
+ 
++int
++TAO_UIOP_Connection_Handler::handle_write_ready (const ACE_Time_Value *t)
++{
++  return ACE::handle_write_ready (this->peer ().get_handle (), t);
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+ #endif /*TAO_HAS_UIOP == 1*/
+Index: tao/Strategies/SHMIOP_Connection_Handler.cpp
+===================================================================
+--- tao/Strategies/SHMIOP_Connection_Handler.cpp	(revision 85793)
++++ tao/Strategies/SHMIOP_Connection_Handler.cpp	(working copy)
+@@ -266,6 +266,12 @@
+   return cache.cache_transport (&prop, this->transport ());
+ }
+ 
++int
++TAO_SHMIOP_Connection_Handler::handle_write_ready (const ACE_Time_Value *t)
++{
++  return ACE::handle_write_ready (this->peer ().get_handle (), t);
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+ #endif /*(TAO_HAS_SHMIOP) && (TAO_HAS_SHMIOP != 0) */
+Index: tao/Strategies/DIOP_Connection_Handler.h
+===================================================================
+--- tao/Strategies/DIOP_Connection_Handler.h	(revision 85793)
++++ tao/Strategies/DIOP_Connection_Handler.h	(working copy)
+@@ -124,6 +124,7 @@
+    * @name TAO_Connection Handler overloads
+    */
+   virtual int release_os_resources (void);
++  virtual int handle_write_ready (const ACE_Time_Value *timeout);
+   //@}
+ 
+   /// Helper method used by the set_dscp_codepoint () methods
+Index: tao/Strategies/UIOP_Connection_Handler.h
+===================================================================
+--- tao/Strategies/UIOP_Connection_Handler.h	(revision 85793)
++++ tao/Strategies/UIOP_Connection_Handler.h	(working copy)
+@@ -90,6 +90,7 @@
+    * @name TAO_Connection Handler overloads
+    */
+   virtual int release_os_resources (void);
++  virtual int handle_write_ready (const ACE_Time_Value *timeout);
+   //@}
+ };
+ 
+Index: tao/Strategies/DIOP_Connection_Handler.cpp
+===================================================================
+--- tao/Strategies/DIOP_Connection_Handler.cpp	(revision 85793)
++++ tao/Strategies/DIOP_Connection_Handler.cpp	(working copy)
+@@ -435,6 +435,12 @@
+   return 0;
+ }
+ 
++int
++TAO_DIOP_Connection_Handler::handle_write_ready (const ACE_Time_Value *t)
++{
++  return ACE::handle_write_ready (this->peer ().get_handle (), t);
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+ #endif /* TAO_HAS_DIOP && TAO_HAS_DIOP != 0 */
+Index: tao/Strategies/SCIOP_Connection_Handler.h
+===================================================================
+--- tao/Strategies/SCIOP_Connection_Handler.h	(revision 85793)
++++ tao/Strategies/SCIOP_Connection_Handler.h	(working copy)
+@@ -117,6 +117,7 @@
+    */
+   //  void handle_close_i (void);
+   virtual int release_os_resources (void);
++  virtual int handle_write_ready (const ACE_Time_Value *timeout);
+   //@}
+ 
+ private:
+Index: tao/Strategies/SCIOP_Connection_Handler.cpp
+===================================================================
+--- tao/Strategies/SCIOP_Connection_Handler.cpp	(revision 85793)
++++ tao/Strategies/SCIOP_Connection_Handler.cpp	(working copy)
+@@ -460,6 +460,12 @@
+   return 0;
+ }
+ 
++int
++TAO_SCIOP_Connection_Handler::handle_write_ready (const ACE_Time_Value *t)
++{
++  return ACE::handle_write_ready (this->peer ().get_handle (), t);
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+ 
+ #endif /* TAO_HAS_SCIOP == 1 */
+Index: tao/Transport.cpp
+===================================================================
+--- tao/Transport.cpp	(revision 85793)
++++ tao/Transport.cpp	(working copy)
+@@ -521,7 +521,7 @@
+  *  Methods called and used in the output path of the ORB.
+  *
+  */
+-int
++TAO_Transport::Drain_Result
+ TAO_Transport::handle_output (TAO::Transport::Drain_Constraints const & dc)
+ {
+   if (TAO_debug_level > 3)
+@@ -538,7 +538,7 @@
+   // The flushing strategy (potentially via the Reactor) wants to send
+   // more data, first check if there is a current message that needs
+   // more sending...
+-  int const retval = this->drain_queue (dc);
++  Drain_Result const retval = this->drain_queue (dc);
+ 
+   if (TAO_debug_level > 3)
+     {
+@@ -546,7 +546,7 @@
+                   ACE_TEXT ("TAO (%P|%t) - Transport[%d]::handle_output, ")
+                   ACE_TEXT ("drain_queue returns %d/%d\n"),
+                   this->id (),
+-                  retval, ACE_ERRNO_GET));
++                  static_cast<int> (retval.dre_), ACE_ERRNO_GET));
+     }
+ 
+   // Any errors are returned directly to the Reactor
+@@ -592,14 +592,14 @@
+ 
+   synch_message.push_back (this->head_, this->tail_);
+ 
+-  int const n = this->drain_queue_i (dc);
++  Drain_Result const n = this->drain_queue_i (dc);
+ 
+-  if (n == -1)
++  if (n == DR_ERROR)
+     {
+       synch_message.remove_from_list (this->head_, this->tail_);
+       return -1; // Error while sending...
+     }
+-  else if (n == 1)
++  else if (n == DR_QUEUE_EMPTY)
+     {
+       bytes_transferred = total_length;
+       return 1;  // Empty queue, message was sent..
+@@ -780,14 +780,14 @@
+   TAO::Transport::Drain_Constraints dc(
+       max_wait_time, this->using_blocking_io_for_synch_messages());
+ 
+-  int const n = this->drain_queue_i (dc);
++  Drain_Result const n = this->drain_queue_i (dc);
+ 
+-  if (n == -1)
++  if (n == DR_ERROR)
+     {
+       synch_message.remove_from_list (this->head_, this->tail_);
+       return -1; // Error while sending...
+     }
+-  else if (n == 1)
++  else if (n == DR_QUEUE_EMPTY)
+     {
+       return 1;  // Empty queue, message was sent..
+     }
+@@ -911,13 +911,13 @@
+   return 0;
+ }
+ 
+-int
++TAO_Transport::Drain_Result
+ TAO_Transport::drain_queue (TAO::Transport::Drain_Constraints const & dc)
+ {
+-  ACE_GUARD_RETURN (ACE_Lock, ace_mon, *this->handler_lock_, -1);
+-  int const retval = this->drain_queue_i (dc);
++  ACE_GUARD_RETURN (ACE_Lock, ace_mon, *this->handler_lock_, DR_ERROR);
++  Drain_Result const retval = this->drain_queue_i (dc);
+ 
+-  if (retval == 1)
++  if (retval == DR_QUEUE_EMPTY)
+     {
+       // ... there is no current message or it was completely
+       // sent, cancel output...
+@@ -926,13 +926,13 @@
+ 
+       flushing_strategy->cancel_output (this);
+ 
+-      return 0;
++      return DR_OK;
+     }
+ 
+   return retval;
+ }
+ 
+-int
++TAO_Transport::Drain_Result
+ TAO_Transport::drain_queue_helper (int &iovcnt, iovec iov[],
+     TAO::Transport::Drain_Constraints const & dc)
+ {
+@@ -973,7 +973,7 @@
+              ACE_TEXT ("send() returns 0\n"),
+              this->id ()));
+         }
+-      return -1;
++      return DR_ERROR;
+     }
+   else if (retval == -1)
+     {
+@@ -987,10 +987,10 @@
+ 
+       if (errno == EWOULDBLOCK || errno == EAGAIN)
+         {
+-          return 0;
++          return DR_WOULDBLOCK;
+         }
+ 
+-      return -1;
++      return DR_ERROR;
+     }
+ 
+   // ... now we need to update the queue, removing elements
+@@ -1013,10 +1013,11 @@
+          this->id(), byte_count, (this->head_ == 0)));
+     }
+ 
+-  return 1;
++  return DR_QUEUE_EMPTY;
++  // drain_queue_i will check if the queue is actually empty
+ }
+ 
+-int
++TAO_Transport::Drain_Result
+ TAO_Transport::drain_queue_i (TAO::Transport::Drain_Constraints const & dc)
+ {
+   // This is the vector used to send data, it must be declared outside
+@@ -1068,10 +1069,9 @@
+       // IOV_MAX elements ...
+       if (iovcnt == ACE_IOV_MAX)
+         {
+-          int const retval = this->drain_queue_helper (iovcnt, iov, dc);
++          Drain_Result const retval =
++            this->drain_queue_helper (iovcnt, iov, dc);
+ 
+-          now = ACE_High_Res_Timer::gettimeofday_hr ();
+-
+           if (TAO_debug_level > 4)
+             {
+               ACE_DEBUG ((LM_DEBUG,
+@@ -1080,11 +1080,13 @@
+                  this->id (), retval));
+             }
+ 
+-          if (retval != 1)
++          if (retval != DR_QUEUE_EMPTY)
+             {
+               return retval;
+             }
+ 
++          now = ACE_High_Res_Timer::gettimeofday_hr ();
++
+           i = this->head_;
+           continue;
+         }
+@@ -1095,7 +1097,7 @@
+ 
+   if (iovcnt != 0)
+     {
+-      int const retval = this->drain_queue_helper (iovcnt, iov, dc);
++      Drain_Result const retval = this->drain_queue_helper (iovcnt, iov, dc);
+ 
+       if (TAO_debug_level > 4)
+         {
+@@ -1105,7 +1107,7 @@
+               this->id (), retval));
+         }
+ 
+-      if (retval != 1)
++      if (retval != DR_QUEUE_EMPTY)
+         {
+           return retval;
+         }
+@@ -1121,10 +1123,10 @@
+           this->reset_flush_timer ();
+         }
+ 
+-      return 1;
++      return DR_QUEUE_EMPTY;
+     }
+ 
+-  return 0;
++  return DR_OK;
+ }
+ 
+ void
+Index: tao/Block_Flushing_Strategy.h
+===================================================================
+--- tao/Block_Flushing_Strategy.h	(revision 85793)
++++ tao/Block_Flushing_Strategy.h	(working copy)
+@@ -22,6 +22,14 @@
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
++namespace TAO
++{
++  namespace Transport
++  {
++    class Drain_Constraints;
++  }
++}
++
+ /**
+  * @class TAO_Block_Flushing_Strategy
+  *
+@@ -37,6 +45,10 @@
+                              ACE_Time_Value *max_wait_time);
+   virtual int flush_transport (TAO_Transport *transport
+                                , ACE_Time_Value *max_wait_time);
++
++private:
++  int call_handle_output (TAO_Transport *transport,
++                          const TAO::Transport::Drain_Constraints &dc);
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/IIOP_Connection_Handler.h
+===================================================================
+--- tao/IIOP_Connection_Handler.h	(revision 85793)
++++ tao/IIOP_Connection_Handler.h	(working copy)
+@@ -123,6 +123,8 @@
+   virtual int release_os_resources (void);
+   //@}
+ 
++  virtual int handle_write_ready (const ACE_Time_Value *timeout);
++
+   // helper function used by the set_dscp_codepoint () methods to
+   // set the TOS field in the IP packets.
+   int set_tos (int tos);
+Index: tao/Connection_Handler.inl
+===================================================================
+--- tao/Connection_Handler.inl	(revision 85793)
++++ tao/Connection_Handler.inl	(working copy)
+@@ -64,6 +64,15 @@
+     }
+ }
+ 
++/// Derived classes should implement this for proper support with the
++/// Blocking Flushing Strategy.
++ACE_INLINE int
++TAO_Connection_Handler::handle_write_ready (const ACE_Time_Value *)
++{
++  return 0;
++}
++
++
+ //@@ CONNECTION_HANDLER_SPL_METHODS_ADD_HOOK
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: orbsvcs/orbsvcs/HTIOP/HTIOP_Connection_Handler.cpp
+===================================================================
+--- orbsvcs/orbsvcs/HTIOP/HTIOP_Connection_Handler.cpp	(revision 85793)
++++ orbsvcs/orbsvcs/HTIOP/HTIOP_Connection_Handler.cpp	(working copy)
+@@ -304,4 +304,10 @@
+   return 0;
+ }
+ 
++int
++TAO::HTIOP::Connection_Handler::handle_write_ready (const ACE_Time_Value *t)
++{
++  return ACE::handle_write_ready (this->peer ().get_handle (), t);
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: orbsvcs/orbsvcs/HTIOP/HTIOP_Connection_Handler.h
+===================================================================
+--- orbsvcs/orbsvcs/HTIOP/HTIOP_Connection_Handler.h	(revision 85793)
++++ orbsvcs/orbsvcs/HTIOP/HTIOP_Connection_Handler.h	(working copy)
+@@ -117,6 +117,7 @@
+        * @name TAO_Connection Handler overloads
+        */
+       virtual int release_os_resources (void);
++      virtual int handle_write_ready (const ACE_Time_Value *timeout);
+       //@}
+ 
+     private:
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h	(revision 85793)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.h	(working copy)
+@@ -132,6 +132,7 @@
+    * @name TAO_Connection Handler overloads
+    */
+   virtual int release_os_resources (void);
++  virtual int handle_write_ready (const ACE_Time_Value *timeout);
+   //@}
+ 
+   // helper function used by the set_dscp_codepoint () methods to
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	(revision 85793)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Connection_Handler.cpp	(working copy)
+@@ -456,4 +456,10 @@
+   return 0;
+ }
+ 
++int
++TAO_UIPMC_Connection_Handler::handle_write_ready (const ACE_Time_Value *t)
++{
++  return ACE::handle_write_ready (this->peer ().get_handle (), t);
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Mcast_Connection_Handler.cpp
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Mcast_Connection_Handler.cpp	(revision 85793)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Mcast_Connection_Handler.cpp	(working copy)
+@@ -228,4 +228,11 @@
+                                                this->transport ());
+ }
+ 
++int
++TAO_UIPMC_Mcast_Connection_Handler::handle_write_ready
++  (const ACE_Time_Value *t)
++{
++  return ACE::handle_write_ready (this->peer ().get_handle (), t);
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: orbsvcs/orbsvcs/PortableGroup/UIPMC_Mcast_Connection_Handler.h
+===================================================================
+--- orbsvcs/orbsvcs/PortableGroup/UIPMC_Mcast_Connection_Handler.h	(revision 85793)
++++ orbsvcs/orbsvcs/PortableGroup/UIPMC_Mcast_Connection_Handler.h	(working copy)
+@@ -127,6 +127,7 @@
+    * @name TAO_Connection Handler overloads
+    */
+   virtual int release_os_resources (void);
++  virtual int handle_write_ready (const ACE_Time_Value *timeout);
+   //@}
+ 
+ };
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp
+===================================================================
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	(revision 85793)
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.cpp	(working copy)
+@@ -440,4 +440,10 @@
+   this->current_->teardown (previous_current_impl, setup_done);
+ }
+ 
++int
++TAO::SSLIOP::Connection_Handler::handle_write_ready (const ACE_Time_Value *t)
++{
++  return ACE::handle_write_ready (this->peer ().get_handle (), t);
++}
++
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h
+===================================================================
+--- orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h	(revision 85793)
++++ orbsvcs/orbsvcs/SSLIOP/SSLIOP_Connection_Handler.h	(working copy)
+@@ -113,6 +113,7 @@
+        */
+       virtual int release_os_resources (void);
+       virtual void pos_io_hook (int & return_value);
++      virtual int handle_write_ready (const ACE_Time_Value *timeout);
+       //@}
+ 
+     protected:
