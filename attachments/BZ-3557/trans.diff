@@ -1,0 +1,58 @@
+Index: Transport_Connector.cpp
+===================================================================
+--- Transport_Connector.cpp	(revision 84228)
++++ Transport_Connector.cpp	(working copy)
+@@ -297,16 +297,7 @@
+   errno = 0; // need to clear errno to ensure a stale enotsup is not set
+   if (desc == 0)
+     return 0;
+-  unsigned int endpoint_count = 0;
+   TAO_Endpoint *root_ep = desc->endpoint();
+-  for (TAO_Endpoint *ep = root_ep->next_filtered (this->orb_core(),0);
+-       ep != 0;
+-       ep = ep->next_filtered(this->orb_core(),root_ep))
+-    if (this->set_validate_endpoint (ep) == 0)
+-      ++endpoint_count;
+-  if (endpoint_count == 0)
+-    return 0;
+-
+   TAO_Transport *base_transport = 0;
+ 
+   TAO::Transport_Cache_Manager &tcm =
+@@ -343,6 +334,14 @@
+   // at this point to register several potential transports so that
+   // when one succeeds the rest are cancelled or closed.
+ 
++  unsigned int endpoint_count = 0;
++  for (TAO_Endpoint *ep = root_ep->next_filtered (this->orb_core(),0);
++       ep != 0;
++       ep = ep->next_filtered(this->orb_core(),root_ep))
++    if (this->set_validate_endpoint (ep) == 0)
++      ++endpoint_count;
++  if (endpoint_count == 0)
++    return 0;
+   return this->make_parallel_connection (r,*desc,timeout);
+ }
+ 
+@@ -486,10 +485,6 @@
+                         TAO_Transport_Descriptor_Interface *desc,
+                         ACE_Time_Value *timeout)
+ {
+-  if (desc == 0 ||
+-      (this->set_validate_endpoint (desc->endpoint ()) == -1))
+-    return 0;
+-
+   TAO::Transport_Cache_Manager &tcm =
+     this->orb_core ()->lane_resources ().transport_cache ();
+ 
+@@ -643,6 +645,10 @@
+         }
+       else
+         {
++	  if (desc == 0 ||
++	      (this->set_validate_endpoint (desc->endpoint ()) == -1))
++	    return 0;
++
+           // @todo: This is not the right place for this! (bugzilla 3023)
+           // Purge connections (if necessary)
+           tcm.purge ();
