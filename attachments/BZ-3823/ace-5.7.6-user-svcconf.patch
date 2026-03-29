@@ -1,0 +1,878 @@
+diff -ur ace-5.7.6.orig/ACEXML/apps/svcconf/Svcconf.cpp ace-5.7.6/ACEXML/apps/svcconf/Svcconf.cpp
+--- ace-5.7.6.orig/ACEXML/apps/svcconf/Svcconf.cpp	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ACEXML/apps/svcconf/Svcconf.cpp	2010-02-11 13:41:53.000000000 -0500
+@@ -6,10 +6,10 @@
+ #include "ACEXML/common/StrCharStream.h"
+ #include "ACEXML/parser/parser/Parser.h"
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 0)
++#if (ACE_USES_CLASSIC_SVC_CONF == 0) || defined ACE_FILE_EXT_BASED_SVC_CONF
+ 
+ extern "C" ACE_Proper_Export_Flag ACE_XML_Svc_Conf *
+-_ACEXML_create_XML_Svc_Conf_Object (void)
++_ACE_create_xml_Svc_Conf_Object (void)
+ {
+   ACE_XML_Svc_Conf *retp = 0;
+ 
+@@ -35,7 +35,11 @@
+     }
+   ACEXML_CATCH (ACEXML_SAXException, ex)
+     {
+-      ex.print ();              // Can't do much except printing the error.
++      // Can't do much except printing the error.
++      ACE_DEBUG((LM_DEBUG,
++		 ACE_TEXT ("ACEXML: (%P|%t) %s: %s\n"),
++		 ex.id(),
++		 ex.message()));
+       return;
+     }
+   ACEXML_ENDTRY;
+@@ -48,11 +52,14 @@
+ 
+ 
+ int
+-ACEXML_Svcconf_Parser::parse_file (const ACE_TCHAR file[])
++ACEXML_Svcconf_Parser::parse_file (ACE_Service_Gestalt *gestalt,
++				   const ACE_TCHAR file[])
+ {
+   if (file == 0)
+     ACE_ERROR_RETURN ((LM_ERROR, "ACEXML_Svcconf_Parser: No filename specified\n"), -1);
+ 
++  svcconf_handler_.gestalt_ = gestalt;
++
+   ACEXML_FileCharStream *fstm = 0;
+   ACE_NEW_RETURN (fstm,
+                   ACEXML_FileCharStream (),
+@@ -73,8 +80,11 @@
+     }
+   ACEXML_CATCH (ACEXML_SAXException, ex)
+     {
+-      ex.print ();
+-      return -1;
++      ACE_DEBUG((LM_DEBUG,
++		 ACE_TEXT ("ACEXML: (%P|%t) %s: %s\n"),
++		 ex.id(),
++		 ex.message()));
++      return 1;
+     }
+   ACEXML_ENDTRY;
+   return 0;
+@@ -82,11 +92,14 @@
+ 
+ 
+ int
+-ACEXML_Svcconf_Parser::parse_string (const ACE_TCHAR str[])
++ACEXML_Svcconf_Parser::parse_string (ACE_Service_Gestalt *gestalt,
++				     const ACE_TCHAR str[])
+ {
+   if (str == 0)
+     ACE_ERROR_RETURN ((LM_ERROR, "ACEXML_Svcconf_Parser: Can't parse a null string\n"), -1);
+ 
++  svcconf_handler_.gestalt_ = gestalt;
++
+   ACEXML_StrCharStream *stm = 0;
+   ACE_NEW_RETURN (stm, ACEXML_StrCharStream, -1);
+   if (stm->open (str, ACE_TEXT ("Svcconf")) < 0)
+@@ -105,8 +118,11 @@
+       // to EINVAL to indicate to upper levels that the stream was
+       // invalid.
+       ACE_OS::last_error (EINVAL);
+-      ex.print ();
+-      return -1;
++      ACE_DEBUG((LM_DEBUG,
++		 ACE_TEXT ("ACEXML: (%P|%t) %s: %s\n"),
++		 ex.id(),
++		 ex.message()));
++      return 1;
+     }
+   ACEXML_ENDTRY;
+   return 0;
+@@ -121,4 +137,4 @@
+ extern "C" void ace_shut_up_aix_ld (void) {};
+ #  endif /* AIX && __IBMCPP__ == 500 */
+ 
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
++#endif /* (ACE_USES_CLASSIC_SVC_CONF == 0) || defined ACE_FILE_EXT_BASED_SVC_CONF */
+diff -ur ace-5.7.6.orig/ACEXML/apps/svcconf/Svcconf.h ace-5.7.6/ACEXML/apps/svcconf/Svcconf.h
+--- ace-5.7.6.orig/ACEXML/apps/svcconf/Svcconf.h	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ACEXML/apps/svcconf/Svcconf.h	2010-02-09 16:00:32.000000000 -0500
+@@ -19,7 +19,7 @@
+ #include "ACEXML/parser/parser/Parser.h"
+ #include "Svcconf_Handler.h"
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 0)
++#if (ACE_USES_CLASSIC_SVC_CONF == 0) || defined ACE_FILE_EXT_BASED_SVC_CONF
+ 
+ class ACEXML_Svcconf_Parser : public ACE_XML_Svc_Conf
+ {
+@@ -28,9 +28,9 @@
+ 
+   virtual ~ACEXML_Svcconf_Parser ();
+ 
+-  virtual int parse_file (const ACE_TCHAR file[]);
++  virtual int parse_file (ACE_Service_Gestalt*, const ACE_TCHAR file[]);
+ 
+-  virtual int parse_string (const ACE_TCHAR str[]);
++  virtual int parse_string (ACE_Service_Gestalt*, const ACE_TCHAR str[]);
+ 
+ protected:
+   ACEXML_Parser parser_;
+@@ -38,7 +38,7 @@
+   ACEXML_InputSource input_stream_;
+ };
+ 
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
++#endif /* (ACE_USES_CLASSIC_SVC_CONF == 0) || defined ACE_FILE_EXT_BASED_SVC_CONF */
+ 
+ #include /**/ "ace/post.h"
+ #endif /* ACEXML_SVCCONF_H */
+diff -ur ace-5.7.6.orig/ACEXML/apps/svcconf/Svcconf_Handler.cpp ace-5.7.6/ACEXML/apps/svcconf/Svcconf_Handler.cpp
+--- ace-5.7.6.orig/ACEXML/apps/svcconf/Svcconf_Handler.cpp	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ACEXML/apps/svcconf/Svcconf_Handler.cpp	2010-02-11 13:33:30.000000000 -0500
+@@ -12,8 +12,9 @@
+ #include "ace/Module.h"
+ #include "ace/OS_NS_strings.h"
+ #include "ace/SString.h"
++#include "ace/Parse_Node.h"
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 0)
++#if (ACE_USES_CLASSIC_SVC_CONF == 0) || defined ACE_FILE_EXT_BASED_SVC_CONF
+ 
+ #if !defined (__ACEXML_INLINE__)
+ # include "Svcconf_Handler.inl"
+@@ -57,6 +58,37 @@
+       ACE_Parsed_Info *active_info = (this->in_stream_def_ == 0 ?
+                                       &this->parsed_info_ :
+                                       &this->stream_info_);
++      if (!this->in_stream_def_ && !this->in_module_)
++        {
++          ACE_Function_Node* function_node = new ACE_Function_Node (
++            active_info->path(), active_info->init_func ());
++
++          ACE_Service_Type_Factory* svc_type_factory =
++            new ACE_Service_Type_Factory (active_info->name (),
++					  active_info->service_type (),
++					  function_node,
++					  active_info->active ());
++
++          ACE_Dynamic_Node dynamic_node (svc_type_factory,
++					 active_info->init_params ());
++
++          int yyerrno = 0;
++          dynamic_node.apply (this->gestalt_, yyerrno);
++          if (yyerrno)
++          {
++            // build the error message
++            ACE_TString msg (ACE_TEXT ("Failed to initialize dynamic service"));
++            msg += ACE_TString (ACE_TEXT (" for entity '"));
++            msg += ACE_TString (active_info->name ());
++            msg += ACE_TString (ACE_TEXT ("'\n"));
++
++            ACEXML_THROW (ACEXML_SAXException (msg.c_str ()));
++          }
++
++          this->parsed_info_.reset();
++        }
++      else
++        {
+ 
+       // We must allocate a string here to ensure that the
+       // name is still available by the time the
+@@ -139,7 +171,7 @@
+         }
+       else
+         {
+-          if (this->in_module_)
++          ACE_ASSERT(this->in_module_);
+             {
+               ACE_ARGV args (active_info->init_params ());
+ 
+@@ -173,35 +205,9 @@
+ //                           this->parsed_info_.name (),
+ //                           this->stream_info_.name ()));
+             }
+-          else
+-            {
+-              ACE_Service_Type *stype =
+-                ACE_Service_Config::create_service_type (active_info->name (),
+-                                                         stp,
+-                                                         svc_dll,
+-                                                         active_info->active ());
+-              // @@ Check error here.
+-
+-              //               ACE_DEBUG ((LM_INFO, ACE_TEXT ("Apply dynamic %s\n"),
+-//                           this->parsed_info_.name ()));
+-              if (ACE_Service_Config::initialize (stype,
+-                                                  active_info->init_params ()) == -1)
+-                {
+-                  // If it did not initialize correctly, the
+-                  // ACE_Service_Config doesn't own this object
+-                  delete stype;
+-
+-                  // build the error message
+-                  ACE_TString msg (ACE_TEXT ("Failed to initialize dynamic service"));
+-                  msg += ACE_TString (ACE_TEXT (" for entity '"));
+-                  msg += ACE_TString (active_info->name ());
+-                  msg += ACE_TString (ACE_TEXT ("'\n"));
+-
+-                  ACEXML_THROW (ACEXML_SAXException (msg.c_str ()));
+-                }
+-            }
+           this->parsed_info_.reset ();
+         }
++      }
+     }
+   else if (ACE_OS::strcmp (qName, ACE_TEXT ("static")) == 0)
+     {
+@@ -767,4 +773,4 @@
+   return 0;
+ }
+ 
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
++#endif /* (ACE_USES_CLASSIC_SVC_CONF == 0) || defined ACE_FILE_EXT_BASED_SVC_CONF */
+diff -ur ace-5.7.6.orig/ACEXML/apps/svcconf/Svcconf_Handler.h ace-5.7.6/ACEXML/apps/svcconf/Svcconf_Handler.h
+--- ace-5.7.6.orig/ACEXML/apps/svcconf/Svcconf_Handler.h	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ACEXML/apps/svcconf/Svcconf_Handler.h	2010-02-09 16:03:39.000000000 -0500
+@@ -16,7 +16,7 @@
+ #include "ACEXML/common/DefaultHandler.h"
+ #include "ace/Service_Types.h"
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 0)
++#if (ACE_USES_CLASSIC_SVC_CONF == 0) || defined ACE_FILE_EXT_BASED_SVC_CONF
+ 
+ class ACE_Parsed_Info
+ {
+@@ -221,6 +221,8 @@
+   virtual void warning (ACEXML_SAXParseException &exception ACEXML_ENV_ARG_DECL)
+     ;
+ 
++  ACE_Service_Gestalt* gestalt_;
++
+ protected:
+   /**
+    * Get the only attribute in <stream> or <streamdef>.
+@@ -271,6 +273,6 @@
+ # include "Svcconf_Handler.inl"
+ #endif /* __ACEXML_INLINE__ */
+ 
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
++#endif /* (ACE_USES_CLASSIC_SVC_CONF == 0) || defined ACE_FILE_EXT_BASED_SVC_CONF */
+ 
+ #endif /* ACEXML_SVCCONF_HANDLER_H */
+diff -ur ace-5.7.6.orig/ACEXML/apps/svcconf/svcconf.mpc ace-5.7.6/ACEXML/apps/svcconf/svcconf.mpc
+--- ace-5.7.6.orig/ACEXML/apps/svcconf/svcconf.mpc	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ACEXML/apps/svcconf/svcconf.mpc	2010-02-10 17:07:27.000000000 -0500
+@@ -1,6 +1,6 @@
+ //  -*- MPC -*-
+ // $Id: svcconf.mpc 80826 2008-03-04 14:51:23Z wotte $
+ 
+-project(ACEXML_XML_Svc_Conf_Parser): ace_output, acelib, acexml, install {
+-  sharedname = ACEXML_XML_Svc_Conf_Parser
++project(ACE_xml_Svc_Conf_Parser): ace_output, acelib, acexml, install {
++  sharedname = ACE_xml_Svc_Conf_Parser
+ }
+diff -ur ace-5.7.6.orig/ace/Null_Condition.h ace-5.7.6/ace/Null_Condition.h
+--- ace-5.7.6.orig/ace/Null_Condition.h	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/Null_Condition.h	2010-02-10 14:11:28.000000000 -0500
+@@ -40,10 +40,10 @@
+ class ACE_Null_Condition
+ {
+ public:
+-  ACE_Null_Condition (const ACE_Null_Mutex &m,
++  ACE_Null_Condition (ACE_Null_Mutex &m,
+                       const ACE_TCHAR * = 0,
+                       void * = 0)
+-    : mutex_ ((ACE_Null_Mutex &) m) {}
++    : mutex_ (m) {}
+ 
+   ~ACE_Null_Condition (void) {}
+ 
+diff -ur ace-5.7.6.orig/ace/Parse_Node.cpp ace-5.7.6/ace/Parse_Node.cpp
+--- ace-5.7.6.orig/ace/Parse_Node.cpp	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/Parse_Node.cpp	2010-02-09 14:24:57.000000000 -0500
+@@ -1,7 +1,5 @@
+ #include "ace/Parse_Node.h"
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+-
+ #include "ace/Service_Config.h"
+ #include "ace/Service_Repository.h"
+ #include "ace/Service_Types.h"
+@@ -314,7 +312,7 @@
+ 
+ 
+ ACE_Dynamic_Node::ACE_Dynamic_Node (ACE_Service_Type_Factory const *stf,
+-                                    ACE_TCHAR *parms)
++                                    const ACE_TCHAR *parms)
+   : ACE_Static_Node (stf->name (), parms)
+   , factory_ (stf)
+ {
+@@ -366,7 +364,7 @@
+ }
+ 
+ ACE_Static_Node::ACE_Static_Node (const ACE_TCHAR *nm,
+-                                  ACE_TCHAR *params)
++                                  const ACE_TCHAR *params)
+   : ACE_Parse_Node (nm),
+     parameters_ (ACE::strnew (params))
+ {
+@@ -924,5 +922,3 @@
+ 
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+-
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+diff -ur ace-5.7.6.orig/ace/Parse_Node.h ace-5.7.6/ace/Parse_Node.h
+--- ace-5.7.6.orig/ace/Parse_Node.h	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/Parse_Node.h	2010-02-08 11:44:59.000000000 -0500
+@@ -22,8 +22,6 @@
+ # pragma once
+ #endif /* ACE_LACKS_PRAGMA_ONCE */
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+-
+ #include "ace/DLL.h"
+ #include "ace/SString.h"
+ #include "ace/Svc_Conf.h"
+@@ -171,7 +169,7 @@
+ class ACE_Static_Node : public ACE_Parse_Node
+ {
+ public:
+-  ACE_Static_Node (const ACE_TCHAR *name, ACE_TCHAR *params = 0);
++  ACE_Static_Node (const ACE_TCHAR *name, const ACE_TCHAR *params = 0);
+   virtual ~ACE_Static_Node (void);
+ 
+   virtual void apply (ACE_Service_Gestalt *cfg, int &yyerrno);
+@@ -209,7 +207,7 @@
+ class ACE_Dynamic_Node : public ACE_Static_Node
+ {
+ public:
+-  ACE_Dynamic_Node (ACE_Service_Type_Factory const *, ACE_TCHAR *params);
++  ACE_Dynamic_Node (ACE_Service_Type_Factory const *, const ACE_TCHAR *params);
+ 
+   virtual ~ACE_Dynamic_Node (void);
+ 
+@@ -516,8 +514,6 @@
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+-
+ #include /**/ "ace/post.h"
+ 
+ #endif  /* ACE_PARSE_NODE_H */
+diff -ur ace-5.7.6.orig/ace/README ace-5.7.6/ace/README
+--- ace-5.7.6.orig/ace/README	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/README	2010-02-09 14:29:56.000000000 -0500
+@@ -1236,6 +1236,11 @@
+                                         svc.conf format.
+                                         ** This macro takes precedence
+                                         ** over previous two macros.
++ACE_FILE_EXT_BASED_SVC_CONF             This macro alters the behaviour of
++                                        ACE_HAS_CLASSIC_SVC_CONF so the parser
++                                        for non-default config file is loaded
++                                        from a dynamic library named
++                                        ACE_<ext>_Svc_Conf_Parser
+ 
+ ----------------------------------------
+ The following is a partial list of where some of these macros are used
+diff -ur ace-5.7.6.orig/ace/Service_Config.cpp ace-5.7.6/ace/Service_Config.cpp
+--- ace-5.7.6.orig/ace/Service_Config.cpp	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/Service_Config.cpp	2010-02-11 10:08:56.000000000 -0500
+@@ -452,7 +452,7 @@
+ 
+ 
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 0)
++//#if (ACE_USES_CLASSIC_SVC_CONF == 0)
+ ACE_Service_Type *
+ ACE_Service_Config::create_service_type  (const ACE_TCHAR *n,
+                                           ACE_Service_Type_Impl *o,
+@@ -465,7 +465,7 @@
+                   0);
+   return sp;
+ }
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
++//#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
+ 
+ ACE_Service_Type_Impl *
+ ACE_Service_Config::create_service_type_impl (const ACE_TCHAR *name,
+diff -ur ace-5.7.6.orig/ace/Service_Config.h ace-5.7.6/ace/Service_Config.h
+--- ace-5.7.6.orig/ace/Service_Config.h	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/Service_Config.h	2010-02-11 12:41:40.000000000 -0500
+@@ -84,8 +84,8 @@
+   ACE_TEXT ("<ACE_Svc_Conf><remove id=\"") \
+   ACE_TEXT (ident) \
+   ACE_TEXT ("\"></remove></ACE_Svc_Conf>")
+-class ACE_XML_Svc_Conf;
+ #endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
++class ACE_XML_Svc_Conf;
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
+@@ -554,12 +554,14 @@
+    */
+   static int parse_args (int, ACE_TCHAR *argv[]);
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 0)
++//#if (ACE_USES_CLASSIC_SVC_CONF == 0)
++// This code only used for module/service initialization form ACEXML/apps/svcconf
++// Should be removed once that is converted to use ACE_Parse_Node hierarchy
+   static ACE_Service_Type *create_service_type  (const ACE_TCHAR *n,
+                                                  ACE_Service_Type_Impl *o,
+                                                  ACE_DLL &dll,
+                                                  int active);
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
++//#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
+ 
+   static ACE_Service_Type_Impl *
+     create_service_type_impl (const ACE_TCHAR *name,
+@@ -583,15 +585,6 @@
+ 
+ protected:
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+-  /// @deprecated
+-  /// This is the implementation function that process_directives()
+-  /// and process_directive() both call.  Returns the number of errors
+-  /// that occurred.
+-  static int process_directives_i (ACE_Svc_Conf_Param *param);
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+-
+-
+   // = Process-wide state.
+ 
+ private:
+diff -ur ace-5.7.6.orig/ace/Service_Gestalt.cpp ace-5.7.6/ace/Service_Gestalt.cpp
+--- ace-5.7.6.orig/ace/Service_Gestalt.cpp	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/Service_Gestalt.cpp	2010-02-11 13:17:09.000000000 -0500
+@@ -13,6 +13,7 @@
+ #include "ace/DLL.h"
+ #include "ace/XML_Svc_Conf.h"
+ #include "ace/SString.h"
++#include "ace/OS_NS_strings.h"
+ 
+ #ifndef ACE_LACKS_UNIX_SIGNALS
+ # include "ace/Signal.h"
+@@ -35,6 +36,22 @@
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
++namespace {
++
++#if (ACE_USES_CLASSIC_SVC_CONF == 1)
++  /// This is the implementation function that process_directives()
++  /// and process_directive() both call.  Returns the number of errors
++  /// that occurred.
++int process_directives_i (ACE_Svc_Conf_Param *param);
++#endif
++#if ACE_USES_CLASSIC_SVC_CONF == 0 || defined (ACE_FILE_EXT_BASED_SVC_CONF)
++  /// Helper function to dynamically link in the XML Service Configurator
++  /// parser.
++  ACE_XML_Svc_Conf* get_xml_svc_conf (ACE_DLL &d, const ACE_TCHAR file_ext[]);
++#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 || defined (ACE_FILE_EXT_BASED_SVC_CONF) */
++
++} // anonymous namespace
++
+ ACE_Service_Type_Dynamic_Guard::ACE_Service_Type_Dynamic_Guard
+   (ACE_Service_Repository &r, const ACE_TCHAR *name)
+     : repo_ (r)
+@@ -508,7 +525,6 @@
+ }
+ 
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+ int
+ ACE_Service_Gestalt::initialize (const ACE_Service_Type_Factory *stf,
+                                  const ACE_TCHAR *parameters)
+@@ -590,7 +606,6 @@
+ 
+   return -1;
+ }
+-#endif /* (ACE_USES_CLASSIC_SVC_CONF == 1) */
+ 
+ 
+ /// Dynamically link the shared object file and retrieve a pointer to
+@@ -792,17 +807,71 @@
+   return this->repo_->insert (service_type);
+ }
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
++#if (ACE_USES_CLASSIC_SVC_CONF == 1) || defined (ACE_FILE_EXT_BASED_SVC_CONF)
++class ACE_Export ACE_Traditional_Svc_Conf : public ACE_XML_Svc_Conf
++{
++public:
++  virtual int parse_file (ACE_Service_Gestalt* gestalt, const ACE_TCHAR file[])
++  {
++    int result = 0;
++
++    FILE *fp = ACE_OS::fopen (file,
++                              ACE_TEXT ("r"));
++
++    if (fp == 0)
++      {
++        // Invalid svc.conf file.  We'll report it here and break out of
++        // the method.
++        if (ACE::debug ())
++          ACE_DEBUG ((LM_ERROR,
++                      ACE_TEXT ("ACE (%P|%t): %p\n"),
++                      file));
++
++        // Use stat to find out if the file exists.  I didn't use access()
++        // because stat is better supported on most non-unix platforms.
++        ACE_stat exists;
++        if (ACE_OS::stat (file, &exists) == 0)
++          // If it exists, but we couldn't open it for reading then we
++          // must not have permission to read it.
++          errno = EPERM;
++        else
++          errno = ENOENT;
++        result = -1;
++      }
++    else
++      {
++        ACE_Svc_Conf_Param f (gestalt, fp);
++
++        // Keep track of the number of errors.
++        result = process_directives_i (&f);
++
++        (void) ACE_OS::fclose (fp);
++      }
++    return result;
++  }
++
++  virtual int parse_string (ACE_Service_Gestalt* gestalt, const ACE_TCHAR directive[])
++  {
++    ACE_Svc_Conf_Param d (gestalt, directive);
++
++    return process_directives_i (&d);
++  }
++
++};
++#endif /* #if (ACE_USES_CLASSIC_SVC_CONF == 1) || defined (ACE_FILE_EXT_BASED_SVC_CONF) */
++
++namespace {
+ 
++#if (ACE_USES_CLASSIC_SVC_CONF == 1) || defined (ACE_FILE_EXT_BASED_SVC_CONF)
+ int
+-ACE_Service_Gestalt::process_directives_i (ACE_Svc_Conf_Param *param)
++process_directives_i (ACE_Svc_Conf_Param *param)
+ {
+ #ifndef ACE_NLOGGING
+   if (ACE::debug ())
+     ACE_DEBUG ((LM_DEBUG,
+                 ACE_TEXT ("ACE (%P|%t) SG::process_directives_i, ")
+                 ACE_TEXT ("repo=%@ - %s\n"),
+-                this->repo_,
++                param->config->current_service_repository(),
+                 (param->type == ACE_Svc_Conf_Param::SVC_CONF_FILE)
+                 ? ACE_TEXT ("<from file>")
+                 : param->source.directive));
+@@ -812,9 +881,6 @@
+   // here which will be reported as a memory leak for some reason.
+   ACE_NO_HEAP_CHECK
+ 
+-  // Were we called in the context of the current instance?
+-  ACE_ASSERT (this == param->config);
+-
+   // Temporarily (for the duration of this call) make sure that *any*
+   // static service registrations will happen with this instance. Such
+   // registrations are possible as a side-effect of dynamically
+@@ -822,7 +888,7 @@
+   // this instance will own both the DLL and those static services,
+   // which implies that their finalization will be performed in the
+   // correct order, i.e. prior to finalizing the DLL
+-  ACE_Service_Config_Guard guard (this);
++  ACE_Service_Config_Guard guard (param->config);
+ 
+   ::ace_yyparse (param);
+ 
+@@ -838,20 +904,32 @@
+   else
+     return 0;
+ }
++#endif /* #if (ACE_USES_CLASSIC_SVC_CONF == 0) || defined (ACE_FILE_EXT_BASED_SVC_CONF) */
+ 
+-#else
++#if (ACE_USES_CLASSIC_SVC_CONF == 0) || defined (ACE_FILE_EXT_BASED_SVC_CONF)
+ 
+ ACE_XML_Svc_Conf *
+-ACE_Service_Gestalt::get_xml_svc_conf (ACE_DLL &xmldll)
++get_xml_svc_conf (ACE_DLL &xmldll, const ACE_TCHAR file_ext[])
+ {
+-  if (xmldll.open (ACE_TEXT ("ACEXML_XML_Svc_Conf_Parser")) == -1)
++  ACE_TCHAR name[PATH_MAX];
++  ACE_OS::snprintf (name,
++		    PATH_MAX - 1,
++		    ACE_TEXT("ACE_%s_Svc_Conf_Parser"),
++		    file_ext);
++
++  if (xmldll.open (name) == -1)
+     ACE_ERROR_RETURN ((LM_ERROR,
+                        ACE_TEXT ("ACE (%P|%t) Failure to open ACEXML_XML_Svc_Conf_Parser: %p\n"),
+                        ACE_TEXT("ACE_Service_Config::get_xml_svc_conf")),
+                       0);
+ 
++  ACE_OS::snprintf (name,
++		    PATH_MAX - 1,
++		    ACE_TEXT("_ACE_create_%s_Svc_Conf_Object"),
++		    file_ext);
++
+   void * foo =
+-    xmldll.symbol (ACE_TEXT ("_ACEXML_create_XML_Svc_Conf_Object"));
++    xmldll.symbol (name);
+ 
+ #if defined (ACE_OPENVMS) && (!defined (__INITIAL_POINTER_SIZE) || (__INITIAL_POINTER_SIZE < 64))
+   int const temp_p = reinterpret_cast<int> (foo);
+@@ -869,7 +947,9 @@
+ 
+   return factory ();
+ }
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
++#endif /* (ACE_USES_CLASSIC_SVC_CONF == 0) || defined (ACE_FILE_EXT_BASED_SVC_CONF) */
++
++} // anonymous namespace
+ 
+ int
+ ACE_Service_Gestalt::process_file (const ACE_TCHAR file[])
+@@ -898,52 +978,32 @@
+   /*
+    * @TODO: Test with ACE_USES_CLASSIC_SVC_CONF turned off!
+    */
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+-  int result = 0;
+-
+-  FILE *fp = ACE_OS::fopen (file,
+-                            ACE_TEXT ("r"));
+-
+-  if (fp == 0)
++#if defined (ACE_FILE_EXT_BASED_SVC_CONF)
++  const ACE_TCHAR* file_ext = ACE_OS::strrchr (file, '.');
++  const ACE_TCHAR conf_suffix[] = ".conf";
++  ACE_DLL dll;
++  auto_ptr<ACE_XML_Svc_Conf> parser;
++  if (NULL == file_ext ||
++      *file_ext == '\0' ||
++      0 == ACE_OS::strncasecmp (file_ext, conf_suffix, sizeof(conf_suffix) - 1))
+     {
+-      // Invalid svc.conf file.  We'll report it here and break out of
+-      // the method.
+-      if (ACE::debug ())
+-        ACE_DEBUG ((LM_ERROR,
+-                    ACE_TEXT ("ACE (%P|%t): %p\n"),
+-                    file));
+-
+-      // Use stat to find out if the file exists.  I didn't use access()
+-      // because stat is better supported on most non-unix platforms.
+-      ACE_stat exists;
+-      if (ACE_OS::stat (file, &exists) == 0)
+-        // If it exists, but we couldn't open it for reading then we
+-        // must not have permission to read it.
+-        errno = EPERM;
+-      else
+-        errno = ENOENT;
+-      result = -1;
++      parser.reset (new ACE_Traditional_Svc_Conf);
+     }
+   else
+     {
+-      ACE_Svc_Conf_Param f (this, fp);
+-
+-      // Keep track of the number of errors.
+-      result = this->process_directives_i (&f);
+-
+-      (void) ACE_OS::fclose (fp);
++	    parser.reset (get_xml_svc_conf (dll, file_ext + 1));
+     }
+-  return result;
++#elif (ACE_USES_CLASSIC_SVC_CONF == 1)
++  auto_ptr<ACE_XML_Svc_Conf> parser (new ACE_Traditional_Svc_Conf);
+ #else
+   ACE_DLL dll;
++  auto_ptr<ACE_XML_Svc_Conf> parser (get_xml_svc_conf (dll, ACE_TEXT("xml")));
++#endif /* ACE_FILE_EXT_BASED_SVC_CONF == 1 */
+ 
+-  auto_ptr<ACE_XML_Svc_Conf> xml_svc_conf (this->get_xml_svc_conf (dll));
+-
+-  if (xml_svc_conf.get () == 0)
++  if (parser.get () == 0)
+     return -1;
+ 
+-  return xml_svc_conf->parse_file (file);
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
++  return parser->parse_file (this, file);
+ }
+ 
+ int
+@@ -960,17 +1020,12 @@
+ #endif
+ 
+ #if (ACE_USES_CLASSIC_SVC_CONF == 1)
+-  ACE_UNUSED_ARG (directive);
+-
+-  ACE_Svc_Conf_Param d (this, directive);
+-
+-  return this->process_directives_i (&d);
++  auto_ptr<ACE_XML_Svc_Conf> xml_svc_conf (new ACE_Traditional_Svc_Conf);
+ #else
+   ACE_DLL dll;
+ 
+   auto_ptr<ACE_XML_Svc_Conf>
+-    xml_svc_conf (this->get_xml_svc_conf (dll));
+-
++    xml_svc_conf (get_xml_svc_conf (dll, ACE_TEXT("xml")));
+   if (xml_svc_conf.get () == 0)
+     return -1;
+ 
+@@ -981,10 +1036,9 @@
+   // DLL and those static services, which implies that their finalization
+   // will be performed in the correct order, i.e. prior to finalizing the DLL
+   ACE_Service_Config_Guard guard (this);
+-
+-  return xml_svc_conf->parse_string (directive);
+ #endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+ 
++  return xml_svc_conf->parse_string (this, directive);
+ } /* process_directive () */
+ 
+ 
+diff -ur ace-5.7.6.orig/ace/Service_Gestalt.h ace-5.7.6/ace/Service_Gestalt.h
+--- ace-5.7.6.orig/ace/Service_Gestalt.h	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/Service_Gestalt.h	2010-02-11 13:16:28.000000000 -0500
+@@ -35,16 +35,8 @@
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+ class ACE_Service_Type_Factory;
+-class ACE_Location_Node;
+-#else
+-class ACE_XML_Svc_Conf;
+-class ACE_DLL;
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+-
+ class ACE_Static_Svc_Descriptor;
+-class ACE_Svc_Conf_Param;
+ 
+ /**
+  * @class ACE_Service_Gestalt
+@@ -255,7 +247,6 @@
+ 
+   // = Utility methods.
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+   /// Dynamically link the shared object file and retrieve a pointer to
+   /// the designated shared object in this file. Also account for the
+   /// possiblity to have static services registered when loading the DLL, by
+@@ -264,7 +255,6 @@
+   /// problems.
+   int initialize (const ACE_Service_Type_Factory *,
+                   const ACE_TCHAR *parameters);
+-#endif /* (ACE_USES_CLASSIC_SVC_CONF == 1) */
+ 
+   /// Dynamically link the shared object file and retrieve a pointer to
+   /// the designated shared object in this file.
+@@ -359,17 +349,6 @@
+   int process_directive_i (const ACE_Static_Svc_Descriptor &ssd,
+                            bool force_replace = false);
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+-  /// This is the implementation function that process_directives()
+-  /// and process_directive() both call.  Returns the number of errors
+-  /// that occurred.
+-  int process_directives_i (ACE_Svc_Conf_Param *param);
+-#else
+-  /// Helper function to dynamically link in the XML Service Configurator
+-  /// parser.
+-  ACE_XML_Svc_Conf* get_xml_svc_conf (ACE_DLL &d);
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 1 */
+-
+   /// Dynamically link the shared object file and retrieve a pointer to
+   /// the designated shared object in this file.
+   int initialize_i (const ACE_Service_Type *sr, const ACE_TCHAR *parameters);
+diff -ur ace-5.7.6.orig/ace/Svc_Conf.h ace-5.7.6/ace/Svc_Conf.h
+--- ace-5.7.6.orig/ace/Svc_Conf.h	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/Svc_Conf.h	2010-02-09 14:38:55.000000000 -0500
+@@ -46,18 +46,18 @@
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 1)
+-
+-// The following yylex() declarations require support for reentrant
+-// parser generation (e.g. from GNU Bison).
+-#define YY_DECL extern "C" int ace_yylex (YYSTYPE *ace_yylval, void *YYLEX_PARAM)
+-
+ // Forward declarations
+ class ACE_Location_Node;
+ class ACE_Parse_Node;
+ class ACE_Static_Node;
+ class ACE_Service_Type_Factory;
+ 
++#if (ACE_USES_CLASSIC_SVC_CONF == 1)
++
++// The following yylex() declarations require support for reentrant
++// parser generation (e.g. from GNU Bison).
++#define YY_DECL extern "C" int ace_yylex (YYSTYPE *ace_yylval, void *YYLEX_PARAM)
++
+ // The following definition for the YYSTYPE must occur before
+ // YY_DECL is declared since YY_DECL expands to function
+ // prototypes that use YYSTYPE.
+diff -ur ace-5.7.6.orig/ace/XML_Svc_Conf.cpp ace-5.7.6/ace/XML_Svc_Conf.cpp
+--- ace-5.7.6.orig/ace/XML_Svc_Conf.cpp	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/XML_Svc_Conf.cpp	2010-02-05 09:53:54.000000000 -0500
+@@ -2,8 +2,6 @@
+ 
+ #include "ace/XML_Svc_Conf.h"
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF == 0)
+-
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ ACE_XML_Svc_Conf::~ACE_XML_Svc_Conf (void)
+@@ -11,5 +9,3 @@
+ }
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+-
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
+diff -ur ace-5.7.6.orig/ace/XML_Svc_Conf.h ace-5.7.6/ace/XML_Svc_Conf.h
+--- ace-5.7.6.orig/ace/XML_Svc_Conf.h	2010-02-11 12:49:34.000000000 -0500
++++ ace-5.7.6/ace/XML_Svc_Conf.h	2010-02-10 12:16:40.000000000 -0500
+@@ -22,8 +22,6 @@
+ # pragma once
+ #endif /* ACE_LACKS_PRAGMA_ONCE */
+ 
+-#if (ACE_USES_CLASSIC_SVC_CONF==0)
+-
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ /**
+@@ -44,22 +42,22 @@
+  *
+  */
+ 
++class ACE_Service_Gestalt;
++
+ class ACE_Export ACE_XML_Svc_Conf
+ {
+ public:
+   typedef ACE_XML_Svc_Conf *(*Factory)(void);
+ 
+-  virtual ~ACE_XML_Svc_Conf (void) = 0;
++  virtual ~ACE_XML_Svc_Conf ();
+ 
+-  virtual int parse_file (const ACE_TCHAR file[]) = 0;
++  virtual int parse_file (ACE_Service_Gestalt*, const ACE_TCHAR file[]) = 0;
+ 
+-  virtual int parse_string (const ACE_TCHAR str[]) = 0;
++  virtual int parse_string (ACE_Service_Gestalt*, const ACE_TCHAR str[]) = 0;
+ };
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL
+ 
+-#endif /* ACE_USES_CLASSIC_SVC_CONF == 0 */
+-
+ #include /**/ "ace/post.h"
+ 
+ #endif /* ACE_XML_SVC_CONF_H */
