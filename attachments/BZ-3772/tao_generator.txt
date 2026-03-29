@@ -1,0 +1,27 @@
+--- ACE_wrappers/TAO/tao/Leader_Follower_old2.h	2009-02-11 08:15:14.000000000 +0000
++++ ACE_wrappers/TAO/tao/Leader_Follower.h	2009-12-07 15:21:04.750000000 +0000
+@@ -184,6 +184,9 @@
+   /// Called when we are out of leaders.
+   void no_leaders_available (void);
+ 
++  /// Set the new leader generator.
++  void set_new_leader_generator(TAO_New_Leader_Generator *new_leader_generator);
++
+ private:
+   /// Shortcut to obtain the TSS resources of the orb core.
+   TAO_ORB_Core_TSS_Resources *get_tss_resources (void) const;
+--- ACE_wrappers/TAO/tao/Leader_Follower_old2.inl	2009-11-26 13:03:24.046875000 +0000
++++ ACE_wrappers/TAO/tao/Leader_Follower.inl	2009-12-07 15:22:58.609375000 +0000
+@@ -211,6 +211,12 @@
+   return this->clients_;
+ }
+ 
++ACE_INLINE void
++TAO_Leader_Follower::set_new_leader_generator(TAO_New_Leader_Generator *new_leader_generator)
++{
++  this->new_leader_generator_ = new_leader_generator;
++}
++
+ // ****************************************************************
+ 
+ ACE_INLINE
