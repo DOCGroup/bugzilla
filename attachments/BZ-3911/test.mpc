@@ -1,0 +1,6 @@
+project (test) : aceexe {
+  exename = test
+  Source_Files {
+    main.cpp    
+  }
+}
