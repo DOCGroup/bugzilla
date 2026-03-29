@@ -1,0 +1,29 @@
+    ACE VERSION: 6.2.3
+
+    HOST MACHINE and OPERATING SYSTEM: any
+
+    TARGET MACHINE and OPERATING SYSTEM, if different from HOST:
+    COMPILER NAME AND VERSION (AND PATCHLEVEL): any
+
+    THE $ACE_ROOT/ace/config.h FILE: N/A
+    THE $ACE_ROOT/include/makeinclude/platform_macros.GNU FILE: N/A
+    CONTENTS OF $ACE_ROOT/bin/MakeProjectCreator/config/default.features
+    (used by MPC when you generate your own makefiles): N/A
+
+    AREA/CLASS/EXAMPLE AFFECTED: Timer_Wheel_T.cpp
+
+    DOES THE PROBLEM AFFECT: COMPILATION (of my program)
+        COMPILATION?
+        LINKING?
+            On Unix systems, did you run make realclean first?
+        EXECUTION?
+        OTHER (please specify)?
+
+    SYNOPSIS: classes derived of Timer_Wheel_T fail to compile in some cases
+    DESCRIPTION: the current implementation of Timer_Wheel_T has a subtle bug when
+	using a timer policy different from the default. Programs using this feature fail to
+	compile against the library.
+
+    REPEAT BY: N/A
+
+    SAMPLE FIX/WORKAROUND: please find a patch file attached
