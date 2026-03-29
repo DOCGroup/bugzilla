@@ -1,0 +1,69 @@
+Index: protocols/ace/INet/BidirStreamBuffer.h
+===================================================================
+--- protocols/ace/INet/BidirStreamBuffer.h	(revision 94033)
++++ protocols/ace/INet/BidirStreamBuffer.h	(working copy)
+@@ -89,8 +89,8 @@
+               int flush_buffer ();
+ 
+               std::streamsize bufsize_;
+-              ACE_Auto_Ptr<char_type> read_buffer_;
+-              ACE_Auto_Ptr<char_type> write_buffer_;
++              ACE_Auto_Array_Ptr<char_type> read_buffer_;
++              ACE_Auto_Array_Ptr<char_type> write_buffer_;
+               openmode        mode_;
+               STREAM_HANDLER *stream_;
+               interceptor_type* interceptor_;
+Index: protocols/ace/INet/BufferedStreamBuffer.h
+===================================================================
+--- protocols/ace/INet/BufferedStreamBuffer.h	(revision 94033)
++++ protocols/ace/INet/BufferedStreamBuffer.h	(working copy)
+@@ -82,7 +82,7 @@
+               int flush_buffer ();
+ 
+               std::streamsize bufsize_;
+-              ACE_Auto_Ptr<char_type> buffer_;
++              ACE_Auto_Array_Ptr<char_type> buffer_;
+               typename std::basic_ios<ACE_CHAR_T, TR>::openmode mode_;
+               interceptor_type* interceptor_;
+ 
+Index: protocols/ace/INet/HTTP_BasicAuthentication.cpp
+===================================================================
+--- protocols/ace/INet/HTTP_BasicAuthentication.cpp	(revision 94033)
++++ protocols/ace/INet/HTTP_BasicAuthentication.cpp	(working copy)
+@@ -38,8 +38,8 @@
+           if (scheme == SCHEME)
+             {
+               size_t out_len = 0;
+-              ACE_Auto_Ptr<ACE_Byte> safe_buf (ACE_Base64::decode ((const ACE_Byte*)info.c_str (),
+-                                                                   &out_len));
++              ACE_Auto_Array_Ptr<ACE_Byte> safe_buf (ACE_Base64::decode ((const ACE_Byte*)info.c_str (),
++                                                                         &out_len));
+               ACE_CString credentials ((char*)safe_buf.get (), out_len);
+               ACE_CString::size_type pos = credentials.find (':');
+               if (pos != ACE_CString::npos)
+@@ -61,7 +61,7 @@
+         credentials += ':';
+         credentials += this->passwd_;
+         size_t out_len = 0;
+-        ACE_Auto_Ptr<ACE_Byte> safe_buf (
++        ACE_Auto_Array_Ptr<ACE_Byte> safe_buf (
+             ACE_Base64::encode ((const ACE_Byte*)credentials.c_str (),
+                                 credentials.length (),
+                                 &out_len,
+Index: protocols/ace/RMCast/Link.cpp
+===================================================================
+--- protocols/ace/RMCast/Link.cpp	(revision 94033)
++++ protocols/ace/RMCast/Link.cpp	(working copy)
+@@ -187,11 +187,7 @@
+   {
+     size_t max_packet_size (params_.max_packet_size ());
+ 
+-    // This is wicked.
+-    //
+-    ACE_Auto_Ptr<char> holder (
+-      reinterpret_cast<char*> (
+-        operator new (max_packet_size + ACE_CDR::MAX_ALIGNMENT)));
++    ACE_Auto_Array_Ptr<char> holder (new char[max_packet_size + ACE_CDR::MAX_ALIGNMENT]);
+ 
+     char* data = ACE_ptr_align_binary (holder.get (), ACE_CDR::MAX_ALIGNMENT);
+ 
