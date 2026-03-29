@@ -1,0 +1,93 @@
+--- ACE_wrappers/TAO/tao/ORB_Core_TSS_Resources_old3.h	2006-08-14 09:52:22.000000000 +0100
++++ ACE_wrappers/TAO/tao/ORB_Core_TSS_Resources.h	2009-12-07 16:04:31.671875000 +0000
+@@ -79,6 +79,9 @@
+   // @CJC@  maybe we should use allocate_tss_slot_id() instead?
+   bool upcalls_temporarily_suspended_on_this_thread_;
+ 
++  // Set to false to prevent this thread from being a leader
++  bool can_be_leader_;
++
+   /// Pointer to the ORB core.  Needed to get access to the TSS
+   /// cleanup functions for the TSS objects stored in the TSS object
+   /// array in this class.
+--- ACE_wrappers/TAO/tao/ORB_Core_TSS_Resources_old3.cpp	2005-11-02 01:13:04.000000000 +0000
++++ ACE_wrappers/TAO/tao/ORB_Core_TSS_Resources.cpp	2009-12-07 16:04:45.328125000 +0000
+@@ -10,6 +10,7 @@
+   , lane_ (0)
+   , ts_objects_ ()
+   , upcalls_temporarily_suspended_on_this_thread_ (false)
++  , can_be_leader_ (true)
+   , orb_core_ (0)
+ {
+ }
+--- ACE_wrappers/TAO/tao/Leader_Follower_old3.cpp	2009-11-26 13:06:12.656250000 +0000
++++ ACE_wrappers/TAO/tao/Leader_Follower.cpp	2009-12-07 16:24:06.296875000 +0000
+@@ -194,6 +194,8 @@
+                                      TAO_Transport *transport,
+                                      ACE_Time_Value *max_wait_time)
+ {
++  TAO_ORB_Core_TSS_Resources *tss = this->get_tss_resources ();
++
+   // Obtain the lock.
+   ACE_GUARD_RETURN (TAO_SYNCH_MUTEX, ace_mon, this->lock (), -1);
+ 
+@@ -225,7 +227,7 @@
+ 
+     // Check if there is a leader.  Note that it cannot be us since we
+     // gave up our leadership when we became a client.
+-    if (this->leader_available ())
++    if (!tss->can_be_leader_ || this->leader_available ())
+       {
+         // = Wait as a follower.
+ 
+@@ -245,7 +247,7 @@
+         TAO_LF_Event_Binder event_binder (event, follower.get ());
+ 
+         while (event->keep_waiting () &&
+-               this->leader_available ())
++               (!tss->can_be_leader_ || this->leader_available ()))
+           {
+             // Add ourselves to the list, do it everytime we wake up
+             // from the CV loop. Because:
+@@ -273,7 +275,8 @@
+             // lost.
+             //
+ 
+-            TAO_LF_Follower_Auto_Adder auto_adder (*this, follower);
++            TAO_LF_Follower_Auto_Adder auto_adder (*this, (tss->can_be_leader_ ?
++                                                              follower : (TAO_LF_Follower *)0));
+ 
+             if (max_wait_time == 0)
+               {
+@@ -387,7 +390,6 @@
+     // the leader.
+     TAO_LF_Client_Leader_Thread_Helper client_leader_thread_helper (*this);
+     ACE_UNUSED_ARG (client_leader_thread_helper);
+-    TAO_ORB_Core_TSS_Resources *tss = this->get_tss_resources ();
+ 
+     {
+       ACE_GUARD_RETURN (ACE_Reverse_Lock<TAO_SYNCH_MUTEX>, rev_mon,
+--- ACE_wrappers/TAO/tao/LF_Follower_Auto_Adder_old3.inl	2005-11-02 01:13:04.000000000 +0000
++++ ACE_wrappers/TAO/tao/LF_Follower_Auto_Adder.inl	2009-12-07 15:58:07.312500000 +0000
+@@ -11,7 +11,8 @@
+   : leader_follower_ (lf)
+   , follower_ (follower)
+ {
+-  (void) this->leader_follower_.add_follower (this->follower_);
++  if (this->follower_)
++      (void) this->leader_follower_.add_follower (this->follower_);
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+--- ACE_wrappers/TAO/tao/LF_Follower_Auto_Adder_old3.cpp	2005-11-02 01:13:04.000000000 +0000
++++ ACE_wrappers/TAO/tao/LF_Follower_Auto_Adder.cpp	2009-12-07 15:57:40.156250000 +0000
+@@ -14,7 +14,8 @@
+ 
+ TAO_LF_Follower_Auto_Adder::~TAO_LF_Follower_Auto_Adder (void)
+ {
+-  this->leader_follower_.remove_follower (this->follower_);
++  if (this->follower_)
++      this->leader_follower_.remove_follower (this->follower_);
+ }
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
