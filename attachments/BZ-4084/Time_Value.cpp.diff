@@ -1,0 +1,22 @@
+Index: ace/Time_Value.cpp
+===================================================================
+--- ace/Time_Value.cpp	(revision 96664)
++++ ace/Time_Value.cpp	(working copy)
+@@ -190,7 +190,7 @@
+               this->tv_.tv_usec -= ACE_ONE_SECOND_IN_USECS;
+             }
+           else
+-            this->tv_.tv_usec = ACE_ONE_SECOND_IN_USECS - 1;
++            this->tv_.tv_usec = 0;
+         while (this->tv_.tv_usec >= ACE_ONE_SECOND_IN_USECS);
+     }
+   else if (this->tv_.tv_usec <= -ACE_ONE_SECOND_IN_USECS)
+@@ -212,7 +212,7 @@
+               this->tv_.tv_usec += ACE_ONE_SECOND_IN_USECS;
+             }
+           else
+-            this->tv_.tv_usec = -ACE_ONE_SECOND_IN_USECS + 1;
++            this->tv_.tv_usec = 0;
+         while (this->tv_.tv_usec <= -ACE_ONE_SECOND_IN_USECS);
+     }
+ 
