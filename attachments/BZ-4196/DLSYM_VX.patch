@@ -1,0 +1,26 @@
+--- TAO.org/ACE_wrappers/ace/OS_NS_dlfcn.inl	2014-10-07 21:58:25.000000000 +0000
++++ TAO/ACE_wrappers/ace/OS_NS_dlfcn.inl	2014-12-11 14:42:09.000000000 +0000
+@@ -256,6 +256,14 @@
+   // which resolves the most recently loaded symbols, which resolve
+   // mostly what we want..
+   ACE_UNUSED_ARG (handle);
++#if _WRS_VXWORKS_MAJOR < 6 || (_WRS_VXWORKS_MAJOR == 6 && _WRS_VXWORKS_MINOR < 9)
++  SYM_TYPE symtype;
++  char *value = 0;
++  STATUS status;
++  ACE_OSCALL (::symFindByName(sysSymTbl, symbolname, &value, &symtype), int, -1, status);
++
++  return status == OK ? reinterpret_cast <void*>(value) : 0;
++#else
+   STATUS status;
+ 
+   SYMBOL_DESC symbolDesc;     /* symFind() descriptor */
+@@ -266,7 +274,7 @@
+   ACE_OSCALL (::symFind(sysSymTbl, &symbolDesc), int, -1, status);
+ 
+   return status == OK ? reinterpret_cast <void*>(symbolDesc.value) : 0;
+-
++#endif
+ # else
+ 
+   ACE_UNUSED_ARG (handle);
