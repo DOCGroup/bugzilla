@@ -1,0 +1,433 @@
+Index: ace/Acceptor.cpp
+===================================================================
+--- ace/Acceptor.cpp	(revision 89179)
++++ ace/Acceptor.cpp	(working copy)
+@@ -367,17 +367,9 @@
+ ACE_Acceptor<SVC_HANDLER, ACE_PEER_ACCEPTOR_2>::handle_input (ACE_HANDLE listener)
+ {
+   ACE_TRACE ("ACE_Acceptor<SVC_HANDLER, ACE_PEER_ACCEPTOR_2>::handle_input");
+-  ACE_Handle_Set conn_handle;
+ 
+   // Default is "timeout (0, 0)," which means "poll."
+   ACE_Time_Value timeout;
+-#  if defined (ACE_WIN32)
+-  // This arg is ignored on Windows and causes pointer truncation
+-  // warnings on 64-bit compiles
+-  int select_width = 0;
+-#  else
+-  int select_width = int (listener) + 1;
+-#  endif /* ACE_WIN32 */
+ 
+   // Accept connections from clients.  Note that a loop is used for two
+   // reasons:
+@@ -434,17 +426,12 @@
+                         ACE_TEXT ("activate_svc_handler")));
+           return 0;
+         }
+-
+-      conn_handle.set_bit (listener);
+     }
+ 
+   // Now, check to see if there is another connection pending and
+   // break out of the loop if there is none.
+   while (this->use_select_
+-         && ACE_OS::select (select_width,
+-                            conn_handle,
+-                            0,
+-                            0,
++         && ACE::handle_read_ready (listener,
+                             &timeout) == 1);
+   return 0;
+ }
+Index: ace/SOCK_IO.cpp
+===================================================================
+--- ace/SOCK_IO.cpp	(revision 89179)
++++ ace/SOCK_IO.cpp	(working copy)
+@@ -37,35 +37,10 @@
+ {
+   ACE_TRACE ("ACE_SOCK_IO::recvv");
+ #if defined (FIONREAD)
+-  ACE_Handle_Set handle_set;
+-  handle_set.reset ();
+-  handle_set.set_bit (this->get_handle ());
+-
+   io_vec->iov_base = 0;
+-
+-  // Check the status of the current socket.
+-#  if defined (ACE_WIN32)
+-  // This arg is ignored on Windows and causes pointer truncation
+-  // warnings on 64-bit compiles.
+-  int select_width = 0;
+-#  else
+-  int select_width = int (this->get_handle ()) + 1;
+-#  endif /* ACE_WIN32 */
+-  switch (ACE_OS::select (select_width,
+-                          handle_set,
+-                          0, 0,
+-                          timeout))
++  if( ACE::handle_read_ready (this->get_handle (), timeout) != 1 )
+     {
+-    case -1:
+       return -1;
+-      /* NOTREACHED */
+-    case 0:
+-      errno = ETIME;
+-      return -1;
+-      /* NOTREACHED */
+-    default:
+-      // Goes fine, fallthrough to get data
+-      break;
+     }
+ 
+   int inlen = 0;
+Index: ace/SOCK_Dgram.cpp
+===================================================================
+--- ace/SOCK_Dgram.cpp	(revision 89179)
++++ ace/SOCK_Dgram.cpp	(working copy)
+@@ -54,34 +54,9 @@
+ {
+   ACE_TRACE ("ACE_SOCK_Dgram::recv");
+ #if defined (FIONREAD)
+-  ACE_Handle_Set handle_set;
+-  handle_set.reset ();
+-  handle_set.set_bit (this->get_handle ());
+-
+-  // Check the status of the current socket to make sure there's data
+-  // to recv (or time out).
+-#  if defined (ACE_WIN32)
+-  // This arg is ignored on Windows and causes pointer truncation
+-  // warnings on 64-bit compiles.
+-  int select_width = 0;
+-#  else
+-  int select_width = int (this->get_handle ()) + 1;
+-#  endif /* ACE_WIN32 */
+-  switch (ACE_OS::select (select_width,
+-                          handle_set,
+-                          0, 0,
+-                          timeout))
++  if( ACE::handle_read_ready (this->get_handle (), timeout) != 1 )
+     {
+-    case -1:
+       return -1;
+-      /* NOTREACHED */
+-    case 0:
+-      errno = ETIME;
+-      return -1;
+-      /* NOTREACHED */
+-    default:
+-      // Goes fine, fallthrough to get data
+-      break;
+     }
+ 
+   sockaddr *saddr = (sockaddr *) addr.get_addr ();
+@@ -453,35 +428,15 @@
+                       int flags,
+                       const ACE_Time_Value *timeout) const
+ {
+-  ACE_Handle_Set handle_set;
+-  handle_set.reset ();
+-  handle_set.set_bit (this->get_handle ());
+-
+-  // Check the status of the current socket.
+-#if defined (ACE_WIN32)
+-  // This arg is ignored on Windows and causes pointer truncation
+-  // warnings on 64-bit compiles.
+-  int select_width = 0;
+-#else
+-  int select_width = int (this->get_handle ()) + 1;
+-#endif /* ACE_WIN32 */
+-  switch (ACE_OS::select (select_width,
+-                          handle_set,
+-                          0,
+-                          0,
+-                          timeout))
++  if( ACE::handle_read_ready (this->get_handle (), timeout) == 1 )
+     {
+-    case -1:
+-      return -1;
+-      /* NOTREACHED */
+-    case 0:
+-      errno = ETIME;
+-      return -1;
+-      /* NOTREACHED */
+-    default:
+       // Goes fine, call <recv> to get data
+       return this->recv (buf, n, addr, flags);
+     }
++  else
++  {
++	  return -1;
++  }
+ }
+ 
+ ssize_t
+@@ -491,35 +446,16 @@
+                       int flags,
+                       const ACE_Time_Value *timeout) const
+ {
+-  ACE_Handle_Set handle_set;
+-  handle_set.reset ();
+-  handle_set.set_bit (this->get_handle ());
+-
+   // Check the status of the current socket.
+-#if defined (ACE_WIN32)
+-  // This arg is ignored on Windows and causes pointer truncation
+-  // warnings on 64-bit compiles.
+-  int select_width = 0;
+-#else
+-  int select_width = int (this->get_handle ()) + 1;
+-#endif /* ACE_WIN32 */
+-  switch (ACE_OS::select (select_width,
+-                          0,
+-                          handle_set,
+-                          0,
+-                          timeout))
++  if( ACE::handle_write_ready (this->get_handle (), timeout) == 1 )
+     {
+-    case -1:
+-      return -1;
+-      /* NOTREACHED */
+-    case 0:
+-      errno = ETIME;
+-      return -1;
+-      /* NOTREACHED */
+-    default:
+       // Goes fine, call <send> to transmit the data.
+       return this->send (buf, n, addr, flags);
+     }
++  else
++  {
++	  return -1;
++  }
+ }
+ 
+ int
+Index: ace/ACE.cpp
+===================================================================
+--- ace/ACE.cpp	(revision 89179)
++++ ace/ACE.cpp	(working copy)
+@@ -33,9 +33,9 @@
+ #include "ace/ACE.inl"
+ #endif /* __ACE_INLINE__ */
+ 
+-#if defined (ACE_HAS_POLL) && defined (ACE_HAS_LIMITED_SELECT)
++#if defined (ACE_HAS_POLL)
+ #  include "ace/OS_NS_poll.h"
+-#endif /* ACE_HAS_POLL  && ACE_HAS_LIMITED_SELECT */
++#endif /* ACE_HAS_POLL */
+ 
+ 
+ ACE_RCSID (ace,
+@@ -2201,14 +2201,19 @@
+                    int write_ready,
+                    int exception_ready)
+ {
+-#if defined (ACE_HAS_POLL) && defined (ACE_HAS_LIMITED_SELECT)
+-  ACE_UNUSED_ARG (write_ready);
++#if defined (ACE_HAS_POLL)
+   ACE_UNUSED_ARG (exception_ready);
+ 
+   struct pollfd fds;
+ 
+   fds.fd = handle;
+-  fds.events = read_ready ? POLLIN : POLLOUT;
++  fds.events = read_ready ? POLLIN : 0;
++  
++  if( write_ready )
++  {
++    fds.events |= POLLOUT;
++  }
++
+   fds.revents = 0;
+ 
+   int result = ACE_OS::poll (&fds, 1, timeout);
+@@ -2231,7 +2236,7 @@
+                                exception_ready ? handle_set.fdset () : 0, // exception_fds.
+                                timeout);
+ 
+-#endif /* ACE_HAS_POLL && ACE_HAS_LIMITED_SELECT */
++#endif /* ACE_HAS_POLL */
+ 
+   switch (result)
+     {
+@@ -2560,7 +2565,7 @@
+ {
+   ACE_TRACE ("ACE::handle_timed_complete");
+ 
+-#if !defined (ACE_WIN32) && defined (ACE_HAS_POLL) && defined (ACE_HAS_LIMITED_SELECT)
++#if !defined (ACE_WIN32) && defined (ACE_HAS_POLL)
+ 
+   struct pollfd fds;
+ 
+@@ -2573,7 +2578,7 @@
+   ACE_Handle_Set wr_handles;
+   rd_handles.set_bit (h);
+   wr_handles.set_bit (h);
+-#endif /* !ACE_WIN32 && ACE_HAS_POLL && ACE_HAS_LIMITED_SELECT */
++#endif /* !ACE_WIN32 && ACE_HAS_POLL */
+ 
+ #if defined (ACE_WIN32)
+   // Winsock is different - it sets the exception bit for failed connect,
+@@ -2593,7 +2598,7 @@
+                           ex_handles,
+                           timeout);
+ #else
+-# if defined (ACE_HAS_POLL) && defined (ACE_HAS_LIMITED_SELECT)
++# if defined (ACE_HAS_POLL)
+ 
+   int n = ACE_OS::poll (&fds, 1, timeout);
+ 
+@@ -2611,7 +2616,7 @@
+                         wr_handles,
+                         0,
+                         timeout);
+-# endif /* ACE_HAS_POLL && ACE_HAS_LIMITED_SELECT */
++# endif /* ACE_HAS_POLL */
+ #endif /* ACE_WIN32 */
+ 
+   // If we failed to connect within the time period allocated by the
+@@ -2645,18 +2650,18 @@
+     }
+ #else
+   if (is_tli)
+-# if defined (ACE_HAS_POLL) && defined (ACE_HAS_LIMITED_SELECT)
++# if defined (ACE_HAS_POLL)
+     need_to_check = (fds.revents & POLLIN) && !(fds.revents & POLLOUT);
+ # else
+     need_to_check = rd_handles.is_set (h) && !wr_handles.is_set (h);
+-# endif /* ACE_HAS_POLL && ACE_HAS_LIMITED_SELECT */
++# endif /* ACE_HAS_POLL */
+ 
+   else
+-# if defined (ACE_HAS_POLL) && defined (ACE_HAS_LIMITED_SELECT)
++# if defined (ACE_HAS_POLL)
+     need_to_check = (fds.revents & POLLIN);
+ # else
+     need_to_check = true;
+-# endif /* ACE_HAS_POLL && ACE_HAS_LIMITED_SELECT */
++# endif /* ACE_HAS_POLL */
+ #endif /* ACE_WIN32 */
+ 
+   if (need_to_check)
+@@ -2718,7 +2723,7 @@
+   if (listener == ACE_INVALID_HANDLE)
+     return -1;
+ 
+-#if defined (ACE_HAS_POLL) && defined (ACE_HAS_LIMITED_SELECT)
++#if defined (ACE_HAS_POLL)
+ 
+   struct pollfd fds;
+ 
+@@ -2730,13 +2735,13 @@
+   // Use the select() implementation rather than poll().
+   ACE_Handle_Set rd_handle;
+   rd_handle.set_bit (listener);
+-#endif /* ACE_HAS_POLL && ACE_HAS_LIMITED_SELECT */
++#endif /* ACE_HAS_POLL */
+ 
+   // We need a loop here if <restart> is enabled.
+ 
+   for (;;)
+     {
+-#if defined (ACE_HAS_POLL) && defined (ACE_HAS_LIMITED_SELECT)
++#if defined (ACE_HAS_POLL)
+ 
+       int n = ACE_OS::poll (&fds, 1, timeout);
+ 
+@@ -2752,7 +2757,7 @@
+       int n = ACE_OS::select (select_width,
+                               rd_handle, 0, 0,
+                               timeout);
+-#endif /* ACE_HAS_POLL && ACE_HAS_LIMITED_SELECT */
++#endif /* ACE_HAS_POLL */
+ 
+       switch (n)
+         {
+Index: tests/SOCK_Test.cpp
+===================================================================
+--- tests/SOCK_Test.cpp	(revision 89179)
++++ tests/SOCK_Test.cpp	(working copy)
+@@ -69,6 +69,17 @@
+   if (cli_stream.disable (ACE_NONBLOCK) == -1)
+     ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) %p\n"), ACE_TEXT ("disable")));
+ 
++  // Test Bug 3606
++  const ACE_Time_Value def_timeout (ACE_DEFAULT_TIMEOUT);
++  ACE_Time_Value tv (def_timeout);
++  int result = ACE::handle_ready (cli_stream.get_handle (), &tv,
++                                  1, // read_ready
++                                  1, // write_ready
++                                  0);
++  // we expect the handle to be at leat write_ready since it is freshly connected.                   
++  if (result == -1)
++    ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("(%P|%t) %p\n"), ACE_TEXT ("ACE::handle_ready")), 0);
++  
+   // Send data to server (correctly handles "incomplete writes").
+ 
+   for (const char *c = ACE_ALPHABET; *c != '\0'; c++)
+@@ -104,36 +115,18 @@
+   // calls...
+   ACE_SOCK_Stream new_stream;
+   ACE_INET_Addr cli_addr;
+-  ACE_Handle_Set handle_set;
+   const ACE_Time_Value def_timeout (ACE_DEFAULT_TIMEOUT);
+   ACE_Time_Value tv (def_timeout);
+ 
+   char buf[BUFSIZ];
+   const char *t = ACE_ALPHABET;
+ 
+-  handle_set.reset ();
+-  handle_set.set_bit (peer_acceptor->get_handle ());
++  int result = ACE::handle_read_ready (peer_acceptor->get_handle (), &tv);
+ 
+-  int select_width;
+-#  if defined (ACE_WIN64)
+-  // This arg is ignored on Windows and causes pointer truncation
+-  // warnings on 64-bit compiles.
+-  select_width = 0;
+-#  else
+-  select_width = int (peer_acceptor->get_handle ()) + 1;
+-#  endif /* ACE_WIN64 */
+-  int result = ACE_OS::select (select_width,
+-                               handle_set,
+-                               0, 0, &tv);
+   ACE_ASSERT (tv == def_timeout);
+ 
+   if (result == -1)
+-    ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("(%P|%t) %p\n"), ACE_TEXT ("select")), 0);
+-  else if (result == 0)
+-    {
+-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) select timed out, shutting down\n")));
+-      return 0;
+-    }
++    ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("(%P|%t) %p\n"), ACE_TEXT ("handle_read_ready")), 0);
+ 
+   // Create a new ACE_SOCK_Stream endpoint (note automatic restart
+   // if errno == EINTR).
+@@ -147,24 +140,12 @@
+       if (new_stream.enable (ACE_NONBLOCK) == -1)
+         ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("(%P|%t) %p\n"), ACE_TEXT ("enable")), 0);
+ 
+-      handle_set.reset ();
+-      handle_set.set_bit (new_stream.get_handle ());
+-
+       // Read data from client (terminate on error).
+       int select_width;
+       for (ssize_t r_bytes; ;)
+         {
+-#  if defined (ACE_WIN64)
+-          // This arg is ignored on Windows and causes pointer truncation
+-          // warnings on 64-bit compiles.
+-          select_width = 0;
+-#  else
+-          select_width = int (new_stream.get_handle ()) + 1;
+-#  endif /* ACE_WIN64 */
+-          if (ACE_OS::select (select_width,
+-                              handle_set,
+-                              0, 0, 0) == -1)
+-            ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("(%P|%t) %p\n"), ACE_TEXT ("select")), 0);
++          if (ACE::handle_read_ready (new_stream.get_handle (), 0) == -1)
++            ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("(%P|%t) %p\n"), ACE_TEXT ("handle_read_ready")), 0);
+ 
+           while ((r_bytes = new_stream.recv (buf, 1)) > 0)
+             {
