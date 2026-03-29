@@ -1,0 +1,34 @@
+Index: connectors/dds4ccm/impl/DDS_Base_Connector_T.cpp
+===================================================================
+--- connectors/dds4ccm/impl/DDS_Base_Connector_T.cpp	(revision 96751)
++++ connectors/dds4ccm/impl/DDS_Base_Connector_T.cpp	(working copy)
+@@ -786,19 +786,19 @@ DDS_Base_Connector_T<CCM_TYPE>::activate_topic (
+                               error_listener.in (),
+                               reactor),
+                             ::CORBA::NO_MEMORY ());
++        }
+ 
+-          DDS::ReturnCode_t const retcode = topic->set_listener (listener,
++        DDS::ReturnCode_t const retcode = topic->set_listener (listener,
+                                                                    mask);
+ 
+-          if (retcode != ::DDS::RETCODE_OK)
+-            {
+-              DDS4CCM_ERROR (DDS4CCM_LOG_LEVEL_ERROR, (LM_ERROR, DDS4CCM_INFO
+-                            "DDS_Base_Connector_T::activate_topic - "
+-                            "Error while setting the listener on the topic - <%C>\n",
+-                            ::CIAO::DDS4CCM::translate_retcode (retcode)));
+-              throw ::CORBA::INTERNAL ();
+-            }
+-        }
++        if (retcode != ::DDS::RETCODE_OK)
++          {
++            DDS4CCM_ERROR (DDS4CCM_LOG_LEVEL_ERROR, (LM_ERROR, DDS4CCM_INFO
++                          "DDS_Base_Connector_T::activate_topic - "
++                          "Error while setting the listener on the topic - <%C>\n",
++                          ::CIAO::DDS4CCM::translate_retcode (retcode)));
++            throw ::CORBA::INTERNAL ();
++          }
+     }
+ }
+ 
