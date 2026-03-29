@@ -1,0 +1,187 @@
+johnny@m4500jw:~/ACE/OpenDDS/tests/DCPS/TopicReuse> ./run_test.pl 
+././tpreuse  -DCPSConfigFile rtps_disc.ini
+==16530== Invalid read of size 4
+==16530==    at 0x53BF5C9: OpenDDS::RTPS::Sedp::disassociate(OpenDDS::RTPS::SPDPdiscoveredParticipantData const&) (Sedp.cpp:595)
+==16530==    by 0x53D1E0D: OpenDDS::RTPS::Spdp::remove_discovered_participant(std::_Rb_tree_iterator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::RTPS::Spdp::DiscoveredParticipant> >) (Spdp.cpp:239)
+==16530==    by 0x53D516A: OpenDDS::RTPS::Spdp::~Spdp() (Spdp.cpp:103)
+==16530==    by 0x53D5468: OpenDDS::RTPS::Spdp::~Spdp() (Spdp.cpp:116)
+==16530==    by 0x53E3F1A: std::_Rb_tree<OpenDDS::DCPS::GUID_t, std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >, std::_Select1st<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >, OpenDDS::DCPS::GUID_tKeyLessThan, std::allocator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > > >::_M_erase(std::_Rb_tree_node<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >*) (RcHandle_T.h:125)
+==16530==    by 0x53E45F3: std::_Rb_tree<OpenDDS::DCPS::GUID_t, std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >, std::_Select1st<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >, OpenDDS::DCPS::GUID_tKeyLessThan, std::allocator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > > >::erase(OpenDDS::DCPS::GUID_t const&) (stl_tree.h:799)
+==16530==    by 0x53DDCA0: OpenDDS::RTPS::RtpsDiscovery::remove_domain_participant(int, OpenDDS::DCPS::GUID_t const&) (stl_map.h:644)
+==16530==    by 0x5D2F272: OpenDDS::DCPS::DomainParticipantFactoryImpl::delete_participant(DDS::DomainParticipant*) (DomainParticipantFactoryImpl.cpp:235)
+==16530==    by 0x4023FA: main (tpreuse.cpp:181)
+==16530==  Address 0x814c21c is 124 bytes inside a block of size 296 free'd
+==16530==    at 0x4C285BC: operator delete(void*) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16530==    by 0x53D1F6D: OpenDDS::RTPS::Spdp::remove_discovered_participant(std::_Rb_tree_iterator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::RTPS::Spdp::DiscoveredParticipant> >) (new_allocator.h:98)
+==16530==    by 0x53D6887: OpenDDS::RTPS::Spdp::SpdpTransport::handle_input(int) (Spdp.cpp:204)
+==16530==    by 0x53E03A3: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify_handle(int, unsigned long, ACE_Handle_Set&, ACE_Event_Handler*, int (ACE_Event_Handler::*)(int)) (Select_Reactor_T.cpp:828)
+==16530==    by 0x53E04C8: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_io_set(int, int&, int, ACE_Handle_Set&, ACE_Handle_Set&, int (ACE_Event_Handler::*)(int)) (Select_Reactor_T.cpp:1212)
+==16530==    by 0x53DFC4B: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_io_handlers(ACE_Select_Reactor_Handle_Set&, int&, int&) (Select_Reactor_T.cpp:1270)
+==16530==    by 0x53E06D0: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch(int, ACE_Select_Reactor_Handle_Set&) (Select_Reactor_T.cpp:1374)
+==16530==    by 0x53E85C9: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value*) (Select_Reactor_T.cpp:1464)
+==16530==    by 0x6C4B163: ACE_Reactor::run_reactor_event_loop(int (*)(ACE_Reactor*)) (Reactor.cpp:220)
+==16530==    by 0x53DA5CF: OpenDDS::RTPS::RtpsDiscovery::ReactorRunner::svc() (RtpsDiscovery.cpp:338)
+==16530==    by 0x6C5E04A: ACE_Task_Base::svc_run(void*) (Task.cpp:260)
+==16530==    by 0x6C5F8A4: ACE_Thread_Adapter::invoke_i() (Thread_Adapter.cpp:161)
+==16530==    by 0x6C5F981: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:96)
+==16530==    by 0x7A66F04: start_thread (in /lib64/libpthread-2.14.1.so)
+==16530==    by 0x7D5710C: clone (in /lib64/libc-2.14.1.so)
+==16530== 
+==16530== Invalid read of size 4
+==16530==    at 0x53BF581: OpenDDS::RTPS::Sedp::disassociate(OpenDDS::RTPS::SPDPdiscoveredParticipantData const&) (Sedp.cpp:600)
+==16530==    by 0x53D1E0D: OpenDDS::RTPS::Spdp::remove_discovered_participant(std::_Rb_tree_iterator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::RTPS::Spdp::DiscoveredParticipant> >) (Spdp.cpp:239)
+==16530==    by 0x53D516A: OpenDDS::RTPS::Spdp::~Spdp() (Spdp.cpp:103)
+==16530==    by 0x53D5468: OpenDDS::RTPS::Spdp::~Spdp() (Spdp.cpp:116)
+==16530==    by 0x53E3F1A: std::_Rb_tree<OpenDDS::DCPS::GUID_t, std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >, std::_Select1st<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >, OpenDDS::DCPS::GUID_tKeyLessThan, std::allocator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > > >::_M_erase(std::_Rb_tree_node<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >*) (RcHandle_T.h:125)
+==16530==    by 0x53E45F3: std::_Rb_tree<OpenDDS::DCPS::GUID_t, std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >, std::_Select1st<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >, OpenDDS::DCPS::GUID_tKeyLessThan, std::allocator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > > >::erase(OpenDDS::DCPS::GUID_t const&) (stl_tree.h:799)
+==16530==    by 0x53DDCA0: OpenDDS::RTPS::RtpsDiscovery::remove_domain_participant(int, OpenDDS::DCPS::GUID_t const&) (stl_map.h:644)
+==16530==    by 0x5D2F272: OpenDDS::DCPS::DomainParticipantFactoryImpl::delete_participant(DDS::DomainParticipant*) (DomainParticipantFactoryImpl.cpp:235)
+==16530==    by 0x4023FA: main (tpreuse.cpp:181)
+==16530==  Address 0x814c21c is 124 bytes inside a block of size 296 free'd
+==16530==    at 0x4C285BC: operator delete(void*) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16530==    by 0x53D1F6D: OpenDDS::RTPS::Spdp::remove_discovered_participant(std::_Rb_tree_iterator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::RTPS::Spdp::DiscoveredParticipant> >) (new_allocator.h:98)
+==16530==    by 0x53D6887: OpenDDS::RTPS::Spdp::SpdpTransport::handle_input(int) (Spdp.cpp:204)
+==16530==    by 0x53E03A3: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify_handle(int, unsigned long, ACE_Handle_Set&, ACE_Event_Handler*, int (ACE_Event_Handler::*)(int)) (Select_Reactor_T.cpp:828)
+==16530==    by 0x53E04C8: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_io_set(int, int&, int, ACE_Handle_Set&, ACE_Handle_Set&, int (ACE_Event_Handler::*)(int)) (Select_Reactor_T.cpp:1212)
+==16530==    by 0x53DFC4B: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_io_handlers(ACE_Select_Reactor_Handle_Set&, int&, int&) (Select_Reactor_T.cpp:1270)
+==16530==    by 0x53E06D0: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch(int, ACE_Select_Reactor_Handle_Set&) (Select_Reactor_T.cpp:1374)
+==16530==    by 0x53E85C9: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value*) (Select_Reactor_T.cpp:1464)
+==16530==    by 0x6C4B163: ACE_Reactor::run_reactor_event_loop(int (*)(ACE_Reactor*)) (Reactor.cpp:220)
+==16530==    by 0x53DA5CF: OpenDDS::RTPS::RtpsDiscovery::ReactorRunner::svc() (RtpsDiscovery.cpp:338)
+==16530==    by 0x6C5E04A: ACE_Task_Base::svc_run(void*) (Task.cpp:260)
+==16530==    by 0x6C5F8A4: ACE_Thread_Adapter::invoke_i() (Thread_Adapter.cpp:161)
+==16530==    by 0x6C5F981: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:96)
+==16530==    by 0x7A66F04: start_thread (in /lib64/libpthread-2.14.1.so)
+==16530==    by 0x7D5710C: clone (in /lib64/libc-2.14.1.so)
+==16530== 
+==16530== Invalid read of size 4
+==16530==    at 0x53BF539: OpenDDS::RTPS::Sedp::disassociate(OpenDDS::RTPS::SPDPdiscoveredParticipantData const&) (Sedp.cpp:605)
+==16530==    by 0x53D1E0D: OpenDDS::RTPS::Spdp::remove_discovered_participant(std::_Rb_tree_iterator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::RTPS::Spdp::DiscoveredParticipant> >) (Spdp.cpp:239)
+==16530==    by 0x53D516A: OpenDDS::RTPS::Spdp::~Spdp() (Spdp.cpp:103)
+==16530==    by 0x53D5468: OpenDDS::RTPS::Spdp::~Spdp() (Spdp.cpp:116)
+==16530==    by 0x53E3F1A: std::_Rb_tree<OpenDDS::DCPS::GUID_t, std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >, std::_Select1st<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >, OpenDDS::DCPS::GUID_tKeyLessThan, std::allocator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > > >::_M_erase(std::_Rb_tree_node<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >*) (RcHandle_T.h:125)
+==16530==    by 0x53E45F3: std::_Rb_tree<OpenDDS::DCPS::GUID_t, std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >, std::_Select1st<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >, OpenDDS::DCPS::GUID_tKeyLessThan, std::allocator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > > >::erase(OpenDDS::DCPS::GUID_t const&) (stl_tree.h:799)
+==16530==    by 0x53DDCA0: OpenDDS::RTPS::RtpsDiscovery::remove_domain_participant(int, OpenDDS::DCPS::GUID_t const&) (stl_map.h:644)
+==16530==    by 0x5D2F272: OpenDDS::DCPS::DomainParticipantFactoryImpl::delete_participant(DDS::DomainParticipant*) (DomainParticipantFactoryImpl.cpp:235)
+==16530==    by 0x4023FA: main (tpreuse.cpp:181)
+==16530==  Address 0x814c21c is 124 bytes inside a block of size 296 free'd
+==16530==    at 0x4C285BC: operator delete(void*) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16530==    by 0x53D1F6D: OpenDDS::RTPS::Spdp::remove_discovered_participant(std::_Rb_tree_iterator<std::pair<OpenDDS::DCPS::GUID_t const, OpenDDS::RTPS::Spdp::DiscoveredParticipant> >) (new_allocator.h:98)
+==16530==    by 0x53D6887: OpenDDS::RTPS::Spdp::SpdpTransport::handle_input(int) (Spdp.cpp:204)
+==16530==    by 0x53E03A3: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify_handle(int, unsigned long, ACE_Handle_Set&, ACE_Event_Handler*, int (ACE_Event_Handler::*)(int)) (Select_Reactor_T.cpp:828)
+==16530==    by 0x53E04C8: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_io_set(int, int&, int, ACE_Handle_Set&, ACE_Handle_Set&, int (ACE_Event_Handler::*)(int)) (Select_Reactor_T.cpp:1212)
+==16530==    by 0x53DFC4B: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_io_handlers(ACE_Select_Reactor_Handle_Set&, int&, int&) (Select_Reactor_T.cpp:1270)
+==16530==    by 0x53E06D0: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch(int, ACE_Select_Reactor_Handle_Set&) (Select_Reactor_T.cpp:1374)
+==16530==    by 0x53E85C9: ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value*) (Select_Reactor_T.cpp:1464)
+==16530==    by 0x6C4B163: ACE_Reactor::run_reactor_event_loop(int (*)(ACE_Reactor*)) (Reactor.cpp:220)
+==16530==    by 0x53DA5CF: OpenDDS::RTPS::RtpsDiscovery::ReactorRunner::svc() (RtpsDiscovery.cpp:338)
+==16530==    by 0x6C5E04A: ACE_Task_Base::svc_run(void*) (Task.cpp:260)
+==16530==    by 0x6C5F8A4: ACE_Thread_Adapter::invoke_i() (Thread_Adapter.cpp:161)
+==16530==    by 0x6C5F981: ACE_Thread_Adapter::invoke() (Thread_Adapter.cpp:96)
+==16530==    by 0x7A66F04: start_thread (in /lib64/libpthread-2.14.1.so)
+==16530==    by 0x7D5710C: clone (in /lib64/libc-2.14.1.so)
+==16530== 
+==16530== 16 bytes in 1 blocks are still reachable in loss record 1 of 8
+==16530==    at 0x4C290FB: operator new(unsigned long, std::nothrow_t const&) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16530==    by 0x5CED02C: TAO_Singleton<OpenDDS::DCPS::Transient_Kludge, ACE_Thread_Mutex>::instance() (TAO_Singleton.cpp:76)
+==16530==    by 0x5CE087F: OpenDDS::DCPS::DomainParticipantImpl::enable() (DomainParticipantImpl.cpp:1562)
+==16530==    by 0x5D2E778: OpenDDS::DCPS::DomainParticipantFactoryImpl::create_participant(int, DDS::DomainParticipantQos const&, DDS::DomainParticipantListener*, unsigned int) (DomainParticipantFactoryImpl.cpp:100)
+==16530==    by 0x401CA6: main (tpreuse.cpp:34)
+==16530== 
+==16530== 16 bytes in 2 blocks are definitely lost in loss record 2 of 8
+==16530==    at 0x4C292C7: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16530==    by 0x53DAFAA: OpenDDS::RTPS::RtpsDiscovery::StaticInitializer::StaticInitializer() (RtpsDiscovery.cpp:667)
+==16530==    by 0x53EA355: ??? (in /home/johnny/ACE/OpenDDS/dds/DCPS/RTPS/libOpenDDS_Rtps.so.3.1.0)
+==16530==    by 0x53498DA: ??? (in /home/johnny/ACE/OpenDDS/dds/DCPS/RTPS/libOpenDDS_Rtps.so.3.1.0)
+==16530==    by 0x7FEFFFC96: ???
+==16530==    by 0x5043442D00657374: ???
+==16530==    by 0x466769666E6F4352: ???
+==16530==    by 0x7370747200656C68: ???
+==16530==    by 0x6E692E637369645E: ???
+==16530==    by 0x54565F4744580068: ???
+==16530==    by 0x53454C00373D524D: ???
+==16530==    by 0x74652F3D59454B52: ???
+==16530==    by 0x656B7373656C2F62: ???
+==16530==    by 0x4E4E006E69622E78: ???
+==16530==    by 0x5245565245535053: ???
+==16530==    by 0x414D007377656E3C: ???
+==16530==    by 0x682F3D485441504D: ???
+==16530==    by 0x6E686F6A2F656D6E: ???
+==16530==    by 0x65726168732F796D: ???
+==16530==    by 0x73752F3A6E616D2E: ???
+==16530==    by 0x2F6C61636F6C2F71: ???
+==16530==    by 0x7273752F3A6E616C: ???
+==16530==    by 0x6D2F65726168732E: ???
+==16530==    by 0x535F474458006E60: ???
+==16530==    by 0x495F4E4F49535344: ???
+==16530== 
+==16530== 28 bytes in 1 blocks are indirectly lost in loss record 3 of 8
+==16530==    at 0x4C28B5B: operator new[](unsigned long, std::nothrow_t const&) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16530==    by 0x6C1AE6B: ACE_New_Allocator::malloc(unsigned long) (Malloc_Allocator.cpp:116)
+==16530==    by 0x6C1F4F4: ACE_Data_Block::ACE_Data_Block(unsigned long, int, char const*, ACE_Allocator*, ACE_Lock*, unsigned long, ACE_Allocator*) (Message_Block.cpp:365)
+==16530==    by 0x6C1F904: ACE_Message_Block::init_i(unsigned long, int, ACE_Message_Block*, char const*, ACE_Allocator*, ACE_Lock*, unsigned long, unsigned long, ACE_Time_Value const&, ACE_Time_Value const&, ACE_Data_Block*, ACE_Allocator*, ACE_Allocator*) (Message_Block.cpp:724)
+==16530==    by 0x6C1FCDC: ACE_Message_Block::ACE_Message_Block(unsigned long, int, ACE_Message_Block*, char const*, ACE_Allocator*, ACE_Lock*, unsigned long, ACE_Time_Value const&, ACE_Time_Value const&, ACE_Allocator*, ACE_Allocator*) (Message_Block.cpp:462)
+==16530==    by 0x53C38E9: OpenDDS::RTPS::Sedp::Writer::write_unregister_dispose(OpenDDS::DCPS::GUID_t const&) (Sedp.cpp:2038)
+==16530==    by 0x53C3FAF: OpenDDS::RTPS::Sedp::remove_publication(OpenDDS::DCPS::GUID_t const&) (Sedp.cpp:895)
+==16530==    by 0x53DB573: OpenDDS::RTPS::RtpsDiscovery::remove_publication(int, OpenDDS::DCPS::GUID_t const&, OpenDDS::DCPS::GUID_t const&) (RtpsDiscovery.cpp:557)
+==16530==    by 0x5CC91B4: OpenDDS::DCPS::PublisherImpl::delete_datawriter(DDS::DataWriter*) (PublisherImpl.cpp:302)
+==16530==    by 0x4020F4: main (tpreuse.cpp:130)
+==16530== 
+==16530== 80 bytes in 1 blocks are indirectly lost in loss record 5 of 8
+==16530==    at 0x4C28B5B: operator new[](unsigned long, std::nothrow_t const&) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16530==    by 0x6C1AE6B: ACE_New_Allocator::malloc(unsigned long) (Malloc_Allocator.cpp:116)
+==16530==    by 0x6C1F8D3: ACE_Message_Block::init_i(unsigned long, int, ACE_Message_Block*, char const*, ACE_Allocator*, ACE_Lock*, unsigned long, unsigned long, ACE_Time_Value const&, ACE_Time_Value const&, ACE_Data_Block*, ACE_Allocator*, ACE_Allocator*) (Message_Block.cpp:724)
+==16530==    by 0x6C1FCDC: ACE_Message_Block::ACE_Message_Block(unsigned long, int, ACE_Message_Block*, char const*, ACE_Allocator*, ACE_Lock*, unsigned long, ACE_Time_Value const&, ACE_Time_Value const&, ACE_Allocator*, ACE_Allocator*) (Message_Block.cpp:462)
+==16530==    by 0x53C38E9: OpenDDS::RTPS::Sedp::Writer::write_unregister_dispose(OpenDDS::DCPS::GUID_t const&) (Sedp.cpp:2038)
+==16530==    by 0x53C3FAF: OpenDDS::RTPS::Sedp::remove_publication(OpenDDS::DCPS::GUID_t const&) (Sedp.cpp:895)
+==16530==    by 0x53DB573: OpenDDS::RTPS::RtpsDiscovery::remove_publication(int, OpenDDS::DCPS::GUID_t const&, OpenDDS::DCPS::GUID_t const&) (RtpsDiscovery.cpp:557)
+==16530==    by 0x5CC91B4: OpenDDS::DCPS::PublisherImpl::delete_datawriter(DDS::DataWriter*) (PublisherImpl.cpp:302)
+==16530==    by 0x4020F4: main (tpreuse.cpp:130)
+==16530== 
+==16530== 104 bytes in 1 blocks are still reachable in loss record 6 of 8
+==16530==    at 0x4C290FB: operator new(unsigned long, std::nothrow_t const&) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16530==    by 0x5D3F51C: TAO_Singleton<OpenDDS::DCPS::Data_Types_Register, ACE_Thread_Mutex>::instance() (TAO_Singleton.cpp:76)
+==16530==    by 0x5D3D1F7: OpenDDS::DCPS::Discovery::create_bit_topics(OpenDDS::DCPS::DomainParticipantImpl*) (Discovery.cpp:28)
+==16530==    by 0x53DB7FB: OpenDDS::RTPS::RtpsDiscovery::init_bit(OpenDDS::DCPS::DomainParticipantImpl*) (RtpsDiscovery.cpp:102)
+==16530==    by 0x5CE08B6: OpenDDS::DCPS::DomainParticipantImpl::enable() (DomainParticipantImpl.cpp:1564)
+==16530==    by 0x5D2E778: OpenDDS::DCPS::DomainParticipantFactoryImpl::create_participant(int, DDS::DomainParticipantQos const&, DDS::DomainParticipantListener*, unsigned int) (DomainParticipantFactoryImpl.cpp:100)
+==16530==    by 0x401CA6: main (tpreuse.cpp:34)
+==16530== 
+==16530== 188 (80 direct, 108 indirect) bytes in 1 blocks are definitely lost in loss record 7 of 8
+==16530==    at 0x4C292C7: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16530==    by 0x53C388E: OpenDDS::RTPS::Sedp::Writer::write_unregister_dispose(OpenDDS::DCPS::GUID_t const&) (Sedp.cpp:2038)
+==16530==    by 0x53C3FAF: OpenDDS::RTPS::Sedp::remove_publication(OpenDDS::DCPS::GUID_t const&) (Sedp.cpp:895)
+==16530==    by 0x53DB573: OpenDDS::RTPS::RtpsDiscovery::remove_publication(int, OpenDDS::DCPS::GUID_t const&, OpenDDS::DCPS::GUID_t const&) (RtpsDiscovery.cpp:557)
+==16530==    by 0x5CC91B4: OpenDDS::DCPS::PublisherImpl::delete_datawriter(DDS::DataWriter*) (PublisherImpl.cpp:302)
+==16530==    by 0x4020F4: main (tpreuse.cpp:130)
+==16530== 
+test PASSED.
+johnny@m4500jw:~/ACE/OpenDDS/tests/DCPS/TopicReuse> cd ..
+johnny@m4500jw:~/ACE/OpenDDS/tests/DCPS> cd ..
+johnny@m4500jw:~/ACE/OpenDDS/tests> cd ..
+johnny@m4500jw:~/ACE/OpenDDS> svn up
+cle.pl
+At revision 5693.
+johnny@m4500jw:~/ACE/OpenDDS> cle.pl
+WARNING: The following files are unknown to the revision control system:
+patch.txt
+svn-commit.tmp
+contrib/wrapper/.swp.DDSWrapper_OpenDDS.mpc
+tests/DCPS/TopicReuse/tpreuse
+tests/DCPS/TopicReuse/MessengerTypeSupportImpl.cpp
+tests/DCPS/TopicReuse/MessengerTypeSupport.idl
+tests/DCPS/TopicReuse/MessengerTypeSupportImpl.h
+dds/DCPS/QOS_XML_Handler/Utils.cpp
+dds/DCPS/QOS_XML_Handler/.DataReaderQos_Handler.h.rej.kate-swp
+dds/DCPS/QOS_XML_Handler/Utils.h
+dds/DCPS/transport/simpleTCP
+examples/DCPS/ishapes/run.sh
+
+You are now ready to edit the ChangeLog.
+johnny@m4500jw:~/ACE/OpenDDS> svn commit
+Sending        ChangeLog
+Sending        tests/DCPS/TopicReuse/tpreuse.cpp
+Transmitting file data ..
+Committed revision 5694.
+johnny@m4500jw:~/ACE/OpenDDS> 
+
