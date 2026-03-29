@@ -1,0 +1,1068 @@
+Starting Naming Service with  -ORBEndpoint iiop://localhost:60003 -o ns.ior
+Inside init...............
+Invoking node daemon
+Run dance_node_manager with -ORBEndpoint iiop://localhost:60001 -s C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/dance_locality_manager -n Broker=C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\Broker.ior -t 30 --domain-nc corbaloc:rir:/NameService
+(1068|1084) [LM_TRACE] -  15:21:29.490000 - NodeManager - initializing ORB
+Inside init...............
+(1068|1084) [LM_TRACE] -  15:21:29.505000 - NodeManager - initializing module instance
+(1068|1084) [LM_TRACE] -  15:21:29.505000 - DAnCE_NodeManager_Module::init - NM's orb is nil.
+(1068|1084) [LM_TRACE] -  15:21:29.505000 - Node_Manager_Module::parse_args - ignoring unknown option 1
+(1068|1084) [LM_DEBUG] -  15:21:29.505000 - Node_Manager_Module::parse_args - Using provided component server executable:C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/dance_locality_manager
+(1068|1084) [LM_DEBUG] -  15:21:29.505000 - Node_Manager_Module::parse_args - Provided Node Manager name: Broker=C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\Broker.ior
+(1068|1084) [LM_DEBUG] -  15:21:29.505000 - Node_Manager_Module::parse_args - Using provided component server spawn timeout:30
+(1068|1084) [LM_DEBUG] -  15:21:29.505000 - Node_Manager_Module::parse_args - Binding to provided Domain Naming Context: 'corbaloc:rir:/NameService'
+(1068|1084) [LM_TRACE] -  15:21:29.505000 - DAnCE_NodeManager_Module::create_poas - Resolving root POA
+(1068|1084) [LM_TRACE] -  15:21:29.505000 - DAnCE_NodeManager_Module::create_poas - Obtaining the POAManager
+(1068|1084) [LM_TRACE] -  15:21:29.505000 - DAnCE_NodeManager_Module::create_poas - DAnCE_NodeManager_Module::create_poas - Creating the "Managers" POA.
+(1068|1084) [LM_TRACE] -  15:21:29.505000 - DAnCE_NodeManager_Module::init - Resolving DomainNC.
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - DAnCE_NodeManager_Module::init - Resolving plan NS naming context.
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - InstallationRepositoryManager::register_manager_instance - 007DF2B4
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - ArtifactInstallation_Impl::register_handler - file:// handler
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - ArtifactInstallation_Impl::register_handler - http:// handler
+(1068|1084) [LM_DEBUG] -  15:21:29.521000 - DAnCE_NodeManager_Module::init - DAnCE_NodeManager::run_main - creating NodeManager for node Broker=C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\Broker.ior
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - DAnCE_NodeManager_Module::init - Allocating new NodeManger servant instance for NodeManager
+(1068|1084) [LM_INFO] -  15:21:29.521000 - NodeManager_impl::NodeManager_impl has been created
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.vanderbilt.dre.DAnCE.LocalityTimeout provided by caller.
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.vanderbilt.dre.DAnCE.DomainNC provided by caller.
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.vanderbilt.dre.DAnCE.LocalityArguments provided by caller.
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.dre.vanderbilt.DAnCE.POA provided by caller.
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.vanderbilt.dre.DAnCE.LocalityExec provided by caller.
+(1068|1084) [LM_DEBUG] -  15:21:29.521000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_Locality_Handler>:<create_Locality_Handler>
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_Locality_Handler> successfully loaded.
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_Locality_Handler>:<create_Locality_Handler>.
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityTimeout
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.DomainNC
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityArguments
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - build_property_map: Bound value for config value edu.dre.vanderbilt.DAnCE.POA
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityExec
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityExec'
+(1068|1084) [LM_DEBUG] -  15:21:29.521000 - Locality_Handler_i - Component server path: C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/dance_locality_manager
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityArguments'
+(1068|1084) [LM_DEBUG] -  15:21:29.521000 - Locality_Handler_i - Component server arguments: (null)
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityTimeout'
+(1068|1084) [LM_DEBUG] -  15:21:29.521000 - Locality_Handler_i - Spawn delay: 30
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityMutltithread'
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - DAnCE::Utility::get_property_value<bool> - Property value for name 'edu.vanderbilt.dre.DAnCE.LocalityMutltithread' has no value
+(1068|1084) [LM_DEBUG] -  15:21:29.521000 - Locality_Handler_i - Threading: Single
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.dre.vanderbilt.DAnCE.POA'
+(1068|1084) [LM_DEBUG] -  15:21:29.521000 - Locality_Handler_i - Threading: Single
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - Locality_Handler_i - Spawning Locality handler
+(1068|1084) [LM_INFO] -  15:21:29.521000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.vanderbilt.dre.DAnCE.LocalityManager>
+(1068|1084) [LM_DEBUG] -  15:21:29.521000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_Error_Interceptors> successfully loaded.
+(1068|1084) [LM_TRACE] -  15:21:29.521000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>.
+(1068|1084) [LM_INFO] -  15:21:29.521000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(1068|1084) [LM_DEBUG] -  15:21:29.521000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_SHS_Interceptors>:<create_DAnCE_SHS_Interceptor>
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_SHS_Interceptors> successfully loaded.
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_SHS_Interceptors>:<create_DAnCE_SHS_Interceptor>.
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - SHS_CORBA_Transport::configure - Considering property <edu.vanderbilt.dre.DAnCE.LocalityTimeout>
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - SHS_CORBA_Transport::configure - Considering property <edu.vanderbilt.dre.DAnCE.DomainNC>
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - SHS_CORBA_Transport::configure - Considering property <edu.vanderbilt.dre.DAnCE.LocalityArguments>
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - SHS_CORBA_Transport::configure - Considering property <edu.dre.vanderbilt.DAnCE.POA>
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - SHS_CORBA_Transport::configure - Considering property <edu.vanderbilt.dre.DAnCE.LocalityExec>
+(1068|1084) [LM_NOTICE] -  15:21:29.537000 - SHS_CORBA_Transport::configure - Failed to get a naming context
+(1068|1084) [LM_INFO] -  15:21:29.537000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(1068|1084) [LM_INFO] -  15:21:29.537000 - NodeApplication_Impl::NodeApplication_Impl - Plugin loaded
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - DAnCE_NodeManager_Module::init - New NodeManger servant instance for NodeManager allocated.
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - DAnCE_NodeManager_Module::init - Registering NM in NC as "Broker.NodeManager".
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - DAnCE_NodeManager_Module::init - Writing node IOR C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\Broker.ior to file IOR:010000001f00000049444c3a4465706c6f796d656e742f4e6f64654d616e616765723a312e30000001000000000000008c000000010102cd0a0000003132372e302e302e310061ea3e00000014010f004e5550000000190000000001000000526f6f74504f41004d616e616765727300010000000100000042726f6b65722e4e6f64654d616e61676572746102000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000.
+(1068|1084) [LM_NOTICE] -  15:21:29.537000 - DAnCE_NodeManager_Module::init - DAnCE_NodeManager is running...
+(1068|1084) [LM_DEBUG] -  15:21:29.537000 - DAnCE_NodeManager_Module::init - NodeManager IOR: IOR:010000001f00000049444c3a4465706c6f796d656e742f4e6f64654d616e616765723a312e30000001000000000000008c000000010102cd0a0000003132372e302e302e310061ea3e00000014010f004e5550000000190000000001000000526f6f74504f41004d616e616765727300010000000100000042726f6b65722e4e6f64654d616e61676572746102000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000
+(1068|1084) [LM_TRACE] -  15:21:29.537000 - NodeManager - running ORB
+Run dance_node_manager with -ORBEndpoint iiop://localhost:60002 -s C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/dance_locality_manager -n Distributor=C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\Distributor.ior -t 30 --domain-nc corbaloc:rir:/NameService
+(3676|1292) [LM_TRACE] -  15:21:30.458000 - NodeManager - initializing ORB
+Inside init...............
+(3676|1292) [LM_TRACE] -  15:21:30.474000 - NodeManager - initializing module instance
+(3676|1292) [LM_TRACE] -  15:21:30.474000 - DAnCE_NodeManager_Module::init - NM's orb is nil.
+(3676|1292) [LM_TRACE] -  15:21:30.474000 - Node_Manager_Module::parse_args - ignoring unknown option 1
+(3676|1292) [LM_DEBUG] -  15:21:30.474000 - Node_Manager_Module::parse_args - Using provided component server executable:C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/dance_locality_manager
+(3676|1292) [LM_DEBUG] -  15:21:30.474000 - Node_Manager_Module::parse_args - Provided Node Manager name: Distributor=C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\Distributor.ior
+(3676|1292) [LM_DEBUG] -  15:21:30.474000 - Node_Manager_Module::parse_args - Using provided component server spawn timeout:30
+(3676|1292) [LM_DEBUG] -  15:21:30.474000 - Node_Manager_Module::parse_args - Binding to provided Domain Naming Context: 'corbaloc:rir:/NameService'
+(3676|1292) [LM_TRACE] -  15:21:30.474000 - DAnCE_NodeManager_Module::create_poas - Resolving root POA
+(3676|1292) [LM_TRACE] -  15:21:30.474000 - DAnCE_NodeManager_Module::create_poas - Obtaining the POAManager
+(3676|1292) [LM_TRACE] -  15:21:30.474000 - DAnCE_NodeManager_Module::create_poas - DAnCE_NodeManager_Module::create_poas - Creating the "Managers" POA.
+(3676|1292) [LM_TRACE] -  15:21:30.474000 - DAnCE_NodeManager_Module::init - Resolving DomainNC.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE_NodeManager_Module::init - Resolving plan NS naming context.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - InstallationRepositoryManager::register_manager_instance - 008AF7C4
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - ArtifactInstallation_Impl::register_handler - file:// handler
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - ArtifactInstallation_Impl::register_handler - http:// handler
+(3676|1292) [LM_DEBUG] -  15:21:30.490000 - DAnCE_NodeManager_Module::init - DAnCE_NodeManager::run_main - creating NodeManager for node Distributor=C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\Distributor.ior
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE_NodeManager_Module::init - Allocating new NodeManger servant instance for NodeManager
+(3676|1292) [LM_INFO] -  15:21:30.490000 - NodeManager_impl::NodeManager_impl has been created
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.vanderbilt.dre.DAnCE.LocalityTimeout provided by caller.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.vanderbilt.dre.DAnCE.DomainNC provided by caller.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.vanderbilt.dre.DAnCE.LocalityArguments provided by caller.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.dre.vanderbilt.DAnCE.POA provided by caller.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - NodeManager_Impl::NodeManager_Impl - Binding property edu.vanderbilt.dre.DAnCE.LocalityExec provided by caller.
+(3676|1292) [LM_DEBUG] -  15:21:30.490000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_Locality_Handler>:<create_Locality_Handler>
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_Locality_Handler> successfully loaded.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_Locality_Handler>:<create_Locality_Handler>.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityTimeout
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.DomainNC
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityArguments
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - build_property_map: Bound value for config value edu.dre.vanderbilt.DAnCE.POA
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityExec
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityExec'
+(3676|1292) [LM_DEBUG] -  15:21:30.490000 - Locality_Handler_i - Component server path: C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/dance_locality_manager
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityArguments'
+(3676|1292) [LM_DEBUG] -  15:21:30.490000 - Locality_Handler_i - Component server arguments: (null)
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityTimeout'
+(3676|1292) [LM_DEBUG] -  15:21:30.490000 - Locality_Handler_i - Spawn delay: 30
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityMutltithread'
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE::Utility::get_property_value<bool> - Property value for name 'edu.vanderbilt.dre.DAnCE.LocalityMutltithread' has no value
+(3676|1292) [LM_DEBUG] -  15:21:30.490000 - Locality_Handler_i - Threading: Single
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.dre.vanderbilt.DAnCE.POA'
+(3676|1292) [LM_DEBUG] -  15:21:30.490000 - Locality_Handler_i - Threading: Single
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - Locality_Handler_i - Spawning Locality handler
+(3676|1292) [LM_INFO] -  15:21:30.490000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.vanderbilt.dre.DAnCE.LocalityManager>
+(3676|1292) [LM_DEBUG] -  15:21:30.490000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_Error_Interceptors> successfully loaded.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>.
+(3676|1292) [LM_INFO] -  15:21:30.490000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(3676|1292) [LM_DEBUG] -  15:21:30.490000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_SHS_Interceptors>:<create_DAnCE_SHS_Interceptor>
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_SHS_Interceptors> successfully loaded.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_SHS_Interceptors>:<create_DAnCE_SHS_Interceptor>.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - SHS_CORBA_Transport::configure - Considering property <edu.vanderbilt.dre.DAnCE.LocalityTimeout>
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - SHS_CORBA_Transport::configure - Considering property <edu.vanderbilt.dre.DAnCE.DomainNC>
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - SHS_CORBA_Transport::configure - Considering property <edu.vanderbilt.dre.DAnCE.LocalityArguments>
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - SHS_CORBA_Transport::configure - Considering property <edu.dre.vanderbilt.DAnCE.POA>
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - SHS_CORBA_Transport::configure - Considering property <edu.vanderbilt.dre.DAnCE.LocalityExec>
+(3676|1292) [LM_NOTICE] -  15:21:30.490000 - SHS_CORBA_Transport::configure - Failed to get a naming context
+(3676|1292) [LM_INFO] -  15:21:30.490000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(3676|1292) [LM_INFO] -  15:21:30.490000 - NodeApplication_Impl::NodeApplication_Impl - Plugin loaded
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE_NodeManager_Module::init - New NodeManger servant instance for NodeManager allocated.
+(3676|1292) [LM_TRACE] -  15:21:30.490000 - DAnCE_NodeManager_Module::init - Registering NM in NC as "Distributor.NodeManager".
+(3676|1292) [LM_TRACE] -  15:21:30.505000 - DAnCE_NodeManager_Module::init - Writing node IOR C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\Distributor.ior to file IOR:010000001f00000049444c3a4465706c6f796d656e742f4e6f64654d616e616765723a312e300000010000000000000090000000010102cd0a0000003132372e302e302e310062ea4300000014010f004e5550000000190000000001000000526f6f74504f41004d616e61676572730001000000010000004469737472696275746f722e4e6f64654d616e616765727402000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000.
+(3676|1292) [LM_NOTICE] -  15:21:30.505000 - DAnCE_NodeManager_Module::init - DAnCE_NodeManager is running...
+(3676|1292) [LM_DEBUG] -  15:21:30.505000 - DAnCE_NodeManager_Module::init - NodeManager IOR: IOR:010000001f00000049444c3a4465706c6f796d656e742f4e6f64654d616e616765723a312e300000010000000000000090000000010102cd0a0000003132372e302e302e310062ea4300000014010f004e5550000000190000000001000000526f6f74504f41004d616e61676572730001000000010000004469737472696275746f722e4e6f64654d616e616765727402000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000
+(3676|1292) [LM_TRACE] -  15:21:30.505000 - NodeManager - running ORB
+Invoking execution manager (dance_execution_manager.exe) with -eC:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\EM.ior
+(1836|3416) [LM_TRACE] -  15:21:31.458000 - ExecutionManager - initializing ORB
+Inside init...............
+(1836|3416) [LM_TRACE] -  15:21:31.474000 - ExecutionManager - initializing module instance
+(1836|3416) [LM_TRACE] -  15:21:31.474000 - DAnCE_ExecutionManager_Module::init - before parsing arguments.
+(1836|3416) [LM_TRACE] -  15:21:31.474000 - DAnCE_ExecutionManager_Module::parse_args - Output filename is C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\EM.ior
+(1836|3416) [LM_DEBUG] -  15:21:31.474000 - Node_Manager_Module::parse_args - Binding to domain naming context corbaloc:rir:/NameService.
+(1836|3416) [LM_TRACE] -  15:21:31.474000 - DAnCE_ExecutionManager_Module::init - before creating value factory.
+(1836|3416) [LM_TRACE] -  15:21:31.474000 - DAnCE_ExecutionManager_Module::init - before registering value factory.
+(1836|3416) [LM_TRACE] -  15:21:31.474000 - DAnCE_ExecutionManager_Module::init - after creating value factory.
+(1836|3416) [LM_TRACE] -  15:21:31.474000 - DAnCE_ExecutionManager_Module::init - before creating the "Managers" POA.
+(1836|3416) [LM_TRACE] -  15:21:31.474000 - DAnCE_ExecutionManager_Module::init - before resolving "DomainNC".
+(1836|3416) [LM_TRACE] -  15:21:31.490000 - DAnCE_ExecutionManager_Module::init - before creating EM servant.
+(1836|3416) [LM_TRACE] -  15:21:31.490000 - ExectionManager::write_IOR - EM's ior was written into file "C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\EM.ior"
+(1836|3416) [LM_TRACE] -  15:21:31.490000 - Registering EM in NC.
+(1836|3416) [LM_TRACE] -  15:21:31.490000 - DAnCE_ExecutionManager_Module::init - before processing --node-mgr options(0).
+(1836|3416) [LM_TRACE] -  15:21:31.490000 - ExecutionManager - running ORB
+Invoking executor - launch the application -
+Start dance_plan_launcher.exe with -x Plan.cdp -k file://C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\EM.ior
+(3900|3312) [LM_TRACE] -  15:21:32.521000 - PlanLauncher - initializing ORB
+Inside init...............
+(3900|3312) [LM_TRACE] -  15:21:32.552000 - PL options : "	C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE\bin\.\dance_plan_launcher.EXE
+	-x
+	Plan.cdp
+	-k
+	file://C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\EM.ior
+(3900|3312) [LM_DEBUG] -  15:21:32.552000 - Plan_Launcher::parse_args - Using XML plan: Plan.cdp
+(3900|3312) [LM_DEBUG] -  15:21:32.552000 - Plan_Launcher::parse_args - Using ExecutionManager IOR: file://C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\EM.ior
+(3900|3312) [LM_DEBUG] -  15:21:32.552000 - Plan_Launcher - Parsing deployment plan
+(3900|3312) [LM_TRACE] -  15:21:32.552000 - XML_File_Intf::read_process_plan - Constructing DOM
+(3900|3312) [LM_TRACE] -  15:21:32.599000 - XML_File_Intf::read_process_plan - DOMElement pointer: 9726944
+(3900|3312) [LM_TRACE] -  15:21:32.599000 - XML_File_Intf::read_process_plan - Parsing XML file with XSC
+(3900|3312) [LM_TRACE] -  15:21:32.599000 - XML_File_Intf::read_process_plan - Processing using config handlers
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - ExecutionManager_Impl::preparePlan - Domain Application Manager was successfully created.
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Creating sub-plans
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Matching instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Initializing new sub plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Preparing sub plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0 for instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Matching instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Initializing new sub plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Preparing sub plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1 for instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor
+(1836|3416) [LM_DEBUG] -  15:21:32.615000 - Split_Plan::split_plan - Selection phase produced 2 child plans, proceeding to copying phase
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Processing instance: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Processing connections.
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Connection: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Endpoint: read_quoter(client)
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Copying endpoint 0 into endpoint 0
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Endpoint: push_quoter(provider)
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Connection: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Endpoint: notify_out(client)
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Endpoint: notify_in(provider)
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Copying endpoint 1 into endpoint 0
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Processing instance: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Processing connections.
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Connection: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Endpoint: read_quoter(client)
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Endpoint: push_quoter(provider)
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Copying endpoint 1 into endpoint 0
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Connection: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Endpoint: notify_out(client)
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Copying endpoint 0 into endpoint 0
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - Split_Plan::split_plan - Endpoint: notify_in(provider)
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - DomainApplicationManager_Impl::preparePlan - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF successfully split. 2 nodes to prepare.
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - DomainApplicationManager_Impl::preparePlan - Calling preparePlan on node Distributor
+(1836|3416) [LM_TRACE] -  15:21:32.615000 - DomainApplicationManager_Impl::preparePlan - preparePlan on node Distributor has been called
+(3676|1292) [LM_DEBUG] -  15:21:32.630000 - NodeManager_impl::preparePlan - started for node Distributor and plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1
+(3676|1292) [LM_TRACE] -  15:21:32.630000 - NodeManager_impl::preparePlan - creating NodeApplicationManager...
+(3676|1292) [LM_DEBUG] -  15:21:32.630000 -  NodeApplicationManager_Impl::NodeApplicationManager_Impl - Initializing for node 'Distributor' starting...
+(3676|1292) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.vanderbilt.dre.DAnCE.LocalityArguments
+(3676|1292) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.vanderbilt.dre.DAnCE.LocalityTimeout
+(3676|1292) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.vanderbilt.dre.DAnCE.LocalityExec
+(3676|1292) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.vanderbilt.dre.DAnCE.DomainNC
+(3676|1292) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.dre.vanderbilt.DAnCE.POA
+(3676|1292) [LM_TRACE] -  15:21:32.630000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceNC'
+(3676|1292) [LM_TRACE] -  15:21:32.630000 - DAnCE::Utility::get_property_value<bool> - Property value for name 'edu.vanderbilt.dre.DAnCE.InstanceNC' has no value
+(3676|1292) [LM_TRACE] -  15:21:32.630000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.DomainNC'
+(1836|3416) [LM_TRACE] -  15:21:32.630000 - DomainApplicationManager_Impl::preparePlan - Calling preparePlan on node Broker
+(1836|3416) [LM_TRACE] -  15:21:32.630000 - DomainApplicationManager_Impl::preparePlan - preparePlan on node Broker has been called
+(1836|3416) [LM_TRACE] -  15:21:32.630000 - DomainApplicationManager_Impl::preparePlan - finished
+(1836|3416) [LM_TRACE] -  15:21:32.630000 - ExecutionManager_Impl::preparePlan - Domain Application Manager preparePlan has been called.
+(1836|3416) [LM_TRACE] -  15:21:32.630000 - ExecutionManager_Impl::preparePlan - finished
+(1068|1084) [LM_DEBUG] -  15:21:32.630000 - NodeManager_impl::preparePlan - started for node Broker and plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0
+(1068|1084) [LM_TRACE] -  15:21:32.630000 - NodeManager_impl::preparePlan - creating NodeApplicationManager...
+(1068|1084) [LM_DEBUG] -  15:21:32.630000 -  NodeApplicationManager_Impl::NodeApplicationManager_Impl - Initializing for node 'Broker' starting...
+(1068|1084) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.vanderbilt.dre.DAnCE.LocalityArguments
+(1068|1084) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.vanderbilt.dre.DAnCE.LocalityTimeout
+(1068|1084) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.vanderbilt.dre.DAnCE.LocalityExec
+(1068|1084) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.vanderbilt.dre.DAnCE.DomainNC
+(1068|1084) [LM_DEBUG] -  15:21:32.630000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Binding value for property edu.dre.vanderbilt.DAnCE.POA
+(1068|1084) [LM_TRACE] -  15:21:32.630000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceNC'
+(1068|1084) [LM_TRACE] -  15:21:32.630000 - DAnCE::Utility::get_property_value<bool> - Property value for name 'edu.vanderbilt.dre.DAnCE.InstanceNC' has no value
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.DomainNC'
+(3676|1292) [LM_DEBUG] -  15:21:32.646000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Successfully resolved the instance naming context.
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - NodeManager_impl::preparePlan - invoking preparePlan on NodeApplicationManager...
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::preparePlan - Performing locality split on plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1.
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Creating sub-plans
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Matching instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Initializing new sub plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Preparing sub plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0 for instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_instance_type - Checking property component factory
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_instance_type - Found unmanaged component type.
+(3676|1292) [LM_DEBUG] -  15:21:32.646000 - Split_Plan::split_plan - Selection phase produced 1 child plans, proceeding to copying phase
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Processing instance: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Processing connections.
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Connection: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Endpoint: push_quoter(provider)
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Copying endpoint 0 into endpoint 0
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Connection: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Endpoint: notify_out(client)
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Copying endpoint 0 into endpoint 0
+(3676|1292) [LM_DEBUG] -  15:21:32.646000 - Locality_Splitter::finalize_sub_plan - No locality manager found, created a default locality named <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::preparePlan - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1 successfully split into 1 localities.
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::preparePlan - Installing 2 artifacts for locality 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0.
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installation request for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0, artifact Quoter.ImplementationArtifacts.StockDistributorArtifacts.StockDistributor_exec
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installation attempt for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0, artifact Quoter.ImplementationArtifacts.StockDistributorArtifacts.StockDistributor_exec @ location[0] StockDistributor_exec
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::parse_uri - parsing location StockDistributor_exec for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installed plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0, artifact Quoter.ImplementationArtifacts.StockDistributorArtifacts.StockDistributor_exec @ location StockDistributor_exec
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installation request for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0, artifact Quoter.ImplementationArtifacts.StockDistributorArtifacts.StockDistributor_svnt
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installation attempt for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0, artifact Quoter.ImplementationArtifacts.StockDistributorArtifacts.StockDistributor_svnt @ location[0] StockDistributor_svnt
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::parse_uri - parsing location StockDistributor_svnt for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installed plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0, artifact Quoter.ImplementationArtifacts.StockDistributorArtifacts.StockDistributor_svnt @ location StockDistributor_svnt
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityManager.ConfigFile'
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_property_value<bool> - Property value for name 'edu.vanderbilt.dre.DAnCE.LocalityManager.ConfigFile' has no value
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::update_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityNamingContext'
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::update_property_value<T> - Property for name 'edu.vanderbilt.dre.DAnCE.LocalityNamingContext' not found; adding property
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::update_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityManager.installer'
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::update_property_value<T> - Property for name 'edu.vanderbilt.dre.DAnCE.LocalityManager.installer' not found; adding property
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::preparePlan - Finished preparing plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1.
+(3676|1292) [LM_TRACE] -  15:21:32.646000 - NodeManager_impl::preparePlan - activating NodeApplicationManager...
+(3676|1292) [LM_INFO] -  15:21:32.646000 - NodeManager_impl::preparePlan - NodeApplicationManager for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1 completed
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DAM_NM_ReplyHandlerImpl::preparePlan - Finished preparePlan on node Distributor
+(1836|3416) [LM_INFO] -  15:21:32.646000 - DAM_NM_ReplyHandlerImpl::preparePlan - Sucessfully prepared node Distributor for deployment
+(1068|1084) [LM_DEBUG] -  15:21:32.646000 - NodeApplicationManager_Impl::NodeApplicationManager_Impl - Successfully resolved the instance naming context.
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - NodeManager_impl::preparePlan - invoking preparePlan on NodeApplicationManager...
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::preparePlan - Performing locality split on plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0.
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Creating sub-plans
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Matching instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Initializing new sub plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Preparing sub plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0 for instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_instance_type - Checking property component factory
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_instance_type - Found unmanaged component type.
+(1068|1084) [LM_DEBUG] -  15:21:32.646000 - Split_Plan::split_plan - Selection phase produced 1 child plans, proceeding to copying phase
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Processing instance: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Processing connections.
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Connection: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Endpoint: read_quoter(client)
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Copying endpoint 0 into endpoint 0
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Connection: Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Endpoint: notify_in(provider)
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - Split_Plan::split_plan - Copying endpoint 0 into endpoint 0
+(1068|1084) [LM_DEBUG] -  15:21:32.646000 - Locality_Splitter::finalize_sub_plan - No locality manager found, created a default locality named <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::preparePlan - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0 successfully split into 1 localities.
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::preparePlan - Installing 2 artifacts for locality 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0.
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installation request for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0, artifact Quoter.ImplementationArtifacts.StockBrokerArtifacts.StockBroker_exec
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installation attempt for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0, artifact Quoter.ImplementationArtifacts.StockBrokerArtifacts.StockBroker_exec @ location[0] StockBroker_exec
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::parse_uri - parsing location StockBroker_exec for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installed plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0, artifact Quoter.ImplementationArtifacts.StockBrokerArtifacts.StockBroker_exec @ location StockBroker_exec
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installation request for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0, artifact Quoter.ImplementationArtifacts.StockBrokerArtifacts.StockBroker_svnt
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installation attempt for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0, artifact Quoter.ImplementationArtifacts.StockBrokerArtifacts.StockBroker_svnt @ location[0] StockBroker_svnt
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::parse_uri - parsing location StockBroker_svnt for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - ArtifactInstallation_Impl::install - installed plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0, artifact Quoter.ImplementationArtifacts.StockBrokerArtifacts.StockBroker_svnt @ location StockBroker_svnt
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_property_value<bool> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityManager.ConfigFile'
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_property_value<bool> - Property value for name 'edu.vanderbilt.dre.DAnCE.LocalityManager.ConfigFile' has no value
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::update_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityNamingContext'
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::update_property_value<T> - Property for name 'edu.vanderbilt.dre.DAnCE.LocalityNamingContext' not found; adding property
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::update_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityManager.installer'
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::update_property_value<T> - Property for name 'edu.vanderbilt.dre.DAnCE.LocalityManager.installer' not found; adding property
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::preparePlan - Finished preparing plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0.
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - NodeManager_impl::preparePlan - activating NodeApplicationManager...
+(1068|1084) [LM_INFO] -  15:21:32.646000 - NodeManager_impl::preparePlan - NodeApplicationManager for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0 completed
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DAM_NM_ReplyHandlerImpl::preparePlan - Finished preparePlan on node Broker
+(1836|3416) [LM_INFO] -  15:21:32.646000 - DAM_NM_ReplyHandlerImpl::preparePlan - Sucessfully prepared node Broker for deployment
+(1836|3416) [LM_DEBUG] -  15:21:32.646000 - DAM_NM_ReplyHandlerImpl::Counter::on_all_completed - Successfully completed operation for plan: 6D382DAE-9024-4C4D-B91B-A0F9176AFACF
+(1836|3416) [LM_NOTICE] -  15:21:32.646000 - ExecutionManager_Impl::finish_preparePlan - Plan with UUID 6D382DAE-9024-4C4D-B91B-A0F9176AFACF was successfully prepared.
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - ExecutionManager_Impl::finish_preparePlan - Domain Application Manager was successfully activated.
+(3900|3312) [LM_DEBUG] -  15:21:32.646000 - Plan_Launcher_Base_Impl::launch_plan - after to call preparePlan
+(3900|3312) [LM_DEBUG] -  15:21:32.646000 - Plan_Launcher_Base_Impl::prepare_plan - ApplicationMAnager was received from preparePlan.
+(3900|3312) [LM_DEBUG] -  15:21:32.646000 - Plan_Launcher_Base_Impl::start_launch - before startLaunch...
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DomainApplicationManager_Impl::startLaunch - Creating DomainApplication for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DomainApplicationManager_Impl::startLaunch - Successfully created DomainApplication for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DomainApplication_Impl::startLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : 2 nodes to launch
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DomainApplication_Impl::startLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : calling startLaunch on node application manager for node Broker
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DomainApplication_Impl::startLaunch - startLaunch has been called on an application
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DomainApplication_Impl::startLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : calling startLaunch on node application manager for node Distributor
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DomainApplication_Impl::startLaunch - startLaunch has been called on an application
+(1836|3416) [LM_TRACE] -  15:21:32.646000 - DomainApplicationManager_Impl::startLaunch - DomainApplication startLaunch has been called
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::startLaunch - Initializing NodeApplication
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityTimeout'
+(1068|1084) [LM_TRACE] -  15:21:32.646000 - NodeApplicationManager_impl::startLaunch - Instructing NodeApplication to prepare locality managers.
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - NodeApplication_Impl::prepare_instances - Considering sub-plan 0:6D382DAE-9024-4C4D-B91B-A0F9176AFACF_0_0 with 2 instances
+(1068|1084) [LM_DEBUG] -  15:21:32.662000 - NodeApplication_Impl::prepare_instances - Found Locality Manager instance 1:Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd], deploying
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - Action_Base::call - Entering Action_Base
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - Action_Base::call - Invoking pre-install interceptors
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - Install_Instance::invoke - Invoking install_instance on handler for type <edu.vanderbilt.dre.DAnCE.LocalityManager>
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - Locality_Handler_i::install_instance - Starting installation of instance <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - Locality_Handler_i::install_instance - Passing 3 properties to activator
+(1068|1084) [LM_DEBUG] -  15:21:32.662000 - DAnCE_LocalityActivator_i::create_locality_manager - Received 3 config properties
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.ImplementationType
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityManager.installer
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityNamingContext
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::construct_command_line - Using generated UUID
+(1068|1084) [LM_DEBUG] -  15:21:32.662000 - DAnCE_LocalityActivator_i::construct_command_line - Creating component server with UUID 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_DEBUG] -  15:21:32.662000 - DAnCE_LocalityActivator_i::create_locality_manager - LocalityManager arguments:  -u 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::create_locality_manager - Attempting to spawn LocalityManager with UUID 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_DEBUG] -  15:21:32.662000 - DAnCE_LocalityActivator_i::spawn_locality_manager - Using default component server executable
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::spawn_locality_manager - Spawning process, command line is C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/dance_locality_manager  -u 6b4f4b68-d891-11df-8000-000c29c627dd -c IOR:010000002700000049444c3a44416e43452f4c6f63616c6974794d616e61676572416374697661746f723a312e300000010000000000000068000000010102cd0a0000003132372e302e302e310061ea1b00000014010f00525354b9a9b84ccab70700000000000100000001000000cd02000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - NodeApplicationManager_impl::startLaunch - Initializing NodeApplication
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityTimeout'
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - NodeApplicationManager_impl::startLaunch - Instructing NodeApplication to prepare locality managers.
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - NodeApplication_Impl::prepare_instances - Considering sub-plan 0:6D382DAE-9024-4C4D-B91B-A0F9176AFACF_1_0 with 2 instances
+(3676|1292) [LM_DEBUG] -  15:21:32.662000 - NodeApplication_Impl::prepare_instances - Found Locality Manager instance 1:Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd], deploying
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - Action_Base::call - Entering Action_Base
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - Action_Base::call - Invoking pre-install interceptors
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - Install_Instance::invoke - Invoking install_instance on handler for type <edu.vanderbilt.dre.DAnCE.LocalityManager>
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - Locality_Handler_i::install_instance - Starting installation of instance <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - Locality_Handler_i::install_instance - Passing 3 properties to activator
+(3676|1292) [LM_DEBUG] -  15:21:32.662000 - DAnCE_LocalityActivator_i::create_locality_manager - Received 3 config properties
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.ImplementationType
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityManager.installer
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.LocalityNamingContext
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::construct_command_line - Using generated UUID
+(3676|1292) [LM_DEBUG] -  15:21:32.662000 - DAnCE_LocalityActivator_i::construct_command_line - Creating component server with UUID 6b4f4b68-d891-11df-8000-000c29c627dd
+(3676|1292) [LM_DEBUG] -  15:21:32.662000 - DAnCE_LocalityActivator_i::create_locality_manager - LocalityManager arguments:  -u 6b4f4b68-d891-11df-8000-000c29c627dd
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::create_locality_manager - Attempting to spawn LocalityManager with UUID 6b4f4b68-d891-11df-8000-000c29c627dd
+(3676|1292) [LM_DEBUG] -  15:21:32.662000 - DAnCE_LocalityActivator_i::spawn_locality_manager - Using default component server executable
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::spawn_locality_manager - Spawning process, command line is C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/dance_locality_manager  -u 6b4f4b68-d891-11df-8000-000c29c627dd -c IOR:010000002700000049444c3a44416e43452f4c6f63616c6974794d616e61676572416374697661746f723a312e300000010000000000000068000000010102cd0a0000003132372e302e302e310062ea1b00000014010f00525354baa9b84cb83d0700000000000100000001000000cd02000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::spawn_locality_manager - Process successfully spawned with pid 1716
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Inside single_threaded_wait_for_callback
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Timout not zero
+(1068|1084) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Inside single_threaded_wait_for_callback calling perform work
+Timeout is 30
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::spawn_locality_manager - Process successfully spawned with pid 2260
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Inside single_threaded_wait_for_callback
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Timout not zero
+(3676|1292) [LM_TRACE] -  15:21:32.662000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Inside single_threaded_wait_for_callback calling perform work
+Timeout is 30
+(1716|3260) [LM_TRACE] -  15:21:32.818000 - DAnCE_LocalityManager_Task::DAnCE_LocalityManager_Task - Creating ORB
+Inside init...............
+(2260|3832) [LM_TRACE] -  15:21:32.833000 - DAnCE_LocalityManager_Task::DAnCE_LocalityManager_Task - Creating ORB
+Inside init...............
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - LocalityManager_Task::parse_args - parsing arguments...
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - LocalityManager_Task::parse_args - Found option: "u" with argument "6b4f4b68-d891-11df-8000-000c29c627dd"
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - LocalityManager_Task::parse_args - uuid is 6b4f4b68-d891-11df-8000-000c29c627dd
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - LocalityManager_Task::parse_args - Found option: "c" with argument "IOR:010000002700000049444c3a44416e43452f4c6f63616c6974794d616e61676572416374697661746f723a312e300000010000000000000068000000010102cd0a0000003132372e302e302e310061ea1b00000014010f00525354b9a9b84ccab70700000000000100000001000000cd02000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000"
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - LocalityManager_Task::parse_args - callback ior is IOR:010000002700000049444c3a44416e43452f4c6f63616c6974794d616e61676572416374697661746f723a312e300000010000000000000068000000010102cd0a0000003132372e302e302e310061ea1b00000014010f00525354b9a9b84ccab70700000000000100000001000000cd02000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - LocalityManager_Task::parse_args - No plugin config specified, adding default at DANCE_ROOT/bin/ciao.localityconfig
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE_LocalityManager_Task::DAnCE_LocalityManager_Task - DAnCE_LocalityManager_Task_ object created.
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - LocalityManager_Task::run - Starting ORB
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - LocalityManager_Task::svc - Activating the root POA
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - LocalityManager_Task::svc - Creating server implementation object
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - LocalityManager_Task::run - Resolving callback IOR
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - LocalityManager_Task::svc - Making callback on my Activator
+(1068|1084) [LM_TRACE] -  15:21:32.865000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Inside single_threaded_wait_for_callback calling perform work
+Timeout is 29.796875
+(1068|1084) [LM_TRACE] -  15:21:32.865000 - DAnCE_LocalityActivator_i::locality_manager_callback - Received callback from LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_TRACE] -  15:21:32.865000 - DAnCE_LocalityActivator_i::locality_manager_callback - Comparing 6b4f4b68-d891-11df-8000-000c29c627dd with 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_TRACE] -  15:21:32.865000 - DAnCE_LocalityActivator_i::locality_manager_callback - Received callback from LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_DEBUG] -  15:21:32.865000 - DAnCE_LocalityActivator_i::create_properties - Creating property sequence for LocalityManager <6b4f4b68-d891-11df-8000-000c29c627dd> with length 3
+(1068|1084) [LM_DEBUG] -  15:21:32.865000 - DAnCE_LocalityActivator_i::locality_manager_callback - Generated 3 Properties for LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_TRACE] -  15:21:32.865000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Inside single_threaded_wait_for_callback calling perform work
+Timeout is 29.796875
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - LocalityManager_Task::svc - Configuration received, got 3 values
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - LocalityManager_i::init - Received 3 properties from init
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - LocalityManager_i::init - Loading 1 plugin configuration files
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - LocalityManager_i::init - Loading plugin file <C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/ciao.localityconfig>
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.InstanceHandler>, artifact <CIAO_Deployment_Handlers>, entrypoint <create_Container_Handler>
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.InstanceHandler>, artifact <CIAO_Deployment_Handlers>, entrypoint <create_Home_Handler>
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.InstanceHandler>, artifact <CIAO_Deployment_Handlers>, entrypoint <create_Component_Handler>
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.InstanceHandler>, artifact <CIAO_Deployment_Handlers>, entrypoint <create_Homed_Component_Handler>
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.DeploymentInterceptor>, artifact <CIAO_Deployment_Interceptors>, entrypoint <create_CIAO_StoreReferences>
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.DeploymentInterceptor>, artifact <DAnCE_Error_Interceptors>, entrypoint <create_DAnCE_Standard_Error>
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.InstanceHandler
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.InstanceHandler
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - Inst_Handler_Impl::install_instance - Starting installation of instance <create_Container_Handler>
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_property_value<T> - Value is create_Container_Handler
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.865000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Handlers
+(1716|3260) [LM_DEBUG] -  15:21:32.865000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Handlers>:<create_Container_Handler>
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - LocalityManager_Task::parse_args - parsing arguments...
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - LocalityManager_Task::parse_args - Found option: "u" with argument "6b4f4b68-d891-11df-8000-000c29c627dd"
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - LocalityManager_Task::parse_args - uuid is 6b4f4b68-d891-11df-8000-000c29c627dd
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - LocalityManager_Task::parse_args - Found option: "c" with argument "IOR:010000002700000049444c3a44416e43452f4c6f63616c6974794d616e61676572416374697661746f723a312e300000010000000000000068000000010102cd0a0000003132372e302e302e310062ea1b00000014010f00525354baa9b84cb83d0700000000000100000001000000cd02000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000"
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - LocalityManager_Task::parse_args - callback ior is IOR:010000002700000049444c3a44416e43452f4c6f63616c6974794d616e61676572416374697661746f723a312e300000010000000000000068000000010102cd0a0000003132372e302e302e310062ea1b00000014010f00525354baa9b84cb83d0700000000000100000001000000cd02000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - LocalityManager_Task::parse_args - No plugin config specified, adding default at DANCE_ROOT/bin/ciao.localityconfig
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE_LocalityManager_Task::DAnCE_LocalityManager_Task - DAnCE_LocalityManager_Task_ object created.
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - LocalityManager_Task::run - Starting ORB
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - LocalityManager_Task::svc - Activating the root POA
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - LocalityManager_Task::svc - Creating server implementation object
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - LocalityManager_Task::run - Resolving callback IOR
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - LocalityManager_Task::svc - Making callback on my Activator
+(3676|1292) [LM_TRACE] -  15:21:32.880000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Inside single_threaded_wait_for_callback calling perform work
+Timeout is 29.781250
+(3676|1292) [LM_TRACE] -  15:21:32.880000 - DAnCE_LocalityActivator_i::locality_manager_callback - Received callback from LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd
+(3676|1292) [LM_TRACE] -  15:21:32.880000 - DAnCE_LocalityActivator_i::locality_manager_callback - Comparing 6b4f4b68-d891-11df-8000-000c29c627dd with 6b4f4b68-d891-11df-8000-000c29c627dd
+(3676|1292) [LM_TRACE] -  15:21:32.880000 - DAnCE_LocalityActivator_i::locality_manager_callback - Received callback from LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd
+(3676|1292) [LM_DEBUG] -  15:21:32.880000 - DAnCE_LocalityActivator_i::create_properties - Creating property sequence for LocalityManager <6b4f4b68-d891-11df-8000-000c29c627dd> with length 3
+(3676|1292) [LM_DEBUG] -  15:21:32.880000 - DAnCE_LocalityActivator_i::locality_manager_callback - Generated 3 Properties for LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd
+(3676|1292) [LM_TRACE] -  15:21:32.880000 - DAnCE_LocalityActivator_i::single_threaded_wait_for_callback - Inside single_threaded_wait_for_callback calling perform work
+Timeout is 29.781250
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - LocalityManager_Task::svc - Configuration received, got 3 values
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - LocalityManager_i::init - Received 3 properties from init
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - LocalityManager_i::init - Loading 1 plugin configuration files
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - LocalityManager_i::init - Loading plugin file <C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE/bin/ciao.localityconfig>
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.InstanceHandler>, artifact <CIAO_Deployment_Handlers>, entrypoint <create_Container_Handler>
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.InstanceHandler>, artifact <CIAO_Deployment_Handlers>, entrypoint <create_Home_Handler>
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.InstanceHandler>, artifact <CIAO_Deployment_Handlers>, entrypoint <create_Component_Handler>
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.InstanceHandler>, artifact <CIAO_Deployment_Handlers>, entrypoint <create_Homed_Component_Handler>
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.DeploymentInterceptor>, artifact <CIAO_Deployment_Interceptors>, entrypoint <create_CIAO_StoreReferences>
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - Plugin_Configurator::load_from_text_file - Attempting to load plugin of type <edu.vanderbilt.dre.DAnCE.DeploymentInterceptor>, artifact <DAnCE_Error_Interceptors>, entrypoint <create_DAnCE_Standard_Error>
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.InstanceHandler
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.InstanceHandler
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - Inst_Handler_Impl::install_instance - Starting installation of instance <create_Container_Handler>
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_property_value<T> - Value is create_Container_Handler
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.880000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Handlers
+(2260|3832) [LM_DEBUG] -  15:21:32.880000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Handlers>:<create_Container_Handler>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Handlers> successfully loaded.
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Handlers>:<create_Container_Handler>.
+(1716|3260) [LM_DEBUG] -  15:21:32.912000 - Container_Handler_i::configure - Received 3 properties for configuration
+(1716|3260) [LM_DEBUG] -  15:21:32.912000 - Container_Handler_i::install_instance - Creating container with id <>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Session_Container::init - Initializing a container with name <>
+(1716|3260) [LM_DEBUG] -  15:21:32.912000 - Container_Handler_i::install_instance - Container <> successfully created
+(1716|3260) [LM_INFO] -  15:21:32.912000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.dre.vanderbilt.dre.DAnCE.CCM.Container>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.InstanceHandler
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.InstanceHandler
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Inst_Handler_Impl::install_instance - Starting installation of instance <create_Home_Handler>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is create_Home_Handler
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Handlers
+(1716|3260) [LM_DEBUG] -  15:21:32.912000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Handlers>:<create_Home_Handler>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Handlers> successfully loaded.
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Handlers>:<create_Home_Handler>.
+(1716|3260) [LM_INFO] -  15:21:32.912000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.dre.vanderbilt.dre.CCM.Home>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.InstanceHandler
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.InstanceHandler
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Inst_Handler_Impl::install_instance - Starting installation of instance <create_Component_Handler>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is create_Component_Handler
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Handlers
+(1716|3260) [LM_DEBUG] -  15:21:32.912000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Handlers>:<create_Component_Handler>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Handlers> successfully loaded.
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Handlers>:<create_Component_Handler>.
+(1716|3260) [LM_INFO] -  15:21:32.912000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.dre.vanderbilt.dre.CCM.Component>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.InstanceHandler
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.InstanceHandler
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Inst_Handler_Impl::install_instance - Starting installation of instance <create_Homed_Component_Handler>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is create_Homed_Component_Handler
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Handlers
+(1716|3260) [LM_DEBUG] -  15:21:32.912000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Handlers>:<create_Homed_Component_Handler>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Handlers> successfully loaded.
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Handlers>:<create_Homed_Component_Handler>.
+(1716|3260) [LM_INFO] -  15:21:32.912000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.vanderbilt.dre.CCM.HomedComponent>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.DeploymentInterceptor
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.DeploymentInterceptor
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Interceptor_Handler_Impl::install_instance - Starting installation of instance <create_CIAO_StoreReferences>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is create_CIAO_StoreReferences
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Interceptors
+(1716|3260) [LM_DEBUG] -  15:21:32.912000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Interceptors>:<create_CIAO_StoreReferences>
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Interceptors> successfully loaded.
+(1716|3260) [LM_TRACE] -  15:21:32.912000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Interceptors>:<create_CIAO_StoreReferences>.
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Handlers> successfully loaded.
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Handlers>:<create_Container_Handler>.
+(2260|3832) [LM_DEBUG] -  15:21:32.927000 - Container_Handler_i::configure - Received 3 properties for configuration
+(2260|3832) [LM_DEBUG] -  15:21:32.927000 - Container_Handler_i::install_instance - Creating container with id <>
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Session_Container::init - Initializing a container with name <>
+(2260|3832) [LM_DEBUG] -  15:21:32.927000 - Container_Handler_i::install_instance - Container <> successfully created
+(2260|3832) [LM_INFO] -  15:21:32.927000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.dre.vanderbilt.dre.DAnCE.CCM.Container>
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.InstanceHandler
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.InstanceHandler
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Inst_Handler_Impl::install_instance - Starting installation of instance <create_Home_Handler>
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Value is create_Home_Handler
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Handlers
+(2260|3832) [LM_DEBUG] -  15:21:32.927000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Handlers>:<create_Home_Handler>
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Handlers> successfully loaded.
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Handlers>:<create_Home_Handler>.
+(2260|3832) [LM_INFO] -  15:21:32.927000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.dre.vanderbilt.dre.CCM.Home>
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.InstanceHandler
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.InstanceHandler
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Inst_Handler_Impl::install_instance - Starting installation of instance <create_Component_Handler>
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Value is create_Component_Handler
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Handlers
+(2260|3832) [LM_DEBUG] -  15:21:32.927000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Handlers>:<create_Component_Handler>
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Handlers> successfully loaded.
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Handlers>:<create_Component_Handler>.
+(2260|3832) [LM_INFO] -  15:21:32.927000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.dre.vanderbilt.dre.CCM.Component>
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.InstanceHandler
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.InstanceHandler
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - Inst_Handler_Impl::install_instance - Starting installation of instance <create_Homed_Component_Handler>
+(2260|3832) [LM_TRACE] -  15:21:32.927000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is create_Homed_Component_Handler
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Handlers
+(2260|3832) [LM_DEBUG] -  15:21:32.943000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Handlers>:<create_Homed_Component_Handler>
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Handlers> successfully loaded.
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Handlers>:<create_Homed_Component_Handler>.
+(2260|3832) [LM_INFO] -  15:21:32.943000 - Plugin_Manager::register_installation_handler - Successfully created installation handler for instance type <edu.vanderbilt.dre.CCM.HomedComponent>
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.DeploymentInterceptor
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.DeploymentInterceptor
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - Interceptor_Handler_Impl::install_instance - Starting installation of instance <create_CIAO_StoreReferences>
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is create_CIAO_StoreReferences
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is CIAO_Deployment_Interceptors
+(2260|3832) [LM_DEBUG] -  15:21:32.943000 - Plugin_Manager::load_plugin - Loading plugin from <CIAO_Deployment_Interceptors>:<create_CIAO_StoreReferences>
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::load_plugin - Loading artifact <CIAO_Deployment_Interceptors> successfully loaded.
+(2260|3832) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::load_plugin - Successfully created plugin from <CIAO_Deployment_Interceptors>:<create_CIAO_StoreReferences>.
+(1716|3260) [LM_INFO] -  15:21:32.943000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.DeploymentInterceptor
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.DeploymentInterceptor
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - Interceptor_Handler_Impl::install_instance - Starting installation of instance <create_DAnCE_Standard_Error>
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is create_DAnCE_Standard_Error
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is DAnCE_Error_Interceptors
+(1716|3260) [LM_DEBUG] -  15:21:32.943000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_Error_Interceptors> successfully loaded.
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>.
+(1716|3260) [LM_INFO] -  15:21:32.943000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.BestEffort'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Unable to find property named edu.vanderbilt.dre.DAnCE.BestEffort
+(1716|3260) [LM_DEBUG] -  15:21:32.943000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_Error_Interceptors> successfully loaded.
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>.
+(1716|3260) [LM_INFO] -  15:21:32.943000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityTimeout'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Property value for name 'edu.vanderbilt.dre.DAnCE.LocalityTimeout' has no value
+(1716|3260) [LM_DEBUG] -  15:21:32.943000 - LocalityManager_i::init - Looking up configuration handler for <edu.vanderbilt.dre.DAnCE.LocalityNamingContext>
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::get_configuration_handler - No configuration plugin for type edu.vanderbilt.dre.DAnCE.LocalityNamingContext found
+(1716|3260) [LM_DEBUG] -  15:21:32.943000 - LocalityManager_i::init - Looking up configuration handler for <edu.vanderbilt.dre.DAnCE.ImplementationType>
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::get_configuration_handler - No configuration plugin for type edu.vanderbilt.dre.DAnCE.ImplementationType found
+(1716|3260) [LM_DEBUG] -  15:21:32.943000 - LocalityManager_i::init - Looking up configuration handler for <edu.vanderbilt.dre.DAnCE.LocalityManager.installer>
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - Plugin_Manager::get_configuration_handler - No configuration plugin for type edu.vanderbilt.dre.DAnCE.LocalityManager.installer found
+(1716|3260) [LM_NOTICE] -  15:21:32.943000 - LocalityManager_Task::svc - Configuration complete for component server 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - DAnCE_LocalityActivator_i::configuration_complete - Received configuration_complete from LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_DEBUG] -  15:21:32.943000 - DAnCE_LocalityActivator_i::create_locality_manager - LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd successfully spawned and configured!
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - Install_Instance::invoke - install_instance completed
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - Action_Base::call - Invoking post-action interceptors
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.LocalityManager
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.LocalityManager
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - SHS_CORBA_Transport::push_event - Unable to publish SHS status update, nil daemon ref
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - Action_Base::call - Signaling result for instance <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1068|1084) [LM_INFO] -  15:21:32.943000 - NodeApplication_Impl::prepare_instances - Successfully started Locality Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]
+(1068|1084) [LM_DEBUG] -  15:21:32.943000 - NodeApplication_Impl::prepare_instances - Invoking preparePlan on locality Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Checking property component factory
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Found unmanaged component type.
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.LocalityManager
+(1716|3260) [LM_TRACE] -  15:21:32.943000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.LocalityManager
+(1068|1084) [LM_DEBUG] -  15:21:32.943000 - NodeApplication_Impl::prepare_instance - Locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]> successfully prepared.
+(1068|1084) [LM_DEBUG] -  15:21:32.943000 - NodeApplication_Impl::prepare_instances - Successfully executed preparePlan on locality Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]
+(1068|1084) [LM_TRACE] -  15:21:32.943000 - NodeApplicationManager_impl::startLaunch - Instructing NodeApplication to start launch localities.
+(1068|1084) [LM_INFO] -  15:21:32.943000 - NodeApplication_Impl::start_launch_instances - StartLaunching locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - LocalityManager_i::startLaunch - Starting installation of edu.dre.vanderbilt.dre.DAnCE.CCM.Container type instances
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - LocalityManager_i::startLaunch - Starting installation of edu.dre.vanderbilt.dre.CCM.Component type instances
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - LocalityManager_i::startLaunch - Starting installation of instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - LocalityManager_i::startLaunch - Starting installation of edu.dre.vanderbilt.dre.CCM.Home type instances
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - LocalityManager_i::startLaunch - Starting installation of edu.vanderbilt.dre.CCM.HomedComponent type instances
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - Action_Base::call - Entering Action_Base
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - Action_Base::call - Invoking pre-install interceptors
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - Install_Instance::invoke - Invoking install_instance on handler for type <edu.dre.vanderbilt.dre.CCM.Component>
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - build_property_map: Bound value for config value component factory
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - build_property_map: Bound value for config value edu.vanderbilt.dre.CIAO.ExecutorArtifact
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - build_property_map: Bound value for config value edu.vanderbilt.dre.CIAO.ServantEntrypoint
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - build_property_map: Bound value for config value edu.vanderbilt.dre.CIAO.ServantArtifact
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.InstanceIOR
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - Component_Handler_i::install_instance - Found Servant entrypoint create_Stock_StockBroker_Servant
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - Component_Handler_i::install_instance - Found Servant artifact StockBroker_svnt
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - Component_Handler_i::install_instance - Found executor artifact: StockBroker_exec
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - Component_Handler_i::install_instance - Found executor entrypoint: create_Stock_StockBroker_Impl
+(1716|3260) [LM_INFO] -  15:21:32.958000 - Component_Handler_i::install_instance - No container provided, using default container for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker>
+(1716|3260) [LM_DEBUG] -  15:21:32.958000 - Session_Container::install_component - Loading component [Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker] from shared libraries
+(1716|3260) [LM_DEBUG] -  15:21:32.958000 - Session_Container::install_component - Executor library [StockBroker_exec] with entrypoint [create_Stock_StockBroker_Impl]
+(1716|3260) [LM_DEBUG] -  15:21:32.958000 - Session_Container::install_component - Servant library [StockBroker_svnt] with entrypoint [create_Stock_StockBroker_Servant]
+(1716|3260) [LM_TRACE] -  15:21:32.958000 - Session_Container::install_component - Executor DLL successfully opened
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Session_Container::install_component - Servant DLL successfully openend.
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Session_Container::install_component - Loading component executor
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Session_Container::install_component - Loading component servant
+(1716|3260) [LM_INFO] -  15:21:32.974000 - Servant_Activator_i::register_port_activator - Registering a port activator for port [notify_in] with ObjectID [Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker_notify_in]
+(1716|3260) [LM_INFO] -  15:21:32.974000 - Servant_Activator_i::incarnate - Attempting to activate port name [Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker_notify_in]
+(1716|3260) [LM_INFO] -  15:21:32.974000 - Servant_Activator_i::incarnate - Activating Port Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker_notify_in
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Session_Container::install_component - Installing component servant
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Session_Container::install_component - Component successfully created
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Session_Container::set_attributes - Configuring attribute values on component object reference.
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Install_Instance::invoke - install_instance completed
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Action_Base::call - Invoking post-action interceptors
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - CIAO_StoreReferences_i::post_install - Interceptor post install for instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker
+(1716|3260) [LM_DEBUG] -  15:21:32.974000 - DAnCE::Utility::write_IOR - Writing ior <IOR:010000001a00000049444c3a53746f636b2f53746f636b42726f6b65723a312e30000000010000000000000078000000010102cd100000003139322e3136382e3231302e31343700eec5cdcd2300000014010f004e5354bca9b84cb4ea0d0001000000010000000000000001000000010000000002000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000> to file <StockBroker.ior>
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker>
+(1716|3260) [LM_INFO] -  15:21:32.974000 - LocalityManager_i::startLaunch - Instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker> successfully deployed
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - DAnCE::Utility::get_instance_type - Checking property component factory
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - DAnCE::Utility::get_instance_type - Found unmanaged component type.
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Action_Base::call - Entering Action_Base
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Action_Base::call - Invoking pre-install interceptors
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Endpoint_Reference::invoke - Invoking provide_endpoint_reference on handler
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Connection_Handler::provide_endpoint_reference - Called for connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in>
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Endpoint_Reference::invoke - provide_endpoint_reference successfull completed
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Action_Base::call - Invoking post-action interceptors
+(1716|3260) [LM_TRACE] -  15:21:32.974000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in>
+(1068|1084) [LM_DEBUG] -  15:21:32.974000 - NodeApplicationManager_impl::startLaunch - Activating NodeApplication servant
+(1836|3416) [LM_TRACE] -  15:21:32.974000 - DA_NAM_ReplyHandlerImpl::startLaunch called.
+(1836|3416) [LM_TRACE] -  15:21:32.974000 - DA_NAM_ReplyHandlerImpl::startLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Broker startLaunch succeeded, received 1 connections
+(2260|3832) [LM_INFO] -  15:21:32.990000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.DeploymentInterceptor
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.DeploymentInterceptor
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Interceptor_Handler_Impl::install_instance - Starting installation of instance <create_DAnCE_Standard_Error>
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.EntryPoint'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Value is create_DAnCE_Standard_Error
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.InstanceHandler.Artifact'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Value is DAnCE_Error_Interceptors
+(2260|3832) [LM_DEBUG] -  15:21:32.990000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_Error_Interceptors> successfully loaded.
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>.
+(2260|3832) [LM_INFO] -  15:21:32.990000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.BestEffort'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Unable to find property named edu.vanderbilt.dre.DAnCE.BestEffort
+(2260|3832) [LM_DEBUG] -  15:21:32.990000 - Plugin_Manager::load_plugin - Loading plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Plugin_Manager::load_plugin - Loading artifact <DAnCE_Error_Interceptors> successfully loaded.
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Plugin_Manager::load_plugin - Successfully created plugin from <DAnCE_Error_Interceptors>:<create_DAnCE_Standard_Error>.
+(2260|3832) [LM_INFO] -  15:21:32.990000 - Plugin_Manager::register_interceptor - Successfully created deployment interceptor
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.LocalityTimeout'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Property value for name 'edu.vanderbilt.dre.DAnCE.LocalityTimeout' has no value
+(2260|3832) [LM_DEBUG] -  15:21:32.990000 - LocalityManager_i::init - Looking up configuration handler for <edu.vanderbilt.dre.DAnCE.LocalityNamingContext>
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Plugin_Manager::get_configuration_handler - No configuration plugin for type edu.vanderbilt.dre.DAnCE.LocalityNamingContext found
+(2260|3832) [LM_DEBUG] -  15:21:32.990000 - LocalityManager_i::init - Looking up configuration handler for <edu.vanderbilt.dre.DAnCE.ImplementationType>
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Plugin_Manager::get_configuration_handler - No configuration plugin for type edu.vanderbilt.dre.DAnCE.ImplementationType found
+(2260|3832) [LM_DEBUG] -  15:21:32.990000 - LocalityManager_i::init - Looking up configuration handler for <edu.vanderbilt.dre.DAnCE.LocalityManager.installer>
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Plugin_Manager::get_configuration_handler - No configuration plugin for type edu.vanderbilt.dre.DAnCE.LocalityManager.installer found
+(2260|3832) [LM_NOTICE] -  15:21:32.990000 - LocalityManager_Task::svc - Configuration complete for component server 6b4f4b68-d891-11df-8000-000c29c627dd
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - DAnCE_LocalityActivator_i::configuration_complete - Received configuration_complete from LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd
+(3676|1292) [LM_DEBUG] -  15:21:32.990000 - DAnCE_LocalityActivator_i::create_locality_manager - LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd successfully spawned and configured!
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - Install_Instance::invoke - install_instance completed
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - Action_Base::call - Invoking post-action interceptors
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.LocalityManager
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.LocalityManager
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - SHS_CORBA_Transport::push_event - Unable to publish SHS status update, nil daemon ref
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - Action_Base::call - Signaling result for instance <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(3676|1292) [LM_INFO] -  15:21:32.990000 - NodeApplication_Impl::prepare_instances - Successfully started Locality Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]
+(3676|1292) [LM_DEBUG] -  15:21:32.990000 - NodeApplication_Impl::prepare_instances - Invoking preparePlan on locality Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Checking property component factory
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Found unmanaged component type.
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.LocalityManager
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.LocalityManager
+(3676|1292) [LM_DEBUG] -  15:21:32.990000 - NodeApplication_Impl::prepare_instance - Locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]> successfully prepared.
+(3676|1292) [LM_DEBUG] -  15:21:32.990000 - NodeApplication_Impl::prepare_instances - Successfully executed preparePlan on locality Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]
+(3676|1292) [LM_TRACE] -  15:21:32.990000 - NodeApplicationManager_impl::startLaunch - Instructing NodeApplication to start launch localities.
+(3676|1292) [LM_INFO] -  15:21:32.990000 - NodeApplication_Impl::start_launch_instances - StartLaunching locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - LocalityManager_i::startLaunch - Starting installation of edu.dre.vanderbilt.dre.DAnCE.CCM.Container type instances
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - LocalityManager_i::startLaunch - Starting installation of edu.dre.vanderbilt.dre.CCM.Component type instances
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - LocalityManager_i::startLaunch - Starting installation of instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - LocalityManager_i::startLaunch - Starting installation of edu.dre.vanderbilt.dre.CCM.Home type instances
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - LocalityManager_i::startLaunch - Starting installation of edu.vanderbilt.dre.CCM.HomedComponent type instances
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Action_Base::call - Entering Action_Base
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Action_Base::call - Invoking pre-install interceptors
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Install_Instance::invoke - Invoking install_instance on handler for type <edu.dre.vanderbilt.dre.CCM.Component>
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - build_property_map: Bound value for config value component factory
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - build_property_map: Bound value for config value edu.vanderbilt.dre.CIAO.ExecutorArtifact
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - build_property_map: Bound value for config value edu.vanderbilt.dre.CIAO.ServantEntrypoint
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - build_property_map: Bound value for config value edu.vanderbilt.dre.CIAO.ServantArtifact
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - build_property_map: Bound value for config value edu.vanderbilt.dre.DAnCE.InstanceIOR
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Component_Handler_i::install_instance - Found Servant entrypoint create_Stock_StockDistributor_Servant
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Component_Handler_i::install_instance - Found Servant artifact StockDistributor_svnt
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Component_Handler_i::install_instance - Found executor artifact: StockDistributor_exec
+(2260|3832) [LM_TRACE] -  15:21:32.990000 - Component_Handler_i::install_instance - Found executor entrypoint: create_Stock_StockDistributor_Impl
+(2260|3832) [LM_INFO] -  15:21:32.990000 - Component_Handler_i::install_instance - No container provided, using default container for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor>
+(2260|3832) [LM_DEBUG] -  15:21:32.990000 - Session_Container::install_component - Loading component [Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor] from shared libraries
+(2260|3832) [LM_DEBUG] -  15:21:32.990000 - Session_Container::install_component - Executor library [StockDistributor_exec] with entrypoint [create_Stock_StockDistributor_Impl]
+(2260|3832) [LM_DEBUG] -  15:21:32.990000 - Session_Container::install_component - Servant library [StockDistributor_svnt] with entrypoint [create_Stock_StockDistributor_Servant]
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Session_Container::install_component - Executor DLL successfully opened
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Session_Container::install_component - Servant DLL successfully openend.
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Session_Container::install_component - Loading component executor
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Session_Container::install_component - Loading component servant
+(2260|3832) [LM_INFO] -  15:21:33.005000 - Servant_Activator_i::register_port_activator - Registering a port activator for port [push_quoter] with ObjectID [Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor_push_quoter]
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Session_Container::install_component - Installing component servant
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Session_Container::install_component - Component successfully created
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Session_Container::set_attributes - Configuring attribute values on component object reference.
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Install_Instance::invoke - install_instance completed
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Action_Base::call - Invoking post-action interceptors
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - CIAO_StoreReferences_i::post_install - Interceptor post install for instance Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor
+(2260|3832) [LM_DEBUG] -  15:21:33.005000 - DAnCE::Utility::write_IOR - Writing ior <IOR:010000001f00000049444c3a53746f636b2f53746f636b4469737472696275746f723a312e300000010000000000000078000000010102cd100000003139322e3136382e3231302e31343700f1c5cdcd2300000014010f004e5354bca9b84cbd270e0001000000010000000000000001000000010000000002000000000000000800000001cdcdcd004f4154010000001800000001cdcdcd0100010001000000010001050901010000000000> to file <StockDistributor.ior>
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor>
+(2260|3832) [LM_INFO] -  15:21:33.005000 - LocalityManager_i::startLaunch - Instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor> successfully deployed
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - DAnCE::Utility::get_instance_type - Checking property component factory
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - DAnCE::Utility::get_instance_type - Found unmanaged component type.
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Action_Base::call - Entering Action_Base
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Action_Base::call - Invoking pre-install interceptors
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Endpoint_Reference::invoke - Invoking provide_endpoint_reference on handler
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Connection_Handler::provide_endpoint_reference - Called for connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter>
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Endpoint_Reference::invoke - provide_endpoint_reference successfull completed
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Action_Base::call - Invoking post-action interceptors
+(2260|3832) [LM_TRACE] -  15:21:33.005000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter>
+(3676|1292) [LM_DEBUG] -  15:21:33.021000 - NodeApplicationManager_impl::startLaunch - Activating NodeApplication servant
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DA_NAM_ReplyHandlerImpl::startLaunch called.
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DA_NAM_ReplyHandlerImpl::startLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Distributor startLaunch succeeded, received 1 connections
+(1836|3416) [LM_DEBUG] -  15:21:33.021000 - DA_NAM_ReplyHandlerImpl::Counter::on_all_completed - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] successfully finished all nodes
+(1836|3416) [LM_NOTICE] -  15:21:33.021000 - DomainApplicationManager_Impl::finish_startLaunch - DomainApplication[0] for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF created 2 provided references.
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DomainApplicationManager_Impl::finish_startLaunch - DomainApplication was successfully activated.
+(3900|3312) [LM_DEBUG] -  15:21:33.021000 - Plan_Launcher_Base_Impl::start_launch - startLaunch completed...
+(3900|3312) [LM_DEBUG] -  15:21:33.021000 - Plan_Launcher_Base_Impl::start_launch - DomainApplication was received from startLaunch
+(3900|3312) [LM_DEBUG] -  15:21:33.021000 - create_external_connections - start
+(3900|3312) [LM_DEBUG] -  15:21:33.021000 - Plan_Launcher_Base_Impl::launch_plan - before finishLaunch
+(1836|3416) [LM_DEBUG] -  15:21:33.021000 - DomainApplication_impl::finishLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : 2 applications to finish launching
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DomainApplication_Impl::finishLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Distributor : calling finishLaunch on a node application
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DomainApplication_Impl::finishLaunch - finishLaunch has been called on a node application
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DomainApplication_Impl::finishLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Broker : calling finishLaunch on a node application
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DomainApplication_Impl::finishLaunch - finishLaunch has been called on a node application
+(3676|1292) [LM_INFO] -  15:21:33.021000 - NodeApplication_Impl::finish_launch_instances - FinishLaunching locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1068|1084) [LM_INFO] -  15:21:33.021000 - NodeApplication_Impl::finish_launch_instances - FinishLaunching locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Starting finsihLaunch, received 2 references, have 2 connections
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in> has 1 endpoints
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Skipping connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in>
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter> has 1 endpoints
+(1716|3260) [LM_DEBUG] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Starting connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter>
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - DAnCE::Utility::get_instance_type - Checking property component factory
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - DAnCE::Utility::get_instance_type - Found unmanaged component type.
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Entering Action_Base
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking pre-install interceptors
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Connect_Instance::invoke - Invoking connect_instance on handler
+(1716|3260) [LM_DEBUG] -  15:21:33.021000 - Connection_Handler::connect_receptacle - Connecting connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter> on instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker>
+(1716|3260) [LM_INFO] -  15:21:33.021000 - Connection_Handler::connect_receptacle - Connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter> successfully established.
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Connect_Instance::invoke - connect_instance successfull completed
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking post-action interceptors
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter>
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Entering Action_Base
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking pre-install interceptors
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Instance_Configured::invoke - Invoking instance_configured on handler for type <edu.dre.vanderbilt.dre.CCM.Component>
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Instance_Configured::invoke - instance_configured completed
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking post-action interceptors
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker>
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DA_NA_ReplyHandlerImpl::finishLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Broker.
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Starting finsihLaunch, received 2 references, have 2 connections
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in> has 1 endpoints
+(2260|3832) [LM_DEBUG] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Starting connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in>
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - DAnCE::Utility::get_instance_type - Checking property component factory
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - DAnCE::Utility::get_instance_type - Found unmanaged component type.
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter> has 1 endpoints
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - LocalityManager_i::finishLaunch - Skipping connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:read_quoter-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:push_quoter>
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Entering Action_Base
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking pre-install interceptors
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Connect_Instance::invoke - Invoking connect_instance on handler
+(2260|3832) [LM_DEBUG] -  15:21:33.021000 - Connection_Handler::connect_publisher - Connecting connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in> on instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor>
+(2260|3832) [LM_INFO] -  15:21:33.021000 - Connection_Handler::connect_publisher - Connection <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in> successfully established.
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Connect_Instance::invoke - connect_instance successfull completed
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking post-action interceptors
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor:notify_out-Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker:notify_in>
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Entering Action_Base
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking pre-install interceptors
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Instance_Configured::invoke - Invoking instance_configured on handler for type <edu.dre.vanderbilt.dre.CCM.Component>
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Instance_Configured::invoke - instance_configured completed
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking post-action interceptors
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor>
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DA_NA_ReplyHandlerImpl::finishLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Distributor.
+(1836|3416) [LM_DEBUG] -  15:21:33.021000 - DA_NA_ReplyHandlerImpl::finishLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : Successfully finished all nodes
+(3900|3312) [LM_DEBUG] -  15:21:33.021000 - Plan_Launcher_Base_Impl::launch_plan - finishLaunch completed.
+(3900|3312) [LM_DEBUG] -  15:21:33.021000 - Plan_Launcher_Base_Impl::start - before invoking start on application...
+(1836|3416) [LM_DEBUG] -  15:21:33.021000 - DomainApplication_impl::start - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : 2 applications to start
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DomainApplication_Impl::start - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Distributor : calling start on a node application
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DomainApplication_Impl::start - start has been called on an application
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DomainApplication_Impl::start - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Broker : calling start on a node application
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DomainApplication_Impl::start - start has been called on an application
+(3676|1292) [LM_INFO] -  15:21:33.021000 - NodeApplication_Impl::start - Starting locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1068|1084) [LM_INFO] -  15:21:33.021000 - NodeApplication_Impl::start - Starting locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Entering Action_Base
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking pre-install interceptors
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Start_Instance::invoke - Invoking activate_instance on handler for type <edu.dre.vanderbilt.dre.CCM.Component>
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Session_Container::activate_component - Invoking CCM activate on provided component object reference.
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Start_Instance::invoke - activate_instance completed
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking post-action interceptors
+(1716|3260) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker>
+(1716|3260) [LM_INFO] -  15:21:33.021000 - LocalityManager_i::start - Instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker> successfully activated
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DA_NA_ReplyHandlerImpl::start - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Broker.
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Entering Action_Base
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking pre-install interceptors
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Start_Instance::invoke - Invoking activate_instance on handler for type <edu.dre.vanderbilt.dre.CCM.Component>
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Session_Container::activate_component - Invoking CCM activate on provided component object reference.
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Start_Instance::invoke - activate_instance completed
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Invoking post-action interceptors
+(2260|3832) [LM_TRACE] -  15:21:33.021000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor>
+(2260|3832) [LM_INFO] -  15:21:33.021000 - LocalityManager_i::start - Instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockDistributor> successfully activated
+(1836|3416) [LM_TRACE] -  15:21:33.021000 - DA_NA_ReplyHandlerImpl::start - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Distributor.
+(1836|3416) [LM_DEBUG] -  15:21:33.021000 - DA_NA_ReplyHandlerImpl::finishLaunch - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : Successfully finished all nodes
+(3900|3312) [LM_DEBUG] -  15:21:33.021000 - Plan_Launcher_Base_Impl::start - after invoking start on application...
+(3900|3312) [LM_DEBUG] -  15:21:33.021000 - Plan_Launcher_Base_Impl::launch_plan - Application Deployed successfully
+(3900|3312) [LM_NOTICE] -  15:21:33.021000 - Plan_Launcher::launch_plan - Successfully deployed plan with UUID: <6D382DAE-9024-4C4D-B91B-A0F9176AFACF>
+Inside fini...............
+The application as a whole is now started. Lets subscribe and unsubscribe some stock
+Start the Stock Distributor by invoking 'StockDistributorDriver -o -r 1'
+Inside init...............
+Start up the Distribution service
+Inside fini...............
+Now subscribe to MSFT by invoking 'StockBrokerDriver -s MSFT'
+Inside init...............
+StockBroker_exec_i::stock_subscribe - subscribe to <MSFT>
+Subscribe successful!
+Inside fini...............
+Now subscribe to IBM by invoking 'StockBrokerDriver -s IBM'
+Inside init...............
+StockBroker_exec_i::stock_subscribe - subscribe to <IBM>
+Subscribe successful!
+Inside fini...............
+Now subscribe to invalid stock by invoking 'StockBrokerDriver -s CIAO'
+Inside init...............
+StockBroker_exec_i::stock_subscribe - <CIAO> not found. Throw Invalid_Stock exception.
+Invalid stock exception.
+Inside fini...............
+Now UNsubscribe to IBM by invoking 'StockBrokerDriver -u IBM'
+Inside init...............
+StockBroker_exec_i::stock_unsubscribe - unsubscribe <IBM>
+Unsubscribe successful!
+Inside fini...............
+Stop the Distributor by invoking 'StockDistributorDriver -f'
+Inside init...............
+Stop the Distribution service
+ERROR: C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO/tutorials/Quoter/Simple/lib/StockDistributorDriver timedout
+We're done. Stop the application now by invoking the plan_launcher again
+This application has requested the Runtime to terminate it in an unusual way.
+Please contact the application's support team for more information.
+Invoking executor - stop the application -
+by running dance_plan_launcher.exe with -k file://C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\EM.ior -x Plan.cdp
+(3112|2748) [LM_TRACE] -  15:21:57.632000 - PlanLauncher - initializing ORB
+Inside init...............
+(3112|2748) [LM_TRACE] -  15:21:57.663000 - PL options : "	C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\DAnCE\bin\.\dance_plan_launcher.EXE
+	-k
+	file://C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\EM.ior
+	-x
+	Plan.cdp
+	-s
+(3112|2748) [LM_DEBUG] -  15:21:57.663000 - Plan_Launcher::parse_args - Using ExecutionManager IOR: file://C:\research\cuts-thirdparty\doc-middleware\Latest_Micro\ACE_wrappers\TAO\CIAO\tutorials\Quoter\Simple\descriptors\EM.ior
+(3112|2748) [LM_DEBUG] -  15:21:57.663000 - Plan_Launcher::parse_args - Using XML plan: Plan.cdp
+(3112|2748) [LM_DEBUG] -  15:21:57.663000 - Plan_Launcher::parse_args - Tearing down nominated plan
+(3112|2748) [LM_DEBUG] -  15:21:57.663000 - Plan_Launcher - Parsing deployment plan
+(3112|2748) [LM_TRACE] -  15:21:57.663000 - XML_File_Intf::read_process_plan - Constructing DOM
+(3112|2748) [LM_TRACE] -  15:21:57.710000 - XML_File_Intf::read_process_plan - DOMElement pointer: 8547312
+(3112|2748) [LM_TRACE] -  15:21:57.710000 - XML_File_Intf::read_process_plan - Parsing XML file with XSC
+(3112|2748) [LM_TRACE] -  15:21:57.710000 - XML_File_Intf::read_process_plan - Processing using config handlers
+(1836|3416) [LM_DEBUG] -  15:21:57.726000 - DomainApplicationManager_impl::getApplications - Returning plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF
+(1836|3416) [LM_DEBUG] -  15:21:57.726000 - DomainApplicationManager_impl::getApplications - Returning 1 running applications for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF
+(3112|2748) [LM_DEBUG] -  15:21:57.726000 - Plan_Launcher::teardown_plan - Tearing down plan with UUID 6D382DAE-9024-4C4D-B91B-A0F9176AFACF
+(1836|3416) [LM_TRACE] -  15:21:57.726000 - DomainApplicationManager_impl::destroyApplication - destroying DomainApplication[0] for plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF
+(1836|3416) [LM_TRACE] -  15:21:57.726000 - DomainApplicationManager_impl::destroyApplication - deactivating application object
+(1836|3416) [LM_TRACE] -  15:21:57.726000 - DomainApplicationManager_impl::destroyApplication - deleting application object
+(1836|3416) [LM_TRACE] -  15:21:57.726000 - DomainApplication_Impl::destroyApplication - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : 2 node applications to destroy
+(1836|3416) [LM_TRACE] -  15:21:57.726000 - DomainApplication_Impl::destroyApplication - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : calling destroyApplication on node application manager for node Distributor
+(1836|3416) [LM_TRACE] -  15:21:57.726000 - DomainApplication_Impl::destroyApplication - destroyApplication has been called on node application manager
+(1836|3416) [LM_TRACE] -  15:21:57.726000 - DomainApplication_Impl::destroyApplication - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : calling destroyApplication on node application manager for node Broker
+(1836|3416) [LM_TRACE] -  15:21:57.726000 - DomainApplication_Impl::destroyApplication - destroyApplication has been called on node application manager
+(1836|3416) [LM_TRACE] -  15:21:57.726000 - DomainApplication_Impl::destroyApplication - finished
+(3676|1292) [LM_INFO] -  15:21:57.742000 - NodeApplication_Impl::remove_instances - Removing locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1068|1084) [LM_INFO] -  15:21:57.742000 - NodeApplication_Impl::remove_instances - Removing locality <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Entering Action_Base
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Invoking pre-install interceptors
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Passivate_Instance::invoke - Invoking activate_instance on handler for type <edu.dre.vanderbilt.dre.CCM.Component>
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Session_Container::passivate_component - Invoking CCM passivate on provided component object reference.
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Passivate_Instance::invoke - activate_instance completed
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Invoking post-action interceptors
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker>
+(1716|3260) [LM_INFO] -  15:21:57.742000 - LocalityManager_i::destroyApplication - Instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker> successfully passivated
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Entering Action_Base
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Invoking pre-install interceptors
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Remove_Instance::invoke - Invoking remove_instance on handler for type <edu.dre.vanderbilt.dre.CCM.Component>
+(1716|3260) [LM_DEBUG] -  15:21:57.742000 - Component_Handler_i::remove_instance - Attempting removal of component instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker>
+(1716|3260) [LM_INFO] -  15:21:57.742000 - Component_Handler_i::remove_instance - No container provided, using default container for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker>
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Servant_Activator_i::etherealize - Attempting to etherealize servant with object ID Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker_notify_in
+(1716|3260) [LM_INFO] -  15:21:57.742000 - Servant_Activator_i::update_port_activator - Attempting to update port name [Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker_notify_in]
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Session_Container::uninstall_servant - Removing component or home servant
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Session_Container::uninstall_servant - Servant successfully removed, reference count is 0
+(1716|3260) [LM_INFO] -  15:21:57.742000 - Component_Handler_i::remove_instance - Instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker> successfully removed
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Remove_Instance::invoke - remove_instance completed
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Invoking post-action interceptors
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Signaling result for instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker>
+(1716|3260) [LM_INFO] -  15:21:57.742000 - LocalityManager_i::destroyApplication - Instance <Quoter.ComponentImplementations.StockQuoterImplementation.StockQuoter.StockBroker> successfully removed
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - Deployment_Scheduler::perform_work - Invoking a deployment event
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Entering Action_Base
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Invoking pre-install interceptors
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - Remove_Instance::invoke - Invoking remove_instance on handler for type <edu.vanderbilt.dre.DAnCE.LocalityManager>
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - DAnCE_LocalityActivator_i::remove_locality_manager - Calling shutdown () on LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd
+(1068|1084) [LM_INFO] -  15:21:57.742000 - DAnCE_LocalityActivator_i::remove_locality_manager - LocalityManager 6b4f4b68-d891-11df-8000-000c29c627dd successfully shut down.
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - Remove_Instance::invoke - remove_instance completed
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Invoking post-action interceptors
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - DAnCE::Utility::get_instance_type - Checking property edu.vanderbilt.dre.DAnCE.ImplementationType
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - DAnCE::Utility::get_property_value<T> - Finding property value for name 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - DAnCE::Utility::get_property_value<T> - Found property 'edu.vanderbilt.dre.DAnCE.ImplementationType'
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - DAnCE::Utility::get_property_value<T> - Value is edu.vanderbilt.dre.DAnCE.LocalityManager
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - DAnCE::Utility::get_instance_type - Found instance type edu.vanderbilt.dre.DAnCE.LocalityManager
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - SHS_CORBA_Transport::push_event - Unable to publish SHS status update, nil daemon ref
+(1068|1084) [LM_TRACE] -  15:21:57.742000 - Action_Base::call - Signaling result for instance <Locality Manager [6b4ce90e-d891-11df-8000-000c29c627dd]>
+(1716|3260) [LM_DEBUG] -  15:21:57.742000 - DAnCE LocalityManager shutdown request received for UUID <6b4f4b68-d891-11df-8000-000c29c627dd>
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Container_Handler_i::remove_instance - Removing container with Id <>
+(1716|3260) [LM_TRACE] -  15:21:57.742000 - Container_Handler_i::remove_instance - Container with Id <> removed.
+(1716|3260) [LM_TRACE] -  15:21:57.757000 - LocalityManager_Task::svc - ORB Event loop completed.
+(1716|3260) [LM_INFO] -  15:21:57.757000 - LocalityManager_Task::run - ORB has shutdown, terminating ComponentServer
+Inside fini...............
+(1836|3416) [LM_TRACE] -  15:21:57.757000 - DA_NAM_ReplyHandlerImpl::destroyApplication called.
+(1836|3416) [LM_TRACE] -  15:21:57.757000 - DA_NAM_ReplyHandlerImpl::destroyApplication - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Broker : Node application destroy succeeded
+(3676|1292) [LM_ERROR] -  15:21:58.804000 - NodeApplication_Impl::remove_instances - Caught CORBA Final_Exception system exception, ID 'IDL:omg.org/CORBA/TRANSIENT:1.0'
+OMG minor code (2), described as 'No usable profile in IOR.', completed = NO
+
+(1836|3416) [LM_TRACE] -  15:21:58.804000 - DA_NAM_ReplyHandlerImpl::destroyApplication_excep called
+(1836|3416) [LM_ERROR] -  15:21:58.804000 - DA_NAM_ReplyHandlerImpl::destroyApplication_excep - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] node Distributor : StopError exception caught.
+(1836|3416) [LM_ERROR] -  15:21:58.804000 - DA_NAM_ReplyHandlerImpl::Counter::on_all_completed_with_failure - Plan 6D382DAE-9024-4C4D-B91B-A0F9176AFACF DomainApplication[01C55338] : 1 errors from nodemanagers
+(1836|3416) [LM_ERROR] -  15:21:58.804000 - ExecutionManager_Impl::DestroyManagerCompletionHandler::handle_exception - propagating exception
+(3112|2748) [LM_ERROR] -  15:21:58.804000 - Plan_Launcher_Base_Impl::teardown_application - Caught CORBA exception while invoking destroyApplication: system exception, ID 'IDL:omg.org/CORBA/UNKNOWN:1.0'
+Unknown vendor minor code id (0), minor code = 0, completed = YES
+
+(3112|2748) [LM_ERROR] -  15:21:58.804000 - Plan_Launcher::teardown_plan - Application Teardown failed, exception: Caught CORBA exception while invoking destroyApplication: system exception, ID 'IDL:omg.org/CORBA/UNKNOWN:1.0'
+Unknown vendor minor code id (0), minor code = 0, completed = YES
+
+Inside fini...............
+ERROR: dance_plan_launcher returned 1
