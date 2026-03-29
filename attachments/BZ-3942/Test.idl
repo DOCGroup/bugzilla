@@ -1,0 +1,9 @@
+#ifndef _TEST_DEF
+#define _TEST_DEF
+
+interface MyInterface
+{
+};
+typedef sequence<MyInterface> MyInterfaceSequence;
+
+#endif
