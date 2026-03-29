@@ -1,0 +1,334 @@
+Index: IIOP_Connector.cpp
+===================================================================
+--- IIOP_Connector.cpp	(revision 86580)
++++ IIOP_Connector.cpp	(working copy)
+@@ -194,15 +194,12 @@
+   int const result =
+     this->begin_connection (svc_handler, r, iiop_endpoint, timeout);
+ 
++  // Make sure that we always do a remove_reference
++  ACE_Event_Handler_var svc_handler_auto_ptr (svc_handler);
++
+   if (result == -1 && errno != EWOULDBLOCK)
+     {
+-      // connect completed unsuccessfully
+-      if (svc_handler)
+-        {
+-          svc_handler->remove_reference();
+-        }
+-
+-       // Give users a clue to the problem.
++      // Give users a clue to the problem.
+       if (TAO_debug_level > 1)
+         {
+           ACE_ERROR ((LM_ERROR,
+@@ -220,14 +217,33 @@
+   TAO_LF_Multi_Event mev;
+   mev.add_event (svc_handler);
+ 
+-  return this->complete_connection (result,
+-                                    desc,
+-                                    sh_ptr,
+-                                    ep_ptr,
+-                                    1U,
+-                                    r,
+-                                    &mev,
+-                                    timeout);
++  TAO_Transport *transport =
++    this->complete_connection (result,
++                               desc,
++                               sh_ptr,
++                               ep_ptr,
++                               1U,
++                               r,
++                               &mev,
++                               timeout);
++
++  // If complete_connection was unsuccessful then remove
++  // the last reference that we have to the svc_handler.
++  if (transport == 0)
++    {
++      if (TAO_debug_level > 1)
++        {
++          ACE_ERROR ((LM_ERROR,
++                      ACE_TEXT ("TAO (%P|%t) - IIOP_Connector::make_connection, ")
++                      ACE_TEXT ("connection to <%C:%d> completed unsuccessfully\n"),
++                      iiop_endpoint->host (),
++                      iiop_endpoint->port ()));
++        }
++      return 0;
++    }
++
++  svc_handler_auto_ptr.release ();
++  return transport;
+ }
+ 
+ TAO_Transport *
+@@ -305,14 +321,25 @@
+ 
+   TAO_Transport *winner = 0;
+   if (count > 0) // only complete if at least one pending or success
+-    winner = this->complete_connection (result,
+-                                        desc,
+-                                        shlist,
+-                                        eplist,
+-                                        count,r,
+-                                        &mev,
+-                                        timeout);
++    {
++      // Make sure that we always do a remove_reference for every member
++      // of the list
++      TAO_IIOP_Connection_Handler_Array_Guard svc_handler_auto_ptr (shlist, count);
+ 
++      winner = this->complete_connection (result,
++                                          desc,
++                                          shlist,
++                                          eplist,
++                                          count,r,
++                                          &mev,
++                                          timeout);
++
++      // We add here an extra reference so that when svc_handler_auto_ptr
++      // will go out of scope the winner will be still alive.
++      if (winner)
++        winner->add_reference ();
++    }
++
+   delete [] shlist; // reference reductions should have been done already
+   delete [] eplist;
+   return winner;
+@@ -365,24 +392,6 @@
+                                    synch_options,
+                                    local_addr);
+ 
+-  // The connect() method creates the service handler and bumps the
+-  // #REFCOUNT# up one extra.  There are four possibilities from
+-  // calling connect(): (a) connection succeeds immediately - in this
+-  // case, the #REFCOUNT# on the handler is two; (b) connection
+-  // completion is pending - in this case, the #REFCOUNT# on the
+-  // handler is also two; (c) connection fails immediately - in this
+-  // case, the #REFCOUNT# on the handler is one since close() gets
+-  // called on the handler; (d) the connect immediately returns when we
+-  // have specified that it shouldn't block.
+-  //
+-  // The extra reference count in
+-  // TAO_Connect_Creation_Strategy::make_svc_handler() is needed in
+-  // the case when connection completion is pending and we are going
+-  // to wait on a variable in the handler to changes, signifying
+-  // success or failure.  Note, that this increment cannot be done
+-  // once the connect() returns since this might be too late if
+-  // another thread pick up the completion and potentially deletes the
+-  // handler before we get a chance to increment the reference count.
+   return result;
+ }
+ 
+@@ -428,9 +437,6 @@
+                                          TAO_LF_Multi_Event *mev,
+                                          ACE_Time_Value *timeout)
+ {
+-  // Make sure that we always do a remove_reference for every member
+-  // of the list
+-  TAO_IIOP_Connection_Handler_Array_Guard svc_handler_auto_ptr (sh_list,count);
+   TList_Holder tlist(count);
+ 
+   TAO_Transport *transport  = 0;
+Index: Connector_Impl.cpp
+===================================================================
+--- Connector_Impl.cpp	(revision 86580)
++++ Connector_Impl.cpp	(working copy)
+@@ -32,12 +32,8 @@
+ 
+   sh->transport ()->opened_as (TAO::TAO_CLIENT_ROLE);
+ 
+-  // We add to the #REFCOUNT# since the Connector needs this. See
+-  // Connector::make_connection() for details.
+-  sh->add_reference ();
++  // At this point, the #REFCOUNT# is one.
+ 
+-   // At this point, the #REFCOUNT# is two.
+-
+   return 0;
+ }
+ 
+Index: Connection_Handler.cpp
+===================================================================
+--- Connection_Handler.cpp	(revision 86580)
++++ Connection_Handler.cpp	(working copy)
+@@ -431,27 +431,18 @@
+ }
+ 
+ int
+-TAO_Connection_Handler::close_handler (u_long flags)
++TAO_Connection_Handler::close_handler (u_long)
+ {
+   this->is_closed_ = true;
+   this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED,
+                        this->orb_core_->leader_follower ());
+ 
+-  // Save these for later.  It's possible that purge_entry() called on
+-  // the transport could cause our own death.
+-  bool pending = this->connection_pending_;
+-  TAO_Transport* transport = this->transport ();
++  // If there was a pending connection cancel it.
++  this->cancel_pending_connection ();
+ 
+-  // After calling this, it is unsafe to assume that this object has
+-  // *NOT* been deleted!  Only if pending is true are we still around.
+-  transport->purge_entry();
++  // Purge transport from cache if it's in cache.
++  this->transport ()->purge_entry();
+ 
+-  // We only need to remove the reference from the transport if there
+-  // were connections pending at the time that the handler is closed or
+-  // the handler is being closed during a new connection.
+-  if (pending || ACE_BIT_DISABLED(flags, CLOSE_DURING_NEW_CONNECTION))
+-    transport->remove_reference ();
+-
+   return 0;
+ }
+ 
+Index: Strategies/DIOP_Connector.cpp
+===================================================================
+--- Strategies/DIOP_Connector.cpp	(revision 86580)
++++ Strategies/DIOP_Connector.cpp	(working copy)
+@@ -133,6 +133,9 @@
+                   TAO_DIOP_Connection_Handler (this->orb_core ()),
+                   0);
+ 
++  // Make sure that we always do a remove_reference
++  ACE_Event_Handler_var svc_handler_auto_ptr (svc_handler);
++
+   u_short port = 0;
+   const ACE_UINT32 ia_any = INADDR_ANY;
+   ACE_INET_Addr local_addr (port, ia_any);
+@@ -151,7 +154,6 @@
+   // Failure to open a connection.
+   if (retval != 0)
+     {
+-      // Close the handler (this will also delete svc_handler).
+       svc_handler->close ();
+ 
+       if (TAO_debug_level > 0)
+@@ -176,7 +178,6 @@
+   // In case of errors transport is zero
+   if (transport == 0)
+     {
+-      // Close the handler (this will also delete svc_handler).
+       svc_handler->close ();
+ 
+       // Give users a clue to the problem.
+@@ -199,7 +200,6 @@
+   // Failure in adding to cache.
+   if (retval == -1)
+     {
+-      // Close the handler (this will also delete svc_handler).
+       svc_handler->close ();
+ 
+       if (TAO_debug_level > 0)
+@@ -212,6 +212,7 @@
+       return 0;
+     }
+ 
++  svc_handler_auto_ptr.release ();
+   return transport;
+ }
+ 
+Index: Strategies/UIOP_Connector.cpp
+===================================================================
+--- Strategies/UIOP_Connector.cpp	(revision 86580)
++++ Strategies/UIOP_Connector.cpp	(working copy)
+@@ -169,23 +169,6 @@
+                                    remote_address,
+                                    synch_options);
+ 
+-  // This call creates the service handler and bumps the #REFCOUNT# up
+-  // one extra.  There are three possibilities: (a) connection
+-  // succeeds immediately - in this case, the #REFCOUNT# on the
+-  // handler is two; (b) connection completion is pending - in this
+-  // case, the #REFCOUNT# on the handler is also two; (c) connection
+-  // fails immediately - in this case, the #REFCOUNT# on the handler
+-  // is one since close() gets called on the handler.
+-  //
+-  // The extra reference count in
+-  // TAO_Connect_Creation_Strategy::make_svc_handler() is needed in
+-  // the case when connection completion is pending and we are going
+-  // to wait on a variable in the handler to changes, signifying
+-  // success or failure.  Note, that this increment cannot be done
+-  // once the connect() returns since this might be too late if
+-  // another thread pick up the completion and potentially deletes the
+-  // handler before we get a chance to increment the reference count.
+-
+   // Make sure that we always do a remove_reference
+   ACE_Event_Handler_var svc_handler_auto_ptr (svc_handler);
+ 
+@@ -301,6 +284,7 @@
+       return 0;
+     }
+ 
++  svc_handler_auto_ptr.release ();
+   return transport;
+ }
+ 
+Index: Strategies/SHMIOP_Connector.cpp
+===================================================================
+--- Strategies/SHMIOP_Connector.cpp	(revision 86580)
++++ Strategies/SHMIOP_Connector.cpp	(working copy)
+@@ -160,14 +160,6 @@
+                                               remote_address,
+                                               synch_options);
+ 
+-  // This call creates the service handler and bumps the #REFCOUNT# up
+-  // one extra.  There are two possibilities: (a) connection succeeds
+-  // immediately - in this case, the #REFCOUNT# on the handler is two;
+-  // (b) connection fails immediately - in this case, the #REFCOUNT#
+-  // on the handler is one since close() gets called on the handler.
+-  // We always use a blocking connection so the connection is never
+-  // pending.
+-
+   // Make sure that we always do a remove_reference
+   ACE_Event_Handler_var svc_handler_auto_ptr (svc_handler);
+ 
+@@ -261,6 +253,7 @@
+       return 0;
+     }
+ 
++  svc_handler_auto_ptr.release ();
+   return transport;
+ }
+ 
+Index: Strategies/SCIOP_Connector.cpp
+===================================================================
+--- Strategies/SCIOP_Connector.cpp	(revision 86580)
++++ Strategies/SCIOP_Connector.cpp	(working copy)
+@@ -195,23 +195,6 @@
+                                    synch_options,
+                                    local_address);
+ 
+-  // This call creates the service handler and bumps the #REFCOUNT# up
+-  // one extra.  There are three possibilities: (a) connection
+-  // succeeds immediately - in this case, the #REFCOUNT# on the
+-  // handler is two; (b) connection completion is pending - in this
+-  // case, the #REFCOUNT# on the handler is also two; (c) connection
+-  // fails immediately - in this case, the #REFCOUNT# on the handler
+-  // is one since close() gets called on the handler.
+-  //
+-  // The extra reference count in
+-  // TAO_Connect_Creation_Strategy::make_svc_handler() is needed in
+-  // the case when connection completion is pending and we are going
+-  // to wait on a variable in the handler to changes, signifying
+-  // success or failure.  Note, that this increment cannot be done
+-  // once the connect() returns since this might be too late if
+-  // another thread pick up the completion and potentially deletes the
+-  // handler before we get a chance to increment the reference count.
+-
+   // Make sure that we always do a remove_reference
+   ACE_Event_Handler_var svc_handler_auto_ptr (svc_handler);
+ 
+@@ -330,6 +313,7 @@
+       return 0;
+     }
+ 
++  svc_handler_auto_ptr.release ();
+   return transport;
+ }
+ 
