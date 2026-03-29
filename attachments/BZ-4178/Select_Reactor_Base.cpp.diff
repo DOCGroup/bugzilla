@@ -1,0 +1,15 @@
+--- C:/work/OpenAuto/ACE/ACE-6.2.0/ACE_wrappers/ace/ACE_Select_Reactor_Base.curr.cpp	Fri Aug  8 14:53:30 2014
++++ C:/work/OpenAuto/ACE/ACE-6.2.0/ACE_wrappers/ace/Select_Reactor_Base.cpp	Fri Aug  8 14:44:37 2014
+@@ -207,6 +207,12 @@
+ 
+   map_type::ENTRY * entry = 0;
+ 
++  // Cannot register more handles than the 
++  // total size of the repository:
++  if (this->event_handlers_.current_size() + 1 >=
++		this->event_handlers_.total_size())  
++	  return -1;
++
+   int const result =
+     this->event_handlers_.bind (handle, event_handler, entry);
+ 
