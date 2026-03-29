@@ -1,0 +1,31 @@
+Index: ace/Time_Value.inl
+===================================================================
+--- ace/Time_Value.inl	(revision 96664)
++++ ace/Time_Value.inl	(working copy)
+@@ -73,10 +73,22 @@
+ ACE_Time_Value::set (double d)
+ {
+   // ACE_OS_TRACE ("ACE_Time_Value::set");
+-  time_t l = (time_t) d;
+-  this->tv_.tv_sec = l;
+-  this->tv_.tv_usec = (suseconds_t) ((d - (double) l) * ACE_ONE_SECOND_IN_USECS + .5);
+-  this->normalize ();
++
++  if (d >= (double)ACE_Numeric_Limits<time_t>::max()) {
++    this->tv_.tv_sec = ACE_Numeric_Limits<time_t>::max();
++    this->tv_.tv_usec = 0;
++  }
++  else if (d <= (double) ACE_Numeric_Limits<time_t>::min()) {
++     this->tv_.tv_sec = ACE_Numeric_Limits<time_t>::min();
++     this->tv_.tv_usec = 0;
++  }
++  else {
++    time_t l = (time_t) d;
++    double r = (d >= 0.)? .5 : -.5;
++   
++    this->tv_.tv_sec = l;
++    this->tv_.tv_usec = (ACE_INT32) ((d - (double) l) * ACE_ONE_SECOND_IN_USECS + r);
++  }
+ }
+ 
+ /// Initializes a timespec_t.  Note that this approach loses precision
