@@ -1,0 +1,808 @@
+diff -rupN -x .svn -x '*.vcxproj*' -x '*.sln' ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/client.cpp ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/client.cpp
+--- ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/client.cpp	1970-01-01 01:00:00.000000000 +0100
++++ ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/client.cpp	2013-04-17 16:45:02.546875000 +0200
+@@ -0,0 +1,54 @@
++#include "orbsvcs/CosNamingC.h"
++
++int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
++{
++    ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Starting StoreReferences test\n")));
++
++    try
++    {
++        // Initialize orb
++        CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
++        CORBA::Object_var obj;
++        CosNaming::NamingContextExt_var ns;
++
++        try
++        {
++            ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Resolving name server\n")));
++
++            // retrieve ns
++            obj = orb->resolve_initial_references ("NameService");
++            ns = CosNaming::NamingContextExt::_narrow (obj.in ());
++            if (true == CORBA::is_nil (obj.in ()))
++                ACE_DEBUG ((LM_ERROR, ACE_TEXT ("Unable to resolve name server\n")));
++        }
++        catch (const CORBA::Exception& ex)
++        {
++            ex._tao_print_exception (ACE_TEXT ("Unable to resolve name server"));
++            return -1;
++        }
++
++        try
++        {
++            ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Resolving deployed component\n")));
++
++            // retrieve deployed component
++            obj = ns->resolve_str ("TestComp");
++            if (true == CORBA::is_nil (obj.in ()))
++                ACE_DEBUG ((LM_ERROR, ACE_TEXT ("Unable to resolve deployed component\n")));
++
++        }
++        catch (const CORBA::Exception& ex)
++        {
++            ex._tao_print_exception (ACE_TEXT ("Unable to resolve deployed component"));
++            return -1;
++        }
++    }
++    catch (const CORBA::Exception& ex)
++    {
++        ex._tao_print_exception (ACE_TEXT ("Error while running test"));
++        return -1;
++    }
++
++    ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("StoreReferences test OK\n")));
++    return 0;
++}
+diff -rupN -x .svn -x '*.vcxproj*' -x '*.sln' ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/DeploymentPlan.cdp ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/DeploymentPlan.cdp
+--- ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/DeploymentPlan.cdp	1970-01-01 01:00:00.000000000 +0100
++++ ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/DeploymentPlan.cdp	2013-04-18 14:46:40.937500000 +0200
+@@ -0,0 +1,139 @@
++<Deployment:DeploymentPlan
++                          xmlns:Deployment="http://www.omg.org/Deployment"
++                          xmlns:xmi="http://www.omg.org/XMI"
++                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++                          xsi:schemaLocation="http://www.omg.org/Deployment Deployment.xsd">
++  <label>StoreReferences_Test</label>
++  <UUID>StoreReferences_Test</UUID>
++  <!-- Home implementation -->
++  <implementation xmi:id="testCompHomeImplementation">
++    <name>testCompHomeImplementation</name>
++    <source/>
++    <artifact xmi:idref="testCompExecArtifact"/>
++    <artifact xmi:idref="testCompSvntArtifact"/>
++    <execParameter>
++      <!-- entrypoint as exec parameter (see 10.6.1) -->
++      <name>home factory</name>
++      <value>
++        <type>
++          <kind>tk_string</kind>
++        </type>
++        <value>
++          <string>create_ComponentHome_Impl</string>
++        </value>
++      </value>
++    </execParameter>
++    <execParameter>
++      <name>edu.vanderbilt.dre.CIAO.ServantEntrypoint</name>
++      <value>
++        <type>
++          <kind>tk_string</kind>
++        </type>
++        <value>
++          <string>create_store_references_test_testCompHome_Servant</string>
++        </value>
++      </value>
++    </execParameter>
++    <execParameter>
++      <name>edu.vanderbilt.dre.CIAO.ServantArtifact</name>
++      <value>
++        <type>
++          <kind>tk_string</kind>
++        </type>
++        <value>
++          <string>testCompSvnt</string>
++        </value>
++      </value>
++    </execParameter>
++    <execParameter>
++      <name>edu.vanderbilt.dre.CIAO.ExecutorArtifact</name>
++      <value>
++        <type>
++          <kind>tk_string</kind>
++        </type>
++        <value>
++          <string>testCompExec</string>
++        </value>
++      </value>
++    </execParameter>
++  </implementation>
++  <!-- Component implementation -->
++  <implementation xmi:id="testCompImplementation">
++    <name>testCompImplementation</name>
++    <source/>
++    <artifact xmi:idref="testCompExecArtifact"/>
++    <artifact xmi:idref="testCompSvntArtifact"/>
++    <execParameter>
++      <!-- entrypoint as exec parameter (see 10.6.1) -->
++      <name>edu.vanderbilt.dre.DAnCE.ImplementationType</name>
++      <value>
++        <type>
++          <kind>tk_string</kind>
++        </type>
++        <value>
++          <string>edu.vanderbilt.dre.CCM.HomedComponent</string>
++        </value>
++      </value>
++    </execParameter>
++  </implementation>
++  <!-- Home instance -->
++  <instance xmi:id="testCompHomeInstance">
++    <name>TestCompHome</name>
++    <node>Node1</node>
++    <source/>
++    <implementation xmi:idref="testCompHomeImplementation"/>
++    <configProperty>
++      <name>edu.vanderbilt.dre.DAnCE.RegisterNaming</name>
++      <value>
++        <type>
++          <kind>tk_string</kind>
++        </type>
++        <value>
++          <string>TestCompHome</string>
++        </value>
++      </value>
++    </configProperty>
++  </instance>
++  <!-- Component instance -->
++  <instance xmi:id="testCompInstance">
++    <name>TestComp</name>
++    <node>Node1</node>
++    <source/>
++    <implementation xmi:idref="testCompImplementation"/>
++    <configProperty>
++      <name>edu.vanderbilt.dre.CIAO.ComponentHomeId</name>
++      <value>
++        <type>
++          <kind>tk_string</kind>
++        </type>
++        <value>
++          <string>TestCompHome</string>
++        </value>
++      </value>
++    </configProperty>
++    <configProperty>
++      <name>edu.vanderbilt.dre.DAnCE.RegisterNaming</name>
++      <value>
++        <type>
++          <kind>tk_string</kind>
++        </type>
++        <value>
++          <string>TestComp</string>
++        </value>
++      </value>
++    </configProperty>
++  </instance>
++  <!-- Artifacts declarations -->
++  <artifact xmi:id="testCompExecArtifact">
++    <name>testCompExec</name>
++    <source/>
++    <node/>
++    <location>StoreReferences_exec</location>
++  </artifact>
++  <artifact xmi:id="testCompSvntArtifact">
++    <name>testCompSvnt</name>
++    <source/>
++    <node/>
++    <location>StoreReferences_svnt</location>
++  </artifact>
++</Deployment:DeploymentPlan>
+diff -rupN -x .svn -x '*.vcxproj*' -x '*.sln' ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/run_test.pl ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/run_test.pl
+--- ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/run_test.pl	1970-01-01 01:00:00.000000000 +0100
++++ ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/run_test.pl	2013-04-18 16:26:58.859375000 +0200
+@@ -0,0 +1,273 @@
++eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
++    & eval 'exec perl -S $0 $argv:q'
++    if 0;
++
++
++use lib "$ENV{'ACE_ROOT'}/bin";
++use PerlACE::TestTarget;
++
++$CIAO_ROOT = "$ENV{'CIAO_ROOT'}";
++$TAO_ROOT = "$ENV{'TAO_ROOT'}";
++$DANCE_ROOT = "$ENV{'DANCE_ROOT'}";
++
++$daemons_running = 0;
++$em_running = 0;
++$ns_running = 0;
++$app_running = 0;
++$registered = 0;
++
++$nr_daemon = 1;
++$port_start = 60010;
++$iorbase = "NodeApp";
++@iorfiles = 0;
++$nodebase = "Node";
++
++# ior files other than daemon
++$ior_nsbase = "ns.ior";
++$ior_nsfile = 0;
++$ior_embase = "EM.ior";
++$ior_emfile = 0;
++
++#  Processes
++$E = 0;
++$EM = 0;
++$NS = 0;
++@DEAMONS = 0;
++$CL = 0;
++
++# targets
++@tg_daemons = 0;
++$tg_naming = 0;
++$tg_exe_man = 0;
++$tg_executor = 0;
++$tg_client = 0;
++
++$nofail_plan = 'SimpleNoFailure.cdp';
++
++$status = 0;
++
++sub create_targets {
++    #   naming service
++    $tg_naming = PerlACE::TestTarget::create_target (1) || die "Create target for ns failed\n";
++    $tg_naming->AddLibPath ('..');
++    #   daemon
++    @tg_daemons = 0;
++    for ($i = 0; $i < $nr_daemon; ++$i) {
++        $tg_daemons[$i] = PerlACE::TestTarget::create_target ($i+2) || die "Create target for daemon $i failed\n";
++        $tg_daemons[$i]->AddLibPath ('.');
++    }
++    #   execution manager
++    $tg_exe_man = PerlACE::TestTarget::create_target (1) || die "Create target for EM failed\n";
++    $tg_exe_man->AddLibPath ('.');
++    #   executor (plan_launcher)
++    $tg_executor = PerlACE::TestTarget::create_target (1) || die "Create target for executor failed\n";
++    $tg_executor->AddLibPath ('.');
++    #   client
++    $tg_client = PerlACE::TestTarget::create_target (1) || die "Create target for client failed\n";
++}
++
++sub init_ior_files {
++    $ior_nsfile = $tg_naming->LocalFile ($ior_nsbase);
++    $ior_emfile = $tg_exe_man->LocalFile ($ior_embase);
++    @iorfiles = 0;
++    for ($i = 0; $i < $nr_daemon; ++$i) {
++        $iorfiles[$i] = $tg_daemons[$i]->LocalFile ("$iorbase$i.ior");
++    }
++    delete_ior_files ();
++}
++
++# Delete if there are any .ior files.
++sub delete_ior_files {
++    for ($i = 0; $i < $nr_daemon; ++$i) {
++        $tg_daemons[$i]->DeleteFile ("$iorbase$i.ior");
++    }
++    $tg_naming->DeleteFile ($ior_nsbase);
++    $tg_exe_man->DeleteFile ($ior_embase);
++}
++
++sub kill_localities {
++    for ($i = 0; $i < $nr_daemon; ++$i) {
++        # in case shutdown did not perform as expected
++        $tg_daemons[$i]->KillAll ('dance_locality_manager');
++    }
++}
++
++sub kill_node_daemons {
++    for ($i = 0; $i < $nr_daemon; ++$i) {
++        $DEAMONS[$i]->Kill (); $DEAMONS[$i]->TimedWait (1);
++        $tg_daemons[$i]->DeleteFile ("$iorbase$i.ior");
++    }
++    kill_localities ();
++}
++
++sub kill_open_processes {
++    if ($daemons_running == 1) {
++        kill_node_daemons ();
++    }
++
++    if ($em_running == 1) {
++        $EM->Kill (); $EM->TimedWait (1);
++    }
++
++    if ($ns_running == 1) {
++        $NS->Kill (); $NS->TimedWait (1);
++    }
++}
++
++
++sub run_node_daemons {
++    for ($i = 0; $i < $nr_daemon; ++$i) {
++        $iorname = "$iorbase$i.ior";
++        $iorfile = $iorfiles[$i];
++        $port = $port_start+$i;
++        $nodename = $nodebase . ($i + 1);
++        $node_host = $tg_daemons[$i]->HostName ();
++        $iiop = "iiop://$node_host:$port";
++        $node_app = $tg_daemons[$i]->GetArchDir("$DANCE_ROOT/bin/") . "dance_locality_manager";
++
++        $d_cmd = "$DANCE_ROOT/bin/dance_node_manager";
++        $d_param = "-ORBEndpoint $iiop -s $node_app -n $nodename=$iorfile -t 30 --domain-nc corbaloc:rir:/NameService --instance-nc corbaloc:rir:/NameService";
++
++        print "Run node daemon \#$nodename\n";
++        $tg_daemons[$i]->SetEnv ("NameServiceIOR", $tg_exe_man->GetEnv ("NameServiceIOR"));
++
++        $DEAMONS[$i] = $tg_daemons[$i]->CreateProcess ($d_cmd, $d_param);
++        $DEAMONS[$i]->Spawn ();
++
++        if ($tg_daemons[$i]->WaitForFileTimed($iorname,
++                                              $tg_daemons[$i]->ProcessStartWaitInterval ()) == -1) {
++            print STDERR
++              "ERROR: The ior $iorfile file of node daemon $i could not be found\n";
++            for (; $i >= 0; --$i) {
++                $DEAMONS[$i]->Kill (); $DEAMONS[$i]->TimedWait (1);
++            }
++            return -1;
++        }
++    }
++    return 0;
++}
++
++if ($#ARGV == -1) {
++    opendir(DIR, ".");
++    @files = grep(/\.cdp$/,readdir(DIR));
++    closedir(DIR);
++}
++else {
++    @files = @ARGV;
++}
++
++foreach $file (@files) {
++    print "Starting test for deployment $file\n";
++
++    # determin number of daemons required
++    if ($file =~ /^(\d+)Node/) {
++      $nr_daemon = int($1);
++    } else {
++      # assume 1
++      $nr_daemon = 1;
++    }
++
++    create_targets ();
++    init_ior_files ();
++
++    print STDERR "Starting Naming Service\n";
++
++    my $ns_host = $tg_naming->HostName ();
++    $NS = $tg_naming->CreateProcess ("$TAO_ROOT/orbsvcs/Naming_Service/tao_cosnaming", "-m 0 -ORBEndpoint iiop://$ns_host:60001 -o $ior_nsfile");
++    $NS->Spawn ();
++
++    if ($tg_naming->WaitForFileTimed ($ior_nsbase,
++                                      $tg_naming->ProcessStartWaitInterval ()) == -1) {
++        print STDERR "ERROR: cannot find naming service IOR file\n";
++        $NS->Kill (); $NS->TimedWait (1);
++        exit 1;
++    }
++
++    $ns_running = 1;
++    # Set up NamingService environment
++    $tg_exe_man->SetEnv ("NameServiceIOR", "corbaloc:iiop:$ns_host:60001/NameService");
++    $tg_executor->SetEnv ("NameServiceIOR", "corbaloc:iiop:$ns_host:60001/NameService");
++    $tg_client->SetEnv ("NameServiceIOR", "corbaloc:iiop:$ns_host:60001/NameService");
++
++    # Invoke node daemon(s).
++    print "Invoking $nr_daemon node daemon(s)\n";
++    $status = run_node_daemons ();
++
++    if ($status != 0) {
++        print STDERR "ERROR: Unable to execute the node daemons\n";
++        kill_open_processes ();
++        exit 1;
++    }
++
++    $daemons_running = 1;
++
++    # Invoke execution manager.
++    print "Invoking execution manager\n";
++    $EM = $tg_exe_man->CreateProcess ("$DANCE_ROOT/bin/dance_execution_manager",
++                                    "-e$ior_emfile --domain-nc corbaloc:rir:/NameService");
++    $EM->Spawn ();
++
++    if ($tg_exe_man->WaitForFileTimed ($ior_embase,
++                                    $tg_exe_man->ProcessStartWaitInterval ()) == -1) {
++        print STDERR "ERROR: The ior file of execution manager could not be found\n";
++        kill_open_processes ();
++        exit 1;
++    }
++
++    $em_running = 1;
++
++    # Invoke executor - start the application -.
++    print "Invoking executor - launch the application -\n";
++    $E = $tg_executor->CreateProcess ("$DANCE_ROOT/bin/dance_plan_launcher",
++                                      "-x $file -k file://$ior_emfile -l");
++    $status = $E->SpawnWaitKill (120);
++    if ($status != 0) {
++        print STDERR "ERROR: Unexpected error from Launch operation [$status]!\n";
++        kill_open_processes ();
++        exit 1;
++    }
++        
++    print "Successfully launched the application\n";
++    $app_running = 1;
++
++    # start idl2 client to verify we are registered at naming service
++    print "Testing NamingService registration of deployed component\n";
++    $CL = $tg_client->CreateProcess ("client", "");
++    $status = $CL->SpawnWaitKill (120);
++    if ($status != 0) {
++        print STDERR "ERROR: NamingService registration failed [$status]!\n";
++    }
++    else {
++        print "Component successfully registered at NameService\n";
++        $registered = 1;
++    }
++
++    if ($app_running) {
++        print "Teardown the application\n";
++        $E = $tg_executor->CreateProcess ("$DANCE_ROOT/bin/dance_plan_launcher",
++                                          "-k file://$ior_emfile -x $file -s");
++        $E->SpawnWaitKill (120);
++        print "Executor finished.\n";
++    }
++ 
++    if ($registered)
++    {
++        # start idl2 client to verify we are no longer registered at naming service
++        print "Testing NamingService deregistration of deployed component\n";
++        $CL = $tg_client->CreateProcess ("client", "-ORBLogFile dummy.log");
++        $status = $CL->SpawnWaitKill (120);
++        if ($status == 0) {
++            print STDERR "ERROR: NamingService deregistration failed [$status]!\n";
++        }
++        else {
++            print "Component successfully deregistered from NameService\n";
++        }
++    }
++    
++    delete_ior_files ();
++    kill_open_processes ();
++    $tg_executor->DeleteFile ('dummy.log');
++    sleep 5;
++}
++
++exit $status;
+diff -rupN -x .svn -x '*.vcxproj*' -x '*.sln' ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences.idl ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences.idl
+--- ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences.idl	1970-01-01 01:00:00.000000000 +0100
++++ ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences.idl	2013-04-17 14:19:31.265625000 +0200
+@@ -0,0 +1,24 @@
++/**
++ * @file
++ * @author Michael Frommberger (michael.frommberger@gmx.net)
++ *
++ * component for testing binding and unbinding at the 
++ * nameservice
++ */
++
++#ifndef STORE_REFERENCES_IDL_
++#define STORE_REFERENCES_IDL_
++
++#include  <Components.idl>
++
++module store_references_test
++{
++  component testComp
++  {
++  };
++
++   home testCompHome manages testComp
++   {
++   };
++};
++#endif
+diff -rupN -x .svn -x '*.vcxproj*' -x '*.sln' ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences.mpc ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences.mpc
+--- ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences.mpc	1970-01-01 01:00:00.000000000 +0100
++++ ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences.mpc	2013-04-18 16:24:53.515625000 +0200
+@@ -0,0 +1,131 @@
++
++project(StoreReferences_idl_gen) : componentidldefaults {
++  after +=
++  custom_only = 1
++  idlflags += -Wb,stub_export_macro=STOREREFERENCES_STUB_Export \
++              -Wb,stub_export_include=StoreReferences_stub_export.h \
++              -Wb,skel_export_macro=STOREREFERENCES_SVNT_Export \
++              -Wb,skel_export_include=StoreReferences_svnt_export.h \
++              -Wb,exec_export_macro=STOREREFERENCES_EXEC_Export \
++              -Wb,exec_export_include=StoreReferences_exec_export.h \
++              -I ..
++
++  IDL_Files {
++    StoreReferences.idl
++  }
++}
++
++project(StoreReferences_lem_gen) : ciaoidldefaults {
++  after += StoreReferences_idl_gen
++  custom_only = 1
++  idlflags += -Wb,stub_export_macro=STOREREFERENCES_EXEC_Export \
++              -Wb,stub_export_include=StoreReferences_exec_export.h \
++              -SS -Gxhst -I ..
++
++  IDL_Files {
++    StoreReferencesE.idl
++  }
++}
++
++project(StoreReferences_lem_stub) : ccm_svnt {
++  after += StoreReferences_lem_gen StoreReferences_stub
++  libs  += StoreReferences_stub
++  sharedname = StoreReferences_lem_stub
++  dynamicflags += STOREREFERENCES_EXEC_BUILD_DLL
++
++  IDL_Files {
++  }
++
++  Source_Files {
++    StoreReferencesEC.cpp
++  }
++
++  Header_Files {
++    StoreReferencesEC.h
++    StoreReferences_exec_export.h
++  }
++
++  Inline_Files {
++    StoreReferencesEC.inl
++  }
++}
++
++project(StoreReferences_stub) : ccm_stub {
++  after += StoreReferences_idl_gen
++  libs  +=
++  sharedname = StoreReferences_stub
++  dynamicflags += STOREREFERENCES_STUB_BUILD_DLL
++
++  IDL_Files {
++  }
++
++  Source_Files {
++    StoreReferencesC.cpp
++  }
++
++  Header_Files {
++    StoreReferencesC.h
++    StoreReferences_stub_export.h
++  }
++
++  Inline_Files {
++    StoreReferencesC.inl
++  }
++}
++
++project(StoreReferences_exec) : ciao_executor {
++  after   += StoreReferences_lem_stub StoreReferences_stub
++  sharedname = StoreReferences_exec
++  libs += StoreReferences_stub StoreReferences_lem_stub
++  dynamicflags += STOREREFERENCES_EXEC_BUILD_DLL
++
++  IDL_Files {
++  }
++
++  Source_Files {
++    StoreReferences_exec.cpp
++  }
++
++  Header_Files {
++    StoreReferences_exec.h
++    StoreReferences_exec_export.h
++  }
++
++  Inline_Files {
++  }
++}
++
++
++project(StoreReferences_svnt) : ciao_servant {
++  after      += StoreReferences_lem_stub
++  sharedname  = StoreReferences_svnt
++  libs       += StoreReferences_stub StoreReferences_lem_stub
++  dynamicflags += STOREREFERENCES_SVNT_BUILD_DLL
++
++  IDL_Files {
++  }
++
++  Source_Files {
++    StoreReferencesS.cpp
++    StoreReferences_svnt.cpp
++  }
++
++  Header_Files {
++    StoreReferencesS.h
++    StoreReferences_svnt.h
++    StoreReferences_svnt_export.h
++  }
++
++  Inline_Files {
++  }
++}
++
++project(*Client) : taoclient, naming {
++  Source_Files {
++      client.cpp
++  }
++  
++  IDL_Files {
++  }
++}
++
+diff -rupN -x .svn -x '*.vcxproj*' -x '*.sln' ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences_exec.cpp ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences_exec.cpp
+--- ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences_exec.cpp	1970-01-01 01:00:00.000000000 +0100
++++ ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences_exec.cpp	2013-04-17 14:16:06.953125000 +0200
+@@ -0,0 +1,100 @@
++
++#include "StoreReferences_exec.h"
++#include "ace/Log_Msg.h"
++#include "tao/ORB_Core.h"
++#include "tao/Transport_Cache_Manager.h"
++#include "tao/Thread_Lane_Resources.h"
++
++namespace CIAO_store_references_test_testComp_Impl
++{
++  Component_exec_i::Component_exec_i  (void)
++  {
++  }
++
++  Component_exec_i::~Component_exec_i  (void)
++  {
++  }
++
++  // Operations from Components::SessionComponent.
++  void
++  Component_exec_i::set_session_context (
++    ::Components::SessionContext_ptr ctx)
++  {
++    this->context_ =
++      ::store_references_test::CCM_testComp_Context::_narrow (ctx);
++
++    if ( ::CORBA::is_nil (this->context_.in ()))
++      {
++        throw ::CORBA::INTERNAL ();
++      }
++  }
++
++  void
++  Component_exec_i::configuration_complete (void)
++  {
++  }
++
++  void
++  Component_exec_i::ccm_activate (void)
++  {
++  }
++
++  void
++  Component_exec_i::ccm_passivate (void)
++  {
++  }
++
++  void
++  Component_exec_i::ccm_remove (void)
++  {
++  }
++
++  extern "C" STOREREFERENCES_EXEC_Export ::Components::EnterpriseComponent_ptr
++  create_Component_Impl (void)
++  {
++    ::Components::EnterpriseComponent_ptr retval =
++      ::Components::EnterpriseComponent::_nil ();
++
++    ACE_NEW_NORETURN (
++      retval,
++      Component_exec_i );
++
++    return retval;
++  }
++
++  Component_home_exec_i::Component_home_exec_i (void)
++  {
++  }
++  
++  Component_home_exec_i::~Component_home_exec_i (void)
++  {
++  }
++
++  ::Components::EnterpriseComponent_ptr Component_home_exec_i::create (void)
++  {
++      ::Components::EnterpriseComponent_ptr retval =
++          ::Components::EnterpriseComponent::_nil ();
++
++      ACE_NEW_THROW_EX (
++              retval,
++              Component_exec_i,
++              ::CORBA::NO_MEMORY ());
++
++      return retval;
++  }
++
++  extern "C" STOREREFERENCES_EXEC_Export ::Components::HomeExecutorBase_ptr
++      create_ComponentHome_Impl (void)
++  {
++      ::Components::HomeExecutorBase_ptr retval =
++          ::Components::HomeExecutorBase::_nil ();
++
++      ACE_NEW_NORETURN (
++              retval,
++              Component_home_exec_i);
++
++      return retval;
++  }
++
++}
++
+diff -rupN -x .svn -x '*.vcxproj*' -x '*.sln' ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences_exec.h ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences_exec.h
+--- ciao_6.1.5_orig\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences_exec.h	1970-01-01 01:00:00.000000000 +0100
++++ ciao_6.1.5\ACE_wrappers\TAO\CIAO\tests\DAnCE\StoreReferences/StoreReferences_exec.h	2013-04-17 14:20:51.843750000 +0200
+@@ -0,0 +1,59 @@
++
++#ifndef STOREREFERENCES_EXEC_H_
++#define STOREREFERENCES_EXEC_H_
++
++
++#include "StoreReferencesEC.h"
++
++#include /**/ "StoreReferences_exec_export.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++# pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++#include "tao/LocalObject.h"
++
++#include <map>
++
++namespace CIAO_store_references_test_testComp_Impl
++{
++  class Component_exec_i
++    : public virtual testComp_Exec,
++      public virtual ::CORBA::LocalObject
++  {
++  public:
++    Component_exec_i  (void);
++    virtual ~Component_exec_i  (void);
++
++    virtual void
++    set_session_context (
++      ::Components::SessionContext_ptr ctx);
++    virtual void configuration_complete (void);
++    virtual void ccm_activate (void);
++    virtual void ccm_passivate (void);
++    virtual void ccm_remove (void);
++
++  private:
++    ::store_references_test::CCM_testComp_Context_var context_;
++  };
++
++  extern "C" STOREREFERENCES_EXEC_Export ::Components::EnterpriseComponent_ptr
++  create_Component_Impl (void);
++
++  class STOREREFERENCES_EXEC_Export Component_home_exec_i
++      : public virtual testCompHome_Exec,
++        public virtual ::CORBA::LocalObject
++  {
++  public:
++      Component_home_exec_i (void);
++      virtual ~Component_home_exec_i (void);
++      virtual ::Components::EnterpriseComponent_ptr create (void);
++  };
++
++  extern "C" STOREREFERENCES_EXEC_Export ::Components::HomeExecutorBase_ptr
++  create_ComponentHome_Impl (void);
++
++}
++
++#endif /* ifndef */
++
