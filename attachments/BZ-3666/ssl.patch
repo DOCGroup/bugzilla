@@ -1,0 +1,26 @@
+Index: ace/SSL/SSL_Context.cpp
+===================================================================
+--- ace/SSL/SSL_Context.cpp	(revision 85182)
++++ ace/SSL/SSL_Context.cpp	(working copy)
+@@ -236,7 +236,7 @@
+   if (this->context_ != 0)
+     return -1;
+ 
+-  SSL_METHOD *method = 0;
++  const SSL_METHOD *method = 0;
+ 
+   switch (mode)
+     {
+Index: ChangeLog
+===================================================================
+--- ChangeLog	(revision 85182)
++++ ChangeLog	(working copy)
+@@ -1,3 +1,8 @@
++Tue Apr 28 09:17:09 UTC 2009  Jules Colding  <colding@42tools.com>
++
++        * ace/SSL/SSL_Context.cpp (set_mode):
++        Fix compile error.
++
+ Fri Apr 24 20:40:16 UTC 2009  James H. Hill  <hillj@isis.vanderbilt.edu>
+ 
+         * docs/ace_guidelines.vsmacros:
