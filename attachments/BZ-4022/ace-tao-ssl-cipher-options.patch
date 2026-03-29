@@ -1,0 +1,56 @@
+--- ACE_wrappers/TAO/docs/Security/SSLIOP-USAGE.html~	2006-07-26 01:00:02.000000000 -0700
++++ ACE_wrappers/TAO/docs/Security/SSLIOP-USAGE.html	2012-02-07 13:12:54.374170754 -0800
+@@ -152,6 +152,17 @@
+ 	    it can be a certificate containing a PEM encoded set of
+ 	    Diffie-Hellman parameters.</td>
+     </tr>
++    <tr>
++      <td><code>-SSLCipherList</code> <em>cipher-spec</em></td>
++      <td>Sets the list of available ciphers.  The cipher specification string
++          should be formatted per the openssl ciphers(1) man page.</td>
++    </tr>
++    <tr>
++      <td><code>-SSLServerCipherOrder</code></td>
++      <td>When choosing a cipher, use the server's preferences instead of
++           the client preferences. When not set, the SSL server will always
++           follow the clients preferences.</td>
++    </tr>
+ 
+   </table>
+   <h4>Environment variables</h4>
+--- ACE_wrappers/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Factory.cpp~	2011-03-07 01:58:16.000000000 -0800
++++ ACE_wrappers/TAO/orbsvcs/orbsvcs/SSLIOP/SSLIOP_Factory.cpp	2012-02-07 12:36:43.639260393 -0800
+@@ -329,6 +329,33 @@
+               rand_path = argv[curarg];
+             }
+         }
++
++      else if (ACE_OS::strcasecmp (argv[curarg],
++                                   ACE_TEXT("-SSLServerCipherOrder")) == 0)
++        {
++          ::SSL_CTX_set_options (ssl_ctx->context (),
++                                 SSL_OP_CIPHER_SERVER_PREFERENCE);
++        }
++
++      else if (ACE_OS::strcasecmp (argv[curarg],
++                                   ACE_TEXT("-SSLCipherList")) == 0)
++        {
++          curarg++;
++          if (curarg < argc)
++            {
++              if (::SSL_CTX_set_cipher_list (ssl_ctx->context (),
++                                             argv[curarg]) == 0)
++                {
++                  ACE_DEBUG ((LM_ERROR,
++                              ACE_TEXT ("TAO (%P|%t) Unable to set cipher ")
++                              ACE_TEXT ("list in SSLIOP ")
++                              ACE_TEXT ("factory.\n")));
++
++                  return -1;
++                }
++            }
++        }
++
+     }
+ 
+   // Load some (more) entropy from the user specified sources
