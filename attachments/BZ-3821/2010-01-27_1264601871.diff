@@ -1,0 +1,382 @@
+Index: be/be_union.cpp
+===================================================================
+--- be/be_union.cpp	(revision 88654)
++++ be/be_union.cpp	(working copy)
+@@ -231,49 +231,62 @@
+     }
+ 
+   AST_ConcreteType *disc = this->disc_type ();
++  if (disc == 0)
++    {
++      return true; // In reality this is an error.
++    }
++
+   AST_Decl::NodeType nt = disc->node_type ();
+-  unsigned long n_labels = this->nlabels ();
++  ACE_UINT64 n_labels = this->nlabels ();
+ 
+   if (nt == AST_Decl::NT_enum)
+     {
+-      AST_Enum *e = AST_Enum::narrow_from_decl (disc);
+-      
+-      if (e == 0)
+-        {
+-          return true;
+-        }
+-
+-      // If we have an enum and the number of labels if as big as the enum
+-      // has members we don't have to generate a default label
+-      if (n_labels == static_cast<unsigned long> (e->member_count ()))
+-        {
+-           return false;
+-        }
+-      else
+-        {
+-          return true;
+-        }
++      // Enums in CORBA are always 32bits in size, so unless
++      // there are that many enum labels in the set, it is
++      // incomplete (reguardless as to the actual member_count).
++      return (n_labels <= ACE_UINT32_MAX);
+     }
+ 
+   AST_PredefinedType *pdt = AST_PredefinedType::narrow_from_decl (disc);
+-
+   if (pdt == 0)
+     {
+-      return true;
++      return true; // In reality this is an error.
+     }
+ 
+-  if (pdt->pt () == AST_PredefinedType::PT_boolean && n_labels == 2)
++  switch (pdt->pt ())
+     {
+-      return false;
++    case AST_PredefinedType::PT_boolean:
++      return (n_labels < 2);
++
++    case AST_PredefinedType::PT_char:
++      return (n_labels <= ACE_OCTET_MAX);
++
++    case AST_PredefinedType::PT_short:
++    case AST_PredefinedType::PT_ushort:
++      return (n_labels <= ACE_UINT16_MAX);
++
++    case AST_PredefinedType::PT_long:
++    case AST_PredefinedType::PT_ulong:
++      return (n_labels <= ACE_UINT32_MAX);
++
++    case AST_PredefinedType::PT_longlong:
++    case AST_PredefinedType::PT_ulonglong:
++      // We would wrap to 0 here - we are using a 64 bit count
++      // this case is so marginal as to always be incomplete.
++      return true;
++
++    // Keep fussy compilers happy.
++    default:
++      break;
+     }
+ 
+   return true;
+ }
+ 
+-unsigned long
++ACE_UINT64
+ be_union::nlabels (void)
+ {
+-  unsigned long retval = 0;
++  ACE_UINT64 retval = 0;
+ 
+   for (UTL_ScopeActiveIterator si (this, UTL_Scope::IK_decls);
+        !si.is_done ();
+Index: be/be_visitor_union/discriminant_ci.cpp
+===================================================================
+--- be/be_visitor_union/discriminant_ci.cpp	(revision 88654)
++++ be/be_visitor_union/discriminant_ci.cpp	(working copy)
+@@ -78,32 +78,12 @@
+           << "void " << be_nl
+           << bu->name () << "::_default ()" << be_nl
+           << "{" << be_idt_nl
+-          << "this->_reset ();" << be_nl
+-          << "this->disc_ = ";
+-
+-      be_type* dt =
+-        be_type::narrow_from_decl (bu->disc_type ());
+-
+-      if (dt == 0)
+-        {
+-          return -1;
+-        }
+-
+-      // Find where was the enum defined, if it was defined in the globa
+-      // scope, then it is easy to generate the enum values....
+-      be_scope* scope =
+-        be_scope::narrow_from_scope (dt->defined_in ());
+-
+-      if (scope == 0)
+-        {
+-          *os << node->value_to_name (dv.u.enum_val);
+-          return 0;
+-        }
+-
+-      // The function value_to_name() takes care of adding
+-      // any necessary scoping to the output.
+-      *os << node->value_to_name (dv.u.enum_val);
+-      *os << ";" << be_uidt_nl << "}" << be_nl << be_nl;
++          << "this->_reset ();" << be_nl;
++      // Since CORBA defines enums to be 32bits, use MAXINT as the
++      // out-of-bounds value for the _default() function. It MUST not
++      // be any already defined enum label.
++      *os << "this->disc_ = (" << bt->name () << ") -1;" << be_uidt_nl;
++      *os << "}" << be_nl << be_nl;
+     }
+ 
+   // the set method
+Index: be/be_visitor_union/cdr_op_cs.cpp
+===================================================================
+--- be/be_visitor_union/cdr_op_cs.cpp	(revision 88654)
++++ be/be_visitor_union/cdr_op_cs.cpp	(working copy)
+@@ -192,7 +192,7 @@
+     {
+       *os << be_nl;
+       *os << "default:" << be_idt_nl;
+-      *os << "_tao_union._d (_tao_discriminant);" << be_nl;
++      *os << "_tao_union._default ();" << be_nl;
+       *os << "break;" << be_uidt;
+     }
+ 
+Index: be/be_visitor_union/serializer_op_cs.cpp
+===================================================================
+--- be/be_visitor_union/serializer_op_cs.cpp	(revision 88654)
++++ be/be_visitor_union/serializer_op_cs.cpp	(working copy)
+@@ -251,7 +251,7 @@
+   *os << "{" << be_idt_nl
+       << "return 0;" << be_uidt_nl
+       << "}" << be_uidt_nl << be_nl
+-      << "::CORBA::Boolean result = 1;" << be_nl << be_nl
++      << "::CORBA::Boolean result = true;" << be_nl << be_nl
+       << "switch (_tao_union._d ())" << be_nl
+       << "{" << be_idt;
+ 
+@@ -322,7 +322,7 @@
+   *os << "{" << be_idt_nl
+       << "return 0;" << be_uidt_nl
+       << "}" << be_uidt_nl << be_nl
+-      << "::CORBA::Boolean result = 1;" << be_nl << be_nl
++      << "::CORBA::Boolean result = true;" << be_nl << be_nl
+       << "switch (_tao_discriminant)" << be_nl
+       << "{" << be_idt;
+ 
+@@ -345,7 +345,7 @@
+     {
+       *os << be_nl;
+       *os << "default:" << be_idt_nl;
+-      *os << "_tao_union._d (_tao_discriminant);" << be_nl;
++      *os << "_tao_union._default ();" << be_nl;
+       *os << "break;" << be_uidt;
+     }
+ 
+Index: be/be_visitor_union/union_cs.cpp
+===================================================================
+--- be/be_visitor_union/union_cs.cpp	(revision 88654)
++++ be/be_visitor_union/union_cs.cpp	(working copy)
+@@ -94,63 +94,71 @@
+   *os << be_nl << be_nl
+       << node->name () << "::" << node->local_name () << " (void)" << be_nl
+       << "{" << be_idt_nl
+-      << "ACE_OS::memset (&this->u_, 0, sizeof (this->u_));" << be_nl
+-      << "this->disc_ = ";
++      << "ACE_OS::memset (&this->u_, 0, sizeof (this->u_));" << be_nl;
+ 
+-  // The default constructor must initialize the discriminator
+-  // to the first case label value found in the union declaration
+-  // so that, if the uninitialized union is inserted into an Any,
+-  // the Any destructor's call to deep_free() will work properly.
+-  UTL_ScopeActiveIterator si (node, UTL_Scope::IK_decls);
+-  be_union_branch *ub = 0;
+-
+-  // In case we have some bogus enum values from an enum declared
+-  // in our scope.
+-  while (ub == 0)
+-    {
+-      // Just get the union's first member.
+-      AST_Decl *d = si.item ();
+-
+-      ub = be_union_branch::narrow_from_decl (d);
+-      si.next ();
+-    }
+-
+-  // Get the first label in its list.
+-  AST_UnionLabel *ul = ub->label (0);
+   AST_Union::DefaultValue dv;
+-
+   // This can indicate an error in the return value, but it is
+   // caught elsewhere.
+   (void) node->default_value (dv);
+-
+-  bool test = dv.computed_ == 0
+-              && ul->label_kind () == AST_UnionLabel::UL_label;
+-
+-  if (test)
++  if ((dv.computed_ != 0) && node->default_index () == -1)
+     {
+-      ub->gen_label_value (os);
++      // _default() function has been generated, use this.
++      *os << "this->_default ();";
+     }
+   else
+     {
+-      ub->gen_default_label_value (os, node);
+-    }
++      // The default constructor must initialize the discriminator
++      // to the first case label value found in the union declaration
++      // so that, if the uninitialized union is inserted into an Any,
++      // the Any destructor's call to deep_free() will work properly.
+ 
+-  *os << ";";
++      *os << "this->disc_ = ";
+ 
+-  if (dv.computed_ == 0)
+-    {
+-      *os << be_nl;
+-      be_visitor_union_branch_public_constructor_cs const_visitor (this->ctx_);
+-      if (ub->accept (&const_visitor) == -1)
++      UTL_ScopeActiveIterator si (node, UTL_Scope::IK_decls);
++      be_union_branch *ub = 0;
++
++      // In case we have some bogus enum values from an enum declared
++      // in our scope.
++      while (ub == 0)
+         {
+-          ACE_ERROR_RETURN ((LM_ERROR,
+-                             "(%N:%l) be_visitor_union_cs::"
+-                             "visit union - "
+-                             "codegen for constructor failed\n"),
+-                            -1);
++          // Just get the union's first member.
++          AST_Decl *d = si.item ();
++
++          ub = be_union_branch::narrow_from_decl (d);
++          si.next ();
+         }
++
++      // Get the first label in its list.
++      AST_UnionLabel *ul = ub->label (0);
++
++      bool test = dv.computed_ == 0
++                  && ul->label_kind () == AST_UnionLabel::UL_label;
++
++      if (test)
++        {
++          ub->gen_label_value (os);
++        }
++      else
++        {
++          ub->gen_default_label_value (os, node);
++        }
++
++      *os << ";";
++
++      if (dv.computed_ == 0)
++        {
++          *os << be_nl;
++          be_visitor_union_branch_public_constructor_cs const_visitor (this->ctx_);
++          if (ub->accept (&const_visitor) == -1)
++            {
++              ACE_ERROR_RETURN ((LM_ERROR,
++                                 "(%N:%l) be_visitor_union_cs::"
++                                 "visit union - "
++                                 "codegen for constructor failed\n"),
++                                -1);
++            }
++        }
+     }
+-
+   *os << be_uidt_nl << "}" << be_nl << be_nl;
+ 
+   this->ctx_->state (TAO_CodeGen::TAO_UNION_PUBLIC_ASSIGN_CS);
+Index: ast/ast_union.cpp
+===================================================================
+--- ast/ast_union.cpp	(revision 88654)
++++ ast/ast_union.cpp	(working copy)
+@@ -567,7 +567,7 @@
+     {
+     case AST_Expression::EV_short:
+     case AST_Expression::EV_ushort:
+-      if (total_case_members == ACE_UINT16_MAX + 1)
++      if (total_case_members > ACE_UINT16_MAX)
+         {
+           this->default_value_.computed_ = 0;
+         }
+@@ -575,6 +575,10 @@
+       break;
+     case AST_Expression::EV_long:
+     case AST_Expression::EV_ulong:
++    case AST_Expression::EV_enum:
++      // Enums in CORBA are always 32bits in size, so unless
++      // there are that many enum labels in the set, it is
++      // incomplete (reguardless as to the actual member_count).
+       if (total_case_members > ACE_UINT32_MAX)
+         {
+           this->default_value_.computed_ = 0;
+@@ -593,7 +597,7 @@
+ 
+       break;
+     case AST_Expression::EV_char:
+-      if (total_case_members == ACE_OCTET_MAX + 1)
++      if (total_case_members > ACE_OCTET_MAX)
+         {
+           this->default_value_.computed_ = 0;
+         }
+@@ -613,38 +617,6 @@
+         }
+ 
+       break;
+-    case AST_Expression::EV_enum:
+-      // Has to be enum.
+-      {
+-        AST_Decl *d = AST_Decl::narrow_from_decl (this->disc_type ());
+-
+-        if (d->node_type () == AST_Decl::NT_typedef)
+-          {
+-            AST_Typedef *bt = AST_Typedef::narrow_from_decl (d);
+-            d = bt->primitive_base_type ();
+-          }
+-
+-        AST_Enum *en = AST_Enum::narrow_from_decl (d);
+-
+-        if (en != 0)
+-          {
+-            if (total_case_members == (ACE_UINT64) en->member_count ())
+-              {
+-                this->default_value_.computed_ = 0;
+-              }
+-          }
+-        else
+-          {
+-            // Error.
+-            this->default_value_.computed_ = -1;
+-            ACE_ERROR_RETURN ((LM_ERROR,
+-                               ACE_TEXT ("(%N:%l) AST_Union::")
+-                               ACE_TEXT ("compute_default_value ")
+-                               ACE_TEXT ("- disc type not an ENUM\n")),
+-                              -1);
+-          }
+-      }
+-      break;
+     default:
+       // Error.
+       this->default_value_.computed_ = -1;
+Index: be_include/be_union.h
+===================================================================
+--- be_include/be_union.h	(revision 88654)
++++ be_include/be_union.h	(working copy)
+@@ -61,7 +61,7 @@
+   // Decides whether a default switch case label in the generated copy
+   // constructor, assignment operator, etc. is needed.
+ 
+-  unsigned long nlabels (void);
++  ACE_UINT64 nlabels (void);
+   // Returns total number of labels, useful when the union has
+   // multiple case labels.
+ 
