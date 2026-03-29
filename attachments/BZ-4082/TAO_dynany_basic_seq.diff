@@ -1,0 +1,179 @@
+Index: tao/AnyTypeCode/Any_Dual_Impl_T.cpp
+===================================================================
+--- tao/AnyTypeCode/Any_Dual_Impl_T.cpp	(revision 2122)
++++ tao/AnyTypeCode/Any_Dual_Impl_T.cpp	(working copy)
+@@ -118,26 +118,16 @@
+ 
+           if (narrow_impl == 0)
+             {
+-              return false;
++              TAO_OutputCDR ocdr;
++              impl->marshal_value (ocdr);
++              TAO_InputCDR icdr (ocdr.begin ());
++              return replace (icdr, any, destructor, any_tc, _tao_elem);
+             }
+ 
+           _tao_elem = narrow_impl->value_;
+           return true;
+         }
+ 
+-      T *empty_value = 0;
+-      ACE_NEW_RETURN (empty_value,
+-                      T,
+-                      false);
+-      TAO::Any_Dual_Impl_T<T> *replacement = 0;
+-      ACE_NEW_RETURN (replacement,
+-                      TAO::Any_Dual_Impl_T<T> (destructor,
+-                                               any_tc,
+-                                               empty_value),
+-                      false);
+-
+-      auto_ptr<TAO::Any_Dual_Impl_T<T> > replacement_safety (replacement);
+-
+       // We know this will work since the unencoded case is covered above.
+       TAO::Unknown_IDL_Type * const unk =
+         dynamic_cast<TAO::Unknown_IDL_Type *> (impl);
+@@ -149,19 +139,7 @@
+       // shared by another Any. This copies the state, not the buffer.
+       TAO_InputCDR for_reading (unk->_tao_get_cdr ());
+ 
+-      CORBA::Boolean const good_decode =
+-        replacement->demarshal_value (for_reading);
+-
+-      if (good_decode)
+-        {
+-          _tao_elem = replacement->value_;
+-          const_cast<CORBA::Any &> (any).replace (replacement);
+-          replacement_safety.release ();
+-          return true;
+-        }
+-
+-      // Duplicated by Any_Impl base class constructor.
+-      ::CORBA::release (any_tc);
++      return replace (for_reading, any, destructor, any_tc, _tao_elem);
+     }
+   catch (const ::CORBA::Exception&)
+     {
+@@ -172,6 +150,42 @@
+ 
+ template<typename T>
+ CORBA::Boolean
++TAO::Any_Dual_Impl_T<T>::replace (TAO_InputCDR &cdr,
++                                  const CORBA::Any &any,
++                                  _tao_destructor destructor,
++                                  CORBA::TypeCode_ptr any_tc,
++                                  const T *&_tao_elem)
++{
++  T *empty_value = 0;
++  ACE_NEW_RETURN (empty_value,
++                  T,
++                  false);
++  TAO::Any_Dual_Impl_T<T> *replacement = 0;
++  ACE_NEW_RETURN (replacement,
++                  TAO::Any_Dual_Impl_T<T> (destructor,
++                                           any_tc,
++                                           empty_value),
++                  false);
++
++  auto_ptr<TAO::Any_Dual_Impl_T<T> > replacement_safety (replacement);
++
++  CORBA::Boolean const good_decode = replacement->demarshal_value (cdr);
++
++  if (good_decode)
++    {
++      _tao_elem = replacement->value_;
++      const_cast<CORBA::Any &> (any).replace (replacement);
++      replacement_safety.release ();
++      return true;
++    }
++
++  // Duplicated by Any_Impl base class constructor.
++  ::CORBA::release (any_tc);
++  return false;
++}
++
++template<typename T>
++CORBA::Boolean
+ TAO::Any_Dual_Impl_T<T>::marshal_value (TAO_OutputCDR &cdr)
+ {
+   return (cdr << *this->value_);
+Index: tao/AnyTypeCode/Any_Dual_Impl_T.h
+===================================================================
+--- tao/AnyTypeCode/Any_Dual_Impl_T.h	(revision 2122)
++++ tao/AnyTypeCode/Any_Dual_Impl_T.h	(working copy)
+@@ -73,6 +73,13 @@
+     void value (const T &);
+ 
+     T * value_;
++
++  private:
++    static CORBA::Boolean replace (TAO_InputCDR &,
++                                   const CORBA::Any &,
++                                   _tao_destructor,
++                                   CORBA::TypeCode_ptr,
++                                   const T *&);
+   };
+ }
+ 
+Index: tao/DynamicAny/DynCommon.cpp
+===================================================================
+--- tao/DynamicAny/DynCommon.cpp	(revision 2122)
++++ tao/DynamicAny/DynCommon.cpp	(working copy)
+@@ -1234,19 +1234,19 @@
+ bool
+ TAO_DynCommon::is_basic_type_seq (CORBA::TypeCode_ptr tc)
+ {
+-  return (tc == CORBA::_tc_BooleanSeq
+-          || tc == CORBA::_tc_OctetSeq
+-          || tc == CORBA::_tc_CharSeq
+-          || tc == CORBA::_tc_WCharSeq
+-          || tc == CORBA::_tc_ShortSeq
+-          || tc == CORBA::_tc_UShortSeq
+-          || tc == CORBA::_tc_LongSeq
+-          || tc == CORBA::_tc_ULongSeq
+-          || tc == CORBA::_tc_LongLongSeq
+-          || tc == CORBA::_tc_ULongLongSeq
+-          || tc == CORBA::_tc_FloatSeq
+-          || tc == CORBA::_tc_DoubleSeq
+-          || tc == CORBA::_tc_LongDoubleSeq);
++  return (tc->equivalent (CORBA::_tc_BooleanSeq)
++          || tc->equivalent (CORBA::_tc_OctetSeq)
++          || tc->equivalent (CORBA::_tc_CharSeq)
++          || tc->equivalent (CORBA::_tc_WCharSeq)
++          || tc->equivalent (CORBA::_tc_ShortSeq)
++          || tc->equivalent (CORBA::_tc_UShortSeq)
++          || tc->equivalent (CORBA::_tc_LongSeq)
++          || tc->equivalent (CORBA::_tc_ULongSeq)
++          || tc->equivalent (CORBA::_tc_LongLongSeq)
++          || tc->equivalent (CORBA::_tc_ULongLongSeq)
++          || tc->equivalent (CORBA::_tc_FloatSeq)
++          || tc->equivalent (CORBA::_tc_DoubleSeq)
++          || tc->equivalent (CORBA::_tc_LongDoubleSeq));
+ }
+ 
+ CORBA::Boolean
+Index: tao/DynamicAny/DynAny_i.cpp
+===================================================================
+--- tao/DynamicAny/DynAny_i.cpp	(revision 2122)
++++ tao/DynamicAny/DynAny_i.cpp	(working copy)
+@@ -58,19 +58,7 @@
+     case CORBA::tk_longdouble:
+       break;
+     case CORBA::tk_sequence:
+-      if (tc == CORBA::_tc_BooleanSeq
+-          || tc == CORBA::_tc_OctetSeq
+-          || tc == CORBA::_tc_CharSeq
+-          || tc == CORBA::_tc_WCharSeq
+-          || tc == CORBA::_tc_ShortSeq
+-          || tc == CORBA::_tc_UShortSeq
+-          || tc == CORBA::_tc_LongSeq
+-          || tc == CORBA::_tc_ULongSeq
+-          || tc == CORBA::_tc_LongLongSeq
+-          || tc == CORBA::_tc_ULongLongSeq
+-          || tc == CORBA::_tc_FloatSeq
+-          || tc == CORBA::_tc_DoubleSeq
+-          || tc == CORBA::_tc_LongDoubleSeq)
++      if (TAO_DynCommon::is_basic_type_seq (tc))
+         {
+           // Otherwise fall through.
+           break;
