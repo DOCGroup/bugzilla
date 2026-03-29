@@ -1,0 +1,104 @@
+diff -Naur TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ETCL_Filter.cpp TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ETCL_Filter.cpp
+--- TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ETCL_Filter.cpp	2010-12-01 14:59:45.000000000 +0000
++++ TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ETCL_Filter.cpp	2010-12-17 15:46:08.000000000 +0000
+@@ -525,8 +525,10 @@
+   TAO_Notify::NVPList attrs;
+   bool changed = true;
+   attrs.push_back(TAO_Notify::NVP("FilterId", this->id_));
+-  attrs.push_back(TAO_Notify::NVP("Grammar", this->constraint_grammar()));
++  char * grammar_value = this->constraint_grammar();
++  attrs.push_back(TAO_Notify::NVP("Grammar", grammar_value));
+   saver.begin_object(0, "filter", attrs, changed);
++  CORBA::string_free(grammar_value);
+ 
+   {
+     int index = 0;
+diff -Naur TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorConsumerAdmin.cpp TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorConsumerAdmin.cpp
+--- TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorConsumerAdmin.cpp	2010-12-01 14:59:45.000000000 +0000
++++ TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorConsumerAdmin.cpp	2010-12-07 13:04:10.000000000 +0000
+@@ -65,6 +65,7 @@
+   // should never be 0 since we throw an exception if anything
+   // fails in allocation or registration.
+   this->queue_size_->remove_ref ();
++  this->overflows_->remove_ref ();
+ }
+ 
+ void
+diff -Naur TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorEventChannel.cpp TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorEventChannel.cpp
+--- TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorEventChannel.cpp	2010-12-01 14:59:45.000000000 +0000
++++ TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorEventChannel.cpp	2010-12-15 12:00:16.000000000 +0000
+@@ -765,8 +765,14 @@
+                                       Monitor_Control_Types::MC_NUMBER,
+                                       true),
+                         CORBA::NO_MEMORY ());
+-                        
+-      events->add_to_registry ();
++       
++       if (!this->register_statistic (stat_name, events))
++         {
++            ACE_ERROR ((LM_ERROR,
++                        "Unable to add statistic %s\n",
++                        stat_name.c_str ()));
++         }
++      // Registry manages refcount, so we do this regardless.
+       events->remove_ref ();
+ 
+       stat_name = dir_name + NotifyMonitoringExt::EventChannelOldestEvent;
+@@ -818,6 +824,9 @@
+                       stat_name.c_str ()));
+         }
+ 
++	// Registry manages refcount, so we do this regardless.
++      overflows->remove_ref ();
++
+       TAO_Control_Registry* cinstance =
+         TAO_Control_Registry::instance ();
+ 
+diff -Naur TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorProxySupplier_T.cpp TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorProxySupplier_T.cpp
+--- TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorProxySupplier_T.cpp	2010-12-01 14:59:45.000000000 +0000
++++ TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/MonitorControlExt/MonitorProxySupplier_T.cpp	2010-12-07 13:05:06.000000000 +0000
+@@ -35,9 +35,20 @@
+     {
+       this->admin_->unregister_child (this);
+     }
++
+   if (this->event_channel_ != 0)
+     {
+       this->event_channel_->unregister_statistic (this->queue_item_stat_name_);
++      this->event_channel_->unregister_statistic (this->overflow_stat_name_);
++    }
++
++  if (this->overflows_ != 0)
++    {
++      this->overflows_->remove_ref ();
++    }
++  if (this->queue_item_count_ != 0)
++    {
++      this->queue_item_count_->remove_ref ();
+     }
+ }
+ 
+diff -Naur TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ProxySupplier.cpp TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ProxySupplier.cpp
+--- TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ProxySupplier.cpp	2010-12-01 14:59:45.000000000 +0000
++++ TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ProxySupplier.cpp	2010-12-07 13:37:47.000000000 +0000
+@@ -60,7 +60,7 @@
+ TAO_Notify_ProxySupplier::connect (TAO_Notify_Consumer *consumer)
+ {
+   // Adopt the consumer
+-  TAO_Notify_Consumer::Ptr auto_consumer (consumer);
++  ACE_Auto_Ptr< TAO_Notify_Consumer > auto_consumer (consumer);
+ 
+   TAO_Notify_Atomic_Property_Long& consumer_count = this->admin_properties().consumers ();
+   const TAO_Notify_Property_Long& max_consumers = this->admin_properties().max_consumers ();
+diff -Naur TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ProxySupplier.h TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ProxySupplier.h
+--- TAO-BACKUP/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ProxySupplier.h	2010-12-01 14:59:45.000000000 +0000
++++ TAO/ACE_wrappers/TAO/orbsvcs/orbsvcs/Notify/ProxySupplier.h	2010-12-07 13:37:33.000000000 +0000
+@@ -86,7 +86,7 @@
+   TAO_Notify_ConsumerAdmin::Ptr consumer_admin_;
+ 
+   /// The Consumer that we're connect to.
+-  TAO_Notify_Consumer::Ptr consumer_;
++  ACE_Auto_Ptr<TAO_Notify_Consumer> consumer_;
+ 
+   /// Access our Peer.
+   virtual TAO_Notify_Peer* peer (void);
