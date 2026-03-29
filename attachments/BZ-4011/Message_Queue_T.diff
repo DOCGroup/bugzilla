@@ -1,0 +1,51 @@
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace: 1
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace\Compression: Debug
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace\Compression\rle: Debug
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace: Debug
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace\ETCL: Debug
+diff -u2r D:\ACE\Middleware-ACE\Middleware-ACE\ACE\ace\Message_Queue_T.cpp D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace\Message_Queue_T.cpp
+--- D:\ACE\Middleware-ACE\Middleware-ACE\ACE\ace\Message_Queue_T.cpp	Sat Feb 18 06:19:34 2012
++++ D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace\Message_Queue_T.cpp	Mon Mar 26 12:20:33 2012
+@@ -2263,4 +2263,21 @@
+ 
+ template <ACE_SYNCH_DECL> int
++ACE_Dynamic_Message_Queue<ACE_SYNCH_USE>::flush_i (void)
++{
++  int number_flushed  = ACE_Message_Queue<ACE_SYNCH_USE>::flush_i();
++  // the list has become empty, and pointers also
++  this->pending_head_ = 0;
++  this->pending_tail_ = 0;
++  this->late_head_ = 0;
++  this->late_tail_ = 0;
++  this->beyond_late_head_ = 0;
++  this->beyond_late_tail_ = 0;
++
++  return number_flushed;
++}
++  // Release all resources from the message queue but do not mark it
++  // as deactivated.
++  
++template <ACE_SYNCH_DECL> int
+ ACE_Dynamic_Message_Queue<ACE_SYNCH_USE>::enqueue_i (ACE_Message_Block *new_item)
+ {
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace: Message_Queue_T.diff
+diff -u2r D:\ACE\Middleware-ACE\Middleware-ACE\ACE\ace\Message_Queue_T.h D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace\Message_Queue_T.h
+--- D:\ACE\Middleware-ACE\Middleware-ACE\ACE\ace\Message_Queue_T.h	Tue Sep 07 17:59:20 2010
++++ D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace\Message_Queue_T.h	Mon Mar 26 12:19:09 2012
+@@ -822,4 +822,14 @@
+ 
+ protected:
++  /**
++   * Release all resources from the message queue but do not mark it
++   * as deactivated.
++   *
++   * @pre The caller must be holding the queue lock before calling this
++   * method.
++   *
++   * @return The number of messages flushed.
++   */
++  virtual int flush_i (void);
+ 
+   /**
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace\Monitor_Control: Debug
+Only in D:\ACE\Middleware-ACE\Middleware-ACE-new\ACE\ace\QoS: Debug
