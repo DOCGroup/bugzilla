@@ -1,0 +1,296 @@
+Index: Bounded_Sequence_CDR_T.h
+===================================================================
+--- Bounded_Sequence_CDR_T.h	(revision 86836)
++++ Bounded_Sequence_CDR_T.h	(working copy)
+@@ -390,7 +390,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::Short, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_short_array (source.get_buffer (), length);
+@@ -399,7 +399,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::Long, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_long_array (source.get_buffer (), length);
+@@ -408,7 +408,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::ULong, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_ulong_array (source.get_buffer (), length);
+@@ -417,7 +417,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::UShort, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_ushort_array (source.get_buffer (), length);
+@@ -426,7 +426,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::Octet, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_octet_array (source.get_buffer (), length);
+@@ -435,7 +435,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::Char, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_char_array (source.get_buffer (), length);
+@@ -445,7 +445,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::WChar, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_wchar_array (source.get_buffer (), length);
+@@ -455,7 +455,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::Float, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_float_array (source.get_buffer (), length);
+@@ -464,7 +464,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::Double, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_double_array (source.get_buffer (), length);
+@@ -473,7 +473,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::LongLong, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_longlong_array (source.get_buffer (), length);
+@@ -482,7 +482,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::ULongLong, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_ulonglong_array (source.get_buffer (), length);
+@@ -491,7 +491,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::LongDouble, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_longdouble_array (source.get_buffer (), length);
+@@ -500,7 +500,7 @@
+   template <typename stream, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <CORBA::Boolean, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     return strm.write_boolean_array (source.get_buffer (), length);
+@@ -509,7 +509,7 @@
+   template <typename stream, typename value_t, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_value_sequence <value_t, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     for(CORBA::ULong i = 0; i < length; ++i) {
+@@ -523,7 +523,7 @@
+   template <typename stream, typename charT, CORBA::ULong MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_basic_string_sequence <charT, MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     for(CORBA::ULong i = 0; i < length; ++i) {
+@@ -537,7 +537,7 @@
+   template <typename stream, typename charT, CORBA::ULong MAX, CORBA::ULong BD_STR_MAX>
+   bool marshal_sequence(stream & strm, const TAO::bounded_bd_string_sequence <charT, MAX, BD_STR_MAX> & source) {
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     for(CORBA::ULong i = 0; i < length; ++i) {
+@@ -556,7 +556,7 @@
+   bool marshal_sequence(stream & strm, const TAO::bounded_object_reference_sequence<object_t, object_t_var, MAX> & source) {
+     typedef typename TAO::bounded_object_reference_sequence<object_t, object_t_var, MAX>::object_type object_type;
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     for(CORBA::ULong i = 0; i < length; ++i) {
+Index: Bounded_Array_Sequence_T.h
+===================================================================
+--- Bounded_Array_Sequence_T.h	(revision 86836)
++++ Bounded_Array_Sequence_T.h	(working copy)
+@@ -54,10 +54,8 @@
+     return impl_.length();
+   }
+   inline void length(CORBA::ULong length) {
+-    if (MAX >= length)
+-      {
+-        impl_.length(length);
+-      }
++    implementation_type::range::check_length(length, MAX);
++    impl_.length(length);
+   }
+   inline value_type const & operator[](CORBA::ULong i) const {
+     return impl_[i];
+@@ -134,7 +132,7 @@
+     typedef TAO_FixedArray_Var_T <T_array, T_slice, T_tag> fixed_array;
+     typedef TAO::Array_Traits<forany> array_traits;
+     ::CORBA::ULong const length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     for(CORBA::ULong i = 0; i < length; ++i) {
+Index: Bounded_Basic_String_Sequence_T.h
+===================================================================
+--- Bounded_Basic_String_Sequence_T.h	(revision 86836)
++++ Bounded_Basic_String_Sequence_T.h	(working copy)
+@@ -66,10 +66,7 @@
+   /// @copydoc details::generic_sequence::length
+   inline void length(CORBA::ULong length) {
+     implementation_type::range::check_length(length, MAX);
+-    if (MAX >= length)
+-      {
+-        impl_.length(length);
+-      }
++    impl_.length(length);
+   }
+   /// @copydoc details::generic_sequence::operator[]
+   inline const_element_type operator[](CORBA::ULong i) const {
+Index: Range_Checking_T.h
+===================================================================
+--- Range_Checking_T.h	(revision 86836)
++++ Range_Checking_T.h	(working copy)
+@@ -118,23 +118,28 @@
+   typedef T value_type;
+ 
+   inline static void check(
+-      CORBA::ULong /* index */,
+-      CORBA::ULong /* length */,
++      CORBA::ULong index,
++      CORBA::ULong length,
+       CORBA::ULong /* maximum */,
+       char const * /* function_name */)
+   {
+     // Applications and tests can specialize this function to define
+     // their own behavior
++#ifdef TAO_CHECKED_SEQUENCE_INDEXING
++    if (length <= index)
++      throw ::CORBA::BAD_PARAM ();
++#else
++    ACE_UNUSED_ARG (index);
++    ACE_UNUSED_ARG (length);
++#endif // TAO_CHECKED_SEQUENCE_INDEXING
+   }
+ 
+   inline static void check_length(
+-      CORBA::ULong & /* new_length */,
+-      CORBA::ULong /* maximum */)
++      CORBA::ULong &new_length,
++      CORBA::ULong maximum)
+   {
+-    /*
+     if (maximum < new_length)
+-      new_length = maximum;
+-    */
++      throw ::CORBA::BAD_PARAM ();
+   }
+ };
+ 
+Index: Valuetype/Bounded_Valuetype_Sequence_T.h
+===================================================================
+--- Valuetype/Bounded_Valuetype_Sequence_T.h	(revision 86836)
++++ Valuetype/Bounded_Valuetype_Sequence_T.h	(working copy)
+@@ -62,10 +62,7 @@
+ 
+   inline void length(CORBA::ULong length) {
+     implementation_type::range::check_length(length, MAX);
+-    if (MAX >= length)
+-      {
+-        impl_.length(length);
+-      }
++    impl_.length(length);
+   }
+   inline value_type const & operator[](CORBA::ULong i) const {
+     return impl_[i];
+@@ -183,7 +180,7 @@
+   bool marshal_sequence(stream & strm, const TAO::bounded_valuetype_sequence<object_t, object_t_var, MAX> & source) {
+ 
+     const ::CORBA::ULong length = source.length ();
+-    if (!(strm << length)) {
++    if (length > source.maximum () || !(strm << length)) {
+       return false;
+     }
+     for(CORBA::ULong i = 0; i < length; ++i) {
+Index: Bounded_Value_Sequence_T.h
+===================================================================
+--- Bounded_Value_Sequence_T.h	(revision 86836)
++++ Bounded_Value_Sequence_T.h	(working copy)
+@@ -61,10 +61,7 @@
+   /// @copydoc details::generic_sequence::length
+   inline void length(CORBA::ULong length) {
+     implementation_type::range::check_length(length, MAX);
+-    if (MAX >= length)
+-      {
+-        impl_.length(length);
+-      }
++    impl_.length(length);
+   }
+   /// @copydoc details::generic_sequence::operator[]
+   inline value_type const & operator[](CORBA::ULong i) const {
+Index: Bounded_Object_Reference_Sequence_T.h
+===================================================================
+--- Bounded_Object_Reference_Sequence_T.h	(revision 86836)
++++ Bounded_Object_Reference_Sequence_T.h	(working copy)
+@@ -68,10 +68,7 @@
+   /// @copydoc details::generic_sequence::length
+   inline void length(CORBA::ULong length) {
+     implementation_type::range::check_length(length, MAX);
+-    if (MAX >= length)
+-      {
+-        impl_.length(length);
+-      }
++    impl_.length(length);
+   }
+   /// @copydoc details::generic_sequence::operator[]
+   inline const_element_type operator[](CORBA::ULong i) const {
