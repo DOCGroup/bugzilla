@@ -1,0 +1,45 @@
+Index: ace/config-sunos5.5.h
+===================================================================
+--- ace/config-sunos5.5.h	(revision 86145)
++++ ace/config-sunos5.5.h	(working copy)
+@@ -24,10 +24,24 @@
+ // SunOS 5.5 does not provide getloadavg()
+ #define ACE_LACKS_GETLOADAVG
+ 
++// Some SunOS releases define _POSIX_PTHREAD_SEMANTICS automatically.
++// We need to be check if the user has manually defined the macro before
++// including <sys/feature_tests.h>.
++#if defined (_POSIX_PTHREAD_SEMANTICS)
++# define ACE_HAS_POSIX_PTHREAD_SEMANTICS
++#endif /* POSIX_PTHREAD_SEMANTICS */
++
+ // Before we do anything, we should include <sys/feature_tests.h> to
+ // ensure that things are set up properly.
+ #include <sys/feature_tests.h>
+ 
++// Some SunOS releases define _POSIX_PTHREAD_SEMANTICS automatically.
++// We need to undef if the macro is set and not defined by the user.
++#if defined (_POSIX_PTHREAD_SEMANTICS) && \
++ !defined (ACE_HAS_POSIX_PTHREAD_SEMANTICS)
++# undef _POSIX_PTHREAD_SEMANTICS
++#endif /* _POSIX_PTHREAD_SEMANTICS && !ACE_HAS_POSIX_PTHREAD_SEMANTICS */
++
+ // Sun has the posix defines so let this file sort out what Sun delivers
+ #include "ace/config-posix.h"
+ 
+Index: ChangeLog
+===================================================================
+--- ChangeLog	(revision 86145)
++++ ChangeLog	(working copy)
+@@ -1,3 +1,11 @@
++Mon Jul 20 22:11:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
++
++        * ace/config-sunos5.5.h:
++
++	  Corrected _POSIX_PTHREAD_SEMANTICS behavior on SunOS hosts. This
++	  was causing a failure in ACE_OS::sched_params when a non-zero
++	  quantum is specified on Solaris 9.
++
+ Mon Jul 20 07:34:12 UTC 2009  Johnny Willemsen  <jwillemsen@remedy.nl>
+ 
+         * apps/gperf/src/Bool_Array.h:
