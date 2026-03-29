@@ -1,0 +1,515 @@
+johnny@m4500jw:~/ACE/latest/ACE_wrappers/TAO/CIAO/connectors/dds4ccm/tests/MemLeakDetection/Event_MemLeakDetection_Test/descriptors> ./run_test.pl Listen.cdp ^C
+johnny@m4500jw:~/ACE/latest/ACE_wrappers/TAO/CIAO/connectors/dds4ccm/tests/MemLeakDetection/Event_MemLeakDetection_Test/descriptors> svn up
+At revision 92259.
+johnny@m4500jw:~/ACE/latest/ACE_wrappers/TAO/CIAO/connectors/dds4ccm/tests/MemLeakDetection/Event_MemLeakDetection_Test/descriptors> svn up
+At revision 92259.
+johnny@m4500jw:~/ACE/latest/ACE_wrappers/TAO/CIAO/connectors/dds4ccm/tests/MemLeakDetection/Event_MemLeakDetection_Test/descriptors> svn up
+At revision 92259.
+johnny@m4500jw:~/ACE/latest/ACE_wrappers/TAO/CIAO/connectors/dds4ccm/tests/MemLeakDetection/Event_MemLeakDetection_Test/descriptors> ./run_test.pl Listen.cdp 
+*********** Starting test for deployment Listen.cdp ***********
+Starting Naming Service
+Invoking node daemon
+Run node daemon
+Run node daemon
+Invoking execution manager
+Invoking executor - launch the application -
+(16591|67488640) [LM_DEBUG] -  15:18:11.855055 - Container_Handler_i::configure - Received 3 properties for configuration
+(16592|67488640) [LM_DEBUG] -  15:18:11.900815 - Container_Handler_i::configure - Received 3 properties for configuration
+(16591|67488640) [LM_DEBUG] -  15:18:11.979296 - Container_Handler_i::install_instance - Creating container with id <>
+(16591|67488640) [LM_DEBUG] -  15:18:11.987611 - Container_Handler_i::install_instance - Container <> successfully created
+(16591|67488640) [LM_TRACE] -  15:18:11.989552 - Container_i::init - Initializing a container with name <>
+(16592|67488640) [LM_DEBUG] -  15:18:12.024628 - Container_Handler_i::install_instance - Creating container with id <>
+(16592|67488640) [LM_DEBUG] -  15:18:12.033399 - Container_Handler_i::install_instance - Container <> successfully created
+(16592|67488640) [LM_TRACE] -  15:18:12.035571 - Container_i::init - Initializing a container with name <>
+(16591|67488640) [LM_DEBUG] -  15:18:12.051993 - Container_Handler_i::install_instance - Container <> successfully initialized
+(16592|67488640) [LM_DEBUG] -  15:18:12.098081 - Container_Handler_i::install_instance - Container <> successfully initialized
+(16591|67488640) [LM_TRACE] -  15:18:12.912154 - Component_Handler_i::install_instance - Found Servant entrypoint create_Event_MemLeakDetection_Test_Receiver_Servant
+(16591|67488640) [LM_TRACE] -  15:18:12.919289 - Component_Handler_i::install_instance - Found Servant artifact Receiver_svnt
+(16591|67488640) [LM_TRACE] -  15:18:12.923162 - Component_Handler_i::install_instance - Found executor artifact: Receiver_exec
+(16591|67488640) [LM_TRACE] -  15:18:12.926797 - Component_Handler_i::install_instance - Found executor entrypoint: create_Event_MemLeakDetection_Test_Receiver_Impl
+(16591|67488640) [LM_INFO] -  15:18:12.930383 - Component_Handler_i::install_instance - No container provided, using default container for instance <ReceiverComponent>
+(16591|67488640) [LM_DEBUG] -  15:18:12.936815 - Session_Container_i::install_component - Loading component [ReceiverComponent] from shared libraries
+(16591|67488640) [LM_DEBUG] -  15:18:12.937812 - Session_Container_i::install_component - Executor library [Receiver_exec] with entrypoint [create_Event_MemLeakDetection_Test_Receiver_Impl]
+(16591|67488640) [LM_DEBUG] -  15:18:12.938859 - Session_Container_i::install_component - Servant library [Receiver_svnt] with entrypoint [create_Event_MemLeakDetection_Test_Receiver_Servant]
+(16592|67488640) [LM_TRACE] -  15:18:12.960848 - Component_Handler_i::install_instance - Found Servant entrypoint create_Event_MemLeakDetectionConnector_DDS_Event_Servant
+(16592|67488640) [LM_TRACE] -  15:18:12.967357 - Component_Handler_i::install_instance - Found Servant artifact DDS_EMLDT_Connector_svnt
+(16592|67488640) [LM_TRACE] -  15:18:12.971203 - Component_Handler_i::install_instance - Found executor artifact: DDS_EMLDT_Connector_exec
+(16592|67488640) [LM_TRACE] -  15:18:12.975084 - Component_Handler_i::install_instance - Found executor entrypoint: create_Event_MemLeakDetectionConnector_DDS_Event_Impl
+(16592|67488640) [LM_INFO] -  15:18:12.978465 - Component_Handler_i::install_instance - No container provided, using default container for instance <Event_MemLeakDetection_Test_ConnectorComponent>
+(16592|67488640) [LM_DEBUG] -  15:18:12.984847 - Session_Container_i::install_component - Loading component [Event_MemLeakDetection_Test_ConnectorComponent] from shared libraries
+(16592|67488640) [LM_DEBUG] -  15:18:12.985824 - Session_Container_i::install_component - Executor library [DDS_EMLDT_Connector_exec] with entrypoint [create_Event_MemLeakDetectionConnector_DDS_Event_Impl]
+(16592|67488640) [LM_DEBUG] -  15:18:12.986825 - Session_Container_i::install_component - Servant library [DDS_EMLDT_Connector_svnt] with entrypoint [create_Event_MemLeakDetectionConnector_DDS_Event_Servant]
+(16591|67488640) [LM_TRACE] -  15:18:13.233515 - Session_Container_i::install_component - Executor DLL [Receiver_exec] successfully opened
+(16592|67488640) [LM_TRACE] -  15:18:13.323912 - Session_Container_i::install_component - Executor DLL [DDS_EMLDT_Connector_exec] successfully opened
+(16591|67488640) [LM_TRACE] -  15:18:13.375190 - Session_Container_i::install_component - Servant DLL [Receiver_svnt] successfully openend
+(16591|67488640) [LM_TRACE] -  15:18:13.376955 - Session_Container_i::install_component - Loading component executor
+(16592|67488640) [LM_TRACE] -  15:18:13.378489 - Session_Container_i::install_component - Servant DLL [DDS_EMLDT_Connector_svnt] successfully openend
+(16592|67488640) [LM_TRACE] -  15:18:13.380218 - Session_Container_i::install_component - Loading component executor
+(16591|67488640) [LM_TRACE] -  15:18:13.385465 - Session_Container_i::install_component - Loading component servant
+(16591|67488640) [LM_TRACE] -  15:18:13.415583 - Session_Container_i::install_component - Installing component servant
+(16592|67488640) [LM_TRACE] -  15:18:13.430125 - Session_Container_i::install_component - Loading component servant
+(16591|67488640) [LM_TRACE] -  15:18:13.440593 - Session_Container_i::install_component - Component successfully created
+(16591|67488640) [LM_TRACE] -  15:18:13.460429 - Session_Container_i::set_attributes - Configuring attribute values on component object reference.
+(16592|67488640) [LM_TRACE] -  15:18:13.464795 - Session_Container_i::install_component - Installing component servant
+(16592|67488640) [LM_TRACE] -  15:18:13.488967 - Session_Container_i::install_component - Component successfully created
+(16592|67488640) [LM_TRACE] -  15:18:13.517706 - Session_Container_i::set_attributes - Configuring attribute values on component object reference.
+(16592|67488640) [LM_TRACE] -  15:18:13.602278 - Connection_Handler::provide_endpoint_reference - Called for connection <listen_data>
+(16591|67488640) [LM_DEBUG] -  15:18:13.909790 - Connection_Handler::connect_receptacle - Connecting connection <listen_data> on instance <ReceiverComponent>
+(16591|67488640) [LM_ERROR] -  15:18:13.912383 - Connection_Handler::connect_receptacle - Error: Wrong number of internal endpoints for local receptacle connection: expected <2> - found <1>
+(16592|67488640) [LM_TRACE] -  15:18:13.936369 - DDS_Base_Connector_T::init_default_domain - Start configuring default domain <0>
+(16592|67488640) [LM_TRACE] -  15:18:13.950354 - CCM_DDS_DomainParticipantFactory_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::create_participant - Start creating domain participant for domain <0>
+(16592|67488640) [LM_DEBUG] -  15:18:13.969502 - DomainParticipantManager::get_participant - DomainParticipant with profile <default> does not exist.
+(16592|67488640) [LM_DEBUG] -  15:18:16.413768 - DomainParticipantManager::add_participant - Added participant with profile <default>.
+(16592|67488640) [LM_DEBUG] -  15:18:16.470412 - CCM_DDS_DomainParticipant_T::create_topic - Attempting to create topic with name Event_MemLeakDetection_Test and type Event_MemLeakDetectionTest
+(16592|67488640) [LM_INFO] -  15:18:16.528936 - CCM_DDS_DomainParticipant_T::create_topic - Successfully created topic with name Event_MemLeakDetection_Test and type Event_MemLeakDetectionTest
+(16592|67488640) [LM_DEBUG] -  15:18:16.540265 - DomainParticipantManager::DDSParticipantTopic::add_topic - Added provided topic. topic <Event_MemLeakDetection_Test> - ref_count <1>
+(16592|67488640) [LM_TRACE] -  15:18:16.545522 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::create_subscriber - Creating Subscriber
+(16592|67488640) [LM_INFO] -  15:18:16.605741 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::create_subscriber - Successfully created a DDSSubscriber
+(16592|67488640) [LM_TRACE] -  15:18:16.610925 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::create_publisher - Start creating Publisher
+(16592|67488640) [LM_INFO] -  15:18:16.655288 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::create_publisher - Successfully created a DDSPublisher
+(16592|67488640) [LM_DEBUG] -  15:18:16.661258 - DDS_Event_Connector_T<DDS_TYPE, CCM_TYPE, FIXED, VENDOR_TYPE>::configuration_complete - No need to create push consumer port.
+(16592|67488640) [LM_DEBUG] -  15:18:16.662307 - DDS_Event_Connector_T<DDS_TYPE, CCM_TYPE, FIXED, VENDOR_TYPE>::configuration_complete - No need to create supplier port.
+(16592|67488640) [LM_DEBUG] -  15:18:16.663338 - DDS_Event_Connector_T<DDS_TYPE, CCM_TYPE, FIXED, VENDOR_TYPE>::configuration_complete - No need to create pull consumer port.
+(16589|67508064) [LM_ERROR] -  15:18:16.936869 - Plan_Launcher::launch_plan - Deployment failed, exception: Caught StartError exception while invoking finishLaunch: Event_MemLeakDetection_Test_Depl_1, 1 errors from node applications:
+        ReceiverNode - finishLaunch raised CORBA exception : user exception, ID 'IDL:Deployment/InvalidConnection:1.0'
+
+Sleeping 5 seconds to allow task to complete
+Teardown the application
+(16592|67488640) [LM_TRACE] -  15:18:28.891338 - Session_Container_i::passivate_component - Invoking CCM passivate on provided component object reference.
+(16591|67488640) [LM_TRACE] -  15:18:28.900478 - Session_Container_i::passivate_component - Invoking CCM passivate on provided component object reference.
+(16592|67488640) [LM_DEBUG] -  15:18:28.926650 - Component_Handler_i::remove_instance - Attempting removal of component instance <Event_MemLeakDetection_Test_ConnectorComponent>
+(16592|67488640) [LM_INFO] -  15:18:28.929916 - Component_Handler_i::remove_instance - No container provided, using default container for instance <Event_MemLeakDetection_Test_ConnectorComponent>
+(16592|67488640) [LM_TRACE] -  15:18:28.942095 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::delete_topic <Event_MemLeakDetection_Test> - Successfully casted provided object reference to servant.
+(16591|67488640) [LM_DEBUG] -  15:18:28.952654 - Component_Handler_i::remove_instance - Attempting removal of component instance <ReceiverComponent>
+(16591|67488640) [LM_INFO] -  15:18:28.956003 - Component_Handler_i::remove_instance - No container provided, using default container for instance <ReceiverComponent>
+(16591|67488640) [LM_TRACE] -  15:18:28.962527 - Session_Container_i::uninstall_servant - Removing component or home servant
+(16592|67488640) [LM_INFO] -  15:18:28.976658 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::delete_topic <Event_MemLeakDetection_Test> - Provided topic successfully deleted
+(16591|67488640) [LM_TRACE] -  15:18:28.982859 - Session_Container_i::uninstall_servant - Servant successfully removed, reference count is 0
+(16592|67488640) [LM_TRACE] -  15:18:28.983546 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::delete_subscriber - Successfully casted provided object reference to Subscriber_type
+(16592|67488640) [LM_INFO] -  15:18:29.002455 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::delete_subscriber - Provided subscriber successfully deleted
+(16592|67488640) [LM_TRACE] -  15:18:29.007709 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::delete_publisher - Successfully casted provided object reference to CCM_DDS_Publisher_T
+(16592|67488640) [LM_INFO] -  15:18:29.016642 - CCM_DDS_DomainParticipant_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::delete_publisher - Provided publisher successfully deleted
+(16592|67488640) [LM_TRACE] -  15:18:29.021742 - CCM_DDS_DomainParticipantFactory_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::delete_participant - Successfully casted provided object reference to servant type.
+(16591|67488640) [LM_INFO] -  15:18:29.027670 - Component_Handler_i::remove_instance - Instance <ReceiverComponent> successfully removed
+(16592|67488640) [LM_TRACE] -  15:18:29.028634 - CCM_DDS_DomainParticipantFactory_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::delete_participant - Going to delete participant.
+(16591|67488640) [LM_TRACE] -  15:18:29.232948 - Container_Handler_i::remove_instance - Finalizing container with Id <>
+(16591|67488640) [LM_TRACE] -  15:18:29.252074 - Container_Handler_i::remove_instance - Removing container with Id <>
+(16591|67488640) [LM_TRACE] -  15:18:29.256614 - Container_Handler_i::remove_instance - Container with Id <> removed.
+==16591== 12 bytes in 2 blocks are indirectly lost in loss record 1 of 32
+==16591==    at 0x4C26153: operator new[](unsigned long, std::nothrow_t const&) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16591==    by 0x785666F: CORBA::string_alloc(unsigned int) (String_Alloc.cpp:39)
+==16591==    by 0x78566B9: CORBA::string_dup(char const*) (String_Alloc.cpp:23)
+==16591==    by 0x7525B33: ACE_Array_Base<TAO::TypeCode::Struct_Field<TAO::String_var<char>, TAO_Pseudo_Var_T<CORBA::TypeCode> > >::ACE_Array_Base(ACE_Array_Base<TAO::TypeCode::Struct_Field<TAO::String_var<char>, TAO_Pseudo_Var_T<CORBA::TypeCode> > > const&) (String_Traits_Base_T.h:55)
+==16591==    by 0x751DE48: TAO::TypeCodeFactory::tc_struct_factory(CORBA::TCKind, TAO_InputCDR&, CORBA::TypeCode*&, ACE_Array_Base<TAO::TypeCodeFactory::TC_Info>&) (Struct_TypeCode.inl:25)
+==16591==    by 0x751D453: operator>>(TAO_InputCDR&, CORBA::TypeCode*&) (TypeCode_CDR_Extraction.cpp:1264)
+==16591==    by 0x74F676C: operator>>(TAO_InputCDR&, CORBA::Any&) (Any.cpp:267)
+==16591==    by 0x5B312D8: DAnCE::Utility::create_any_from_user_exception(CORBA::UserException const&) (DAnCE_Utility.cpp:445)
+==16591==    by 0x56E7CF5: DAnCE::Action_Base::call() (Action_Base.cpp:75)
+==16591==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16591==    by 0x56E4168: DAnCE::Deployment_Completion::single_threaded_wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:91)
+==16591==    by 0x56E43DA: DAnCE::Deployment_Completion::wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:38)
+==16591==    by 0x4E3DD71: DAnCE::LocalityManager_i::finishLaunch(Deployment::Connections const&, bool) (Locality_Manager_Impl.cpp:519)
+==16591==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16591==    by 0x6396D77: POA_Deployment::Application::finishLaunch_skel(TAO_ServerRequest&, void*, void*) (Deployment_ApplicationS.cpp:1182)
+==16591==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16591==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16591==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16591==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16591==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16591==    by 0x780243A: TAO_GIOP_Message_Base::process_request(TAO_Transport*, TAO_InputCDR&, TAO_OutputCDR&, TAO_GIOP_Message_Generator_Parser*) (GIOP_Message_Base.cpp:987)
+==16591==    by 0x78030D5: TAO_GIOP_Message_Base::process_request_message(TAO_Transport*, TAO_Queued_Data*) (GIOP_Message_Base.cpp:724)
+==16591==    by 0x7870C53: TAO_Transport::process_parsed_messages(TAO_Queued_Data*, TAO_Resume_Handle&) (Transport.cpp:2428)
+==16591==    by 0x78725EC: TAO_Transport::handle_input_parse_data(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:2352)
+==16591==    by 0x7872855: TAO_Transport::handle_input(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:1686)
+==16591== 
+==16591== 18 bytes in 1 blocks are indirectly lost in loss record 2 of 32
+==16591==    at 0x4C26153: operator new[](unsigned long, std::nothrow_t const&) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16591==    by 0x785666F: CORBA::string_alloc(unsigned int) (String_Alloc.cpp:39)
+==16591==    by 0x78566B9: CORBA::string_dup(char const*) (String_Alloc.cpp:23)
+==16591==    by 0x751DE30: TAO::TypeCodeFactory::tc_struct_factory(CORBA::TCKind, TAO_InputCDR&, CORBA::TypeCode*&, ACE_Array_Base<TAO::TypeCodeFactory::TC_Info>&) (String_Traits_Base_T.h:55)
+==16591==    by 0x751D453: operator>>(TAO_InputCDR&, CORBA::TypeCode*&) (TypeCode_CDR_Extraction.cpp:1264)
+==16591==    by 0x74F676C: operator>>(TAO_InputCDR&, CORBA::Any&) (Any.cpp:267)
+==16591==    by 0x5B312D8: DAnCE::Utility::create_any_from_user_exception(CORBA::UserException const&) (DAnCE_Utility.cpp:445)
+==16591==    by 0x56E7CF5: DAnCE::Action_Base::call() (Action_Base.cpp:75)
+==16591==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16591==    by 0x56E4168: DAnCE::Deployment_Completion::single_threaded_wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:91)
+==16591==    by 0x56E43DA: DAnCE::Deployment_Completion::wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:38)
+==16591==    by 0x4E3DD71: DAnCE::LocalityManager_i::finishLaunch(Deployment::Connections const&, bool) (Locality_Manager_Impl.cpp:519)
+==16591==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16591==    by 0x6396D77: POA_Deployment::Application::finishLaunch_skel(TAO_ServerRequest&, void*, void*) (Deployment_ApplicationS.cpp:1182)
+==16591==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16591==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16591==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16591==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16591==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16591==    by 0x780243A: TAO_GIOP_Message_Base::process_request(TAO_Transport*, TAO_InputCDR&, TAO_OutputCDR&, TAO_GIOP_Message_Generator_Parser*) (GIOP_Message_Base.cpp:987)
+==16591==    by 0x78030D5: TAO_GIOP_Message_Base::process_request_message(TAO_Transport*, TAO_Queued_Data*) (GIOP_Message_Base.cpp:724)
+==16591==    by 0x7870C53: TAO_Transport::process_parsed_messages(TAO_Queued_Data*, TAO_Resume_Handle&) (Transport.cpp:2428)
+==16591==    by 0x78725EC: TAO_Transport::handle_input_parse_data(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:2352)
+==16591==    by 0x7872855: TAO_Transport::handle_input(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:1686)
+==16591==    by 0x77F2695: TAO_Connection_Handler::handle_input_internal(int, ACE_Event_Handler*) (Connection_Handler.cpp:267)
+==16591== 
+==16591== 32 bytes in 1 blocks are indirectly lost in loss record 4 of 32
+==16591==    at 0x4C26153: operator new[](unsigned long, std::nothrow_t const&) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16591==    by 0x7BF566B: ACE_New_Allocator::malloc(unsigned long) (Malloc_Allocator.cpp:116)
+==16591==    by 0x7525AF7: ACE_Array_Base<TAO::TypeCode::Struct_Field<TAO::String_var<char>, TAO_Pseudo_Var_T<CORBA::TypeCode> > >::ACE_Array_Base(ACE_Array_Base<TAO::TypeCode::Struct_Field<TAO::String_var<char>, TAO_Pseudo_Var_T<CORBA::TypeCode> > > const&) (Array_Base.cpp:78)
+==16591==    by 0x751DE48: TAO::TypeCodeFactory::tc_struct_factory(CORBA::TCKind, TAO_InputCDR&, CORBA::TypeCode*&, ACE_Array_Base<TAO::TypeCodeFactory::TC_Info>&) (Struct_TypeCode.inl:25)
+==16591==    by 0x751D453: operator>>(TAO_InputCDR&, CORBA::TypeCode*&) (TypeCode_CDR_Extraction.cpp:1264)
+==16591==    by 0x74F676C: operator>>(TAO_InputCDR&, CORBA::Any&) (Any.cpp:267)
+==16591==    by 0x5B312D8: DAnCE::Utility::create_any_from_user_exception(CORBA::UserException const&) (DAnCE_Utility.cpp:445)
+==16591==    by 0x56E7CF5: DAnCE::Action_Base::call() (Action_Base.cpp:75)
+==16591==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16591==    by 0x56E4168: DAnCE::Deployment_Completion::single_threaded_wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:91)
+==16591==    by 0x56E43DA: DAnCE::Deployment_Completion::wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:38)
+==16591==    by 0x4E3DD71: DAnCE::LocalityManager_i::finishLaunch(Deployment::Connections const&, bool) (Locality_Manager_Impl.cpp:519)
+==16591==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16591==    by 0x6396D77: POA_Deployment::Application::finishLaunch_skel(TAO_ServerRequest&, void*, void*) (Deployment_ApplicationS.cpp:1182)
+==16591==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16591==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16591==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16591==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16591==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16591==    by 0x780243A: TAO_GIOP_Message_Base::process_request(TAO_Transport*, TAO_InputCDR&, TAO_OutputCDR&, TAO_GIOP_Message_Generator_Parser*) (GIOP_Message_Base.cpp:987)
+==16591==    by 0x78030D5: TAO_GIOP_Message_Base::process_request_message(TAO_Transport*, TAO_Queued_Data*) (GIOP_Message_Base.cpp:724)
+==16591==    by 0x7870C53: TAO_Transport::process_parsed_messages(TAO_Queued_Data*, TAO_Resume_Handle&) (Transport.cpp:2428)
+==16591==    by 0x78725EC: TAO_Transport::handle_input_parse_data(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:2352)
+==16591==    by 0x7872855: TAO_Transport::handle_input(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:1686)
+==16591==    by 0x77F2695: TAO_Connection_Handler::handle_input_internal(int, ACE_Event_Handler*) (Connection_Handler.cpp:267)
+==16591== 
+==16591== 37 bytes in 1 blocks are indirectly lost in loss record 5 of 32
+==16591==    at 0x4C26153: operator new[](unsigned long, std::nothrow_t const&) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16591==    by 0x785666F: CORBA::string_alloc(unsigned int) (String_Alloc.cpp:39)
+==16591==    by 0x78566B9: CORBA::string_dup(char const*) (String_Alloc.cpp:23)
+==16591==    by 0x751DE24: TAO::TypeCodeFactory::tc_struct_factory(CORBA::TCKind, TAO_InputCDR&, CORBA::TypeCode*&, ACE_Array_Base<TAO::TypeCodeFactory::TC_Info>&) (String_Traits_Base_T.h:55)
+==16591==    by 0x751D453: operator>>(TAO_InputCDR&, CORBA::TypeCode*&) (TypeCode_CDR_Extraction.cpp:1264)
+==16591==    by 0x74F676C: operator>>(TAO_InputCDR&, CORBA::Any&) (Any.cpp:267)
+==16591==    by 0x5B312D8: DAnCE::Utility::create_any_from_user_exception(CORBA::UserException const&) (DAnCE_Utility.cpp:445)
+==16591==    by 0x56E7CF5: DAnCE::Action_Base::call() (Action_Base.cpp:75)
+==16591==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16591==    by 0x56E4168: DAnCE::Deployment_Completion::single_threaded_wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:91)
+==16591==    by 0x56E43DA: DAnCE::Deployment_Completion::wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:38)
+==16591==    by 0x4E3DD71: DAnCE::LocalityManager_i::finishLaunch(Deployment::Connections const&, bool) (Locality_Manager_Impl.cpp:519)
+==16591==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16591==    by 0x6396D77: POA_Deployment::Application::finishLaunch_skel(TAO_ServerRequest&, void*, void*) (Deployment_ApplicationS.cpp:1182)
+==16591==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16591==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16591==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16591==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16591==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16591==    by 0x780243A: TAO_GIOP_Message_Base::process_request(TAO_Transport*, TAO_InputCDR&, TAO_OutputCDR&, TAO_GIOP_Message_Generator_Parser*) (GIOP_Message_Base.cpp:987)
+==16591==    by 0x78030D5: TAO_GIOP_Message_Base::process_request_message(TAO_Transport*, TAO_Queued_Data*) (GIOP_Message_Base.cpp:724)
+==16591==    by 0x7870C53: TAO_Transport::process_parsed_messages(TAO_Queued_Data*, TAO_Resume_Handle&) (Transport.cpp:2428)
+==16591==    by 0x78725EC: TAO_Transport::handle_input_parse_data(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:2352)
+==16591==    by 0x7872855: TAO_Transport::handle_input(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:1686)
+==16591==    by 0x77F2695: TAO_Connection_Handler::handle_input_internal(int, ACE_Event_Handler*) (Connection_Handler.cpp:267)
+==16591== 
+==16591== 187 (88 direct, 99 indirect) bytes in 1 blocks are definitely lost in loss record 13 of 32
+==16591==    at 0x4C2663D: operator new(unsigned long, std::nothrow_t const&) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16591==    by 0x751DDDC: TAO::TypeCodeFactory::tc_struct_factory(CORBA::TCKind, TAO_InputCDR&, CORBA::TypeCode*&, ACE_Array_Base<TAO::TypeCodeFactory::TC_Info>&) (TypeCode_CDR_Extraction.cpp:496)
+==16591==    by 0x751D453: operator>>(TAO_InputCDR&, CORBA::TypeCode*&) (TypeCode_CDR_Extraction.cpp:1264)
+==16591==    by 0x74F676C: operator>>(TAO_InputCDR&, CORBA::Any&) (Any.cpp:267)
+==16591==    by 0x5B312D8: DAnCE::Utility::create_any_from_user_exception(CORBA::UserException const&) (DAnCE_Utility.cpp:445)
+==16591==    by 0x56E7CF5: DAnCE::Action_Base::call() (Action_Base.cpp:75)
+==16591==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16591==    by 0x56E4168: DAnCE::Deployment_Completion::single_threaded_wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:91)
+==16591==    by 0x56E43DA: DAnCE::Deployment_Completion::wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:38)
+==16591==    by 0x4E3DD71: DAnCE::LocalityManager_i::finishLaunch(Deployment::Connections const&, bool) (Locality_Manager_Impl.cpp:519)
+==16591==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16591==    by 0x6396D77: POA_Deployment::Application::finishLaunch_skel(TAO_ServerRequest&, void*, void*) (Deployment_ApplicationS.cpp:1182)
+==16591==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16591==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16591==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16591==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16591==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16591==    by 0x780243A: TAO_GIOP_Message_Base::process_request(TAO_Transport*, TAO_InputCDR&, TAO_OutputCDR&, TAO_GIOP_Message_Generator_Parser*) (GIOP_Message_Base.cpp:987)
+==16591==    by 0x78030D5: TAO_GIOP_Message_Base::process_request_message(TAO_Transport*, TAO_Queued_Data*) (GIOP_Message_Base.cpp:724)
+==16591==    by 0x7870C53: TAO_Transport::process_parsed_messages(TAO_Queued_Data*, TAO_Resume_Handle&) (Transport.cpp:2428)
+==16591==    by 0x78725EC: TAO_Transport::handle_input_parse_data(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:2352)
+==16591==    by 0x7872855: TAO_Transport::handle_input(TAO_Resume_Handle&, ACE_Time_Value*) (Transport.cpp:1686)
+==16591==    by 0x77F2695: TAO_Connection_Handler::handle_input_internal(int, ACE_Event_Handler*) (Connection_Handler.cpp:267)
+==16591==    by 0x77F2834: TAO_Connection_Handler::handle_input_eh(int, ACE_Event_Handler*) (Connection_Handler.cpp:226)
+==16591==    by 0x7C43EB5: ACE_TP_Reactor::dispatch_socket_event(ACE_EH_Dispatch_Info&) (TP_Reactor.cpp:571)
+==16591== 
+(16592|67488640) [LM_INFO] -  15:18:32.543798 - CCM_DDS_DomainParticipantFactory_T<DDS_TYPE, CCM_TYPE, VENDOR_TYPE>::delete_participant - Successfully deleted provided participant.
+(16592|67488640) [LM_TRACE] -  15:18:32.549352 - Session_Container_i::uninstall_servant - Removing component or home servant
+(16592|67488640) [LM_TRACE] -  15:18:32.567450 - Session_Container_i::uninstall_servant - Servant successfully removed, reference count is 0
+(16592|67488640) [LM_TRACE] -  15:18:32.608192 - DDS_Base_Connector_T::~DDS_Base_Connector_T - Connector has been destructed
+(16592|67488640) [LM_INFO] -  15:18:32.651651 - Component_Handler_i::remove_instance - Instance <Event_MemLeakDetection_Test_ConnectorComponent> successfully removed
+(16592|67488640) [LM_TRACE] -  15:18:32.869892 - Container_Handler_i::remove_instance - Finalizing container with Id <>
+(16592|67488640) [LM_TRACE] -  15:18:32.891858 - Container_Handler_i::remove_instance - Removing container with Id <>
+(16592|67488640) [LM_TRACE] -  15:18:32.896558 - Container_Handler_i::remove_instance - Container with Id <> removed.
+(16592|67488640) [LM_DEBUG] -  15:18:33.238297 - DomainParticipantManager::~DomainParticipantManager - Finalizing DDS
+==16592== 8 bytes in 1 blocks are still reachable in loss record 1 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xD832E11: DDSParticipantBuiltinTopicDataTypeSupport::register_type(DDSDomainParticipant*, char const*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD831628: DDSBuiltin_register_typesI(DDSDomainParticipant*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81B904: DDSDomainParticipant_impl::create_disabledI(DDS_DomainParticipantFactoryImpl*, unsigned char*, unsigned char, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81BB1A: DDSDomainParticipant_impl::createI(DDS_DomainParticipantFactoryImpl*, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81CF43: DDSDomainParticipantFactory_impl::create_participant(int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xC4E0EEE: DDS_Base_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_domain() (DomainParticipantFactory_T.cpp:74)
+==16592==    by 0xC4EABA2: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_Base_Connector_T.cpp:178)
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592== 
+==16592== 8 bytes in 1 blocks are still reachable in loss record 2 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xD834241: DDSPublicationBuiltinTopicDataTypeSupport::register_type(DDSDomainParticipant*, char const*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD83163C: DDSBuiltin_register_typesI(DDSDomainParticipant*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81B904: DDSDomainParticipant_impl::create_disabledI(DDS_DomainParticipantFactoryImpl*, unsigned char*, unsigned char, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81BB1A: DDSDomainParticipant_impl::createI(DDS_DomainParticipantFactoryImpl*, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81CF43: DDSDomainParticipantFactory_impl::create_participant(int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xC4E0EEE: DDS_Base_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_domain() (DomainParticipantFactory_T.cpp:74)
+==16592==    by 0xC4EABA2: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_Base_Connector_T.cpp:178)
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592== 
+==16592== 8 bytes in 1 blocks are still reachable in loss record 3 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xD835671: DDSSubscriptionBuiltinTopicDataTypeSupport::register_type(DDSDomainParticipant*, char const*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD831650: DDSBuiltin_register_typesI(DDSDomainParticipant*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81B904: DDSDomainParticipant_impl::create_disabledI(DDS_DomainParticipantFactoryImpl*, unsigned char*, unsigned char, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81BB1A: DDSDomainParticipant_impl::createI(DDS_DomainParticipantFactoryImpl*, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81CF43: DDSDomainParticipantFactory_impl::create_participant(int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xC4E0EEE: DDS_Base_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_domain() (DomainParticipantFactory_T.cpp:74)
+==16592==    by 0xC4EABA2: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_Base_Connector_T.cpp:178)
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592== 
+==16592== 8 bytes in 1 blocks are still reachable in loss record 4 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xD836AA1: DDSTopicBuiltinTopicDataTypeSupport::register_type(DDSDomainParticipant*, char const*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD831664: DDSBuiltin_register_typesI(DDSDomainParticipant*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81B904: DDSDomainParticipant_impl::create_disabledI(DDS_DomainParticipantFactoryImpl*, unsigned char*, unsigned char, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81BB1A: DDSDomainParticipant_impl::createI(DDS_DomainParticipantFactoryImpl*, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81CF43: DDSDomainParticipantFactory_impl::create_participant(int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xC4E0EEE: DDS_Base_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_domain() (DomainParticipantFactory_T.cpp:74)
+==16592==    by 0xC4EABA2: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_Base_Connector_T.cpp:178)
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592== 
+==16592== 8 bytes in 1 blocks are still reachable in loss record 5 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xD83FFB3: DDSStringTypeSupport::register_type(DDSDomainParticipant*, char const*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD838EE7: DDSBuiltinTypes_register_typesI(DDSDomainParticipant*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81B9C0: DDSDomainParticipant_impl::create_disabledI(DDS_DomainParticipantFactoryImpl*, unsigned char*, unsigned char, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81BB1A: DDSDomainParticipant_impl::createI(DDS_DomainParticipantFactoryImpl*, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81CF43: DDSDomainParticipantFactory_impl::create_participant(int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xC4E0EEE: DDS_Base_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_domain() (DomainParticipantFactory_T.cpp:74)
+==16592==    by 0xC4EABA2: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_Base_Connector_T.cpp:178)
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592== 
+==16592== 8 bytes in 1 blocks are still reachable in loss record 6 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xD83EE3F: DDSOctetsTypeSupport::register_type(DDSDomainParticipant*, char const*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD838EFB: DDSBuiltinTypes_register_typesI(DDSDomainParticipant*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81B9C0: DDSDomainParticipant_impl::create_disabledI(DDS_DomainParticipantFactoryImpl*, unsigned char*, unsigned char, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81BB1A: DDSDomainParticipant_impl::createI(DDS_DomainParticipantFactoryImpl*, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81CF43: DDSDomainParticipantFactory_impl::create_participant(int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xC4E0EEE: DDS_Base_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_domain() (DomainParticipantFactory_T.cpp:74)
+==16592==    by 0xC4EABA2: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_Base_Connector_T.cpp:178)
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592== 
+==16592== 8 bytes in 1 blocks are still reachable in loss record 7 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xD83CFBF: DDSKeyedStringTypeSupport::register_type(DDSDomainParticipant*, char const*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD838F0F: DDSBuiltinTypes_register_typesI(DDSDomainParticipant*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81B9C0: DDSDomainParticipant_impl::create_disabledI(DDS_DomainParticipantFactoryImpl*, unsigned char*, unsigned char, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81BB1A: DDSDomainParticipant_impl::createI(DDS_DomainParticipantFactoryImpl*, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81CF43: DDSDomainParticipantFactory_impl::create_participant(int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xC4E0EEE: DDS_Base_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_domain() (DomainParticipantFactory_T.cpp:74)
+==16592==    by 0xC4EABA2: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_Base_Connector_T.cpp:178)
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592== 
+==16592== 8 bytes in 1 blocks are still reachable in loss record 8 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xD83B27F: DDSKeyedOctetsTypeSupport::register_type(DDSDomainParticipant*, char const*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD838F23: DDSBuiltinTypes_register_typesI(DDSDomainParticipant*) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81B9C0: DDSDomainParticipant_impl::create_disabledI(DDS_DomainParticipantFactoryImpl*, unsigned char*, unsigned char, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81BB1A: DDSDomainParticipant_impl::createI(DDS_DomainParticipantFactoryImpl*, int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xD81CF43: DDSDomainParticipantFactory_impl::create_participant(int, DDS_DomainParticipantQos const&, DDSDomainParticipantListener*, unsigned int) (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xC4E0EEE: DDS_Base_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_domain() (DomainParticipantFactory_T.cpp:74)
+==16592==    by 0xC4EABA2: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_Base_Connector_T.cpp:178)
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592== 
+==16592== 8 bytes in 1 blocks are still reachable in loss record 9 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xCBE55C9: Event_MemLeakDetectionTestTypeSupport::register_type(DDSDomainParticipant*, char const*) (dds_cpp_data_TTypeSupport.gen:137)
+==16592==    by 0xC4D09E4: DDS_TopicBase_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_topic() (DDS_TopicBase_Connector_T.cpp:159)
+==16592==    by 0xC4EABB6: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_TopicBase_Connector_T.cpp:23)
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592==    by 0x56E4168: DAnCE::Deployment_Completion::single_threaded_wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:91)
+==16592==    by 0x56E43DA: DAnCE::Deployment_Completion::wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:38)
+==16592==    by 0x4E3ED03: DAnCE::LocalityManager_i::finishLaunch(Deployment::Connections const&, bool) (Locality_Manager_Impl.cpp:598)
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592== 
+==16592== 16 bytes in 1 blocks are still reachable in loss record 10 of 35
+==16592==    at 0x4C267D0: operator new(unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16592==    by 0xD836CC0: NDDSConfigLogger::get_instance() (in /home/johnny/RTI/ndds.4.5b.rev01/lib/x64Linux2.6gcc4.3.2/libnddscpp.so)
+==16592==    by 0xC4E0500: DDS_Base_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, (DDS4CCM_Vendor)0>::init_default_domain() (DDS_Base_Connector_T.cpp:108)
+==16592==    by 0xC4EABA2: DDS_Event_Connector_T<CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::Event_MemLeakDetectionTest_DDS_Traits, CIAO_Event_MemLeakDetectionConnector_DDS_Event_Impl::DDS_DDS_Event_Traits, false, (DDS4CCM_Vendor)0>::configuration_complete() (DDS_Base_Connector_T.cpp:178)
+Executor finished.
+==16592==    by 0xE4020F1: ???
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592==    by 0xA6932B7: POA_Components::CCMObject::configuration_complete_skel(TAO_ServerRequest&, void*, void*) (CCM_ObjectS.cpp:791)
+==16592==    by 0x6BED69C: TAO_ServantBase::synchronous_upcall_dispatch(TAO_ServerRequest&, void*, void*) (Servant_Base.cpp:220)
+==16592==    by 0x6BC32AF: TAO_Object_Adapter::dispatch_servant(TAO::ObjectKey const&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:370)
+==16592==    by 0x6BC343F: TAO_Object_Adapter::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Object_Adapter.cpp:783)
+==16592==    by 0x77ED752: TAO_Adapter_Registry::dispatch(TAO::ObjectKey&, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Adapter_Registry.cpp:110)
+==16592==    by 0x7851973: TAO_Request_Dispatcher::dispatch(TAO_ORB_Core*, TAO_ServerRequest&, TAO_Pseudo_Out_T<CORBA::Object>) (Request_Dispatcher.cpp:21)
+==16592==    by 0x77F1930: TAO::Collocated_Invocation::invoke(TAO::Collocation_Proxy_Broker*, TAO::Collocation_Strategy) (Collocated_Invocation.cpp:74)
+==16592==    by 0x781CD93: TAO::Invocation_Adapter::invoke_collocated_i(TAO_Stub*, TAO_Operation_Details&, TAO_Pseudo_Var_T<CORBA::Object>&, TAO::Collocation_Strategy) (Invocation_Adapter.cpp:168)
+==16592==    by 0x781D05A: TAO::Invocation_Adapter::invoke_i(TAO_Stub*, TAO_Operation_Details&) (Invocation_Adapter.cpp:105)
+==16592==    by 0x781C625: TAO::Invocation_Adapter::invoke(TAO::Exception_Data*, unsigned long) (Invocation_Adapter.cpp:46)
+==16592==    by 0xBB98942: Components::CCMObject::configuration_complete() (CCM_ObjectC.cpp:833)
+==16592==    by 0x99A9E43: CIAO::Component_Handler_i::instance_configured(Deployment::DeploymentPlan const&, unsigned int) (Component_Handler.cpp:516)
+==16592==    by 0x56ED1BC: DAnCE::Instance_Configured::invoke(DAnCE::InstanceDeploymentHandler*) (Configured.cpp:54)
+==16592==    by 0x56E752D: DAnCE::Action_Base::call() (Action_Base.cpp:66)
+==16592==    by 0x56E3E5C: DAnCE::Deployment_Scheduler::perform_work() (Deployment_Scheduler.cpp:74)
+==16592==    by 0x56E4168: DAnCE::Deployment_Completion::single_threaded_wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:91)
+==16592==    by 0x56E43DA: DAnCE::Deployment_Completion::wait_on_completion(ACE_Time_Value*) (Deployment_Completion.cpp:38)
+==16592==    by 0x4E3ED03: DAnCE::LocalityManager_i::finishLaunch(Deployment::Connections const&, bool) (Locality_Manager_Impl.cpp:598)
+==16592==    by 0x6BF461D: TAO::Upcall_Wrapper::upcall(TAO_ServerRequest&, TAO::Argument* const*, unsigned long, TAO::Upcall_Command&, void*, CORBA::TypeCode* const*, unsigned int) (Upcall_Wrapper.cpp:109)
+==16592== 
+
+
