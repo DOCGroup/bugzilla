@@ -1,0 +1,476 @@
+[build@balrog RT2384]$ gdb Master 3487
+GNU gdb Red Hat Linux (6.5-37.el5_2.2rh)
+Copyright (C) 2006 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "x86_64-redhat-linux-gnu"...Using host libthread_db library "/lib64/libthread_db.so.1".
+
+Attaching to program: /home/build/ACE/RT2384/ACE_wrappers/RT2384/Master, process 3487
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_Strategies.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_Strategies.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_BiDirGIOP.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_BiDirGIOP.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_Utils.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_Utils.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_PI.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_PI.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_CodecFactory.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_CodecFactory.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_PortableServer.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_IORTable.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_IORTable.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/orbsvcs/orbsvcs/libTAO_CosNaming.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/orbsvcs/orbsvcs/libTAO_CosNaming.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_AnyTypeCode.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO_AnyTypeCode.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO.so.1.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/TAO/tao/libTAO.so.1.6.8
+Reading symbols from /home/build/ACE/RT2384/ACE_wrappers/ace/libACE.so.5.6.8...done.
+Loaded symbols for /home/build/ACE/RT2384/ACE_wrappers/ace/libACE.so.5.6.8
+Reading symbols from /lib64/libpthread.so.0...done.
+[Thread debugging using libthread_db enabled]
+[New Thread 46912665023328 (LWP 3487)]
+[New Thread 1296386368 (LWP 3509)]
+[New Thread 1285896512 (LWP 3508)]
+[New Thread 1275406656 (LWP 3507)]
+[New Thread 1264916800 (LWP 3506)]
+[New Thread 1254426944 (LWP 3505)]
+[New Thread 1092585792 (LWP 3504)]
+[New Thread 1243937088 (LWP 3503)]
+[New Thread 1233447232 (LWP 3502)]
+[New Thread 1222957376 (LWP 3501)]
+[New Thread 1212467520 (LWP 3500)]
+[New Thread 1201977664 (LWP 3499)]
+[New Thread 1191487808 (LWP 3498)]
+[New Thread 1180997952 (LWP 3496)]
+[New Thread 1170508096 (LWP 3495)]
+[New Thread 1160018240 (LWP 3494)]
+[New Thread 1149528384 (LWP 3493)]
+[New Thread 1139038528 (LWP 3492)]
+[New Thread 1128548672 (LWP 3491)]
+[New Thread 1118058816 (LWP 3490)]
+[New Thread 1107568960 (LWP 3489)]
+Loaded symbols for /lib64/libpthread.so.0
+Reading symbols from /usr/lib64/libstdc++.so.6...done.
+Loaded symbols for /usr/lib64/libstdc++.so.6
+Reading symbols from /lib64/libm.so.6...done.
+Loaded symbols for /lib64/libm.so.6
+Reading symbols from /lib64/libgcc_s.so.1...done.
+Loaded symbols for /lib64/libgcc_s.so.1
+Reading symbols from /lib64/libc.so.6...done.
+Loaded symbols for /lib64/libc.so.6
+Reading symbols from /lib64/libdl.so.2...done.
+Loaded symbols for /lib64/libdl.so.2
+Reading symbols from /lib64/librt.so.1...done.
+Loaded symbols for /lib64/librt.so.1
+Reading symbols from /lib64/ld-linux-x86-64.so.2...done.
+Loaded symbols for /lib64/ld-linux-x86-64.so.2
+Reading symbols from /lib64/libnss_files.so.2...done.
+Loaded symbols for /lib64/libnss_files.so.2
+Reading symbols from /lib64/libnss_dns.so.2...done.
+Loaded symbols for /lib64/libnss_dns.so.2
+Reading symbols from /lib64/libresolv.so.2...done.
+Loaded symbols for /lib64/libresolv.so.2
+0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) t
+[Current thread is 0 (LWP 3487)]
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db0da in ACE_Condition_Thread_Mutex::wait (this=0x2acbd5c) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:328
+#2  0x00002aaab4568b43 in TAO_Leader_Follower::wait_for_client_leader_to_complete (this=0x2acbcd0, max_wait_time=0x0) at Leader_Follower.cpp:94
+#3  0x00002aaab456b8f2 in TAO_LF_Strategy_Complete::set_event_loop_thread (this=<value optimized out>, tv=0x0, lf=@0x2acbcd0) at ../tao/Leader_Follower.inl:78
+#4  0x00002aaab457fe91 in TAO_ORB_Core::run (this=0x2ac9b00, tv=0x0, perform_work=0) at ../tao/LF_Event_Loop_Thread_Helper.inl:16
+#5  0x0000000000406060 in main (argc=1, argv=0x7ffff7ab1138) at Master.cpp:189
+(gdb) t 1
+[Switching to thread 1 (Thread 46912665023328 (LWP 3487))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db0da in ACE_Condition_Thread_Mutex::wait (this=0x2acbd5c) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:328
+#2  0x00002aaab4568b43 in TAO_Leader_Follower::wait_for_client_leader_to_complete (this=0x2acbcd0, max_wait_time=0x0) at Leader_Follower.cpp:94
+#3  0x00002aaab456b8f2 in TAO_LF_Strategy_Complete::set_event_loop_thread (this=<value optimized out>, tv=0x0, lf=@0x2acbcd0) at ../tao/Leader_Follower.inl:78
+#4  0x00002aaab457fe91 in TAO_ORB_Core::run (this=0x2ac9b00, tv=0x0, perform_work=0) at ../tao/LF_Event_Loop_Thread_Helper.inl:16
+#5  0x0000000000406060 in main (argc=1, argv=0x7ffff7ab1138) at Master.cpp:189
+(gdb) t 2
+[Switching to thread 2 (Thread 1296386368 (LWP 3509))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2b4bfac, mutex=@0x0, abstime=0x463) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x4d4538b0, transport=0x2aaab8010b70, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x4d453c20, max_wait_time=0x0, rd=@0x463, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x4d453c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x4d453f20, details=<value optimized out>, effective_target=@0x4d453db0, r=@0x4d453ce0, max_wait_time=@0x4d453da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x4d453f20, stub=<value optimized out>, details=@0x4d453e10, effective_target=@0x4d453db0, max_wait_time=@0x4d453da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x4d453f20, stub=0x2aaab8fc6e10, details=@0x4d453e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x4d453f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fc6f90) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=19) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=19) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2aaab80066e0) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 3
+[Switching to thread 3 (Thread 1285896512 (LWP 3508))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaabc007dec, mutex=@0x0, abstime=0x46d) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x4ca528b0, transport=0x2aaab800eae0, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x4ca52c20, max_wait_time=0x0, rd=@0x46d, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x4ca52c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x4ca52f20, details=<value optimized out>, effective_target=@0x4ca52db0, r=@0x4ca52ce0, max_wait_time=@0x4ca52da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x4ca52f20, stub=<value optimized out>, details=@0x4ca52e10, effective_target=@0x4ca52db0, max_wait_time=@0x4ca52da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x4ca52f20, stub=0x2aaab8fc6e10, details=@0x4ca52e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x4ca52f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fc6f90) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=18) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=18) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2aaab8006490) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 4
+[Switching to thread 4 (Thread 1275406656 (LWP 3507))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaab94ed53c, mutex=@0x0, abstime=0x467) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x4c0518b0, transport=0x2aaab800ca50, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x4c051c20, max_wait_time=0x0, rd=@0x467, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x4c051c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x4c051f20, details=<value optimized out>, effective_target=@0x4c051db0, r=@0x4c051ce0, max_wait_time=@0x4c051da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x4c051f20, stub=<value optimized out>, details=@0x4c051e10, effective_target=@0x4c051db0, max_wait_time=@0x4c051da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x4c051f20, stub=0x2aaab8fd13b0, details=@0x4c051e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x4c051f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fd1530) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=17) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=17) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2aaab8006240) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 6
+[Switching to thread 6 (Thread 1254426944 (LWP 3505))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) t 5
+[Switching to thread 5 (Thread 1264916800 (LWP 3506))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2b511ac, mutex=@0x0, abstime=0x44d) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x4b6508b0, transport=0x2aaab800a9c0, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x4b650c20, max_wait_time=0x0, rd=@0x44d, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x4b650c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x4b650f20, details=<value optimized out>, effective_target=@0x4b650db0, r=@0x4b650ce0, max_wait_time=@0x4b650da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x4b650f20, stub=<value optimized out>, details=@0x4b650e10, effective_target=@0x4b650db0, max_wait_time=@0x4b650da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x4b650f20, stub=0x2aaab8fc6e10, details=@0x4b650e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x4b650f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fc6f90) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=16) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=16) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2aaab8005ff0) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 6
+[Switching to thread 6 (Thread 1254426944 (LWP 3505))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2b483bc, mutex=@0x0, abstime=0x453) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x4ac4f8b0, transport=0x2aaab8008930, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x4ac4fc20, max_wait_time=0x0, rd=@0x453, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x4ac4fc20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x4ac4ff20, details=<value optimized out>, effective_target=@0x4ac4fdb0, r=@0x4ac4fce0, max_wait_time=@0x4ac4fda8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x4ac4ff20, stub=<value optimized out>, details=@0x4ac4fe10, effective_target=@0x4ac4fdb0, max_wait_time=@0x4ac4fda8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x4ac4ff20, stub=0x2aaab8fe5ef0, details=@0x4ac4fe10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x4ac4ff20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fe6070) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=15) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=15) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2aaab8005da0) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 7
+[Switching to thread 7 (Thread 1092585792 (LWP 3504))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaaac016a6c, mutex=@0x0, abstime=0x45d) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x411f78b0, transport=0x2aaab8006880, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x411f7c20, max_wait_time=0x0, rd=@0x45d, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x411f7c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x411f7f20, details=<value optimized out>, effective_target=@0x411f7db0, r=@0x411f7ce0, max_wait_time=@0x411f7da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x411f7f20, stub=<value optimized out>, details=@0x411f7e10, effective_target=@0x411f7db0, max_wait_time=@0x411f7da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x411f7f20, stub=0x2aaab8ff0490, details=@0x411f7e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x411f7f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8ff0610) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=14) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=14) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2aaab8005b50) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 8
+[Switching to thread 8 (Thread 1243937088 (LWP 3503))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaab951466c, mutex=@0x0, abstime=0x45d) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x4a24e8b0, transport=0x2aaab80008c0, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x4a24ec20, max_wait_time=0x0, rd=@0x45d, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x4a24ec20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x4a24ef20, details=<value optimized out>, effective_target=@0x4a24edb0, r=@0x4a24ece0, max_wait_time=@0x4a24eda8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x4a24ef20, stub=<value optimized out>, details=@0x4a24ee10, effective_target=@0x4a24edb0, max_wait_time=@0x4a24eda8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x4a24ef20, stub=0x2aaab8ffba50, details=@0x4a24ee10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x4a24ef20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8ffbbd0) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=13) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=13) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b24f70) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 9
+[Switching to thread 9 (Thread 1233447232 (LWP 3502))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaaac02251c, mutex=@0x0, abstime=0x453) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x4984d8b0, transport=0x2b2f430, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x4984dc20, max_wait_time=0x0, rd=@0x453, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x4984dc20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x4984df20, details=<value optimized out>, effective_target=@0x4984ddb0, r=@0x4984dce0, max_wait_time=@0x4984dda8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x4984df20, stub=<value optimized out>, details=@0x4984de10, effective_target=@0x4984ddb0, max_wait_time=@0x4984dda8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x4984df20, stub=0x2aaab8fbc870, details=@0x4984de10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x4984df20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fbc9f0) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=12) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=12) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b24d20) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 10
+[Switching to thread 10 (Thread 1222957376 (LWP 3501))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) b
+Breakpoint 1 at 0x3c8600a496
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaaac01650c, mutex=@0x0, abstime=0x445) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x2aaaac48f218, transport=0x2b355e0, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab456adb5 in TAO_LF_Connect_Strategy::wait_i (this=<value optimized out>, ev=0x2aaaac48f218, transport=0x2aaaac497310, max_wait_time=0x0) at LF_Connect_Strategy.cpp:54
+#4  0x00002aaab45bf1d0 in TAO_Connector::wait_for_connection_completion (this=0x2b103d0, r=0x48e4cce0, desc=@0x48e4c910, transport=@0x48e4ca38, timeout=0x0) at Transport_Connector.cpp:789
+#5  0x00002aaab4557feb in TAO_IIOP_Connector::complete_connection (this=0x2b103d0, result=-1, desc=@0x48e4cc20, sh_list=@0x48e4cac8, ep_list=0x48e4cad0, count=1, r=0x48e4cce0, mev=0x48e4caa0, timeout=0x0) at IIOP_Connector.cpp:456
+#6  0x00002aaab455894f in TAO_IIOP_Connector::make_connection (this=0x2b103d0, r=0x48e4cce0, desc=@0x48e4cc20, timeout=0x0) at IIOP_Connector.cpp:230
+#7  0x00002aaab45be6f3 in TAO_Connector::connect (this=0x2b103d0, r=0x48e4cce0, desc=0x48e4cc20, timeout=0x0) at Transport_Connector.cpp:669
+#8  0x00002aaab45981c6 in TAO::Profile_Transport_Resolver::try_connect_i (this=0x48e4cce0, desc=0x48e4cc20, timeout=0x0, parallel=false) at Profile_Transport_Resolver.cpp:175
+#9  0x00002aaab45982cb in TAO::Profile_Transport_Resolver::try_connect (this=0x2aaaac01650c, desc=0x0, timeout=0x445) at Profile_Transport_Resolver.cpp:118
+#10 0x00002aaab45640eb in TAO_Default_Endpoint_Selector::select_endpoint (this=<value optimized out>, r=0x48e4cce0, max_wait_time=0x0) at Invocation_Endpoint_Selectors.cpp:70
+#11 0x00002aaab4597f7e in TAO::Profile_Transport_Resolver::resolve (this=0x48e4cce0, max_time_val=0x0) at Profile_Transport_Resolver.cpp:89
+#12 0x00002aaab45626b9 in TAO::Invocation_Adapter::invoke_remote_i (this=0x48e4cf20, stub=<value optimized out>, details=@0x48e4ce10, effective_target=@0x48e4cdb0, max_wait_time=@0x48e4cda8) at Invocation_Adapter.cpp:244
+#13 0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x48e4cf20, stub=0x2aaab9007020, details=@0x48e4ce10) at Invocation_Adapter.cpp:91
+#14 0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x48e4cf20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#15 0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab90071a0) at MasterClientC.cpp:159
+#16 0x0000000000406310 in Dispatcher_step (id=11) at Master.cpp:78
+#17 0x0000000000406742 in Dispatcher_run (id=11) at Master.cpp:116
+#18 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b24ad0) at Thread_Adapter.cpp:98
+#19 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#20 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 11
+[Switching to thread 11 (Thread 1212467520 (LWP 3500))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaabc00cd7c, mutex=@0x0, abstime=0x43d) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x4844b8b0, transport=0x2aaab80039f0, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x4844bc20, max_wait_time=0x0, rd=@0x43d, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x4844bc20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x4844bf20, details=<value optimized out>, effective_target=@0x4844bdb0, r=@0x4844bce0, max_wait_time=@0x4844bda8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x4844bf20, stub=<value optimized out>, details=@0x4844be10, effective_target=@0x4844bdb0, max_wait_time=@0x4844bda8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x4844bf20, stub=0x2aaab8ff0490, details=@0x4844be10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x4844bf20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8ff0610) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=10) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=10) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b24880) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 12
+[Switching to thread 12 (Thread 1201977664 (LWP 3499))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaabc007bbc, mutex=@0x0, abstime=0x44f) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x47a4a8b0, transport=0x2aaab8002970, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x47a4ac20, max_wait_time=0x0, rd=@0x44f, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x47a4ac20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x47a4af20, details=<value optimized out>, effective_target=@0x47a4adb0, r=@0x47a4ace0, max_wait_time=@0x47a4ada8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x47a4af20, stub=<value optimized out>, details=@0x47a4ae10, effective_target=@0x47a4adb0, max_wait_time=@0x47a4ada8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x47a4af20, stub=0x2aaab8fb22d0, details=@0x47a4ae10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x47a4af20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fb2450) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=9) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=9) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b24630) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 13
+[Switching to thread 13 (Thread 1191487808 (LWP 3498))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaab95145dc, mutex=@0x0, abstime=0x453) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x470498b0, transport=0x2b2d3a0, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x47049c20, max_wait_time=0x0, rd=@0x453, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x47049c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x47049f20, details=<value optimized out>, effective_target=@0x47049db0, r=@0x47049ce0, max_wait_time=@0x47049da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x47049f20, stub=<value optimized out>, details=@0x47049e10, effective_target=@0x47049db0, max_wait_time=@0x47049da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x47049f20, stub=0x2aaab8fe5ef0, details=@0x47049e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x47049f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fe6070) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=8) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=8) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b243e0) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 14
+[Switching to thread 14 (Thread 1180997952 (LWP 3496))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2b510cc, mutex=@0x0, abstime=0x455) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x466488b0, transport=0x2b2b310, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x46648c20, max_wait_time=0x0, rd=@0x455, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x46648c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x46648f20, details=<value optimized out>, effective_target=@0x46648db0, r=@0x46648ce0, max_wait_time=@0x46648da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x46648f20, stub=<value optimized out>, details=@0x46648e10, effective_target=@0x46648db0, max_wait_time=@0x46648da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x46648f20, stub=0x2aaab8fc6e10, details=@0x46648e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x46648f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fc6f90) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=7) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=7) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b24190) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 15
+[Switching to thread 15 (Thread 1170508096 (LWP 3495))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaabc00dbac, mutex=@0x0, abstime=0x483) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x45c478b0, transport=0x2aaaac0008c0, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x45c47c20, max_wait_time=0x0, rd=@0x483, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x45c47c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x45c47f20, details=<value optimized out>, effective_target=@0x45c47db0, r=@0x45c47ce0, max_wait_time=@0x45c47da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x45c47f20, stub=<value optimized out>, details=@0x45c47e10, effective_target=@0x45c47db0, max_wait_time=@0x45c47da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x45c47f20, stub=0x2aaab8fe5ef0, details=@0x45c47e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x45c47f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fe6070) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=6) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=6) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b23f40) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 16
+[Switching to thread 16 (Thread 1160018240 (LWP 3494))]#0  0x0000003c8600b025 in pthread_sigmask () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600b025 in pthread_sigmask () from /lib64/libpthread.so.0
+#1  0x00002aaab49302b9 in ~ACE_Sig_Guard (this=0x45246560) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:3171
+#2  0x00002aaab48ccfdb in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::any_ready (this=<value optimized out>, wait_set=@0x2acc598) at /home/build/ACE/RT2384/ACE_wrappers/ace/Select_Reactor_T.cpp:56
+#3  0x00002aaab48cf1a6 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::wait_for_multiple_events (this=0x2, dispatch_set=@0x45246560, max_wait_time=0x0) at /home/build/ACE/RT2384/ACE_wrappers/ace/Select_Reactor_T.cpp:1071
+#4  0x00002aaab4945948 in ACE_TP_Reactor::dispatch_i (this=0x2, max_wait_time=0x45246560, guard=@0x0) at TP_Reactor.cpp:180
+#5  0x00002aaab4945a86 in ACE_TP_Reactor::handle_events (this=0x2acc050, max_wait_time=0x0) at TP_Reactor.cpp:173
+#6  0x00002aaab45692e9 in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x452468b0, transport=<value optimized out>, max_wait_time=0x0) at /home/build/ACE/RT2384/ACE_wrappers/ace/Reactor.inl:188
+#7  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x45246c20, max_wait_time=0x45246560, rd=@0x0, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#8  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x45246c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#9  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x45246f20, details=<value optimized out>, effective_target=@0x45246db0, r=@0x45246ce0, max_wait_time=@0x45246da8) at Invocation_Adapter.cpp:300
+#10 0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x45246f20, stub=<value optimized out>, details=@0x45246e10, effective_target=@0x45246db0, max_wait_time=@0x45246da8) at Invocation_Adapter.cpp:274
+#11 0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x45246f20, stub=0x2aaab8ffba50, details=@0x45246e10) at Invocation_Adapter.cpp:91
+#12 0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x45246f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#13 0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8ffbbd0) at MasterClientC.cpp:159
+#14 0x0000000000406310 in Dispatcher_step (id=5) at Master.cpp:78
+#15 0x0000000000406742 in Dispatcher_run (id=5) at Master.cpp:116
+#16 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b23d30) at Thread_Adapter.cpp:98
+#17 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#18 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 17
+[Switching to thread 17 (Thread 1149528384 (LWP 3493))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaab951653c, mutex=@0x0, abstime=0x45f) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x448458b0, transport=0x2b314c0, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x44845c20, max_wait_time=0x0, rd=@0x45f, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x44845c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x44845f20, details=<value optimized out>, effective_target=@0x44845db0, r=@0x44845ce0, max_wait_time=@0x44845da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x44845f20, stub=<value optimized out>, details=@0x44845e10, effective_target=@0x44845db0, max_wait_time=@0x44845da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x44845f20, stub=0x2aaab8fd13b0, details=@0x44845e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x44845f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fd1530) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=4) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=4) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b23b20) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 18
+[Switching to thread 18 (Thread 1139038528 (LWP 3492))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) b
+Note: breakpoint 1 also set at pc 0x3c8600a496.
+Breakpoint 2 at 0x3c8600a496
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaabc00db4c, mutex=@0x0, abstime=0x42f) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x43e448b0, transport=0x2b33550, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x43e44c20, max_wait_time=0x0, rd=@0x42f, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x43e44c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x43e44f20, details=<value optimized out>, effective_target=@0x43e44db0, r=@0x43e44ce0, max_wait_time=@0x43e44da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x43e44f20, stub=<value optimized out>, details=@0x43e44e10, effective_target=@0x43e44db0, max_wait_time=@0x43e44da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x43e44f20, stub=0x2aaab8fa6d10, details=@0x43e44e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x43e44f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fa6e90) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=3) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=3) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b23910) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 19
+[Switching to thread 19 (Thread 1128548672 (LWP 3491))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2b4f5ec, mutex=@0x0, abstime=0x467) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x434438b0, transport=0x2b29280, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x43443c20, max_wait_time=0x0, rd=@0x467, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x43443c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x43443f20, details=<value optimized out>, effective_target=@0x43443db0, r=@0x43443ce0, max_wait_time=@0x43443da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x43443f20, stub=<value optimized out>, details=@0x43443e10, effective_target=@0x43443db0, max_wait_time=@0x43443da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x43443f20, stub=0x2aaab8fc6e10, details=@0x43443e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x43443f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fc6f90) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=2) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=2) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b23690) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 20
+[Switching to thread 20 (Thread 1118058816 (LWP 3490))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2aaabc00daec, mutex=@0x0, abstime=0x40d) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x42a428b0, transport=0x2b271f0, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x42a42c20, max_wait_time=0x0, rd=@0x40d, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x42a42c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x42a42f20, details=<value optimized out>, effective_target=@0x42a42db0, r=@0x42a42ce0, max_wait_time=@0x42a42da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x42a42f20, stub=<value optimized out>, details=@0x42a42e10, effective_target=@0x42a42db0, max_wait_time=@0x42a42da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x42a42f20, stub=0x2aaab8fd13b0, details=@0x42a42e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x42a42f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fd1530) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=1) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=1) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b23440) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 21
+[Switching to thread 21 (Thread 1107568960 (LWP 3489))]#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+(gdb) back
+#0  0x0000003c8600a496 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x00002aaab48db1a7 in ACE_Condition_Thread_Mutex::wait (this=0x2b4febc, mutex=@0x0, abstime=0x437) at /home/build/ACE/RT2384/ACE_wrappers/ace/OS_NS_Thread.inl:357
+#2  0x00002aaab45690fb in TAO_Leader_Follower::wait_for_event (this=0x2acbcd0, event=0x420418b0, transport=0x2b25110, max_wait_time=0x0) at ../tao/LF_Follower.inl:16
+#3  0x00002aaab45a2c3d in TAO::Synch_Twoway_Invocation::wait_for_reply (this=0x42041c20, max_wait_time=0x0, rd=@0x437, bd=@0xffffffffffffffff) at Synch_Invocation.cpp:252
+#4  0x00002aaab45a39dd in TAO::Synch_Twoway_Invocation::remote_twoway (this=0x42041c20, max_wait_time=0x0) at Synch_Invocation.cpp:168
+#5  0x00002aaab4562bc8 in TAO::Invocation_Adapter::invoke_twoway (this=0x42041f20, details=<value optimized out>, effective_target=@0x42041db0, r=@0x42041ce0, max_wait_time=@0x42041da8) at Invocation_Adapter.cpp:300
+#6  0x00002aaab45627d0 in TAO::Invocation_Adapter::invoke_remote_i (this=0x42041f20, stub=<value optimized out>, details=@0x42041e10, effective_target=@0x42041db0, max_wait_time=@0x42041da8) at Invocation_Adapter.cpp:274
+#7  0x00002aaab4563190 in TAO::Invocation_Adapter::invoke_i (this=0x42041f20, stub=0x2aaab8fc6e10, details=@0x42041e10) at Invocation_Adapter.cpp:91
+#8  0x00002aaab4562da2 in TAO::Invocation_Adapter::invoke (this=0x42041f20, ex_data=0x0, ex_count=0) at Invocation_Adapter.cpp:50
+#9  0x0000000000409548 in MasterClient::Server::ping (this=0x2aaab8fc6f90) at MasterClientC.cpp:159
+#10 0x0000000000406310 in Dispatcher_step (id=0) at Master.cpp:78
+#11 0x0000000000406742 in Dispatcher_run (id=0) at Master.cpp:116
+#12 0x00002aaab493dd15 in ACE_Thread_Adapter::invoke (this=0x2b231f0) at Thread_Adapter.cpp:98
+#13 0x0000003c860062f7 in start_thread () from /lib64/libpthread.so.0
+#14 0x0000003c854d1b6d in clone () from /lib64/libc.so.6
+(gdb) t 22
+Thread ID 22 not known.
+(gdb)
+
