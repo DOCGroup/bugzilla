@@ -1,0 +1,409 @@
+johnny@m4500jw:~/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/Reader/descriptors> ./run_test.pl 
+Starting Naming Service with  -ORBEndpoint iiop://localhost:60003 -o ns.ior
+Invoking node daemon
+Run dance_node_manager with -ORBEndpoint iiop://localhost:60001 -s /home/johnny/ACE/F6/QOS/DOC_ROOT/DAnCE/bin/dance_locality_manager -n SenderNode=/home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/Reader/descriptors/NodeApp1.ior -t 30 --domain-nc corbaloc:rir:/NameService
+Run dance_node_manager with -ORBEndpoint iiop://localhost:60002 -s /home/johnny/ACE/F6/QOS/DOC_ROOT/DAnCE/bin/dance_locality_manager -n ReceiverNode=/home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/Reader/descriptors/NodeApp2.ior -t 30 --domain-nc corbaloc:rir:/NameService
+Invoking execution manager (dance_execution_manager.exe) with -e/home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/Reader/descriptors/EM.ior
+Invoking executor - launch the application -
+Start dance_plan_launcher.exe with -x Plan.cdp -k file:///home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/Reader/descriptors/EM.ior
+(11389|140008690984736) NOTICE: not using file configuration - no configuration file specified.
+(11389|140008690984736) NOTICE: Service_Participant::intializeScheduling() - no scheduling policy specified, not setting policy.
+(11388|140478482319136) NOTICE: not using file configuration - no configuration file specified.
+(11388|140478482319136) NOTICE: Service_Participant::intializeScheduling() - no scheduling policy specified, not setting policy.
+(11389|140008690984736) Service_Participant::set_repo_domain: Domain[ 0] = Repo[ DEFAULT_RTPS].
+(11388|140478482319136) Service_Participant::set_repo_domain: Domain[ 0] = Repo[ DEFAULT_RTPS].
+QOS_XML_File_Handler::init - Constructing DOM
+QOS_XML_File_Handler::init - Constructing DOM
+QOS_XML_File_Handler::init - DOMElement pointer: 7666248
+(11389|140008690984736) [LM_DEBUG] -  19:55:20.692287 - DDS_TopicBase_Connector_T::late_binded - Topic <Reader_Test> is not late binded.
+QOS_XML_File_Handler::init - DOMElement pointer: 7694840
+(11388|140478482319136) [LM_DEBUG] -  19:55:20.692976 - DDS_TopicBase_Connector_T::late_binded - Topic <Reader_Test> is not late binded.
+(11388|140478482319136) [LM_TRACE] -  19:55:20.717520 - DDS_Base_Connector_T::init_domain - Start configuring default domain <0>
+QOS_XML_File_Handler::get_profile - Found profile <ReaderProfile>
+ParticipantQos_Handler::get_participant_qos - No Participant QOS available in profile <ReaderProfile>
+(11388|140478482319136) [LM_INFO] -  19:55:20.717671 - DDS_Base_Connector_T::init_domain - Using participant QOS <DDS::DomainParticipantQos(DDS::UserDataQosPolicy(DDS::OctetSeq[]), DDS::EntityFactoryQosPolicy(true))>
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 7410
+(11388|140478482319136) DataLinkSet send_control_element_allocator 767c60 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 767d50 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 767ff0 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7680e0 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 768380 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 768470 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 768648 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 768738 with 20 chunks
+(11388|140478482319136) ip interface 127.0.0.1:0 maps to hostname localhost
+(11389|140008690984736) [LM_TRACE] -  19:55:20.778220 - DDS_Base_Connector_T::init_domain - Start configuring default domain <0>
+QOS_XML_File_Handler::get_profile - Found profile <ReaderProfile>
+ParticipantQos_Handler::get_participant_qos - No Participant QOS available in profile <ReaderProfile>
+(11389|140008690984736) [LM_INFO] -  19:55:20.778569 - DDS_Base_Connector_T::init_domain - Using participant QOS <DDS::DomainParticipantQos(DDS::UserDataQosPolicy(DDS::OctetSeq[]), DDS::EntityFactoryQosPolicy(true))>
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Spdp::SpdpTransport::open_unicast_socket() - failed to open unicast socket on port 7410 ACE_SOCK_Dgram::open: Address already in use.  Trying next participantId...
+(11389|140008690984736) Spdp::SpdpTransport::open_unicast_socket() - opened unicast socket on port 7412
+(11389|140008690984736) DataLinkSet send_control_element_allocator 759880 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 759970 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 759c10 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 759d00 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 759fa0 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 75a090 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 75a268 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 75a358 with 20 chunks
+(11389|140008690984736) ip interface 127.0.0.1:0 maps to hostname localhost
+(11388|140478482319136) WARNING: Could not find FQDN. Using "127.0.0.1" as fully qualified hostname, please correct system configuration.
+(11388|140478482319136) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(11388|140478482319136) TransportSendStrategy replaced_element_allocator 76eda0 with 20 chunks
+(11388|140478482319136) TransportReceiveStrategy-mb Cached_Allocator_With_Overflow 78bc88 with 1000 chunks
+(11388|140478482319136) TransportReceiveStrategy-db Cached_Allocator_With_Overflow 78bd00 with 100 chunks
+(11388|140478482319136) TransportReceiveStrategy-data Cached_Allocator_With_Overflow 78bd78 with 100 chunks
+(11388|140478482319136) TransportImpl::configure()
+   transport_type                : rtps_udp
+   name                          : _OPENDDS__SEDPTransportInst_01030026b9c860dc2c7c00000
+   queue_messages_per_pool       : 10
+   queue_initial_pools           : 5
+   max_packet_size               : 2147481599
+   max_samples_per_packet        : 10
+   optimum_packet_size           : 4096
+   thread_per_connection         : false
+   datalink_release_delay        : 10000
+   datalink_control_chunks       : 32
+   local_address                 : 127.0.0.1:47173
+   use_multicast                 : true
+   multicast_group_address       : 239.255.0.1:7402
+   nak_depth                     : 32
+   nak_response_delay            : 200
+   heartbeat_period              : 1000
+   heartbeat_response_delay      : 500
+   handshake_timeout             : 150000
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7a7078 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7a7168 with 20 chunks
+(11388|140478482319136) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 7a8e90 with 20 chunks
+(11388|140478482319136) DataReaderImpl::enable Cached_Allocator_With_Overflow 7a9380 with 20 chunks
+(11388|140478482319136) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7aa3a8 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7aa498 with 20 chunks
+(11388|140478482319136) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 7e2880 with 20 chunks
+(11388|140478482319136) DataReaderImpl::enable Cached_Allocator_With_Overflow 7e3770 with 20 chunks
+(11388|140478482319136) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7e4768 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7e4858 with 20 chunks
+(11388|140478482319136) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 7e6540 with 20 chunks
+(11388|140478482319136) DataReaderImpl::enable Cached_Allocator_With_Overflow 7e7cf0 with 20 chunks
+(11388|140478482319136) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7e8d18 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7e8e08 with 20 chunks
+(11388|140478482319136) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 7eab10 with 20 chunks
+(11388|140478482319136) DataReaderImpl::enable Cached_Allocator_With_Overflow 7ec040 with 20 chunks
+(11388|140478482319136) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+QOS_XML_File_Handler::get_profile - Found profile <ReaderProfile>
+TopicQos_Handler::get_topic_qos - No Topic QOS available in profile <ReaderProfile>
+(11388|140478482319136) [LM_INFO] -  19:55:20.862306 - DDS_Base_Connector_T::init_topic - Using topic QOS <DDS::TopicQos(DDS::TopicDataQosPolicy(DDS::OctetSeq[]), DDS::DurabilityQosPolicy(DDS::VOLATILE_DURABILITY_QOS), DDS::DurabilityServiceQosPolicy(DDS::Duration_t(0, 0), DDS::KEEP_LAST_HISTORY_QOS, 1, -1, -1, -1), DDS::DeadlineQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::LatencyBudgetQosPolicy(DDS::Duration_t(0, 0)), DDS::LivelinessQosPolicy(DDS::AUTOMATIC_LIVELINESS_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::ReliabilityQosPolicy(DDS::BEST_EFFORT_RELIABILITY_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::DestinationOrderQosPolicy(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS), DDS::HistoryQosPolicy(DDS::KEEP_LAST_HISTORY_QOS, 1), DDS::ResourceLimitsQosPolicy(-1, -1, -1), DDS::TransportPriorityQosPolicy(0), DDS::LifespanQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::OwnershipQosPolicy(DDS::SHARED_OWNERSHIP_QOS))>
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+QOS_XML_File_Handler::get_profile - Found profile <ReaderProfile>
+SubscriberQos_Handler::get_subscriber_qos - No Subscriber QOS available in profile <ReaderProfile>
+(11388|140478482319136) [LM_INFO] -  19:55:20.862574 - DDS_Base_Connector_T::init_subscriber - Using publisher QOS <DDS::SubscriberQos(DDS::PresentationQosPolicy(DDS::INSTANCE_PRESENTATION_QOS, false, false), DDS::PartitionQosPolicy(DDS::StringSeq[]), DDS::GroupDataQosPolicy(DDS::OctetSeq[]), DDS::EntityFactoryQosPolicy(true))>
+(11388|140478482319136) [LM_DEBUG] -  19:55:20.862616 - DDS_TopicBase_Connector_T::configuration_complete - No need to create a publisher.
+(11388|140478482319136) [LM_DEBUG] -  19:55:20.862657 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - Creating push consumer port.
+QOS_XML_File_Handler::get_profile - Found profile <ReaderProfile>
+QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - set durability to <1>
+QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - Set reliability_kind to <1>
+QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - Set history to <1>
+(11388|140478482319136) [LM_INFO] -  19:55:20.862860 - DDS_Subscriber_Base_T::configuration_complete - Using datareader QOS <DDS::DataReaderQos(DDS::DurabilityQosPolicy(DDS::TRANSIENT_LOCAL_DURABILITY_QOS), DDS::DeadlineQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::LatencyBudgetQosPolicy(DDS::Duration_t(0, 0)), DDS::LivelinessQosPolicy(DDS::AUTOMATIC_LIVELINESS_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::ReliabilityQosPolicy(DDS::RELIABLE_RELIABILITY_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::DestinationOrderQosPolicy(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS), DDS::HistoryQosPolicy(DDS::KEEP_ALL_HISTORY_QOS, 1), DDS::ResourceLimitsQosPolicy(-1, -1, -1), DDS::UserDataQosPolicy(DDS::OctetSeq[]), DDS::OwnershipQosPolicy(DDS::SHARED_OWNERSHIP_QOS), DDS::TimeBasedFilterQosPolicy(DDS::Duration_t(0, 0)), DDS::ReaderDataLifecycleQosPolicy(DDS::Duration_t(2147483647, 2147483647), DDS::Duration_t(2147483647, 2147483647)))>
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7edf28 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 7ee018 with 20 chunks
+(11388|140478482319136) ReaderTestDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 7efd00 with 20 chunks
+(11388|140478482319136) DataReaderImpl::enable Cached_Allocator_With_Overflow 7efed0 with 20 chunks
+(11388|140478482319136) TransportImpl::configure()
+   transport_type                : rtps_udp
+   name                          : the_rtps_transport
+   queue_messages_per_pool       : 10
+   queue_initial_pools           : 5
+   max_packet_size               : 2147481599
+   max_samples_per_packet        : 10
+   optimum_packet_size           : 4096
+   thread_per_connection         : false
+   datalink_release_delay        : 10000
+   datalink_control_chunks       : 32
+   local_address                 : 127.0.0.1:58784
+   use_multicast                 : true
+   multicast_group_address       : 239.255.0.2:7401
+   nak_depth                     : 32
+   nak_response_delay            : 200
+   heartbeat_period              : 1000
+   heartbeat_response_delay      : 500
+   handshake_timeout             : 1000
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Sedp::write_subscription_data - not currently associated, dropping msg.
+(11388|140478482319136) Sedp::add_subscription - calling match_endpoints
+(11388|140478482319136) SubscriberImpl::reader_enabled, datareader(topic_name=Reader_Test) enabled
+(11388|140478482319136) [LM_DEBUG] -  19:55:20.863876 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - No need to create supplier port.
+(11388|140478482319136) [LM_DEBUG] -  19:55:20.863897 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - No need to create pull consumer port.
+(11389|140008690984736) WARNING: Could not find FQDN. Using "127.0.0.1" as fully qualified hostname, please correct system configuration.
+(11389|140008690984736) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(11389|140008690984736) TransportSendStrategy replaced_element_allocator 7877d0 with 20 chunks
+(11389|140008690984736) TransportReceiveStrategy-mb Cached_Allocator_With_Overflow 78a0e8 with 1000 chunks
+(11389|140008690984736) TransportReceiveStrategy-db Cached_Allocator_With_Overflow 78a160 with 100 chunks
+(11389|140008690984736) TransportReceiveStrategy-data Cached_Allocator_With_Overflow 78a1d8 with 100 chunks
+(11389|140008690984736) TransportImpl::configure()
+   transport_type                : rtps_udp
+   name                          : _OPENDDS__SEDPTransportInst_01030026b9c860dc2c7d00000
+   queue_messages_per_pool       : 10
+   queue_initial_pools           : 5
+   max_packet_size               : 2147481599
+   max_samples_per_packet        : 10
+   optimum_packet_size           : 4096
+   thread_per_connection         : false
+   datalink_release_delay        : 10000
+   datalink_control_chunks       : 32
+   local_address                 : 127.0.0.1:58447
+   use_multicast                 : true
+   multicast_group_address       : 239.255.0.1:7402
+   nak_depth                     : 32
+   nak_response_delay            : 200
+   heartbeat_period              : 1000
+   heartbeat_response_delay      : 500
+   handshake_timeout             : 150000
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7dbe98 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7dbf88 with 20 chunks
+(11389|140008690984736) ParticipantBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 7a4fc0 with 20 chunks
+(11389|140008690984736) DataReaderImpl::enable Cached_Allocator_With_Overflow 7a5040 with 20 chunks
+(11389|140008690984736) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSParticipant) enabled
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7def28 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7df018 with 20 chunks
+(11389|140008690984736) TopicBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 7e0c10 with 20 chunks
+(11389|140008690984736) DataReaderImpl::enable Cached_Allocator_With_Overflow 7e1b00 with 20 chunks
+(11389|140008690984736) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSTopic) enabled
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7e2b28 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7e2c18 with 20 chunks
+(11389|140008690984736) PublicationBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 7e4920 with 20 chunks
+(11389|140008690984736) DataReaderImpl::enable Cached_Allocator_With_Overflow 7e60d0 with 20 chunks
+(11389|140008690984736) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSPublication) enabled
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7e70f8 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7e71e8 with 20 chunks
+(11389|140008690984736) SubscriptionBuiltinTopicDataDataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow 7e8ef0 with 20 chunks
+(11389|140008690984736) DataReaderImpl::enable Cached_Allocator_With_Overflow 7ea420 with 20 chunks
+(11389|140008690984736) SubscriberImpl::reader_enabled, datareader(topic_name=DCPSSubscription) enabled
+QOS_XML_File_Handler::get_profile - Found profile <ReaderProfile>
+TopicQos_Handler::get_topic_qos - No Topic QOS available in profile <ReaderProfile>
+(11389|140008690984736) [LM_INFO] -  19:55:20.919774 - DDS_Base_Connector_T::init_topic - Using topic QOS <DDS::TopicQos(DDS::TopicDataQosPolicy(DDS::OctetSeq[]), DDS::DurabilityQosPolicy(DDS::VOLATILE_DURABILITY_QOS), DDS::DurabilityServiceQosPolicy(DDS::Duration_t(0, 0), DDS::KEEP_LAST_HISTORY_QOS, 1, -1, -1, -1), DDS::DeadlineQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::LatencyBudgetQosPolicy(DDS::Duration_t(0, 0)), DDS::LivelinessQosPolicy(DDS::AUTOMATIC_LIVELINESS_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::ReliabilityQosPolicy(DDS::BEST_EFFORT_RELIABILITY_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::DestinationOrderQosPolicy(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS), DDS::HistoryQosPolicy(DDS::KEEP_LAST_HISTORY_QOS, 1), DDS::ResourceLimitsQosPolicy(-1, -1, -1), DDS::TransportPriorityQosPolicy(0), DDS::LifespanQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::OwnershipQosPolicy(DDS::SHARED_OWNERSHIP_QOS))>
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+QOS_XML_File_Handler::get_profile - Found profile <ReaderProfile>
+SubscriberQos_Handler::get_subscriber_qos - No Subscriber QOS available in profile <ReaderProfile>
+(11389|140008690984736) [LM_INFO] -  19:55:20.920071 - DDS_Base_Connector_T::init_subscriber - Using publisher QOS <DDS::SubscriberQos(DDS::PresentationQosPolicy(DDS::INSTANCE_PRESENTATION_QOS, false, false), DDS::PartitionQosPolicy(DDS::StringSeq[]), DDS::GroupDataQosPolicy(DDS::OctetSeq[]), DDS::EntityFactoryQosPolicy(true))>
+QOS_XML_File_Handler::get_profile - Found profile <ReaderProfile>
+(11388|140478269449984) Spdp::data_received - 01030026.b9c860dc.2c7c0000.000001c1(e1a532a9) discovered 01030026.b9c860dc.2c7d0000.000001c1(47d2391d) lease 300s
+PublisherQos_Handler::get_publisher_qos - No Publisher QOS available in profile <ReaderProfile>
+(11389|140008493311744) Spdp::data_received - 01030026.b9c860dc.2c7d0000.000001c1(47d2391d) discovered 01030026.b9c860dc.2c7c0000.000001c1(e1a532a9) lease 300s
+(11389|140008690984736) [LM_INFO] -  19:55:20.920311 - DDS_Base_Connector_T::init_publisher - Using publisher QOS <DDS::PublisherQos(DDS::PresentationQosPolicy(DDS::INSTANCE_PRESENTATION_QOS, false, false), DDS::PartitionQosPolicy(DDS::StringSeq[]), DDS::GroupDataQosPolicy(DDS::OctetSeq[]), DDS::EntityFactoryQosPolicy(true))>
+(11388|140478269449984) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008493311744) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) [LM_DEBUG] -  19:55:20.920533 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - No need to create push consumer port.
+(11389|140008690984736) [LM_DEBUG] -  19:55:20.920568 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - Creating supplier port.
+QOS_XML_File_Handler::get_profile - Found profile <ReaderProfile>
+QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - set durability to <2>
+(11389|140008493311744) ConditionImpl::signal_all()
+QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - Set reliability_kind to <1>
+(11389|140008493311744) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(11388|140478269449984) ConditionImpl::signal_all()
+QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - Set reliability max_blocking_time to <10:0>
+(11388|140478258652928) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.2c7c0000.000003c7(3af0f51e) <--> with remote publication  01030026.b9c860dc.2c7d0000.000003c2(eced0a25).
+(11389|140008493311744) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11388|140478269449984) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - Set history to <1>
+(11388|140478269449984) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11389|140008404379392) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.2c7d0000.000003c7(9c87feaa) <--> with remote publication  01030026.b9c860dc.2c7c0000.000003c2(4a9a0191).
+(11388|140478269449984) ConditionImpl::signal_all()
+(11389|140008493311744) ConditionImpl::signal_all()
+(11388|140478269449984) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(11388|140478269449984) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11389|140008690984736) [LM_INFO] -  19:55:20.921040 - DDS_Update_T::configuration_complete - Using datawriter QOS <DDS::DataWriterQos(DDS::DurabilityQosPolicy(DDS::TRANSIENT_DURABILITY_QOS), DDS::DurabilityServiceQosPolicy(DDS::Duration_t(0, 0), DDS::KEEP_LAST_HISTORY_QOS, 1, -1, -1, -1), DDS::DeadlineQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::LatencyBudgetQosPolicy(DDS::Duration_t(0, 0)), DDS::LivelinessQosPolicy(DDS::AUTOMATIC_LIVELINESS_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::ReliabilityQosPolicy(DDS::RELIABLE_RELIABILITY_QOS, DDS::Duration_t(10, 0)), DDS::DestinationOrderQosPolicy(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS), DDS::HistoryQosPolicy(DDS::KEEP_ALL_HISTORY_QOS, 1), DDS::ResourceLimitsQosPolicy(-1, -1, -1), DDS::TransportPriorityQosPolicy(0), DDS::LifespanQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::UserDataQosPolicy(DDS::OctetSeq[]), DDS::OwnershipQosPolicy(DDS::SHARED_OWNERSHIP_QOS), DDS::OwnershipStrengthQosPolicy(0), DDS::WriterDataLifecycleQosPolicy(true))>
+(11389|140008493311744) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(11389|140008493311744) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7ec698 with 20 chunks
+(11389|140008690984736) DataLinkSet send_control_element_allocator 7ec788 with 20 chunks
+(11388|140478258652928) RtpsUdpTransport::connect_datalink_i waiting for handshake local 01030026.b9c860dc.2c7c0000.000003c2(4a9a0191) remote 01030026.b9c860dc.2c7d0000.000003c7(9c87feaa)
+(11389|140008404379392) RtpsUdpTransport::connect_datalink_i waiting for handshake local 01030026.b9c860dc.2c7d0000.000003c2(eced0a25) remote 01030026.b9c860dc.2c7c0000.000003c7(3af0f51e)
+(11389|140008690984736) ReaderTestDataWriterImpl::enable_specific is unbounded data - allocate from heap
+(11389|140008690984736) ReaderTestDataWriterImpl::enable_specific-mb Cached_Allocator_With_Overflow 7ee4c0 with 200 chunks
+(11389|140008690984736) ReaderTestDataWriterImpl::enable_specific-db Cached_Allocator_With_Overflow 7f2400 with 20 chunks
+(11389|140008690984736) WriteDataContainer sample_list_element_allocator 80f4a8 with 20 chunks
+(11389|140008690984736) WriteDataContainer transport_send_element_allocator 80f520 with 20 chunks
+(11389|140008690984736) DataWriterImpl::enable-mb Cached_Allocator_With_Overflow 813f60 with 20 chunks
+(11389|140008690984736) DataWriterImpl::enable-db Cached_Allocator_With_Overflow 817ea0 with 20 chunks
+(11389|140008690984736) DataWriterImpl::enable-header Cached_Allocator_With_Overflow 8185f0 with 20 chunks
+(11389|140008690984736) TransportImpl::configure()
+   transport_type                : rtps_udp
+   name                          : the_rtps_transport
+   queue_messages_per_pool       : 10
+   queue_initial_pools           : 5
+   max_packet_size               : 2147481599
+   max_samples_per_packet        : 10
+   optimum_packet_size           : 4096
+   thread_per_connection         : false
+   datalink_release_delay        : 10000
+   datalink_control_chunks       : 32
+   local_address                 : 127.0.0.1:59784
+   use_multicast                 : true
+   multicast_group_address       : 239.255.0.2:7401
+   nak_depth                     : 32
+   nak_response_delay            : 200
+   heartbeat_period              : 1000
+   heartbeat_response_delay      : 500
+   handshake_timeout             : 1000
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Sedp::write_publication_data - not currently associated, dropping msg.
+(11389|140008690984736) Sedp::add_publication - calling match_endpoints
+(11389|140008690984736) [LM_DEBUG] -  19:55:20.922717 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - No need to create pull consumer port.
+(11389|140008690984736) [LM_DEBUG] -  19:55:20.924485 - TopicListener::get_mask - Mask becomes DDS::INCONSISTENT_TOPIC_STATUS
+(11389|140008690984736) [LM_DEBUG] -  19:55:20.924533 - SubscriberListener::get_mask - Mask becomes DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS | DDS::SAMPLE_REJECTED_STATUS | DDS::LIVELINESS_CHANGED_STATUS | DDS::SUBSCRIPTION_MATCHED_STATUS
+(11389|140008690984736) [LM_DEBUG] -  19:55:20.924563 - PublisherListener::get_mask - Mask becomes DDS::OFFERED_DEADLINE_MISSED_STATUS | DDS::OFFERED_INCOMPATIBLE_QOS_STATUS | DDS::LIVELINESS_LOST_STATUS | DDS::PUBLICATION_MATCHED_STATUS
+(11388|140478482319136) [LM_DEBUG] -  19:55:20.924660 - TopicListener::get_mask - Mask becomes DDS::INCONSISTENT_TOPIC_STATUS
+(11388|140478482319136) [LM_DEBUG] -  19:55:20.924704 - SubscriberListener::get_mask - Mask becomes DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS | DDS::SAMPLE_REJECTED_STATUS | DDS::LIVELINESS_CHANGED_STATUS | DDS::SUBSCRIPTION_MATCHED_STATUS
+(11388|140478482319136) [LM_DEBUG] -  19:55:20.924746 - PortStatusListener::get_mask - Mask becomes DDS::REQUESTED_DEADLINE_MISSED_STATUS | DDS::SAMPLE_LOST_STATUS
+(11388|140478482319136) [LM_DEBUG] -  19:55:20.924773 - DataReaderListener_T::get_mask - Mask becomes DDS::REQUESTED_DEADLINE_MISSED_STATUS | DDS::SAMPLE_LOST_STATUS | DDS::DATA_AVAILABLE_STATUS
+Sleeping 30 seconds to allow task to complete
+(11388|140478258652928) RtpsUdpTransport::connect_datalink_i wait for handshake completed
+(11389|140008404379392) RtpsUdpTransport::connect_datalink_i wait for handshake completed
+(11388|140478258652928) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.2c7c0000.000003c2(4a9a0191) <--> with remote subscription 01030026.b9c860dc.2c7d0000.000003c7(9c87feaa).
+(11389|140008404379392) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.2c7d0000.000003c2(eced0a25) <--> with remote subscription 01030026.b9c860dc.2c7c0000.000003c7(3af0f51e).
+(11389|140008404379392) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.2c7d0000.000004c7(d3c6686d) <--> with remote publication  01030026.b9c860dc.2c7c0000.000004c2(5db9756).
+(11388|140478258652928) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.2c7c0000.000004c7(75b163d9) <--> with remote publication  01030026.b9c860dc.2c7d0000.000004c2(a3ac9ce2).
+(11389|140008404379392) RtpsUdpTransport::connect_datalink_i waiting for handshake local 01030026.b9c860dc.2c7d0000.000004c2(a3ac9ce2) remote 01030026.b9c860dc.2c7c0000.000004c7(75b163d9)
+(11388|140478258652928) RtpsUdpTransport::connect_datalink_i waiting for handshake local 01030026.b9c860dc.2c7c0000.000004c2(5db9756) remote 01030026.b9c860dc.2c7d0000.000004c7(d3c6686d)
+(11388|140478258652928) RtpsUdpTransport::connect_datalink_i wait for handshake completed
+(11388|140478258652928) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.2c7c0000.000004c2(5db9756) <--> with remote subscription 01030026.b9c860dc.2c7d0000.000004c7(d3c6686d).
+(11389|140008404379392) RtpsUdpTransport::connect_datalink_i wait for handshake completed
+(11389|140008404379392) DataLink::make_reservation() - creating association local publication  01030026.b9c860dc.2c7d0000.000004c2(a3ac9ce2) <--> with remote subscription 01030026.b9c860dc.2c7c0000.000004c7(75b163d9).
+(11388|140478258652928) DataLinkSet send_control_element_allocator 98004688 with 20 chunks
+(11389|140008404379392) DataLinkSet send_control_element_allocator 38004648 with 20 chunks
+(11388|140478258652928) RtpsUdpDataLink::customize_queue_element() - storing durable data for local 01030026.b9c860dc.2c7c0000.000004c2(5db9756)
+(11389|140008404379392) RtpsUdpDataLink::customize_queue_element() - storing durable data for local 01030026.b9c860dc.2c7d0000.000003c2(eced0a25)
+(11388|140478258652928) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478258652928) ConditionImpl::signal_all()
+(11388|140478258652928) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(11388|140478258652928) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11388|140478258652928) ConditionImpl::signal_all()
+(11388|140478258652928) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(11389|140008404379392) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478258652928) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11388|140478258652928) Sedp::data_received(dwd) - calling match_endpoints new
+(11389|140008404379392) ConditionImpl::signal_all()
+(11389|140008404379392) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(11389|140008404379392) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11389|140008404379392) ConditionImpl::signal_all()
+(11388|140478258652928) Sedp::match - adding reader association
+(11389|140008404379392) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(11389|140008404379392) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11389|140008404379392) Sedp::data_received(drd) - calling match_endpoints new
+(11388|140478258652928) DataReaderImpl::add_association - bit 0 local 01030026.b9c860dc.2c7c0000.00000007(8ab9646d) remote 01030026.b9c860dc.2c7d0000.00000002(5ca49b56)
+(11389|140008404379392) Sedp::match - adding writer association
+(11388|140478258652928) WriterInfo::WriterInfo: writer 01030026.b9c860dc.2c7d0000.00000002(5ca49b56) added to reader 01030026.b9c860dc.2c7c0000.00000007(8ab9646d).
+(11389|140008404379392) DataWriterImpl::add_association - bit 0 local 01030026.b9c860dc.2c7d0000.00000002(5ca49b56) remote 01030026.b9c860dc.2c7c0000.00000007(8ab9646d)
+(11388|140478258652928) DataReaderImpl::add_association: inserted writer 01030026.b9c860dc.2c7d0000.00000002(5ca49b56).return 1 
+(11388|140478258652928) DataReaderImpl::add_association: reader 01030026.b9c860dc.2c7c0000.00000007(8ab9646d) is associated with writer 01030026.b9c860dc.2c7d0000.00000002(5ca49b56).
+(11389|140008404379392) DataWriterImpl::add_association(): adding subscription to publication 01030026.b9c860dc.2c7d0000.00000002(5ca49b56) with priority 0.
+(11388|140478258652928) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(11389|140008404379392) DirectPriorityMapper:thread_priority() - mapped TRANSPORT_PRIORITY value 0 to thread priority 0.
+(11388|140478258652928) TransportSendStrategy replaced_element_allocator 98005070 with 20 chunks
+(11389|140008404379392) TransportSendStrategy replaced_element_allocator 38005140 with 20 chunks
+(11389|140008404379392) TransportReceiveStrategy-mb Cached_Allocator_With_Overflow 3800ba58 with 1000 chunks
+(11389|140008404379392) TransportReceiveStrategy-db Cached_Allocator_With_Overflow 3800bad0 with 100 chunks
+(11389|140008404379392) TransportReceiveStrategy-data Cached_Allocator_With_Overflow 3800bb48 with 100 chunks
+(11388|140478258652928) TransportReceiveStrategy-mb Cached_Allocator_With_Overflow 9800bbc8 with 1000 chunks
+(11388|140478258652928) TransportReceiveStrategy-db Cached_Allocator_With_Overflow 9800bc40 with 100 chunks
+(11388|140478258652928) TransportReceiveStrategy-data Cached_Allocator_With_Overflow 9800bcb8 with 100 chunks
+(11389|140008404379392) RtpsUdpTransport::connect_datalink_i waiting for handshake local 01030026.b9c860dc.2c7d0000.00000002(5ca49b56) remote 01030026.b9c860dc.2c7c0000.00000007(8ab9646d)
+(11388|140478258652928) DataLink::make_reservation() - creating association local subscription 01030026.b9c860dc.2c7c0000.00000007(8ab9646d) <--> with remote publication  01030026.b9c860dc.2c7d0000.00000002(5ca49b56).
+(11388|140478258652928) DataReaderImpl::add_association: id_to_handle_map_[ 01030026.b9c860dc.2c7d0000.00000002(5ca49b56)] = 0x4.
+(11388|140478258652928) [LM_DEBUG] -  19:55:24.428379 - SubscriberListener::on_subscription_matched: total count <1> - count change <1> - current count <1> - current count change <1> last publication handle <4>
+(11388|140478258652928) [LM_DEBUG] -  19:55:24.428464 - SubscriberListener::on_unexpected_status - No error listener connected for <DDS::SUBSCRIPTION_MATCHED_STATUS>
+(11388|140478258652928) ConditionImpl::signal_all()
+(11388|140478258652928) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x4000.
+(11388|140478258652928) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11388|140478258652928) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008404379392) RtpsUdpTransport::connect_datalink_i ERROR: wait for handshake failed
+(11389|140008404379392) DataWriterImpl::add_association: ERROR: transport layer failed to associate.
+(11389|140008404379392) DataWriterImpl::association_complete - bit 0 local 01030026.b9c860dc.2c7d0000.00000002(5ca49b56) remote 01030026.b9c860dc.2c7c0000.00000007(8ab9646d)
+Invoking executor - stop the application -
+by running dance_plan_launcher.exe with -k file:///home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/Reader/descriptors/EM.ior -x Plan.cdp
+ERROR: Sender didn't receive a DDS::PUBLICATION_MATCHED_STATUS event!
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+ERROR: Test did not run: Didn't receive the expected number of samples
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) DataReaderImpl::remove_associations: bit 0 local 01030026.b9c860dc.2c7c0000.00000007(8ab9646d) remote 01030026.b9c860dc.2c7d0000.00000002(5ca49b56) num remotes 1 
+(11388|140478482319136) DataReaderImpl::writer_removed: reader 01030026.b9c860dc.2c7c0000.00000007(8ab9646d) from writer 01030026.b9c860dc.2c7d0000.00000002(5ca49b56).
+(11389|140008404379392) Sedp::data_received(drd) - calling match_endpoints disp/unreg
+(11388|140478258652928) Sedp::data_received(dwd) - calling match_endpoints disp/unreg
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) DataReaderImpl::lookup_instance_handles: searching for handles for writer Ids: 01030026.b9c860dc.2c7d0000.00000002(5ca49b56).
+(11388|140478482319136) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.2c7c0000.00000007(8ab9646d) <--> with remote 01030026.b9c860dc.2c7d0000.00000002(5ca49b56).
+(11389|140008404379392) ConditionImpl::signal_all()
+(11389|140008404379392) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(11388|140478258652928) ConditionImpl::signal_all()
+(11389|140008404379392) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11389|140008404379392) ConditionImpl::signal_all()
+(11388|140478258652928) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x200.
+(11389|140008404379392) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(11389|140008404379392) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11388|140478258652928) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11388|140478258652928) ConditionImpl::signal_all()
+(11388|140478258652928) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x400.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) DataLinkSet send_control_element_allocator 772e38 with 20 chunks
+(11388|140478258652928) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11388|140478482319136) ConditionImpl::signal_all()
+(11388|140478482319136) StatusConditionImpl::get_trigger_value() - mask==0xffffffff, changes==0x4000.
+(11388|140478482319136) ConditionImpl::signal_all() - number of sets: 0, locally: 0.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.2c7d0000.000003c2(eced0a25) <--> with remote 01030026.b9c860dc.2c7c0000.000003c7(3af0f51e).
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11389|140008690984736) DataLinkSet send_control_element_allocator 6b4998 with 20 chunks
+(11388|140478482319136) Service_Participant::get_discovery: returning repository for domain 0, repo DEFAULT_RTPS.
+(11388|140478482319136) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.2c7c0000.000003c2(4a9a0191) <--> with remote 01030026.b9c860dc.2c7d0000.000003c7(9c87feaa).
+(11389|140008690984736) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.2c7d0000.000003c7(9c87feaa) <--> with remote 01030026.b9c860dc.2c7c0000.000003c2(4a9a0191).
+(11389|140008690984736) DataLinkSet send_control_element_allocator 6b4998 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 714078 with 20 chunks
+(11389|140008690984736) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.2c7d0000.000004c2(a3ac9ce2) <--> with remote 01030026.b9c860dc.2c7c0000.000004c7(75b163d9).
+(11388|140478482319136) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.2c7c0000.000003c7(3af0f51e) <--> with remote 01030026.b9c860dc.2c7d0000.000003c2(eced0a25).
+(11389|140008690984736) DataLinkSet send_control_element_allocator 6b4998 with 20 chunks
+(11388|140478482319136) DataLinkSet send_control_element_allocator 772e38 with 20 chunks
+(11388|140478482319136) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.2c7c0000.000004c2(5db9756) <--> with remote 01030026.b9c860dc.2c7d0000.000004c7(d3c6686d).
+(11389|140008690984736) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.2c7d0000.000004c7(d3c6686d) <--> with remote 01030026.b9c860dc.2c7c0000.000004c2(5db9756).
+(11389|140008690984736) DataLinkSet send_control_element_allocator 6b4998 with 20 chunks
+(11389|140008690984736) SubscriberImpl::lookup_datareader, The datareader(topic_name=DCPSParticipant) is not found
+(11388|140478482319136) DataLinkSet send_control_element_allocator 714078 with 20 chunks
+(11389|140008690984736) Spdp::remove_discovered_participant - erasing 01030026.b9c860dc.2c7c0000.000001c1(e1a532a9)
+(11388|140478482319136) DataLink::release_reservations() - releasing association local: 01030026.b9c860dc.2c7c0000.000004c7(75b163d9) <--> with remote 01030026.b9c860dc.2c7d0000.000004c2(a3ac9ce2).
+(11388|140478482319136) DataLinkSet send_control_element_allocator 772e38 with 20 chunks
+(11388|140478482319136) SubscriberImpl::lookup_datareader, The datareader(topic_name=DCPSParticipant) is not found
+(11388|140478482319136) Spdp::remove_discovered_participant - erasing 01030026.b9c860dc.2c7d0000.000001c1(47d2391d)
+(11388|140478482319136) [LM_TRACE] -  19:55:51.376884 - DDS_Base_Connector_T::~DDS_Base_Connector_T - Connector has been destructed
+(11389|140008690984736) [LM_TRACE] -  19:55:51.376960 - DDS_Base_Connector_T::~DDS_Base_Connector_T - Connector has been destructed
+Executor returned.
+Shutting down rest of the processes.
+johnny@m4500jw:~/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/Reader/descriptors> 
+
