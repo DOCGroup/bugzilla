@@ -1,0 +1,60 @@
+--- fe/lex.yy.cpp	2014-01-03 06:45:38.000000000 -0500
++++ /D/Devl/TDrv/ACE_wrappers/TAO/TAO_IDL/fe/lex.yy.cpp	2014-09-10 17:59:42.129355300 -0400
+@@ -929,7 +929,7 @@
+ 
+ char tao_yytext[TAO_YYLMAX];
+ char *tao_yytext_ptr;
+-/*  $Id$
++/*  $Id: lex.yy.cpp 97497 2014-01-03 12:45:38Z johnnyw $
+ 
+ COPYRIGHT
+ 
+@@ -2567,7 +2567,7 @@
+                 if ( ! (tao_yy_buffer_stack) )
+                         TAO_YY_FATAL_ERROR( "out of dynamic memory in tao_yyensure_buffer_stack()" );
+ 
+-                memset((tao_yy_buffer_stack), 0, num_to_alloc * sizeof(struct tao_yy_buffer_state*));
++                ACE_OS::memset((tao_yy_buffer_stack), 0, num_to_alloc * sizeof(struct tao_yy_buffer_state*));
+ 
+                 (tao_yy_buffer_stack_max) = num_to_alloc;
+                 (tao_yy_buffer_stack_top) = 0;
+@@ -2588,7 +2588,7 @@
+                         TAO_YY_FATAL_ERROR( "out of dynamic memory in tao_yyensure_buffer_stack()" );
+ 
+                 /* zero only the new slots.*/
+-                memset((tao_yy_buffer_stack) + (tao_yy_buffer_stack_max), 0, grow_size * sizeof(struct tao_yy_buffer_state*));
++                ACE_OS::memset((tao_yy_buffer_stack) + (tao_yy_buffer_stack_max), 0, grow_size * sizeof(struct tao_yy_buffer_state*));
+                 (tao_yy_buffer_stack_max) = num_to_alloc;
+         }
+ }
+@@ -2639,7 +2639,7 @@
+ TAO_YY_BUFFER_STATE tao_yy_scan_string (tao_yyconst char * tao_yystr )
+ {
+ 
+-        return tao_yy_scan_bytes(tao_yystr,strlen(tao_yystr) );
++        return tao_yy_scan_bytes(tao_yystr,ACE_OS::strlen(tao_yystr) );
+ }
+ 
+ /** Setup the input buffer state to scan the given bytes. The next call to tao_yylex() will
+
+--- be/be_visitor_connector/executor_ami_exs.cpp	2012-02-20 06:34:24.000000000 -0500
++++ /D/Devl/TDrv/ACE_wrappers/TAO/TAO_IDL/be/be_visitor_connector/executor_ami_exs.cpp	2014-09-10 17:45:27.937498300 -0400
+@@ -3,7 +3,7 @@
+ /**
+  *  @file    executor_ami_exs.cpp
+  *
+- *  $Id$
++ *  $Id: executor_ami_exs.cpp 95536 2012-02-20 12:34:23Z johnnyw $
+  *
+  *  Visitor generating code for executors in the AMI connector
+  *  impl source.
+@@ -179,7 +179,7 @@
+   AST_Decl *d = i.item ();
+ 
+   const char * loc_name = node->local_name()->get_string();
+-  const char *exec_ext = (strstr (loc_name, "sync") ? "1" : "0");
++  const char *exec_ext = (ACE_OS::strstr (loc_name, "sync") ? "1" : "0");
+ 
+     os_ << d->local_name () << "_"
+       << node->local_name () << " (void)" << be_nl
+
