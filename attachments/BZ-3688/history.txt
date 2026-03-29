@@ -1,0 +1,155 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</workspaces/trunk/Bug_xxx>
+lothar@regensburg$ ./build.sh version 1.6.8; echo $?
+ACE_ROOT=/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers
+TAO_ROOT=/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO
+CIAO_ROOT=/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO/CIAO
+DDS_ROOT=/tmp/notthere
+MPC_ROOT was set to /opt2/src/ACE/MPC.
+Using .../1.6.8/ACE_wrappers/bin/MakeProjectCreator/config/MPC.cfg
+'dynamic_types' directory /tmp/notthere/MPC not found.
+Generating 'gnuace' output using default input
+Generation Time: 0s
+make[1]: Entering directory `/workspaces/trunk/Bug_xxx'
+touch .depend.Bug_Xxx_Lib
+make[1]: Leaving directory `/workspaces/trunk/Bug_xxx'
+make[1]: Entering directory `/workspaces/trunk/Bug_xxx'
+
+GNUmakefile: /workspaces/trunk/Bug_xxx/GNUmakefile.Bug_Xxx_Lib MAKEFLAGS=w
+
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL -DBUGXXX_BUILD_DLL  -c -fPIC -o .shobj/DllORB.o DllORB.cpp
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL -DBUGXXX_BUILD_DLL  -c -fPIC -o .shobj/TestListener.o TestListener.cpp
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL -DBUGXXX_BUILD_DLL  -c -fPIC -o .shobj/TestBroadcaster.o TestBroadcaster.cpp
+/opt2/linux/ix86/bin/g++-4.3.1 -Wl,-O3 -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL -DBUGXXX_BUILD_DLL -shared -Wl,-h -Wl,libbugxxx.so.1.6.8 -o libbugxxx.so.1.6.8 .shobj/DllORB.o .shobj/TestListener.o .shobj/TestBroadcaster.o -m64 -I/opt2/linux/x86_64/include -m64 -L/opt2/linux/x86_64/lib -Wl,-E -L/workspaces/trunk/Bug_xxx -L. -L/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/lib -lTAO_PortableServer -lTAO_CosNotification -lTAO_CosEvent -lTAO_AnyTypeCode -lTAO -lACE -ldl -lpthread -lrt
+rm -f libbugxxx.so
+/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/bin/add_rel_link.sh libbugxxx.so.1.6.8 libbugxxx.so
+ln -s libbugxxx.so.1.6.8 libbugxxx.so
+chmod a+rx libbugxxx.so.1.6.8
+make[1]: Leaving directory `/workspaces/trunk/Bug_xxx'
+make[1]: Entering directory `/workspaces/trunk/Bug_xxx'
+touch .depend.Bug_Xxx_Server
+make[1]: Leaving directory `/workspaces/trunk/Bug_xxx'
+make[1]: Entering directory `/workspaces/trunk/Bug_xxx'
+
+GNUmakefile: /workspaces/trunk/Bug_xxx/GNUmakefile.Bug_Xxx_Server MAKEFLAGS=w
+
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL  -c -o .obj/server.o server.cpp
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL  -m64 -I/opt2/linux/x86_64/include -m64 -L/opt2/linux/x86_64/lib -Wl,-E -L/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/lib -L. -L/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/lib -o server .obj/server.o -lbugxxx -lTAO_Notify_Service -lTAO_IORTable -lTAO_CosNaming -lTAO_CosNotification_Serv -lTAO_Messaging -lTAO_PI -lTAO_CodecFactory -lTAO_DynamicAny -lTAO_Valuetype -lACE_ETCL_Parser -lTAO_ETCL -lACE_ETCL -lTAO_CosNotification_Skel -lTAO_CosEvent_Skel -lTAO_Svc_Utils -lTAO_PortableServer -lTAO_CosNotification -lTAO_CosEvent -lTAO_AnyTypeCode -lTAO -lACE -ldl -lpthread -lrt
+make[1]: Leaving directory `/workspaces/trunk/Bug_xxx'
+LD_LIBRARY_PATH=.:/opt2/linux/x86_64/ACE/1.6.8/ACE_wrappers/lib:.
+(26559|140719166895856) main - entered
+(26559|140719166895856) main - cycle ...
+(26559|140719166895856) loadunloadcycle - loading
+(26559|140719166895856) loadunloadcycle - loading ORB done
+(26559|140719166895856) loadunloadcycle - v_orb OK
+(26559|140719166895856) loadunloadcycle - v_poa OK
+(26559|140719166895856) loadunloadcycle - v_rootPOA OK
+(26559|140719166895856) loadunloadcycle - loading NamingService done
+Loading the Cos Notification Service...
+(26559|140719166895856) loadunloadcycle - loading NotifyService done
+(26559|140719166895856) publish ...
+(26559|140719166895856) testListener.m_receivedData.size()=3
+(26559|140719166895856) publish done
+(26559|140719166895856) loadunloadcycle - unloading
+(26559|140719166895856) loadunloadcycle - unloading NotifyService ...
+(26559|140719166895856) loadunloadcycle - unloading NotifyService done
+(26559|140719166895856) loadunloadcycle - unloading NameService ...
+(26559|140719166895856) loadunloadcycle - unloading NameService done
+(26559|140719166895856) loadunloadcycle - unloading ORB ...
+(26559|140719166895856) loadunloadcycle - unloading ORB done
+(26559|140719166895856) main - cycle done
+(26559|140719166895856) main - leaving
+0
+</workspaces/trunk/Bug_xxx>
+lothar@regensburg$ ./build.sh version svn-latest; echo $?
+ACE_ROOT=/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers
+TAO_ROOT=/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO
+CIAO_ROOT=/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO/CIAO
+DDS_ROOT=/tmp/notthere
+MPC_ROOT was set to /opt2/src/ACE/MPC.
+Using .../svn-latest/ACE_wrappers/bin/MakeProjectCreator/config/MPC.cfg
+'dynamic_types' directory /tmp/notthere/MPC not found.
+Generating 'gnuace' output using default input
+Generation Time: 0s
+make[1]: Entering directory `/workspaces/trunk/Bug_xxx'
+touch .depend.Bug_Xxx_Lib
+make[1]: Leaving directory `/workspaces/trunk/Bug_xxx'
+make[1]: Entering directory `/workspaces/trunk/Bug_xxx'
+
+GNUmakefile: /workspaces/trunk/Bug_xxx/GNUmakefile.Bug_Xxx_Lib MAKEFLAGS=w
+
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL -DBUGXXX_BUILD_DLL  -c -fPIC -o .shobj/DllORB.o DllORB.cpp
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL -DBUGXXX_BUILD_DLL  -c -fPIC -o .shobj/TestListener.o TestListener.cpp
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL -DBUGXXX_BUILD_DLL  -c -fPIC -o .shobj/TestBroadcaster.o TestBroadcaster.cpp
+/opt2/linux/ix86/bin/g++-4.3.1 -Wl,-O3 -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL -DBUGXXX_BUILD_DLL -shared -Wl,-h -Wl,libbugxxx.so.1.6.9 -o libbugxxx.so.1.6.9 .shobj/DllORB.o .shobj/TestListener.o .shobj/TestBroadcaster.o -m64 -I/opt2/linux/x86_64/include -m64 -L/opt2/linux/x86_64/lib -Wl,-E -L/workspaces/trunk/Bug_xxx -L. -L/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/lib -lTAO_PortableServer -lTAO_CosNotification -lTAO_CosEvent -lTAO_AnyTypeCode -lTAO -lACE -ldl -lpthread -lrt
+rm -f libbugxxx.so
+/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/bin/add_rel_link.sh libbugxxx.so.1.6.9 libbugxxx.so
+ln -s libbugxxx.so.1.6.9 libbugxxx.so
+chmod a+rx libbugxxx.so.1.6.9
+make[1]: Leaving directory `/workspaces/trunk/Bug_xxx'
+make[1]: Entering directory `/workspaces/trunk/Bug_xxx'
+touch .depend.Bug_Xxx_Server
+make[1]: Leaving directory `/workspaces/trunk/Bug_xxx'
+make[1]: Entering directory `/workspaces/trunk/Bug_xxx'
+
+GNUmakefile: /workspaces/trunk/Bug_xxx/GNUmakefile.Bug_Xxx_Server MAKEFLAGS=w
+
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL  -c -o .obj/server.o server.cpp
+/opt2/linux/ix86/bin/g++-4.3.1 -m64 -I/opt2/linux/x86_64/include -fvisibility=hidden -fvisibility-inlines-hidden -W -Wall -Wpointer-arith  -O3 -ggdb -pipe -DACE_USE_RCSID=0 -DACE_HAS_VALGRIND -D_REENTRANT -DACE_HAS_AIO_CALLS -D_GNU_SOURCE   -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -DACE_HAS_EXCEPTIONS -D__ACE_INLINE__ -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO -I/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/TAO/orbsvcs -DACE_HAS_IPV6 -DTAO_HAS_TYPED_EVENT_CHANNEL  -m64 -I/opt2/linux/x86_64/include -m64 -L/opt2/linux/x86_64/lib -Wl,-E -L/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/lib -L. -L/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/lib -o server .obj/server.o -lbugxxx -lTAO_Notify_Service -lTAO_IORTable -lTAO_CosNaming -lTAO_CosNotification_Serv -lTAO_Messaging -lTAO_PI -lTAO_CodecFactory -lTAO_DynamicAny -lTAO_Valuetype -lACE_ETCL_Parser -lTAO_ETCL -lACE_ETCL -lTAO_CosNotification_Skel -lTAO_CosEvent_Skel -lTAO_Svc_Utils -lTAO_PortableServer -lTAO_CosNotification -lTAO_CosEvent -lTAO_AnyTypeCode -lTAO -lACE -ldl -lpthread -lrt
+make[1]: Leaving directory `/workspaces/trunk/Bug_xxx'
+LD_LIBRARY_PATH=.:/opt2/linux/x86_64/ACE/svn-latest/ACE_wrappers/lib:.
+(26782|139948426938096) main - entered
+(26782|139948426938096) main - cycle ...
+(26782|139948426938096) loadunloadcycle - loading
+(26782|139948426938096) loadunloadcycle - loading ORB done
+(26782|139948426938096) loadunloadcycle - v_orb OK
+(26782|139948426938096) loadunloadcycle - v_poa OK
+(26782|139948426938096) loadunloadcycle - v_rootPOA OK
+(26782|139948426938096) loadunloadcycle - loading NamingService done
+Loading the Cos Notification Service...
+(26782|139948426938096) logging_strategy == 0
+(26782|139948426938096) loadunloadcycle - loading NotifyService done
+(26782|139948426938096) publish ...
+(26782|139948426938096) testListener.m_receivedData.size()=5
+(26782|139948426938096) publish done
+(26782|139948426938096) loadunloadcycle - unloading
+(26782|139948426938096) loadunloadcycle - unloading NotifyService ...
+(26782|139948426938096) loadunloadcycle - unloading NotifyService done
+(26782|139948426938096) loadunloadcycle - unloading NameService ...
+(26782|139948426938096) loadunloadcycle - unloading NameService done
+(26782|139948426938096) loadunloadcycle - unloading ORB ...
+(26782|139948426938096) loadunloadcycle - unloading ORB done
+(26782|139948426938096) main - cycle done
+(26782|139948426938096) main - leaving
+5
+</workspaces/trunk/Bug_xxx>
+lothar@regensburg$
