@@ -1,0 +1,24 @@
+Index: tools/IDL3_to_IDL2/idl3_to_idl2_visitor.cpp
+===================================================================
+--- tools/IDL3_to_IDL2/idl3_to_idl2_visitor.cpp	(revision 96701)
++++ tools/IDL3_to_IDL2/idl3_to_idl2_visitor.cpp	(working copy)
+@@ -897,7 +897,18 @@
+               break;
+             }
+           default:
+-            return d->ast_accept (this);
++            {
++              if (d->ast_accept (this) == -1)
++                {
++                  ACE_ERROR_RETURN ((LM_ERROR,
++                                     ACE_TEXT ("idl3_to_idl2_visitor")
++                                     ACE_TEXT ("::visit_porttype_mirror - ")
++                                     ACE_TEXT ("codegen for mirror port failed\n")),
++                                    -1);
++                }
++
++              break;
++            }
+         }
+     }
+ 
