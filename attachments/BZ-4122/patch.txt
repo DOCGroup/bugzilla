@@ -1,0 +1,15 @@
+--- OS_NS_sys_mman.inl.orig	2013-08-12 13:54:16.000000000 -0400
++++ OS_NS_sys_mman.inl	2013-08-12 13:55:50.000000000 -0400
+@@ -104,11 +104,11 @@
+ 
+ #  ifdef ACE_WIN64
+       const DWORD len_low = static_cast<DWORD>(len),
+         len_high = static_cast<DWORD>(len >> 32);
+ #  else
+-      const DWORD len_low = len, len_high = 0;
++      const DWORD len_low = static_cast<DWORD>(len), len_high = 0;
+ #  endif
+ 
+       *file_mapping = ACE_TEXT_CreateFileMapping (file_handle,
+                                                   attr,
+                                                   prot,
