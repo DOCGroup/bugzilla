@@ -1,0 +1,26 @@
+Index: TAO_IDL/be/be_component.cpp
+===================================================================
+--- TAO_IDL/be/be_component.cpp	(版本 96670)
++++ TAO_IDL/be/be_component.cpp	(工作副本)
+@@ -267,6 +267,7 @@
+     }
+ 
+   AST_Component *c = AST_Component::narrow_from_scope (s);
++  AST_Interface *interface = 0;
+ 
+   if (c != 0)
+     {
+@@ -282,6 +283,13 @@
+       // will be 0 and the call will return immediately.
+       this->scan (c->base_component ());
+     }
++  else if ( (interface = AST_Interface::narrow_from_scope(s)) != 0)
++    {
++      for (long i = 0; i < interface->n_inherits (); ++i)
++        {
++          this->scan (DeclAsScope (interface->inherits ()[i]));
++        }
++    }
+ }
+ 
+ void
