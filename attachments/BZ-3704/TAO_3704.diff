@@ -1,0 +1,203 @@
+Index: tao/Connection_Handler.h
+===================================================================
+--- tao/Connection_Handler.h	(revision 85694)
++++ tao/Connection_Handler.h	(working copy)
+@@ -136,6 +136,11 @@
+   /// Release the OS resources related to this handler.
+   virtual int release_os_resources (void);
+ 
++  virtual bool get_blocking_io ();
++
++  ///@return success/failure in changing blocking io mode
++  virtual bool set_blocking_io (bool block);
++
+   /*
+    * Hook to add public methods from concrete connection handler
+    * implementation onto the base connection handler.
+Index: tao/Block_Flushing_Strategy.cpp
+===================================================================
+--- tao/Block_Flushing_Strategy.cpp	(revision 85701)
++++ tao/Block_Flushing_Strategy.cpp	(working copy)
+@@ -3,11 +3,40 @@
+ #include "tao/Block_Flushing_Strategy.h"
+ #include "tao/Transport.h"
+ #include "tao/Queued_Message.h"
++#include "tao/Connection_Handler.h"
+ 
+ ACE_RCSID(tao, Block_Flushing_Strategy, "$Id$")
+ 
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
++namespace
++{
++  struct Blocking_Guard
++  {
++    explicit Blocking_Guard (TAO_Transport *t)
++      : transport_ (t)
++      , restore_nonblock_ (!t->connection_handler ()->get_blocking_io ())
++    {
++      if (this->restore_nonblock_)
++        {
++          t->connection_handler ()->set_blocking_io (true);
++        }
++    }
++
++    ~Blocking_Guard ()
++    {
++      if (this->restore_nonblock_)
++        {
++          this->transport_->connection_handler ()->set_blocking_io (false);
++        }
++    }
++
++    TAO_Transport *transport_;
++    bool restore_nonblock_;
++  };
++}
++
++
+ int
+ TAO_Block_Flushing_Strategy::schedule_output (TAO_Transport *)
+ {
+@@ -25,6 +54,7 @@
+                                             TAO_Queued_Message *msg,
+                                             ACE_Time_Value *max_wait_time)
+ {
++  Blocking_Guard g (transport);
+   while (!msg->all_data_sent ())
+     {
+       TAO::Transport::Drain_Constraints dc(
+@@ -39,6 +69,7 @@
+ TAO_Block_Flushing_Strategy::flush_transport (TAO_Transport *transport,
+                                               ACE_Time_Value *max_wait_time)
+ {
++  Blocking_Guard g (transport);
+   while (!transport->queue_is_empty ())
+     {
+       TAO::Transport::Drain_Constraints dc(
+Index: tao/IIOP_Connection_Handler.cpp
+===================================================================
+--- tao/IIOP_Connection_Handler.cpp	(revision 85694)
++++ tao/IIOP_Connection_Handler.cpp	(working copy)
+@@ -58,7 +58,8 @@
+ TAO_IIOP_Connection_Handler::TAO_IIOP_Connection_Handler (ACE_Thread_Manager *t)
+   : TAO_IIOP_SVC_HANDLER (t, 0 , 0),
+     TAO_Connection_Handler (0),
+-    dscp_codepoint_ (IPDSFIELD_DSCP_DEFAULT << 2)
++    dscp_codepoint_ (IPDSFIELD_DSCP_DEFAULT << 2),
++    blocking_io_ (false)
+ {
+   // This constructor should *never* get called, it is just here to
+   // make the compiler happy: the default implementation of the
+@@ -73,7 +74,8 @@
+   TAO_ORB_Core *orb_core)
+   : TAO_IIOP_SVC_HANDLER (orb_core->thr_mgr (), 0, 0),
+     TAO_Connection_Handler (orb_core),
+-    dscp_codepoint_ (IPDSFIELD_DSCP_DEFAULT << 2)
++    dscp_codepoint_ (IPDSFIELD_DSCP_DEFAULT << 2),
++    blocking_io_ (false)
+ {
+   TAO_IIOP_Transport* specific_transport = 0;
+   ACE_NEW (specific_transport,
+@@ -258,8 +260,9 @@
+         }
+     }
+ 
+-  if (this->transport ()->wait_strategy ()->non_blocking ()
+-      || this->transport ()->opened_as () == TAO::TAO_SERVER_ROLE)
++  this->blocking_io_ = !this->transport ()->wait_strategy ()->non_blocking ()
++    && (this->transport ()->opened_as () != TAO::TAO_SERVER_ROLE);
++  if (!this->blocking_io_)
+     {
+       if (this->peer ().enable (ACE_NONBLOCK) == -1)
+         return -1;
+@@ -668,6 +671,37 @@
+     }
+ }
+ 
++bool TAO_IIOP_Connection_Handler::get_blocking_io ()
++{
++  return this->blocking_io_;
++}
++
++bool TAO_IIOP_Connection_Handler::set_blocking_io (bool block)
++{
++  if (block == this->blocking_io_)
++    {
++      return true;
++    }
++
++  if (block)
++    {
++      if (this->peer ().disable (ACE_NONBLOCK) == -1)
++        {
++          return false;
++        }
++    }
++  else
++    {
++      if (this->peer ().enable (ACE_NONBLOCK) == -1)
++        {
++          return false;
++        }
++    }
++  this->blocking_io_ = block;
++  return true;
++}
++
++
+ //@@ CONNECTION_HANDLER_SPL_COPY_HOOK_END
+ /*
+  * End copy hook
+Index: tao/IIOP_Connection_Handler.h
+===================================================================
+--- tao/IIOP_Connection_Handler.h	(revision 85694)
++++ tao/IIOP_Connection_Handler.h	(working copy)
+@@ -123,6 +123,9 @@
+   virtual int release_os_resources (void);
+   //@}
+ 
++  virtual bool get_blocking_io ();
++  virtual bool set_blocking_io (bool block);
++
+   // helper function used by the set_dscp_codepoint () methods to
+   // set the TOS field in the IP packets.
+   int set_tos (int tos);
+@@ -131,6 +134,8 @@
+ 
+   /// Stores the type of service value.
+   int dscp_codepoint_;
++
++  bool blocking_io_;
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/Connection_Handler.inl
+===================================================================
+--- tao/Connection_Handler.inl	(revision 85694)
++++ tao/Connection_Handler.inl	(working copy)
+@@ -64,6 +64,24 @@
+     }
+ }
+ 
++/// Derived classes should implement these for proper support with the
++/// Blocking Flushing Strategy.
++//@{
++
++ACE_INLINE bool
++TAO_Connection_Handler::get_blocking_io ()
++{
++  return true;
++}
++
++ACE_INLINE bool
++TAO_Connection_Handler::set_blocking_io (bool)
++{
++  return true;
++}
++
++//@}
++
+ //@@ CONNECTION_HANDLER_SPL_METHODS_ADD_HOOK
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
