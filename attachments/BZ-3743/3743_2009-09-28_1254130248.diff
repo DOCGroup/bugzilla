@@ -1,0 +1,728 @@
+Index: include/idl_global.h
+===================================================================
+--- include/idl_global.h	(revision 86667)
++++ include/idl_global.h	(working copy)
+@@ -556,9 +556,9 @@
+   // keywords e.g. delete, operator etc. with _cxx_ prefix.
+   // Is set by the IFR Service.
+ 
+-  void add_include_path (const char *s);
++  void add_include_path (const char *s, bool is_system);
+   // Add another path to 'include_paths_'.
+-  
++
+   void add_rel_include_path (const char *s);
+   ACE_Unbounded_Queue<char *> const & rel_include_paths (void) const;
+   // Accessor/mutator for the rel_include_paths_ member.
+@@ -703,9 +703,15 @@
+   bool preserve_cpp_keywords_;
+   // Do we allow C++ keywords as identifiers in the idl to stay as they are ?
+ 
+-  ACE_Unbounded_Queue<char *> include_paths_;
++  struct Include_Path_Info {
++    char *path_;
++    bool is_system_;
++  };
++  typedef ACE_Unbounded_Queue<Include_Path_Info> Unbounded_Paths_Queue;
++  typedef ACE_Unbounded_Queue_Iterator<Include_Path_Info> Unbounded_Paths_Queue_Iterator;
++  Unbounded_Paths_Queue include_paths_;
+   // List of -I options passed to us.
+-  
++
+   ACE_Unbounded_Queue<char *> rel_include_paths_;
+   // Used by backends with the -r option.
+ 
+Index: include/drv_extern.h
+===================================================================
+--- include/drv_extern.h	(revision 86667)
++++ include/drv_extern.h	(working copy)
+@@ -76,7 +76,9 @@
+ extern void DRV_pre_proc (char const * myfile);
+ extern void DRV_store_env_include_paths (void);
+ extern void DRV_cpp_init (void);
+-extern ACE_CString& DRV_add_include_path (ACE_CString&, const char* p, const char* suffix);
++extern ACE_CString& DRV_add_include_path (ACE_CString&,
++                                          const char* p, const char* suffix,
++                                          bool is_system);
+ extern void DRV_cpp_post_init (void);
+ extern void DRV_cpp_putarg (char const * str);
+ extern void DRV_cpp_new_location (char const * new_loc);
+Index: fe/fe_init.cpp
+===================================================================
+--- fe/fe_init.cpp	(revision 86667)
++++ fe/fe_init.cpp	(working copy)
+@@ -727,7 +727,7 @@
+        !iter.done (); iter.advance ())
+     {
+       iter.next (path_tmp);
+-      idl_global->add_include_path (path_tmp->fast_rep ());
++      idl_global->add_include_path (path_tmp->fast_rep (), false);
+     }
+ }
+ 
+Index: driver/drv_mcpp_preproc.cpp
+===================================================================
+--- driver/drv_mcpp_preproc.cpp	(revision 86667)
++++ driver/drv_mcpp_preproc.cpp	(working copy)
+@@ -265,8 +265,8 @@
+       // IDL_GlobalData::validate_orb_include accordingly.
+       if (TAO_ROOT != 0)
+         {
+-            DRV_add_include_path (include_path1, TAO_ROOT, 0);
+-            DRV_add_include_path (include_path2, TAO_ROOT, "/tao");
++            DRV_add_include_path (include_path1, TAO_ROOT, 0, true);
++            DRV_add_include_path (include_path2, TAO_ROOT, "/tao", true);
+         }
+       else
+         {
+@@ -274,8 +274,8 @@
+ 
+           if (ACE_ROOT != 0)
+             {
+-              DRV_add_include_path (include_path1, ACE_ROOT, "/TAO");
+-              DRV_add_include_path (include_path2, ACE_ROOT, "/TAO/tao");
++              DRV_add_include_path (include_path1, ACE_ROOT, "/TAO", true);
++              DRV_add_include_path (include_path2, ACE_ROOT, "/TAO/tao", true);
+             }
+           else
+             {
+@@ -283,10 +283,10 @@
+               // TAO_IDL_INCLUDE_DIR may be in quotes,
+               // e.g. "/usr/local/include/tao"
+               // We deal with a case like this below ...
+-              DRV_add_include_path (include_path1, TAO_IDL_INCLUDE_DIR, 0);
+-              DRV_add_include_path (include_path2, TAO_IDL_INCLUDE_DIR, "/tao");
++              DRV_add_include_path (include_path1, TAO_IDL_INCLUDE_DIR, 0, true);
++              DRV_add_include_path (include_path2, TAO_IDL_INCLUDE_DIR, "/tao", true);
+ #else
+-              DRV_add_include_path (include_path1, ".", 0);
++              DRV_add_include_path (include_path1, ".", 0, true);
+ #endif  /* TAO_IDL_INCLUDE_DIR */
+             }
+         }
+@@ -377,7 +377,7 @@
+ 
+                   if (full_path != 0)
+                     {
+-                      idl_global->add_include_path (full_path);
++                      idl_global->add_include_path (full_path, false);
+                     }
+ 
+                   include_added = true;
+@@ -412,7 +412,8 @@
+ }
+ 
+ ACE_CString&
+-DRV_add_include_path (ACE_CString& include_path, const char* p, const char* suffix)
++DRV_add_include_path (ACE_CString& include_path, const char* p,
++                      const char* suffix, bool is_system)
+ {
+   if (p == 0) return include_path;
+ 
+@@ -461,7 +462,7 @@
+       include_option += '"';
+ 
+   DRV_cpp_putarg (include_option.c_str ());
+-  idl_global->add_include_path (include_path.c_str ());
++  idl_global->add_include_path (include_path.c_str (), is_system);
+ 
+   return include_path;
+ }
+@@ -481,7 +482,7 @@
+   // IDL_GlobalData::validate_orb_include accordingly.
+   if (TAO_ROOT != 0)
+     {
+-      DRV_add_include_path (include_path3, TAO_ROOT, "/orbsvcs");
++      DRV_add_include_path (include_path3, TAO_ROOT, "/orbsvcs", true);
+     }
+   else
+     {
+@@ -490,18 +491,19 @@
+ 
+       if (ACE_ROOT != 0)
+         {
+-          DRV_add_include_path (include_path3, ACE_ROOT, "/TAO/orbsvcs");
++          DRV_add_include_path (include_path3, ACE_ROOT, "/TAO/orbsvcs", true);
+         }
+       else
+         {
+ #if defined (TAO_IDL_INCLUDE_DIR)
+           DRV_add_include_path (include_path3,
+                                 TAO_IDL_INCLUDE_DIR,
+-                                "/orbsvcs");
++                                "/orbsvcs",
++                                 true);
+ #else
+           // If ACE_ROOT isn't defined either, there will already
+           // be a warning from DRV_preproc().
+-          DRV_add_include_path (include_path3, ".", 0);
++          DRV_add_include_path (include_path3, ".", 0, true);
+ #endif /* TAO_IDL_INCLUDE_DIR */
+         }
+     }
+@@ -513,16 +515,16 @@
+   // IDL_GlobalData::validate_orb_include accordingly.
+   if (CIAO_ROOT != 0)
+     {
+-      DRV_add_include_path (include_path4, CIAO_ROOT, 0);
+-      DRV_add_include_path (include_path5, CIAO_ROOT, "/ciao");
+-      DRV_add_include_path (include_path5, CIAO_ROOT, "/ccm");
++      DRV_add_include_path (include_path4, CIAO_ROOT, 0, true);
++      DRV_add_include_path (include_path5, CIAO_ROOT, "/ciao", true);
++      DRV_add_include_path (include_path5, CIAO_ROOT, "/ccm", true);
+     }
+   else if (TAO_ROOT != 0)
+     {
+       // If CIAO_ROOT hasn't been set, maybe it's nested under TAO_ROOT.
+-      DRV_add_include_path (include_path4, TAO_ROOT, "/CIAO");
+-      DRV_add_include_path (include_path5, TAO_ROOT, "/CIAO/ciao");
+-      DRV_add_include_path (include_path5, TAO_ROOT, "/CIAO/ccm");
++      DRV_add_include_path (include_path4, TAO_ROOT, "/CIAO", true);
++      DRV_add_include_path (include_path5, TAO_ROOT, "/CIAO/ciao", true);
++      DRV_add_include_path (include_path5, TAO_ROOT, "/CIAO/ccm", true);
+     }
+   else
+     {
+@@ -531,27 +533,30 @@
+ 
+       if (ACE_ROOT != 0)
+         {
+-          DRV_add_include_path (include_path4, ACE_ROOT, "/TAO/CIAO");
+-          DRV_add_include_path (include_path5, ACE_ROOT, "/TAO/CIAO/ciao");
+-          DRV_add_include_path (include_path5, ACE_ROOT, "/TAO/CIAO/ccm");
++          DRV_add_include_path (include_path4, ACE_ROOT, "/TAO/CIAO", true);
++          DRV_add_include_path (include_path5, ACE_ROOT, "/TAO/CIAO/ciao", true);
++          DRV_add_include_path (include_path5, ACE_ROOT, "/TAO/CIAO/ccm", true);
+         }
+       else
+         {
+ #if defined (TAO_IDL_INCLUDE_DIR)
+           DRV_add_include_path (include_path4,
+                                 TAO_IDL_INCLUDE_DIR,
+-                                0);
++                                0,
++                                true);
+           DRV_add_include_path (include_path5,
+                                 TAO_IDL_INCLUDE_DIR,
+-                                "/ciao");
++                                "/ciao",
++                                true);
+           DRV_add_include_path (include_path5,
+                                 TAO_IDL_INCLUDE_DIR,
+-                                "/ccm");
++                                "/ccm",
++                                true);
+ #else
+           // If ACE_ROOT isn't defined either, there will already
+           // be a warning from DRV_preproc().
+-          DRV_add_include_path (include_path4, ACE_ROOT, ".");
+-          DRV_add_include_path (include_path5, ACE_ROOT, ".");
++          DRV_add_include_path (include_path4, ACE_ROOT, ".", true);
++          DRV_add_include_path (include_path5, ACE_ROOT, ".", true);
+ #endif /* TAO_IDL_INCLUDE_DIR */
+         }
+     }
+@@ -872,7 +877,7 @@
+       // to the preprocessor.
+       // This should go after user supplied include paths.
+       ACE_CString include_path_arg;
+-      DRV_add_include_path (include_path_arg, directory, "/tao");
++      DRV_add_include_path (include_path_arg, directory, "/tao", true);
+     }
+ 
+   while (DRV_get_line (fp))
+@@ -1014,12 +1019,12 @@
+     }
+ 
+   FE_set_yyin (yyin);
+-  
++
+   if (idl_global->compile_flags () & IDL_CF_ONLY_PREPROC)
+     {
+       char buffer[ACE_MAXLOGMSGLEN];
+       size_t bytes;
+-      
++
+       // ACE_DEBUG sends to stderr - we want stdout for this dump
+       // of the preprocessor output. So we modify the singleton that
+       // was created in this process. Since IDL_CF_ONLY_PREPROC causes
+@@ -1029,9 +1034,9 @@
+       out->msg_ostream (&cout);
+       out->clr_flags (ACE_Log_Msg::STDERR);
+       out->set_flags (ACE_Log_Msg::OSTREAM);
+-      
++
+       size_t end = ACE_OS::strlen (yyin);
+-      
++
+       for (size_t i = 0; i < end; i += ACE_MAXLOGMSGLEN)
+         {
+           ACE_DEBUG ((LM_DEBUG, "%s",
+Index: driver/drv_preproc.cpp
+===================================================================
+--- driver/drv_preproc.cpp	(revision 86667)
++++ driver/drv_preproc.cpp	(working copy)
+@@ -270,12 +270,10 @@
+ 
+       char* TAO_ROOT = ACE_OS::getenv ("TAO_ROOT");
+ 
+-      // When adding new dirs here don't forget to update
+-      // IDL_GlobalData::validate_orb_include accordingly.
+       if (TAO_ROOT != 0)
+         {
+-            DRV_add_include_path (include_path1, TAO_ROOT, 0);
+-            DRV_add_include_path (include_path2, TAO_ROOT, "/tao");
++            DRV_add_include_path (include_path1, TAO_ROOT, 0, true);
++            DRV_add_include_path (include_path2, TAO_ROOT, "/tao", true);
+         }
+       else
+         {
+@@ -283,8 +281,8 @@
+ 
+           if (ACE_ROOT != 0)
+             {
+-              DRV_add_include_path (include_path1, ACE_ROOT, "/TAO");
+-              DRV_add_include_path (include_path2, ACE_ROOT, "/TAO/tao");
++              DRV_add_include_path (include_path1, ACE_ROOT, "/TAO", true);
++              DRV_add_include_path (include_path2, ACE_ROOT, "/TAO/tao", true);
+             }
+           else
+             {
+@@ -294,12 +292,14 @@
+               // We deal with a case like this below ...
+               DRV_add_include_path (include_path1,
+                                     TAO_IDL_INCLUDE_DIR,
+-                                    0);
++                                    0,
++                                    true);
+               DRV_add_include_path (include_path2,
+                                     TAO_IDL_INCLUDE_DIR,
+-                                    "/tao");
++                                    "/tao",
++                                    true);
+ #else
+-              DRV_add_include_path (include_path1, ".", 0);
++              DRV_add_include_path (include_path1, ".", 0, true);
+ #endif  /* TAO_IDL_INCLUDE_DIR */
+             }
+         }
+@@ -394,7 +394,7 @@
+ 
+                   if (full_path != 0)
+                     {
+-                      idl_global->add_include_path (full_path);
++                      idl_global->add_include_path (full_path, false);
+                     }
+ 
+                   include_added = true;
+@@ -429,7 +429,8 @@
+ }
+ 
+ ACE_CString&
+-DRV_add_include_path (ACE_CString& include_path, const char* p, const char* suffix)
++DRV_add_include_path (ACE_CString& include_path, const char* p,
++                      const char* suffix, bool is_system)
+ {
+   if (p == 0) return include_path;
+ 
+@@ -478,7 +479,7 @@
+       include_option += '"';
+ 
+   DRV_cpp_putarg (include_option.c_str ());
+-  idl_global->add_include_path (include_path.c_str ());
++  idl_global->add_include_path (include_path.c_str (), is_system);
+ 
+   return include_path;
+ }
+@@ -498,7 +499,7 @@
+   // IDL_GlobalData::validate_orb_include accordingly.
+   if (TAO_ROOT != 0)
+     {
+-      DRV_add_include_path (include_path3, TAO_ROOT, "/orbsvcs");
++      DRV_add_include_path (include_path3, TAO_ROOT, "/orbsvcs", true);
+     }
+   else
+     {
+@@ -507,18 +508,19 @@
+ 
+       if (ACE_ROOT != 0)
+         {
+-          DRV_add_include_path (include_path3, ACE_ROOT, "/TAO/orbsvcs");
++          DRV_add_include_path (include_path3, ACE_ROOT, "/TAO/orbsvcs", true);
+         }
+       else
+         {
+ #if defined (TAO_IDL_INCLUDE_DIR)
+           DRV_add_include_path (include_path3,
+                                 TAO_IDL_INCLUDE_DIR,
+-                                "/orbsvcs");
++                                "/orbsvcs",
++                                true);
+ #else
+           // If ACE_ROOT isn't defined either, there will already
+           // be a warning from DRV_preproc().
+-          DRV_add_include_path (include_path3, ".", 0);
++          DRV_add_include_path (include_path3, ".", 0, true);
+ #endif  /* TAO_IDL_INCLUDE_DIR */
+         }
+     }
+@@ -530,16 +532,16 @@
+   // IDL_GlobalData::validate_orb_include accordingly.
+   if (CIAO_ROOT != 0)
+     {
+-      DRV_add_include_path (include_path4, CIAO_ROOT, 0);
+-      DRV_add_include_path (include_path5, CIAO_ROOT, "/ciao");
+-      DRV_add_include_path (include_path5, CIAO_ROOT, "/ccm");
++      DRV_add_include_path (include_path4, CIAO_ROOT, 0, true);
++      DRV_add_include_path (include_path5, CIAO_ROOT, "/ciao", true);
++      DRV_add_include_path (include_path5, CIAO_ROOT, "/ccm", true);
+     }
+   else if (TAO_ROOT != 0)
+     {
+       // If CIAO_ROOT hasn't been set, maybe it's nested under TAO_ROOT.
+-      DRV_add_include_path (include_path4, TAO_ROOT, "/CIAO");
+-      DRV_add_include_path (include_path5, TAO_ROOT, "/CIAO/ciao");
+-      DRV_add_include_path (include_path5, TAO_ROOT, "/CIAO/ccm");
++      DRV_add_include_path (include_path4, TAO_ROOT, "/CIAO", true);
++      DRV_add_include_path (include_path5, TAO_ROOT, "/CIAO/ciao", true);
++      DRV_add_include_path (include_path5, TAO_ROOT, "/CIAO/ccm", true);
+     }
+   else
+     {
+@@ -548,27 +550,30 @@
+ 
+       if (ACE_ROOT != 0)
+         {
+-          DRV_add_include_path (include_path4, ACE_ROOT, "/TAO/CIAO");
+-          DRV_add_include_path (include_path5, ACE_ROOT, "/TAO/CIAO/ciao");
+-          DRV_add_include_path (include_path5, ACE_ROOT, "/TAO/CIAO/ccm");
++          DRV_add_include_path (include_path4, ACE_ROOT, "/TAO/CIAO", true);
++          DRV_add_include_path (include_path5, ACE_ROOT, "/TAO/CIAO/ciao", true);
++          DRV_add_include_path (include_path5, ACE_ROOT, "/TAO/CIAO/ccm", true);
+         }
+       else
+         {
+ #if defined (TAO_IDL_INCLUDE_DIR)
+           DRV_add_include_path (include_path4,
+                                 TAO_IDL_INCLUDE_DIR,
+-                                0);
++                                0,
++                                true);
+           DRV_add_include_path (include_path5,
+                                 TAO_IDL_INCLUDE_DIR,
+-                                "/ciao");
++                                "/ciao",
++                                true);
+           DRV_add_include_path (include_path5,
+                                 TAO_IDL_INCLUDE_DIR,
+-                                "/ccm");
++                                "/ccm",
++                                true);
+ #else
+           // If ACE_ROOT isn't defined either, there will already
+           // be a warning from DRV_preproc().
+-          DRV_add_include_path (include_path4, ACE_ROOT, ".");
+-          DRV_add_include_path (include_path5, ACE_ROOT, ".");
++          DRV_add_include_path (include_path4, ACE_ROOT, ".", true);
++          DRV_add_include_path (include_path5, ACE_ROOT, ".", true);
+ #endif  /* TAO_IDL_INCLUDE_DIR */
+         }
+     }
+@@ -889,7 +894,7 @@
+       // to the preprocessor.
+       // This should go after user supplied include paths.
+       ACE_CString include_path_arg;
+-      DRV_add_include_path (include_path_arg, directory, "/tao");
++      DRV_add_include_path (include_path_arg, directory, "/tao", true);
+     }
+ 
+   while (DRV_get_line (fp))
+Index: driver/drv_args.cpp
+===================================================================
+--- driver/drv_args.cpp	(revision 86667)
++++ driver/drv_args.cpp	(working copy)
+@@ -300,7 +300,7 @@
+                       arg += (has_space ? "\"" : "");
+ 
+                       DRV_cpp_putarg (arg.c_str ());
+-                      idl_global->add_include_path (arg.substr (2).c_str ());
++                      idl_global->add_include_path (arg.substr (2).c_str (), false);
+                       ++i;
+                     }
+                   else
+@@ -330,7 +330,7 @@
+                   arg += av[i] + 2;
+                   arg += (has_space? "\"" : "");
+ 
+-                  idl_global->add_include_path (arg.substr (2).c_str ());
++                  idl_global->add_include_path (arg.substr (2).c_str (), false);
+                   DRV_cpp_putarg (arg.c_str ());
+                 }
+ 
+Index: util/utl_global.cpp
+===================================================================
+--- util/utl_global.cpp	(revision 86667)
++++ util/utl_global.cpp	(working copy)
+@@ -734,7 +734,7 @@
+ 
+   char pre_abspath[MAXPATHLEN] = "";
+   char post_abspath[MAXPATHLEN] = "";
+-  char **path_tmp = 0;
++  Include_Path_Info *path_info = 0;
+   char *post_tmp = 0;
+   char *full_path = 0;
+ 
+@@ -771,14 +771,12 @@
+ 
+           if (valid_file == 0)
+             {
+-              for (ACE_Unbounded_Queue_Iterator<char *>iter (
+-                      this->include_paths_
+-                    );
+-                  !iter.done ();
+-                  iter.advance ())
++              for (Unbounded_Paths_Queue_Iterator iter (this->include_paths_);
++                   !iter.done ();
++                   iter.advance ())
+                 {
+-                  iter.next (path_tmp);
+-                  ACE_CString pre_partial (*path_tmp);
++                  iter.next (path_info);
++                  ACE_CString pre_partial (path_info->path_);
+ 
+                   // If the include path has literal "s (because of an include
+                   // of a Windows path with spaces), we must remove them here.
+@@ -1353,9 +1351,10 @@
+ }
+ 
+ void
+-IDL_GlobalData::add_include_path (const char *s)
++IDL_GlobalData::add_include_path (const char *s, bool is_system)
+ {
+-  this->include_paths_.enqueue_tail (ACE::strnew (s));
++  Include_Path_Info info = { ACE::strnew (s), is_system };
++  this->include_paths_.enqueue_tail (info);
+ }
+ 
+ void
+@@ -1573,18 +1572,18 @@
+   delete [] this->pd_include_file_names;
+   this->pd_include_file_names = 0;
+ 
+-  char **path_tmp = 0;
++  Include_Path_Info *path_info = 0;
+ 
+-  for (ACE_Unbounded_Queue_Iterator<char *>qiter (
+-            this->include_paths_
+-          );
++  for (Unbounded_Paths_Queue_Iterator qiter (this->include_paths_);
+        qiter.done () == 0;
+        qiter.advance ())
+     {
+-      qiter.next (path_tmp);
+-      ACE::strdelete (*path_tmp);
++      qiter.next (path_info);
++      ACE::strdelete (path_info->path_);
+     }
+ 
++  char **path_tmp  = 0;
++
+   for (ACE_Unbounded_Queue_Iterator<char *>riter (
+             this->rel_include_paths_
+           );
+@@ -1866,22 +1865,22 @@
+   ACE_CString const the_file (ACE_CString ('/')
+                               + ACE_CString (filename));
+ 
+-  for (ACE_Unbounded_Queue_Iterator<char *> i (this->include_paths_);
++  for (Unbounded_Paths_Queue_Iterator i (this->include_paths_);
+        !i.done () && f == 0;
+        i.advance ())
+     {
+-      char ** path = 0;
+-      (void) i.next (path);
++      Include_Path_Info *path_info = 0;
++      (void) i.next (path_info);
+ 
+-      if (path != 0)
++      if (path_info->path_ != 0)
+         {
+-          ACE_CString const complete_filename (ACE_CString (*path)
++          ACE_CString const complete_filename (ACE_CString (path_info->path_)
+                                                + the_file);
+ 
+           f = ACE_OS::fopen (complete_filename.c_str (), "r");
+ 
+           if (f != 0)
+-            directory = *path;
++            directory = path_info->path_;
+         }
+     }
+ 
+@@ -1933,142 +1932,53 @@
+ bool
+ IDL_GlobalData::validate_orb_include (UTL_String * idl_file_name)
+ {
+-  // It's important to update the values of orb_includes/svcs_includes
+-  // once new predefined include dirs are added somewhere in
+-  // driver/drv_preproc.cpp
++  char foundpath[MAXPATHLEN] = "";
+ 
+-  ACE_Unbounded_Queue<ACE_CString> list;
+-  FE_extract_env_include_paths (list);
+-  const size_t env_includes = list.size () + 1; // 1 for current folder
++  {
++    // Check in the current folder.
++    char abspath[MAXPATHLEN] = "";
++    ACE_CString cwd_path = ACE_OS::getcwd (abspath,
++                                           sizeof (abspath) / sizeof (char));
++    if (is_include_file_found (cwd_path, idl_file_name, this))
++      {
++        ACE_OS::strcpy (foundpath, cwd_path.c_str ());
++      }
++  }
+ 
+-  // We try to search for idl_file_name in several folders in the
+-  // following order.
+-  //   0) Current folder (include_counter == 0). If idl_file_name is
+-  //      found here then it's definitely not TAO specific. Return false.
+-  //   1) Those includes that were extracted from INCLUDE environment
+-  //      variable if one existed (include_counter > 0 && include_counter
+-  //      < env_includes). If idl_file_name is found here then
+-  //      we have to check if its complete path is not equal to any of
+-  //      those in group 2 or 4.
+-  //   2) $TAO_ROOT, $TAO_ROOT/tao
+-  //      (include_counter >= env_includes && include_counter < env_includes
+-  //      + orb_includes). Return true if nothing was found in group
+-  //      1 and idl_file_name is found here OR idl_file_name was found
+-  //      in group 1 and path is the same as here.
+-  //   3) User specific includes i.e. those that were provided with -I
+-  //      option (include_counter >= env_includes + orb_includes &&
+-  //      include_counter < all_includes - svcs_includes). If idl_file_name
+-  //      is found here then check for existence of the same path in group 4.
+-  //   4) $TAO_ROOT/orbsvcs, $TAO_ROOT/CIAO, $TAO_ROOT/CIAO/ciao,
+-  //      $TAO_ROOT/CIAO/ccm
+-  //      (include_counter >= all_includes - svcs_includes && include_counter
+-  //      < all_includes). Return true if nothing was found in groups
+-  //      1 or 3 and idl_file_name is found here OR idl_file_name
+-  //      was found in groups 1 or 3 and path is the same as here.
+-  // Return false if idl_file_name was found neither in groups 2 nor 4.
++  for (Unbounded_Paths_Queue_Iterator iter (this->include_paths_);
++       !iter.done ();
++       iter.advance ())
++    {
++      Include_Path_Info *path_info = 0;
++      iter.next (path_info);
+ 
+-  const size_t orb_includes = 2;
+-  const size_t svcs_includes = 4;
+-  const size_t all_includes =
+-    this->include_paths_.size () + 1; // 1 for current folder
++      ACE_CString partial = path_info->path_;
+ 
+-  char foundpath[MAXPATHLEN] = "";
+-  size_t include_counter = 0;
+-  unsigned int inc_group = 0;
+-
+-  for (ACE_Unbounded_Queue_Iterator<char *>iter (this->include_paths_);
+-       !iter.done (); ++include_counter)
+-    {
+-      if (include_counter == 0)
++      // We don't need to check anything if the file is already
++      // found and the folder where are currently checking is
++      // provided by user.
++      if (foundpath[0] != 0 && !path_info->is_system_)
+         {
+-          inc_group = 0;
+-        }
+-      else if (include_counter > 0 &&
+-               include_counter < env_includes)
+-        {
+-          inc_group = 1;
+-        }
+-      else if (include_counter >= env_includes &&
+-               include_counter < env_includes + orb_includes)
+-        {
+-          inc_group = 2;
+-        }
+-      else if (include_counter >= env_includes + orb_includes &&
+-               include_counter < all_includes - svcs_includes)
+-        {
+-          inc_group = 3;
+-        }
+-      else if (include_counter >= all_includes - svcs_includes &&
+-               include_counter < all_includes)
+-        {
+-          inc_group = 4;
+-        }
+-
+-      // We don't need to check anything in groups 1 and 3 if
+-      // foundpath was already set then we only have to check
+-      // whether it belongs to groups 2 or 4.
+-      if (foundpath[0] != 0 && (inc_group == 1 || inc_group == 3))
+-        {
+-          iter.advance ();
+           continue;
+         }
+ 
+-      ACE_CString partial;
+-      if (inc_group == 0)
+-        {
+-          char abspath[MAXPATHLEN] = "";
+-          char *path_tmp = ACE_OS::getcwd (abspath, MAXPATHLEN);
+-          partial = path_tmp;
+-        }
+-      else
+-        {
+-          char **path_tmp = 0;
+-          iter.next (path_tmp);
+-          iter.advance ();
+-          partial = *path_tmp;
+-        }
+-
+       if (is_include_file_found (partial, idl_file_name, this))
+         {
+-          // 0)
+-          if (inc_group == 0)
++          if (path_info->is_system_)
+             {
+-              return false;
+-            }
+-          // 1)
+-          else if (inc_group == 1)
+-            {
+-              // We can fill in foundpath here since we are sure
+-              // that it was not set before. Check above ensures that.
+-              ACE_OS::strcpy (foundpath, partial.c_str ());
+-              continue;
+-            }
+-          // 2)
+-          else if (inc_group == 2)
+-            {
+               if (foundpath[0] == 0 ||
+                   ACE_OS::strcmp (foundpath, partial.c_str ()) == 0)
+                 {
+                   return true;
+                 }
+             }
+-          // 3)
+-          else if (inc_group == 3)
++          else
+             {
+               // We can fill in foundpath here since we are sure
+               // that it was not set before. Check above ensures that.
+               ACE_OS::strcpy (foundpath, partial.c_str ());
+               continue;
+             }
+-          // 4)
+-          else if (inc_group == 4)
+-            {
+-              if (foundpath[0] == 0 ||
+-                  ACE_OS::strcmp (foundpath, partial.c_str ()) == 0)
+-                {
+-                  return true;
+-                }
+-            }
+         }
+     }
+ 
