@@ -1,0 +1,259 @@
+>Debug.ListCallStack /AllThreads 
+Callstack for Thread 1 (Thread Id: 748 (0x2ec)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      KernelBase.dll!751f179c() 
+ 5      ACEd.dll!ACE_OS::thr_join(void * thr_handle=0x00000240, unsigned long * status=0x0026de2c) 
+ 6      ACEd.dll!ACE_Thread::join(void * wait_for=0x00000240, unsigned long * status=0x00000000) 
+ 7      ACEd.dll!ACE_Thread_Manager::wait_task(ACE_Task_Base * task=0x00d883d8) 
+ 8      ACEd.dll!ACE_Task_Base::wait() 
+ 9      OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Sedp::Task::~Task() 
+ 10     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Sedp::~Sedp() 
+ 11     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Spdp::~Spdp() 
+ 12     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Spdp::`scalar deleting destructor'() 
+ 13     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::RcObject<ACE_Thread_Mutex>::_remove_ref() 
+ 14     OpenDDS_Rtpsd.dll!OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp>::bump_down() 
+ 15     OpenDDS_Rtpsd.dll!OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp>::~RcHandle<OpenDDS::RTPS::Spdp>() 
+ 16     OpenDDS_Rtpsd.dll!std::_Pair_base<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >::~_Pair_base<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >() 
+ 17     OpenDDS_Rtpsd.dll!std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >::~pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >() 
+ 18     OpenDDS_Rtpsd.dll!std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> >::`scalar deleting destructor'() 
+ 19     OpenDDS_Rtpsd.dll!std::_Destroy<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >(std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > * _Ptr=0x0112eadc ({guidPrefix=0x0112eadc "" entityId={...} }, {ptr_=0x00d882e0 })) 
+ 20     OpenDDS_Rtpsd.dll!std::allocator<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >::destroy(std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > * _Ptr=0x0112eadc ({guidPrefix=0x0112eadc "" entityId={...} }, {ptr_=0x00d882e0 })) 
+ 21     OpenDDS_Rtpsd.dll!std::_Dest_val<std::allocator<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >,std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >(std::allocator<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > > & _Alval={...}, std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > * _Pdest=0x0112eadc ({guidPrefix=0x0112eadc "" entityId={...} }, {ptr_=0x00d882e0 })) 
+ 22     OpenDDS_Rtpsd.dll!std::_Tree<std::_Tmap_traits<OpenDDS::DCPS::GUID_t,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp>,OpenDDS::DCPS::GUID_tKeyLessThan,std::allocator<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >,0> >::erase(std::_Tree_const_iterator<std::_Tree_val<std::_Tmap_traits<OpenDDS::DCPS::GUID_t,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp>,OpenDDS::DCPS::GUID_tKeyLessThan,std::allocator<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >,0> > > _Where=({guidPrefix=0x00dcae3c "" entityId={...} }, {ptr_=0x00deda08 })) 
+ 23     OpenDDS_Rtpsd.dll!std::_Tree<std::_Tmap_traits<OpenDDS::DCPS::GUID_t,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp>,OpenDDS::DCPS::GUID_tKeyLessThan,std::allocator<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >,0> >::erase(std::_Tree_const_iterator<std::_Tree_val<std::_Tmap_traits<OpenDDS::DCPS::GUID_t,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp>,OpenDDS::DCPS::GUID_tKeyLessThan,std::allocator<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >,0> > > _First=({guidPrefix=0x00dcae3c "" entityId={...} }, {ptr_=0x00deda08 }), std::_Tree_const_iterator<std::_Tree_val<std::_Tmap_traits<OpenDDS::DCPS::GUID_t,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp>,OpenDDS::DCPS::GUID_tKeyLessThan,std::allocator<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >,0> > > _Last=({guidPrefix=0x00dcae3c "" entityId={...} }, {ptr_=0x00deda08 })) 
+ 24     OpenDDS_Rtpsd.dll!std::_Tree<std::_Tmap_traits<OpenDDS::DCPS::GUID_t,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp>,OpenDDS::DCPS::GUID_tKeyLessThan,std::allocator<std::pair<OpenDDS::DCPS::GUID_t const ,OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::Spdp> > >,0> >::erase(const OpenDDS::DCPS::GUID_t & _Keyval={...}) 
+ 25     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::RtpsDiscovery::remove_domain_participant(int domain=11, const OpenDDS::DCPS::GUID_t & participantId={...}) 
+ 26     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::DomainParticipantFactoryImpl::delete_participant(DDS::DomainParticipant * a_participant=0x00dc8820) 
+ 27     dpshutdown.exe!ace_main_i(int argc=1, char * * argv=0x00d71080) 
+ 28     dpshutdown.exe!ACE_Main::run_i(int argc=1, char * * argv=0x00d71080) 
+ 29     ACEd.dll!ACE_Main_Base::run(int argc=1, char * * argv=0x00d71080) 
+ 30     dpshutdown.exe!main(int argc=1, char * * argv=0x00d71080) 
+ 31     dpshutdown.exe!__tmainCRTStartup() 
+ 32     dpshutdown.exe!mainCRTStartup() 
+ 33     kernel32.dll!758aed6c() 
+ 34     ntdll.dll!7708377b() 
+ 35     ntdll.dll!7708374e() 
+
+Callstack for Thread 2 (Thread Id: 3712 (0xe80)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a04() 
+ 4      ntdll.dll!7704fe39() 
+ 5      kernel32.dll!758aed6c() 
+ 6      ntdll.dll!7708377b() 
+ 7      ntdll.dll!7708374e() 
+
+Callstack for Thread 3 (Thread Id: 4364 (0x110c)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      mswsock.dll!74c26f0f() 
+ 5      mswsock.dll!74c26d30() 
+ 6      ws2_32.dll!771e2f7d() 
+ 7      ws2_32.dll!771e6a28() 
+ 8      ACEd.dll!ACE_OS::select(int width=0, fd_set * rfds=0x00d7614c, fd_set * wfds=0x00000000, fd_set * efds=0x00000000, const ACE_Time_Value * timeout=0x00000000) 
+ 9      ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::wait_for_multiple_events(ACE_Select_Reactor_Handle_Set & dispatch_set={...}, ACE_Time_Value * max_wait_time=0x00000000) 
+ 10     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i(ACE_Time_Value * max_wait_time=0x00000000) 
+ 11     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value * max_wait_time=0x00000000) 
+ 12     ACEd.dll!ACE_Reactor::run_reactor_event_loop(int (ACE_Reactor *)* eh=0x00000000) 
+ 13     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::Service_Participant::ReactorTask::svc() 
+ 14     ACEd.dll!ACE_Task_Base::svc_run(void * args=0x0112f078) 
+ 15     ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 16     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 17     ACEd.dll!ace_thread_adapter(void * args=0x00d741d0) 
+ 18     msvcr100d.dll!_callthreadstartex() 
+ 19     msvcr100d.dll!_threadstartex(void * ptd=0x00d74660) 
+ 20     kernel32.dll!758aed6c() 
+ 21     ntdll.dll!7708377b() 
+ 22     ntdll.dll!7708374e() 
+
+Callstack for Thread 4 (Thread Id: 2772 (0xad4)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a04() 
+ 4      netbios.dll!72211ca2() 
+ 5      kernel32.dll!758aed6c() 
+ 6      ntdll.dll!7708377b() 
+ 7      ntdll.dll!7708374e() 
+
+Callstack for Thread 5 (Thread Id: 5412 (0x1524)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!7705224d() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      kernel32.dll!758ac3d4() 
+*4      ACEd.dll!ACE_OS::thread_mutex_lock(_RTL_CRITICAL_SECTION * m=0x00d884c0) 
+ 5      ACEd.dll!ACE_Thread_Mutex::acquire() 
+ 6      OpenDDS_Dcpsd.dll!ACE_Guard<ACE_Thread_Mutex>::acquire() 
+ 7      OpenDDS_Dcpsd.dll!ACE_Guard<ACE_Thread_Mutex>::ACE_Guard<ACE_Thread_Mutex>(ACE_Thread_Mutex & l={...}) 
+ 8      OpenDDS_Dcpsd.dll!OpenDDS::DCPS::DataLinkSet::insert_link(OpenDDS::DCPS::DataLink * link=0x00db56c8) 
+ 9      OpenDDS_Dcpsd.dll!OpenDDS::DCPS::TransportClient::add_link(const OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::DataLink> & link={...}, const OpenDDS::DCPS::GUID_t & peer={...}) 
+ 10     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::TransportClient::associate(const OpenDDS::DCPS::AssociationData & data={...}, bool active=true) 
+ 11     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Sedp::Writer::assoc(const OpenDDS::DCPS::AssociationData & subscription={...}) 
+ 12     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Sedp::Task::svc_i(const OpenDDS::RTPS::SPDPdiscoveredParticipantData * ppdata=0x00e3b2f0) 
+ 13     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Sedp::Task::svc() 
+ 14     ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00d883d8) 
+ 15     ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 16     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 17     ACEd.dll!ace_thread_adapter(void * args=0x00d74e50) 
+ 18     msvcr100d.dll!_callthreadstartex() 
+ 19     msvcr100d.dll!_threadstartex(void * ptd=0x00da6640) 
+ 20     kernel32.dll!758aed6c() 
+ 21     ntdll.dll!7708377b() 
+ 22     ntdll.dll!7708374e() 
+
+Callstack for Thread 6 (Thread Id: 5292 (0x14ac)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      mswsock.dll!74c217cd() 
+ 5      mswsock.dll!74c26d30() 
+ 6      ws2_32.dll!771e2f7d() 
+ 7      ws2_32.dll!771e6a28() 
+ 8      ACEd.dll!ACE_OS::select(int width=0, fd_set * rfds=0x00da7e54, fd_set * wfds=0x00000000, fd_set * efds=0x00000000, const ACE_Time_Value * timeout=0x02cff290) 
+ 9      ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::wait_for_multiple_events(ACE_Select_Reactor_Handle_Set & dispatch_set={...}, ACE_Time_Value * max_wait_time=0x00000000) 
+ 10     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i(ACE_Time_Value * max_wait_time=0x00000000) 
+ 11     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value * max_wait_time=0x00000000) 
+ 12     ACEd.dll!ACE_Reactor::run_reactor_event_loop(int (ACE_Reactor *)* eh=0x00000000) 
+ 13     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::TransportReactorTask::svc() 
+ 14     ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00da7da4) 
+ 15     ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 16     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 17     ACEd.dll!ace_thread_adapter(void * args=0x00da53a0) 
+ 18     msvcr100d.dll!_callthreadstartex() 
+ 19     msvcr100d.dll!_threadstartex(void * ptd=0x00db4458) 
+ 20     kernel32.dll!758aed6c() 
+ 21     ntdll.dll!7708377b() 
+ 22     ntdll.dll!7708374e() 
+
+Callstack for Thread 7 (Thread Id: 4892 (0x131c)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      KernelBase.dll!751f179c() 
+ 5      ACEd.dll!ACE_OS::cond_wait(ACE_cond_t * cv=0x00da7cd4, _RTL_CRITICAL_SECTION * external_mutex=0x00da7cac) 
+ 6      OpenDDS_Dcpsd.dll!ACE_Condition<ACE_Thread_Mutex>::wait() 
+ 7      OpenDDS_Dcpsd.dll!OpenDDS::DCPS::QueueTaskBase<OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::DataLink> >::svc() 
+ 8      ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00da7c60) 
+ 9      ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 10     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 11     ACEd.dll!ace_thread_adapter(void * args=0x00dc80a0) 
+ 12     msvcr100d.dll!_callthreadstartex() 
+ 13     msvcr100d.dll!_threadstartex(void * ptd=0x00dec4e0) 
+ 14     kernel32.dll!758aed6c() 
+ 15     ntdll.dll!7708377b() 
+ 16     ntdll.dll!7708374e() 
+
+Callstack for Thread 8 (Thread Id: 5448 (0x1548)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      mswsock.dll!74c26f0f() 
+ 5      mswsock.dll!74c26d30() 
+ 6      ws2_32.dll!771e2f7d() 
+ 7      ws2_32.dll!771e6a28() 
+ 8      ACEd.dll!ACE_OS::select(int width=0, fd_set * rfds=0x00ddc0ec, fd_set * wfds=0x00000000, fd_set * efds=0x00000000, const ACE_Time_Value * timeout=0x036df1b8) 
+ 9      ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::wait_for_multiple_events(ACE_Select_Reactor_Handle_Set & dispatch_set={...}, ACE_Time_Value * max_wait_time=0x00000000) 
+ 10     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i(ACE_Time_Value * max_wait_time=0x00000000) 
+ 11     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value * max_wait_time=0x00000000) 
+ 12     ACEd.dll!ACE_Reactor::run_reactor_event_loop(int (ACE_Reactor *)* eh=0x00000000) 
+ 13     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::RtpsDiscovery::ReactorRunner::svc() 
+ 14     ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00d744e4) 
+ 15     ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 16     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 17     ACEd.dll!ace_thread_adapter(void * args=0x00dc96b0) 
+ 18     msvcr100d.dll!_callthreadstartex() 
+ 19     msvcr100d.dll!_threadstartex(void * ptd=0x00dff990) 
+ 20     kernel32.dll!758aed6c() 
+ 21     ntdll.dll!7708377b() 
+ 22     ntdll.dll!7708374e() 
+
+Callstack for Thread 9 (Thread Id: 4040 (0xfc8)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      KernelBase.dll!751f179c() 
+ 5      ACEd.dll!ACE_OS::cond_timedwait(ACE_cond_t * cv=0x00e2599c, _RTL_CRITICAL_SECTION * external_mutex=0x00e25980, ACE_Time_Value * timeout=0x0387e4f0) 
+ 6      OpenDDS_Rtps_Udpd.dll!ACE_Condition<ACE_Thread_Mutex>::wait(ACE_Thread_Mutex & mutex={...}, const ACE_Time_Value * abstime=0x0387e738) 
+ 7      OpenDDS_Rtps_Udpd.dll!ACE_Condition<ACE_Thread_Mutex>::wait(const ACE_Time_Value * abstime=0x0387e738) 
+ 8      OpenDDS_Rtps_Udpd.dll!OpenDDS::DCPS::RtpsUdpDataLink::wait_for_handshake(const OpenDDS::DCPS::GUID_t & local_id={...}, const OpenDDS::DCPS::GUID_t & remote_id={...}) 
+ 9      OpenDDS_Rtps_Udpd.dll!OpenDDS::DCPS::RtpsUdpTransport::connect_datalink_i(const OpenDDS::DCPS::GUID_t & local_id={...}, const OpenDDS::DCPS::GUID_t & remote_id={...}, const CORBA::OctetSeq & remote_data={...}, bool remote_reliable=true, const OpenDDS::DCPS::TransportImpl::ConnectionAttribs & attribs={...}) 
+ 10     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::TransportImpl::find_connect_i(const OpenDDS::DCPS::GUID_t & local_id={...}, const OpenDDS::DCPS::AssociationData & remote_association={...}, const OpenDDS::DCPS::TransportImpl::ConnectionAttribs & attribs={...}, bool active=true, bool connect=true) 
+ 11     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::TransportImpl::connect_datalink(const OpenDDS::DCPS::GUID_t & local_id={...}, const OpenDDS::DCPS::AssociationData & remote_association={...}, const OpenDDS::DCPS::TransportImpl::ConnectionAttribs & attribs={...}) 
+ 12     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::TransportClient::associate(const OpenDDS::DCPS::AssociationData & data={...}, bool active=true) 
+ 13     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Sedp::Writer::assoc(const OpenDDS::DCPS::AssociationData & subscription={...}) 
+ 14     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Sedp::Task::svc_i(const OpenDDS::RTPS::SPDPdiscoveredParticipantData * ppdata=0x00e3b228) 
+ 15     OpenDDS_Rtpsd.dll!OpenDDS::RTPS::Sedp::Task::svc() 
+ 16     ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00dedb00) 
+ 17     ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 18     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 19     ACEd.dll!ace_thread_adapter(void * args=0x00dc9718) 
+ 20     msvcr100d.dll!_callthreadstartex() 
+ 21     msvcr100d.dll!_threadstartex(void * ptd=0x00e22f80) 
+ 22     kernel32.dll!758aed6c() 
+ 23     ntdll.dll!7708377b() 
+ 24     ntdll.dll!7708374e() 
+
+Callstack for Thread 10 (Thread Id: 4760 (0x1298)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      mswsock.dll!74c217cd() 
+ 5      mswsock.dll!74c26d30() 
+ 6      ws2_32.dll!771e2f7d() 
+ 7      ws2_32.dll!771e6a28() 
+ 8      ACEd.dll!ACE_OS::select(int width=0, fd_set * rfds=0x00e12b8c, fd_set * wfds=0x00000000, fd_set * efds=0x00000000, const ACE_Time_Value * timeout=0x03adf478) 
+ 9      ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::wait_for_multiple_events(ACE_Select_Reactor_Handle_Set & dispatch_set={...}, ACE_Time_Value * max_wait_time=0x00000000) 
+ 10     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i(ACE_Time_Value * max_wait_time=0x00000000) 
+ 11     ACEd.dll!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value * max_wait_time=0x00000000) 
+ 12     ACEd.dll!ACE_Reactor::run_reactor_event_loop(int (ACE_Reactor *)* eh=0x00000000) 
+ 13     OpenDDS_Dcpsd.dll!OpenDDS::DCPS::TransportReactorTask::svc() 
+ 14     ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00e12adc) 
+ 15     ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 16     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 17     ACEd.dll!ace_thread_adapter(void * args=0x00dc9718) 
+ 18     msvcr100d.dll!_callthreadstartex() 
+ 19     msvcr100d.dll!_threadstartex(void * ptd=0x00e24430) 
+ 20     kernel32.dll!758aed6c() 
+ 21     ntdll.dll!7708377b() 
+ 22     ntdll.dll!7708374e() 
+
+Callstack for Thread 11 (Thread Id: 3352 (0xd18)):
+ Index  Function
+--------------------------------------------------------------------------------
+ 1      ntdll.dll!77067094() 
+ 2      [Frames below may be incorrect and/or missing, no symbols loaded for ntdll.dll]
+ 3      ntdll.dll!77066a24() 
+ 4      KernelBase.dll!751f179c() 
+ 5      ACEd.dll!ACE_OS::cond_wait(ACE_cond_t * cv=0x00e12a0c, _RTL_CRITICAL_SECTION * external_mutex=0x00e129e4) 
+ 6      OpenDDS_Dcpsd.dll!ACE_Condition<ACE_Thread_Mutex>::wait() 
+ 7      OpenDDS_Dcpsd.dll!OpenDDS::DCPS::QueueTaskBase<OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::DataLink> >::svc() 
+ 8      ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00e12998) 
+ 9      ACEd.dll!ACE_Thread_Adapter::invoke_i() 
+ 10     ACEd.dll!ACE_Thread_Adapter::invoke() 
+ 11     ACEd.dll!ace_thread_adapter(void * args=0x00dc98b8) 
+ 12     msvcr100d.dll!_callthreadstartex() 
+ 13     msvcr100d.dll!_threadstartex(void * ptd=0x00e472b0) 
+ 14     kernel32.dll!758aed6c() 
+ 15     ntdll.dll!7708377b() 
+ 16     ntdll.dll!7708374e() 
