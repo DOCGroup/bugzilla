@@ -1,0 +1,228 @@
+johnny@m4500jw:~/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/ContentFilteredTopic/EventListener/descriptors> ./run_test.pl 
+Starting Naming Service with  -ORBEndpoint iiop://localhost:60003 -o ns.ior
+Invoking node daemon
+Run dance_node_manager with -ORBEndpoint iiop://localhost:60001 -s /home/johnny/ACE/F6/QOS/DOC_ROOT/DAnCE/bin/dance_locality_manager -n SenderNode=/home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/ContentFilteredTopic/EventListener/descriptors/NodeApp1.ior -t 30 --domain-nc corbaloc:rir:/NameService
+Run dance_node_manager with -ORBEndpoint iiop://localhost:60002 -s /home/johnny/ACE/F6/QOS/DOC_ROOT/DAnCE/bin/dance_locality_manager -n ReceiverNode=/home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/ContentFilteredTopic/EventListener/descriptors/NodeApp2.ior -t 30 --domain-nc corbaloc:rir:/NameService
+Invoking execution manager (dance_execution_manager.exe) with -e/home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/ContentFilteredTopic/EventListener/descriptors/EM.ior
+Invoking executor - launch the application -
+Start dance_plan_launcher.exe with -x Plan.cdp -k file:///home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/ContentFilteredTopic/EventListener/descriptors/EM.ior
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.282863 - DDS_TopicBase_Connector_T::late_binded - Topic <CFTLE_Test> is not late binded.
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.284404 - DDS_TopicBase_Connector_T::late_binded - Topic <CFTLE_Test> is not late binded.
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.284548 - CCM_DDS_ContentFilterSetting_i::filter - Expression : <( (iteration > %0) AND (iteration < %1) )>
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.284585 - Parameters :
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.284606 -  <2>
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.284629 -  <5>
+(1469|139766252799776) [LM_TRACE] -  10:02:42.308813 - DDS_Base_Connector_T::init_domain - Start configuring default domain <0>
+(1469|139766252799776) [LM_INFO] -  10:02:42.308895 - DDS_Base_Connector_T::init_domain - Using participant QOS <DDS::DomainParticipantQos(DDS::UserDataQosPolicy(DDS::OctetSeq[]), DDS::EntityFactoryQosPolicy(true))>
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.308955 - DomainParticipantManager::get_participant - Searching DomainParticipant for domain <0> with profile <(null)>
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.308999 - DomainParticipantManager::get_participant - DomainParticipant for domain <0> with profile <(null)> does not exist.
+(1468|139865452316448) [LM_TRACE] -  10:02:42.309039 - DDS_Base_Connector_T::init_domain - Start configuring default domain <0>
+(1468|139865452316448) [LM_INFO] -  10:02:42.310440 - DDS_Base_Connector_T::init_domain - Using participant QOS <DDS::DomainParticipantQos(DDS::UserDataQosPolicy(DDS::OctetSeq[]), DDS::EntityFactoryQosPolicy(true))>
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.310519 - DomainParticipantManager::get_participant - Searching DomainParticipant for domain <0> with profile <(null)>
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.310566 - DomainParticipantManager::get_participant - DomainParticipant for domain <0> with profile <(null)> does not exist.
+(1468|139865452316448) WARNING: Could not find FQDN. Using "127.0.0.1" as fully qualified hostname, please correct system configuration.
+(1469|139766252799776) WARNING: Could not find FQDN. Using "127.0.0.1" as fully qualified hostname, please correct system configuration.
+(1469|139766252799776) [LM_TRACE] -  10:02:42.410035 - DDS_Base_Connector_T::init_domain - Created domainparticipant <2:0x7684b0> domain <0> - qos_profile <(null)>
+(1469|139766252799776) [LM_TRACE] -  10:02:42.410122 - DDS_Base_Connector_T::init_domain - Creating OpenDDS config <0#> for transport <0##transport>
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.410222 - DomainParticipantManager::register_participant - Added a new DomainParticipant for domain <0> with profile<(null)> handle <2:0x7684b0>.
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.410310 - DDS_TopicBase_Connector_T::register_type - Going to register type <IDL:ContentFilteredTopicListenEventTestTypeSupport:1.0>.
+(1469|139766252799776) [LM_TRACE] -  10:02:42.410376 - DDS_Base_Connector_T::init_topic - Finding existing topic name <CFTLE_Test> for profile <(null)> in participant <2:0x7684b0>
+(1469|139766252799776) [LM_INFO] -  10:02:42.410578 - DDS_Base_Connector_T::init_topic - Using topic QOS <DDS::TopicQos(DDS::TopicDataQosPolicy(DDS::OctetSeq[]), DDS::DurabilityQosPolicy(DDS::VOLATILE_DURABILITY_QOS), DDS::DurabilityServiceQosPolicy(DDS::Duration_t(0, 0), DDS::KEEP_LAST_HISTORY_QOS, 1, -1, -1, -1), DDS::DeadlineQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::LatencyBudgetQosPolicy(DDS::Duration_t(0, 0)), DDS::LivelinessQosPolicy(DDS::AUTOMATIC_LIVELINESS_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::ReliabilityQosPolicy(DDS::BEST_EFFORT_RELIABILITY_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::DestinationOrderQosPolicy(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS), DDS::HistoryQosPolicy(DDS::KEEP_LAST_HISTORY_QOS, 1), DDS::ResourceLimitsQosPolicy(-1, -1, -1), DDS::TransportPriorityQosPolicy(0), DDS::LifespanQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::OwnershipQosPolicy(DDS::SHARED_OWNERSHIP_QOS))>
+(1469|139766252799776) [LM_TRACE] -  10:02:42.410705 - DDS_Base_Connector_T::init_topic - Created new topic <3:0x786a20> name <CFTLE_Test> for profile <(null)>
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.410750 - DDS_TopicBase_Connector_T::configuration_complete - No need to create a subscriber.
+(1469|139766252799776) [LM_INFO] -  10:02:42.410819 - DDS_Base_Connector_T::init_publisher - Using publisher QOS <DDS::PublisherQos(DDS::PresentationQosPolicy(DDS::INSTANCE_PRESENTATION_QOS, false, false), DDS::PartitionQosPolicy(DDS::StringSeq[]), DDS::GroupDataQosPolicy(DDS::OctetSeq[]), DDS::EntityFactoryQosPolicy(true))>
+(1468|139865452316448) [LM_TRACE] -  10:02:42.410857 - DDS_Base_Connector_T::init_domain - Created domainparticipant <2:0x769700> domain <0> - qos_profile <(null)>
+(1469|139766252799776) [LM_TRACE] -  10:02:42.410943 - DDS_Base_Connector_T::init_publisher - Created publisher <4:0x786df0> using participant <2:0x7684b0>
+(1468|139865452316448) [LM_TRACE] -  10:02:42.411023 - DDS_Base_Connector_T::init_domain - Creating OpenDDS config <0#> for transport <0##transport>
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.411049 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - No need to create push consumer port.
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.411117 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - Creating supplier port.
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.411213 - DomainParticipantManager::register_participant - Added a new DomainParticipant for domain <0> with profile<(null)> handle <2:0x769700>.
+(1469|139766252799776) [LM_INFO] -  10:02:42.411218 - DDS_Update_T::configuration_complete - Using datawriter QOS <DDS::DataWriterQos(DDS::DurabilityQosPolicy(DDS::VOLATILE_DURABILITY_QOS), DDS::DurabilityServiceQosPolicy(DDS::Duration_t(0, 0), DDS::KEEP_LAST_HISTORY_QOS, 1, -1, -1, -1), DDS::DeadlineQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::LatencyBudgetQosPolicy(DDS::Duration_t(0, 0)), DDS::LivelinessQosPolicy(DDS::AUTOMATIC_LIVELINESS_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::ReliabilityQosPolicy(DDS::RELIABLE_RELIABILITY_QOS, DDS::Duration_t(0, 100000000)), DDS::DestinationOrderQosPolicy(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS), DDS::HistoryQosPolicy(DDS::KEEP_LAST_HISTORY_QOS, 1), DDS::ResourceLimitsQosPolicy(-1, -1, -1), DDS::TransportPriorityQosPolicy(0), DDS::LifespanQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::UserDataQosPolicy(DDS::OctetSeq[]), DDS::OwnershipQosPolicy(DDS::SHARED_OWNERSHIP_QOS), DDS::OwnershipStrengthQosPolicy(0), DDS::WriterDataLifecycleQosPolicy(true))>
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.411336 - DDS_TopicBase_Connector_T::register_type - Going to register type <IDL:ContentFilteredTopicListenEventTestTypeSupport:1.0>.
+(1468|139865452316448) [LM_TRACE] -  10:02:42.411442 - DDS_Base_Connector_T::init_topic - Finding existing topic name <CFTLE_Test> for profile <(null)> in participant <2:0x769700>
+(1468|139865452316448) [LM_INFO] -  10:02:42.411739 - DDS_Base_Connector_T::init_topic - Using topic QOS <DDS::TopicQos(DDS::TopicDataQosPolicy(DDS::OctetSeq[]), DDS::DurabilityQosPolicy(DDS::VOLATILE_DURABILITY_QOS), DDS::DurabilityServiceQosPolicy(DDS::Duration_t(0, 0), DDS::KEEP_LAST_HISTORY_QOS, 1, -1, -1, -1), DDS::DeadlineQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::LatencyBudgetQosPolicy(DDS::Duration_t(0, 0)), DDS::LivelinessQosPolicy(DDS::AUTOMATIC_LIVELINESS_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::ReliabilityQosPolicy(DDS::BEST_EFFORT_RELIABILITY_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::DestinationOrderQosPolicy(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS), DDS::HistoryQosPolicy(DDS::KEEP_LAST_HISTORY_QOS, 1), DDS::ResourceLimitsQosPolicy(-1, -1, -1), DDS::TransportPriorityQosPolicy(0), DDS::LifespanQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::OwnershipQosPolicy(DDS::SHARED_OWNERSHIP_QOS))>
+(1468|139865452316448) [LM_TRACE] -  10:02:42.411921 - DDS_Base_Connector_T::init_topic - Created new topic <4:0x787c70> name <CFTLE_Test> for profile <(null)>
+(1468|139865452316448) [LM_INFO] -  10:02:42.412047 - DDS_Base_Connector_T::init_subscriber - Using subscriber QOS <DDS::SubscriberQos(DDS::PresentationQosPolicy(DDS::INSTANCE_PRESENTATION_QOS, false, false), DDS::PartitionQosPolicy(DDS::StringSeq[]), DDS::GroupDataQosPolicy(DDS::OctetSeq[]), DDS::EntityFactoryQosPolicy(true))>
+(1468|139865452316448) [LM_TRACE] -  10:02:42.412147 - DDS_Base_Connector_T::init_subscriber - Created subscriber <5:0x788040> using participant <2:0x769700>
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.412204 - DDS_TopicBase_Connector_T::configuration_complete - No need to create a publisher.
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.412308 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - Creating push consumer port.
+(1469|139766252799776) [LM_TRACE] -  10:02:42.412362 - DDS_Write_T::configuration_complete - Created datawriter <6:0x7871c0> using publisher <4:0x786df0>
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.412440 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - No need to create pull consumer port.
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.412645 - CCM_DDS_ContentFilterSetting_i::create_contentfilteredtopic: successfully created ContentFilteredTopic <DDS4CCM_CFT_7464432>
+(1468|139865452316448) [LM_INFO] -  10:02:42.412891 - DDS_Subscriber_Base_T::configuration_complete - Using datareader QOS <DDS::DataReaderQos(DDS::DurabilityQosPolicy(DDS::VOLATILE_DURABILITY_QOS), DDS::DeadlineQosPolicy(DDS::Duration_t(2147483647, 2147483647)), DDS::LatencyBudgetQosPolicy(DDS::Duration_t(0, 0)), DDS::LivelinessQosPolicy(DDS::AUTOMATIC_LIVELINESS_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::ReliabilityQosPolicy(DDS::BEST_EFFORT_RELIABILITY_QOS, DDS::Duration_t(2147483647, 2147483647)), DDS::DestinationOrderQosPolicy(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS), DDS::HistoryQosPolicy(DDS::KEEP_LAST_HISTORY_QOS, 1), DDS::ResourceLimitsQosPolicy(-1, -1, -1), DDS::UserDataQosPolicy(DDS::OctetSeq[]), DDS::OwnershipQosPolicy(DDS::SHARED_OWNERSHIP_QOS), DDS::TimeBasedFilterQosPolicy(DDS::Duration_t(0, 0)), DDS::ReaderDataLifecycleQosPolicy(DDS::Duration_t(2147483647, 2147483647), DDS::Duration_t(2147483647, 2147483647)))>
+(1468|139865452316448) [LM_TRACE] -  10:02:42.413499 - DDS_Subscriber_Base_T::configuration_complete - Created DataReader <6:0x788e40> using subscriber <5:0x788040>
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.413584 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - No need to create supplier port.
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.413643 - DDS_Event_Connector_T<CCM_TYPE, DDS_TYPE, FIXED, SEQ_TYPE>::configuration_complete - No need to create pull consumer port.
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.415125 - TopicListener::get_mask - Mask becomes DDS::INCONSISTENT_TOPIC_STATUS
+Receiver_exec_i::ccm_activate - Start listening.
+(1469|139766252799776) [LM_DEBUG] -  10:02:42.415171 - PublisherListener::get_mask - Mask becomes DDS::OFFERED_DEADLINE_MISSED_STATUS | DDS::OFFERED_INCOMPATIBLE_QOS_STATUS | DDS::LIVELINESS_LOST_STATUS | DDS::PUBLICATION_MATCHED_STATUS
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.415525 - TopicListener::get_mask - Mask becomes DDS::INCONSISTENT_TOPIC_STATUS
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.415620 - SubscriberListener::get_mask - Mask becomes DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS | DDS::SAMPLE_REJECTED_STATUS | DDS::LIVELINESS_CHANGED_STATUS | DDS::SUBSCRIPTION_MATCHED_STATUS
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.415695 - PortStatusListener::get_mask - Mask becomes DDS::REQUESTED_DEADLINE_MISSED_STATUS | DDS::SAMPLE_LOST_STATUS
+(1468|139865452316448) [LM_DEBUG] -  10:02:42.415731 - DataReaderListener_T::get_mask - Mask becomes DDS::REQUESTED_DEADLINE_MISSED_STATUS | DDS::SAMPLE_LOST_STATUS | DDS::DATA_AVAILABLE_STATUS
+Sleeping 30 seconds to allow task to complete
+(1468|139865248139008) [LM_DEBUG] -  10:02:45.918937 - SubscriberListener::on_subscription_matched: total count <1> - count change <1> - current count <1> - current count change <1> last publication handle <7>
+(1468|139865248139008) [LM_DEBUG] -  10:02:45.919090 - SubscriberListener::on_unexpected_status - No error listener connected for <DDS::SUBSCRIPTION_MATCHED_STATUS>
+(1469|139766048646912) [LM_DEBUG] -  10:02:45.920088 - PublisherListener::on_publication_matched: total count <1> - count change <1> - current count <1> - current count change <1> last publication handle <7>
+(1469|139766048646912) [LM_DEBUG] -  10:02:45.920158 - PublisherListener::on_unexpected_status: No error listener connected for <DDS::PUBLICATION_MATCHED_STATUS>
+(1468|139864997619456) [LM_DEBUG] -  10:02:47.468444 - SubscriberListener::on_liveliness_changed: alive count <1> - not alive count <0> - alive count change <1> - not alive count change <0> last publication handle <7>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.468569 - Writer_T::write_one - Write successful
+(1468|139864997619456) [LM_DEBUG] -  10:02:47.468593 - SubscriberListener::on_unexpected_status - No error listener connected for <DDS::LIVELINESS_CHANGED_STATUS>
+Written key <KEY_1> - <1>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.515961 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <1>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.565779 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <1>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.615827 - Writer_T::write_one - Write successful
+Written key <KEY_4> - <1>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.665645 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <1>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.765607 - Writer_T::write_one - Write successful
+Written key <KEY_1> - <2>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.815504 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <2>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.865537 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <2>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.915551 - Writer_T::write_one - Write successful
+Written key <KEY_4> - <2>
+(1469|139766252799776) [LM_TRACE] -  10:02:47.965515 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <2>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.065664 - Writer_T::write_one - Write successful
+Written key <KEY_1> - <3>
+(1468|139865452316448) [LM_INFO] -  10:02:48.066221 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_1> - iteration <3>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.115581 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <3>
+(1468|139865452316448) [LM_INFO] -  10:02:48.115759 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_2> - iteration <3>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.165699 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <3>
+(1468|139865452316448) [LM_INFO] -  10:02:48.165995 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_3> - iteration <3>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.215635 - Writer_T::write_one - Write successful
+Written key <KEY_4> - <3>
+(1468|139865452316448) [LM_INFO] -  10:02:48.215858 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_4> - iteration <3>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.265561 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <3>
+(1468|139865452316448) [LM_INFO] -  10:02:48.265820 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_5> - iteration <3>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.365632 - Writer_T::write_one - Write successful
+Written key <KEY_1> - <4>
+(1468|139865452316448) [LM_INFO] -  10:02:48.365870 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_1> - iteration <4>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.415850 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <4>
+(1468|139865452316448) [LM_INFO] -  10:02:48.415996 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_2> - iteration <4>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.465782 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <4>
+(1468|139865452316448) [LM_INFO] -  10:02:48.465949 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_3> - iteration <4>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.515681 - Writer_T::write_one - Write successful
+(1468|139865452316448) [LM_INFO] -  10:02:48.515867 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+Written key <KEY_4> - <4>
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_4> - iteration <4>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.565669 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <4>
+(1468|139865452316448) [LM_INFO] -  10:02:48.565951 - DataReaderListener_T::on_data_available_i - Take data returned DDS::RETCODE_OK.
+ContentFilteredTopicListenEventTest_Listener::on_one_data: key <KEY_5> - iteration <4>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.665531 - Writer_T::write_one - Write successful
+Written key <KEY_1> - <5>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.715541 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <5>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.765553 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <5>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.815540 - Writer_T::write_one - Write successful
+Written key <KEY_4> - <5>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.865537 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <5>
+(1469|139766252799776) [LM_TRACE] -  10:02:48.965635 - Writer_T::write_one - Write successful
+Written key <KEY_1> - <6>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.015543 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <6>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.065542 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <6>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.115542 - Writer_T::write_one - Write successful
+Written key <KEY_4> - <6>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.165541 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <6>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.265560 - Writer_T::write_one - Write successful
+Written key <KEY_1> - <7>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.315539 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <7>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.365568 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <7>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.415495 - Writer_T::write_one - Write successful
+Written key <KEY_4> - <7>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.465510 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <7>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.565518 - Writer_T::write_one - Write successful
+Written key <KEY_1> - <8>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.615541 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <8>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.665543 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <8>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.715512 - Writer_T::write_one - Write successful
+Written key <KEY_4> - <8>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.765553 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <8>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.865507 - Writer_T::write_one - Write successful
+Written key <KEY_1> - <9>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.915530 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <9>
+(1469|139766252799776) [LM_TRACE] -  10:02:49.965544 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <9>
+(1469|139766252799776) [LM_TRACE] -  10:02:50.015514 - Writer_T::write_one - Write successful
+Written key <KEY_4> - <9>
+(1469|139766252799776) [LM_TRACE] -  10:02:50.065512 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <9>
+(1469|139766252799776) [LM_TRACE] -  10:02:50.165567 - Writer_T::write_one - Write successful
+Written key <KEY_1> - <10>
+(1469|139766252799776) [LM_TRACE] -  10:02:50.215558 - Writer_T::write_one - Write successful
+Written key <KEY_2> - <10>
+(1469|139766252799776) [LM_TRACE] -  10:02:50.265567 - Writer_T::write_one - Write successful
+Written key <KEY_3> - <10>
+(1469|139766252799776) [LM_TRACE] -  10:02:50.315576 - Writer_T::write_one - Write successful
+Written key <KEY_4> - <10>
+(1469|139766252799776) [LM_TRACE] -  10:02:50.365520 - Writer_T::write_one - Write successful
+Written key <KEY_5> - <10>
+.(1469|139766048646912) WARNING: DataWriterImpl::remove_associations: removing reader 01030026.b9c860dc.61e40000.00000007(e4068b0a) before association_complete() call.
+Invoking executor - stop the application -
+by running dance_plan_launcher.exe with -k file:///home/johnny/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/ContentFilteredTopic/EventListener/descriptors/EM.ior -x Plan.cdp
+(1469|139766252799776) [LM_DEBUG] -  10:03:13.073457 - DDS_Base_Connector_T::passivate_topic - Setting the listener on the topic to nil
+(1469|139766252799776) [LM_DEBUG] -  10:03:13.073487 - DDS_Base_Connector_T::passivate_publisher - Setting the listener on the publisher to nil
+(1468|139865452316448) [LM_DEBUG] -  10:03:13.073733 - DDS_Subscriber_Base_T::passivate - Setting the listener on the reader to nil
+(1469|139766252799776) [LM_TRACE] -  10:03:13.073781 - DDS_Write_T::remove - Going to delete DataWriter <6:0x7871c0> from publisher <4:0x786df0>
+(1468|139865452316448) [LM_DEBUG] -  10:03:13.073796 - DDS_Base_Connector_T::passivate_topic - Setting the listener on the topic to nil
+(1468|139865452316448) [LM_DEBUG] -  10:03:13.073815 - DDS_Base_Connector_T::passivate_subscriber - Setting the listener on the subscriber to nil
+CFT_EVENT: Thread switch for ReaderListener seems OK. (DDS uses the CCM thread for its callback) listener <139865452316448> - component <139865452316448>
+CFT_EVENT: ReaderListener: Expected number of samples received: expected <10> - received <10>
+(1468|139865452316448) [LM_TRACE] -  10:03:13.074361 - DDS_Subscriber_Base_T::remove - Going to delete DataReader <6:0x788e40> from subscriber <5:0x788040>
+(1468|139865452316448) [LM_INFO] -  10:03:13.074918 - DDS_Subscriber_Base_T::remove - Deleted DataReader
+(1468|139865452316448) [LM_ERROR] -  10:03:13.074960 - CCM_DDS_ContentFilterSetting_i::delete_contentfilteredtopic: Error deleting contentfilteredtopic: <DDS::RETCODE_PRECONDITION_NOT_MET>
+(1469|139766252799776) [LM_INFO] -  10:03:13.075250 - DDS_Write_T::remove - Deleted DataWriter
+(1469|139766252799776) [LM_TRACE] -  10:03:13.075364 - DDS_Base_Connector_T::remove_topic - Going to delete topic <CFTLE_Test><3:0x786a20>from participant<2:0x7684b0>
+DDS_Event_Connector_T::do_ccm_remove - Caught CCM_DDS internal exception: error <DDS::RETCODE_PRECONDITION_NOT_MET>
+(1469|139766252799776) [LM_TRACE] -  10:03:13.075469 - DDS_Base_Connector_T::remove_topic - Deleted topic <CFTLE_Test> from <2:0x7684b0> return code <DDS::RETCODE_OK>
+(1469|139766252799776) [LM_TRACE] -  10:03:13.075499 - DDS_Base_Connector_T::remove_publisher - Going to delete publisher <4:0x786df0> from participant<2:0x7684b0>
+(1469|139766252799776) [LM_INFO] -  10:03:13.075536 - DDS_Base_Connector_T::remove_publisher - Deleted publisher
+(1469|139766252799776) [LM_TRACE] -  10:03:13.075567 - DomainParticipantManager::unregister_participant - Delete participant <2:0x7684b0> for domain <0> since ref_count is one.
+(1469|139766252799776) [LM_TRACE] -  10:03:13.075598 - DDS_Base_Connector_T::remove_domain - Going to delete participant <2:0x7684b0>for domain <0> with qos <(null)>.
+(1469|139766252799776) [LM_TRACE] -  10:03:13.914880 - DDS_Base_Connector_T::remove_domain - Deleted participant for domain <0> with qos <(null)> return code <DDS::RETCODE_OK>
+(1469|139766252799776) [LM_TRACE] -  10:03:13.915244 - DDS_Base_Connector_T::~DDS_Base_Connector_T - Connector has been destructed
+(1469|139766252799776) [LM_DEBUG] -  10:03:13.915307 - DomainParticipantManager::close - No participants anymore, shutting down DDS.
+(1469|139766252799776) [LM_TRACE] -  10:03:13.916994 - DDS_Base_Connector_T::remove_domain - Closed the domain participant manager, DDS interaction has been shutdown completely.
+(1497|139730069452576) [LM_ERROR] -  10:03:13.918461 - Plan_Launcher::teardown_plan - Application Teardown failed, exception: Caught CORBA exception while invoking destroyApplication: system exception, ID 'IDL:omg.org/CORBA/UNKNOWN:1.0'
+Unknown vendor minor code id (0), minor code = 0, completed = YES
+
+(1469|139766252799776) [LM_DEBUG] -  10:03:13.921906 - DomainParticipantManager::~DomainParticipantManager
+ERROR: dance_plan_launcher returned 1
+(25060|140518469809920) SubscriptionBuiltinTopicDataDataReaderImpl::store_instance_data, insert handle failed. 
+(25060|140518469809920) SubscriptionBuiltinTopicDataDataReaderImpl::store_instance_data, insert handle failed. 
+(1468|139865248139008) SubscriptionBuiltinTopicDataDataReaderImpl::store_instance_data, insert handle failed. 
+(1468|139865248139008) SubscriptionBuiltinTopicDataDataReaderImpl::store_instance_data, insert handle failed. 
+(1468|139865248139008) ERROR: DataReaderImpl::get_handle_instance: lookup for 0x0 failed
+(25060|140518469809920) ERROR: DataReaderImpl::get_handle_instance: lookup for 0x0 failed
+johnny@m4500jw:~/ACE/F6/QOS/DOC_ROOT/CIAO/connectors/dds4ccm/tests/ContentFilteredTopic/EventListener/descriptors> .
+
