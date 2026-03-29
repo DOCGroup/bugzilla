@@ -1,0 +1,1043 @@
+Index: TAO/orbsvcs/orbsvcs/Event_Utilities.h
+===================================================================
+--- TAO/orbsvcs/orbsvcs/Event_Utilities.h	(revision 48)
++++ TAO/orbsvcs/orbsvcs/Event_Utilities.h	(working copy)
+@@ -96,7 +96,8 @@
+ {
+ public:
+   /// Default construction.
+-  ACE_ConsumerQOS_Factory (TAO_EC_Event_Initializer initializer = 0);
++  ACE_ConsumerQOS_Factory (TAO_EC_Event_Initializer initializer = 0,
++                           int qos_max_len = 0);
+ 
+   /// Death and destruction.
+   ~ACE_ConsumerQOS_Factory (void);
+Index: TAO/orbsvcs/orbsvcs/Event_Utilities.cpp
+===================================================================
+--- TAO/orbsvcs/orbsvcs/Event_Utilities.cpp	(revision 48)
++++ TAO/orbsvcs/orbsvcs/Event_Utilities.cpp	(working copy)
+@@ -16,11 +16,19 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ ACE_ConsumerQOS_Factory::
+-    ACE_ConsumerQOS_Factory (TAO_EC_Event_Initializer initializer)
++ACE_ConsumerQOS_Factory( TAO_EC_Event_Initializer initializer,
++                         int qos_max_len )
+   : designator_set_ (0),
+     event_initializer_ (initializer)
+ {
+   qos_.is_gateway = 0;
++
++  // Allocate the space requested by the application....
++  qos_.dependencies.length (qos_max_len);
++
++  // ... now reset the length, we do not want to use any elements in
++  // the sequence that have not been initialized....
++  qos_.dependencies.length (0);
+ }
+ 
+ ACE_ConsumerQOS_Factory::~ACE_ConsumerQOS_Factory (void)
+@@ -177,17 +185,18 @@
+                                  u_int ncalls)
+ {
+   CORBA::ULong l = this->qos_.publications.length ();
+-  if (l >= this->qos_.publications.maximum ())
+-    {
+-      // There is not enough space for the next element, grow the
+-      // buffer.
+-      this->qos_.publications.length (l + 1);
+ 
++  //if (l >= this->qos_.publications.maximum ())
++  //{
+       // @@ TODO We may want to consider more efficient growing
+       // strategies here, for example, duplicating the size of the
+       // buffer, or growing in fixed sized chunks...
+-    }
++  //}
+ 
++  // This needs to accurately reflect the used length, and should always be 
++  // set - KDS
++  this->qos_.publications.length (l + 1);
++
+   if (this->event_initializer_ != 0)
+     (*this->event_initializer_) (qos_.publications[l].event);
+   this->qos_.publications[l].event.header.source = sid;
+Index: TAO/orbsvcs/Event_Service/Event_Service.cpp
+===================================================================
+--- TAO/orbsvcs/Event_Service/Event_Service.cpp	(revision 48)
++++ TAO/orbsvcs/Event_Service/Event_Service.cpp	(working copy)
+@@ -15,6 +15,8 @@
+ #include "orbsvcs/Event/EC_TPC_Factory.h"
+ #include "orbsvcs/Event/EC_Event_Channel.h"
+ 
++#include "tao/corba.h"
++#include "tao/AnyTypeCode/Any.h"
+ #include "tao/BiDir_GIOP/BiDirGIOP.h"
+ #include "ace/OS_NS_strings.h"
+ 
+Index: TAO/orbsvcs/tests/EC_Custom_Marshal/ECM_Supplier.cpp
+===================================================================
+--- TAO/orbsvcs/tests/EC_Custom_Marshal/ECM_Supplier.cpp	(revision 48)
++++ TAO/orbsvcs/tests/EC_Custom_Marshal/ECM_Supplier.cpp	(working copy)
+@@ -6,6 +6,8 @@
+ #include "ace/ACE.h"
+ #include "ace/OS_NS_unistd.h"
+ 
++#include "tao/corba.h"
++#include "tao/AnyTypeCode/Any.h"
+ #include "tao/Timeprobe.h"
+ #include "tao/CDR.h"
+ #include "orbsvcs/Event_Utilities.h"
+Index: TAO/tao/Connection_Handler.h
+===================================================================
+--- TAO/tao/Connection_Handler.h	(revision 48)
++++ TAO/tao/Connection_Handler.h	(working copy)
+@@ -58,11 +58,8 @@
+ public:
+ 
+   /// Constructor
+-  TAO_Connection_Handler (void);
++  explicit TAO_Connection_Handler (TAO_ORB_Core *orb_core);
+ 
+-  /// Constructor
+-  TAO_Connection_Handler (TAO_ORB_Core *orb_core);
+-
+   /// Destructor
+   virtual ~TAO_Connection_Handler (void);
+ 
+Index: TAO/tao/GIOP_Message_Base.cpp
+===================================================================
+--- TAO/tao/GIOP_Message_Base.cpp	(revision 48)
++++ TAO/tao/GIOP_Message_Base.cpp	(working copy)
+@@ -14,6 +14,7 @@
+ #include "tao/SystemException.h"
+ #include "tao/ZIOP_Adapter.h"
+ #include "ace/Min_Max.h"
++#include "tao/Endpoint.h"
+ 
+ /*
+  * Hook to add additional include files during specializations.
+@@ -688,8 +689,23 @@
+     }
+ #endif
+   if (TAO_debug_level > 9)
+-    { //due to alignment data block has an offset which needs to be corrected
+-      this->dump_msg ("recv",
++    {
++      ACE_CString s("recv");
++      if ( transport ) {
++        TAO::Transport_Cache_Manager::HASH_MAP_ENTRY * cme(
++          transport->cache_map_entry() );
++        if ( cme ) {
++          char buf[80];
++          TAO_Endpoint * ep( cme->key().property()->endpoint() );
++          if ( ep && ( ep->addr_to_string( buf, sizeof(buf) ) != -1) ) {
++            s="recv(from ";
++            s += buf;
++            s += ")";
++          }
++        }
++      }
++      //due to alignment data block has an offset which needs to be corrected
++      this->dump_msg (s.c_str(),
+                       reinterpret_cast <u_char *> (db->base () + rd_pos - TAO_GIOP_MESSAGE_HEADER_LEN),
+                       db->size ()  + rd_pos - TAO_GIOP_MESSAGE_HEADER_LEN);
+     }
+@@ -800,7 +816,21 @@
+ #endif
+   if (TAO_debug_level > 9)
+     {
+-      this->dump_msg ("recv",
++      ACE_CString s("recv");
++      if ( params.transport_ ) {
++        char buf[80];
++        TAO::Transport_Cache_Manager::HASH_MAP_ENTRY * cme(
++          params.transport_->cache_map_entry() );
++        if ( cme ) {
++          TAO_Endpoint * ep( cme->key().property()->endpoint() );
++          if ( ep && (ep->addr_to_string( buf, sizeof(buf) ) != -1) ) {
++            s="recv(from ";
++            s += buf;
++            s += ")";
++          }
++        }
++      }
++      this->dump_msg (s.c_str(),
+                       reinterpret_cast <u_char *> (db->base () + rd_pos - TAO_GIOP_MESSAGE_HEADER_LEN),
+                       db->size ()  + rd_pos - TAO_GIOP_MESSAGE_HEADER_LEN);
+     }
+Index: TAO/tao/AnyTypeCode/SystemExceptionA.cpp
+===================================================================
+--- TAO/tao/AnyTypeCode/SystemExceptionA.cpp	(revision 48)
++++ TAO/tao/AnyTypeCode/SystemExceptionA.cpp	(working copy)
+@@ -167,7 +167,7 @@
+ #undef TAO_SYSTEM_EXCEPTION
+ 
+ #define TAO_SYSTEM_EXCEPTION(name) \
+-CORBA::Boolean operator>>= (const CORBA::Any &any, \
++CORBA::Boolean CORBA::operator>>= (const CORBA::Any &any, \
+                             const CORBA::name *&ex) \
+ { \
+   return \
+Index: TAO/tao/Transport_Connector.cpp
+===================================================================
+--- TAO/tao/Transport_Connector.cpp	(revision 48)
++++ TAO/tao/Transport_Connector.cpp	(working copy)
+@@ -734,7 +734,12 @@
+       result = tcm.cache_transport (&desc, transport);
+       if (result == -1)
+       {
+-
++        if (TAO_debug_level > 2)
++          ACE_DEBUG ((LM_DEBUG,
++                      ACE_TEXT("TAO (%P|%t) - Transport_Connector::")
++                      ACE_TEXT("wait_for_connection_completion, ")
++                      ACE_TEXT("transport [%d], cache_transport failed!.\n"),
++                      transport->id ()));
+       }
+     }
+   else if (transport->connection_handler ()->is_timeout ())
+Index: TAO/tao/PortableServer/Active_Object_Map.h
+===================================================================
+--- TAO/tao/PortableServer/Active_Object_Map.h	(revision 48)
++++ TAO/tao/PortableServer/Active_Object_Map.h	(working copy)
+@@ -47,7 +47,9 @@
+  *
+  * Implementation to be used by the POA.
+  */
+-class TAO_Active_Object_Map
++#include "portableserver_export.h"
++
++class TAO_PortableServer_Export TAO_Active_Object_Map
+ {
+ public:
+ 
+Index: TAO/tao/PortableServer/POAManager.inl
+===================================================================
+--- TAO/tao/PortableServer/POAManager.inl	(revision 48)
++++ TAO/tao/PortableServer/POAManager.inl	(working copy)
+@@ -86,7 +86,7 @@
+   // shifting of 64 bit addresses is performed since the
+   // TAO_POA_Manager object is not large enough to allow that trick.
+ 
+-  CORBA::Long id = 0;
++  ptrdiff_t id = 0;
+ 
+   // Note that we reinterpret_cast to an "unsigned long" instead of
+   // CORBA::ULong since we need to first cast to an integer large
+@@ -108,7 +108,7 @@
+ //     id = ...GENERATE_ID_ATOMICALLY...;  // Fallback
+ 
+   char* buf = new char [25];
+-  ACE_OS::sprintf (buf, "POAManager%d", id);
++  ACE_OS::sprintf (buf, "POAManager%u", id);
+   return buf;
+ }
+ 
+Index: TAO/tao/Transport_Cache_Manager.h
+===================================================================
+--- TAO/tao/Transport_Cache_Manager.h	(revision 48)
++++ TAO/tao/Transport_Cache_Manager.h	(working copy)
+@@ -16,6 +16,9 @@
+ #include /**/ "ace/pre.h"
+ 
+ #include "tao/Transport_Cache_Manager_T.h"
++// DMM: replaced forward decl with #include to avoid trying to delete
++// incomplete object later
++#include "tao/Transport_Descriptor_Interface.h"
+ 
+ #if !defined (ACE_LACKS_PRAGMA_ONCE)
+ #define  ACE_LACKS_PRAGMA_ONCE
+@@ -24,7 +27,6 @@
+ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+ class TAO_Transport;
+-class TAO_Transport_Descriptor_Interface;
+ 
+ namespace TAO
+ {
+Index: TAO/tao/IIOP_Acceptor.cpp
+===================================================================
+--- TAO/tao/IIOP_Acceptor.cpp	(revision 48)
++++ TAO/tao/IIOP_Acceptor.cpp	(working copy)
+@@ -282,7 +282,7 @@
+       ACE_DEBUG ((LM_DEBUG,
+                   ACE_TEXT ("TAO (%P|%t) - ")
+                   ACE_TEXT ("IIOP_Acceptor::open, address==%C, options=%C\n"),
+-                  address, options));
++                  address, (options?options:"(null)")));
+     }
+ 
+   this->orb_core_ = orb_core;
+Index: TAO/tao/Exception.h
+===================================================================
+--- TAO/tao/Exception.h	(revision 48)
++++ TAO/tao/Exception.h	(working copy)
+@@ -28,7 +28,7 @@
+ #include /**/ "tao/TAO_Export.h"
+ #include "tao/Basic_Types.h"
+ #include "tao/CORBA_String.h"
+-#include "ace/SStringfwd.h"
++#include "ace/SString.h"
+ #include "ace/iosfwd.h"
+ #include "ace/CORBA_macros.h"
+ 
+Index: TAO/tao/IIOP_Connection_Handler.cpp
+===================================================================
+--- TAO/tao/IIOP_Connection_Handler.cpp	(revision 48)
++++ TAO/tao/IIOP_Connection_Handler.cpp	(working copy)
+@@ -33,7 +33,7 @@
+       ACE_DEBUG ((LM_DEBUG,
+                   ACE_TEXT("TAO (%P|%t) - IIOP_Connection_Handler[%d]::")
+                   ACE_TEXT("add_reference, up to %d\n"),
+-                  this->transport (), rc));
++                  this->transport ()->id(), rc));
+     }
+   return rc;
+ 
+@@ -42,13 +42,13 @@
+ ACE_Event_Handler::Reference_Count
+ TAO_IIOP_Connection_Handler::remove_reference (void)
+ {
+-  TAO_Transport *tport = this->transport ();
++  size_t id = this->transport ()->id();
+   Reference_Count rc = TAO_IIOP_SVC_HANDLER::remove_reference ();
+   if (TAO_debug_level > 9)
+     {
+       ACE_DEBUG ((LM_DEBUG,
+                   ACE_TEXT("TAO (%P|%t) - IIOP_Connection_Handler[%d]::")
+-                  ACE_TEXT("remove_reference, down to %d\n"), tport, rc));
++                  ACE_TEXT("remove_reference, down to %d\n"), id, rc));
+     }
+   return rc;
+ }
+@@ -84,7 +84,7 @@
+       ACE_DEBUG ((LM_DEBUG,
+                   ACE_TEXT("TAO (%P|%t) - IIOP_Connection_Handler[%d] ctor, ")
+                   ACE_TEXT("this=%@\n"),
+-                  static_cast<TAO_Transport *> (specific_transport), this));
++                  static_cast<TAO_Transport *> (specific_transport)->id(), this));
+     }
+ 
+   // store this pointer (indirectly increment ref count)
+@@ -93,6 +93,14 @@
+ 
+ TAO_IIOP_Connection_Handler::~TAO_IIOP_Connection_Handler (void)
+ {
++  if (TAO_debug_level > 4)
++    {
++      size_t id = this->transport()?this->transport()->id():0xffffffff;
++      ACE_DEBUG ((LM_DEBUG,
++                  ACE_TEXT("TAO (%P|%t) - IIOP_Connection_Handler[%d] dtor, ")
++                  ACE_TEXT("this=%@,transport=%@\n"),
++                  id, this, this->transport() ));
++    }
+   delete this->transport ();
+   int const result =
+     this->release_os_resources ();
+Index: TAO/tao/IIOP_Connector.cpp
+===================================================================
+--- TAO/tao/IIOP_Connector.cpp	(revision 48)
++++ TAO/tao/IIOP_Connector.cpp	(working copy)
+@@ -199,6 +199,10 @@
+       // connect completed unsuccessfully
+       if (svc_handler)
+         {
++          if (TAO_debug_level > 2)
++            ACE_DEBUG ((LM_DEBUG,
++                        ACE_TEXT ("TAO (%P|%t) - IIOP_Connector::")
++                        ACE_TEXT ("make_connection, svc_handler->remove_reference") ));
+           svc_handler->remove_reference();
+         }
+ 
+Index: TAO/tao/ORB.cpp
+===================================================================
+--- TAO/tao/ORB.cpp	(revision 48)
++++ TAO/tao/ORB.cpp	(working copy)
+@@ -1324,7 +1324,27 @@
+                                         command_line.get_TCHAR_argv ());
+ 
+   // Check for errors returned from <TAO_Internal::open_services>.
+-  if (result != 0 && errno != ENOENT)
++  if (result != 0 && (
++        errno != ENOENT
++#if        defined(VXWORKS)
++        /* mcarter:
++         *   The above TAO::ORB::open_services call indirectly invokes
++         *   fopen() through this call graph:
++         *     TAO::ORB::open_services
++         *     -> open_services_i
++         *     -> ACE_Service_Config::open
++         *     -> ACE_Service_Config::open_i
++         *     -> ACE_Service_Config::process_directives
++         *     -> ACE_Service_Config::process_file
++         *     -> ACE_OS::fopen
++         *   In VxWorks's ftp-based filesystem, the fopen() call fails with
++         *     EINVAL rather than ENOENT.
++         *   Therefore, we must also check for and allow EINVAL:
++         */
++        && errno != EINVAL
++#endif
++                     )
++     )
+     {
+       ACE_ERROR ((LM_ERROR,
+                   ACE_TEXT ("TAO (%P|%t) %p\n"),
+Index: TAO/tao/Connection_Handler.cpp
+===================================================================
+--- TAO/tao/Connection_Handler.cpp	(revision 48)
++++ TAO/tao/Connection_Handler.cpp	(working copy)
+@@ -387,7 +387,7 @@
+     {
+       ACE_DEBUG  ((LM_DEBUG,
+                    "TAO (%P|%t) - Connection_Handler[%d]::"
+-                   "close_connection_eh\n",
++                   "close_connection_eh about to return\n",
+                    id));
+     }
+ 
+@@ -436,6 +436,13 @@
+ int
+ TAO_Connection_Handler::close_handler (u_long flags)
+ {
++  if (TAO_debug_level > 4) {
++    ACE_DEBUG ((LM_DEBUG,
++                ACE_TEXT ("TAO (%P|%t) - Connection_Handler[%d]::close_handler;"
++                          " is_closed_=%d\n"),
++                this->transport()->id (), is_closed_
++               ));
++  }
+   this->is_closed_ = true;
+   this->state_changed (TAO_LF_Event::LFS_CONNECTION_CLOSED,
+                        this->orb_core_->leader_follower ());
+Index: TAO/tao/Transport.cpp
+===================================================================
+--- TAO/tao/Transport.cpp	(revision 49)
++++ TAO/tao/Transport.cpp	(working copy)
+@@ -201,6 +201,11 @@
+ 
+ TAO_Transport::~TAO_Transport (void)
+ {
++  if (TAO_debug_level > 4) {
++    ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("TAO (%P|%t) - Transport[%d]::~Transport\n"),
++                this->id_
++                 ));
++  }
+   delete this->messaging_object_;
+ 
+   delete this->ws_;
+@@ -487,6 +492,15 @@
+     entry = this->cache_map_entry_;
+     this->cache_map_entry_ = 0;
+   }
++
++  if (TAO_debug_level > 3)
++    {
++      ACE_DEBUG ((LM_DEBUG,
++                  ACE_TEXT ("TAO (%P|%t) - Transport[%d]::purge_entry, " )
++                  ACE_TEXT ("entry is %@\n"),
++                  this->id (),entry));
++    }
++  
+   return this->transport_cache_manager ().purge_entry (entry);
+ }
+ 
+@@ -929,7 +943,7 @@
+ #endif  /* TAO_HAS_SENDFILE==1 */
+     retval = this->send (iov, iovcnt, byte_count, max_wait_time);
+ 
+-  if (TAO_debug_level == 5)
++  if (TAO_debug_level > 9)
+     {
+       dump_iov (iov, iovcnt, this->id (),
+                 byte_count, ACE_TEXT("drain_queue_helper"));
+@@ -2643,6 +2657,11 @@
+ void
+ TAO_Transport::pre_close (void)
+ {
++  if (TAO_debug_level > 4) {
++    ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("TAO (%P|%t) - Transport[%d]::pre_close\n"),
++                this->id_));
++  }
++  
+   // @TODO: something needs to be done with is_connected_. Checking it is
+   // guarded by a mutex, but setting it is not. Until the need for mutexed
+   // protection is required, the transport cache is holding its own copy
+Index: TAO/tao/Sequence_T.h
+===================================================================
+--- TAO/tao/Sequence_T.h	(revision 48)
++++ TAO/tao/Sequence_T.h	(working copy)
+@@ -14,3 +14,19 @@
+ #include "tao/Bounded_Array_Sequence_T.h"
+ #include "tao/Bounded_Sequence_CDR_T.h"
+ 
++#ifdef _MSC_VER
++// added for TENA - otherwise get duplicate symbols in OM lib Converter
++template class TAO_Export TAO::unbounded_basic_string_sequence<char>;
++template class TAO_Export TAO::unbounded_value_sequence<char>;
++template class TAO_Export TAO::unbounded_value_sequence<int>;
++template class TAO_Export TAO::unbounded_value_sequence<unsigned int>;
++template class TAO_Export TAO::unbounded_value_sequence<short>;
++template class TAO_Export TAO::unbounded_value_sequence<unsigned short>;
++template class TAO_Export TAO::unbounded_value_sequence<bool>;
++template class TAO_Export TAO::unbounded_value_sequence<long>;
++template class TAO_Export TAO::unbounded_value_sequence<unsigned long>;
++template class TAO_Export TAO::unbounded_value_sequence<__int64>;
++template class TAO_Export TAO::unbounded_value_sequence<unsigned __int64>;
++template class TAO_Export TAO::unbounded_value_sequence<float>;
++template class TAO_Export TAO::unbounded_value_sequence<double>;
++#endif
+Index: TAO/tao/Transport_Cache_Manager_T.cpp
+===================================================================
+--- TAO/tao/Transport_Cache_Manager_T.cpp	(revision 49)
++++ TAO/tao/Transport_Cache_Manager_T.cpp	(working copy)
+@@ -463,6 +463,14 @@
+   int
+   Transport_Cache_Manager_T<TT, TRDT, PSTRAT>::purge_entry_i (HASH_MAP_ENTRY *&entry)
+   {
++    if (TAO_debug_level > 4) {
++      transport_type const * transport( entry->item().transport() );
++      ACE_DEBUG ((LM_INFO,
++                  ACE_TEXT ("TAO (%P|%t) - Transport_Cache_Manager_T::purge_entry_i: ")
++                  ACE_TEXT ("Transport[%d]\n"),
++                  transport->id()
++                   ));
++    }
+     int retval = 0;
+ 
+     if (entry != 0)
+Index: TAO/tao/RTScheduling/Request_Interceptor.cpp
+===================================================================
+--- TAO/tao/RTScheduling/Request_Interceptor.cpp	(revision 48)
++++ TAO/tao/RTScheduling/Request_Interceptor.cpp	(working copy)
+@@ -401,7 +401,8 @@
+       tss->rtscheduler_previous_current_impl_ = 0;
+ 
+     }
+-  else ACE_DEBUG ((LM_DEBUG,
++  else if (TAO_debug_level > 0)
++    ACE_DEBUG ((LM_DEBUG,
+                    "Send Reply Current is 0\n"));
+ }
+ 
+Index: TAO/tao/RTCORBA/Thread_Pool.h
+===================================================================
+--- TAO/tao/RTCORBA/Thread_Pool.h	(revision 48)
++++ TAO/tao/RTCORBA/Thread_Pool.h	(working copy)
+@@ -154,6 +154,7 @@
+   int is_collocated (const TAO_MProfile &mprofile);
+ 
+   /// Create the static threads - only called once.
++  /// Return value is as described in ACE_Task_Base::activate() .
+   int create_static_threads (void);
+ 
+   /// Mark that this lane is shutting down, we then don't create any
+@@ -198,12 +199,14 @@
+   /// Validate lane's priority and map it to a native value.
+   void validate_and_map_priority (void);
+ 
++  /// Return value is as described in ACE_Task_Base::activate() .
+   int create_threads_i (TAO_Thread_Pool_Threads &thread_pool,
+                         CORBA::ULong number_of_threads,
+                         long thread_flags);
+ 
+   /// Create @a number_of_threads of dynamic threads.  Can be called
+   /// multiple times.
++  /// Return value is as described in ACE_Task_Base::activate() .
+   int create_dynamic_threads (CORBA::ULong number_of_threads);
+ 
+   /// The Thread Pool to which this lane belongs.
+Index: ace/OS_NS_sys_mman.inl
+===================================================================
+--- ace/OS_NS_sys_mman.inl	(revision 48)
++++ ace/OS_NS_sys_mman.inl	(working copy)
+@@ -100,9 +100,9 @@
+ 
+       *file_mapping = ACE_TEXT_CreateFileMapping (file_handle,
+                                                   attr,
+-                                                  prot,
++                                                  static_cast<DWORD>(prot),
+                                                   0,
+-                                                  (file_handle == ACE_INVALID_HANDLE) ? len : 0,
++                                                  (file_handle == ACE_INVALID_HANDLE) ? static_cast<DWORD>(len) : 0,
+                                                   file_mapping_name);
+     }
+ 
+Index: ace/OS_NS_unistd.h
+===================================================================
+--- ace/OS_NS_unistd.h	(revision 48)
++++ ace/OS_NS_unistd.h	(working copy)
+@@ -312,7 +312,7 @@
+                       bool substitute_env_args = true);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+-  void swab (const void *src, void *dest, ssize_t n);
++  void swab (const void *src, void *dest, int n);
+ 
+   ACE_NAMESPACE_INLINE_FUNCTION
+   long sysconf (int);
+Index: ace/Arg_Shifter.h
+===================================================================
+--- ace/Arg_Shifter.h	(revision 48)
++++ ace/Arg_Shifter.h	(working copy)
+@@ -33,13 +33,23 @@
+  * @a argv vector, so deeper levels of argument parsing can locate the yet
+  * unprocessed arguments at the beginning of the vector.
+  *
++ * Nomenclature:
++ *   argument - a member of the argv array
++ *   option - an argument starting with '-'
++ *   flag - synonym for "option"
++ *   parameter value - an argument not starting with '-'
++ *   parameter - synonym for "parameter value"
++ *
+  * The @c ACE_Arg_Shifter copies the pointers of the @a argv vector
+- * into a temporary array. As the @c ACE_Arg_Shifter iterates over
+- * the copied vector, it places known arguments in the rear of the
+- * vector, leaving the unknown ones in the beginning. So, after having
+- * visited all the arguments in the temporary vector, @c ACE_Arg_Shifter
+- * has placed all the unknown arguments in their original order at
+- * the front of original @a argv.
++ * into a temporary array, emptying the original.  As the @c ACE_Arg_Shifter
++ * iterates over the temporary array, it places known arguments in the rear
++ * of the original array and places the unknown ones in the beginning of the
++ * original array.  It modifies argc to be the number of unknown arguments,
++ * so it looks to the caller as if the original array contains only unknown
++ * arguments.  So, after @c ACE_Arg_Shifter has visited all the arguments
++ * in the temporary array, the original @a argv array appears to contain
++ * only the unknown arguments in their original order (but it actually has
++ * all the known arguments, too, beyond argc).
+  */
+ template <typename CHAR_TYPE>
+ class ACE_Arg_Shifter_T
+@@ -102,15 +112,23 @@
+    *     main -foobar -4 does not succeed (-4 is not a parameter)
+    *          but instead, would return 0
+    *
+-   * 0 is returned:
+-   *     If the current argument does not match flag
+-   *     If there is no parameter found after a 'matched' flag
++   * 0 is returned if:
++   *   1. the current argument does not match flag, or
++   *   2. there is no parameter found after a 'matched' flag
++   *   mcarter: WARNING: In case 2, the flag is still consumed!
++   *                     This is almost certainly a bug, but do not fix it
++   *                     because some things rely on it!
+    *
+    * If the flag is matched and the flag and parameter DO NOT RUN
+    * together, the flag is consumed, the parameter is returned,
+    * and the new current argument is the parameter value.
+    * ie '-foobarflag  VALUE' leaves the new cur arg == "VALUE"
+    *
++   * If the flag is matched and the flag and parameter DO NOT RUN
++   * together, the flag is consumed, the parameter is returned,
++   * and the new current argument is the parameter value.
++   * ie '-foobarflag  VALUE' leaves the new cur arg == "VALUE"
++   *
+    * If the flag is matched and the flag and parameter RUN
+    * together '-foobarflagVALUE', the flag is NOT consumed
+    * and the cur arg is left pointing to the entire flag/value pair
+@@ -202,6 +220,9 @@
+   /// The index of <argv_> in which we'll stick the next known
+   /// argument.
+   int front_;
++  /* This is not really the "front" at all.  It's the point after
++   * which the unknown arguments end and at which the known arguments begin.
++   */
+ };
+ 
+ typedef ACE_Arg_Shifter_T<ACE_TCHAR> ACE_Arg_Shifter;
+Index: ace/Time_Value.cpp
+===================================================================
+--- ace/Time_Value.cpp	(revision 48)
++++ ace/Time_Value.cpp	(working copy)
+@@ -172,7 +172,55 @@
+   // // ACE_OS_TRACE ("ACE_Time_Value::normalize");
+   // From Hans Rohnert...
+ 
+-  if (this->tv_.tv_usec >= ACE_ONE_SECOND_IN_USECS)
++
++  /* mcarter:
++   *   This function has been modified from its original version.
++   *   It has been modified to support VxWorks.
++   *   Details:
++   *     ACE_Time_Value internally uses an OS-defined "timeval" structure
++   *       to represent time.  On nearly every OS known to humankind,
++   *       the "timeval" structure looks like this:
++   *         {
++   *           long tv_sec;
++   *           long tv_usec;
++   *         }
++   *     However, VxWorks, in their superior wisdom, decided to make their
++   *       "timeval" structure looks like this:
++   *         {
++   *           long tv_sec;
++   *           unsigned long tv_usec;
++   *         }
++   *     ACE assumes that it can store a negative value into tv_usec while
++   *       computing time differences.  Obviously, this breaks on VxWorks.
++   *       For example, the below normalization code used to have a 'while'
++   *       loop with this condition:
++   *         this->tv_.tv_usec <= -ACE_ONE_SECOND_IN_USECS
++   *       The LHS is an unsigned long, and the RHS is a signed long.
++   *       The C++ standard says, "If either operand [of a comparison] is
++   *         unsigned long the other is converted to unsigned long."
++   *       This means that -ACE_ONE_SECOND_IN_USECS would be converted to
++   *         unsigned long, thereby making it positive, thereby making the
++   *         condition true when tv_usec is 0, thereby causing serious
++   *         program errors!)
++   *     To work around this problem, we make use of the fact that there
++   *       is no loss of information when assigning a negative long to an
++   *       unsigned long.  
++   *     The work-around is as follows:
++   *       All code that assigns to this->tv_.tv_usec remains as-is.
++   *       On VxWorks, negative numbers are stored as positive numbers, but
++   *         _without_loss_of_information_.
++   *       When it comes time to read the value back out, the value _must_
++   *         be read with the usec() accessor method.
++   *       On most platforms, the signed long value is simply passed through.
++   *       On VxWorks, the unsigned long is returned as a signed long,
++   *         thereby retrieving the original signed value that was stored.
++   *       Since the VxWorks OS will never put a value larger than 1,000,000
++   *         into tv_usec, there is no risk that the value that VxWorks
++   *         stores will ever be misinterpreted as a negative number when
++   *         it's read out as a signed long.
++   */
++
++  if (this->usec() >= ACE_ONE_SECOND_IN_USECS)
+     {
+       /*! \todo This loop needs some optimization.
+        */
+@@ -181,9 +229,11 @@
+           ++this->tv_.tv_sec;
+           this->tv_.tv_usec -= ACE_ONE_SECOND_IN_USECS;
+         }
+-      while (this->tv_.tv_usec >= ACE_ONE_SECOND_IN_USECS);
++      while (this->usec() >= ACE_ONE_SECOND_IN_USECS);
+     }
+-  else if (this->tv_.tv_usec <= -ACE_ONE_SECOND_IN_USECS)
++  else if (
++           this->usec() <= -ACE_ONE_SECOND_IN_USECS
++          )
+     {
+       /*! \todo This loop needs some optimization.
+        */
+@@ -192,17 +242,17 @@
+           --this->tv_.tv_sec;
+           this->tv_.tv_usec += ACE_ONE_SECOND_IN_USECS;
+         }
+-      while (this->tv_.tv_usec <= -ACE_ONE_SECOND_IN_USECS);
++      while (this->usec() <= -ACE_ONE_SECOND_IN_USECS);
+     }
+ 
+-  if (this->tv_.tv_sec >= 1 && this->tv_.tv_usec < 0)
++  if (this->tv_.tv_sec >= 1 && this->usec() < 0)
+     {
+       --this->tv_.tv_sec;
+       this->tv_.tv_usec += ACE_ONE_SECOND_IN_USECS;
+     }
+ // tv_sec in qnxnto is unsigned
+ #if !defined ( __QNXNTO__)
+-  else if (this->tv_.tv_sec < 0 && this->tv_.tv_usec > 0)
++  else if (this->tv_.tv_sec < 0 && this->usec() > 0)
+     {
+       ++this->tv_.tv_sec;
+       this->tv_.tv_usec -= ACE_ONE_SECOND_IN_USECS;
+Index: ace/config-macosx-leopard.h
+===================================================================
+--- ace/config-macosx-leopard.h	(revision 48)
++++ ace/config-macosx-leopard.h	(working copy)
+@@ -231,4 +231,4 @@
+ #error "Compiler must be upgraded, see http://developer.apple.com"
+ #endif /* __APPLE_CC__ */
+ 
+-#endif /* ACE_CONFIG_MACOSX_TIGER_H */
++#endif /* ACE_CONFIG_MACOSX_LEOPARD_H */
+Index: ace/OS_NS_regex.inl
+===================================================================
+--- ace/OS_NS_regex.inl	(revision 48)
++++ ace/OS_NS_regex.inl	(working copy)
+@@ -3,7 +3,9 @@
+ // $Id: OS_NS_regex.inl 80826 2008-03-04 14:51:23Z wotte $
+ 
+ #include "ace/OS_NS_errno.h"
++#if defined (ACE_HAS_REGEX)
+ #include "ace/os_include/os_regex.h"
++#endif
+ 
+ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+ 
+Index: ace/config-sunos5.10.h
+===================================================================
+--- ace/config-sunos5.10.h	(revision 48)
++++ ace/config-sunos5.10.h	(working copy)
+@@ -22,6 +22,10 @@
+ #  undef ACE_LACKS_ALPHASORT
+ #endif
+ 
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++#   define ACE_LACKS_PRAGMA_ONCE
++# endif /* ! ACE_LACKS_PRAGMA_ONCE */
++
+ // Solaris 10 offers a useable log2() unlike previous Solaris versions.
+ #if defined (ACE_LACKS_LOG2)
+ #  undef ACE_LACKS_LOG2
+Index: ace/Guard_T.h
+===================================================================
+--- ace/Guard_T.h	(revision 48)
++++ ace/Guard_T.h	(working copy)
+@@ -31,12 +31,35 @@
+  * @class ACE_Guard
+  *
+  * @brief This data structure is meant to be used within a method or
+- * function...  It performs automatic aquisition and release of
++ * function...  It performs automatic acquisition and release of
+  * a parameterized synchronization object ACE_LOCK.
+  *
+- * The <ACE_LOCK> class given as an actual parameter must provide at
+- * the very least the <acquire>, <tryacquire>, <release>, and
++ * The <ACE_LOCK> class given as an actual parameter must provide, at
++ * the very least, the <acquire>, <tryacquire>, <release>, and
+  * <remove> methods.
++ *
++ * WARNING: A successfully constructed ACE_Guard does NOT mean that the
++ * lock was acquired!  It is the caller's responsibility, after
++ * constructing an ACE_Guard, to check whether the lock was successfully
++ * acquired.  Code like this is dangerous:
++ *   {
++ *     ACE_Guard<ACE_Lock> g(lock);
++ *     ... perform critical operation requiring lock to be held ...
++ *   }
++ * Instead, one must do something like this:
++ *   {
++ *     ACE_Guard<ACE_Lock> g(lock);
++ *     if (! g.locked())
++ *       {
++ *         ... handle error ...
++ *       }
++ *     else
++ *       {
++ *         ... perform critical operation requiring lock to be held ...
++ *       }
++ *   }
++ * The ACE_GUARD_RETURN() and ACE_GUARD_REACTION() macros are designed to
++ * to help with this.
+  */
+ template <class ACE_LOCK>
+ class ACE_Guard
+@@ -114,6 +137,8 @@
+  * acquires/releases a write lock automatically (naturally, the
+  * <ACE_LOCK> it is instantiated with must support the appropriate
+  * API).
++ *
++ * WARNING: See important "WARNING" in comments at top of ACE_Guard.
+  */
+ template <class ACE_LOCK>
+ class ACE_Write_Guard : public ACE_Guard<ACE_LOCK>
+@@ -158,6 +183,8 @@
+  * acquires/releases a read lock automatically (naturally, the
+  * <ACE_LOCK> it is instantiated with must support the appropriate
+  * API).
++ *
++ * WARNING: See important "WARNING" in comments at top of ACE_Guard.
+  */
+ template <class ACE_LOCK>
+ class ACE_Read_Guard : public ACE_Guard<ACE_LOCK>
+Index: ace/Handle_Set.inl
+===================================================================
+--- ace/Handle_Set.inl	(revision 48)
++++ ace/Handle_Set.inl	(working copy)
+@@ -88,8 +88,11 @@
+   return FD_ISSET (handle,
+                    const_cast<fd_set*> (&this->mask_));
+ #else
++  //
++  // const_cast added to make Mac OS X 10.5 happy.
++  //
+   return FD_ISSET (handle,
+-                   &this->mask_);
++                   const_cast<fd_set*>(&this->mask_));
+ #endif /* ACE_HAS_BIG_FD_SET */
+ }
+ 
+Index: ace/OS_NS_unistd.inl
+===================================================================
+--- ace/OS_NS_unistd.inl	(revision 48)
++++ ace/OS_NS_unistd.inl	(working copy)
+@@ -10,6 +10,9 @@
+ #include "ace/Default_Constants.h"
+ #include "ace/OS_Memory.h"
+ #include "ace/Truncate.h"
++#ifdef ACE_MACOSX
++#include <string.h>         /* For swab */
++#endif
+ 
+ #if defined (ACE_HAS_CLOCK_GETTIME)
+ # include "ace/os_include/os_time.h"
+@@ -970,7 +973,7 @@
+ ACE_INLINE void
+ ACE_OS::swab (const void *src,
+               void *dest,
+-              ssize_t length)
++              int length)
+ {
+ #if defined (ACE_LACKS_SWAB)
+   // ------------------------------------------------------------
+Index: ace/Global_Macros.h
+===================================================================
+--- ace/Global_Macros.h	(revision 48)
++++ ace/Global_Macros.h	(working copy)
+@@ -166,6 +166,16 @@
+ 
+ // Convenient macro for testing for deadlock, as well as for detecting
+ // when mutexes fail.
++/* mcarter: WARNING:
++ *   Use of ACE_GUARD() is rarely correct.  ACE_GUARD() causes the current
++ *   function to return if the lock is not acquired.  Since merely returning
++ *   (no value) almost certainly fails to handle the acquisition failure
++ *   and almost certainly fails to communicate the failure to the caller
++ *   for the caller to handle, ACE_GUARD() is almost always the wrong
++ *   thing to do.  The same goes for ACE_WRITE_GUARD() and ACE_READ_GUARD() .
++ *   ACE_GUARD_REACTION() is better because it lets you specify error
++ *   handling code.
++ */
+ #define ACE_GUARD_ACTION(MUTEX, OBJ, LOCK, ACTION, REACTION) \
+    ACE_Guard< MUTEX > OBJ (LOCK); \
+    if (OBJ.locked () != 0) { ACTION; } \
+@@ -191,6 +201,37 @@
+ 
+ // ----------------------------------------------------------------
+ 
++#if defined(ACE_UNEXPECTED_RETURNS)
++
++/* Using ACE_UNEXPECTED_RETURNS is ill-advised because, in many cases,
++ *   it fails to inform callers of the error condition.
++ * It exists mainly to provide back-compatibility with old, dangerous,
++ *   incorrect behavior.
++ * Code that previously used ACE_GUARD() or ACE_GUARD_RETURN() to return
++ *   upon failure to acquire a lock can now use:
++ *     ACE_GUARD_REACTION(..., ACE_UNEXPECTED(...))
++ *   The behavior of this depends on whether or not ACE_UNEXPECTED_RETURNS
++ *     is defined.  If so, it just returns upon failure (as in the original),
++ *     which is usually dangerous because it usually fails to handle the
++ *     error.  If not, it calls std::unexpected(), which does whatever the
++ *     std::unexpected handler does (which is to abort, by default).
++ */
++#  define ACE_UNEXPECTED(RETVAL) \
++  do { \
++    return RETVAL; \
++  } while (0)
++
++#else
++
++#  define ACE_UNEXPECTED(RETVAL) \
++  do { \
++    std::unexpected(); \
++  } while (0)
++
++#endif
++
++// ----------------------------------------------------------------
++
+ # define ACE_DES_NOFREE(POINTER,CLASS) \
+    do { \
+         if (POINTER) \
+Index: include/makeinclude/platform_sunos5_sunc++.GNU
+===================================================================
+--- include/makeinclude/platform_sunos5_sunc++.GNU	(revision 48)
++++ include/makeinclude/platform_sunos5_sunc++.GNU	(working copy)
+@@ -173,7 +173,10 @@
+ 
+ #### Sun CC-specific "Pure virtual function called" bug fix trigger.
+ #### XXX: Shouldn't this go into a compiler version specific guard ???
+-CPPFLAGS       += -DSUN_CC_HAS_PVFC_BUG
++# TENA: moved this to config-sunos5.8.h; our stuff does not use the
++# platform_*.GNU build files, and horrible things happened as a
++# result.  See https://www.tena-sda.org/helpdesk/browse/MW-1925
++#CPPFLAGS       += -DSUN_CC_HAS_PVFC_BUG
+ 
+ #### Exception handling breaks on MP machines prior to Sun C++ 4.2
+ #### with jumbo patch 104631-02, see ace/config-sunos5.5.h.
+Index: include/makeinclude/wrapper_macros.GNU
+===================================================================
+--- include/makeinclude/wrapper_macros.GNU	(revision 48)
++++ include/makeinclude/wrapper_macros.GNU	(working copy)
+@@ -126,6 +126,7 @@
+ #  DEFFLAGS     C++ preprocessor flag for defining symbols
+ #  DLD          Name of dynamic linker
+ #  LD           Name of linker
++#  GPERF        Location of gperf executable
+ #  IDL          Name of the CORBA IDL compiler
+ #  TEMPLATES_FLAG
+ #               Flag to pass to the compiler to control the instantiation of
+@@ -380,6 +381,8 @@
+ IDL_SERVER_TINL_EXT ?= S_T.inl
+ IDL_SERVER_TSRC_EXT ?= S_T.cpp
+ 
++GPERF ?= $(ACE_ROOT)/bin/gperf
++
+ ifeq (,$(findstring -I$(ACE_ROOT),$(INCLDIRS)))
+   INCLDIRS        += -I$(ACE_ROOT)
+ endif
+Index: include/makeinclude/platform_macosx_panther.GNU
+===================================================================
+--- include/makeinclude/platform_macosx_panther.GNU	(revision 48)
++++ include/makeinclude/platform_macosx_panther.GNU	(working copy)
+@@ -31,5 +31,5 @@
+ #
+ include $(ACE_ROOT)/include/makeinclude/platform_g++_common.GNU
+ 
+-LDFLAGS         += -flat_namespace -undefined warning
++LDFLAGS         += -flat_namespace -undefined suppress
+ CCFLAGS         += $(CFLAGS) $(TEMPLATES_FLAG)
+Index: include/makeinclude/platform_linux.GNU
+===================================================================
+--- include/makeinclude/platform_linux.GNU	(revision 48)
++++ include/makeinclude/platform_linux.GNU	(working copy)
+@@ -82,6 +82,13 @@
+ #
+ include $(ACE_ROOT)/include/makeinclude/platform_g++_common.GNU
+ 
++#
++# /usr/include/features.h says all of the below are default.
++# To ensure that they are always set, regardless of #include file order,
++# we'll set them here explicitly.
++#
++CPPFLAGS += -D_SVID_SOURCE -D_BSD_SOURCE -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199506L
++
+ # TAO with GCC 4.0.2 and -O3 seems to result in runtime issues, for example
+ # the ForwardRequest PI test will fail. For GCC 4.0.2 we default to -O2
+ ifeq ($(CXX_VERSION),4.0.2)
+Index: include/makeinclude/platform_macosx_tiger.GNU
+===================================================================
+--- include/makeinclude/platform_macosx_tiger.GNU	(revision 48)
++++ include/makeinclude/platform_macosx_tiger.GNU	(working copy)
+@@ -39,9 +39,11 @@
+ OCFLAGS		   += -O2 
+ RANLIB          = ranlib
+ SOEXT			= dylib
+-SOFLAGS		   += -dynamiclib
++SOFLAGS		   += -dynamiclib -Wl,-install_name,$(SHLIB_UNCHECKED)
+ SOBUILD			= -o $(VSHDIR)$*.dylib $<
+ 
++PIC     = -fPIC
++
+ # Test for template instantiation, add to SOFLAGS if versioned_so set,
+ # add -E to LDFLAGS if using GNU ld
+ #
+Index: include/makeinclude/platform_irix6.x_sgic++.GNU
+===================================================================
+--- include/makeinclude/platform_irix6.x_sgic++.GNU	(revision 48)
++++ include/makeinclude/platform_irix6.x_sgic++.GNU	(working copy)
+@@ -62,9 +62,9 @@
+ # Suppress warnings about "last argument" of varargs function is unnamed
+ ifeq (7.3,$(findstring 7.3,$(CXX_VERSION)))
+     # 7.3.x doesn't have the 3506 error code
+-    CCFLAGS         += -diag_suppress 3284,1253,3439,1234
++    CCFLAGS         += -diag_suppress 3284,1253,3439,1234,1460
+ else
+-    CCFLAGS         += -diag_suppress 3284,1253,3439,1234,3506
++    CCFLAGS         += -diag_suppress 3284,1253,3439,1234,3506,1460
+ endif
+ 
+ LDFLAGS		+= -Wl,-woff,15
