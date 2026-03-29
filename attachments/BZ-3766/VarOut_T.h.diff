@@ -1,0 +1,28 @@
+--- C:/DOCUME~1/tv2745/LOCALS~1/Temp/VarOut_T.h-revBASE.svn000.tmp.h	Thu Nov 19 23:11:07 2009
++++ C:/Middleware/ACE_Devo/TAO/tao/VarOut_T.h	Thu Nov 19 22:49:56 2009
+@@ -44,7 +44,6 @@
+   const T * operator-> (void) const;
+ 
+   operator const T & () const;
+-  operator T & ();
+   operator T & () const;
+ 
+   typedef const T &   _in_type;
+@@ -85,6 +84,9 @@
+   // Fixed-size types only.
+   TAO_Fixed_Var_T & operator= (const T &);
+ 
++  // Fixed-size types only.
++  operator T & ();
++
+   typedef T &   _out_type;
+   typedef T     _retn_type;
+ 
+@@ -113,6 +115,7 @@
+ 
+   // Variable size types only.
+   operator T *& ();
++  operator T & ();
+ 
+   typedef T *&  _out_type;
+   typedef T *   _retn_type;
