@@ -1,0 +1,23 @@
+Index: Leader_Follower_Flushing_Strategy.cpp
+===================================================================
+--- Leader_Follower_Flushing_Strategy.cpp	(revision 85444)
++++ Leader_Follower_Flushing_Strategy.cpp	(working copy)
+@@ -47,8 +47,17 @@
+     {
+       TAO_ORB_Core * const orb_core = transport->orb_core ();
+ 
+-      while (!transport->queue_is_empty ())
++      if (max_wait_time == 0)
+         {
++          while (orb_core->reactor ()->work_pending ())
++            {
++              ACE_Time_Value tv (0, 100);
++              if (orb_core->run (&tv, 1) == -1)
++                return -1;
++            }
++        }
++      else
++        {
+           if (orb_core->run (max_wait_time, 1) == -1)
+             return -1;
+ 
