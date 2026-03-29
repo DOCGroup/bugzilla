@@ -1,0 +1,11 @@
+--- D:/projects/ACE_wrappers/ace/Timer_Wheel_T.cpp	Tue Jul 08 14:18:39 2014
++++ C:/Users/Erik Sohns/Desktop/Timer_Wheel_T.cpp	Tue Jul 08 14:14:42 2014
+@@ -816,7 +816,7 @@
+ template <class TYPE, class FUNCTOR, class ACE_LOCK, typename TIME_POLICY> int
+ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::expire ()
+ {
+-	return ACE_Timer_Queue_T<TYPE,FUNCTOR,ACE_LOCK>::expire();
++  return ACE_Timer_Queue_T<TYPE,FUNCTOR,ACE_LOCK,TIME_POLICY>::expire ();
+ }
+ 
+ /**
