@@ -1,0 +1,416 @@
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Resource_Factory type=00127980 => 00127880
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=DLL_Parser type=0012B320 => 0012B300
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=FILE_Parser type=0012B220 => 0012B200
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=CORBALOC_Parser type=0012B120 => 0012B100
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=CORBANAME_Parser type=0012AFC0 => 0012AFA0
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=MCAST_Parser type=0012AEC0 => 0012AE80
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=HTTP_Parser type=0012B420 => 0012B400
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Default_Thread_Lane_Resources_Manager_Factory type=0012B860 => 0012B840
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Server_Strategy_Factory type=00127CA0 => 00127C40
+TAO (88145926|88211462) - ORB_Core: Codeset Manager not available
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=IIOP_Factory type=0012ADA0 => 0012AD80
+TAO (88145926|88211462) - Loaded default protocol <IIOP_Factory>
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Protocols_Hooks type=00000000 => 00000000
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=TAO_Object_Adapter_Factory type=00000000 => 00000000
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Network_Priority_Protocols_Hooks type=00000000 => 00000000
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=FT_ClientService_Activate type=00000000 => 00000000
+TAO (88145926|88211462) - Created new ORB <VERBOSE_LOGGING_TEST_0>
+ACE (88145926|88211462) SCG:<dtor=0011EDA8> - new repo=00120D80
+log flags 4 verbose: 0
+CORBA::ORB::destroy() called on ORB <VERBOSE_LOGGING_TEST_0>.
+TAO (88145926|88211462) - Destroying ORB <VERBOSE_LOGGING_TEST_0>
+Start ORB_init with ORBVerboseLogging=1
+server adding args: -ORBCDRTradeoff 2048 -ORBCollocation per-orb -ORBDebug -ORBDebugLevel 10 -ORBDefaultInitRef corbaloc::localhost:4177 -ORBDottedDecimalAddresses 1 -ORBId Client -ORBListenEndpoints iiop://:4178 -ORBLogFile \network\temp\ACE\wince6\ACE_wrappers/TAO\tests\Bug_3559_Regression/ORBLog.log -ORBNegotiateCodesets 0 -ORBNodelay 1 -ORBSvcConfDirective "static Client_Strategy_Factory '-ORBWaitStrategy mt_noupcall'" -ORBVerboseLogging 1 
+ACE (88145926|88211462) SCG:<ctor=0011EDA8> - config=00120D20 repo=00120D80 superceded by repo=00120D80
+TAO (88145926|88211462) - We are the default ORB ...
+TAO (88145926|88211462) - Initializing the orb-specific services
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=ORBInitializer_Registry type=00000000 => 00000000
+ACE (88145926|88211462) SG::process_directive, repo=00120D80 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (88145926|88211462) SG::process_directives_i, repo=00120D80 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (88145926|88211462) SCG:<ctor=0011EC2C> - config=00120D20 repo=00120D80 superceded by repo=00120D80
+ACE (88145926|88211462) SG::initialize - repo=00120D80, name=ORBInitializer_Registry - looking up in the repo
+ACE (88145926|88211462) STDG::<ctor>, repo=00120D80, name=ORBInitializer_Registry - begining at [18]
+ACE (88145926|88211462) LN::open_dll - path=TAO_PI
+ACE (88145926|88211462) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+ACE (88145926|88211462) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+ACE (88145926|88211462) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+ACE (88145926|88211462) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+ACE (88145926|88211462) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+ACE (88145926|88211462) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+ACE (88145926|88211462) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+ACE (88145926|88211462) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+ACE (88145926|88211462) DLL_Handle::open ("TAO_PI", 0x0) -> failed: 
+ACE (88145926|88211462) DLL_Handle::open ('TAO_PI') failed, errno=0: 
+ACE (88145926|88211462) DLL_Handle::open ("TAO_PI"): Invalid handle error: 
+ACE_DLL_Manager::open_dll: Could not open dll TAO_PI.
+ACE (88145926|88211462) DLL_Handle::close - TAO_PI (handle=0, refcount=0)
+ACE (88145926|88211462) LN::open_dll - Failed to open TAO_PI: 
+ACE (88145926|88211462) Unable to create service object for ORBInitializer_Registry
+ACE (88145926|88211462) STDG::<dtor> - Failed (-1) to find ORBInitializer_Registry -> 00000000
+ACE (88145926|88211462) Dynamic_Node::apply - Did dynamic on ORBInitializer_Registry (yyerrno=1)
+ACE (88145926|88211462) SCG:<dtor=0011EC2C> - new repo=00120D80
+ACE (88145926|88211462) DSB::instance, repo=00120D80, name=ORBInitializer_Registry type=00000000 => 00000000
+Jan 01 12:00:53.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+Jan 01 12:00:53.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Resource_Factory type=00127980 => 00127880
+Jan 01 12:00:53.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=DLL_Parser type=0012B320 => 0012B300
+Jan 01 12:00:53.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=FILE_Parser type=0012B220 => 0012B200
+Jan 01 12:00:53.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=CORBALOC_Parser type=0012B120 => 0012B100
+Jan 01 12:00:53.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=CORBANAME_Parser type=0012AFC0 => 0012AFA0
+Jan 01 12:00:53.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=MCAST_Parser type=0012AEC0 => 0012AE80
+Jan 01 12:00:53.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=HTTP_Parser type=0012B420 => 0012B400
+Jan 01 12:00:53.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Default_Thread_Lane_Resources_Manager_Factory type=0012B860 => 0012B840
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Server_Strategy_Factory type=00127CA0 => 00127C40
+Jan 01 12:00:54.000 2006@LM_DEBUG@TAO (88145926|88211462) - ORB_Core: Codeset Manager not available
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=IIOP_Factory type=0012ADA0 => 0012AD80
+Jan 01 12:00:54.000 2006@LM_DEBUG@TAO (88145926|88211462) - Loaded protocol <IIOP_Factory>
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Protocols_Hooks type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=TAO_Object_Adapter_Factory type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Network_Priority_Protocols_Hooks type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=FT_ClientService_Activate type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@LM_DEBUG@TAO (88145926|88211462) - Created new ORB <VERBOSE_LOGGING_TEST_1>
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) SCG:<dtor=0011EDA8> - new repo=00120D80
+Jan 01 12:00:54.000 2006@LM_DEBUG@log flags 36 verbose: 1
+Jan 01 12:00:54.000 2006@LM_DEBUG@CORBA::ORB::destroy() called on ORB <VERBOSE_LOGGING_TEST_1>.
+Jan 01 12:00:54.000 2006@LM_DEBUG@TAO (88145926|88211462) - Destroying ORB <VERBOSE_LOGGING_TEST_1>
+Jan 01 12:00:54.000 2006@LM_DEBUG@Start ORB_init with ORBVerboseLogging=2
+Jan 01 12:00:54.000 2006@LM_DEBUG@server adding args: Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBCDRTradeoff Jan 01 12:00:54.000 2006@LM_DEBUG@2048 Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBCollocation Jan 01 12:00:54.000 2006@LM_DEBUG@per-orb Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBDebug Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBDebugLevel Jan 01 12:00:54.000 2006@LM_DEBUG@10 Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBDefaultInitRef Jan 01 12:00:54.000 2006@LM_DEBUG@corbaloc::localhost:4177 Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBDottedDecimalAddresses Jan 01 12:00:54.000 2006@LM_DEBUG@1 Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBId Jan 01 12:00:54.000 2006@LM_DEBUG@Client Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBListenEndpoints Jan 01 12:00:54.000 2006@LM_DEBUG@iiop://:4178 Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBLogFile Jan 01 12:00:54.000 2006@LM_DEBUG@\network\temp\ACE\wince6\ACE_wrappers/TAO\tests\Bug_3559_Regression/ORBLog.log Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBNegotiateCodesets Jan 01 12:00:54.000 2006@LM_DEBUG@0 Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBNodelay Jan 01 12:00:54.000 2006@LM_DEBUG@1 Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBSvcConfDirective Jan 01 12:00:54.000 2006@LM_DEBUG@"static Client_Strategy_Factory '-ORBWaitStrategy mt_noupcall'" Jan 01 12:00:54.000 2006@LM_DEBUG@-ORBVerboseLogging Jan 01 12:00:54.000 2006@LM_DEBUG@2 Jan 01 12:00:54.000 2006@LM_DEBUG@
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) SCG:<ctor=0011EDA8> - config=00120D20 repo=00120D80 superceded by repo=00120D80
+Jan 01 12:00:54.000 2006@LM_DEBUG@TAO (88145926|88211462) - We are the default ORB ...
+Jan 01 12:00:54.000 2006@LM_DEBUG@TAO (88145926|88211462) - Initializing the orb-specific services
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=ORBInitializer_Registry type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) SG::process_directive, repo=00120D80 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) SG::process_directives_i, repo=00120D80 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) SCG:<ctor=0011EC2C> - config=00120D20 repo=00120D80 superceded by repo=00120D80
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) SG::initialize - repo=00120D80, name=ORBInitializer_Registry - looking up in the repo
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) STDG::<ctor>, repo=00120D80, name=ORBInitializer_Registry - begining at [18]
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) LN::open_dll - path=TAO_PI
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+Jan 01 12:00:54.000 2006@LM_ERROR@ACE (88145926|88211462) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+Jan 01 12:00:54.000 2006@LM_ERROR@ACE (88145926|88211462) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+Jan 01 12:00:54.000 2006@LM_ERROR@ACE (88145926|88211462) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+Jan 01 12:00:54.000 2006@LM_ERROR@ACE (88145926|88211462) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DLL_Handle::open ("TAO_PI", 0x0) -> failed: 
+Jan 01 12:00:54.000 2006@LM_ERROR@ACE (88145926|88211462) DLL_Handle::open ('TAO_PI') failed, errno=0: 
+Jan 01 12:00:54.000 2006@LM_ERROR@ACE (88145926|88211462) DLL_Handle::open ("TAO_PI"): Invalid handle error: 
+Jan 01 12:00:54.000 2006@LM_ERROR@ACE_DLL_Manager::open_dll: Could not open dll TAO_PI.
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DLL_Handle::close - TAO_PI (handle=0, refcount=0)
+Jan 01 12:00:54.000 2006@LM_ERROR@ACE (88145926|88211462) LN::open_dll - Failed to open TAO_PI: 
+Jan 01 12:00:54.000 2006@LM_ERROR@ACE (88145926|88211462) Unable to create service object for ORBInitializer_Registry
+Jan 01 12:00:54.000 2006@LM_WARNING@ACE (88145926|88211462) STDG::<dtor> - Failed (-1) to find ORBInitializer_Registry -> 00000000
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) Dynamic_Node::apply - Did dynamic on ORBInitializer_Registry (yyerrno=1)
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) SCG:<dtor=0011EC2C> - new repo=00120D80
+Jan 01 12:00:54.000 2006@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=ORBInitializer_Registry type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Resource_Factory type=00127980 => 00127880
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=DLL_Parser type=0012B320 => 0012B300
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=FILE_Parser type=0012B220 => 0012B200
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=CORBALOC_Parser type=0012B120 => 0012B100
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=CORBANAME_Parser type=0012AFC0 => 0012AFA0
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=MCAST_Parser type=0012AEC0 => 0012AE80
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=HTTP_Parser type=0012B420 => 0012B400
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Default_Thread_Lane_Resources_Manager_Factory type=0012B860 => 0012B840
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Server_Strategy_Factory type=00127CA0 => 00127C40
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@TAO (88145926|88211462) - ORB_Core: Codeset Manager not available
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=IIOP_Factory type=0012ADA0 => 0012AD80
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@TAO (88145926|88211462) - Loaded protocol <IIOP_Factory>
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Protocols_Hooks type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=TAO_Object_Adapter_Factory type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=Network_Priority_Protocols_Hooks type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) DSB::instance, repo=00120D80, name=FT_ClientService_Activate type=00000000 => 00000000
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@TAO (88145926|88211462) - Created new ORB <VERBOSE_LOGGING_TEST_2>
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SCG:<dtor=0011EDA8> - new repo=00120D80
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@log flags 52 verbose: 2
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@CORBA::ORB::destroy() called on ORB <VERBOSE_LOGGING_TEST_2>.
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@TAO (88145926|88211462) - Destroying ORB <VERBOSE_LOGGING_TEST_2>
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@Test OK, a timestamp was found
+Jan 01 12:00:54.000 2006@<local_host>@88145926@LM_DEBUG@Test passed!Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [17], name=ACE_Service_Manager, type=0012C740, object=0012C700, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=ACE_Service_Manager, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [16], name=ACE_Naming_Context, type=0012C5C0, object=0012C100, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=ACE_Naming_Context, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [15], name=Default_Collocation_Resolver, type=0012BA20, object=0012BA00, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Default_Collocation_Resolver, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [14], name=Default_Thread_Lane_Resources_Manager_Factory, type=0012B860, object=0012B840, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Default_Thread_Lane_Resources_Manager_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [13], name=Default_Endpoint_Selector_Factory, type=0012B6A0, object=0012B660, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Default_Endpoint_Selector_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [12], name=Default_Stub_Factory, type=0012B520, object=0012B500, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Default_Stub_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [11], name=HTTP_Parser, type=0012B420, object=0012B400, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=HTTP_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [10], name=DLL_Parser, type=0012B320, object=0012B300, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=DLL_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [9], name=FILE_Parser, type=0012B220, object=0012B200, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=FILE_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [8], name=CORBALOC_Parser, type=0012B120, object=0012B100, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=CORBALOC_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [7], name=CORBANAME_Parser, type=0012AFC0, object=0012AFA0, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=CORBANAME_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [6], name=MCAST_Parser, type=0012AEC0, object=0012AE80, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=MCAST_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [5], name=IIOP_Factory, type=0012ADA0, object=0012AD80, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=IIOP_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [4], name=Server_Strategy_Factory, type=00127CA0, object=00127C40, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Server_Strategy_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [3], name=Client_Strategy_Factory, type=00127B00, object=00127AC0, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Client_Strategy_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [2], name=Resource_Factory, type=00127980, object=00127880, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Resource_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [1], name=TAO_ORB_Core_Static_Resources, type=001232A0, object=001230E0, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=TAO_ORB_Core_Static_Resources, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::fini, repo=00120D80 [0], name=TAO_Codeset, type=00122FA0, object=00122F80, active=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=TAO_Codeset, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SG::close - complete this=00120D20, repo=00120D80, owned=0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::<dtor>, this=00120D80
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80, size=18
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [17], name=ACE_Service_Manager, object=0012C7A0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=ACE_Service_Manager, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [16], name=ACE_Naming_Context, object=0012C620
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=ACE_Naming_Context, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [15], name=Default_Collocation_Resolver, object=0012BA80
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Default_Collocation_Resolver, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [14], name=Default_Thread_Lane_Resources_Manager_Factory, object=0012B8E0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Default_Thread_Lane_Resources_Manager_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [13], name=Default_Endpoint_Selector_Factory, object=0012B720
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Default_Endpoint_Selector_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [12], name=Default_Stub_Factory, object=0012B580
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Default_Stub_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [11], name=HTTP_Parser, object=0012B460
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=HTTP_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [10], name=DLL_Parser, object=0012B360
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=DLL_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [9], name=FILE_Parser, object=0012B260
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=FILE_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [8], name=CORBALOC_Parser, object=0012B160
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=CORBALOC_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [7], name=CORBANAME_Parser, object=0012B020
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=CORBANAME_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [6], name=MCAST_Parser, object=0012AF00
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=MCAST_Parser, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [5], name=IIOP_Factory, object=0012ADE0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=IIOP_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [4], name=Server_Strategy_Factory, object=00127D00
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Server_Strategy_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [3], name=Client_Strategy_Factory, object=00127B60
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Client_Strategy_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [2], name=Resource_Factory, object=001279E0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=Resource_Factory, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [1], name=TAO_ORB_Core_Static_Resources, object=00123300
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=TAO_ORB_Core_Static_Resources, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SR::close - repo=00120D80 [0], name=TAO_Codeset, object=00122FE0
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) ST::fini - destroying name=TAO_Codeset, dll=(null)
+Jan 01 12:00:55.000 2006@<local_host>@88145926@LM_DEBUG@ACE (88145926|88211462) SG::~SG - this=00120D20, pss = 00000000
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Resource_Factory type=00127980 => 00127880
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=DLL_Parser type=0012B320 => 0012B300
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=FILE_Parser type=0012B220 => 0012B200
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=CORBALOC_Parser type=0012B120 => 0012B100
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=CORBANAME_Parser type=0012AFC0 => 0012AFA0
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=MCAST_Parser type=0012AEC0 => 0012AE80
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=HTTP_Parser type=0012B420 => 0012B400
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Default_Thread_Lane_Resources_Manager_Factory type=0012B860 => 0012B840
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Server_Strategy_Factory type=00127CA0 => 00127C40
+TAO (88539142|88604678) - ORB_Core: Codeset Manager not available
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=IIOP_Factory type=0012ADA0 => 0012AD80
+TAO (88539142|88604678) - Loaded default protocol <IIOP_Factory>
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Protocols_Hooks type=00000000 => 00000000
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=TAO_Object_Adapter_Factory type=00000000 => 00000000
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Network_Priority_Protocols_Hooks type=00000000 => 00000000
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=FT_ClientService_Activate type=00000000 => 00000000
+TAO (88539142|88604678) - Created new ORB <VERBOSE_LOGGING_TEST_0>
+ACE (88539142|88604678) SCG:<dtor=0011EDA8> - new repo=00120D80
+log flags 4 verbose: 0
+CORBA::ORB::destroy() called on ORB <VERBOSE_LOGGING_TEST_0>.
+TAO (88539142|88604678) - Destroying ORB <VERBOSE_LOGGING_TEST_0>
+Start ORB_init with ORBVerboseLogging=1
+server adding args: -ORBCDRTradeoff 2048 -ORBCollocation per-orb -ORBDebug -ORBDebugLevel 10 -ORBDefaultInitRef corbaloc::localhost:4177 -ORBDottedDecimalAddresses 1 -ORBId Client -ORBListenEndpoints iiop://:4178 -ORBLogFile \network\temp\ACE\wince6\ACE_wrappers/TAO\tests\Bug_3559_Regression/ORBLog.log -ORBNegotiateCodesets 0 -ORBNodelay 1 -ORBSvcConfDirective "static Client_Strategy_Factory '-ORBWaitStrategy mt_noupcall'" -ORBVerboseLogging 1 
+ACE (88539142|88604678) SCG:<ctor=0011EDA8> - config=00120D20 repo=00120D80 superceded by repo=00120D80
+TAO (88539142|88604678) - We are the default ORB ...
+TAO (88539142|88604678) - Initializing the orb-specific services
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=ORBInitializer_Registry type=00000000 => 00000000
+ACE (88539142|88604678) SG::process_directive, repo=00120D80 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (88539142|88604678) SG::process_directives_i, repo=00120D80 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+ACE (88539142|88604678) SCG:<ctor=0011EC2C> - config=00120D20 repo=00120D80 superceded by repo=00120D80
+ACE (88539142|88604678) SG::initialize - repo=00120D80, name=ORBInitializer_Registry - looking up in the repo
+ACE (88539142|88604678) STDG::<ctor>, repo=00120D80, name=ORBInitializer_Registry - begining at [18]
+ACE (88539142|88604678) LN::open_dll - path=TAO_PI
+ACE (88539142|88604678) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+ACE (88539142|88604678) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+ACE (88539142|88604678) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+ACE (88539142|88604678) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+ACE (88539142|88604678) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+ACE (88539142|88604678) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+ACE (88539142|88604678) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+ACE (88539142|88604678) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+ACE (88539142|88604678) DLL_Handle::open ("TAO_PI", 0x0) -> failed: 
+ACE (88539142|88604678) DLL_Handle::open ('TAO_PI') failed, errno=0: 
+ACE (88539142|88604678) DLL_Handle::open ("TAO_PI"): Invalid handle error: 
+ACE_DLL_Manager::open_dll: Could not open dll TAO_PI.
+ACE (88539142|88604678) DLL_Handle::close - TAO_PI (handle=0, refcount=0)
+ACE (88539142|88604678) LN::open_dll - Failed to open TAO_PI: 
+ACE (88539142|88604678) Unable to create service object for ORBInitializer_Registry
+ACE (88539142|88604678) STDG::<dtor> - Failed (-1) to find ORBInitializer_Registry -> 00000000
+ACE (88539142|88604678) Dynamic_Node::apply - Did dynamic on ORBInitializer_Registry (yyerrno=1)
+ACE (88539142|88604678) SCG:<dtor=0011EC2C> - new repo=00120D80
+ACE (88539142|88604678) DSB::instance, repo=00120D80, name=ORBInitializer_Registry type=00000000 => 00000000
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Resource_Factory type=00127980 => 00127880
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=DLL_Parser type=0012B320 => 0012B300
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=FILE_Parser type=0012B220 => 0012B200
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=CORBALOC_Parser type=0012B120 => 0012B100
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=CORBANAME_Parser type=0012AFC0 => 0012AFA0
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=MCAST_Parser type=0012AEC0 => 0012AE80
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=HTTP_Parser type=0012B420 => 0012B400
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Default_Thread_Lane_Resources_Manager_Factory type=0012B860 => 0012B840
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Server_Strategy_Factory type=00127CA0 => 00127C40
+Jan 01 12:00:49.000 2006@LM_DEBUG@TAO (88539142|88604678) - ORB_Core: Codeset Manager not available
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=IIOP_Factory type=0012ADA0 => 0012AD80
+Jan 01 12:00:49.000 2006@LM_DEBUG@TAO (88539142|88604678) - Loaded protocol <IIOP_Factory>
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Protocols_Hooks type=00000000 => 00000000
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=TAO_Object_Adapter_Factory type=00000000 => 00000000
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Network_Priority_Protocols_Hooks type=00000000 => 00000000
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=FT_ClientService_Activate type=00000000 => 00000000
+Jan 01 12:00:49.000 2006@LM_DEBUG@TAO (88539142|88604678) - Created new ORB <VERBOSE_LOGGING_TEST_1>
+Jan 01 12:00:49.000 2006@LM_DEBUG@ACE (88539142|88604678) SCG:<dtor=0011EDA8> - new repo=00120D80
+Jan 01 12:00:49.000 2006@LM_DEBUG@log flags 36 verbose: 1
+Jan 01 12:00:49.000 2006@LM_DEBUG@CORBA::ORB::destroy() called on ORB <VERBOSE_LOGGING_TEST_1>.
+Jan 01 12:00:49.000 2006@LM_DEBUG@TAO (88539142|88604678) - Destroying ORB <VERBOSE_LOGGING_TEST_1>
+Jan 01 12:00:49.000 2006@LM_DEBUG@Start ORB_init with ORBVerboseLogging=2
+Jan 01 12:00:49.000 2006@LM_DEBUG@server adding args: Jan 01 12:00:49.000 2006@LM_DEBUG@-ORBCDRTradeoff Jan 01 12:00:49.000 2006@LM_DEBUG@2048 Jan 01 12:00:49.000 2006@LM_DEBUG@-ORBCollocation Jan 01 12:00:49.000 2006@LM_DEBUG@per-orb Jan 01 12:00:49.000 2006@LM_DEBUG@-ORBDebug Jan 01 12:00:49.000 2006@LM_DEBUG@-ORBDebugLevel Jan 01 12:00:49.000 2006@LM_DEBUG@10 Jan 01 12:00:49.000 2006@LM_DEBUG@-ORBDefaultInitRef Jan 01 12:00:50.000 2006@LM_DEBUG@corbaloc::localhost:4177 Jan 01 12:00:50.000 2006@LM_DEBUG@-ORBDottedDecimalAddresses Jan 01 12:00:50.000 2006@LM_DEBUG@1 Jan 01 12:00:50.000 2006@LM_DEBUG@-ORBId Jan 01 12:00:50.000 2006@LM_DEBUG@Client Jan 01 12:00:50.000 2006@LM_DEBUG@-ORBListenEndpoints Jan 01 12:00:50.000 2006@LM_DEBUG@iiop://:4178 Jan 01 12:00:50.000 2006@LM_DEBUG@-ORBLogFile Jan 01 12:00:50.000 2006@LM_DEBUG@\network\temp\ACE\wince6\ACE_wrappers/TAO\tests\Bug_3559_Regression/ORBLog.log Jan 01 12:00:50.000 2006@LM_DEBUG@-ORBNegotiateCodesets Jan 01 12:00:50.000 2006@LM_DEBUG@0 Jan 01 12:00:50.000 2006@LM_DEBUG@-ORBNodelay Jan 01 12:00:50.000 2006@LM_DEBUG@1 Jan 01 12:00:50.000 2006@LM_DEBUG@-ORBSvcConfDirective Jan 01 12:00:50.000 2006@LM_DEBUG@"static Client_Strategy_Factory '-ORBWaitStrategy mt_noupcall'" Jan 01 12:00:50.000 2006@LM_DEBUG@-ORBVerboseLogging Jan 01 12:00:50.000 2006@LM_DEBUG@2 Jan 01 12:00:50.000 2006@LM_DEBUG@
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) SCG:<ctor=0011EDA8> - config=00120D20 repo=00120D80 superceded by repo=00120D80
+Jan 01 12:00:50.000 2006@LM_DEBUG@TAO (88539142|88604678) - We are the default ORB ...
+Jan 01 12:00:50.000 2006@LM_DEBUG@TAO (88539142|88604678) - Initializing the orb-specific services
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=ORBInitializer_Registry type=00000000 => 00000000
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) SG::process_directive, repo=00120D80 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) SG::process_directives_i, repo=00120D80 - dynamic ORBInitializer_Registry Service_Object * TAO_PI:_make_ORBInitializer_Registry() ""
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) SCG:<ctor=0011EC2C> - config=00120D20 repo=00120D80 superceded by repo=00120D80
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) SG::initialize - repo=00120D80, name=ORBInitializer_Registry - looking up in the repo
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) STDG::<ctor>, repo=00120D80, name=ORBInitializer_Registry - begining at [18]
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) LN::open_dll - path=TAO_PI
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+Jan 01 12:00:50.000 2006@LM_ERROR@ACE (88539142|88604678) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+Jan 01 12:00:50.000 2006@LM_ERROR@ACE (88539142|88604678) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+Jan 01 12:00:50.000 2006@LM_ERROR@ACE (88539142|88604678) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) DLL_Handle::open ("TAO_PId.dll", 0x0) -> failed: 
+Jan 01 12:00:50.000 2006@LM_ERROR@ACE (88539142|88604678) DLL_Handle::open ('TAO_PId.dll') failed, errno=0: 
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) DLL_Handle::open ("TAO_PI", 0x0) -> failed: 
+Jan 01 12:00:50.000 2006@LM_ERROR@ACE (88539142|88604678) DLL_Handle::open ('TAO_PI') failed, errno=0: 
+Jan 01 12:00:50.000 2006@LM_ERROR@ACE (88539142|88604678) DLL_Handle::open ("TAO_PI"): Invalid handle error: 
+Jan 01 12:00:50.000 2006@LM_ERROR@ACE_DLL_Manager::open_dll: Could not open dll TAO_PI.
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) DLL_Handle::close - TAO_PI (handle=0, refcount=0)
+Jan 01 12:00:50.000 2006@LM_ERROR@ACE (88539142|88604678) LN::open_dll - Failed to open TAO_PI: 
+Jan 01 12:00:50.000 2006@LM_ERROR@ACE (88539142|88604678) Unable to create service object for ORBInitializer_Registry
+Jan 01 12:00:50.000 2006@LM_WARNING@ACE (88539142|88604678) STDG::<dtor> - Failed (-1) to find ORBInitializer_Registry -> 00000000
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) Dynamic_Node::apply - Did dynamic on ORBInitializer_Registry (yyerrno=1)
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) SCG:<dtor=0011EC2C> - new repo=00120D80
+Jan 01 12:00:50.000 2006@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=ORBInitializer_Registry type=00000000 => 00000000
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Resource_Factory type=00127980 => 00127880
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=DLL_Parser type=0012B320 => 0012B300
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=FILE_Parser type=0012B220 => 0012B200
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=CORBALOC_Parser type=0012B120 => 0012B100
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=CORBANAME_Parser type=0012AFC0 => 0012AFA0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=MCAST_Parser type=0012AEC0 => 0012AE80
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=HTTP_Parser type=0012B420 => 0012B400
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Default_Thread_Lane_Resources_Manager_Factory type=0012B860 => 0012B840
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Server_Strategy_Factory type=00127CA0 => 00127C40
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@TAO (88539142|88604678) - ORB_Core: Codeset Manager not available
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=IIOP_Factory type=0012ADA0 => 0012AD80
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@TAO (88539142|88604678) - Loaded protocol <IIOP_Factory>
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Protocols_Hooks type=00000000 => 00000000
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=TAO_Object_Adapter_Factory type=00000000 => 00000000
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=TAO_ORB_Core_Static_Resources type=001232A0 => 001230E0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=Network_Priority_Protocols_Hooks type=00000000 => 00000000
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) DSB::instance, repo=00120D80, name=FT_ClientService_Activate type=00000000 => 00000000
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@TAO (88539142|88604678) - Created new ORB <VERBOSE_LOGGING_TEST_2>
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SCG:<dtor=0011EDA8> - new repo=00120D80
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@log flags 52 verbose: 2
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@CORBA::ORB::destroy() called on ORB <VERBOSE_LOGGING_TEST_2>.
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@TAO (88539142|88604678) - Destroying ORB <VERBOSE_LOGGING_TEST_2>
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@Test OK, a timestamp was found
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@Test passed!Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [17], name=ACE_Service_Manager, type=0012C740, object=0012C700, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=ACE_Service_Manager, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [16], name=ACE_Naming_Context, type=0012C5C0, object=0012C100, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=ACE_Naming_Context, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [15], name=Default_Collocation_Resolver, type=0012BA20, object=0012BA00, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Default_Collocation_Resolver, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [14], name=Default_Thread_Lane_Resources_Manager_Factory, type=0012B860, object=0012B840, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Default_Thread_Lane_Resources_Manager_Factory, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [13], name=Default_Endpoint_Selector_Factory, type=0012B6A0, object=0012B660, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Default_Endpoint_Selector_Factory, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [12], name=Default_Stub_Factory, type=0012B520, object=0012B500, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Default_Stub_Factory, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [11], name=HTTP_Parser, type=0012B420, object=0012B400, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=HTTP_Parser, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [10], name=DLL_Parser, type=0012B320, object=0012B300, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=DLL_Parser, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [9], name=FILE_Parser, type=0012B220, object=0012B200, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=FILE_Parser, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [8], name=CORBALOC_Parser, type=0012B120, object=0012B100, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=CORBALOC_Parser, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [7], name=CORBANAME_Parser, type=0012AFC0, object=0012AFA0, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=CORBANAME_Parser, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [6], name=MCAST_Parser, type=0012AEC0, object=0012AE80, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=MCAST_Parser, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [5], name=IIOP_Factory, type=0012ADA0, object=0012AD80, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=IIOP_Factory, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [4], name=Server_Strategy_Factory, type=00127CA0, object=00127C40, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Server_Strategy_Factory, dll=(null)
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [3], name=Client_Strategy_Factory, type=00127B00, object=00127AC0, active=0
+Jan 01 12:00:50.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Client_Strategy_Factory, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [2], name=Resource_Factory, type=00127980, object=00127880, active=0
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Resource_Factory, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [1], name=TAO_ORB_Core_Static_Resources, type=001232A0, object=001230E0, active=0
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=TAO_ORB_Core_Static_Resources, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::fini, repo=00120D80 [0], name=TAO_Codeset, type=00122FA0, object=00122F80, active=0
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=TAO_Codeset, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SG::close - complete this=00120D20, repo=00120D80, owned=0
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::<dtor>, this=00120D80
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80, size=18
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [17], name=ACE_Service_Manager, object=0012C7A0
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=ACE_Service_Manager, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [16], name=ACE_Naming_Context, object=0012C620
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=ACE_Naming_Context, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [15], name=Default_Collocation_Resolver, object=0012BA80
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Default_Collocation_Resolver, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [14], name=Default_Thread_Lane_Resources_Manager_Factory, object=0012B8E0
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Default_Thread_Lane_Resources_Manager_Factory, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [13], name=Default_Endpoint_Selector_Factory, object=0012B720
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Default_Endpoint_Selector_Factory, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [12], name=Default_Stub_Factory, object=0012B580
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Default_Stub_Factory, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [11], name=HTTP_Parser, object=0012B460
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=HTTP_Parser, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [10], name=DLL_Parser, object=0012B360
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=DLL_Parser, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [9], name=FILE_Parser, object=0012B260
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=FILE_Parser, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [8], name=CORBALOC_Parser, object=0012B160
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=CORBALOC_Parser, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [7], name=CORBANAME_Parser, object=0012B020
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=CORBANAME_Parser, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [6], name=MCAST_Parser, object=0012AF00
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=MCAST_Parser, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [5], name=IIOP_Factory, object=0012ADE0
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=IIOP_Factory, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [4], name=Server_Strategy_Factory, object=00127D00
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Server_Strategy_Factory, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [3], name=Client_Strategy_Factory, object=00127B60
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Client_Strategy_Factory, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [2], name=Resource_Factory, object=001279E0
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=Resource_Factory, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [1], name=TAO_ORB_Core_Static_Resources, object=00123300
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=TAO_ORB_Core_Static_Resources, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SR::close - repo=00120D80 [0], name=TAO_Codeset, object=00122FE0
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) ST::fini - destroying name=TAO_Codeset, dll=(null)
+Jan 01 12:00:51.000 2006@<local_host>@88539142@LM_DEBUG@ACE (88539142|88604678) SG::~SG - this=00120D20, pss = 00000000
