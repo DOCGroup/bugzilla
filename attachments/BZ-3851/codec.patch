@@ -1,0 +1,57 @@
+Index: Codecs.cpp
+===================================================================
+--- Codecs.cpp	(revision 625)
++++ Codecs.cpp	(working copy)
+@@ -128,18 +128,18 @@
+   return len;
+ }
+ 
+-ACE_Byte*
+-ACE_Base64::decode (const ACE_Byte* input, size_t* output_len)
++int
++ACE_Base64::decode (ACE_Byte* result, size_t* output_len, const ACE_Byte* input)
+ {
+   if (!ACE_Base64::init_)
+     ACE_Base64::init();
+ 
+-  if (!input)
+-    return 0;
++  if (!input || !result)
++    return -1;
+ 
+   size_t result_len = ACE_Base64::length (input);
+-  ACE_Byte* result = 0;
+-  ACE_NEW_RETURN (result, ACE_Byte[result_len], 0);
++  if (result_len > *output_len)
++      return -1;
+ 
+   ACE_Byte* ptr = const_cast<ACE_Byte*> (input);
+   while (*ptr != 0 &&
+@@ -209,11 +209,11 @@
+   if (errors)
+     {
+       delete[] result;
+-      return 0;
++      return -1;
+     }
+   result[pos] = 0;
+   *output_len = pos;
+-  return result;
++  return 0;
+ }
+ 
+ void
+Index: Codecs.h
+===================================================================
+--- Codecs.h	(revision 625)
++++ Codecs.h	(working copy)
+@@ -72,8 +72,7 @@
+    * @return Binary data in byte stream or NULL if input data cannot
+    *         be encoded.
+    */
+-  static ACE_Byte* decode (const ACE_Byte* input,
+-                           size_t* output_len);
++  static int decode (ACE_Byte* output, size_t* output_len, const ACE_Byte* input);
+ 
+   /**
+    * Return the length of the encoded input data
