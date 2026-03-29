@@ -1,0 +1,134 @@
+Index: TAO_IDL/be/be_visitor_typecode/union_typecode.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_typecode/union_typecode.cpp	(revision 96785)
++++ TAO_IDL/be/be_visitor_typecode/union_typecode.cpp	(working copy)
+@@ -118,7 +118,8 @@
+      << "\"" << node->original_local_name () << "\"," << be_nl
+      << "&" << discriminant_type->tc_name () << "," << be_nl
+      << "_tao_cases_" << node->flat_name () << "," << be_nl
+-     << node->nfields () << ", "
++     << "sizeof (_tao_cases_" << node->flat_name () << ")/"
++        "sizeof (_tao_cases_" << node->flat_name () << "[0])," << be_nl
+      << node->default_index () << ");" << be_uidt_nl
+      << be_uidt_nl;
+ 
+@@ -135,9 +136,9 @@
+ {
+   AST_Field ** member_ptr = 0;
+ 
+-  size_t const count = node->nfields ();
++  ACE_CDR::ULong const count = node->nfields ();
+ 
+-  for (size_t i = 0; i < count; ++i)
++  for (ACE_CDR::ULong i = 0u; i < count; ++i)
+     {
+       node->field (member_ptr, i);
+ 
+@@ -186,14 +187,13 @@
+   TAO_OutStream & os = *this->ctx_->stream ();
+ 
+   // Start with static instances of each array element-to-be.
+-  ACE_CDR::ULong const count = node->nfields ();
+-
+-  for (ACE_CDR::ULong i = 0; i < count; ++i)
++  ACE_CDR::ULong countLabels = 0u;
++  ACE_CDR::ULong const countFields = node->nfields ();
++  for (ACE_CDR::ULong fieldNumber = 0u; fieldNumber < countFields; ++fieldNumber)
+     {
+       AST_Field ** member_ptr = 0;
++      node->field (member_ptr, fieldNumber);
+ 
+-      node->field (member_ptr, i);
+-
+       be_type * const type =
+         be_type::narrow_from_decl ((*member_ptr)->field_type ());
+ 
+@@ -202,33 +202,38 @@
+ 
+       ACE_ASSERT (branch != 0);
+ 
+-      os << "static TAO::TypeCode::Case_T<"
+-         << discriminant_type->full_name () << ", "
+-         << "char const *, ::CORBA::TypeCode_ptr const *> const "
+-         << fields_name_str << "__" << i <<" (";
++      bool const nonDefaultLabel =
++        (branch->label ()->label_kind () == AST_UnionLabel::UL_label);
+ 
+-      if (branch->label ()->label_kind () == AST_UnionLabel::UL_label)
+-        {
+-          // Non-default case.
++      ACE_CDR::ULong const numberOfLabels =
++        (nonDefaultLabel) ? branch->label_list_length () : 1u;
+ 
+-          // Generate the label value.  Only the first label value is
+-          // used in the case where multiple labels are used for the
+-          // same union branch/case.
+-          branch->gen_label_value (&os, 0);
+-        }
+-      else
++      for (ACE_CDR::ULong labelNumber= 0u; labelNumber < numberOfLabels; ++labelNumber)
+         {
+-          // Default case.
++          os << "static TAO::TypeCode::Case_T<"
++             << discriminant_type->full_name () << ", "
++             << "char const *, ::CORBA::TypeCode_ptr const *> const "
++             << fields_name_str << "__" << countLabels++ <<" (";
+ 
+-          ACE_ASSERT (branch->label ()->label_kind ()
+-                      == AST_UnionLabel::UL_default);
++          if (nonDefaultLabel)
++            {
++              // Non-default case.
++              // Generate the label value.
++              branch->gen_label_value (&os, labelNumber);
++            }
++          else
++            {
++              // Default case.
++              ACE_ASSERT (branch->label ()->label_kind ()
++                          == AST_UnionLabel::UL_default);
+ 
+-          branch->gen_default_label_value (&os, node);
++              branch->gen_default_label_value (&os, node);
++            }
++
++          os << ", \"" << branch->original_local_name () << "\", "
++             << "&"  << type->tc_name ()
++             << ");" << be_nl;
+         }
+-
+-      os << ", \"" << branch->original_local_name () << "\", "
+-         << "&"  << type->tc_name ()
+-         << ");" << be_nl;
+     }
+ 
+   // Now generate the TAO::TypeCode::Case array.
+@@ -239,20 +244,21 @@
+      << "[] =" << be_idt_nl
+      << "{" << be_idt_nl;
+ 
+-  for (ACE_CDR::ULong n = 0; n < count; ++n)
++  for (ACE_CDR::ULong n = 0u; n < countLabels; ++n)
+     {
+       os << "&" << fields_name_str << "__" << n;
+ 
+-      if (n < count - 1)
++      if (n < countLabels - 1u)
+         {
+-          os << ",";
++          os << "," << be_nl;
+         }
+-
+-      os << be_nl;
++      else
++        {
++          os << be_uidt_nl;
++        }
+     }
+ 
+-  os << be_uidt_nl
+-     << "};" << be_uidt_nl << be_nl;
++  os << "};" << be_uidt_nl << be_nl;
+ 
+   return 0;
+ }
