@@ -1,0 +1,154 @@
+Index: Dev_Poll_Reactor.h
+===================================================================
+--- Dev_Poll_Reactor.h	(revision 89904)
++++ Dev_Poll_Reactor.h	(working copy)
+@@ -420,6 +420,9 @@
+     /// Returns the current table size.
+     size_t size (void) const;
+ 
++    /// Returns the current table size.
++    size_t max_size (void) const;
++
+     /// Dump the state of an object.
+     void dump (void) const;
+ 
+@@ -428,6 +431,9 @@
+ 
+   private:
+ 
++    /// Current number of handles.
++    int size_;
++
+     /// Maximum number of handles.
+     int max_size_;
+ 
+@@ -1044,10 +1050,6 @@
+    */
+   ACE_HANDLE poll_fd_;
+ 
+-  /// The maximum number of file descriptors over which demultiplexing
+-  /// will occur.
+-  size_t size_;
+-
+   /// Track HANDLES we are interested in for various events that must
+   /// be dispatched *without* polling.
+   /// ACE_Dev_Poll_Ready_Set ready_set_;
+Index: Dev_Poll_Reactor.cpp
+===================================================================
+--- Dev_Poll_Reactor.cpp	(revision 89904)
++++ Dev_Poll_Reactor.cpp	(working copy)
+@@ -429,7 +429,8 @@
+ // -----------------------------------------------------------------
+ 
+ ACE_Dev_Poll_Reactor::Handler_Repository::Handler_Repository (void)
+-  : max_size_ (0),
++  : size_ (0),
++    max_size_ (0),
+     handlers_ (0)
+ {
+   ACE_TRACE ("ACE_Dev_Poll_Reactor::Handler_Repository::Handler_Repository");
+@@ -566,6 +567,7 @@
+   this->handlers_[handle].event_handler = event_handler;
+   this->handlers_[handle].mask = mask;
+   event_handler->add_reference ();
++  ++this->size_;
+ 
+   return 0;
+ }
+@@ -587,6 +589,7 @@
+   entry->mask = ACE_Event_Handler::NULL_MASK;
+   entry->suspended = false;
+   entry->controlled = false;
++  --this->size_;
+   return 0;
+ }
+ 
+@@ -600,7 +603,6 @@
+                                             int s_queue)
+   : initialized_ (false)
+   , poll_fd_ (ACE_INVALID_HANDLE)
+-  , size_ (0)
+   // , ready_set_ ()
+ #if defined (ACE_HAS_EVENT_POLL)
+   , epoll_wait_in_progress_ (false)
+@@ -647,7 +649,6 @@
+                                             int s_queue)
+   : initialized_ (false)
+   , poll_fd_ (ACE_INVALID_HANDLE)
+-  , size_ (0)
+   // , ready_set_ ()
+ #if defined (ACE_HAS_DEV_POLL)
+   , dp_fds_ (0)
+@@ -789,8 +790,6 @@
+                                             ACE_Event_Handler::READ_MASK) == -1))
+     result = -1;
+ 
+-  this->size_ = size;
+-
+   if (result != -1)
+     // We're all set to go.
+     this->initialized_ = true;
+@@ -994,7 +990,7 @@
+   struct dvpoll dvp;
+ 
+   dvp.dp_fds = this->dp_fds_;
+-  dvp.dp_nfds = this->size_;
++  dvp.dp_nfds = this->handler_rep_.size ();
+   dvp.dp_timeout = timeout;  // Milliseconds
+ 
+   // Poll for events
+@@ -1785,7 +1777,7 @@
+ 
+   ACE_MT (ACE_GUARD_RETURN (ACE_Dev_Poll_Reactor_Token, mon, this->token_, -1));
+ 
+-  size_t const len = this->handler_rep_.size ();
++  size_t const len = this->handler_rep_.max_size ();
+ 
+   for (size_t i = 0; i < len; ++i)
+     {
+@@ -1896,7 +1888,7 @@
+ 
+   ACE_MT (ACE_GUARD_RETURN (ACE_Dev_Poll_Reactor_Token, mon, this->token_, -1));
+ 
+-  size_t const len = this->handler_rep_.size ();
++  size_t const len = this->handler_rep_.max_size ();
+ 
+   for (size_t i = 0; i < len; ++i)
+     {
+@@ -2200,7 +2192,7 @@
+ size_t
+ ACE_Dev_Poll_Reactor::size (void) const
+ {
+-  return this->size_;
++  return this->handler_rep_.size ();
+ }
+ 
+ ACE_Lock &
+@@ -2475,7 +2467,7 @@
+               ACE_TEXT ("initialized_ = %d"),
+               this->initialized_));
+   ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("poll_fd_ = %d"), this->poll_fd_));
+-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("size_ = %u"), this->size_));
++  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("size_ = %u"), this->handler_rep_.size ()));
+   ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("deactivated_ = %d"),
+               this->deactivated_));
+Index: Dev_Poll_Reactor.inl
+===================================================================
+--- Dev_Poll_Reactor.inl	(revision 89904)
++++ Dev_Poll_Reactor.inl	(working copy)
+@@ -36,6 +36,14 @@
+ {
+   ACE_TRACE ("ACE_Dev_Poll_Reactor::Handler_Repository::size");
+ 
++  return this->size_;
++}
++
++ACE_INLINE size_t
++ACE_Dev_Poll_Reactor::Handler_Repository::max_size (void) const
++{
++  ACE_TRACE ("ACE_Dev_Poll_Reactor::Handler_Repository::max_size");
++
+   return this->max_size_;
+ }
+ 
