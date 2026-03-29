@@ -1,0 +1,86 @@
+TAO (75366434|134414338) - Connection_Handler[19]::handle_input, handle = 19/19
+TAO (75366434|134414338) - Transport[19]::handle_input
+TAO (75366434|134414338) - Transport[19]::process_queue_head, 0 enqueued
+TAO (75366434|134414338) - Transport[19]::handle_input_parse_data, enter
+TAO (75366434|134414338) - Transport[19]::handle_input_parse_data, read 909 bytes
+TAO (75366434|134414338) - GIOP_Message_State::parse_message_header_i
+TAO (75366434|134414338) - GIOP_Message_State::get_version_info
+TAO (75366434|134414338) - GIOP_Message_State::get_byte_order_info
+TAO (75366434|134414338) - GIOP_Message_State::parse_message_header_i
+TAO (75366434|134414338) - GIOP_Message_State::get_version_info
+TAO (75366434|134414338) - GIOP_Message_State::get_byte_order_info
+TAO (75366434|134414338) - GIOP_Message_State::parse_message_header_i
+TAO (75366434|134414338) - GIOP_Message_State::get_version_info
+TAO (75366434|134414338) - GIOP_Message_State::get_byte_order_info
+TAO (75366434|134414338) - GIOP_Message_State::parse_message_header_i
+TAO (75366434|134414338) - GIOP_Message_State::get_version_info
+TAO (75366434|134414338) - GIOP_Message_State::get_byte_order_info
+TAO (75366434|134414338) - GIOP_Message_State::parse_message_header_i
+TAO (75366434|134414338) - GIOP_Message_State::get_version_info
+TAO (75366434|134414338) - GIOP_Message_State::get_byte_order_info
+TAO (75366434|134414338) - GIOP_Message_State::parse_message_header_i
+TAO (75366434|134414338) - GIOP_Message_State::get_version_info
+TAO (75366434|134414338) - GIOP_Message_State::get_byte_order_info
+TAO (75366434|134414338) - GIOP_Message_State::parse_message_header_i
+TAO (75366434|134414338) - GIOP_Message_State::get_version_info
+TAO (75366434|134414338) - GIOP_Message_State::get_byte_order_info
+TAO (75366434|134414338) - GIOP_Message_State::parse_message_header_i
+TAO (75366434|134414338) - GIOP_Message_State::get_version_info
+TAO (75366434|134414338) - GIOP_Message_State::get_byte_order_info
+TAO (75366434|134414338) - GIOP_Message_State::parse_message_header_i
+TAO (75366434|134414338) - GIOP_Message_State::get_version_info
+TAO (75366434|134414338) - GIOP_Message_State::get_byte_order_info
+TAO (75366434|134414338) - Transport[19]::handle_input_parse_data, notify reactor
+TAO (75366434|134414338) - Transport[19]::notify_reactor, notify to Reactor
+TAO (75366434|134414338) - Transport[19]::process_parsed_messages, entering (missing data == 0)
+TAO (75366434|134414338) - GIOP_Message_Base::dump_msg, recv GIOP v1.2 msg, 897 data bytes, my endian, not compressed, Type Request[6]
+GIOP message - HEXDUMP 909 bytes (showing first 448 bytes)
+47 49 4f 50 01 02 01 00  59 00 00 00 06 00 00 00   GIOP....Y.......
+03 00 00 00 00 00 49 86  10 00 00 00 43 6f 6e 6e   ......I.....Conn
+65 63 74 69 6f 6e 48 65  61 6c 74 68 06 00 00 00   ectionHealth....
+5f 69 73 5f 61 00 00 01  00 00 00 00 00 00 00 3a   _is_a..........:
+21 00 00 00 49 44 4c 3a  43 4f 4d 4d 4f 4e 2f 43   !...IDL:COMMON/C
+6f 6e 6e 65 63 74 69 6f  6e 48 65 61 6c 74 68 49   onnectionHealthI
+3a 31 2e 30 00 47 49 4f  50 01 02 01 00 59 00 00   :1.0.GIOP....Y..
+00 07 00 00 00 03 00 00  00 00 00 49 86 10 00 00   ...........I....
+00 43 6f 6e 6e 65 63 74  69 6f 6e 48 65 61 6c 74   .ConnectionHealt
+68 06 00 00 00 5f 69 73  5f 61 00 00 01 00 00 00   h...._is_a......
+00 00 00 00 3a 21 00 00  00 49 44 4c 3a 43 4f 4d   ....:!...IDL:COM
+4d 4f 4e 2f 43 6f 6e 6e  65 63 74 69 6f 6e 48 65   MON/ConnectionHe
+61 6c 74 68 49 3a 31 2e  30 00 47 49 4f 50 01 02   althI:1.0.GIOP..
+01 00 59 00 00 00 08 00  00 00 03 00 00 00 00 00   ..Y.............
+49 86 10 00 00 00 43 6f  6e 6e 65 63 74 69 6f 6e   I.....Connection
+48 65 61 6c 74 68 06 00  00 00 5f 69 73 5f 61 00   Health...._is_a.
+00 01 00 00 00 00 00 00  00 3a 21 00 00 00 49 44   .........:!...ID
+4c 3a 43 4f 4d 4d 4f 4e  2f 43 6f 6e 6e 65 63 74   L:COMMON/Connect
+69 6f 6e 48 65 61 6c 74  68 49 3a 31 2e 30 00 47   ionHealthI:1.0.G
+49 4f 50 01 02 01 00 59  00 00 00 09 00 00 00 03   IOP....Y........
+00 00 00 00 00 49 86 10  00 00 00 43 6f 6e 6e 65   .....I.....Conne
+63 74 69 6f 6e 48 65 61  6c 74 68 06 00 00 00 5f   ctionHealth...._
+69 73 5f 61 00 00 01 00  00 00 00 00 00 00 3a 21   is_a..........:!
+00 00 00 49 44 4c 3a 43  4f 4d 4d 4f 4e 2f 43 6f   ...IDL:COMMON/Co
+6e 6e 65 63 74 69 6f 6e  48 65 61 6c 74 68 49 3a   nnectionHealthI:
+31 2e 30 00 47 49 4f 50  01 02 01 00 59 00 00 00   1.0.GIOP....Y...
+0a 00 00 00 03 00 00 00  00 00 49 86 10 00 00 00   ..........I.....
+43 6f 6e 6e 65 63 74 69  6f 6e 48 65 61 6c 74 68   ConnectionHealth
+TAO (75366434|134414338) - GIOP_Message_Base::dump_msg, send GIOP v1.2 msg, 148 data bytes, my endian, not compressed, Type Reply[6]
+GIOP message - HEXDUMP 160 bytes
+47 49 4f 50 01 02 01 01  94 00 00 00 06 00 00 00   GIOP............
+03 00 00 00 00 00 00 00  21 00 00 00 49 44 4c 3a   ........!...IDL:
+43 4f 4d 4d 4f 4e 2f 43  6f 6e 6e 65 63 74 69 6f   COMMON/Connectio
+6e 48 65 61 6c 74 68 49  3a 31 2e 30 00 00 7e 04   nHealthI:1.0..~.
+01 00 00 00 00 00 00 00  54 00 00 00 01 01 02 00   ........T.......
+0e 00 00 00 31 39 32 2e  31 36 38 2e 32 35 34 2e   ....192.168.254.
+32 00 51 10 23 00 00 00  14 01 0f 00 4e 53 54 98   2.Q.#.......NST.
+36 78 49 00 00 00 00 01  00 00 00 01 00 00 00 00   6xI.............
+00 00 00 01 00 00 00 01  00 00 00 00 01 00 00 00   ................
+00 00 00 00 08 00 00 00  01 00 00 00 00 4f 41 54   .............OAT
+TAO (75366434|134414338) - Transport[19]::cleanup_queue, byte_count = 160
+TAO (75366434|134414338) - Transport[19]::cleanup_queue, after transfer, bc = 0, all_sent = 1, ml = 0
+ACE (75366434|134283266) SCG:<dtor=0051FBA8> - new repo=001C66A0
+TAO (75366434|134414338) - Transport[19]::drain_queue_helper, byte_count = 160, head_is_empty = 1
+ACE (75366434|134283266) SCG:<ctor=0051FBA8> - config=001C6640 repo=001C66A0 superceded by repo=001C66A0
+TAO (75366434|134414338) - Transport[19]::drain_queue_i, helper retval = 1
+TAO (75366434|134414338) - Connection_Handler[19]::handle_input, handle = 19/19, retval = 0
+ACE (75366434|134414338) SCG:<dtor=0052FBBC> - new repo=001C66A0
+ACE (75366434|134414338) SCG:<ctor=0052FBBC> - config=001C6640 repo=001C66A0 superceded by repo=001C66A0
