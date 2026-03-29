@@ -1,0 +1,24 @@
+This test tries to use comma delimited corbaloc with FT_Client_ORB.
+
+To run automatically, execute "./run_test.sh"
+
+To run the test manually:
+
+- run 2 servers:
+
+./server -ORBEndPoint iiop://:9220
+./server -ORBEndPoint iiop://:9221
+
+- run client:
+
+echo "corbaloc:iiop:localhost:9220,iiop:localhost:9221/CorbaSimple" | \
+        ./client -ORBSvcConf client.conf
+
+expected behaviour:
+
+- client invokes RPC on the first server(9220)
+- server(9220) serves the request and shuts down
+- client sleeps, then issues another request
+- request is server by server(9221)
+
+Test prepared by milan.cvetkovic@mpathix.com
