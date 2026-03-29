@@ -1,0 +1,91 @@
+Index: tools/Config_Handlers/DataType_Handler.cpp
+===================================================================
+--- tools/Config_Handlers/DataType_Handler.cpp	(版本 96713)
++++ tools/Config_Handlers/DataType_Handler.cpp	(工作副本)
+@@ -4,6 +4,11 @@
+ #include "tao/AnyTypeCode/TypeCode.h"
+ #include "tao/AnyTypeCode/TypeCode_Constants.h"
+ #include "dance/Logger/Log_Macros.h"
++#include "DynAny_Handler/DynEnum_Handler.h"
++#include "DynAny_Handler/DynSequence_Handler.h"
++#include "DynAny_Handler/DynStruct_Handler.h"
++#include "DynAny_Handler/DynAlias_Handler.h"
++
+ namespace DAnCE
+ {
+   namespace Config_Handlers
+@@ -101,6 +106,22 @@
+           type = CORBA::TypeCode::_duplicate (CORBA::_tc_TypeCode);
+           break;
+ 
++        case TCKind::tk_enum_l:
++          type = DynEnum_Handler::create_typecode (desc);
++          break;
++
++        case TCKind::tk_struct_l:
++          type = DynStruct_Handler::create_typecode (desc);
++          break;
++
++        case TCKind::tk_sequence_l:
++          type = DynSequence_Handler::create_typecode (desc);
++          break;
++
++        case TCKind::tk_alias_l:
++          type = DynAlias_Handler::create_typecode (desc);
++          break;
++
+         default:
+           DANCE_DEBUG (DANCE_LOG_TERMINAL_ERROR,
+             (LM_ERROR,
+Index: tools/Config_Handlers/DynAny_Handler/DynEnum_Handler.h
+===================================================================
+--- tools/Config_Handlers/DynAny_Handler/DynEnum_Handler.h	(版本 96713)
++++ tools/Config_Handlers/DynAny_Handler/DynEnum_Handler.h	(工作副本)
+@@ -30,7 +30,7 @@
+      * @class DynEnum_Handler
+      * @brief Translates enums specified in deployment plans into Dynamic Anys
+      */
+-    class DynEnum_Handler
++    class DynAny_Handler_Export DynEnum_Handler
+     {
+     public:
+       static DynamicAny::DynAny_ptr extract_into_dynany (const DataType &type,
+Index: tools/Config_Handlers/DynAny_Handler/DynStruct_Handler.h
+===================================================================
+--- tools/Config_Handlers/DynAny_Handler/DynStruct_Handler.h	(版本 96713)
++++ tools/Config_Handlers/DynAny_Handler/DynStruct_Handler.h	(工作副本)
+@@ -30,7 +30,7 @@
+      * @class DynStruct_Handler
+      * @brief Translates structs specified in deployment plans into Dynamic Anys
+      */
+-    class DynStruct_Handler
++    class DynAny_Handler_Export DynStruct_Handler
+     {
+     public:
+       static DynamicAny::DynAny_ptr extract_into_dynany (const DataType &type,
+Index: tools/Config_Handlers/DynAny_Handler/DynSequence_Handler.h
+===================================================================
+--- tools/Config_Handlers/DynAny_Handler/DynSequence_Handler.h	(版本 96713)
++++ tools/Config_Handlers/DynAny_Handler/DynSequence_Handler.h	(工作副本)
+@@ -31,7 +31,7 @@
+      * @brief Translates sequences specified in deployment plans into Dynamic Anys
+      *
+      */
+-    class DynSequence_Handler
++    class DynAny_Handler_Export DynSequence_Handler
+     {
+     public:
+       static DynamicAny::DynAny_ptr extract_into_dynany (const DataType &type,
+Index: tools/Config_Handlers/DynAny_Handler/DynAlias_Handler.h
+===================================================================
+--- tools/Config_Handlers/DynAny_Handler/DynAlias_Handler.h	(版本 96713)
++++ tools/Config_Handlers/DynAny_Handler/DynAlias_Handler.h	(工作副本)
+@@ -31,7 +31,7 @@
+      * @brief Translates enums specified in deployment plans into Dynamic Anys
+      *
+      */
+-    class DynAlias_Handler
++    class DynAny_Handler_Export DynAlias_Handler
+     {
+     public:
+       static DynamicAny::DynAny_ptr extract_into_dynany (const DataType &type,
