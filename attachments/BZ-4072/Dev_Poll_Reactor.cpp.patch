@@ -1,0 +1,143 @@
+*** Dev_Poll_Reactor.cpp	2012-05-12 04:16:53.000000000 +0900
+--- ../ACE_wrappers/ace/Dev_Poll_Reactor.cpp	2012-09-09 23:43:25.924613800 +0900
+***************
+*** 11,16 ****
+--- 11,19 ----
+  # include "ace/OS_NS_fcntl.h"
+  # include "ace/OS_NS_stropts.h"
+  
++ # if defined (ACE_HAS_EVENT_POLL)
++ #    define ACE_EVENT_POLL_OPTIMIZE
++ # endif /* ACE_HAS_EVENT_POLL */
+  # if defined (ACE_HAS_DEV_POLL)
+  #    if defined (ACE_LINUX)
+  #      include /**/ <linux/devpoll.h>
+***************
+*** 1822,1828 ****
+--- 1825,1835 ----
+  
+    ACE_HANDLE handle = event_handler->get_handle ();
+  
++ #if defined (ACE_EVENT_POLL_OPTIMIZE)
++   ACE_MT (ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, mon, this->to_be_resumed_lock_, -1));
++ #else
+    ACE_MT (ACE_GUARD_RETURN (ACE_Dev_Poll_Reactor_Token, mon, this->token_, -1));
++ #endif // ACE_EVENT_POLL_OPTIMIZE
+  
+    return this->resume_handler_i (handle);
+  }
+***************
+*** 1832,1838 ****
+--- 1839,1849 ----
+  {
+    ACE_TRACE ("ACE_Dev_Poll_Reactor::resume_handler");
+  
++ #if defined (ACE_EVENT_POLL_OPTIMIZE)
++   ACE_MT (ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, mon, this->to_be_resumed_lock_, -1));
++ #else
+    ACE_MT (ACE_GUARD_RETURN (ACE_Dev_Poll_Reactor_Token, mon, this->token_, -1));
++ #endif // ACE_EVENT_POLL_OPTIMIZE
+  
+    return this->resume_handler_i (handle);
+  }
+***************
+*** 1845,1855 ****
+--- 1856,1874 ----
+    ACE_Handle_Set_Iterator handle_iter (handles);
+    ACE_HANDLE h;
+  
++ #if defined (ACE_EVENT_POLL_OPTIMIZE)
++   while ((h = handle_iter ()) != ACE_INVALID_HANDLE) {
++     ACE_MT (ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, mon, this->to_be_resumed_lock_, -1));
++     if (this->resume_handler_i (h) == -1)
++       return -1;
++   }
++ #else
+    ACE_MT (ACE_GUARD_RETURN (ACE_Dev_Poll_Reactor_Token, mon, this->token_, -1));
+  
+    while ((h = handle_iter ()) != ACE_INVALID_HANDLE)
+      if (this->resume_handler_i (h) == -1)
+        return -1;
++ #endif // ACE_EVENT_POLL_OPTIMIZE
+  
+    return 0;
+  }
+***************
+*** 1882,1889 ****
+--- 1901,1910 ----
+    if (info == 0)
+      return -1;
+  
++ #if !defined (ACE_EVENT_POLL_OPTIMIZE)
+    if (!info->suspended)
+      return 0;
++ #endif // ACE_EVENT_POLL_OPTIMIZE
+  
+    ACE_Reactor_Mask mask = info->mask;
+    if (mask == ACE_Event_Handler::NULL_MASK)
+***************
+*** 1952,1957 ****
+--- 1973,2001 ----
+  {
+    ACE_TRACE ("ACE_Dev_Poll_Reactor::schedule_timer");
+  
++ #if defined (ACE_EVENT_POLL_OPTIMIZE)
++   ACE_Time_Value earliest_time (ACE_Time_Value::zero);
++   bool need_notify = false;
++   
++   if (0 != this->timer_queue_) {
++     if (!this->timer_queue_->is_empty ())
++       earliest_time = this->timer_queue_->earliest_time ();
++     else
++       need_notify = true;
++     
++     ACE_Time_Value schedule_time = this->timer_queue_->gettimeofday () + delay;
++     long result = this->timer_queue_->schedule
++       (event_handler,
++        arg,
++        schedule_time,
++        interval);
++     
++     if (need_notify || schedule_time < earliest_time)
++       this->notify ();
++     
++     return result;
++   }
++ #else  // ACE_EVENT_POLL_OPTIMIZE
+    ACE_MT (ACE_GUARD_RETURN (ACE_Dev_Poll_Reactor_Token, mon, this->token_, -1));
+  
+    if (0 != this->timer_queue_)
+***************
+*** 1960,1965 ****
+--- 2004,2010 ----
+         arg,
+         this->timer_queue_->gettimeofday () + delay,
+         interval);
++ #endif // ACE_EVENT_POLL_OPTIMIZE
+  
+    errno = ESHUTDOWN;
+    return -1;
+***************
+*** 1986,1992 ****
+--- 2031,2039 ----
+  {
+    ACE_TRACE ("ACE_Dev_Poll_Reactor::cancel_timer");
+  
++ #if !defined (ACE_EVENT_POLL_OPTIMIZE)
+    ACE_MT (ACE_GUARD_RETURN (ACE_Dev_Poll_Reactor_Token, mon, this->token_, -1));
++ #endif // ACE_EVENT_POLL_OPTIMIZE
+  
+    return (this->timer_queue_ == 0
+            ? 0
+***************
+*** 2001,2007 ****
+--- 2048,2056 ----
+  {
+    ACE_TRACE ("ACE_Dev_Poll_Reactor::cancel_timer");
+  
++ #if !defined (ACE_EVENT_POLL_OPTIMIZE)
+    ACE_MT (ACE_GUARD_RETURN (ACE_Dev_Poll_Reactor_Token, mon, this->token_, -1));
++ #endif // ACE_EVENT_POLL_OPTIMIZE
+  
+    return (this->timer_queue_ == 0
+            ? 0
