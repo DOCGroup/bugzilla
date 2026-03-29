@@ -1,0 +1,194 @@
+Index: ORB_Core.cpp
+===================================================================
+--- ORB_Core.cpp	(revision 89074)
++++ ORB_Core.cpp	(working copy)
+@@ -2307,9 +2307,13 @@
+     tm->wait ();
+ 
+   // Explicitly destroy the valuetype adapter
+-  delete this->valuetype_adapter_;
+-  this->valuetype_adapter_ = 0;
++  {
++    ACE_GUARD (TAO_SYNCH_MUTEX, monitor, this->lock_);
+ 
++    delete this->valuetype_adapter_;
++    this->valuetype_adapter_ = 0;
++  }
++
+   // Explicitly destroy the object reference table since it
+   // contains references to objects, which themselves may contain
+   // reference to this ORB.
+@@ -3470,6 +3474,82 @@
+   return this->valuetype_adapter_;
+ }
+ 
++// *************************************************************
++// Valuetype factory operations
++// *************************************************************
++
++#if !defined(CORBA_E_MICRO)
++CORBA::ValueFactory
++TAO_ORB_Core::register_value_factory (const char *repository_id,
++                                      CORBA::ValueFactory factory)
++{
++  if (this->valuetype_adapter ())
++    {
++      ACE_GUARD_RETURN (TAO_SYNCH_MUTEX, ace_mon, this->lock_, 0);
++
++      if (this->valuetype_adapter_ == 0)
++        {
++          return 0;
++        }
++
++      int const result =
++        this->valuetype_adapter_->vf_map_rebind (repository_id, factory);
++
++      if (result == 0) // No previous factory found
++        {
++          return 0;
++        }
++
++      if (result == -1)
++        {
++          // Error on bind.
++          throw ::CORBA::MARSHAL ();
++        }
++    }
++
++  return factory;    // previous factory was found
++}
++#endif
++
++#if !defined(CORBA_E_MICRO)
++void
++TAO_ORB_Core::unregister_value_factory (const char *repository_id)
++{
++  if (this->valuetype_adapter ())
++    {
++      ACE_GUARD (TAO_SYNCH_MUTEX, ace_mon, this->lock_);
++
++      if (this->valuetype_adapter_ == 0)
++        {
++          return;
++        }
++
++      // Dont care whther it was successful or not!
++      (void) this->valuetype_adapter_->vf_map_unbind (repository_id);
++    }
++}
++#endif
++
++#if !defined(CORBA_E_MICRO)
++CORBA::ValueFactory
++TAO_ORB_Core::lookup_value_factory (const char *repository_id)
++{
++  if (this->valuetype_adapter ())
++    {
++      ACE_GUARD_RETURN (TAO_SYNCH_MUTEX, ace_mon, this->lock_, 0);
++
++      if (this->valuetype_adapter_ == 0)
++        {
++          return 0;
++        }
++
++      return this->valuetype_adapter_->vf_map_find (repository_id);
++    }
++
++  return 0;
++}
++#endif
++
+ // ****************************************************************
+ 
+ TAO_Export TAO_ORB_Core *
+Index: ORB.cpp
+===================================================================
+--- ORB.cpp	(revision 89074)
++++ ORB.cpp	(working copy)
+@@ -1722,25 +1722,9 @@
+ CORBA::ORB::register_value_factory (const char *repository_id,
+                                     CORBA::ValueFactory factory)
+ {
+-  TAO_Valuetype_Adapter *vta = this->orb_core ()->valuetype_adapter ();
++  this->check_shutdown ();
+ 
+-  if (vta)
+-    {
+-      int const result = vta->vf_map_rebind (repository_id, factory);
+-
+-      if (result == 0) // No previous factory found
+-        {
+-          return 0;
+-        }
+-
+-      if (result == -1)
+-        {
+-          // Error on bind.
+-          throw ::CORBA::MARSHAL ();
+-        }
+-    }
+-
+-  return factory;    // previous factory was found
++  return this->orb_core_->register_value_factory (repository_id, factory);
+ }
+ #endif
+ 
+@@ -1748,13 +1732,9 @@
+ void
+ CORBA::ORB::unregister_value_factory (const char *repository_id)
+ {
+-  TAO_Valuetype_Adapter *vta = this->orb_core ()->valuetype_adapter ();
++  this->check_shutdown ();
+ 
+-  if (vta)
+-    {
+-      // Dont care whther it was successful or not!
+-      (void) vta->vf_map_unbind (repository_id);
+-    }
++  this->orb_core_->unregister_value_factory (repository_id);
+ }
+ #endif
+ 
+@@ -1762,14 +1742,9 @@
+ CORBA::ValueFactory
+ CORBA::ORB::lookup_value_factory (const char *repository_id)
+ {
+-  TAO_Valuetype_Adapter *vta = this->orb_core ()->valuetype_adapter ();
++  this->check_shutdown ();
+ 
+-  if (vta)
+-    {
+-      return vta->vf_map_find (repository_id);
+-    }
+-
+-  return 0;
++  return this->orb_core_->lookup_value_factory (repository_id);
+ }
+ #endif
+ 
+Index: ORB_Core.h
+===================================================================
+--- ORB_Core.h	(revision 89074)
++++ ORB_Core.h	(working copy)
+@@ -820,6 +820,21 @@
+   /// Return the valuetype adapter
+   TAO_Valuetype_Adapter *valuetype_adapter (void);
+ 
++#if !defined(CORBA_E_MICRO)
++  // Value factory operations  (CORBA 2.3 ptc/98-10-05 Ch. 4.2 p.4-7)
++  CORBA::ValueFactory register_value_factory (
++    const char *repository_id,
++    CORBA::ValueFactory factory);
++#endif
++
++#if !defined(CORBA_E_MICRO)
++  void unregister_value_factory (const char * repository_id);
++#endif
++
++#if !defined(CORBA_E_MICRO)
++  CORBA::ValueFactory lookup_value_factory (const char *repository_id);
++#endif
++
+   /// Get the IOR Interceptor adapter. If not created, this method will try
+   /// to create one.
+   TAO_IORInterceptor_Adapter *ior_interceptor_adapter (void);
