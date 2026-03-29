@@ -1,0 +1,225 @@
+diff --git a/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_Error_Handler.cpp b/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_Error_Handler.cpp
+new file mode 100644
+index 0000000..fe01eb3
+--- /dev/null
++++ b/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_Error_Handler.cpp
+@@ -0,0 +1,94 @@
++// $Id: XML_Error_Handler.cpp 96985 2013-04-11 15:50:32Z huangh $
++
++#include "XML_Error_Handler.h"
++#include "ace/Log_Category.h"
++#include "ace/Auto_Ptr.h"
++#include "ace/ACE.h"
++#include <xercesc/util/XMLString.hpp>
++#include <xercesc/dom/DOMLocator.hpp>
++#include <xercesc/sax/SAXParseException.hpp>
++#include "ace/XML_Utils/XercesString.h"
++#include <iostream>
++
++#include "dds/DCPS/debug.h"
++#include "xercesc/util/PlatformUtils.hpp"
++
++using xercesc::SAXParseException;
++using xercesc::XMLString;
++
++namespace OpenDDS
++{
++namespace DCPS
++{
++  XML_Error_Handler::XML_Error_Handler (void)
++    : errors_ (false)
++  {
++  }
++
++  XML_Error_Handler::~XML_Error_Handler()
++  {
++  }
++
++  void XML_Error_Handler::warning(const SAXParseException& toCatch)
++  {
++    if (DCPS_debug_level > 5)
++      {
++	char *file = XMLString::transcode (toCatch.getSystemId ());
++	char *msg = XMLString::transcode (toCatch.getMessage ());
++	
++	ACE_ERROR ((LM_ERROR, "(%P|%t) Warning loading XML QoS descriptor %C:%u:%u - %C\n",
++		    file, toCatch.getLineNumber (), toCatch.getColumnNumber (),
++		    msg));
++	
++	XMLString::release (&file);
++	XMLString::release (&msg);
++      }
++  }
++
++  void XML_Error_Handler::error(const SAXParseException& toCatch)
++  {
++    if (DCPS_debug_level > 1)
++      {
++	char *file = XMLString::transcode (toCatch.getSystemId ());
++	char *msg = XMLString::transcode (toCatch.getMessage ());
++	
++	ACE_ERROR ((LM_ERROR, "(%P|%t) Error loading XML QoS descriptor %C:%u:%u - %C\n",
++		    file, toCatch.getLineNumber (), toCatch.getColumnNumber (),
++		    msg));
++	
++	XMLString::release (&file);
++	XMLString::release (&msg);
++      }
++    this->errors_ = true;
++  }
++
++  void XML_Error_Handler::fatalError(const SAXParseException& toCatch)
++  {
++    if (DCPS_debug_level > 1)
++      {
++	char *file = XMLString::transcode (toCatch.getSystemId ());
++	char *msg = XMLString::transcode (toCatch.getMessage ());
++	
++	ACE_ERROR ((LM_ERROR, "(%P|%t) Fatal Error loading XML QoS descriptor %C:%u:%u - %C\n",
++		    file, toCatch.getLineNumber (), toCatch.getColumnNumber (),
++		    msg));
++	
++	XMLString::release (&file);
++	XMLString::release (&msg);
++      }
++
++    this->errors_ = true;
++  }
++
++  void XML_Error_Handler::resetErrors()
++  {
++    this->errors_ = false;
++  }
++
++  bool
++  XML_Error_Handler::getErrors (void) const
++  {
++    return this->errors_;
++  }
++}
++}
+diff --git a/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_Error_Handler.h b/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_Error_Handler.h
+new file mode 100644
+index 0000000..010b506
+--- /dev/null
++++ b/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_Error_Handler.h
+@@ -0,0 +1,61 @@
++//==============================================================
++/**
++ *  @file  XML_Error_Handler.h
++ *
++ *  $Id: XML_Error_Handler.h 95801 2012-05-31 09:14:36Z johnnyw $
++ *
++ *  @brief Error handler for Xerces
++ *
++ *  @author Bala Natarajan <bala@dre.vanderbilt.edu>
++ */
++//================================================================
++#ifndef DDS_QOS_XML_ERROR_HANDLER_H
++#define DDS_QOS_XML_ERROR_HANDLER_H
++
++#include /**/ "ace/pre.h"
++
++#if !defined (ACE_LACKS_PRAGMA_ONCE)
++#pragma once
++#endif /* ACE_LACKS_PRAGMA_ONCE */
++
++#include <xercesc/sax/ErrorHandler.hpp>
++
++using xercesc::SAXParseException;
++
++namespace OpenDDS
++{
++namespace DCPS
++{
++  /**
++    * @class XML_Error_Hander
++    *
++    * @brief Error handler for XERCES
++    *
++    */
++  class XML_Error_Handler
++    : public xercesc::ErrorHandler
++  {
++  public:
++
++    XML_Error_Handler (void);
++
++    ~XML_Error_Handler (void);
++
++    void warning(const SAXParseException& toCatch);
++    void error(const SAXParseException& toCatch);
++    void fatalError(const SAXParseException& toCatch);
++    void resetErrors();
++    bool getErrors (void) const;
++  private :
++    // Disallow copying
++    XML_Error_Handler (const XML_Error_Handler&);
++    XML_Error_Handler& operator= (const XML_Error_Handler&);
++
++    bool errors_;
++  };
++}
++}
++
++#include /**/ "ace/post.h"
++
++#endif /* ACE_XML_ERROR_HANDLER_H */
+diff --git a/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_File_Intf.cpp b/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_File_Intf.cpp
+index c462e70..a70c298 100644
+--- a/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_File_Intf.cpp
++++ b/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_File_Intf.cpp
+@@ -13,9 +13,29 @@
+ 
+ #include "dds/DCPS/debug.h"
+ 
++#include "XML_Error_Handler.h"
++
+ namespace OpenDDS {
+ namespace DCPS {
+ 
++  class QOS_XML_Typedef
++  {
++  public:
++    typedef ::XML::Environment_Resolver PATH_RESOLVER;
++    typedef ::XML::XML_Schema_Resolver< ::XML::Environment_Resolver > XML_RESOLVER;
++    typedef OpenDDS::DCPS::XML_Error_Handler ERROR_HANDLER;
++    typedef ::XML::XML_Helper< XML_RESOLVER, ERROR_HANDLER > HELPER;
++
++    static ERROR_HANDLER _xml_error_handler;
++
++  public:
++    static HELPER XML_HELPER;
++  };
++
++  QOS_XML_Typedef::HELPER QOS_XML_Typedef::XML_HELPER;
++
++  typedef QOS_XML_Typedef XML_Helper_type;
++
+   QOS_XML_File_Handler::QOS_XML_File_Handler (void)
+   {
+   }
+diff --git a/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_File_Intf.h b/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_File_Intf.h
+index bb0f1be..49275ac 100644
+--- a/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_File_Intf.h
++++ b/middleware/DDS/dds/DCPS/QOS_XML_Handler/XML_File_Intf.h
+@@ -101,7 +101,6 @@ namespace DCPS {
+ 
+   private:
+     ::dds::qosProfile_seq profiles_;
+-    typedef XML::XML_Typedef XML_Helper_type;
+ 
+     /**
+      *
+diff --git a/middleware/DDS/dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc b/middleware/DDS/dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc
+index b282fb6..44398c7 100644
+--- a/middleware/DDS/dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc
++++ b/middleware/DDS/dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc
+@@ -35,6 +35,7 @@ project (OpenDDS_QOS_XML_XSC_Handler) : install, acelib, xerces, anytypecode, \
+ 
+   Source_Files {
+     dds_qos.cpp
++    XML_Error_Handler.cpp
+     XML_File_Intf.cpp
+     QOS_XML_Loader.cpp
+     DataWriterQos_Handler.cpp
