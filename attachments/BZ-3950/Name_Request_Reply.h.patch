@@ -1,0 +1,27 @@
+24c24
+< #include /**/ "ace/ACE_export.h"
+---
+> #include "ace/Basic_Types.h"
+30,33d29
+< #include "ace/Default_Constants.h"
+< #include "ace/Basic_Types.h"
+< #include "ace/iosfwd.h"
+< 
+92,94d87
+<   /// helper method to set up internal name, value and type pointers
+<   void reset_pointers(ACE_UINT32 name_length, ACE_UINT32 value_length);
+< 
+195,202d187
+< // Forward decls.
+< class ACE_InputCDR;
+< class ACE_OutputCDR;
+< 
+< // iostream operators for ACE_Name_Request.
+< ACE_Export int operator>> (ACE_InputCDR &cdr, ACE_Name_Request &name_request);
+< ACE_Export int operator<< (ACE_OutputCDR &cdr, const ACE_Name_Request &name_request);
+< 
+275,278d259
+< 
+< // iostream operators for ACE_Name_Reply.
+< ACE_Export int operator>> (ACE_InputCDR &cdr, ACE_Name_Reply &name_reply);
+< ACE_Export int operator<< (ACE_OutputCDR &cdr, const ACE_Name_Reply &name_reply);
