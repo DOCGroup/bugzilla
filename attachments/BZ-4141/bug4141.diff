@@ -1,0 +1,302 @@
+Index: tao/Invocation_Adapter.inl
+===================================================================
+--- tao/Invocation_Adapter.inl	(revision 97392)
++++ tao/Invocation_Adapter.inl	(working copy)
+@@ -15,10 +15,12 @@
+       size_t op_len,
+       int collocation_opportunity,
+       Invocation_Type type,
+-      Invocation_Mode mode)
++      Invocation_Mode mode,
++      bool has_in_args)
+     : target_ (target)
+     , args_ (args)
+     , number_args_  (arg_number)
++    , has_in_args_ (has_in_args)
+     , operation_ (operation)
+     , op_len_ (op_len)
+     , collocation_opportunity_ (collocation_opportunity)
+Index: tao/Invocation_Adapter.h
+===================================================================
+--- tao/Invocation_Adapter.h	(revision 97392)
++++ tao/Invocation_Adapter.h	(working copy)
+@@ -110,7 +110,8 @@
+                         size_t op_len,
+                         int collocation_opportunity,
+                         TAO::Invocation_Type type = TAO_TWOWAY_INVOCATION,
+-                        TAO::Invocation_Mode mode = TAO_SYNCHRONOUS_INVOCATION);
++                        TAO::Invocation_Mode mode = TAO_SYNCHRONOUS_INVOCATION,
++                        bool has_in_args = true);
+ 
+     virtual ~Invocation_Adapter (void);
+ 
+@@ -262,6 +263,8 @@
+      */
+     int const number_args_;
+ 
++    bool has_in_args_;
++
+     /// Name of the operation.
+     char const * operation_;
+ 
+Index: tao/operation_details.inl
+===================================================================
+--- tao/operation_details.inl	(revision 97392)
++++ tao/operation_details.inl	(working copy)
+@@ -9,6 +9,7 @@
+                                               CORBA::ULong len,
+                                               TAO::Argument **args,
+                                               CORBA::ULong num,
++                                              CORBA::Boolean has_in_args,
+                                               TAO::Exception_Data *data,
+                                               CORBA::ULong count)
+   : opname_ (name)
+@@ -18,6 +19,7 @@
+     , addressing_mode_ (TAO_Target_Specification::Key_Addr)
+     , args_ (args)
+     , num_args_ (num)
++    , has_in_args_ (has_in_args)
+     , ex_data_ (data)
+     , ex_count_ (count)
+     , use_stub_args_ (args ? true : false)
+@@ -48,6 +50,28 @@
+   return (this->num_args_ > 1);
+ }
+ 
++#if 1
++ACE_INLINE CORBA::Boolean
++TAO_Operation_Details::in_argument_flag (void) const
++{
++  return this->has_in_args_  && this->num_args_ > 1;
++}
++#else
++ACE_INLINE CORBA::Boolean
++TAO_Operation_Details::in_argument_flag (void) const
++{
++  for (CORBA::ULong i = 1; i < this->num_args_ && !this->has_in_args_; i++)
++    {
++      if (dynamic_cast<TAO::InArgument *>(args_[i]) != 0 ||
++          dynamic_cast<TAO::InoutArgument *>(args_[i]))
++        {
++          return true;
++        }
++    }
++  return false;
++}
++#endif // TAO_IGNORE_IN_ARGS
++
+ ACE_INLINE TAO_Service_Context &
+ TAO_Operation_Details::request_service_context (void)
+ {
+Index: tao/Messaging/Asynch_Invocation_Adapter.h
+===================================================================
+--- tao/Messaging/Asynch_Invocation_Adapter.h	(revision 97392)
++++ tao/Messaging/Asynch_Invocation_Adapter.h	(working copy)
+@@ -68,7 +68,8 @@
+         const char *operation,
+         size_t op_len,
+         int collocation_opportunity,
+-        TAO::Invocation_Mode mode = TAO_ASYNCHRONOUS_CALLBACK_INVOCATION);
++        TAO::Invocation_Mode mode = TAO_ASYNCHRONOUS_CALLBACK_INVOCATION,
++        bool has_in_args = true);
+ 
+     void invoke (Messaging::ReplyHandler_ptr reply_handler_ptr,
+                  const TAO_Reply_Handler_Stub &reply_handler_stub);
+Index: tao/Messaging/Asynch_Invocation_Adapter.cpp
+===================================================================
+--- tao/Messaging/Asynch_Invocation_Adapter.cpp	(revision 97392)
++++ tao/Messaging/Asynch_Invocation_Adapter.cpp	(working copy)
+@@ -28,7 +28,8 @@
+     const char *operation,
+     size_t op_len,
+     int collocation_opportunity,
+-    Invocation_Mode m)
++    Invocation_Mode m,
++    bool has_in_args)
+     : Invocation_Adapter (target,
+                           args,
+                           arg_number,
+@@ -36,7 +37,8 @@
+                           op_len,
+                           collocation_opportunity,
+                           TAO_TWOWAY_INVOCATION,
+-                          m)
++                          m,
++                          has_in_args)
+     , safe_rd_ ()
+   {
+   }
+Index: tao/Invocation_Adapter.cpp
+===================================================================
+--- tao/Invocation_Adapter.cpp	(revision 97392)
++++ tao/Invocation_Adapter.cpp	(working copy)
+@@ -41,6 +41,7 @@
+                                       this->op_len_,
+                                       this->args_,
+                                       this->number_args_,
++                                      this->has_in_args_,
+                                       ex_data,
+                                       ex_count);
+ 
+Index: tao/operation_details.h
+===================================================================
+--- tao/operation_details.h	(revision 97392)
++++ tao/operation_details.h	(working copy)
+@@ -76,6 +76,7 @@
+                          CORBA::ULong len,
+                          TAO::Argument **args = 0,
+                          CORBA::ULong num_args = 0,
++                         CORBA::Boolean has_in_args = true,
+                          TAO::Exception_Data *ex_data = 0,
+                          CORBA::ULong ex_count = 0);
+ 
+@@ -88,6 +89,7 @@
+   /// Return the flag that indicates whether the operation has any
+   /// arguments
+   CORBA::Boolean argument_flag (void) const;
++  CORBA::Boolean in_argument_flag (void) const;
+ 
+   /// Set the response flags
+   void response_flags (CORBA::Octet flags);
+@@ -209,6 +211,9 @@
+   /// Number of arguments including the return value
+   CORBA::ULong num_args_;
+ 
++  /// A flag indicating any args are sent with the request
++  CORBA::Boolean has_in_args_;
++
+   /// The type of exceptions that the operations can throw.
+   TAO::Exception_Data *ex_data_;
+ 
+@@ -232,6 +237,7 @@
+ 
+   /// The optional reply dispatcher
+   TAO_Reply_Dispatcher *reply_dispatcher_;
++
+ };
+ 
+ TAO_END_VERSIONED_NAMESPACE_DECL
+Index: tao/GIOP_Message_Generator_Parser_12.cpp
+===================================================================
+--- tao/GIOP_Message_Generator_Parser_12.cpp	(revision 97392)
++++ tao/GIOP_Message_Generator_Parser_12.cpp	(working copy)
+@@ -83,7 +83,7 @@
+     return false;
+ 
+   // We align the pointer only if the operation has arguments.
+-  if (opdetails.argument_flag ()
++  if (opdetails.in_argument_flag ()
+       && msg.align_write_ptr (TAO_GIOP_MESSAGE_ALIGN_PTR) == -1)
+     {
+       return false;
+Index: TAO_IDL/include/ast_operation.h
+===================================================================
+--- TAO_IDL/include/ast_operation.h	(revision 97392)
++++ TAO_IDL/include/ast_operation.h	(working copy)
+@@ -111,6 +111,9 @@
+   /// Return the number of arguments
+   virtual int argument_count (void);
+ 
++  /// Return the flag indicating a request sends argument data
++  virtual bool has_in_arguments (void);
++
+   /// Count the number of arguments of a certain type.
+   /**
+    * @param direction_mask limit the direction (IN, OUT or INOUT) of
+@@ -165,6 +168,9 @@
+   int argument_count_;
+   // Number of arguments.
+ 
++  bool has_in_arguments_;
++  // True if any arguments are IN or INOUT
++
+   int has_native_;
+   // Is any argument of type native.
+ 
+Index: TAO_IDL/be/be_visitor_operation/operation.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_operation/operation.cpp	(revision 97392)
++++ TAO_IDL/be/be_visitor_operation/operation.cpp	(working copy)
+@@ -294,8 +294,21 @@
+ 
+   if (node->flags () == AST_Operation::OP_oneway)
+     {
++      *os << "," << be_nl;
++      *os << "TAO::TAO_ONEWAY_INVOCATION" << be_nl;
++    }
++
++  if (!node->has_in_arguments ())
++    {
++      if (node->flags () != AST_Operation::OP_oneway)
++        {
++          *os << "," << be_nl;
++          *os << "TAO::TAO_TWOWAY_INVOCATION" << be_nl;
++        }
++
+       *os << "," << be_nl
+-          << "TAO::TAO_ONEWAY_INVOCATION";
++          << "TAO::TAO_SYNCHRONOUS_INVOCATION," << be_nl
++          << "false";
+     }
+ 
+   *os << be_uidt_nl
+Index: TAO_IDL/be/be_visitor_operation/ami_cs.cpp
+===================================================================
+--- TAO_IDL/be/be_visitor_operation/ami_cs.cpp	(revision 97392)
++++ TAO_IDL/be/be_visitor_operation/ami_cs.cpp	(working copy)
+@@ -210,6 +210,13 @@
+       *os << " | TAO::TAO_CO_THRU_POA_STRATEGY";
+     }
+ 
++  if (!node->has_in_arguments ())
++    {
++      *os << "," << be_nl
++          << "TAO::TAO_ASYNCHRONOUS_CALLBACK_INVOCATION," << be_nl
++          << "false";
++    }
++
+   *os << be_uidt_nl
+       << ");" << be_uidt;
+ 
+Index: TAO_IDL/ast/ast_operation.cpp
+===================================================================
+--- TAO_IDL/ast/ast_operation.cpp	(revision 97392)
++++ TAO_IDL/ast/ast_operation.cpp	(working copy)
+@@ -109,6 +109,7 @@
+     pd_context (0),
+     pd_exceptions (0),
+     argument_count_ (-1),
++    has_in_arguments_ (false),
+     has_native_ (0)
+ {
+   AST_PredefinedType *pdt = 0;
+@@ -159,6 +160,15 @@
+   return this->argument_count_;
+ }
+ 
++// Return the IN/INOUT member flag.
++bool
++AST_Operation::has_in_arguments (void)
++{
++  this->compute_argument_attr ();
++
++  return this->has_in_arguments_;
++}
++
+ int
+ AST_Operation::count_arguments_with_direction (int direction_mask)
+ {
+@@ -258,6 +268,13 @@
+ 
+               arg = AST_Argument::narrow_from_decl (d);
+ 
++              if (arg->direction() == AST_Argument::dir_IN ||
++                  arg->direction() == AST_Argument::dir_INOUT)
++                {
++                  this->has_in_arguments_ = true;
++                }
++
++
+               type = AST_Type::narrow_from_decl (arg->field_type ());
+ 
+               if (type->node_type () == AST_Decl::NT_native)
