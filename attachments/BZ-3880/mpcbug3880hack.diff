@@ -1,0 +1,13 @@
+Index: modules/Creator.pm
+===================================================================
+--- modules/Creator.pm	(revision 1878)
++++ modules/Creator.pm	(working copy)
+@@ -174,7 +174,7 @@
+   ## Read the global configuration file
+   if (!$self->{'global_read'}) {
+     $status = $self->read_global_configuration();
+-    $self->{'global_read'} = 1;
++  #  $self->{'global_read'} = 1; # comment this out to hack-fix bug 3880
+   }
+ 
+   if ($status) {
