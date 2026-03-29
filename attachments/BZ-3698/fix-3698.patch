@@ -1,0 +1,14 @@
+diff -r -u ACE_wrappers.orig/ace/CDR_Stream.inl ACE_wrappers/ace/CDR_Stream.inl
+--- ACE_wrappers.orig/ace/CDR_Stream.inl	2009-01-20 21:49:26.000000000 -0500
++++ ACE_wrappers/ace/CDR_Stream.inl	2009-06-11 12:19:48.000000000 -0400
+@@ -461,6 +461,10 @@
+   if (end <= this->current_->end () &&
+       end >= buf)
+     {
++      for (char * ptr = this->current_->wr_ptr(); ptr != buf; ptr++) {
++	*ptr = 0;
++      }
++
+ #if !defined (ACE_LACKS_CDR_ALIGNMENT)
+       this->current_alignment_ += offset + size;
+ #endif /* ACE_LACKS_CDR_ALIGNMENT */
